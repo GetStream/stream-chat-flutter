@@ -1,6 +1,6 @@
 # Flutter Chat Components
 
-<a href="https://getstream.io/chat/"><img src="https://i.imgur.com/SRkDlFX.png" alt="react native chat" /></a>
+<a href="https://getstream.io/chat/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" /></a>
 
 > The official Flutter components for Stream Chat, a service for
 > building chat applications.
