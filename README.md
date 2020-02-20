@@ -24,6 +24,15 @@ The best place to start is the [Flutter Chat Tutorial](https://getstream.io/chat
 
 TODO
 
+### Add dependency
+
+```yaml
+dependencies:
+ stream_chat_flutter: ^0.1.0
+```
+
+You should then run `flutter packages get`
+
 ## Docs
 
 TODO
