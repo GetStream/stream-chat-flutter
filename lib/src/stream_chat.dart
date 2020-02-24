@@ -27,25 +27,9 @@ class StreamChat extends InheritedWidget {
     }));
   }
 
-  User get user => _userController.value;
+  User get user => client.state.user;
 
-  Stream<User> get userStream => _userController.stream;
-  final BehaviorSubject<User> _userController = BehaviorSubject();
-
-  Future<void> setUser(User newUser, [String token]) async {
-    _userController.sink.add(null);
-
-    try {
-      if (token != null) {
-        await client.setUser(newUser, token);
-      } else {
-        await client.setUserWithProvider(newUser);
-      }
-      _userController.sink.add(newUser);
-    } catch (e, stack) {
-      _userController.sink.addError(e, stack);
-    }
-  }
+  Stream<User> get userStream => client.state.userStream;
 
   Stream<List<ChannelState>> get channelsStream => _channelsController.stream;
   final BehaviorSubject<List<ChannelState>> _channelsController =
@@ -91,7 +75,6 @@ class StreamChat extends InheritedWidget {
   void dispose() {
     client.dispose();
     _subscriptions.forEach((s) => s.cancel());
-    _userController.close();
     _queryChannelsLoadingController.close();
     _channelsController.close();
   }

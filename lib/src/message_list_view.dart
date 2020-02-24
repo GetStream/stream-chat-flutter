@@ -256,7 +256,7 @@ class _MessageListViewState extends State<MessageListView> {
             _messages = newMessages;
           });
         } else if (newMessages.first.user.id ==
-            streamChannel.channelClient.client.user.id) {
+            streamChannel.channelClient.client.state.user.id) {
           _scrollController.jumpTo(0);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             setState(() {

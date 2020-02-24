@@ -30,18 +30,18 @@ class StreamChannel extends StatefulWidget {
   }
 
   @override
-  StreamChannelState createState() => StreamChannelState(channelClient);
+  StreamChannelState createState() => StreamChannelState();
 }
 
 class StreamChannelState extends State<StreamChannel> {
-  final ChannelClient channelClient;
+  StreamChannelState();
 
-  StreamChannelState(this.channelClient);
+  ChannelClient get channelClient => widget.channelClient;
 
-  ChannelState get channelState => channelClient.state.channelState;
+  ChannelState get channelState => widget.channelClient.state.channelState;
 
   Stream<ChannelState> get channelStateStream =>
-      channelClient.state.channelStateStream;
+      widget.channelClient.state.channelStateStream;
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
 
@@ -55,7 +55,7 @@ class StreamChannelState extends State<StreamChannel> {
       firstId = channelState.messages.first.id;
     }
 
-    channelClient
+    widget.channelClient
         .query(
       messagesPagination: PaginationParams(
         lessThan: firstId,
@@ -73,11 +73,11 @@ class StreamChannelState extends State<StreamChannel> {
     _queryMessageController.add(true);
 
     String firstId;
-    if (channelClient.state.threads.containsKey(parentId)) {
-      firstId = channelClient.state.threads[parentId].first.id;
+    if (widget.channelClient.state.threads.containsKey(parentId)) {
+      firstId = widget.channelClient.state.threads[parentId].first.id;
     }
 
-    return channelClient
+    return widget.channelClient
         .getReplies(
       parentId,
       PaginationParams(
@@ -95,29 +95,26 @@ class StreamChannelState extends State<StreamChannel> {
   @override
   void dispose() {
     _queryMessageController.close();
-    channelClient.dispose();
+    widget.channelClient.dispose();
 
     super.dispose();
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (channelClient == null) {
+    if (widget.channelClient == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
     return FutureBuilder<bool>(
-      future: channelClient.initialized,
+      future: widget.channelClient.initialized,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         } else if (snapshot.hasError) {
           return Center(
