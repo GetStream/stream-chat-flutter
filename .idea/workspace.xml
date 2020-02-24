@@ -2,17 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8a42da92-86e3-4aa3-b70d-cc6a9fefa34f" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/salvatoregiordano.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/lib/multiple_conversation.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/channel_image.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/channel_list_view.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/channel_name_text.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/channel_preview.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/lib/multiple_conversation.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/multiple_conversation.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/lib/single_conversation.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/single_conversation.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/test/widget_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/test/widget_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/test/widget_test.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/src/channel_list_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/channel_list_view.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/src/channel_preview.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/channel_preview.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/src/stream_channel.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/stream_channel.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/stream_chat_flutter.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/stream_chat_flutter.dart" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,15 +22,6 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/analysis_options.yaml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="799">
-              <caret line="47" column="28" selection-start-line="47" selection-start-column="28" selection-end-line="47" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../stream_chat_dart/lib/src/client.dart">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="485">
@@ -43,11 +30,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/src/channel_list_view.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="890">
-              <caret line="133" column="14" selection-start-line="133" selection-start-column="14" selection-end-line="133" selection-end-column="14" />
+            <state relative-caret-position="136">
+              <caret line="8" column="26" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="26" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -58,8 +45,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/src/channel_preview.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="884">
-              <caret line="52" column="40" selection-start-line="52" selection-start-column="40" selection-end-line="52" selection-end-column="40" />
+            <state relative-caret-position="782">
+              <caret line="46" column="31" selection-start-line="46" selection-start-column="31" selection-end-line="46" selection-end-column="31" />
               <folding>
                 <element signature="e#0#46#0" expanded="true" />
               </folding>
@@ -70,8 +57,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/src/stream_chat.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+            <state relative-caret-position="1309">
+              <caret line="77" column="28" selection-start-line="77" selection-start-column="28" selection-end-line="77" selection-end-column="28" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -80,10 +67,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/src/message_widget.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="875">
+              <caret line="79" column="26" selection-start-line="79" selection-start-column="26" selection-end-line="79" selection-end-column="26" />
+              <folding>
+                <element signature="e#0#64#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/src/stream_channel.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1213">
-              <caret line="102" selection-start-line="102" selection-end-line="102" />
+            <state relative-caret-position="170">
+              <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -103,8 +102,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/src/message_list_view.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="874">
-              <caret line="207" column="30" selection-start-line="207" selection-start-column="30" selection-end-line="207" selection-end-column="30" />
+            <state relative-caret-position="1230">
+              <caret line="258" column="53" selection-start-line="258" selection-start-column="53" selection-end-line="258" selection-end-column="53" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
               </folding>
@@ -147,6 +146,7 @@
       <find>dispose</find>
       <find>CHANNEL-</find>
       <find>_userController</find>
+      <find>onTap</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -163,16 +163,16 @@
         <option value="$PROJECT_DIR$/lib/src/user_avatar.dart" />
         <option value="$PROJECT_DIR$/lib/src/message_widget.dart" />
         <option value="$PROJECT_DIR$/lib/src/message_input.dart" />
-        <option value="$PROJECT_DIR$/lib/src/message_list_view.dart" />
         <option value="$PROJECT_DIR$/example/lib/main.dart" />
         <option value="$PROJECT_DIR$/lib/src/channel_image.dart" />
-        <option value="$PROJECT_DIR$/lib/src/channel_preview.dart" />
         <option value="$PROJECT_DIR$/lib/stream_chat_flutter.dart" />
-        <option value="$PROJECT_DIR$/lib/src/stream_channel.dart" />
-        <option value="$PROJECT_DIR$/example/lib/multiple_conversation.dart" />
         <option value="$PROJECT_DIR$/example/lib/single_conversation.dart" />
         <option value="$PROJECT_DIR$/lib/src/stream_chat.dart" />
+        <option value="$PROJECT_DIR$/lib/src/message_list_view.dart" />
+        <option value="$PROJECT_DIR$/lib/src/channel_preview.dart" />
         <option value="$PROJECT_DIR$/lib/src/channel_list_view.dart" />
+        <option value="$PROJECT_DIR$/example/lib/multiple_conversation.dart" />
+        <option value="$PROJECT_DIR$/lib/src/stream_channel.dart" />
       </list>
     </option>
   </component>
@@ -383,16 +383,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/src/message_widget.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="875">
-          <caret line="79" column="26" selection-start-line="79" selection-start-column="26" selection-end-line="79" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#64#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/src/message_input.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
@@ -448,40 +438,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/src/message_list_view.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="874">
-          <caret line="207" column="30" selection-start-line="207" selection-start-column="30" selection-end-line="207" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/src/channel_preview.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="884">
-          <caret line="52" column="40" selection-start-line="52" selection-start-column="40" selection-end-line="52" selection-end-column="40" />
-          <folding>
-            <element signature="e#0#46#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../flutter/packages/flutter/lib/src/widgets/async.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="580">
           <caret line="383" column="14" selection-start-line="383" selection-start-column="14" selection-end-line="383" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/src/stream_channel.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1213">
-          <caret line="102" selection-start-line="102" selection-end-line="102" />
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -494,8 +454,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/src/stream_chat.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+        <state relative-caret-position="1309">
+          <caret line="77" column="28" selection-start-line="77" selection-start-column="28" selection-end-line="77" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/src/message_widget.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="875">
+          <caret line="79" column="26" selection-start-line="79" selection-start-column="26" selection-end-line="79" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/src/message_list_view.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1230">
+          <caret line="258" column="53" selection-start-line="258" selection-start-column="53" selection-end-line="258" selection-end-column="53" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
           </folding>
@@ -504,10 +484,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/src/channel_list_view.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="890">
-          <caret line="133" column="14" selection-start-line="133" selection-start-column="14" selection-end-line="133" selection-end-column="14" />
+        <state relative-caret-position="136">
+          <caret line="8" column="26" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="26" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/src/channel_preview.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="782">
+          <caret line="46" column="31" selection-start-line="46" selection-start-column="31" selection-end-line="46" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#46#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/src/stream_channel.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
           </folding>
         </state>
       </provider>

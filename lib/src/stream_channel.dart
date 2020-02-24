@@ -8,7 +8,7 @@ class StreamChannel extends StatefulWidget {
   StreamChannel({
     Key key,
     @required this.child,
-    this.channelClient,
+    @required this.channelClient,
   }) : super(
           key: key,
         );
@@ -95,8 +95,6 @@ class StreamChannelState extends State<StreamChannel> {
   @override
   void dispose() {
     _queryMessageController.close();
-    widget.channelClient.dispose();
-
     super.dispose();
   }
 
@@ -109,6 +107,7 @@ class StreamChannelState extends State<StreamChannel> {
     }
     return FutureBuilder<bool>(
       future: widget.channelClient.initialized,
+      initialData: widget.channelClient.state != null,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Scaffold(

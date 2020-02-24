@@ -4,12 +4,13 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'channel_image.dart';
+import 'channel_list_view.dart';
 import 'channel_name_text.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
 
 class ChannelPreview extends StatelessWidget {
-  final VoidCallback onTap;
+  final ChannelTapCallback onTap;
 
   const ChannelPreview({
     Key key,
@@ -37,14 +38,13 @@ class ChannelPreview extends StatelessWidget {
     ChannelState channelState,
     StreamChannelState streamChannel,
   ) {
+    final channelClient =
+        StreamChat.of(context).client.channelClients[channelState.channel.id];
     return StreamChannel(
-      channelClient:
-          StreamChat.of(context).client.channelClients[channelState.channel.id],
+      channelClient: channelClient,
       child: ListTile(
         onTap: () {
-          if (onTap != null) {
-            onTap();
-          }
+          onTap(channelClient);
         },
         leading: ChannelImage(
           channel: channelState.channel,

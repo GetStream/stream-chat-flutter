@@ -9,27 +9,21 @@ void main() async {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
   );
 
-  runApp(StreamChat(
-    client: client,
-    child: MyApp(),
-  ));
-}
+  final channelClient = client.channel('messaging', id: 'godevs');
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
+  channelClient.watch();
 
-class _MyAppState extends State<MyApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+  runApp(
+    StreamChat(
+      client: client,
+      child: MaterialApp(
+        home: StreamChat(
+          client: client,
+          child: ChannelListPage(),
+        ),
       ),
-      home: ChannelListPage(),
-    );
-  }
+    ),
+  );
 }
 
 class ChannelListPage extends StatelessWidget {
@@ -48,7 +42,10 @@ class ChannelListPage extends StatelessWidget {
         ),
         onChannelTap: (channelClient) {
           Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return ChannelPage(channelClient);
+            return StreamChannel(
+              child: ChannelPage(),
+              channelClient: channelClient,
+            );
           }));
         },
       ),
@@ -57,21 +54,20 @@ class ChannelListPage extends StatelessWidget {
 }
 
 class ChannelPage extends StatelessWidget {
-  ChannelPage(this.channelClient);
-
-  final ChannelClient channelClient;
+  const ChannelPage({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return StreamChannel(
-      channelClient: channelClient,
-      child: Scaffold(
-        body: Column(
-          children: <Widget>[
-            Expanded(child: MessageListView()),
-            MessageInput(),
-          ],
-        ),
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListView(),
+          ),
+          MessageInput(),
+        ],
       ),
     );
   }

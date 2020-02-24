@@ -100,14 +100,15 @@ class _ChannelListViewState extends State<ChannelListView> {
 
       Widget child;
       if (widget._channelPreviewBuilder != null) {
-        child = widget._channelPreviewBuilder(context, channelState);
+        child = GestureDetector(
+          onTap: () {
+            widget.onChannelTap(channelClient);
+          },
+          child: widget._channelPreviewBuilder(context, channelState),
+        );
       } else {
         child = ChannelPreview(
-          onTap: widget?.onChannelTap != null
-              ? () {
-                  widget?.onChannelTap(channelClient);
-                }
-              : null,
+          onTap: widget.onChannelTap,
         );
       }
 

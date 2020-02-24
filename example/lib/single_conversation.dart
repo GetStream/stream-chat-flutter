@@ -19,18 +19,29 @@ void main() async {
         client: client,
         child: StreamChannel(
           channelClient: channelClient,
-          child: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: MessageListView(),
-                ),
-                MessageInput(),
-              ],
-            ),
-          ),
+          child: ChannelPage(),
         ),
       ),
     ),
   );
+}
+
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListView(),
+          ),
+          MessageInput(),
+        ],
+      ),
+    );
+  }
 }
