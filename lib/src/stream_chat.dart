@@ -32,7 +32,7 @@ class StreamChat extends InheritedWidget {
   Stream<User> get userStream => _userController.stream;
   final BehaviorSubject<User> _userController = BehaviorSubject();
 
-  void setUser(User newUser, [String token]) async {
+  Future<void> setUser(User newUser, [String token]) async {
     _userController.sink.add(null);
 
     try {

@@ -9,7 +9,7 @@ import 'stream_channel.dart';
 
 typedef MessageBuilder = Widget Function(BuildContext, Message, int index);
 typedef ParentMessageBuilder = Widget Function(BuildContext, Message);
-typedef ParentTapCallback = void Function(Message parent);
+typedef OnThreadSelectCallback = void Function(Message parent);
 
 class MessageListView extends StatefulWidget {
   MessageListView({
@@ -17,13 +17,13 @@ class MessageListView extends StatefulWidget {
     MessageBuilder messageBuilder,
     this.parentMessageBuilder,
     this.parentMessage,
-    this.parentTapCallback,
+    this.onThreadSelect,
   })  : _messageBuilder = messageBuilder,
         super(key: key);
 
   final MessageBuilder _messageBuilder;
   final ParentMessageBuilder parentMessageBuilder;
-  final ParentTapCallback parentTapCallback;
+  final OnThreadSelectCallback onThreadSelect;
   final Message parentMessage;
 
   @override
@@ -59,7 +59,7 @@ class _MessageListViewState extends State<MessageListView> {
         reverse: true,
         childrenDelegate: SliverChildBuilderDelegate(
           (context, i) {
-            if (i == this._messages.length + 1) {
+            if (i == _messages.length + 1) {
               if (widget.parentMessage != null) {
                 if (widget.parentMessageBuilder != null) {
                   return widget.parentMessageBuilder(
@@ -74,7 +74,7 @@ class _MessageListViewState extends State<MessageListView> {
                         previousMessage: null,
                         message: widget.parentMessage.copyWith(replyCount: 0),
                         nextMessage: null,
-                        parentTapCallback: widget.parentTapCallback,
+                        onThreadSelect: widget.onThreadSelect,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -97,18 +97,18 @@ class _MessageListViewState extends State<MessageListView> {
               }
             }
 
-            if (i == this._messages.length) {
+            if (i == _messages.length) {
               return _buildLoadingIndicator(streamChannel);
             }
-            final message = this._messages[i];
+            final message = _messages[i];
 
             if (widget._messageBuilder != null) {
               return widget._messageBuilder(context, message, i);
             }
 
             final previousMessage =
-                i < this._messages.length - 1 ? this._messages[i + 1] : null;
-            final nextMessage = i > 0 ? this._messages[i - 1] : null;
+                i < _messages.length - 1 ? _messages[i + 1] : null;
+            final nextMessage = i > 0 ? _messages[i - 1] : null;
 
             if (i == 0) {
               return _buildBottomMessage(
@@ -119,7 +119,7 @@ class _MessageListViewState extends State<MessageListView> {
               );
             }
 
-            if (i == this._messages.length - 1) {
+            if (i == _messages.length - 1) {
               return _buildTopMessage(
                 message,
                 nextMessage,
@@ -133,14 +133,13 @@ class _MessageListViewState extends State<MessageListView> {
               previousMessage: previousMessage,
               message: message,
               nextMessage: nextMessage,
-              parentTapCallback: widget.parentTapCallback,
+              onThreadSelect: widget.onThreadSelect,
             );
           },
-          childCount: this._messages.length + 2,
+          childCount: _messages.length + 2,
           findChildIndexCallback: (key) {
             final ValueKey<String> valueKey = key;
-            final index = this
-                ._messages
+            final index = _messages
                 .indexWhere((m) => 'MESSAGE-${m.id}' == valueKey.value);
             return index != -1 ? index : null;
           },
@@ -149,7 +148,7 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
-  Container _buildLoadingIndicator(StreamChannel streamChannel) {
+  Container _buildLoadingIndicator(StreamChannelState streamChannel) {
     return Container(
       height: 50,
       child: StreamBuilder<bool>(
@@ -178,7 +177,7 @@ class _MessageListViewState extends State<MessageListView> {
   Widget _buildTopMessage(
     Message message,
     Message nextMessage,
-    StreamChannel channelBloc,
+    StreamChannelState streamChannelState,
     BuildContext context,
   ) {
     return VisibilityDetector(
@@ -188,12 +187,12 @@ class _MessageListViewState extends State<MessageListView> {
         previousMessage: null,
         message: message,
         nextMessage: nextMessage,
-        parentTapCallback: widget.parentTapCallback,
+        onThreadSelect: widget.onThreadSelect,
       ),
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
         if (topIsVisible && !_topWasVisible) {
-          channelBloc.queryMessages();
+          streamChannelState.queryMessages();
         }
         _topWasVisible = topIsVisible;
       },
@@ -201,7 +200,7 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildBottomMessage(
-    StreamChannel channelBloc,
+    StreamChannelState channelBloc,
     Message previousMessage,
     Message message,
     BuildContext context,
@@ -209,8 +208,8 @@ class _MessageListViewState extends State<MessageListView> {
     return VisibilityDetector(
       key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
-        this._isBottom = visibility.visibleBounds != Rect.zero;
-        if (this._isBottom) {
+        _isBottom = visibility.visibleBounds != Rect.zero;
+        if (_isBottom) {
           if (channelBloc.channelClient.state.unreadCount > 0) {
             channelBloc.channelClient.markRead();
           }
@@ -221,7 +220,7 @@ class _MessageListViewState extends State<MessageListView> {
         previousMessage: previousMessage,
         message: message,
         nextMessage: null,
-        parentTapCallback: widget.parentTapCallback,
+        onThreadSelect: widget.onThreadSelect,
       ),
     );
   }
@@ -254,14 +253,14 @@ class _MessageListViewState extends State<MessageListView> {
         if (!_scrollController.hasClients ||
             _scrollController.offset < _newMessageLoadingOffset) {
           setState(() {
-            this._messages = newMessages;
+            _messages = newMessages;
           });
         } else if (newMessages.first.user.id ==
             streamChannel.channelClient.client.user.id) {
           _scrollController.jumpTo(0);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             setState(() {
-              this._messages = newMessages;
+              _messages = newMessages;
             });
           });
         } else {
@@ -269,7 +268,7 @@ class _MessageListViewState extends State<MessageListView> {
         }
       } else {
         setState(() {
-          this._messages = newMessages;
+          _messages = newMessages;
         });
       }
     });

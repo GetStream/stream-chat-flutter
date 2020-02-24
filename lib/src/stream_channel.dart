@@ -4,21 +4,44 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-class StreamChannel extends InheritedWidget {
-  final ChannelClient channelClient;
-
-  ChannelState get channelState => channelClient.state.channelState;
-  Stream<ChannelState> get channelStateStream =>
-      channelClient.state.channelStateStream;
-
+class StreamChannel extends StatefulWidget {
   StreamChannel({
     Key key,
-    @required Widget child,
-    @required this.channelClient,
+    @required this.child,
+    this.channelClient,
   }) : super(
           key: key,
-          child: child,
         );
+
+  final Widget child;
+  final ChannelClient channelClient;
+
+  static StreamChannelState of(BuildContext context) {
+    StreamChannelState streamChannelState;
+
+    streamChannelState = context.findAncestorStateOfType<StreamChannelState>();
+
+    if (streamChannelState == null) {
+      throw Exception(
+          'You must have a StreamChannel widget at the top of your widget tree');
+    }
+
+    return streamChannelState;
+  }
+
+  @override
+  StreamChannelState createState() => StreamChannelState(channelClient);
+}
+
+class StreamChannelState extends State<StreamChannel> {
+  final ChannelClient channelClient;
+
+  StreamChannelState(this.channelClient);
+
+  ChannelState get channelState => channelClient.state.channelState;
+
+  Stream<ChannelState> get channelStateStream =>
+      channelClient.state.channelStateStream;
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
 
@@ -69,31 +92,41 @@ class StreamChannel extends InheritedWidget {
     });
   }
 
+  @override
   void dispose() {
     _queryMessageController.close();
     channelClient.dispose();
+
+    super.dispose();
   }
 
   @override
-  bool updateShouldNotify(InheritedWidget oldWidget) {
-    return true;
+  void initState() {
+    super.initState();
   }
 
-  static StreamChannel of(BuildContext context, [bool listen = false]) {
-    StreamChannel streamChannel;
-
-    if (listen) {
-      streamChannel =
-          context.dependOnInheritedWidgetOfExactType<StreamChannel>();
-    } else {
-      streamChannel = context.findAncestorWidgetOfExactType<StreamChannel>();
+  @override
+  Widget build(BuildContext context) {
+    if (channelClient == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
     }
-
-    if (streamChannel == null) {
-      throw Exception(
-          'You must have a StreamChannel widget at the top of your widget tree');
-    }
-
-    return streamChannel;
+    return FutureBuilder<bool>(
+      future: channelClient.initialized,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text(snapshot.error),
+          );
+        } else {
+          return widget.child;
+        }
+      },
+    );
   }
 }

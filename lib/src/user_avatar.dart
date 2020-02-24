@@ -15,7 +15,7 @@ class UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: this.radius,
+      radius: radius,
       backgroundImage: user.extraData.containsKey('image')
           ? CachedNetworkImageProvider(user.extraData['image'] as String)
           : null,
