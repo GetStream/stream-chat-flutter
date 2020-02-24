@@ -5,19 +5,19 @@ import 'channel_preview.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
 
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, ChannelState);
-typedef ChannelTapCallback = void Function(ChannelClient);
+typedef ChannelTapCallback = void Function(ChannelClient, Widget);
 
 class ChannelListView extends StatefulWidget {
   ChannelListView({
     Key key,
-    ChannelPreviewBuilder channelPreviewBuilder,
     this.filter,
     this.options,
     this.sort,
     this.pagination,
     this.onChannelTap,
-  })  : _channelPreviewBuilder = channelPreviewBuilder,
+    this.channelWidget,
+    this.channelPreview,
+  })  : assert(channelWidget != null || onChannelTap != null),
         super(key: key);
 
   final Map<String, dynamic> filter;
@@ -26,8 +26,8 @@ class ChannelListView extends StatefulWidget {
   final PaginationParams pagination;
   final ScrollController _scrollController = ScrollController();
   final ChannelTapCallback onChannelTap;
-
-  final ChannelPreviewBuilder _channelPreviewBuilder;
+  final Widget channelWidget;
+  final Widget channelPreview;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -98,17 +98,47 @@ class _ChannelListViewState extends State<ChannelListView> {
       final channelClient =
           streamChat.client.channelClients[channelState.channel.id];
 
+      ChannelTapCallback onTap;
+      if (widget.onChannelTap != null) {
+        onTap = widget.onChannelTap;
+      } else {
+        onTap = (client, _) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return StreamChannel(
+                  child: widget.channelWidget,
+                  channelClient: client,
+                );
+              },
+            ),
+          );
+        };
+      }
+
       Widget child;
-      if (widget._channelPreviewBuilder != null) {
-        child = GestureDetector(
-          onTap: () {
-            widget.onChannelTap(channelClient);
-          },
-          child: widget._channelPreviewBuilder(context, channelState),
+      if (widget.channelPreview != null) {
+        child = Stack(
+          children: [
+            widget.channelPreview,
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    onTap(channelClient, widget.channelWidget);
+                  },
+                ),
+              ),
+            ),
+          ],
         );
       } else {
         child = ChannelPreview(
-          onTap: widget.onChannelTap,
+          onTap: (channelClient) {
+            onTap(channelClient, widget.channelWidget);
+          },
         );
       }
 

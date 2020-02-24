@@ -14,10 +14,10 @@ void main() async {
   channelClient.watch();
 
   runApp(
-    MaterialApp(
-      home: StreamChat(
-        client: client,
-        child: StreamChannel(
+    StreamChat(
+      client: client,
+      child: MaterialApp(
+        home: StreamChannel(
           channelClient: channelClient,
           child: ChannelPage(),
         ),

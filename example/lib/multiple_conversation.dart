@@ -9,18 +9,11 @@ void main() async {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
   );
 
-  final channelClient = client.channel('messaging', id: 'godevs');
-
-  channelClient.watch();
-
   runApp(
     StreamChat(
       client: client,
       child: MaterialApp(
-        home: StreamChat(
-          client: client,
-          child: ChannelListPage(),
-        ),
+        home: ChannelListPage(),
       ),
     ),
   );
@@ -40,14 +33,7 @@ class ChannelListPage extends StatelessWidget {
         pagination: PaginationParams(
           limit: 20,
         ),
-        onChannelTap: (channelClient) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return StreamChannel(
-              child: ChannelPage(),
-              channelClient: channelClient,
-            );
-          }));
-        },
+        channelWidget: ChannelPage(),
       ),
     );
   }

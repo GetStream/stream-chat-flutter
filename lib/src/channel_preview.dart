@@ -4,17 +4,16 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'channel_image.dart';
-import 'channel_list_view.dart';
 import 'channel_name_text.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
 
 class ChannelPreview extends StatelessWidget {
-  final ChannelTapCallback onTap;
+  final void Function(ChannelClient) onTap;
 
   const ChannelPreview({
     Key key,
-    @required this.onTap,
+    this.onTap,
   }) : super(key: key);
 
   @override
