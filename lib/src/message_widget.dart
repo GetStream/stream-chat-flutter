@@ -222,21 +222,34 @@ class _MessageWidgetState extends State<MessageWidget>
     );
 
     if (widget.message.text.trim().isNotEmpty) {
-      column.children.add(Container(
-        margin: EdgeInsets.only(
-          top: nOfAttachmentWidgets > 0 ? 5 : 0,
-        ),
-        decoration: _buildBoxDecoration(
-            isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
-        padding: EdgeInsets.all(10),
-        constraints: BoxConstraints.loose(Size.fromWidth(300)),
-        child: MarkdownBody(
-          data: '${widget.message.text}',
-          onTapLink: (link) {
-            _launchURL(link);
-          },
-          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
-        ),
+      final topPadding = widget.message.latestReactions.isNotEmpty ? 36.0 : 0.0;
+      column.children.add(Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          widget.message.latestReactions.isNotEmpty
+              ? Positioned(
+                  left: isMyMessage ? 0 : null,
+                  right: !isMyMessage ? 0 : null,
+                  top: 0,
+                  child: _buildReactions(isMyMessage))
+              : SizedBox(),
+          Container(
+            margin: EdgeInsets.only(
+              top: nOfAttachmentWidgets > 0 ? (topPadding) : (topPadding),
+            ),
+            decoration: _buildBoxDecoration(
+                isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
+            padding: EdgeInsets.all(10),
+            constraints: BoxConstraints.loose(Size.fromWidth(300)),
+            child: MarkdownBody(
+              data: '${widget.message.text}',
+              onTapLink: (link) {
+                _launchURL(link);
+              },
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+            ),
+          ),
+        ],
       ));
     }
 
@@ -253,72 +266,71 @@ class _MessageWidgetState extends State<MessageWidget>
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    IconButton(
+                  children: reactionToEmoji.keys.map((reactionType) {
+                    return IconButton(
                       iconSize: fontSize + 10,
                       icon: Text(
-                        '♥️',
+                        reactionToEmoji[reactionType],
                         style: textStyle,
                       ),
                       onPressed: () {
-                        sendReaction('love');
+                        sendReaction(reactionType);
                       },
-                    ),
-                    IconButton(
-                      iconSize: fontSize + 10,
-                      icon: Text(
-                        '😂',
-                        style: textStyle,
-                      ),
-                      onPressed: () {
-                        sendReaction('haha');
-                      },
-                    ),
-                    IconButton(
-                      iconSize: fontSize + 10,
-                      icon: Text(
-                        '👍',
-                        style: textStyle,
-                      ),
-                      onPressed: () {
-                        sendReaction('like');
-                      },
-                    ),
-                    IconButton(
-                      iconSize: fontSize + 10,
-                      icon: Text(
-                        '😕',
-                        style: textStyle,
-                      ),
-                      onPressed: () {
-                        sendReaction('sad');
-                      },
-                    ),
-                    IconButton(
-                      iconSize: fontSize + 10,
-                      icon: Text(
-                        '😡',
-                        style: textStyle,
-                      ),
-                      onPressed: () {
-                        sendReaction('angry');
-                      },
-                    ),
-                    IconButton(
-                      iconSize: fontSize + 10,
-                      icon: Text(
-                        '😲',
-                        style: textStyle,
-                      ),
-                      onPressed: () {
-                        sendReaction('wow');
-                      },
-                    ),
-                  ],
+                    );
+                  }).toList(),
                 );
               });
         });
   }
+
+  Widget _buildReactions(bool isMyMessage) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          widget.message.latestReactions.isNotEmpty
+              ? Positioned(
+                  left: isMyMessage ? 0 : null,
+                  right: !isMyMessage ? 0 : null,
+                  bottom: 1,
+                  child: CustomPaint(
+                    painter: ReactionBubblePainter(),
+                  ),
+                )
+              : SizedBox(),
+          AnimatedContainer(
+            transform: Matrix4.translationValues(
+                -16 * (isMyMessage ? 1.0 : -1.0), 0, 0),
+            padding: widget.message.latestReactions.isNotEmpty
+                ? const EdgeInsets.all(8)
+                : EdgeInsets.zero,
+            decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.all(Radius.circular(14))),
+            duration: Duration(milliseconds: 300),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[]
+                ..addAll(widget.message.latestReactions.map((reaction) {
+                  return Text(reactionToEmoji[reaction.type] ?? '?');
+                })),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  final Map<String, String> reactionToEmoji = {
+    'love': '♥️',
+    'haha': '😂',
+    'like': '👍',
+    'sad': '😕',
+    'angry': '😡',
+    'wow': '😲',
+  };
 
   void sendReaction(String reactionType) {
     StreamChannel.of(context)
@@ -435,5 +447,22 @@ class _MessageWidgetState extends State<MessageWidget>
   @override
   bool get wantKeepAlive {
     return widget.message.attachments.isNotEmpty;
+  }
+}
+
+class ReactionBubblePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.black;
+    final path = Path();
+    path.arcToPoint(Offset(-5, 0));
+    path.arcToPoint(Offset(0, 10), radius: Radius.circular(16));
+    path.arcToPoint(Offset(5, 0), radius: Radius.circular(16));
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }

@@ -287,7 +287,7 @@ class _MessageListViewState extends State<MessageListView> {
                 ? widget.threadBuilder(context, message)
                 : null);
       };
-    } else {
+    } else if (widget.threadBuilder != null) {
       _onThreadTap = (message) {
         Navigator.push(
           context,
