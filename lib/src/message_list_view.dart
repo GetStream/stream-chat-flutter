@@ -9,7 +9,8 @@ import 'stream_channel.dart';
 
 typedef MessageBuilder = Widget Function(BuildContext, Message, int index);
 typedef ParentMessageBuilder = Widget Function(BuildContext, Message);
-typedef OnThreadSelectCallback = void Function(Message parent);
+typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
+typedef ThreadTapCallback = void Function(Message, Widget);
 
 class MessageListView extends StatefulWidget {
   MessageListView({
@@ -17,13 +18,15 @@ class MessageListView extends StatefulWidget {
     MessageBuilder messageBuilder,
     this.parentMessageBuilder,
     this.parentMessage,
-    this.onThreadSelect,
+    this.threadBuilder,
+    this.onThreadTap,
   })  : _messageBuilder = messageBuilder,
         super(key: key);
 
   final MessageBuilder _messageBuilder;
   final ParentMessageBuilder parentMessageBuilder;
-  final OnThreadSelectCallback onThreadSelect;
+  final ThreadBuilder threadBuilder;
+  final ThreadTapCallback onThreadTap;
   final Message parentMessage;
 
   @override
@@ -37,6 +40,8 @@ class _MessageListViewState extends State<MessageListView> {
   bool _topWasVisible = false;
   List<Message> _messages = [];
   List<Message> _newMessageList = [];
+
+  Function _onThreadTap;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +79,7 @@ class _MessageListViewState extends State<MessageListView> {
                         previousMessage: null,
                         message: widget.parentMessage.copyWith(replyCount: 0),
                         nextMessage: null,
-                        onThreadSelect: widget.onThreadSelect,
+                        onThreadTap: _onThreadTap,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -131,7 +136,7 @@ class _MessageListViewState extends State<MessageListView> {
               previousMessage: previousMessage,
               message: message,
               nextMessage: nextMessage,
-              onThreadSelect: widget.onThreadSelect,
+              onThreadTap: _onThreadTap,
             );
           },
           childCount: _messages.length + 2,
@@ -185,7 +190,7 @@ class _MessageListViewState extends State<MessageListView> {
         previousMessage: null,
         message: message,
         nextMessage: nextMessage,
-        onThreadSelect: widget.onThreadSelect,
+        onThreadTap: _onThreadTap,
       ),
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
@@ -218,7 +223,7 @@ class _MessageListViewState extends State<MessageListView> {
         previousMessage: previousMessage,
         message: message,
         nextMessage: null,
-        onThreadSelect: widget.onThreadSelect,
+        onThreadTap: _onThreadTap,
       ),
     );
   }
@@ -270,6 +275,32 @@ class _MessageListViewState extends State<MessageListView> {
         });
       }
     });
+
+    _getOnThreadTap();
+  }
+
+  void _getOnThreadTap() {
+    if (widget.onThreadTap != null) {
+      _onThreadTap = (message) {
+        widget.onThreadTap(
+            message,
+            widget.threadBuilder != null
+                ? widget.threadBuilder(context, message)
+                : null);
+      };
+    } else {
+      _onThreadTap = (message) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) {
+            return StreamChannel(
+              channelClient: StreamChannel.of(context).channelClient,
+              child: widget.threadBuilder(context, message),
+            );
+          }),
+        );
+      };
+    }
   }
 
   @override

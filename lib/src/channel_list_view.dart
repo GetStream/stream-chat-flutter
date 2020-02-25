@@ -18,8 +18,7 @@ class ChannelListView extends StatefulWidget {
     this.onChannelTap,
     this.channelWidget,
     this.channelPreviewBuilder,
-  })  : assert(channelWidget != null || onChannelTap != null),
-        super(key: key);
+  }) : super(key: key);
 
   final Map<String, dynamic> filter;
   final Map<String, dynamic> options;

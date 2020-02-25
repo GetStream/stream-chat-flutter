@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
-import 'message_list_view.dart';
 import 'stream_chat.dart';
 
 class MessageWidget extends StatefulWidget {
@@ -18,13 +17,13 @@ class MessageWidget extends StatefulWidget {
     @required this.previousMessage,
     @required this.message,
     @required this.nextMessage,
-    this.onThreadSelect,
+    this.onThreadTap,
   }) : super(key: key);
 
   final Message previousMessage;
   final Message message;
   final Message nextMessage;
-  final OnThreadSelectCallback onThreadSelect;
+  final void Function(Message) onThreadTap;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -59,8 +58,8 @@ class _MessageWidgetState extends State<MessageWidget>
           widget.message.replyCount > 0
               ? GestureDetector(
                   onTap: () {
-                    if (widget.onThreadSelect != null) {
-                      widget.onThreadSelect(widget.message);
+                    if (widget.onThreadTap != null) {
+                      widget.onThreadTap(widget.message);
                     }
                   },
                   child: Padding(
