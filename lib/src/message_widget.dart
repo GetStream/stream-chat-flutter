@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
@@ -55,34 +56,8 @@ class _MessageWidgetState extends State<MessageWidget>
             isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
           _buildBubble(context, isMyMessage, isLastUser),
-          widget.message.replyCount > 0
-              ? GestureDetector(
-                  onTap: () {
-                    if (widget.onThreadTap != null) {
-                      widget.onThreadTap(widget.message);
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Row(
-                      children: <Widget>[
-                        Text(
-                          'Replies: ${widget.message.replyCount}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle
-                              .copyWith(color: Colors.blue),
-                        ),
-                        Icon(
-                          Icons.subdirectory_arrow_left,
-                          color: Colors.black12,
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Container(),
-          isNextUser ? Container() : _buildTimestamp(isMyMessage, alignment),
+          _buildThreadIndicator(context),
+          isNextUser ? SizedBox() : _buildTimestamp(isMyMessage, alignment),
         ],
       ),
       isNextUser
@@ -118,6 +93,36 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  Widget _buildThreadIndicator(BuildContext context) {
+    return widget.message.replyCount > 0
+        ? GestureDetector(
+            onTap: () {
+              if (widget.onThreadTap != null) {
+                widget.onThreadTap(widget.message);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Row(
+                children: <Widget>[
+                  Text(
+                    'Replies: ${widget.message.replyCount}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle
+                        .copyWith(color: Colors.blue),
+                  ),
+                  Icon(
+                    Icons.subdirectory_arrow_left,
+                    color: Colors.black12,
+                  ),
+                ],
+              ),
+            ),
+          )
+        : SizedBox();
+  }
+
   Widget _buildBubble(
     BuildContext context,
     bool isMyMessage,
@@ -128,7 +133,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final column = Column(
       crossAxisAlignment:
           isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: widget.message.attachments.map((attachment) {
+      children: List<Widget>.from(widget.message.attachments.map((attachment) {
         nOfAttachmentWidgets++;
 
         Widget attachmentWidget;
@@ -212,8 +217,8 @@ class _MessageWidgetState extends State<MessageWidget>
         }
 
         nOfAttachmentWidgets--;
-        return Container();
-      }).toList(),
+        return SizedBox();
+      })),
     );
 
     if (widget.message.text.trim().isNotEmpty) {
@@ -235,7 +240,91 @@ class _MessageWidgetState extends State<MessageWidget>
       ));
     }
 
-    return column;
+    return GestureDetector(
+        child: column,
+        onLongPress: () {
+          showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                final fontSize = 40.0;
+                final textStyle = TextStyle(
+                  fontSize: fontSize,
+                );
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    IconButton(
+                      iconSize: fontSize + 10,
+                      icon: Text(
+                        '♥️',
+                        style: textStyle,
+                      ),
+                      onPressed: () {
+                        sendReaction('love');
+                      },
+                    ),
+                    IconButton(
+                      iconSize: fontSize + 10,
+                      icon: Text(
+                        '😂',
+                        style: textStyle,
+                      ),
+                      onPressed: () {
+                        sendReaction('haha');
+                      },
+                    ),
+                    IconButton(
+                      iconSize: fontSize + 10,
+                      icon: Text(
+                        '👍',
+                        style: textStyle,
+                      ),
+                      onPressed: () {
+                        sendReaction('like');
+                      },
+                    ),
+                    IconButton(
+                      iconSize: fontSize + 10,
+                      icon: Text(
+                        '😕',
+                        style: textStyle,
+                      ),
+                      onPressed: () {
+                        sendReaction('sad');
+                      },
+                    ),
+                    IconButton(
+                      iconSize: fontSize + 10,
+                      icon: Text(
+                        '😡',
+                        style: textStyle,
+                      ),
+                      onPressed: () {
+                        sendReaction('angry');
+                      },
+                    ),
+                    IconButton(
+                      iconSize: fontSize + 10,
+                      icon: Text(
+                        '😲',
+                        style: textStyle,
+                      ),
+                      onPressed: () {
+                        sendReaction('wow');
+                      },
+                    ),
+                  ],
+                );
+              });
+        });
+  }
+
+  void sendReaction(String reactionType) {
+    StreamChannel.of(context)
+        .channelClient
+        .sendReaction(widget.message.id, reactionType);
+    Navigator.of(context).pop();
   }
 
   Widget _buildImage(
