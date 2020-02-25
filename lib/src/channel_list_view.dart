@@ -6,6 +6,7 @@ import 'stream_channel.dart';
 import 'stream_chat.dart';
 
 typedef ChannelTapCallback = void Function(ChannelClient, Widget);
+typedef ChannelPreviewBuilder = Widget Function(BuildContext, ChannelClient);
 
 class ChannelListView extends StatefulWidget {
   ChannelListView({
@@ -16,7 +17,7 @@ class ChannelListView extends StatefulWidget {
     this.pagination,
     this.onChannelTap,
     this.channelWidget,
-    this.channelPreview,
+    this.channelPreviewBuilder,
   })  : assert(channelWidget != null || onChannelTap != null),
         super(key: key);
 
@@ -27,7 +28,7 @@ class ChannelListView extends StatefulWidget {
   final ScrollController _scrollController = ScrollController();
   final ChannelTapCallback onChannelTap;
   final Widget channelWidget;
-  final Widget channelPreview;
+  final ChannelPreviewBuilder channelPreviewBuilder;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -117,34 +118,46 @@ class _ChannelListViewState extends State<ChannelListView> {
         };
       }
 
-      Widget child;
-      if (widget.channelPreview != null) {
-        child = Stack(
-          children: [
-            widget.channelPreview,
-            Positioned.fill(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    onTap(channelClient, widget.channelWidget);
-                  },
-                ),
-              ),
-            ),
-          ],
-        );
-      } else {
-        child = ChannelPreview(
-          onTap: (channelClient) {
-            onTap(channelClient, widget.channelWidget);
-          },
-        );
-      }
-
       return StreamChannel(
         key: ValueKey<String>('CHANNEL-${channelClient.id}'),
-        child: child,
+        child: StreamBuilder<ChannelState>(
+          initialData: channelClient.state.channelState,
+          stream: channelClient.state.channelStateStream,
+          builder: (context, snapshot) {
+            final channelState = snapshot.data;
+
+            Widget child;
+            if (widget.channelPreviewBuilder != null) {
+              child = Stack(
+                children: [
+                  widget.channelPreviewBuilder(
+                    context,
+                    channelClient,
+                  ),
+                  Positioned.fill(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          onTap(channelClient, widget.channelWidget);
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            } else {
+              child = ChannelPreview(
+                channelClient: channelClient,
+                onTap: (channelClient) {
+                  onTap(channelClient, widget.channelWidget);
+                },
+              );
+            }
+
+            return child;
+          },
+        ),
         channelClient: channelClient,
       );
     } else {
