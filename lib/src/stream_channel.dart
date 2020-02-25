@@ -109,7 +109,7 @@ class StreamChannelState extends State<StreamChannel> {
       future: widget.channelClient.initialized,
       initialData: widget.channelClient.state != null,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || !snapshot.data) {
           return Scaffold(
             body: Center(
               child: CircularProgressIndicator(),

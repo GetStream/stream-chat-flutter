@@ -15,15 +15,14 @@ typedef ThreadTapCallback = void Function(Message, Widget);
 class MessageListView extends StatefulWidget {
   MessageListView({
     Key key,
-    MessageBuilder messageBuilder,
+    this.messageBuilder,
     this.parentMessageBuilder,
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
-  })  : _messageBuilder = messageBuilder,
-        super(key: key);
+  }) : super(key: key);
 
-  final MessageBuilder _messageBuilder;
+  final MessageBuilder messageBuilder;
   final ParentMessageBuilder parentMessageBuilder;
   final ThreadBuilder threadBuilder;
   final ThreadTapCallback onThreadTap;
@@ -105,8 +104,8 @@ class _MessageListViewState extends State<MessageListView> {
             }
             final message = _messages[i];
 
-            if (widget._messageBuilder != null) {
-              return widget._messageBuilder(context, message, i);
+            if (widget.messageBuilder != null) {
+              return widget.messageBuilder(context, message, i);
             }
 
             final previousMessage =
