@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-class ChannelNameText extends StatelessWidget {
-  const ChannelNameText({
+class ChannelName extends StatelessWidget {
+  const ChannelName({
     Key key,
-    this.channel,
+    @required this.channel,
   }) : super(key: key);
 
   final Channel channel;
@@ -12,7 +12,7 @@ class ChannelNameText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      channel.extraData['name'] as String ?? channel.config.name,
+      channel.extraData['name'] as String ?? channel.cid,
       style: Theme.of(context).textTheme.body2,
     );
   }

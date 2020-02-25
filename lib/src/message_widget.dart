@@ -5,12 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
 import 'message_list_view.dart';
 import 'stream_chat.dart';
-import 'user_avatar.dart';
 
 class MessageWidget extends StatefulWidget {
   const MessageWidget({

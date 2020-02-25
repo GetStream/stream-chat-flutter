@@ -32,19 +32,21 @@ class ChannelListPage extends StatelessWidget {
         channelPreviewBuilder: (context, channelClient) {
           final channelState = channelClient.state.channelState;
           return ListTile(
-            leading: CircleAvatar(
-              backgroundImage:
-                  channelState.channel.extraData.containsKey('image')
-                      ? NetworkImage(channelState.channel.extraData['image'])
-                      : null,
+            leading: ChannelAvatar(
+              channel: channelState.channel,
             ),
-            title: Text(channelState.channel.extraData['name'] ?? ''),
+            title: ChannelName(
+              channel: channelState.channel,
+            ),
             trailing: channelClient.state.unreadCount > 0
                 ? CircleAvatar(
                     radius: 10,
                     child: Text(channelClient.state.unreadCount.toString()),
                   )
-                : Container(),
+                : SizedBox(
+                    height: 0,
+                    width: 0,
+                  ),
           );
         },
         sort: [SortOption('last_message_at')],

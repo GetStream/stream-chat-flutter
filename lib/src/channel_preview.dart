@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'channel_image.dart';
-import 'channel_name_text.dart';
+import 'channel_name.dart';
 
 class ChannelPreview extends StatelessWidget {
   final void Function(ChannelClient) onTap;
@@ -27,7 +27,7 @@ class ChannelPreview extends StatelessWidget {
       leading: ChannelImage(
         channel: channelState.channel,
       ),
-      title: ChannelNameText(
+      title: ChannelName(
         channel: channelState.channel,
       ),
       subtitle: _buildSubtitle(),
