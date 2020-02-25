@@ -43,10 +43,7 @@ class ChannelListPage extends StatelessWidget {
                     radius: 10,
                     child: Text(channelClient.state.unreadCount.toString()),
                   )
-                : SizedBox(
-                    height: 0,
-                    width: 0,
-                  ),
+                : SizedBox(),
           );
         },
         sort: [SortOption('last_message_at')],

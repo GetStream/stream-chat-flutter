@@ -79,9 +79,7 @@ class ChannelPreview extends StatelessWidget {
     final lastMessage =
         channelState.messages.isNotEmpty ? channelState.messages.last : null;
     if (lastMessage == null) {
-      return SizedBox.fromSize(
-        size: Size.zero,
-      );
+      return SizedBox();
     }
 
     final prefix = lastMessage.attachments

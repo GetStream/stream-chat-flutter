@@ -202,9 +202,7 @@ class _MessageWidgetState extends State<MessageWidget>
                             ),
                           ),
                         )
-                      : SizedBox.fromSize(
-                          size: Size.zero,
-                        ),
+                      : SizedBox(),
                 ],
               ),
               margin: EdgeInsets.only(

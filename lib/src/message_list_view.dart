@@ -91,9 +91,7 @@ class _MessageListViewState extends State<MessageListView> {
                   );
                 }
               } else {
-                return SizedBox.fromSize(
-                  size: Size.zero,
-                );
+                return SizedBox();
               }
             }
 
