@@ -257,8 +257,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         right: isMyMessage ? 0.0 : 8.0,
                         left: isMyMessage ? 8.0 : 0.0,
                       ),
-                      child: AnimatedContainer(
-                        duration: Duration(milliseconds: 300),
+                      child: Container(
                         margin: EdgeInsets.only(
                           top: nOfAttachmentWidgets > 0
                               ? (topPadding)
