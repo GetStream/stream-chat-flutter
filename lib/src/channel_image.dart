@@ -6,20 +6,24 @@ class ChannelImage extends StatelessWidget {
   const ChannelImage({
     Key key,
     @required this.channel,
+    this.radius = 20,
   }) : super(key: key);
 
   final Channel channel;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 20,
+      radius: radius,
       backgroundImage: channel.extraData.containsKey('image')
-          ? CachedNetworkImageProvider(channel.extraData['image'] as String)
+          ? CachedNetworkImageProvider(channel.extraData['image'])
           : null,
       child: channel.extraData.containsKey('image')
           ? null
-          : Text(channel.config.name[0]),
+          : Text(channel.extraData.containsKey('name')
+              ? channel.extraData['name'][0]
+              : ''),
     );
   }
 }
