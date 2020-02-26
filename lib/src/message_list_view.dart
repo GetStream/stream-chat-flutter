@@ -67,7 +67,9 @@ class _MessageListViewState extends State<MessageListView> {
               if (widget.parentMessage != null) {
                 if (widget.parentMessageBuilder != null) {
                   return widget.parentMessageBuilder(
-                      context, widget.parentMessage);
+                    context,
+                    widget.parentMessage,
+                  );
                 } else {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,10 +106,6 @@ class _MessageListViewState extends State<MessageListView> {
             }
             final message = _messages[i];
 
-            if (widget.messageBuilder != null) {
-              return widget.messageBuilder(context, message, i);
-            }
-
             final previousMessage =
                 i < _messages.length - 1 ? _messages[i + 1] : null;
             final nextMessage = i > 0 ? _messages[i - 1] : null;
@@ -127,6 +125,13 @@ class _MessageListViewState extends State<MessageListView> {
                 nextMessage,
                 streamChannel,
                 context,
+              );
+            }
+
+            if (widget.messageBuilder != null) {
+              return Builder(
+                key: ValueKey<String>('MESSAGE-${message.id}'),
+                builder: (_) => widget.messageBuilder(context, message, i),
               );
             }
 
@@ -182,15 +187,25 @@ class _MessageListViewState extends State<MessageListView> {
     StreamChannelState streamChannelState,
     BuildContext context,
   ) {
-    return VisibilityDetector(
-      key: ValueKey<String>('TOP-MESSAGE'),
-      child: MessageWidget(
+    Widget messageWidget;
+    if (widget.messageBuilder != null) {
+      messageWidget = Builder(
+        key: ValueKey<String>('MESSAGE-${message.id}'),
+        builder: (_) => widget.messageBuilder(context, message, 0),
+      );
+    } else {
+      messageWidget = MessageWidget(
         key: ValueKey<String>('MESSAGE-${message.id}'),
         previousMessage: null,
         message: message,
         nextMessage: nextMessage,
         onThreadTap: _onThreadTap,
-      ),
+      );
+    }
+
+    return VisibilityDetector(
+      key: ValueKey<String>('TOP-MESSAGE'),
+      child: messageWidget,
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
         if (topIsVisible && !_topWasVisible) {
@@ -207,23 +222,33 @@ class _MessageListViewState extends State<MessageListView> {
     Message message,
     BuildContext context,
   ) {
-    return VisibilityDetector(
-      key: ValueKey<String>('BOTTOM-MESSAGE'),
-      onVisibilityChanged: (visibility) {
-        _isBottom = visibility.visibleBounds != Rect.zero;
-        if (_isBottom) {
-          if (channelBloc.channelClient.state.unreadCount > 0) {
-            channelBloc.channelClient.markRead();
-          }
-        }
-      },
-      child: MessageWidget(
+    Widget messageWidget;
+    if (widget.messageBuilder != null) {
+      messageWidget = Builder(
+        key: ValueKey<String>('MESSAGE-${message.id}'),
+        builder: (_) => widget.messageBuilder(context, message, 0),
+      );
+    } else {
+      messageWidget = MessageWidget(
         key: ValueKey<String>('MESSAGE-${message.id}'),
         previousMessage: previousMessage,
         message: message,
         nextMessage: null,
         onThreadTap: _onThreadTap,
-      ),
+      );
+    }
+
+    return VisibilityDetector(
+      key: ValueKey<String>('BOTTOM-MESSAGE'),
+      onVisibilityChanged: (visibility) {
+        _isBottom = visibility.visibleBounds != Rect.zero;
+        if (_isBottom) {
+          if (channelBloc.channel.state.unreadCount > 0) {
+            channelBloc.channel.markRead();
+          }
+        }
+      },
+      child: messageWidget,
     );
   }
 
@@ -234,17 +259,17 @@ class _MessageListViewState extends State<MessageListView> {
     super.initState();
 
     final streamChannel = StreamChannel.of(context);
-    if (streamChannel.channelClient.state.unreadCount > 0) {
-      streamChannel.channelClient.markRead();
+    if (streamChannel.channel.state.unreadCount > 0) {
+      streamChannel.channel.markRead();
     }
 
     Stream<List<Message>> stream;
 
     if (widget.parentMessage == null) {
-      stream = streamChannel.channelStateStream.map((c) => c.messages);
+      stream = streamChannel.channel.state.messagesStream;
     } else {
       streamChannel.getReplies(widget.parentMessage.id);
-      stream = streamChannel.channelClient.state.threadsStream
+      stream = streamChannel.channel.state.threadsStream
           .where((threads) => threads.containsKey(widget.parentMessage.id))
           .map((threads) => threads[widget.parentMessage.id]);
     }
@@ -258,7 +283,7 @@ class _MessageListViewState extends State<MessageListView> {
             _messages = newMessages;
           });
         } else if (newMessages.first.user.id ==
-            streamChannel.channelClient.client.state.user.id) {
+            streamChannel.channel.client.state.user.id) {
           _scrollController.jumpTo(0);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             setState(() {
@@ -293,7 +318,7 @@ class _MessageListViewState extends State<MessageListView> {
           context,
           MaterialPageRoute(builder: (_) {
             return StreamChannel(
-              channelClient: StreamChannel.of(context).channelClient,
+              channel: StreamChannel.of(context).channel,
               child: widget.threadBuilder(context, message),
             );
           }),

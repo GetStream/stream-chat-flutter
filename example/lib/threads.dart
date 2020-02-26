@@ -51,9 +51,9 @@ class ChannelPage extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: MessageListView(
-              threadBuilder: (_, message) {
+              threadBuilder: (_, parentMessage) {
                 return ThreadPage(
-                  parent: message,
+                  parent: parentMessage,
                 );
               },
             ),

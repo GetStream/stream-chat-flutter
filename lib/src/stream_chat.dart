@@ -18,7 +18,7 @@ class StreamChat extends InheritedWidget {
           child: child,
         ) {
     _subscriptions.add(client.on('message.new').listen((Event e) {
-      final index = channels.indexWhere((c) => c.channel.cid == e.cid);
+      final index = channels.indexWhere((c) => c.cid == e.cid);
       if (index > 0) {
         final channel = channels.removeAt(index);
         channels.insert(0, channel);
@@ -31,10 +31,9 @@ class StreamChat extends InheritedWidget {
 
   Stream<User> get userStream => client.state.userStream;
 
-  Stream<List<ChannelState>> get channelsStream => _channelsController.stream;
-  final BehaviorSubject<List<ChannelState>> _channelsController =
-      BehaviorSubject();
-  final List<ChannelState> channels = [];
+  Stream<List<Channel>> get channelsStream => _channelsController.stream;
+  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
+  final List<Channel> channels = [];
 
   final BehaviorSubject<bool> _queryChannelsLoadingController =
       BehaviorSubject.seeded(false);
@@ -60,7 +59,7 @@ class StreamChat extends InheritedWidget {
         options: options,
         paginationParams: paginationParams,
       );
-      channels.addAll(res.map((c) => c.state.channelState));
+      channels.addAll(res);
       _channelsController.sink.add(channels);
       _queryChannelsLoadingController.sink.add(false);
     } catch (e) {

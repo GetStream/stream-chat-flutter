@@ -334,7 +334,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   void sendReaction(String reactionType) {
     StreamChannel.of(context)
-        .channelClient
+        .channel
         .sendReaction(widget.message.id, reactionType);
     Navigator.of(context).pop();
   }

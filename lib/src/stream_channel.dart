@@ -8,13 +8,13 @@ class StreamChannel extends StatefulWidget {
   StreamChannel({
     Key key,
     @required this.child,
-    @required this.channelClient,
+    @required this.channel,
   }) : super(
           key: key,
         );
 
   final Widget child;
-  final ChannelClient channelClient;
+  final Channel channel;
 
   static StreamChannelState of(BuildContext context) {
     StreamChannelState streamChannelState;
@@ -36,12 +36,10 @@ class StreamChannel extends StatefulWidget {
 class StreamChannelState extends State<StreamChannel> {
   StreamChannelState();
 
-  ChannelClient get channelClient => widget.channelClient;
-
-  ChannelState get channelState => widget.channelClient.state.channelState;
+  Channel get channel => widget.channel;
 
   Stream<ChannelState> get channelStateStream =>
-      widget.channelClient.state.channelStateStream;
+      widget.channel.state.channelStateStream;
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
 
@@ -51,11 +49,11 @@ class StreamChannelState extends State<StreamChannel> {
     _queryMessageController.add(true);
 
     String firstId;
-    if (channelState.messages.isNotEmpty) {
-      firstId = channelState.messages.first.id;
+    if (channel.state.messages.isNotEmpty) {
+      firstId = channel.state.messages.first.id;
     }
 
-    widget.channelClient
+    widget.channel
         .query(
       messagesPagination: PaginationParams(
         lessThan: firstId,
@@ -73,11 +71,11 @@ class StreamChannelState extends State<StreamChannel> {
     _queryMessageController.add(true);
 
     String firstId;
-    if (widget.channelClient.state.threads.containsKey(parentId)) {
-      firstId = widget.channelClient.state.threads[parentId].first.id;
+    if (widget.channel.state.threads.containsKey(parentId)) {
+      firstId = widget.channel.state.threads[parentId].first.id;
     }
 
-    return widget.channelClient
+    return widget.channel
         .getReplies(
       parentId,
       PaginationParams(
@@ -100,14 +98,14 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.channelClient == null) {
+    if (widget.channel == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
     return FutureBuilder<bool>(
-      future: widget.channelClient.initialized,
-      initialData: widget.channelClient.state != null,
+      future: widget.channel.initialized,
+      initialData: widget.channel.state != null,
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data) {
           return Scaffold(

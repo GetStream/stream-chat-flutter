@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import '../stream_chat_flutter.dart';
 import 'channel_preview.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
 
-typedef ChannelTapCallback = void Function(ChannelClient, Widget);
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, ChannelClient);
+typedef ChannelTapCallback = void Function(Channel, Widget);
+typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
 class ChannelListView extends StatefulWidget {
   ChannelListView({
@@ -47,7 +48,7 @@ class _ChannelListViewState extends State<ChannelListView> {
           options: widget.options,
         );
       },
-      child: StreamBuilder<List<ChannelState>>(
+      child: StreamBuilder<List<Channel>>(
           stream: streamChat.channelsStream,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
@@ -63,19 +64,19 @@ class _ChannelListViewState extends State<ChannelListView> {
               );
             }
 
-            final channelsStates = snapshot.data;
+            final channels = snapshot.data;
             return ListView.custom(
               physics: AlwaysScrollableScrollPhysics(),
               controller: widget._scrollController,
               childrenDelegate: SliverChildBuilderDelegate(
                 (context, i) {
-                  return _itemBuilder(context, i, channelsStates);
+                  return _itemBuilder(context, i, channels);
                 },
-                childCount: (channelsStates.length * 2) + 1,
+                childCount: (channels.length * 2) + 1,
                 findChildIndexCallback: (key) {
                   final ValueKey<String> valueKey = key;
-                  final index = channelsStates.indexWhere(
-                      (cs) => 'CHANNEL-${cs.channel.id}' == valueKey.value);
+                  final index = channels.indexWhere(
+                      (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
                   return index != -1 ? (index * 2) : null;
                 },
               ),
@@ -84,7 +85,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
   }
 
-  Widget _itemBuilder(context, int i, List<ChannelState> channelsStates) {
+  Widget _itemBuilder(context, int i, List<Channel> channels) {
     if (i % 2 != 0) {
       return _separatorBuilder(context, i);
     }
@@ -92,11 +93,10 @@ class _ChannelListViewState extends State<ChannelListView> {
     i = i ~/ 2;
 
     final streamChat = StreamChat.of(context);
-    if (i < channelsStates.length) {
-      final channelState = channelsStates[i];
+    if (i < channels.length) {
+      final channel = channels[i];
 
-      final channelClient =
-          streamChat.client.channelClients[channelState.channel.id];
+      final channelClient = streamChat.client.channelClients[channel.id];
 
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {
@@ -109,7 +109,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               builder: (context) {
                 return StreamChannel(
                   child: widget.channelWidget,
-                  channelClient: client,
+                  channel: client,
                 );
               },
             ),
@@ -119,12 +119,11 @@ class _ChannelListViewState extends State<ChannelListView> {
 
       return StreamChannel(
         key: ValueKey<String>('CHANNEL-${channelClient.id}'),
-        child: StreamBuilder<ChannelState>(
-          initialData: channelClient.state.channelState,
-          stream: channelClient.state.channelStateStream,
+        channel: channelClient,
+        child: StreamBuilder<DateTime>(
+          initialData: channelClient.updatedAt,
+          stream: channelClient.updatedAtStream,
           builder: (context, snapshot) {
-            final channelState = snapshot.data;
-
             Widget child;
             if (widget.channelPreviewBuilder != null) {
               child = Stack(
@@ -147,17 +146,15 @@ class _ChannelListViewState extends State<ChannelListView> {
               );
             } else {
               child = ChannelPreview(
-                channelClient: channelClient,
+                channel: channelClient,
                 onTap: (channelClient) {
                   onTap(channelClient, widget.channelWidget);
                 },
               );
             }
-
             return child;
           },
         ),
-        channelClient: channelClient,
       );
     } else {
       return _buildQueryProgressIndicator(context, streamChat);

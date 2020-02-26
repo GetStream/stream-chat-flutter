@@ -27,31 +27,32 @@ class ChannelListPage extends StatelessWidget {
         filter: {
           'members': {
             '\$in': [StreamChat.of(context).user.id],
-          }
+          },
         },
-        channelPreviewBuilder: (context, channelClient) {
-          final channelState = channelClient.state.channelState;
-          return ListTile(
-            leading: ChannelAvatar(
-              channel: channelState.channel,
-            ),
-            title: ChannelName(
-              channel: channelState.channel,
-            ),
-            trailing: channelClient.state.unreadCount > 0
-                ? CircleAvatar(
-                    radius: 10,
-                    child: Text(channelClient.state.unreadCount.toString()),
-                  )
-                : SizedBox(),
-          );
-        },
+        channelPreviewBuilder: _channelPreviewBuilder,
         sort: [SortOption('last_message_at')],
         pagination: PaginationParams(
           limit: 20,
         ),
         channelWidget: ChannelPage(),
       ),
+    );
+  }
+
+  Widget _channelPreviewBuilder(BuildContext context, Channel channel) {
+    return ListTile(
+      leading: ChannelImage(
+        channel: channel,
+      ),
+      title: ChannelName(
+        channel: channel,
+      ),
+      trailing: channel.state.unreadCount > 0
+          ? CircleAvatar(
+              radius: 10,
+              child: Text(channel.state.unreadCount.toString()),
+            )
+          : SizedBox(),
     );
   }
 }

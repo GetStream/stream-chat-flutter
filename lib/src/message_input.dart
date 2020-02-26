@@ -60,7 +60,7 @@ class _MessageInputState extends State<MessageInput> {
                     },
                     controller: _textController,
                     onChanged: (s) {
-                      StreamChannel.of(context).channelClient.keyStroke();
+                      StreamChannel.of(context).channel.keyStroke();
                       setState(() {
                         _messageIsPresent = s.trim().isNotEmpty;
                       });
@@ -121,7 +121,7 @@ class _MessageInputState extends State<MessageInput> {
     FocusScope.of(context).unfocus();
 
     StreamChannel.of(context)
-        .channelClient
+        .channel
         .sendMessage(
           Message(
             parentId: widget.parent?.id,

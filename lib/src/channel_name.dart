@@ -12,7 +12,9 @@ class ChannelName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      channel.extraData['name'] as String ?? channel.cid,
+      channel?.extraData != null
+          ? (channel?.extraData['name'] ?? channel.cid)
+          : channel.cid,
       style: Theme.of(context).textTheme.body2,
     );
   }

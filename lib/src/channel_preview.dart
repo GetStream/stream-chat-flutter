@@ -3,39 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'channel_image.dart';
+import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
 
 class ChannelPreview extends StatelessWidget {
-  final void Function(ChannelClient) onTap;
-  final ChannelState channelState;
-  final ChannelClient channelClient;
+  final void Function(Channel) onTap;
+  final Channel channel;
 
   ChannelPreview({
-    @required this.channelClient,
+    @required this.channel,
     Key key,
     this.onTap,
-  })  : channelState = channelClient.state.channelState,
-        super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        onTap(channelClient);
+        onTap(channel);
       },
       leading: ChannelImage(
-        channel: channelState.channel,
+        channel: channel,
       ),
       title: ChannelName(
-        channel: channelState.channel,
+        channel: channel,
       ),
       subtitle: _buildSubtitle(),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          _buildDate(context, channelState.channel.lastMessageAt),
+          _buildDate(context, channel.lastMessageAt),
         ],
       ),
     );
@@ -64,11 +62,11 @@ class ChannelPreview extends StatelessWidget {
 
   Widget _buildSubtitle() {
     return StreamBuilder<List<User>>(
-        stream: channelClient.state.typingEventsStream,
+        stream: channel.state.typingEventsStream,
         initialData: [],
         builder: (context, snapshot) {
           final typings = snapshot.data;
-          final opacity = channelClient.state.unreadCount > .0 ? 1.0 : 0.5;
+          final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
           return typings.isNotEmpty
               ? _buildTypings(typings, context, opacity)
               : _buildLastMessage(context, opacity);
@@ -77,7 +75,7 @@ class ChannelPreview extends StatelessWidget {
 
   Widget _buildLastMessage(BuildContext context, double opacity) {
     final lastMessage =
-        channelState.messages.isNotEmpty ? channelState.messages.last : null;
+        channel.state.messages.isNotEmpty ? channel.state.messages.last : null;
     if (lastMessage == null) {
       return SizedBox();
     }

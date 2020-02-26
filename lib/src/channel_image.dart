@@ -16,12 +16,12 @@ class ChannelImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: radius,
-      backgroundImage: channel.extraData.containsKey('image')
+      backgroundImage: channel.extraData?.containsKey('image') ?? false
           ? CachedNetworkImageProvider(channel.extraData['image'])
           : null,
-      child: channel.extraData.containsKey('image')
+      child: channel.extraData?.containsKey('image') ?? false
           ? null
-          : Text(channel.extraData.containsKey('name')
+          : Text(channel.extraData?.containsKey('name') ?? false
               ? channel.extraData['name'][0]
               : ''),
     );
