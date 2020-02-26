@@ -3,6 +3,7 @@ import 'package:chewie/chewie.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
@@ -222,18 +223,19 @@ class _MessageWidgetState extends State<MessageWidget>
     );
 
     if (widget.message.text.trim().isNotEmpty) {
-      final topPadding = widget.message.latestReactions.isNotEmpty ? 36.0 : 0.0;
+      final topPadding =
+          widget.message.reactionCounts?.isNotEmpty == true ? 36.0 : 0.0;
       column.children.add(Stack(
         overflow: Overflow.visible,
+        alignment: Alignment.centerRight,
         children: <Widget>[
-          widget.message.latestReactions.isNotEmpty
-              ? Positioned(
-                  left: isMyMessage ? 0 : null,
-                  right: !isMyMessage ? 0 : null,
-                  top: 0,
-                  child: _buildReactions(isMyMessage))
-              : SizedBox(),
-          Container(
+          Positioned(
+              left: isMyMessage ? 0 : null,
+              right: !isMyMessage ? 0 : null,
+              top: 0,
+              child: _buildReactions(isMyMessage)),
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
             margin: EdgeInsets.only(
               top: nOfAttachmentWidgets > 0 ? (topPadding) : (topPadding),
             ),
@@ -256,69 +258,111 @@ class _MessageWidgetState extends State<MessageWidget>
     return GestureDetector(
         child: column,
         onLongPress: () {
-          showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                final fontSize = 40.0;
-                final textStyle = TextStyle(
-                  fontSize: fontSize,
-                );
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: reactionToEmoji.keys.map((reactionType) {
-                    return IconButton(
-                      iconSize: fontSize + 10,
-                      icon: Text(
-                        reactionToEmoji[reactionType],
-                        style: textStyle,
-                      ),
-                      onPressed: () {
+          _showMessageBottomSheet(context);
+        });
+  }
+
+  void _showMessageBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          final fontSize = 40.0;
+          final textStyle = TextStyle(
+            fontSize: fontSize,
+          );
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: reactionToEmoji.keys.map((reactionType) {
+              final ownReactionIndex = widget.message.ownReactions
+                  .indexWhere((reaction) => reaction.type == reactionType);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  IconButton(
+                    iconSize: fontSize + 10,
+                    icon: Text(
+                      reactionToEmoji[reactionType],
+                      style: textStyle,
+                    ),
+                    onPressed: () {
+                      if (ownReactionIndex != -1) {
+                        removeReaction(reactionType);
+                      } else {
                         sendReaction(reactionType);
-                      },
-                    );
-                  }).toList(),
-                );
-              });
+                      }
+                    },
+                  ),
+                  ownReactionIndex != -1
+                      ? Text(widget.message.ownReactions[ownReactionIndex].score
+                          .toString())
+                      : SizedBox(),
+                ],
+              );
+            }).toList(),
+          );
         });
   }
 
   Widget _buildReactions(bool isMyMessage) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          widget.message.latestReactions.isNotEmpty
-              ? Positioned(
-                  left: isMyMessage ? 0 : null,
-                  right: !isMyMessage ? 0 : null,
-                  bottom: 1,
-                  child: CustomPaint(
-                    painter: ReactionBubblePainter(),
-                  ),
-                )
-              : SizedBox(),
-          AnimatedContainer(
-            transform: Matrix4.translationValues(
-                -16 * (isMyMessage ? 1.0 : -1.0), 0, 0),
-            padding: widget.message.latestReactions.isNotEmpty
-                ? const EdgeInsets.all(8)
-                : EdgeInsets.zero,
-            decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.all(Radius.circular(14))),
-            duration: Duration(milliseconds: 300),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[]
-                ..addAll(widget.message.latestReactions.map((reaction) {
-                  return Text(reactionToEmoji[reaction.type] ?? '?');
-                })),
+      child: GestureDetector(
+        onTap: () {
+          _showMessageBottomSheet(context);
+        },
+        child: Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            widget.message.reactionCounts?.isNotEmpty == true
+                ? Positioned(
+                    left: isMyMessage ? 0 : null,
+                    right: !isMyMessage ? 0 : null,
+                    bottom: 2,
+                    child: CustomPaint(
+                      painter: ReactionBubblePainter(),
+                    ),
+                  )
+                : SizedBox(),
+            Container(
+              transform: Matrix4.translationValues(
+                ((widget.message.reactionCounts?.length ?? 0) * 10) *
+                    (isMyMessage ? -1.0 : 1.0),
+                0,
+                0,
+              ),
+              padding: widget.message.reactionCounts?.isNotEmpty == true
+                  ? const EdgeInsets.all(8)
+                  : EdgeInsets.zero,
+              decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.all(Radius.circular(14))),
+              child: (widget.message.reactionCounts != null &&
+                      widget.message.reactionCounts.isNotEmpty)
+                  ? Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: widget.message.reactionCounts.keys
+                          .map((reactionType) {
+                        return Text(
+                          reactionToEmoji[reactionType] ?? '?',
+                        ) as Widget; //TODO refactor
+                      }).toList()
+                            ..add(Padding(
+                              padding: const EdgeInsets.only(left: 4.0),
+                              child: Text(
+                                widget.message.reactionCounts.values
+                                    .fold(0, (t, v) => v + t)
+                                    .toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            )))
+                  : SizedBox(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -336,6 +380,13 @@ class _MessageWidgetState extends State<MessageWidget>
     StreamChannel.of(context)
         .channel
         .sendReaction(widget.message.id, reactionType);
+    Navigator.of(context).pop();
+  }
+
+  void removeReaction(String reactionType) {
+    StreamChannel.of(context)
+        .channel
+        .deleteReaction(widget.message.id, reactionType);
     Navigator.of(context).pop();
   }
 
@@ -455,9 +506,9 @@ class ReactionBubblePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black;
     final path = Path();
-    path.arcToPoint(Offset(-5, 0));
-    path.arcToPoint(Offset(0, 10), radius: Radius.circular(16));
-    path.arcToPoint(Offset(5, 0), radius: Radius.circular(16));
+    path.arcToPoint(Offset(-6, -6));
+    path.arcToPoint(Offset(0, 10));
+    path.arcToPoint(Offset(6, -6));
     canvas.drawPath(path, paint);
   }
 

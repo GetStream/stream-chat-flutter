@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() async {
-  final client = Client('qk4nn7rpcn75');
+  final client = Client('qk4nn7rpcn75', logLevel: Level.INFO);
 
   await client.setUser(
     User(id: 'wild-breeze-7'),
