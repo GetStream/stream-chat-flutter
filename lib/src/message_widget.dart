@@ -51,46 +51,70 @@ class _MessageWidgetState extends State<MessageWidget>
     final alignment =
         isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
-    var row = <Widget>[
-      Column(
-        crossAxisAlignment:
-            isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildBubble(context, isMyMessage, isLastUser),
-          _buildThreadIndicator(context),
-          isNextUser ? SizedBox() : _buildTimestamp(isMyMessage, alignment),
-        ],
-      ),
-      isNextUser
-          ? Container(
-              width: 40,
-            )
-          : Padding(
-              padding: EdgeInsets.only(
-                left: isMyMessage ? 8.0 : 0,
-                right: isMyMessage ? 0 : 8.0,
-              ),
-              child: UserAvatar(user: widget.message.user),
-            ),
-    ];
+    Widget child;
 
-    if (!isMyMessage) {
-      row = row.reversed.toList();
+    if (widget.message.type == 'deleted') {
+      child = Align(
+        alignment: alignment,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 54,
+            vertical: 14,
+          ),
+          child: Text(
+            'This message was deleted...',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
+    } else {
+      var row = <Widget>[
+        Column(
+          crossAxisAlignment:
+              isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: <Widget>[
+            _buildBubble(context, isMyMessage, isLastUser),
+            _buildThreadIndicator(context),
+            isNextUser ? SizedBox() : _buildTimestamp(isMyMessage, alignment),
+          ],
+        ),
+        isNextUser
+            ? Container(
+                width: 40,
+              )
+            : Padding(
+                padding: EdgeInsets.only(
+                  left: isMyMessage ? 8.0 : 0,
+                  right: isMyMessage ? 0 : 8.0,
+                ),
+                child: UserAvatar(user: widget.message.user),
+              ),
+      ];
+
+      if (!isMyMessage) {
+        row = row.reversed.toList();
+      }
+
+      child = AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        margin: EdgeInsets.only(
+          top: isLastUser ? 5 : 24,
+          bottom: widget.nextMessage == null ? 30 : 0,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment:
+              isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: row,
+        ),
+      );
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      margin: EdgeInsets.only(
-        top: isLastUser ? 5 : 24,
-        bottom: widget.nextMessage == null ? 30 : 0,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment:
-            isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: row,
-      ),
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: child,
     );
   }
 
@@ -147,71 +171,75 @@ class _MessageWidgetState extends State<MessageWidget>
         if (attachmentWidget != null) {
           final boxDecoration = _buildBoxDecoration(isMyMessage, isLastUser)
               .copyWith(color: Color(0xffebebeb));
-          return ClipRRect(
-            borderRadius: boxDecoration.borderRadius,
-            child: Container(
-              decoration: boxDecoration,
-              constraints: BoxConstraints.loose(Size.fromWidth(300)),
-              child: Stack(
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      attachmentWidget,
-                      attachment.title != null
-                          ? Container(
-                              constraints:
-                                  BoxConstraints.loose(Size.fromHeight(70)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      attachment.title,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .subtitle
-                                          .copyWith(color: Colors.blue),
-                                    ),
-                                    Text(
-                                      Uri.parse(attachment.thumbUrl)
-                                          .authority
-                                          .split('.')
-                                          .reversed
-                                          .take(2)
-                                          .toList()
-                                          .reversed
-                                          .join('.'),
-                                      overflow: TextOverflow.ellipsis,
-                                      style:
-                                          Theme.of(context).textTheme.caption,
-                                    ),
-                                  ],
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 2.0),
+            child: ClipRRect(
+              borderRadius: boxDecoration.borderRadius,
+              child: Container(
+                decoration: boxDecoration,
+                constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                child: Stack(
+                  children: <Widget>[
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        attachmentWidget,
+                        attachment.title != null
+                            ? Container(
+                                constraints:
+                                    BoxConstraints.loose(Size.fromHeight(70)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        attachment.title,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .subtitle
+                                            .copyWith(color: Colors.blue),
+                                      ),
+                                      Text(
+                                        Uri.parse(attachment.thumbUrl)
+                                            .authority
+                                            .split('.')
+                                            .reversed
+                                            .take(2)
+                                            .toList()
+                                            .reversed
+                                            .join('.'),
+                                        overflow: TextOverflow.ellipsis,
+                                        style:
+                                            Theme.of(context).textTheme.caption,
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                color: Color(0xffebebeb),
+                              )
+                            : Container(),
+                      ],
+                    ),
+                    attachment.type == 'image' && attachment.titleLink != null
+                        ? Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => _launchURL(attachment.titleLink),
                               ),
-                              color: Color(0xffebebeb),
-                            )
-                          : Container(),
-                    ],
-                  ),
-                  attachment.type == 'image' && attachment.titleLink != null
-                      ? Positioned.fill(
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => _launchURL(attachment.titleLink),
                             ),
-                          ),
-                        )
-                      : SizedBox(),
-                ],
-              ),
-              margin: EdgeInsets.only(
-                top: nOfAttachmentWidgets > 1 ? 5 : 0,
+                          )
+                        : SizedBox(),
+                  ],
+                ),
+                margin: EdgeInsets.only(
+                  top: nOfAttachmentWidgets > 1 ? 5 : 0,
+                ),
               ),
             ),
           );
@@ -223,8 +251,6 @@ class _MessageWidgetState extends State<MessageWidget>
     );
 
     if (widget.message.text.trim().isNotEmpty) {
-      final topPadding =
-          widget.message.reactionCounts?.isNotEmpty == true ? 2.0 : 0.0;
       column.children.addAll(
         <Widget>[
           IntrinsicWidth(
@@ -246,7 +272,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         ? Positioned(
                             left: isMyMessage ? 8 : null,
                             right: !isMyMessage ? 8 : null,
-                            top: -4,
+                            top: -6,
                             child: CustomPaint(
                               painter: ReactionBubblePainter(),
                             ),
@@ -258,11 +284,6 @@ class _MessageWidgetState extends State<MessageWidget>
                         left: isMyMessage ? 8.0 : 0.0,
                       ),
                       child: Container(
-                        margin: EdgeInsets.only(
-                          top: nOfAttachmentWidgets > 0
-                              ? (topPadding)
-                              : (topPadding),
-                        ),
                         decoration: _buildBoxDecoration(isMyMessage,
                             isLastUser || nOfAttachmentWidgets > 0),
                         padding: EdgeInsets.all(10),
@@ -289,11 +310,11 @@ class _MessageWidgetState extends State<MessageWidget>
     return GestureDetector(
         child: column,
         onLongPress: () {
-          _showMessageBottomSheet(context);
+          _showMessageBottomSheet(context, isMyMessage);
         });
   }
 
-  void _showMessageBottomSheet(BuildContext context) {
+  void _showMessageBottomSheet(BuildContext context, bool isMyMessage) {
     showModalBottomSheet(
         context: context,
         builder: (context) {
@@ -301,38 +322,68 @@ class _MessageWidgetState extends State<MessageWidget>
           final textStyle = TextStyle(
             fontSize: fontSize,
           );
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          return Column(
             mainAxisSize: MainAxisSize.min,
-            children: reactionToEmoji.keys.map((reactionType) {
-              final ownReactionIndex = widget.message.ownReactions
-                  .indexWhere((reaction) => reaction.type == reactionType);
-              return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  IconButton(
-                    iconSize: fontSize + 10,
-                    icon: Text(
-                      reactionToEmoji[reactionType],
-                      style: textStyle,
-                    ),
-                    onPressed: () {
-                      if (ownReactionIndex != -1) {
-                        removeReaction(reactionType);
-                      } else {
-                        sendReaction(reactionType);
-                      }
-                    },
-                  ),
-                  ownReactionIndex != -1
-                      ? Text(widget.message.ownReactions[ownReactionIndex].score
-                          .toString())
-                      : SizedBox(),
-                ],
-              );
-            }).toList(),
+                children: reactionToEmoji.keys.map((reactionType) {
+                  final ownReactionIndex = widget.message.ownReactions
+                      .indexWhere((reaction) => reaction.type == reactionType);
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      IconButton(
+                        iconSize: fontSize + 10,
+                        icon: Text(
+                          reactionToEmoji[reactionType],
+                          style: textStyle,
+                        ),
+                        onPressed: () {
+                          if (ownReactionIndex != -1) {
+                            removeReaction(reactionType);
+                          } else {
+                            sendReaction(reactionType);
+                          }
+                        },
+                      ),
+                      ownReactionIndex != -1
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 4.0),
+                              child: Text(widget
+                                  .message.ownReactions[ownReactionIndex].score
+                                  .toString()),
+                            )
+                          : SizedBox(),
+                    ],
+                  );
+                }).toList(),
+              ),
+              isMyMessage
+                  ? FlatButton(
+                      child: Padding(
+                        padding: const EdgeInsets.all(28.0),
+                        child: Text(
+                          'Delete message',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline
+                              .copyWith(color: Colors.red),
+                        ),
+                      ),
+                      onPressed: () {
+                        StreamChat.of(context)
+                            .client
+                            .deleteMessage(widget.message.id);
+                        Navigator.pop(context);
+                      },
+                    )
+                  : SizedBox(),
+            ],
           );
         });
   }
@@ -340,10 +391,12 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildReactions(bool isMyMessage) {
     return GestureDetector(
       onTap: () {
-        _showMessageBottomSheet(context);
+        _showMessageBottomSheet(context, isMyMessage);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0),
+        padding: EdgeInsets.symmetric(
+            vertical:
+                widget.message.reactionCounts?.isNotEmpty == true ? 4.0 : 0),
         child: AnimatedContainer(
           duration: Duration(milliseconds: 300),
           curve: Curves.decelerate,

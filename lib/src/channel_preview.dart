@@ -40,6 +40,8 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Text _buildDate(BuildContext context, DateTime lastMessageAt) {
+    lastMessageAt = lastMessageAt.toLocal();
+
     String stringDate;
     final now = DateTime.now();
 
