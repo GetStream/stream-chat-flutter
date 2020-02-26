@@ -156,7 +156,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 children: <Widget>[
                   Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       attachmentWidget,
                       attachment.title != null
@@ -224,39 +224,58 @@ class _MessageWidgetState extends State<MessageWidget>
 
     if (widget.message.text.trim().isNotEmpty) {
       final topPadding =
-          widget.message.reactionCounts?.isNotEmpty == true ? 36.0 : 0.0;
-      column.children.add(Stack(
-        overflow: Overflow.visible,
-        alignment: Alignment.centerRight,
-        children: <Widget>[
-          Positioned(
-              left: isMyMessage ? 0 : null,
-              right: !isMyMessage ? 0 : null,
-              top: 0,
-              child: _buildReactions(isMyMessage)),
-          AnimatedContainer(
-            duration: Duration(milliseconds: 300),
-            margin: EdgeInsets.only(
-              top: nOfAttachmentWidgets > 0 ? (topPadding) : (topPadding),
-            ),
-            decoration: _buildBoxDecoration(
-                isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
-            padding: EdgeInsets.all(10),
-            constraints: BoxConstraints.loose(Size.fromWidth(300)),
-            child: MarkdownBody(
-              data: '${widget.message.text}',
-              onTapLink: (link) {
-                _launchURL(link);
-              },
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
-            ),
+          widget.message.reactionCounts?.isNotEmpty == true ? 2.0 : 0.0;
+      column.children.addAll(
+        <Widget>[
+          Align(
+            child: _buildReactions(isMyMessage),
+            alignment:
+                isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
+          ),
+          Stack(
+            overflow: Overflow.visible,
+            children: <Widget>[
+              widget.message.reactionCounts?.isNotEmpty == true
+                  ? Positioned(
+                      left: isMyMessage ? 8 : null,
+                      right: !isMyMessage ? 8 : null,
+                      top: -4,
+                      child: CustomPaint(
+                        painter: ReactionBubblePainter(),
+                      ),
+                    )
+                  : SizedBox(),
+              Padding(
+                padding: EdgeInsets.only(
+                  right: isMyMessage ? 0.0 : 8.0,
+                  left: isMyMessage ? 8.0 : 0.0,
+                ),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  margin: EdgeInsets.only(
+                    top: nOfAttachmentWidgets > 0 ? (topPadding) : (topPadding),
+                  ),
+                  decoration: _buildBoxDecoration(
+                      isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
+                  padding: EdgeInsets.all(10),
+                  constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                  child: MarkdownBody(
+                    data: '${widget.message.text}',
+                    onTapLink: (link) {
+                      _launchURL(link);
+                    },
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
-      ));
+      );
     }
 
     return GestureDetector(
-        child: column,
+        child: IntrinsicWidth(child: column),
         onLongPress: () {
           _showMessageBottomSheet(context);
         });
@@ -307,61 +326,42 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildReactions(bool isMyMessage) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: GestureDetector(
-        onTap: () {
-          _showMessageBottomSheet(context);
-        },
-        child: Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            widget.message.reactionCounts?.isNotEmpty == true
-                ? Positioned(
-                    left: isMyMessage ? 0 : null,
-                    right: !isMyMessage ? 0 : null,
-                    bottom: 2,
-                    child: CustomPaint(
-                      painter: ReactionBubblePainter(),
-                    ),
-                  )
-                : SizedBox(),
-            Container(
-              transform: Matrix4.translationValues(
-                ((widget.message.reactionCounts?.length ?? 0) * 10) *
-                    (isMyMessage ? -1.0 : 1.0),
-                0,
-                0,
-              ),
-              padding: widget.message.reactionCounts?.isNotEmpty == true
-                  ? const EdgeInsets.all(8)
-                  : EdgeInsets.zero,
-              decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.all(Radius.circular(14))),
-              child: (widget.message.reactionCounts != null &&
-                      widget.message.reactionCounts.isNotEmpty)
-                  ? Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: widget.message.reactionCounts.keys
-                          .map((reactionType) {
-                        return Text(
-                          reactionToEmoji[reactionType] ?? '?',
-                        ) as Widget; //TODO refactor
-                      }).toList()
-                            ..add(Padding(
-                              padding: const EdgeInsets.only(left: 4.0),
-                              child: Text(
-                                widget.message.reactionCounts.values
-                                    .fold(0, (t, v) => v + t)
-                                    .toString(),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            )))
-                  : SizedBox(),
-            ),
-          ],
+    return GestureDetector(
+      onTap: () {
+        _showMessageBottomSheet(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2.0),
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          curve: Curves.decelerate,
+          padding: widget.message.reactionCounts?.isNotEmpty == true
+              ? const EdgeInsets.all(8)
+              : EdgeInsets.zero,
+          decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.all(Radius.circular(14))),
+          child: (widget.message.reactionCounts != null &&
+                  widget.message.reactionCounts.isNotEmpty)
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children:
+                      widget.message.reactionCounts.keys.map((reactionType) {
+                    return Text(
+                      reactionToEmoji[reactionType] ?? '?',
+                    ) as Widget; //TODO refactor
+                  }).toList()
+                        ..add(Padding(
+                          padding: const EdgeInsets.only(left: 4.0),
+                          child: Text(
+                            widget.message.reactionCounts.values
+                                .fold(0, (t, v) => v + t)
+                                .toString(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )))
+              : SizedBox(),
         ),
       ),
     );
