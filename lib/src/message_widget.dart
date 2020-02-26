@@ -227,55 +227,68 @@ class _MessageWidgetState extends State<MessageWidget>
           widget.message.reactionCounts?.isNotEmpty == true ? 2.0 : 0.0;
       column.children.addAll(
         <Widget>[
-          Align(
-            child: _buildReactions(isMyMessage),
-            alignment:
-                isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
-          ),
-          Stack(
-            overflow: Overflow.visible,
-            children: <Widget>[
-              widget.message.reactionCounts?.isNotEmpty == true
-                  ? Positioned(
-                      left: isMyMessage ? 8 : null,
-                      right: !isMyMessage ? 8 : null,
-                      top: -4,
-                      child: CustomPaint(
-                        painter: ReactionBubblePainter(),
+          IntrinsicWidth(
+            child: Column(
+              crossAxisAlignment: isMyMessage
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: <Widget>[
+                Align(
+                  child: _buildReactions(isMyMessage),
+                  alignment: isMyMessage
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                ),
+                Stack(
+                  overflow: Overflow.visible,
+                  children: <Widget>[
+                    widget.message.reactionCounts?.isNotEmpty == true
+                        ? Positioned(
+                            left: isMyMessage ? 8 : null,
+                            right: !isMyMessage ? 8 : null,
+                            top: -4,
+                            child: CustomPaint(
+                              painter: ReactionBubblePainter(),
+                            ),
+                          )
+                        : SizedBox(),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: isMyMessage ? 0.0 : 8.0,
+                        left: isMyMessage ? 8.0 : 0.0,
                       ),
-                    )
-                  : SizedBox(),
-              Padding(
-                padding: EdgeInsets.only(
-                  right: isMyMessage ? 0.0 : 8.0,
-                  left: isMyMessage ? 8.0 : 0.0,
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        margin: EdgeInsets.only(
+                          top: nOfAttachmentWidgets > 0
+                              ? (topPadding)
+                              : (topPadding),
+                        ),
+                        decoration: _buildBoxDecoration(isMyMessage,
+                            isLastUser || nOfAttachmentWidgets > 0),
+                        padding: EdgeInsets.all(10),
+                        constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                        child: MarkdownBody(
+                          data: '${widget.message.text}',
+                          onTapLink: (link) {
+                            _launchURL(link);
+                          },
+                          styleSheet:
+                              MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  margin: EdgeInsets.only(
-                    top: nOfAttachmentWidgets > 0 ? (topPadding) : (topPadding),
-                  ),
-                  decoration: _buildBoxDecoration(
-                      isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
-                  padding: EdgeInsets.all(10),
-                  constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                  child: MarkdownBody(
-                    data: '${widget.message.text}',
-                    onTapLink: (link) {
-                      _launchURL(link);
-                    },
-                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       );
     }
 
     return GestureDetector(
-        child: IntrinsicWidth(child: column),
+        child: column,
         onLongPress: () {
           _showMessageBottomSheet(context);
         });
