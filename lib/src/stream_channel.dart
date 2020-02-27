@@ -69,10 +69,15 @@ class StreamChannelState extends State<StreamChannel> {
 
   Future<void> getReplies(String parentId) async {
     _queryMessageController.add(true);
+    print('PARENT $parentId');
 
     String firstId;
     if (widget.channel.state.threads.containsKey(parentId)) {
-      firstId = widget.channel.state.threads[parentId].first.id;
+      final thread = widget.channel.state.threads[parentId];
+
+      if (thread != null && thread.isNotEmpty) {
+        firstId = thread?.first?.id;
+      }
     }
 
     return widget.channel

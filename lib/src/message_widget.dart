@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:date_format/date_format.dart';
@@ -21,12 +23,14 @@ class MessageWidget extends StatefulWidget {
     @required this.message,
     @required this.nextMessage,
     this.onThreadTap,
+    this.isParent = false,
   }) : super(key: key);
 
   final Message previousMessage;
   final Message message;
   final Message nextMessage;
   final void Function(Message) onThreadTap;
+  final bool isParent;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -63,7 +67,7 @@ class _MessageWidgetState extends State<MessageWidget>
               isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: <Widget>[
             _buildBubble(context, isMyMessage, isLastUser),
-            _buildThreadIndicator(context),
+            _buildThreadIndicator(context, isMyMessage),
             isNextUser ? SizedBox() : _buildTimestamp(isMyMessage, alignment),
           ],
         ),
@@ -125,10 +129,33 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  Widget _buildThreadIndicator(BuildContext context) {
+  Widget _buildThreadIndicator(BuildContext context, bool isMyMessage) {
+    var row = [
+      Text(
+        'Replies: ${widget.message.replyCount}',
+        style:
+            Theme.of(context).textTheme.subtitle.copyWith(color: Colors.blue),
+      ),
+      Transform(
+        transform: Matrix4.rotationY(isMyMessage ? 0 : pi),
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.subdirectory_arrow_left,
+          color: Colors.black12,
+        ),
+      ),
+    ];
+
+    if (!isMyMessage) {
+      row = row.reversed.toList();
+    }
+
     return widget.message.replyCount > 0
         ? GestureDetector(
             onTap: () {
+              if (widget.isParent) {
+                return;
+              }
               if (widget.onThreadTap != null) {
                 widget.onThreadTap(widget.message);
               }
@@ -136,19 +163,7 @@ class _MessageWidgetState extends State<MessageWidget>
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 2.0),
               child: Row(
-                children: <Widget>[
-                  Text(
-                    'Replies: ${widget.message.replyCount}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .subtitle
-                        .copyWith(color: Colors.blue),
-                  ),
-                  Icon(
-                    Icons.subdirectory_arrow_left,
-                    color: Colors.black12,
-                  ),
-                ],
+                children: row,
               ),
             ),
           )
@@ -332,9 +347,16 @@ class _MessageWidgetState extends State<MessageWidget>
 
   void _showMessageBottomSheet(BuildContext context, bool isMyMessage) {
     showModalBottomSheet(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
         context: context,
         builder: (context) {
-          final fontSize = 40.0;
+          final fontSize = 30.0;
           final textStyle = TextStyle(
             fontSize: fontSize,
           );
@@ -342,42 +364,49 @@ class _MessageWidgetState extends State<MessageWidget>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: reactionToEmoji.keys.map((reactionType) {
-                  final ownReactionIndex = widget.message.ownReactions
-                      .indexWhere((reaction) => reaction.type == reactionType);
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      IconButton(
-                        iconSize: fontSize + 10,
-                        icon: Text(
-                          reactionToEmoji[reactionType],
-                          style: textStyle,
+              Container(
+                color: Colors.black87,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: reactionToEmoji.keys.map((reactionType) {
+                    final ownReactionIndex = widget.message.ownReactions
+                        .indexWhere(
+                            (reaction) => reaction.type == reactionType);
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        IconButton(
+                          iconSize: fontSize + 10,
+                          icon: Text(
+                            reactionToEmoji[reactionType],
+                            style: textStyle,
+                          ),
+                          onPressed: () {
+                            if (ownReactionIndex != -1) {
+                              removeReaction(reactionType);
+                            } else {
+                              sendReaction(reactionType);
+                            }
+                          },
                         ),
-                        onPressed: () {
-                          if (ownReactionIndex != -1) {
-                            removeReaction(reactionType);
-                          } else {
-                            sendReaction(reactionType);
-                          }
-                        },
-                      ),
-                      ownReactionIndex != -1
-                          ? Padding(
-                              padding: const EdgeInsets.only(bottom: 4.0),
-                              child: Text(widget
-                                  .message.ownReactions[ownReactionIndex].score
-                                  .toString()),
-                            )
-                          : SizedBox(),
-                    ],
-                  );
-                }).toList(),
+                        ownReactionIndex != -1
+                            ? Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: Text(
+                                  widget.message.ownReactions[ownReactionIndex]
+                                      .score
+                                      .toString(),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )
+                            : SizedBox(),
+                      ],
+                    );
+                  }).toList(),
+                ),
               ),
               isMyMessage
                   ? FlatButton(
@@ -399,6 +428,19 @@ class _MessageWidgetState extends State<MessageWidget>
                       },
                     )
                   : SizedBox(),
+              FlatButton(
+                child: Padding(
+                  padding: const EdgeInsets.all(28.0),
+                  child: Text(
+                    'Start a thread',
+                    style: Theme.of(context).textTheme.headline,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  widget.onThreadTap(widget.message);
+                },
+              ),
             ],
           );
         });

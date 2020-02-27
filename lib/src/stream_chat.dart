@@ -51,6 +51,8 @@ class StreamChatState extends State<StreamChat> {
         builder: (context) => Theme(
           data: Theme.of(context).copyWith(
             accentColor: StreamChatTheme.of(context).accentColor,
+            scaffoldBackgroundColor: theme.primaryColor,
+            backgroundColor: theme.primaryColor,
           ),
           child: WillPopScope(
             onWillPop: () async {
@@ -82,8 +84,21 @@ class StreamChatState extends State<StreamChat> {
     final theme = defaultTheme.copyWith(
       primaryColor: widget.streamChatThemeData?.primaryColor,
       channelTheme: defaultTheme.channelTheme.copyWith(
-        channelHeaderTheme:
-            widget.streamChatThemeData?.channelTheme?.channelHeaderTheme,
+        channelHeaderTheme: defaultTheme.channelTheme.channelHeaderTheme
+            .copyWith(
+                color: widget.streamChatThemeData?.channelTheme
+                    ?.channelHeaderTheme?.color,
+                lastMessageAt: widget.streamChatThemeData?.channelTheme
+                    ?.channelHeaderTheme?.lastMessageAt,
+                title: widget.streamChatThemeData?.channelTheme
+                    ?.channelHeaderTheme?.title,
+                avatarTheme:
+                    defaultTheme.channelPreviewTheme.avatarTheme.copyWith(
+                  constraints: widget.streamChatThemeData?.channelTheme
+                      ?.channelHeaderTheme?.avatarTheme?.constraints,
+                  borderRadius: widget.streamChatThemeData?.channelTheme
+                      ?.channelHeaderTheme?.avatarTheme?.borderRadius,
+                )),
         inputBackground:
             widget.streamChatThemeData?.channelTheme?.inputBackground,
         messageInputButtonIconTheme: widget

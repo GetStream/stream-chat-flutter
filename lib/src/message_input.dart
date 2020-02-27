@@ -8,11 +8,11 @@ class MessageInput extends StatefulWidget {
   MessageInput({
     Key key,
     this.onMessageSent,
-    this.parent,
+    this.parentMessage,
   }) : super(key: key);
 
   final void Function(Message) onMessageSent;
-  final Message parent;
+  final Message parentMessage;
 
   @override
   _MessageInputState createState() => _MessageInputState();
@@ -45,7 +45,10 @@ class _MessageInputState extends State<MessageInput> {
             decoration: BoxDecoration(
               color: StreamChatTheme.of(context).channelTheme.inputBackground,
               borderRadius: BorderRadius.circular(10.0),
-              border: Border.all(color: Colors.black.withOpacity(.2)),
+              border: Border.all(
+                  color: _typingStarted
+                      ? Colors.transparent
+                      : Colors.black.withOpacity(.2)),
             ),
             child: Flex(
               direction: Axis.horizontal,
@@ -127,7 +130,7 @@ class _MessageInputState extends State<MessageInput> {
         .channel
         .sendMessage(
           Message(
-            parentId: widget.parent?.id,
+            parentId: widget.parentMessage?.id,
             text: text,
           ),
         )

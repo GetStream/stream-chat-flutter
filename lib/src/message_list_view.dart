@@ -40,7 +40,6 @@ class _MessageListViewState extends State<MessageListView> {
   bool _topWasVisible = false;
   List<Message> _messages = [];
   List<Message> _newMessageList = [];
-
   Function _onThreadTap;
 
   @override
@@ -79,9 +78,10 @@ class _MessageListViewState extends State<MessageListView> {
                         key: ValueKey<String>(
                             'PARENT-MESSAGE-${widget.parentMessage.id}'),
                         previousMessage: null,
-                        message: widget.parentMessage.copyWith(replyCount: 0),
+                        message: widget.parentMessage,
                         nextMessage: null,
                         onThreadTap: _onThreadTap,
+                        isParent: true,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -306,7 +306,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   void _getOnThreadTap() {
     if (widget.onThreadTap != null) {
-      _onThreadTap = (message) {
+      _onThreadTap = (Message message) {
         widget.onThreadTap(
             message,
             widget.threadBuilder != null
@@ -314,14 +314,24 @@ class _MessageListViewState extends State<MessageListView> {
                 : null);
       };
     } else if (widget.threadBuilder != null) {
-      _onThreadTap = (message) {
+      _onThreadTap = (Message message) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) {
-            return StreamChannel(
-              channel: StreamChannel.of(context).channel,
-              child: widget.threadBuilder(context, message),
-            );
+            return StreamBuilder<Message>(
+                stream: StreamChannel.of(context)
+                    .channel
+                    .state
+                    .messagesStream
+                    .map((messages) =>
+                        messages.firstWhere((m) => m.id == message.id)),
+                initialData: message,
+                builder: (_, snapshot) {
+                  return StreamChannel(
+                    channel: StreamChannel.of(context).channel,
+                    child: widget.threadBuilder(context, snapshot.data),
+                  );
+                });
           }),
         );
       };

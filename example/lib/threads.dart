@@ -22,15 +22,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Container(
         child: StreamChat(
-          streamChatThemeData: StreamChatThemeData(
-            accentColor: Colors.red,
-            channelTheme: ChannelTheme(
-              inputGradient: LinearGradient(colors: [
-                Colors.red,
-                Colors.yellow,
-              ]),
-            ),
-          ),
           client: client,
           child: ChannelListPage(),
         ),
@@ -104,7 +95,9 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          MessageInput(),
+          MessageInput(
+            parentMessage: parent,
+          ),
         ],
       ),
     );
