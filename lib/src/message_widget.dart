@@ -54,19 +54,7 @@ class _MessageWidgetState extends State<MessageWidget>
     Widget child;
 
     if (widget.message.type == 'deleted') {
-      child = Align(
-        alignment: alignment,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 54,
-            vertical: 14,
-          ),
-          child: Text(
-            'This message was deleted...',
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ),
-      );
+      child = _buildDeletedMessage(alignment);
     } else {
       var row = <Widget>[
         Column(
@@ -115,6 +103,22 @@ class _MessageWidgetState extends State<MessageWidget>
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
       child: child,
+    );
+  }
+
+  Align _buildDeletedMessage(Alignment alignment) {
+    return Align(
+      alignment: alignment,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 54,
+          vertical: 14,
+        ),
+        child: Text(
+          'This message was deleted...',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
     );
   }
 
