@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import '../stream_chat_flutter.dart';
 import 'message_widget.dart';
 import 'stream_channel.dart';
 
@@ -87,7 +88,7 @@ class _MessageListViewState extends State<MessageListView> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           child: Text(
-                            'Start of a new thread',
+                            'Start of thread',
                             textAlign: TextAlign.center,
                           ),
                           color: Theme.of(context).primaryColorLight,

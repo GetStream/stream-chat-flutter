@@ -26,6 +26,7 @@ class ChannelPreview extends StatelessWidget {
         channel: channel,
       ),
       title: ChannelName(
+        textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
         channel: channel,
       ),
       subtitle: _buildSubtitle(),
@@ -62,7 +63,7 @@ class ChannelPreview extends StatelessWidget {
 
         return Text(
           stringDate,
-          style: Theme.of(context).textTheme.caption,
+          style: StreamChatTheme.of(context).channelPreviewTheme.lastMessageAt,
         );
       },
     );
@@ -115,9 +116,14 @@ class ChannelPreview extends StatelessWidget {
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.caption.copyWith(
-                color: Colors.black.withOpacity(opacity),
-              ),
+          style:
+              StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                    color: StreamChatTheme.of(context)
+                        .channelPreviewTheme
+                        .subtitle
+                        .color
+                        .withOpacity(opacity),
+                  ),
         );
       },
     );
@@ -127,8 +133,12 @@ class ChannelPreview extends StatelessWidget {
     return Text(
       '${typings.map((u) => u.extraData.containsKey('name') ? u.extraData['name'] : u.id).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
       maxLines: 1,
-      style: Theme.of(context).textTheme.caption.copyWith(
-            color: Colors.black.withOpacity(opacity),
+      style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+            color: StreamChatTheme.of(context)
+                .channelPreviewTheme
+                .subtitle
+                .color
+                .withOpacity(opacity),
           ),
     );
   }

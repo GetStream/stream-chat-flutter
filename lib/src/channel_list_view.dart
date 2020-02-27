@@ -161,7 +161,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     }
   }
 
-  Widget _buildQueryProgressIndicator(context, StreamChat streamChat) {
+  Widget _buildQueryProgressIndicator(context, StreamChatState streamChat) {
     return StreamBuilder<bool>(
         stream: streamChat.queryChannelsLoading,
         initialData: false,
@@ -184,7 +184,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
   }
 
-  void _listenChannelPagination(StreamChat streamChat) {
+  void _listenChannelPagination(StreamChatState streamChat) {
     if (widget._scrollController.position.maxScrollExtent ==
         widget._scrollController.position.pixels) {
       streamChat.queryChannels(

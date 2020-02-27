@@ -9,14 +9,34 @@ void main() async {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
   );
 
-  runApp(
-    StreamChat(
-      client: client,
-      child: MaterialApp(
-        home: ChannelListPage(),
+  runApp(MyApp(client));
+}
+
+class MyApp extends StatelessWidget {
+  final Client client;
+
+  MyApp(this.client);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Container(
+        child: StreamChat(
+          streamChatThemeData: StreamChatThemeData(
+            accentColor: Colors.red,
+            channelTheme: ChannelTheme(
+              inputGradient: LinearGradient(colors: [
+                Colors.red,
+                Colors.yellow,
+              ]),
+            ),
+          ),
+          client: client,
+          child: ChannelListPage(),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class ChannelListPage extends StatelessWidget {

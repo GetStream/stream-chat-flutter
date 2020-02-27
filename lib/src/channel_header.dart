@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import './channel_name.dart';
@@ -22,7 +23,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return AppBar(
+      elevation: 1,
       leading: showBackButton ? _buildBackButton(context) : Container(),
+      backgroundColor:
+          StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
       actions: <Widget>[
         Padding(
           padding: const EdgeInsets.only(right: 10.0),
@@ -39,6 +43,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         children: <Widget>[
           ChannelName(
             channel: channel,
+            textStyle: StreamChatTheme.of(context)
+                .channelTheme
+                .channelHeaderTheme
+                .title,
           ),
           _buildLastActive(context, channel),
         ],
@@ -54,7 +62,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         return (snapshot.data != null)
             ? Text(
                 'Active ${timeago.format(snapshot.data)}',
-                style: Theme.of(context).textTheme.caption,
+                style: StreamChatTheme.of(context)
+                    .channelTheme
+                    .channelHeaderTheme
+                    .lastMessageAt,
               )
             : Container();
       },

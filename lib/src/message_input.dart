@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 import 'stream_channel.dart';
 
@@ -34,17 +33,17 @@ class _MessageInputState extends State<MessageInput> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
           gradient: _typingStarted
-              ? LinearGradient(colors: [Color(0xFF00AEFF), Color(0xFF0076FF)])
+              ? StreamChatTheme.of(context).channelTheme.inputGradient
               : null,
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).canvasColor,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.black.withAlpha(5),
+              color: StreamChatTheme.of(context).channelTheme.inputBackground,
               borderRadius: BorderRadius.circular(10.0),
               border: Border.all(color: Colors.black.withOpacity(.2)),
             ),
@@ -84,7 +83,7 @@ class _MessageInputState extends State<MessageInput> {
                       ? CrossFadeState.showFirst
                       : CrossFadeState.showSecond,
                   firstChild: _buildSendButton(context),
-                  secondChild: Container(),
+                  secondChild: SizedBox(),
                   duration: Duration(milliseconds: 300),
                   alignment: Alignment.center,
                 ),
@@ -96,13 +95,17 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  IconButton _buildSendButton(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        _sendMessage(context);
-      },
-      icon: Icon(
-        Icons.send,
+  Widget _buildSendButton(BuildContext context) {
+    return IconTheme(
+      data:
+          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+      child: IconButton(
+        onPressed: () {
+          _sendMessage(context);
+        },
+        icon: Icon(
+          Icons.send,
+        ),
       ),
     );
   }

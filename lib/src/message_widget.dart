@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
@@ -41,7 +42,7 @@ class _MessageWidgetState extends State<MessageWidget>
     super.build(context);
 
     final streamChat = StreamChat.of(context);
-    final currentUserId = streamChat.user.id;
+    final currentUserId = streamChat.client.state.user.id;
     final messageUserId = widget.message.user.id;
     final previousUserId = widget.previousMessage?.user?.id;
     final nextUserId = widget.nextMessage?.user?.id;
@@ -116,7 +117,9 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
         child: Text(
           'This message was deleted...',
-          style: TextStyle(fontStyle: FontStyle.italic),
+          style: StreamChatTheme.of(context).messageTheme.messageText.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
         ),
       ),
     );
@@ -203,10 +206,13 @@ class _MessageWidgetState extends State<MessageWidget>
                                       Text(
                                         attachment.title,
                                         overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .subtitle
-                                            .copyWith(color: Colors.blue),
+                                        style: StreamChatTheme.of(context)
+                                            .messageTheme
+                                            .messageText
+                                            .copyWith(
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                       Text(
                                         Uri.parse(attachment.thumbUrl)
@@ -218,8 +224,9 @@ class _MessageWidgetState extends State<MessageWidget>
                                             .reversed
                                             .join('.'),
                                         overflow: TextOverflow.ellipsis,
-                                        style:
-                                            Theme.of(context).textTheme.caption,
+                                        style: StreamChatTheme.of(context)
+                                            .messageTheme
+                                            .createdAt,
                                       ),
                                     ],
                                   ),
@@ -298,7 +305,12 @@ class _MessageWidgetState extends State<MessageWidget>
                             _launchURL(link);
                           },
                           styleSheet:
-                              MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                              MarkdownStyleSheet.fromTheme(Theme.of(context))
+                                  .copyWith(
+                            p: StreamChatTheme.of(context)
+                                .messageTheme
+                                .messageText,
+                          ),
                         ),
                       ),
                     ),
@@ -547,6 +559,7 @@ class _MessageWidgetState extends State<MessageWidget>
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
         formatDate(widget.message.createdAt.toLocal(), [HH, ':', nn]),
+        style: StreamChatTheme.of(context).messageTheme.createdAt,
       ),
     );
   }
@@ -560,7 +573,11 @@ class _MessageWidgetState extends State<MessageWidget>
         topRight: Radius.circular((isMyMessage && isLastUser) ? 2 : 16),
         bottomRight: Radius.circular(isMyMessage ? 2 : 16),
       ),
-      color: isMyMessage ? Color(0xffebebeb) : Colors.white,
+      color: isMyMessage
+          ? StreamChatTheme.of(context).messageTheme.ownMessageBackgroundColor
+          : StreamChatTheme.of(context)
+              .messageTheme
+              .otherMessageBackgroundColor,
     );
   }
 
