@@ -65,6 +65,7 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: ChannelHeader(),
       body: Column(
         children: <Widget>[
           Expanded(

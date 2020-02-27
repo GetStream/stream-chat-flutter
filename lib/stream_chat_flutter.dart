@@ -1,5 +1,6 @@
 export 'package:stream_chat/stream_chat.dart';
 
+export 'src/channel_header.dart';
 export 'src/channel_image.dart';
 export 'src/channel_list_view.dart';
 export 'src/channel_name.dart';

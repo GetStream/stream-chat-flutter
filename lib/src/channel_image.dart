@@ -14,16 +14,21 @@ class ChannelImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: radius,
-      backgroundImage: channel.extraData?.containsKey('image') ?? false
-          ? CachedNetworkImageProvider(channel.extraData['image'])
-          : null,
-      child: channel.extraData?.containsKey('image') ?? false
-          ? null
-          : Text(channel.extraData?.containsKey('name') ?? false
-              ? channel.extraData['name'][0]
-              : ''),
-    );
+    return StreamBuilder<Map<String, dynamic>>(
+        stream: channel.extraDataStream,
+        initialData: channel.extraData,
+        builder: (context, snapshot) {
+          return CircleAvatar(
+            radius: radius,
+            backgroundImage: snapshot.data?.containsKey('image') ?? false
+                ? CachedNetworkImageProvider(snapshot.data['image'])
+                : null,
+            child: snapshot.data?.containsKey('image') ?? false
+                ? null
+                : Text(snapshot.data?.containsKey('name') ?? false
+                    ? snapshot.data['name'][0]
+                    : ''),
+          );
+        });
   }
 }

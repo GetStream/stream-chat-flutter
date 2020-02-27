@@ -11,11 +11,16 @@ class ChannelName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      channel?.extraData != null
-          ? (channel?.extraData['name'] ?? channel.cid)
-          : channel.cid,
-      style: Theme.of(context).textTheme.body2,
-    );
+    return StreamBuilder<Map<String, dynamic>>(
+        stream: channel.extraDataStream,
+        initialData: channel.extraData,
+        builder: (context, snapshot) {
+          return Text(
+            snapshot.data != null
+                ? (snapshot.data['name'] ?? channel.cid)
+                : channel.cid,
+            style: Theme.of(context).textTheme.body2,
+          );
+        });
   }
 }
