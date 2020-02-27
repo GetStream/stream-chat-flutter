@@ -33,39 +33,45 @@ class ChannelPreview extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          _buildDate(context, channel.lastMessageAt),
+          _buildDate(context),
         ],
       ),
     );
   }
 
-  Text _buildDate(BuildContext context, DateTime lastMessageAt) {
-    lastMessageAt = lastMessageAt.toLocal();
+  Widget _buildDate(BuildContext context) {
+    return StreamBuilder<DateTime>(
+      stream: channel.lastMessageAtStream,
+      initialData: channel.lastMessageAt,
+      builder: (context, snapshot) {
+        final lastMessageAt = snapshot.data.toLocal();
 
-    String stringDate;
-    final now = DateTime.now();
+        String stringDate;
+        final now = DateTime.now();
 
-    if (now.year != lastMessageAt.year ||
-        now.month != lastMessageAt.month ||
-        now.day != lastMessageAt.day) {
-      stringDate =
-          '${lastMessageAt.day}/${lastMessageAt.month}/${lastMessageAt.year}';
-      stringDate = formatDate(lastMessageAt, [dd, '/', mm, '/', yyyy]);
-    } else {
-      stringDate = '${lastMessageAt.hour}:${lastMessageAt.minute}';
-      stringDate = formatDate(lastMessageAt, [HH, ':', nn]);
-    }
+        if (now.year != lastMessageAt.year ||
+            now.month != lastMessageAt.month ||
+            now.day != lastMessageAt.day) {
+          stringDate =
+              '${lastMessageAt.day}/${lastMessageAt.month}/${lastMessageAt.year}';
+          stringDate = formatDate(lastMessageAt, [dd, '/', mm, '/', yyyy]);
+        } else {
+          stringDate = '${lastMessageAt.hour}:${lastMessageAt.minute}';
+          stringDate = formatDate(lastMessageAt, [HH, ':', nn]);
+        }
 
-    return Text(
-      stringDate,
-      style: Theme.of(context).textTheme.caption,
+        return Text(
+          stringDate,
+          style: Theme.of(context).textTheme.caption,
+        );
+      },
     );
   }
 
   Widget _buildSubtitle() {
     return StreamBuilder<List<User>>(
         stream: channel.state.typingEventsStream,
-        initialData: [],
+        initialData: channel.state.typingEvents,
         builder: (context, snapshot) {
           final typings = snapshot.data;
           final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
@@ -76,31 +82,44 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildLastMessage(BuildContext context, double opacity) {
-    final lastMessage =
-        channel.state.messages.isNotEmpty ? channel.state.messages.last : null;
-    if (lastMessage == null) {
-      return SizedBox();
-    }
+    return StreamBuilder<List<Message>>(
+      stream: channel.state.messagesStream,
+      initialData: channel.state.messages,
+      builder: (context, snapshot) {
+        final messages = snapshot.data;
+        final lastMessage = messages.isNotEmpty ? messages.last : null;
+        if (lastMessage == null) {
+          return SizedBox();
+        }
 
-    final prefix = lastMessage.attachments
-        .map((e) {
-          if (e.type == 'image') {
-            return '📷';
-          } else if (e.type == 'video') {
-            return '🎬';
-          }
-          return null;
-        })
-        .where((e) => e != null)
-        .join(' ');
+        String text;
+        if (lastMessage.type == 'deleted') {
+          text = 'This message was deleted.';
+        } else {
+          final prefix = lastMessage.attachments
+              .map((e) {
+                if (e.type == 'image') {
+                  return '📷';
+                } else if (e.type == 'video') {
+                  return '🎬';
+                }
+                return null;
+              })
+              .where((e) => e != null)
+              .join(' ');
 
-    return Text(
-      '$prefix ${lastMessage.text ?? ''}',
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.caption.copyWith(
-            color: Colors.black.withOpacity(opacity),
-          ),
+          text = '$prefix ${lastMessage.text ?? ''}';
+        }
+
+        return Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.caption.copyWith(
+                color: Colors.black.withOpacity(opacity),
+              ),
+        );
+      },
     );
   }
 
