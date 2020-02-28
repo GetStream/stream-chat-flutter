@@ -28,7 +28,8 @@ class StreamChatThemeData {
   final Color accentColor;
   final ChannelPreviewTheme channelPreviewTheme;
   final ChannelTheme channelTheme;
-  final MessageTheme messageTheme;
+  final MessageTheme ownMessageTheme;
+  final MessageTheme otherMessageTheme;
 
   StreamChatThemeData({
     this.primaryColor,
@@ -36,7 +37,8 @@ class StreamChatThemeData {
     this.accentColor,
     this.channelPreviewTheme,
     this.channelTheme,
-    this.messageTheme,
+    this.otherMessageTheme,
+    this.ownMessageTheme,
   });
 
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
@@ -52,8 +54,13 @@ class StreamChatThemeData {
           theme.accentColor,
         ]),
       ),
-      messageTheme: MessageTheme(
-        replies: defaultTheme.messageTheme.replies.copyWith(
+      ownMessageTheme: MessageTheme(
+        replies: defaultTheme.ownMessageTheme.replies.copyWith(
+          color: theme.accentColor,
+        ),
+      ),
+      otherMessageTheme: MessageTheme(
+        replies: defaultTheme.ownMessageTheme.replies.copyWith(
           color: theme.accentColor,
         ),
       ),
@@ -66,7 +73,8 @@ class StreamChatThemeData {
     Color accentColor,
     ChannelPreviewTheme channelPreviewTheme,
     ChannelTheme channelTheme,
-    MessageTheme messageTheme,
+    MessageTheme ownMessageTheme,
+    MessageTheme otherMessageTheme,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
@@ -97,27 +105,40 @@ class StreamChatThemeData {
                   this.channelTheme.inputBackground,
             ) ??
             this.channelTheme,
-        messageTheme: messageTheme?.copyWith(
-              messageText:
-                  messageTheme?.messageText ?? this.messageTheme.messageText,
-              messageAuthor: messageTheme?.messageAuthor ??
-                  this.messageTheme.messageAuthor,
-              messageMention: messageTheme?.messageMention ??
-                  this.messageTheme.messageMention,
-              createdAt: messageTheme?.createdAt ?? this.messageTheme.createdAt,
-              replies: messageTheme?.replies ?? this.messageTheme.replies,
-              fontFamily:
-                  messageTheme?.fontFamily ?? this.messageTheme.fontFamily,
-              ownMessageBackgroundColor:
-                  messageTheme?.ownMessageBackgroundColor ??
-                      this.messageTheme.ownMessageBackgroundColor,
-              otherMessageBackgroundColor:
-                  messageTheme?.otherMessageBackgroundColor ??
-                      this.messageTheme.otherMessageBackgroundColor,
-              avatarTheme:
-                  messageTheme?.avatarTheme ?? this.messageTheme.avatarTheme,
+        ownMessageTheme: ownMessageTheme?.copyWith(
+              messageText: ownMessageTheme?.messageText ??
+                  this.ownMessageTheme.messageText,
+              messageAuthor: ownMessageTheme?.messageAuthor ??
+                  this.ownMessageTheme.messageAuthor,
+              messageMention: ownMessageTheme?.messageMention ??
+                  this.ownMessageTheme.messageMention,
+              createdAt:
+                  ownMessageTheme?.createdAt ?? this.ownMessageTheme.createdAt,
+              replies: ownMessageTheme?.replies ?? this.ownMessageTheme.replies,
+              messageBackgroundColor: ownMessageTheme?.messageBackgroundColor ??
+                  this.ownMessageTheme.messageBackgroundColor,
+              avatarTheme: ownMessageTheme?.avatarTheme ??
+                  this.ownMessageTheme.avatarTheme,
             ) ??
-            this.messageTheme,
+            this.ownMessageTheme,
+        otherMessageTheme: otherMessageTheme?.copyWith(
+              messageText: otherMessageTheme?.messageText ??
+                  this.otherMessageTheme.messageText,
+              messageAuthor: otherMessageTheme?.messageAuthor ??
+                  this.otherMessageTheme.messageAuthor,
+              messageMention: otherMessageTheme?.messageMention ??
+                  this.otherMessageTheme.messageMention,
+              createdAt: otherMessageTheme?.createdAt ??
+                  this.otherMessageTheme.createdAt,
+              replies:
+                  otherMessageTheme?.replies ?? this.otherMessageTheme.replies,
+              messageBackgroundColor:
+                  otherMessageTheme?.messageBackgroundColor ??
+                      this.otherMessageTheme.messageBackgroundColor,
+              avatarTheme: otherMessageTheme?.avatarTheme ??
+                  this.otherMessageTheme.avatarTheme,
+            ) ??
+            this.otherMessageTheme,
       );
 
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
@@ -174,7 +195,7 @@ class StreamChatThemeData {
           Color(0xFF0076FF),
         ]),
       ),
-      messageTheme: MessageTheme(
+      ownMessageTheme: MessageTheme(
         messageText: TextStyle(
           fontSize: 15,
           color: Colors.black,
@@ -188,8 +209,30 @@ class StreamChatThemeData {
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
-        ownMessageBackgroundColor: Color(0xffebebeb),
-        otherMessageBackgroundColor: Colors.white,
+        messageBackgroundColor: Color(0xffebebeb),
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: BoxConstraints.tightFor(
+            height: 32,
+            width: 32,
+          ),
+        ),
+      ),
+      otherMessageTheme: MessageTheme(
+        messageText: TextStyle(
+          fontSize: 15,
+          color: Colors.black,
+        ),
+        createdAt: TextStyle(
+          color: Colors.black.withOpacity(.5),
+          fontSize: 11,
+        ),
+        replies: TextStyle(
+          color: accentColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+        messageBackgroundColor: Colors.white,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -268,9 +311,7 @@ class MessageTheme {
   final TextStyle messageMention;
   final TextStyle createdAt;
   final TextStyle replies;
-  final String fontFamily;
-  final Color ownMessageBackgroundColor;
-  final Color otherMessageBackgroundColor;
+  final Color messageBackgroundColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
@@ -278,9 +319,7 @@ class MessageTheme {
     this.messageText,
     this.messageAuthor,
     this.messageMention,
-    this.fontFamily,
-    this.ownMessageBackgroundColor,
-    this.otherMessageBackgroundColor,
+    this.messageBackgroundColor,
     this.avatarTheme,
     this.createdAt,
   });
@@ -291,8 +330,7 @@ class MessageTheme {
     TextStyle messageMention,
     TextStyle createdAt,
     TextStyle replies,
-    String fontFamily,
-    Color ownMessageBackgroundColor,
+    Color messageBackgroundColor,
     Color otherMessageBackgroundColor,
     AvatarTheme avatarTheme,
   }) =>
@@ -301,11 +339,8 @@ class MessageTheme {
         messageAuthor: messageAuthor ?? this.messageAuthor,
         messageMention: messageMention ?? this.messageMention,
         createdAt: createdAt ?? this.createdAt,
-        fontFamily: fontFamily ?? this.fontFamily,
-        ownMessageBackgroundColor:
-            ownMessageBackgroundColor ?? this.ownMessageBackgroundColor,
-        otherMessageBackgroundColor:
-            otherMessageBackgroundColor ?? this.otherMessageBackgroundColor,
+        messageBackgroundColor:
+            messageBackgroundColor ?? this.messageBackgroundColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         replies: replies ?? this.replies,
       );

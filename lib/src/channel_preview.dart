@@ -103,6 +103,8 @@ class ChannelPreview extends StatelessWidget {
                   return '📷';
                 } else if (e.type == 'video') {
                   return '🎬';
+                } else if (e.type == 'giphy') {
+                  return 'GIF';
                 }
                 return null;
               })
