@@ -42,7 +42,7 @@ class StreamChatThemeData {
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
     final defaultTheme = getDefaultTheme(theme);
 
-    return StreamChatThemeData(
+    return defaultTheme.copyWith(
       accentColor: theme.accentColor,
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
@@ -72,9 +72,52 @@ class StreamChatThemeData {
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
         accentColor: accentColor ?? this.accentColor,
-        channelPreviewTheme: channelPreviewTheme ?? this.channelPreviewTheme,
-        channelTheme: channelTheme ?? this.channelTheme,
-        messageTheme: messageTheme ?? this.messageTheme,
+        channelPreviewTheme: channelPreviewTheme?.copyWith(
+              title:
+                  channelPreviewTheme.title ?? this.channelPreviewTheme.title,
+              subtitle: channelPreviewTheme.subtitle ??
+                  this.channelPreviewTheme.subtitle,
+              lastMessageAt: channelPreviewTheme.lastMessageAt ??
+                  this.channelPreviewTheme.lastMessageAt,
+              avatarTheme: channelPreviewTheme.avatarTheme ??
+                  this.channelPreviewTheme.avatarTheme,
+            ) ??
+            this.channelPreviewTheme,
+        channelTheme: channelTheme?.copyWith(
+              channelHeaderTheme: channelTheme.channelHeaderTheme ??
+                  this.channelTheme.channelHeaderTheme,
+              messageInputButtonIconTheme:
+                  channelTheme.messageInputButtonIconTheme ??
+                      this.channelTheme.messageInputButtonIconTheme,
+              messageInputButtonTheme: channelTheme.messageInputButtonTheme ??
+                  this.channelTheme.messageInputButtonTheme,
+              inputGradient:
+                  channelTheme.inputGradient ?? this.channelTheme.inputGradient,
+              inputBackground: channelTheme.inputBackground ??
+                  this.channelTheme.inputBackground,
+            ) ??
+            this.channelTheme,
+        messageTheme: messageTheme?.copyWith(
+              messageText:
+                  messageTheme?.messageText ?? this.messageTheme.messageText,
+              messageAuthor: messageTheme?.messageAuthor ??
+                  this.messageTheme.messageAuthor,
+              messageMention: messageTheme?.messageMention ??
+                  this.messageTheme.messageMention,
+              createdAt: messageTheme?.createdAt ?? this.messageTheme.createdAt,
+              replies: messageTheme?.replies ?? this.messageTheme.replies,
+              fontFamily:
+                  messageTheme?.fontFamily ?? this.messageTheme.fontFamily,
+              ownMessageBackgroundColor:
+                  messageTheme?.ownMessageBackgroundColor ??
+                      this.messageTheme.ownMessageBackgroundColor,
+              otherMessageBackgroundColor:
+                  messageTheme?.otherMessageBackgroundColor ??
+                      this.messageTheme.otherMessageBackgroundColor,
+              avatarTheme:
+                  messageTheme?.avatarTheme ?? this.messageTheme.avatarTheme,
+            ) ??
+            this.messageTheme,
       );
 
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
@@ -182,7 +225,15 @@ class ChannelTheme {
     Color inputBackground,
   }) =>
       ChannelTheme(
-        channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
+        channelHeaderTheme: channelHeaderTheme?.copyWith(
+              title: channelHeaderTheme?.title ?? this.channelHeaderTheme.title,
+              lastMessageAt: channelHeaderTheme?.lastMessageAt ??
+                  this.channelHeaderTheme.lastMessageAt,
+              avatarTheme: channelHeaderTheme?.avatarTheme ??
+                  this.channelHeaderTheme.avatarTheme,
+              color: channelHeaderTheme?.color ?? this.channelHeaderTheme.color,
+            ) ??
+            this.channelHeaderTheme,
         messageInputButtonIconTheme:
             messageInputButtonIconTheme ?? this.messageInputButtonIconTheme,
         messageInputButtonTheme:
