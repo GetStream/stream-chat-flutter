@@ -329,9 +329,21 @@ class _MessageWidgetState extends State<MessageWidget>
                           onTapLink: (link) {
                             _launchURL(link);
                           },
-                          styleSheet:
-                              MarkdownStyleSheet.fromTheme(Theme.of(context))
-                                  .copyWith(
+                          styleSheet: MarkdownStyleSheet.fromTheme(
+                            Theme.of(context).copyWith(
+                              textTheme: Theme.of(context).textTheme.apply(
+                                    bodyColor: messageTheme.messageText.color,
+                                    decoration:
+                                        messageTheme.messageText.decoration,
+                                    decorationColor: messageTheme
+                                        .messageText.decorationColor,
+                                    decorationStyle: messageTheme
+                                        .messageText.decorationStyle,
+                                    fontFamily:
+                                        messageTheme.messageText.fontFamily,
+                                  ),
+                            ),
+                          ).copyWith(
                             p: messageTheme.messageText,
                           ),
                         ),
