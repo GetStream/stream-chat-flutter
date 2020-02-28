@@ -1,3 +1,7 @@
+## 0.1.4
+
+- Fix message widget builder on reaction
+
 ## 0.1.3
 
 - Fix upload attachment
