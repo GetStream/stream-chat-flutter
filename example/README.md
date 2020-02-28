@@ -1,6 +1,6 @@
 # Flutter Chat Example Application
 
-An example chat application
+An example chat application using Flutter and Stream Chat.
 
 ## Getting Started
 
