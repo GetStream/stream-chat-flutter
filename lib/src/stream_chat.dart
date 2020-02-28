@@ -113,7 +113,6 @@ class StreamChatState extends State<StreamChat> {
         messageText: themeData?.ownMessageTheme?.messageText,
         messageBackgroundColor:
             themeData?.ownMessageTheme?.messageBackgroundColor,
-        fontFamily: themeData?.ownMessageTheme?.fontFamily,
         messageAuthor: themeData?.ownMessageTheme?.messageAuthor,
         messageMention: themeData?.ownMessageTheme?.messageMention,
         avatarTheme: defaultTheme.ownMessageTheme.avatarTheme.copyWith(
@@ -127,7 +126,6 @@ class StreamChatState extends State<StreamChat> {
         messageText: themeData?.otherMessageTheme?.messageText,
         messageBackgroundColor:
             themeData?.otherMessageTheme?.messageBackgroundColor,
-        fontFamily: themeData?.otherMessageTheme?.fontFamily,
         messageAuthor: themeData?.otherMessageTheme?.messageAuthor,
         messageMention: themeData?.otherMessageTheme?.messageMention,
         avatarTheme: defaultTheme.otherMessageTheme.avatarTheme.copyWith(

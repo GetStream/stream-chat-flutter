@@ -115,8 +115,6 @@ class StreamChatThemeData {
               createdAt:
                   ownMessageTheme?.createdAt ?? this.ownMessageTheme.createdAt,
               replies: ownMessageTheme?.replies ?? this.ownMessageTheme.replies,
-              fontFamily: ownMessageTheme?.fontFamily ??
-                  this.ownMessageTheme.fontFamily,
               messageBackgroundColor: ownMessageTheme?.messageBackgroundColor ??
                   this.ownMessageTheme.messageBackgroundColor,
               avatarTheme: ownMessageTheme?.avatarTheme ??
@@ -134,8 +132,6 @@ class StreamChatThemeData {
                   this.otherMessageTheme.createdAt,
               replies:
                   otherMessageTheme?.replies ?? this.otherMessageTheme.replies,
-              fontFamily: otherMessageTheme?.fontFamily ??
-                  this.otherMessageTheme.fontFamily,
               messageBackgroundColor:
                   otherMessageTheme?.messageBackgroundColor ??
                       this.otherMessageTheme.messageBackgroundColor,
@@ -315,7 +311,6 @@ class MessageTheme {
   final TextStyle messageMention;
   final TextStyle createdAt;
   final TextStyle replies;
-  final String fontFamily;
   final Color messageBackgroundColor;
   final AvatarTheme avatarTheme;
 
@@ -324,7 +319,6 @@ class MessageTheme {
     this.messageText,
     this.messageAuthor,
     this.messageMention,
-    this.fontFamily,
     this.messageBackgroundColor,
     this.avatarTheme,
     this.createdAt,
@@ -336,7 +330,6 @@ class MessageTheme {
     TextStyle messageMention,
     TextStyle createdAt,
     TextStyle replies,
-    String fontFamily,
     Color messageBackgroundColor,
     Color otherMessageBackgroundColor,
     AvatarTheme avatarTheme,
@@ -346,7 +339,6 @@ class MessageTheme {
         messageAuthor: messageAuthor ?? this.messageAuthor,
         messageMention: messageMention ?? this.messageMention,
         createdAt: createdAt ?? this.createdAt,
-        fontFamily: fontFamily ?? this.fontFamily,
         messageBackgroundColor:
             messageBackgroundColor ?? this.messageBackgroundColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
