@@ -104,6 +104,9 @@ class ThreadPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: ThreadHeader(
+        parent: parent,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
