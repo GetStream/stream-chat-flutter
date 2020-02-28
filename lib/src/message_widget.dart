@@ -133,8 +133,7 @@ class _MessageWidgetState extends State<MessageWidget>
     var row = [
       Text(
         'Replies: ${widget.message.replyCount}',
-        style:
-            Theme.of(context).textTheme.subtitle.copyWith(color: Colors.blue),
+        style: StreamChatTheme.of(context).messageTheme.replies,
       ),
       Transform(
         transform: Matrix4.rotationY(isMyMessage ? 0 : pi),
@@ -360,88 +359,90 @@ class _MessageWidgetState extends State<MessageWidget>
           final textStyle = TextStyle(
             fontSize: fontSize,
           );
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Container(
-                color: Colors.black87,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: reactionToEmoji.keys.map((reactionType) {
-                    final ownReactionIndex = widget.message.ownReactions
-                        .indexWhere(
-                            (reaction) => reaction.type == reactionType);
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        IconButton(
-                          iconSize: fontSize + 10,
-                          icon: Text(
-                            reactionToEmoji[reactionType],
-                            style: textStyle,
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Container(
+                  color: Colors.black87,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: reactionToEmoji.keys.map((reactionType) {
+                      final ownReactionIndex = widget.message.ownReactions
+                          .indexWhere(
+                              (reaction) => reaction.type == reactionType);
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          IconButton(
+                            iconSize: fontSize + 10,
+                            icon: Text(
+                              reactionToEmoji[reactionType],
+                              style: textStyle,
+                            ),
+                            onPressed: () {
+                              if (ownReactionIndex != -1) {
+                                removeReaction(reactionType);
+                              } else {
+                                sendReaction(reactionType);
+                              }
+                            },
                           ),
-                          onPressed: () {
-                            if (ownReactionIndex != -1) {
-                              removeReaction(reactionType);
-                            } else {
-                              sendReaction(reactionType);
-                            }
-                          },
-                        ),
-                        ownReactionIndex != -1
-                            ? Padding(
-                                padding: const EdgeInsets.only(bottom: 4.0),
-                                child: Text(
-                                  widget.message.ownReactions[ownReactionIndex]
-                                      .score
-                                      .toString(),
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              )
-                            : SizedBox(),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-              isMyMessage
-                  ? FlatButton(
-                      child: Padding(
-                        padding: const EdgeInsets.all(28.0),
-                        child: Text(
-                          'Delete message',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headline
-                              .copyWith(color: Colors.red),
-                        ),
-                      ),
-                      onPressed: () {
-                        StreamChat.of(context)
-                            .client
-                            .deleteMessage(widget.message.id);
-                        Navigator.pop(context);
-                      },
-                    )
-                  : SizedBox(),
-              FlatButton(
-                child: Padding(
-                  padding: const EdgeInsets.all(28.0),
-                  child: Text(
-                    'Start a thread',
-                    style: Theme.of(context).textTheme.headline,
+                          ownReactionIndex != -1
+                              ? Padding(
+                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  child: Text(
+                                    widget.message
+                                        .ownReactions[ownReactionIndex].score
+                                        .toString(),
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )
+                              : SizedBox(),
+                        ],
+                      );
+                    }).toList(),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  widget.onThreadTap(widget.message);
-                },
-              ),
-            ],
+                isMyMessage
+                    ? FlatButton(
+                        child: Padding(
+                          padding: const EdgeInsets.all(28.0),
+                          child: Text(
+                            'Delete message',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline
+                                .copyWith(color: Colors.red),
+                          ),
+                        ),
+                        onPressed: () {
+                          StreamChat.of(context)
+                              .client
+                              .deleteMessage(widget.message.id);
+                          Navigator.pop(context);
+                        },
+                      )
+                    : SizedBox(),
+                FlatButton(
+                  child: Padding(
+                    padding: const EdgeInsets.all(28.0),
+                    child: Text(
+                      'Start a thread',
+                      style: Theme.of(context).textTheme.headline,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    widget.onThreadTap(widget.message);
+                  },
+                ),
+              ],
+            ),
           );
         });
   }
@@ -491,7 +492,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   final Map<String, String> reactionToEmoji = {
-    'love': '♥️',
+    'love': '❤️️',
     'haha': '😂',
     'like': '👍',
     'sad': '😕',

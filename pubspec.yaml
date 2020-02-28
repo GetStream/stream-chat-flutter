@@ -19,7 +19,7 @@ dependencies:
   video_player: ^0.10.7
   chewie: ^0.9.8+1
   animations: ^1.0.0+3
-  stream_chat: ^0.1.8
+  stream_chat: ^0.1.10
 
 dev_dependencies:
   pedantic: ^1.8.0+1

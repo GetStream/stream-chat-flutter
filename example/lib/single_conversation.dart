@@ -17,8 +17,18 @@ void main() async {
   // ignore: unawaited_futures
   channel.watch();
 
-  runApp(
-    MaterialApp(
+  runApp(MyApp(client, channel));
+}
+
+class MyApp extends StatelessWidget {
+  final Client client;
+  final Channel channel;
+
+  MyApp(this.client, this.channel);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       home: StreamChat(
         client: client,
         child: StreamChannel(
@@ -26,8 +36,8 @@ void main() async {
           child: ChannelPage(),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class ChannelPage extends StatelessWidget {

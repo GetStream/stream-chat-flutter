@@ -44,15 +44,15 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _computeTheme(context);
+    final theme = _getTheme(context, widget.streamChatThemeData);
     return StreamChatTheme(
       data: theme,
       child: Builder(
         builder: (context) => Theme(
           data: Theme.of(context).copyWith(
             accentColor: StreamChatTheme.of(context).accentColor,
-            scaffoldBackgroundColor: theme.primaryColor,
-            backgroundColor: theme.primaryColor,
+            scaffoldBackgroundColor: Colors.white,
+            backgroundColor: Colors.white,
           ),
           child: WillPopScope(
             onWillPop: () async {
@@ -79,144 +79,64 @@ class StreamChatState extends State<StreamChat> {
     );
   }
 
-  StreamChatThemeData _computeTheme(BuildContext context) {
-    final defaultTheme = _getDefaultTheme(context);
+  StreamChatThemeData _getTheme(
+    BuildContext context,
+    StreamChatThemeData themeData,
+  ) {
+    final defaultTheme = StreamChatThemeData.getDefaultTheme(Theme.of(context));
     final theme = defaultTheme.copyWith(
-      primaryColor: widget.streamChatThemeData?.primaryColor,
+      primaryColor: themeData?.primaryColor,
       channelTheme: defaultTheme.channelTheme.copyWith(
-        channelHeaderTheme: defaultTheme.channelTheme.channelHeaderTheme
-            .copyWith(
-                color: widget.streamChatThemeData?.channelTheme
-                    ?.channelHeaderTheme?.color,
-                lastMessageAt: widget.streamChatThemeData?.channelTheme
-                    ?.channelHeaderTheme?.lastMessageAt,
-                title: widget.streamChatThemeData?.channelTheme
-                    ?.channelHeaderTheme?.title,
-                avatarTheme:
-                    defaultTheme.channelPreviewTheme.avatarTheme.copyWith(
-                  constraints: widget.streamChatThemeData?.channelTheme
-                      ?.channelHeaderTheme?.avatarTheme?.constraints,
-                  borderRadius: widget.streamChatThemeData?.channelTheme
-                      ?.channelHeaderTheme?.avatarTheme?.borderRadius,
-                )),
-        inputBackground:
-            widget.streamChatThemeData?.channelTheme?.inputBackground,
-        messageInputButtonIconTheme: widget
-            .streamChatThemeData?.channelTheme?.messageInputButtonIconTheme,
-        inputGradient: widget.streamChatThemeData?.channelTheme?.inputGradient,
+        channelHeaderTheme:
+            defaultTheme.channelTheme.channelHeaderTheme.copyWith(
+          color: themeData?.channelTheme?.channelHeaderTheme?.color,
+          lastMessageAt:
+              themeData?.channelTheme?.channelHeaderTheme?.lastMessageAt,
+          title: themeData?.channelTheme?.channelHeaderTheme?.title,
+          avatarTheme: defaultTheme.channelPreviewTheme.avatarTheme.copyWith(
+            constraints: themeData
+                ?.channelTheme?.channelHeaderTheme?.avatarTheme?.constraints,
+            borderRadius: themeData
+                ?.channelTheme?.channelHeaderTheme?.avatarTheme?.borderRadius,
+          ),
+        ),
+        inputBackground: themeData?.channelTheme?.inputBackground,
+        messageInputButtonIconTheme:
+            themeData?.channelTheme?.messageInputButtonIconTheme,
+        inputGradient: themeData?.channelTheme?.inputGradient,
         messageInputButtonTheme:
-            widget.streamChatThemeData?.channelTheme?.messageInputButtonTheme,
+            themeData?.channelTheme?.messageInputButtonTheme,
       ),
       messageTheme: defaultTheme.messageTheme.copyWith(
-        createdAt: widget.streamChatThemeData?.messageTheme?.createdAt,
-        messageText: widget.streamChatThemeData?.messageTheme?.messageText,
-        otherMessageBackgroundColor: widget
-            .streamChatThemeData?.messageTheme?.otherMessageBackgroundColor,
+        replies: themeData?.messageTheme?.replies,
+        createdAt: themeData?.messageTheme?.createdAt,
+        messageText: themeData?.messageTheme?.messageText,
+        otherMessageBackgroundColor:
+            themeData?.messageTheme?.otherMessageBackgroundColor,
         ownMessageBackgroundColor:
-            widget.streamChatThemeData?.messageTheme?.ownMessageBackgroundColor,
-        fontFamily: widget.streamChatThemeData?.messageTheme?.fontFamily,
-        messageAuthor: widget.streamChatThemeData?.messageTheme?.messageAuthor,
-        messageMention:
-            widget.streamChatThemeData?.messageTheme?.messageMention,
+            themeData?.messageTheme?.ownMessageBackgroundColor,
+        fontFamily: themeData?.messageTheme?.fontFamily,
+        messageAuthor: themeData?.messageTheme?.messageAuthor,
+        messageMention: themeData?.messageTheme?.messageMention,
         avatarTheme: defaultTheme.messageTheme.avatarTheme.copyWith(
-          constraints: widget
-              .streamChatThemeData?.messageTheme?.avatarTheme?.constraints,
-          borderRadius: widget
-              .streamChatThemeData?.messageTheme?.avatarTheme?.borderRadius,
+          constraints: themeData?.messageTheme?.avatarTheme?.constraints,
+          borderRadius: themeData?.messageTheme?.avatarTheme?.borderRadius,
         ),
       ),
-      accentColor: widget.streamChatThemeData?.accentColor,
-      secondaryColor: widget.streamChatThemeData?.secondaryColor,
+      accentColor: themeData?.accentColor,
+      secondaryColor: themeData?.secondaryColor,
       channelPreviewTheme: defaultTheme.channelPreviewTheme.copyWith(
         avatarTheme: defaultTheme.channelPreviewTheme.avatarTheme.copyWith(
-          constraints: widget.streamChatThemeData?.channelPreviewTheme
-              ?.avatarTheme?.constraints,
-          borderRadius: widget.streamChatThemeData?.channelPreviewTheme
-              ?.avatarTheme?.borderRadius,
+          constraints: themeData?.channelPreviewTheme?.avatarTheme?.constraints,
+          borderRadius:
+              themeData?.channelPreviewTheme?.avatarTheme?.borderRadius,
         ),
-        title: widget.streamChatThemeData?.channelPreviewTheme?.title,
-        lastMessageAt:
-            widget.streamChatThemeData?.channelPreviewTheme?.lastMessageAt,
-        subtitle: widget.streamChatThemeData?.channelPreviewTheme?.subtitle,
+        title: themeData?.channelPreviewTheme?.title,
+        lastMessageAt: themeData?.channelPreviewTheme?.lastMessageAt,
+        subtitle: themeData?.channelPreviewTheme?.subtitle,
       ),
     );
     return theme;
-  }
-
-  StreamChatThemeData _getDefaultTheme(BuildContext context) {
-    final accentColor = Color(0xff006cff);
-    return StreamChatThemeData(
-      accentColor: accentColor,
-      primaryColor: Colors.white,
-      channelPreviewTheme: ChannelPreviewTheme(
-        avatarTheme: AvatarTheme(
-          borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        ),
-        title: TextStyle(
-          fontSize: 14,
-          color: Colors.black,
-        ),
-        subtitle: TextStyle(
-          fontSize: 13,
-          color: Colors.black,
-        ),
-        lastMessageAt: TextStyle(
-          fontSize: 11,
-          color: Colors.black.withOpacity(.5),
-        ),
-      ),
-      channelTheme: ChannelTheme(
-        messageInputButtonIconTheme: Theme.of(context).iconTheme.copyWith(
-              color: accentColor,
-            ),
-        channelHeaderTheme: ChannelHeaderTheme(
-          avatarTheme: AvatarTheme(
-            borderRadius: BorderRadius.circular(20),
-            constraints: BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
-          ),
-          color: Colors.white,
-          title: TextStyle(
-            fontSize: 14,
-            color: Colors.black,
-          ),
-          lastMessageAt: TextStyle(
-            fontSize: 11,
-            color: Colors.black.withOpacity(.5),
-          ),
-        ),
-        inputBackground: Colors.black.withAlpha(12),
-        inputGradient: LinearGradient(colors: [
-          Color(0xFF00AEFF),
-          Color(0xFF0076FF),
-        ]),
-      ),
-      messageTheme: MessageTheme(
-        messageText: TextStyle(
-          fontSize: 15,
-          color: Colors.black,
-        ),
-        createdAt: TextStyle(
-          color: Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-        ownMessageBackgroundColor: Color(0xffebebeb),
-        otherMessageBackgroundColor: Colors.white,
-        avatarTheme: AvatarTheme(
-          borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
-            height: 32,
-            width: 32,
-          ),
-        ),
-      ),
-    );
   }
 
   @override

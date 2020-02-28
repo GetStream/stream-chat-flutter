@@ -40,10 +40,23 @@ class StreamChatThemeData {
   });
 
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
-    return StreamChatThemeData(
+    final defaultTheme = getDefaultTheme(theme);
+
+    return defaultTheme.copyWith(
       accentColor: theme.accentColor,
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
+      channelTheme: ChannelTheme(
+        inputGradient: LinearGradient(colors: [
+          theme.accentColor.withOpacity(.5),
+          theme.accentColor,
+        ]),
+      ),
+      messageTheme: MessageTheme(
+        replies: defaultTheme.messageTheme.replies.copyWith(
+          color: theme.accentColor,
+        ),
+      ),
     );
   }
 
@@ -59,10 +72,134 @@ class StreamChatThemeData {
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
         accentColor: accentColor ?? this.accentColor,
-        channelPreviewTheme: channelPreviewTheme ?? this.channelPreviewTheme,
-        channelTheme: channelTheme ?? this.channelTheme,
-        messageTheme: messageTheme ?? this.messageTheme,
+        channelPreviewTheme: channelPreviewTheme?.copyWith(
+              title:
+                  channelPreviewTheme.title ?? this.channelPreviewTheme.title,
+              subtitle: channelPreviewTheme.subtitle ??
+                  this.channelPreviewTheme.subtitle,
+              lastMessageAt: channelPreviewTheme.lastMessageAt ??
+                  this.channelPreviewTheme.lastMessageAt,
+              avatarTheme: channelPreviewTheme.avatarTheme ??
+                  this.channelPreviewTheme.avatarTheme,
+            ) ??
+            this.channelPreviewTheme,
+        channelTheme: channelTheme?.copyWith(
+              channelHeaderTheme: channelTheme.channelHeaderTheme ??
+                  this.channelTheme.channelHeaderTheme,
+              messageInputButtonIconTheme:
+                  channelTheme.messageInputButtonIconTheme ??
+                      this.channelTheme.messageInputButtonIconTheme,
+              messageInputButtonTheme: channelTheme.messageInputButtonTheme ??
+                  this.channelTheme.messageInputButtonTheme,
+              inputGradient:
+                  channelTheme.inputGradient ?? this.channelTheme.inputGradient,
+              inputBackground: channelTheme.inputBackground ??
+                  this.channelTheme.inputBackground,
+            ) ??
+            this.channelTheme,
+        messageTheme: messageTheme?.copyWith(
+              messageText:
+                  messageTheme?.messageText ?? this.messageTheme.messageText,
+              messageAuthor: messageTheme?.messageAuthor ??
+                  this.messageTheme.messageAuthor,
+              messageMention: messageTheme?.messageMention ??
+                  this.messageTheme.messageMention,
+              createdAt: messageTheme?.createdAt ?? this.messageTheme.createdAt,
+              replies: messageTheme?.replies ?? this.messageTheme.replies,
+              fontFamily:
+                  messageTheme?.fontFamily ?? this.messageTheme.fontFamily,
+              ownMessageBackgroundColor:
+                  messageTheme?.ownMessageBackgroundColor ??
+                      this.messageTheme.ownMessageBackgroundColor,
+              otherMessageBackgroundColor:
+                  messageTheme?.otherMessageBackgroundColor ??
+                      this.messageTheme.otherMessageBackgroundColor,
+              avatarTheme:
+                  messageTheme?.avatarTheme ?? this.messageTheme.avatarTheme,
+            ) ??
+            this.messageTheme,
       );
+
+  static StreamChatThemeData getDefaultTheme(ThemeData theme) {
+    final accentColor = Color(0xff006cff);
+    return StreamChatThemeData(
+      accentColor: accentColor,
+      primaryColor: Colors.white,
+      channelPreviewTheme: ChannelPreviewTheme(
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
+          ),
+        ),
+        title: TextStyle(
+          fontSize: 14,
+          color: Colors.black,
+        ),
+        subtitle: TextStyle(
+          fontSize: 13,
+          color: Colors.black,
+        ),
+        lastMessageAt: TextStyle(
+          fontSize: 11,
+          color: Colors.black.withOpacity(.5),
+        ),
+      ),
+      channelTheme: ChannelTheme(
+        messageInputButtonIconTheme: theme.iconTheme.copyWith(
+          color: accentColor,
+        ),
+        channelHeaderTheme: ChannelHeaderTheme(
+          avatarTheme: AvatarTheme(
+            borderRadius: BorderRadius.circular(20),
+            constraints: BoxConstraints.tightFor(
+              height: 40,
+              width: 40,
+            ),
+          ),
+          color: Colors.white,
+          title: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+          lastMessageAt: TextStyle(
+            fontSize: 11,
+            color: Colors.black.withOpacity(.5),
+          ),
+        ),
+        inputBackground: Colors.black.withAlpha(12),
+        inputGradient: LinearGradient(colors: [
+          Color(0xFF00AEFF),
+          Color(0xFF0076FF),
+        ]),
+      ),
+      messageTheme: MessageTheme(
+        messageText: TextStyle(
+          fontSize: 15,
+          color: Colors.black,
+        ),
+        createdAt: TextStyle(
+          color: Colors.black.withOpacity(.5),
+          fontSize: 11,
+        ),
+        replies: TextStyle(
+          color: accentColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+        ownMessageBackgroundColor: Color(0xffebebeb),
+        otherMessageBackgroundColor: Colors.white,
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: BoxConstraints.tightFor(
+            height: 32,
+            width: 32,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ChannelTheme {
@@ -88,7 +225,15 @@ class ChannelTheme {
     Color inputBackground,
   }) =>
       ChannelTheme(
-        channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
+        channelHeaderTheme: channelHeaderTheme?.copyWith(
+              title: channelHeaderTheme?.title ?? this.channelHeaderTheme.title,
+              lastMessageAt: channelHeaderTheme?.lastMessageAt ??
+                  this.channelHeaderTheme.lastMessageAt,
+              avatarTheme: channelHeaderTheme?.avatarTheme ??
+                  this.channelHeaderTheme.avatarTheme,
+              color: channelHeaderTheme?.color ?? this.channelHeaderTheme.color,
+            ) ??
+            this.channelHeaderTheme,
         messageInputButtonIconTheme:
             messageInputButtonIconTheme ?? this.messageInputButtonIconTheme,
         messageInputButtonTheme:
@@ -122,12 +267,14 @@ class MessageTheme {
   final TextStyle messageAuthor;
   final TextStyle messageMention;
   final TextStyle createdAt;
+  final TextStyle replies;
   final String fontFamily;
   final Color ownMessageBackgroundColor;
   final Color otherMessageBackgroundColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
+    this.replies,
     this.messageText,
     this.messageAuthor,
     this.messageMention,
@@ -143,6 +290,7 @@ class MessageTheme {
     TextStyle messageAuthor,
     TextStyle messageMention,
     TextStyle createdAt,
+    TextStyle replies,
     String fontFamily,
     Color ownMessageBackgroundColor,
     Color otherMessageBackgroundColor,
@@ -159,6 +307,7 @@ class MessageTheme {
         otherMessageBackgroundColor:
             otherMessageBackgroundColor ?? this.otherMessageBackgroundColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
+        replies: replies ?? this.replies,
       );
 }
 
