@@ -107,20 +107,32 @@ class StreamChatState extends State<StreamChat> {
         messageInputButtonTheme:
             themeData?.channelTheme?.messageInputButtonTheme,
       ),
-      messageTheme: defaultTheme.messageTheme.copyWith(
-        replies: themeData?.messageTheme?.replies,
-        createdAt: themeData?.messageTheme?.createdAt,
-        messageText: themeData?.messageTheme?.messageText,
-        otherMessageBackgroundColor:
-            themeData?.messageTheme?.otherMessageBackgroundColor,
-        ownMessageBackgroundColor:
-            themeData?.messageTheme?.ownMessageBackgroundColor,
-        fontFamily: themeData?.messageTheme?.fontFamily,
-        messageAuthor: themeData?.messageTheme?.messageAuthor,
-        messageMention: themeData?.messageTheme?.messageMention,
-        avatarTheme: defaultTheme.messageTheme.avatarTheme.copyWith(
-          constraints: themeData?.messageTheme?.avatarTheme?.constraints,
-          borderRadius: themeData?.messageTheme?.avatarTheme?.borderRadius,
+      ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
+        replies: themeData?.ownMessageTheme?.replies,
+        createdAt: themeData?.ownMessageTheme?.createdAt,
+        messageText: themeData?.ownMessageTheme?.messageText,
+        messageBackgroundColor:
+            themeData?.ownMessageTheme?.messageBackgroundColor,
+        fontFamily: themeData?.ownMessageTheme?.fontFamily,
+        messageAuthor: themeData?.ownMessageTheme?.messageAuthor,
+        messageMention: themeData?.ownMessageTheme?.messageMention,
+        avatarTheme: defaultTheme.ownMessageTheme.avatarTheme.copyWith(
+          constraints: themeData?.ownMessageTheme?.avatarTheme?.constraints,
+          borderRadius: themeData?.ownMessageTheme?.avatarTheme?.borderRadius,
+        ),
+      ),
+      otherMessageTheme: defaultTheme.otherMessageTheme.copyWith(
+        replies: themeData?.otherMessageTheme?.replies,
+        createdAt: themeData?.otherMessageTheme?.createdAt,
+        messageText: themeData?.otherMessageTheme?.messageText,
+        messageBackgroundColor:
+            themeData?.otherMessageTheme?.messageBackgroundColor,
+        fontFamily: themeData?.otherMessageTheme?.fontFamily,
+        messageAuthor: themeData?.otherMessageTheme?.messageAuthor,
+        messageMention: themeData?.otherMessageTheme?.messageMention,
+        avatarTheme: defaultTheme.otherMessageTheme.avatarTheme.copyWith(
+          constraints: themeData?.otherMessageTheme?.avatarTheme?.constraints,
+          borderRadius: themeData?.otherMessageTheme?.avatarTheme?.borderRadius,
         ),
       ),
       accentColor: themeData?.accentColor,

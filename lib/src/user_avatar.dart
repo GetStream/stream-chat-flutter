@@ -19,10 +19,12 @@ class UserAvatar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       constraints:
-          StreamChatTheme.of(context).messageTheme.avatarTheme.constraints,
+          StreamChatTheme.of(context).ownMessageTheme.avatarTheme.constraints,
       decoration: BoxDecoration(
-        borderRadius:
-            StreamChatTheme.of(context).messageTheme.avatarTheme.borderRadius,
+        borderRadius: StreamChatTheme.of(context)
+            .ownMessageTheme
+            .avatarTheme
+            .borderRadius,
         color: StreamChatTheme.of(context).accentColor,
       ),
       child: user.extraData?.containsKey('image') ?? false

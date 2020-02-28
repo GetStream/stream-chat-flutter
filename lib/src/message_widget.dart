@@ -41,6 +41,8 @@ class _MessageWidgetState extends State<MessageWidget>
   final Map<String, ChangeNotifier> _videoControllers = {};
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
+  MessageTheme messageTheme;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -55,6 +57,10 @@ class _MessageWidgetState extends State<MessageWidget>
     final isNextUser = nextUserId == messageUserId;
     final alignment =
         isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
+
+    messageTheme = isMyMessage
+        ? StreamChatTheme.of(context).ownMessageTheme
+        : StreamChatTheme.of(context).otherMessageTheme;
 
     Widget child;
 
@@ -121,9 +127,10 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
         child: Text(
           'This message was deleted...',
-          style: StreamChatTheme.of(context).messageTheme.messageText.copyWith(
-                fontStyle: FontStyle.italic,
-              ),
+          style: messageTheme.messageText.copyWith(
+            fontStyle: FontStyle.italic,
+            color: Colors.black,
+          ),
         ),
       ),
     );
@@ -133,7 +140,7 @@ class _MessageWidgetState extends State<MessageWidget>
     var row = [
       Text(
         'Replies: ${widget.message.replyCount}',
-        style: StreamChatTheme.of(context).messageTheme.replies,
+        style: messageTheme.replies,
       ),
       Transform(
         transform: Matrix4.rotationY(isMyMessage ? 0 : pi),
@@ -220,13 +227,11 @@ class _MessageWidgetState extends State<MessageWidget>
                                       Text(
                                         attachment.title,
                                         overflow: TextOverflow.ellipsis,
-                                        style: StreamChatTheme.of(context)
-                                            .messageTheme
-                                            .messageText
-                                            .copyWith(
-                                              color: Colors.blue,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        style:
+                                            messageTheme.messageText.copyWith(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                       Text(
                                         Uri.parse(attachment.thumbUrl)
@@ -238,9 +243,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                             .reversed
                                             .join('.'),
                                         overflow: TextOverflow.ellipsis,
-                                        style: StreamChatTheme.of(context)
-                                            .messageTheme
-                                            .createdAt,
+                                        style: messageTheme.createdAt,
                                       ),
                                     ],
                                   ),
@@ -321,9 +324,7 @@ class _MessageWidgetState extends State<MessageWidget>
                           styleSheet:
                               MarkdownStyleSheet.fromTheme(Theme.of(context))
                                   .copyWith(
-                            p: StreamChatTheme.of(context)
-                                .messageTheme
-                                .messageText,
+                            p: messageTheme.messageText,
                           ),
                         ),
                       ),
@@ -602,7 +603,7 @@ class _MessageWidgetState extends State<MessageWidget>
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
         formatDate(widget.message.createdAt.toLocal(), [HH, ':', nn]),
-        style: StreamChatTheme.of(context).messageTheme.createdAt,
+        style: messageTheme.createdAt,
       ),
     );
   }
@@ -616,11 +617,7 @@ class _MessageWidgetState extends State<MessageWidget>
         topRight: Radius.circular((isMyMessage && isLastUser) ? 2 : 16),
         bottomRight: Radius.circular(isMyMessage ? 2 : 16),
       ),
-      color: isMyMessage
-          ? StreamChatTheme.of(context).messageTheme.ownMessageBackgroundColor
-          : StreamChatTheme.of(context)
-              .messageTheme
-              .otherMessageBackgroundColor,
+      color: messageTheme.messageBackgroundColor,
     );
   }
 
