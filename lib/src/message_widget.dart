@@ -487,8 +487,8 @@ class _MessageWidgetState extends State<MessageWidget>
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
-            vertical:
-                widget.message.reactionCounts?.isNotEmpty == true ? 4.0 : 0),
+          vertical: widget.message.reactionCounts?.isNotEmpty == true ? 4.0 : 0,
+        ),
         child: AnimatedContainer(
           duration: Duration(milliseconds: 300),
           curve: Curves.decelerate,
@@ -500,29 +500,34 @@ class _MessageWidgetState extends State<MessageWidget>
               borderRadius: BorderRadius.all(Radius.circular(14))),
           child: (widget.message.reactionCounts != null &&
                   widget.message.reactionCounts.isNotEmpty)
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children:
-                      widget.message.reactionCounts.keys.map((reactionType) {
-                            return Text(
-                              reactionToEmoji[reactionType] ?? '?',
-                            ) as Widget; //TODO refactor
-                          }).toList() +
-                          [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 4.0),
-                              child: Text(
-                                widget.message.reactionCounts.values
-                                    .fold(0, (t, v) => v + t)
-                                    .toString(),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            )
-                          ])
+              ? _buildReactionRow()
               : SizedBox(),
         ),
       ),
+    );
+  }
+
+  Row _buildReactionRow() {
+    List<Widget> children =
+        widget.message.reactionCounts.keys.map((reactionType) {
+      return Text(
+        reactionToEmoji[reactionType] ?? '?',
+      );
+    }).toList();
+
+    children.add(Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Text(
+        widget.message.reactionCounts.values
+            .fold(0, (t, v) => v + t)
+            .toString(),
+        style: TextStyle(color: Colors.white),
+      ),
+    ));
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: children,
     );
   }
 
