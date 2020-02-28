@@ -19,32 +19,34 @@ class ChannelImage extends StatelessWidget {
         stream: channel.extraDataStream,
         initialData: channel.extraData,
         builder: (context, snapshot) {
-          return Container(
-            padding: const EdgeInsets.all(4),
-            constraints: StreamChatTheme.of(context)
+          return ClipRRect(
+            borderRadius: StreamChatTheme.of(context)
                 .channelPreviewTheme
                 .avatarTheme
-                .constraints,
-            decoration: BoxDecoration(
-              borderRadius: StreamChatTheme.of(context)
+                .borderRadius,
+            child: Container(
+              constraints: StreamChatTheme.of(context)
                   .channelPreviewTheme
                   .avatarTheme
-                  .borderRadius,
-              color: StreamChatTheme.of(context).accentColor,
+                  .constraints,
+              decoration: BoxDecoration(
+                color: StreamChatTheme.of(context).accentColor,
+              ),
+              child: snapshot.data?.containsKey('image') ?? false
+                  ? CachedNetworkImage(
+                      imageUrl: snapshot.data['image'],
+                      errorWidget: (_, __, ___) {
+                        return Center(
+                          child: Text(
+                              snapshot.data?.containsKey('name') ?? false
+                                  ? snapshot.data['name'][0]
+                                  : ''),
+                        );
+                      },
+                      fit: BoxFit.cover,
+                    )
+                  : SizedBox(),
             ),
-            child: snapshot.data?.containsKey('image') ?? false
-                ? CachedNetworkImage(
-                    imageUrl: snapshot.data['image'],
-                    errorWidget: (_, __, ___) {
-                      return Center(
-                        child: Text(snapshot.data?.containsKey('name') ?? false
-                            ? snapshot.data['name'][0]
-                            : ''),
-                      );
-                    },
-                    fit: BoxFit.cover,
-                  )
-                : SizedBox(),
           );
         });
   }

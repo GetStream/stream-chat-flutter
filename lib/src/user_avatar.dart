@@ -16,30 +16,29 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      constraints:
-          StreamChatTheme.of(context).ownMessageTheme.avatarTheme.constraints,
-      decoration: BoxDecoration(
-        borderRadius: StreamChatTheme.of(context)
-            .ownMessageTheme
-            .avatarTheme
-            .borderRadius,
-        color: StreamChatTheme.of(context).accentColor,
+    return ClipRRect(
+      borderRadius:
+          StreamChatTheme.of(context).ownMessageTheme.avatarTheme.borderRadius,
+      child: Container(
+        constraints:
+            StreamChatTheme.of(context).ownMessageTheme.avatarTheme.constraints,
+        decoration: BoxDecoration(
+          color: StreamChatTheme.of(context).accentColor,
+        ),
+        child: user.extraData?.containsKey('image') ?? false
+            ? CachedNetworkImage(
+                imageUrl: user.extraData['image'],
+                errorWidget: (_, __, ___) {
+                  return Center(
+                    child: Text(user.extraData?.containsKey('name') ?? false
+                        ? user.extraData['name'][0]
+                        : ''),
+                  );
+                },
+                fit: BoxFit.cover,
+              )
+            : SizedBox(),
       ),
-      child: user.extraData?.containsKey('image') ?? false
-          ? CachedNetworkImage(
-              imageUrl: user.extraData['image'],
-              errorWidget: (_, __, ___) {
-                return Center(
-                  child: Text(user.extraData?.containsKey('name') ?? false
-                      ? user.extraData['name'][0]
-                      : ''),
-                );
-              },
-              fit: BoxFit.cover,
-            )
-          : SizedBox(),
     );
   }
 }

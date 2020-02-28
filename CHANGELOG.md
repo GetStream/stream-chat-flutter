@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Fix avatar shape
+
 ## 0.1.1
 
 - Add ThreadHeader
