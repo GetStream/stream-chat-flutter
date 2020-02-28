@@ -324,6 +324,8 @@ class _MessageInputState extends State<MessageInput> {
       ),
     );
 
+    attachment.url = res.file;
+
     setState(() {
       attachment.uploaded = true;
     });
@@ -404,9 +406,9 @@ class _MessageInputState extends State<MessageInput> {
 }
 
 class _SendingAttachment {
-  final String url;
   final File file;
   final FileType type;
+  String url;
   bool uploaded = false;
 
   _SendingAttachment({

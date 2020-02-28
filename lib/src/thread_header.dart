@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
-import 'stream_channel.dart';
-
 class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
   final VoidCallback onBackPressed;
@@ -19,7 +17,6 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
     return AppBar(
       automaticallyImplyLeading: false,
       elevation: 1,

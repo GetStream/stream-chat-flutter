@@ -505,19 +505,21 @@ class _MessageWidgetState extends State<MessageWidget>
                   mainAxisAlignment: MainAxisAlignment.start,
                   children:
                       widget.message.reactionCounts.keys.map((reactionType) {
-                    return Text(
-                      reactionToEmoji[reactionType] ?? '?',
-                    ) as Widget; //TODO refactor
-                  }).toList()
-                        ..add(Padding(
-                          padding: const EdgeInsets.only(left: 4.0),
-                          child: Text(
-                            widget.message.reactionCounts.values
-                                .fold(0, (t, v) => v + t)
-                                .toString(),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        )))
+                            return Text(
+                              reactionToEmoji[reactionType] ?? '?',
+                            ) as Widget; //TODO refactor
+                          }).toList() +
+                          [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4.0),
+                              child: Text(
+                                widget.message.reactionCounts.values
+                                    .fold(0, (t, v) => v + t)
+                                    .toString(),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            )
+                          ])
               : SizedBox(),
         ),
       ),
