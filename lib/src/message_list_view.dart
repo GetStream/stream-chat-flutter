@@ -218,7 +218,7 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildBottomMessage(
-    StreamChannelState channel,
+    StreamChannelState streamChannel,
     Message previousMessage,
     Message message,
     BuildContext context,
@@ -243,9 +243,9 @@ class _MessageListViewState extends State<MessageListView> {
       key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
         _isBottom = visibility.visibleBounds != Rect.zero;
-        if (_isBottom) {
-          if (channel.channel.state.unreadCount > 0) {
-            channel.channel.markRead();
+        if (_isBottom && streamChannel.channel.config.readEvents) {
+          if (streamChannel.channel.state.unreadCount > 0) {
+            streamChannel.channel.markRead();
           }
         }
       },

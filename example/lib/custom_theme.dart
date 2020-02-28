@@ -23,27 +23,19 @@ class MyApp extends StatelessWidget {
       primarySwatch: Colors.green,
     );
 
-    final streamTheme = StreamChatThemeData.fromTheme(theme);
-
     return MaterialApp(
       theme: theme,
       home: Container(
         child: StreamChat(
-          streamChatThemeData: streamTheme.copyWith(
-            channelPreviewTheme: ChannelPreviewTheme(
-              avatarTheme: AvatarTheme(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
+          streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
             ownMessageTheme: MessageTheme(
-              replies: streamTheme.ownMessageTheme.replies
-                  .copyWith(fontStyle: FontStyle.italic),
-              avatarTheme: AvatarTheme(
-                borderRadius: BorderRadius.circular(12),
+              messageBackgroundColor: Colors.black,
+              messageText: TextStyle(
+                color: Colors.white,
               ),
-            ),
-            otherMessageTheme: MessageTheme(
-              messageBackgroundColor: Colors.red,
+              avatarTheme: AvatarTheme(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
           client: client,

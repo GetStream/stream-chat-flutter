@@ -42,12 +42,16 @@ class _MessageWidgetState extends State<MessageWidget>
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
   MessageTheme messageTheme;
+  StreamChatState streamChat;
+  StreamChannelState streamChannel;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    final streamChat = StreamChat.of(context);
+    streamChat = StreamChat.of(context);
+    streamChannel = StreamChannel.of(context);
+
     final currentUserId = streamChat.client.state.user.id;
     final messageUserId = widget.message.user.id;
     final previousUserId = widget.previousMessage?.user?.id;
@@ -73,7 +77,9 @@ class _MessageWidgetState extends State<MessageWidget>
               isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: <Widget>[
             _buildBubble(context, isMyMessage, isLastUser),
-            _buildThreadIndicator(context, isMyMessage),
+            streamChannel.channel.config.replies
+                ? _buildThreadIndicator(context, isMyMessage)
+                : SizedBox(),
             isNextUser ? SizedBox() : _buildTimestamp(isMyMessage, alignment),
           ],
         ),
@@ -287,12 +293,14 @@ class _MessageWidgetState extends State<MessageWidget>
                   ? CrossAxisAlignment.end
                   : CrossAxisAlignment.start,
               children: <Widget>[
-                Align(
-                  child: _buildReactions(isMyMessage),
-                  alignment: isMyMessage
-                      ? Alignment.centerLeft
-                      : Alignment.centerRight,
-                ),
+                streamChannel.channel.config.reactions
+                    ? Align(
+                        child: _buildReactions(isMyMessage),
+                        alignment: isMyMessage
+                            ? Alignment.centerLeft
+                            : Alignment.centerRight,
+                      )
+                    : SizedBox(),
                 Stack(
                   overflow: Overflow.visible,
                   children: <Widget>[
@@ -346,6 +354,11 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   void _showMessageBottomSheet(BuildContext context, bool isMyMessage) {
+    if (!streamChannel.channel.config.reactions &&
+        !streamChannel.channel.config.replies) {
+      return;
+    }
+
     showModalBottomSheet(
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
@@ -367,47 +380,52 @@ class _MessageWidgetState extends State<MessageWidget>
               children: <Widget>[
                 Container(
                   color: Colors.black87,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: reactionToEmoji.keys.map((reactionType) {
-                      final ownReactionIndex = widget.message.ownReactions
-                          .indexWhere(
-                              (reaction) => reaction.type == reactionType);
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          IconButton(
-                            iconSize: fontSize + 10,
-                            icon: Text(
-                              reactionToEmoji[reactionType],
-                              style: textStyle,
-                            ),
-                            onPressed: () {
-                              if (ownReactionIndex != -1) {
-                                removeReaction(reactionType);
-                              } else {
-                                sendReaction(reactionType);
-                              }
-                            },
-                          ),
-                          ownReactionIndex != -1
-                              ? Padding(
-                                  padding: const EdgeInsets.only(bottom: 4.0),
-                                  child: Text(
-                                    widget.message
-                                        .ownReactions[ownReactionIndex].score
-                                        .toString(),
-                                    style: TextStyle(color: Colors.white),
+                  child: streamChannel.channel.config.reactions
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: reactionToEmoji.keys.map((reactionType) {
+                            final ownReactionIndex = widget.message.ownReactions
+                                .indexWhere((reaction) =>
+                                    reaction.type == reactionType);
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                IconButton(
+                                  iconSize: fontSize + 10,
+                                  icon: Text(
+                                    reactionToEmoji[reactionType],
+                                    style: textStyle,
                                   ),
-                                )
-                              : SizedBox(),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                                  onPressed: () {
+                                    if (ownReactionIndex != -1) {
+                                      removeReaction(reactionType);
+                                    } else {
+                                      sendReaction(reactionType);
+                                    }
+                                  },
+                                ),
+                                ownReactionIndex != -1
+                                    ? Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 4.0),
+                                        child: Text(
+                                          widget
+                                              .message
+                                              .ownReactions[ownReactionIndex]
+                                              .score
+                                              .toString(),
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      )
+                                    : SizedBox(),
+                              ],
+                            );
+                          }).toList(),
+                        )
+                      : SizedBox(),
                 ),
                 isMyMessage
                     ? FlatButton(
@@ -429,19 +447,21 @@ class _MessageWidgetState extends State<MessageWidget>
                         },
                       )
                     : SizedBox(),
-                FlatButton(
-                  child: Padding(
-                    padding: const EdgeInsets.all(28.0),
-                    child: Text(
-                      'Start a thread',
-                      style: Theme.of(context).textTheme.headline,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    widget.onThreadTap(widget.message);
-                  },
-                ),
+                streamChannel.channel.config.replies
+                    ? FlatButton(
+                        child: Padding(
+                          padding: const EdgeInsets.all(28.0),
+                          child: Text(
+                            'Start a thread',
+                            style: Theme.of(context).textTheme.headline,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          widget.onThreadTap(widget.message);
+                        },
+                      )
+                    : SizedBox(),
               ],
             ),
           );
@@ -502,16 +522,12 @@ class _MessageWidgetState extends State<MessageWidget>
   };
 
   void sendReaction(String reactionType) {
-    StreamChannel.of(context)
-        .channel
-        .sendReaction(widget.message.id, reactionType);
+    streamChannel.channel.sendReaction(widget.message.id, reactionType);
     Navigator.of(context).pop();
   }
 
   void removeReaction(String reactionType) {
-    StreamChannel.of(context)
-        .channel
-        .deleteReaction(widget.message.id, reactionType);
+    streamChannel.channel.deleteReaction(widget.message.id, reactionType);
     Navigator.of(context).pop();
   }
 
