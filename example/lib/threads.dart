@@ -19,15 +19,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
-      primarySwatch: Colors.orange,
-    );
-
     return MaterialApp(
-      theme: theme,
       home: Container(
         child: StreamChat(
-          streamChatThemeData: StreamChatThemeData.fromTheme(theme),
           client: client,
           child: ChannelListPage(),
         ),
