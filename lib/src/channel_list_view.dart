@@ -96,7 +96,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     if (i < channels.length) {
       final channel = channels[i];
 
-      final channelClient = streamChat.client.channelClients[channel.id];
+      final channelClient = streamChat.client.channels[channel.id];
 
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {

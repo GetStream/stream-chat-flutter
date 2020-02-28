@@ -40,10 +40,23 @@ class StreamChatThemeData {
   });
 
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
+    final defaultTheme = getDefaultTheme(theme);
+
     return StreamChatThemeData(
       accentColor: theme.accentColor,
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
+      channelTheme: ChannelTheme(
+        inputGradient: LinearGradient(colors: [
+          theme.accentColor.withOpacity(.5),
+          theme.accentColor,
+        ]),
+      ),
+      messageTheme: MessageTheme(
+        replies: defaultTheme.messageTheme.replies.copyWith(
+          color: theme.accentColor,
+        ),
+      ),
     );
   }
 
@@ -63,6 +76,87 @@ class StreamChatThemeData {
         channelTheme: channelTheme ?? this.channelTheme,
         messageTheme: messageTheme ?? this.messageTheme,
       );
+
+  static StreamChatThemeData getDefaultTheme(ThemeData theme) {
+    final accentColor = Color(0xff006cff);
+    return StreamChatThemeData(
+      accentColor: accentColor,
+      primaryColor: Colors.white,
+      channelPreviewTheme: ChannelPreviewTheme(
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
+          ),
+        ),
+        title: TextStyle(
+          fontSize: 14,
+          color: Colors.black,
+        ),
+        subtitle: TextStyle(
+          fontSize: 13,
+          color: Colors.black,
+        ),
+        lastMessageAt: TextStyle(
+          fontSize: 11,
+          color: Colors.black.withOpacity(.5),
+        ),
+      ),
+      channelTheme: ChannelTheme(
+        messageInputButtonIconTheme: theme.iconTheme.copyWith(
+          color: accentColor,
+        ),
+        channelHeaderTheme: ChannelHeaderTheme(
+          avatarTheme: AvatarTheme(
+            borderRadius: BorderRadius.circular(20),
+            constraints: BoxConstraints.tightFor(
+              height: 40,
+              width: 40,
+            ),
+          ),
+          color: Colors.white,
+          title: TextStyle(
+            fontSize: 14,
+            color: Colors.black,
+          ),
+          lastMessageAt: TextStyle(
+            fontSize: 11,
+            color: Colors.black.withOpacity(.5),
+          ),
+        ),
+        inputBackground: Colors.black.withAlpha(12),
+        inputGradient: LinearGradient(colors: [
+          Color(0xFF00AEFF),
+          Color(0xFF0076FF),
+        ]),
+      ),
+      messageTheme: MessageTheme(
+        messageText: TextStyle(
+          fontSize: 15,
+          color: Colors.black,
+        ),
+        createdAt: TextStyle(
+          color: Colors.black.withOpacity(.5),
+          fontSize: 11,
+        ),
+        replies: TextStyle(
+          color: accentColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+        ownMessageBackgroundColor: Color(0xffebebeb),
+        otherMessageBackgroundColor: Colors.white,
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: BoxConstraints.tightFor(
+            height: 32,
+            width: 32,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ChannelTheme {
@@ -122,12 +216,14 @@ class MessageTheme {
   final TextStyle messageAuthor;
   final TextStyle messageMention;
   final TextStyle createdAt;
+  final TextStyle replies;
   final String fontFamily;
   final Color ownMessageBackgroundColor;
   final Color otherMessageBackgroundColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
+    this.replies,
     this.messageText,
     this.messageAuthor,
     this.messageMention,
@@ -143,6 +239,7 @@ class MessageTheme {
     TextStyle messageAuthor,
     TextStyle messageMention,
     TextStyle createdAt,
+    TextStyle replies,
     String fontFamily,
     Color ownMessageBackgroundColor,
     Color otherMessageBackgroundColor,
@@ -159,6 +256,7 @@ class MessageTheme {
         otherMessageBackgroundColor:
             otherMessageBackgroundColor ?? this.otherMessageBackgroundColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
+        replies: replies ?? this.replies,
       );
 }
 

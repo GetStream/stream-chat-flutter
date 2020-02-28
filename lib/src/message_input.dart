@@ -25,72 +25,74 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          gradient: _typingStarted
-              ? StreamChatTheme.of(context).channelTheme.inputGradient
-              : null,
-        ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: Colors.white,
             borderRadius: BorderRadius.circular(10.0),
+            gradient: _typingStarted
+                ? StreamChatTheme.of(context).channelTheme.inputGradient
+                : null,
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: StreamChatTheme.of(context).channelTheme.inputBackground,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10.0),
-              border: Border.all(
-                  color: _typingStarted
-                      ? Colors.transparent
-                      : Colors.black.withOpacity(.2)),
             ),
-            child: Flex(
-              direction: Axis.horizontal,
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    minLines: null,
-                    maxLines: null,
-                    onSubmitted: (_) {
-                      _sendMessage(context);
-                    },
-                    controller: _textController,
-                    onChanged: (s) {
-                      StreamChannel.of(context).channel.keyStroke();
-                      setState(() {
-                        _messageIsPresent = s.trim().isNotEmpty;
-                      });
-                    },
-                    onTap: () {
-                      setState(() {
-                        _typingStarted = true;
-                      });
-                    },
-                    style: Theme.of(context).textTheme.body1,
-                    autofocus: false,
-                    decoration: InputDecoration(
-                      hintText: 'Write a message',
-                      prefixText: '   ',
-                      border: InputBorder.none,
+            child: Container(
+              decoration: BoxDecoration(
+                color: StreamChatTheme.of(context).channelTheme.inputBackground,
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(
+                    color: _typingStarted
+                        ? Colors.transparent
+                        : Colors.black.withOpacity(.2)),
+              ),
+              child: Flex(
+                direction: Axis.horizontal,
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      minLines: null,
+                      maxLines: null,
+                      onSubmitted: (_) {
+                        _sendMessage(context);
+                      },
+                      controller: _textController,
+                      onChanged: (s) {
+                        StreamChannel.of(context).channel.keyStroke();
+                        setState(() {
+                          _messageIsPresent = s.trim().isNotEmpty;
+                        });
+                      },
+                      onTap: () {
+                        setState(() {
+                          _typingStarted = true;
+                        });
+                      },
+                      style: Theme.of(context).textTheme.body1,
+                      autofocus: false,
+                      decoration: InputDecoration(
+                        hintText: 'Write a message',
+                        prefixText: '   ',
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
-                ),
-                AnimatedCrossFade(
-                  crossFadeState: _messageIsPresent
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  firstChild: _buildSendButton(context),
-                  secondChild: SizedBox(),
-                  duration: Duration(milliseconds: 300),
-                  alignment: Alignment.center,
-                ),
-              ],
+                  AnimatedCrossFade(
+                    crossFadeState: _messageIsPresent
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: _buildSendButton(context),
+                    secondChild: SizedBox(),
+                    duration: Duration(milliseconds: 300),
+                    alignment: Alignment.center,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
