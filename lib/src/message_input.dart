@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -136,7 +137,7 @@ class _MessageInputState extends State<MessageInput> {
                     Container(
                       height: 50,
                       width: 50,
-                      child: Image.file(attachment.file),
+                      child: _buildAttachment(attachment),
                     ),
                     Positioned(
                       height: 16,
@@ -176,6 +177,25 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
+  Widget _buildAttachment(_SendingAttachment attachment) {
+    switch (attachment.type) {
+      case FileType.IMAGE:
+        return Image.file(attachment.file);
+        break;
+      case FileType.VIDEO:
+        return Container(
+          child: Icon(Icons.videocam),
+          color: Colors.black26,
+        );
+        break;
+      default:
+        return Container(
+          child: Icon(Icons.insert_drive_file),
+          color: Colors.black26,
+        );
+    }
+  }
+
   Material _buildAttachmentButton() {
     return Material(
       clipBehavior: Clip.hardEdge,
@@ -184,31 +204,110 @@ class _MessageInputState extends State<MessageInput> {
       ),
       color: Colors.transparent,
       child: IconButton(
-        onPressed: () async {
-          final file = await FilePicker.getFile(type: FileType.IMAGE);
-          print(file.path);
-
-          final channel = StreamChannel.of(context).channel;
-
-          final bytes = await file.readAsBytes();
-          final res = await channel.sendFile(MultipartFile.fromBytes(
-            bytes,
-            filename: file.path.split('/').last,
-          ));
-
-          setState(() {
-            _attachments.add(_SendingAttachment(
-              url: res.file,
-              extension: file.path.split('.').last,
-              file: file,
-            ));
-          });
+        onPressed: () {
+          showModalBottomSheet(
+              clipBehavior: Clip.hardEdge,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+              ),
+              context: context,
+              builder: (_) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ListTile(
+                      title: Text(
+                        'Add a file',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.image),
+                      title: Text('Upload a photo'),
+                      onTap: () {
+                        _pickFile(FileType.IMAGE, false);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.video_library),
+                      title: Text('Upload a video'),
+                      onTap: () {
+                        _pickFile(FileType.VIDEO, false);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.camera_alt),
+                      title: Text('Photo from camera'),
+                      onTap: () {
+                        ImagePicker.pickImage(source: ImageSource.camera);
+                        _pickFile(FileType.IMAGE, true);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.videocam),
+                      title: Text('Video from camera'),
+                      onTap: () {
+                        _pickFile(FileType.VIDEO, true);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.insert_drive_file),
+                      title: Text('Upload a file'),
+                      onTap: () {
+                        _pickFile(FileType.ANY, false);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                );
+              });
         },
         icon: Icon(
           Icons.add_circle_outline,
         ),
       ),
     );
+  }
+
+  void _pickFile(FileType type, bool camera) async {
+    File file;
+
+    if (camera) {
+      if (type == FileType.IMAGE) {
+        file = await ImagePicker.pickImage(source: ImageSource.camera);
+      } else if (type == FileType.VIDEO) {
+        file = await ImagePicker.pickVideo(source: ImageSource.camera);
+      }
+    } else {
+      file = await FilePicker.getFile(type: type);
+    }
+
+    final channel = StreamChannel.of(context).channel;
+
+    final bytes = await file.readAsBytes();
+    final res = await channel.sendFile(
+      MultipartFile.fromBytes(
+        bytes,
+        filename: file.path.split('/').last,
+      ),
+    );
+
+    setState(() {
+      _attachments.add(_SendingAttachment(
+        url: res.file,
+        file: file,
+        type: type,
+      ));
+    });
   }
 
   Widget _buildSendButton(BuildContext context) {
@@ -239,7 +338,7 @@ class _MessageInputState extends State<MessageInput> {
       return;
     }
 
-    final attachments = List.from(_attachments);
+    final attachments = List<_SendingAttachment>.from(_attachments);
 
     _textController.clear();
     _attachments.clear();
@@ -257,10 +356,22 @@ class _MessageInputState extends State<MessageInput> {
             parentId: widget.parentMessage?.id,
             text: text,
             attachments: attachments.map((attachment) {
+              String type;
+              switch (attachment.type) {
+                case FileType.IMAGE:
+                  type = 'image';
+                  break;
+                case FileType.VIDEO:
+                  type = 'video';
+                  break;
+                default:
+                  type = 'file';
+              }
               return Attachment(
-                imageUrl: attachment.url,
+                imageUrl:
+                    attachment.type == FileType.IMAGE ? attachment.url : null,
                 assetUrl: attachment.url,
-                type: 'image',
+                type: type,
               );
             }).toList(),
           ),
@@ -275,12 +386,12 @@ class _MessageInputState extends State<MessageInput> {
 
 class _SendingAttachment {
   final String url;
-  final String extension;
   final File file;
+  final FileType type;
 
   _SendingAttachment({
     this.url,
-    this.extension,
     this.file,
+    this.type,
   });
 }

@@ -48,6 +48,10 @@
     </array>
     <key>NSAppleMusicUsageDescription</key>
     <string>Used to send message attachments</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Used to send message attachments</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Used to send message attachments</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Used to send message attachments</string>
 </dict>

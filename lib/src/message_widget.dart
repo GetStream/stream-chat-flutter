@@ -211,7 +211,7 @@ class _MessageWidgetState extends State<MessageWidget>
               borderRadius: boxDecoration.borderRadius,
               child: Container(
                 decoration: boxDecoration,
-                constraints: BoxConstraints.loose(Size(300, 500)),
+                constraints: BoxConstraints.loose(Size.fromWidth(300)),
                 child: Stack(
                   children: <Widget>[
                     Column(
@@ -256,7 +256,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                 ),
                                 color: Color(0xffebebeb),
                               )
-                            : Container(),
+                            : SizedBox(),
                       ],
                     ),
                     attachment.type == 'image' && attachment.titleLink != null
