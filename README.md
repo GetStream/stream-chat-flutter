@@ -13,7 +13,7 @@
 **Quick Links**
 
 - [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
-- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) [WIP]
+- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 
 ## Flutter Chat Tutorial
