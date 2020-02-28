@@ -72,17 +72,30 @@ class ChannelPage extends StatelessWidget {
     );
   }
 
-  Widget _messageBuilder(context, message, _) {
+  Widget _messageBuilder(context, message, index) {
     final isCurrentUser = StreamChat.of(context).user.id == message.user.id;
     final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
-    return ListTile(
-      title: Text(
-        message.text,
-        textAlign: textAlign,
-      ),
-      subtitle: Text(
-        message.user.extraData['name'],
-        textAlign: textAlign,
+    final color = isCurrentUser ? Colors.blueGrey : Colors.blue;
+
+    return Padding(
+      padding: EdgeInsets.all(5.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: color, width: 1),
+          borderRadius: BorderRadius.all(
+            Radius.circular(5.0),
+          ),
+        ),
+        child: ListTile(
+          title: Text(
+            message.text,
+            textAlign: textAlign,
+          ),
+          subtitle: Text(
+            message.user.extraData['name'],
+            textAlign: textAlign,
+          ),
+        ),
       ),
     );
   }
