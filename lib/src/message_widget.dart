@@ -508,11 +508,11 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Row _buildReactionRow() {
-    List<Widget> children =
+    final List<Widget> children =
         widget.message.reactionCounts.keys.map((reactionType) {
       return Text(
         reactionToEmoji[reactionType] ?? '?',
-      );
+      ) as Widget;
     }).toList();
 
     children.add(Padding(
