@@ -168,6 +168,16 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                       ),
                     ),
+                    attachment.uploaded
+                        ? SizedBox()
+                        : Positioned.fill(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),
@@ -180,7 +190,10 @@ class _MessageInputState extends State<MessageInput> {
   Widget _buildAttachment(_SendingAttachment attachment) {
     switch (attachment.type) {
       case FileType.IMAGE:
-        return Image.file(attachment.file);
+        return Image.file(
+          attachment.file,
+          fit: BoxFit.cover,
+        );
         break;
       case FileType.VIDEO:
         return Container(
@@ -294,6 +307,16 @@ class _MessageInputState extends State<MessageInput> {
     final channel = StreamChannel.of(context).channel;
 
     final bytes = await file.readAsBytes();
+
+    final attachment = _SendingAttachment(
+      file: file,
+      type: type,
+    );
+
+    setState(() {
+      _attachments.add(attachment);
+    });
+
     final res = await channel.sendFile(
       MultipartFile.fromBytes(
         bytes,
@@ -302,11 +325,7 @@ class _MessageInputState extends State<MessageInput> {
     );
 
     setState(() {
-      _attachments.add(_SendingAttachment(
-        url: res.file,
-        file: file,
-        type: type,
-      ));
+      attachment.uploaded = true;
     });
   }
 
@@ -388,6 +407,7 @@ class _SendingAttachment {
   final String url;
   final File file;
   final FileType type;
+  bool uploaded = false;
 
   _SendingAttachment({
     this.url,
