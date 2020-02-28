@@ -211,7 +211,7 @@ class _MessageWidgetState extends State<MessageWidget>
               borderRadius: boxDecoration.borderRadius,
               child: Container(
                 decoration: boxDecoration,
-                constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                constraints: BoxConstraints.loose(Size(300, 500)),
                 child: Stack(
                   children: <Widget>[
                     Column(
@@ -222,7 +222,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         attachment.title != null
                             ? Container(
                                 constraints:
-                                    BoxConstraints.loose(Size.fromHeight(70)),
+                                    BoxConstraints.loose(Size(300, 500)),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
@@ -549,7 +549,8 @@ class _MessageWidgetState extends State<MessageWidget>
     Attachment attachment,
   ) {
     return CachedNetworkImage(
-      imageUrl: attachment.thumbUrl ?? attachment.imageUrl,
+      imageUrl:
+          attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
       fit: BoxFit.cover,
     );
   }

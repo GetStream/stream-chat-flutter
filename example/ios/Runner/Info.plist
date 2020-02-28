@@ -41,5 +41,14 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIBackgroundModes</key>
+    <array>
+       <string>fetch</string>
+       <string>remote-notification</string>
+    </array>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>Used to send message attachments</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Used to send message attachments</string>
 </dict>
 </plist>
