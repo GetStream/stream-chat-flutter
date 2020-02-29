@@ -28,7 +28,7 @@ TODO
 
 ```yaml
 dependencies:
- stream_chat_flutter: ^0.1.4
+ stream_chat_flutter: ^0.1.5
 ```
 
 You should then run `flutter packages get`

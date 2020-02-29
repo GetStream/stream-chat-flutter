@@ -1,3 +1,7 @@
+## 0.1.5
+
+- Fix channels pagination
+
 ## 0.1.4
 
 - Fix message widget builder on reaction
