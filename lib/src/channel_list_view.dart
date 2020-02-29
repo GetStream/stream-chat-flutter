@@ -25,7 +25,6 @@ class ChannelListView extends StatefulWidget {
   final Map<String, dynamic> options;
   final List<SortOption> sort;
   final PaginationParams pagination;
-  final ScrollController _scrollController = ScrollController();
   final ChannelTapCallback onChannelTap;
   final Widget channelWidget;
   final ChannelPreviewBuilder channelPreviewBuilder;
@@ -35,6 +34,8 @@ class ChannelListView extends StatefulWidget {
 }
 
 class _ChannelListViewState extends State<ChannelListView> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
@@ -67,7 +68,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             final channels = snapshot.data;
             return ListView.custom(
               physics: AlwaysScrollableScrollPhysics(),
-              controller: widget._scrollController,
+              controller: _scrollController,
               childrenDelegate: SliverChildBuilderDelegate(
                 (context, i) {
                   return _itemBuilder(context, i, channels);
@@ -185,8 +186,8 @@ class _ChannelListViewState extends State<ChannelListView> {
   }
 
   void _listenChannelPagination(StreamChatState streamChat) {
-    if (widget._scrollController.position.maxScrollExtent ==
-        widget._scrollController.position.pixels) {
+    if (_scrollController.position.maxScrollExtent ==
+        _scrollController.offset) {
       streamChat.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
@@ -210,7 +211,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       options: widget.options,
     );
 
-    widget._scrollController.addListener(() {
+    _scrollController.addListener(() {
       _listenChannelPagination(streamChat);
     });
   }
