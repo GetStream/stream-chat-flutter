@@ -1,12 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Third step of the [tutorial](https://getstream.io/chat/flutter/tutorial/)
+///
+/// So far you’ve learned how to use the default widgets.
+/// The library has been designed with composition in mind and to allow all common customizations to be very easy.
+/// This means that you can change any component in your application by swapping the default widgets with the ones you build yourself.
+///
+/// Let’s see how we can make some changes to the SDK’s UI components.
+/// We start by changing how channel previews are shown in the channel list and include the number of unread messages for each.
+///
+/// We're passing a custom widget to [ChannelListView.channelPreviewBuilder], this will override the default [ChannelPreview] and allows you to create one yourself.
+///
+/// There are a couple interesting things we do in this widget:
+///
+/// - Instead of creating a whole new style for the channel name, we inherit the text style from the parent theme ([StreamChatTheme.of]) and only change the color attribute
+///
+/// - We loop over the list of channel messages to search for the first not deleted message ([Channel.state.messages])
+///
+/// - We retrieve the count of unread messages from [Channel.state]
 void main() async {
-  final client = Client('qk4nn7rpcn75');
+  final client = Client(
+    'b67pax5b2wdq',
+    logLevel: Level.INFO,
+  );
 
   await client.setUser(
-    User(id: 'wild-breeze-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
+    User(id: 'falling-mountain-7'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
   );
 
   runApp(MyApp(client));

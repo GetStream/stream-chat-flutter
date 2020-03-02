@@ -1,23 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// Sixth step of the [tutorial](https://getstream.io/chat/flutter/tutorial/)
-///
-/// The Flutter SDK comes with a fully designed set of widgets which you can customize to fit with your application style and typography.
-/// Changing the theme of Chat widgets works in a very similar way that [MaterialApp] and [Theme] do.
-///
-/// Out of the box all chat widgets use their own default styling, there are two ways to change the styling:
-///
-/// 1. Initialize the [StreamChatTheme] from your existing [MaterialApp] style
-/// 2. Construct a custom theme and provide all the customizations needed
-///
-/// First we create a new Material [Theme] and pick [Colors.green] as swatch color. The theme is then passed to [MaterialApp] as usual.
-///
-/// Then we create a new [StreamChatTheme] from the green theme we just created.
-/// After saving the app you will see the UI will update several widgets to match with the new color.
-///
-/// We also change the message color posted by the current user.
-/// You can perform these more granular style changes using [StreamChatTheme.copyWith].
 void main() async {
   final client = Client(
     'b67pax5b2wdq',
@@ -39,25 +22,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
-      primarySwatch: Colors.green,
-    );
-
     return MaterialApp(
-      theme: theme,
       home: Container(
         child: StreamChat(
-          streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
-            ownMessageTheme: MessageTheme(
-              messageBackgroundColor: Colors.black,
-              messageText: TextStyle(
-                color: Colors.white,
-              ),
-              avatarTheme: AvatarTheme(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
           client: client,
           child: ChannelListPage(),
         ),

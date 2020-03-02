@@ -1,15 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// First step of the [tutorial](https://getstream.io/chat/flutter/tutorial/)
+///
+/// There are three important things to notice that are common to all Flutter application using StreamChat:
+///
+/// 1. The Dart API [Client] is initialized with your API Key
+/// 2. The current user is set by calling [Client.setUser]
+/// 3. The client is then passed to the top-level [StreamChat] widget
+///    [StreamChat] is an inherited widget and must be the parent of all Chat related widgets.
+///
+/// Please note that while Flutter can be used to build both mobile and web applications;
+/// in this tutorial we focus on mobile, make sure when running the app you use a mobile device.
+///
+/// Let's have a look at what we've built:
+///
+/// - We set up the Chat [Client] with the API key
+///
+/// - We set the the current user for Chat with [Client.setUser] and a pre-generated user token
+///
+/// - We make [StreamChat] the root Widget of our application
+///
+/// - We create a single [ChannelPage] widget under [StreamChat] with three widgets: [ChannelHeader], [MessageListView] and [MessageInput]
+///
+/// If you now run the simulator you will see a single channel UI.
 void main() async {
   final client = Client(
-    'qk4nn7rpcn75',
+    'b67pax5b2wdq',
     logLevel: Level.INFO,
   );
 
   await client.setUser(
-    User(id: 'wild-breeze-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
+    User(id: 'falling-mountain-7'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
   );
 
   final channel = client.channel('messaging', id: 'godevs');

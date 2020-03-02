@@ -38,9 +38,14 @@ class ChannelImage extends StatelessWidget {
                       errorWidget: (_, __, ___) {
                         return Center(
                           child: Text(
-                              snapshot.data?.containsKey('name') ?? false
-                                  ? snapshot.data['name'][0]
-                                  : ''),
+                            snapshot.data?.containsKey('name') ?? false
+                                ? snapshot.data['name'][0]
+                                : '',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         );
                       },
                       fit: BoxFit.cover,

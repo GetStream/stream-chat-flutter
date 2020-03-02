@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Fourth step of the [tutorial](https://getstream.io/chat/flutter/tutorial/)
+///
+/// Stream Chat supports message threads out of the box. Threads allows users to create sub-conversations inside the same channel.
+///
+/// Using threaded conversations is very simple and mostly a matter of plugging the [MessageListView] to another widget that renders the widget.
+/// To make this simple, such a widget only needs to build [MessageListView] with the parent attribute set to the thread’s root message.
+///
+/// Now we can open threads and create new ones as well, if you long press a message you can tap on Reply and it will open the same [ThreadPage].
 void main() async {
-  final client = Client('qk4nn7rpcn75', logLevel: Level.INFO);
+  final client = Client(
+    'b67pax5b2wdq',
+    logLevel: Level.INFO,
+  );
 
   await client.setUser(
-    User(id: 'wild-breeze-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
+    User(id: 'falling-mountain-7'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
   );
 
   runApp(MyApp(client));
