@@ -14,7 +14,6 @@ import 'stream_channel.dart';
 /// It shows the current [Channel] information.
 ///
 /// ```dart
-///
 /// class MyApp extends StatelessWidget {
 ///   final Client client;
 ///   final Channel channel;
@@ -36,7 +35,6 @@ import 'stream_channel.dart';
 ///     );
 ///   }
 /// }
-///
 /// ```
 ///
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
@@ -52,9 +50,14 @@ import 'stream_channel.dart';
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
+  /// True if this header shows the leading back button
   final bool showBackButton;
+
+  /// Callback to call when pressing the back button.
+  /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
+  /// Creates a channel header
   ChannelHeader({
     Key key,
     this.showBackButton = true,

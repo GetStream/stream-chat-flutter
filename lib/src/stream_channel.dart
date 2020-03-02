@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+/// Widget used to provide information about the channel to the widget tree
+///
+/// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
 class StreamChannel extends StatefulWidget {
   StreamChannel({
     Key key,
@@ -16,6 +19,7 @@ class StreamChannel extends StatefulWidget {
   final Widget child;
   final Channel channel;
 
+  /// Use this method to get the current [StreamChannelState] instance
   static StreamChannelState of(BuildContext context) {
     StreamChannelState streamChannelState;
 
@@ -34,17 +38,19 @@ class StreamChannel extends StatefulWidget {
 }
 
 class StreamChannelState extends State<StreamChannel> {
-  StreamChannelState();
-
+  /// Current channel
   Channel get channel => widget.channel;
 
+  /// Current channel state stream
   Stream<ChannelState> get channelStateStream =>
       widget.channel.state.channelStateStream;
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
 
+  /// The stream notifying the state of queryMessage call
   Stream<bool> get queryMessage => _queryMessageController.stream;
 
+  /// Calls [channel.query] updating [queryMessage] stream
   void queryMessages() {
     _queryMessageController.add(true);
 
@@ -67,6 +73,7 @@ class StreamChannelState extends State<StreamChannel> {
     });
   }
 
+  /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(String parentId) async {
     _queryMessageController.add(true);
     print('PARENT $parentId');

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
@@ -16,6 +17,15 @@ import 'package:video_player/video_player.dart';
 
 import 'stream_chat.dart';
 
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget_paint.png)
+///
+/// It shows a message with reactions, replies and user avatar.
+///
+/// Usually you don't use this widget as it's the default message widget used by [MessageListView].
+///
+/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class MessageWidget extends StatefulWidget {
   const MessageWidget({
     Key key,
@@ -26,10 +36,19 @@ class MessageWidget extends StatefulWidget {
     this.isParent = false,
   }) : super(key: key);
 
-  final Message previousMessage;
+  /// This message
   final Message message;
+
+  /// The previous message
+  final Message previousMessage;
+
+  /// The next message
   final Message nextMessage;
+
+  /// The function called when tapping on replies
   final void Function(Message) onThreadTap;
+
+  /// True if this is the parent of the thread being showed
   final bool isParent;
 
   @override

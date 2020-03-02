@@ -6,6 +6,27 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// Widget used to provide information about the chat to the widget tree
+///
+/// class MyApp extends StatelessWidget {
+///   final Client client;
+///
+///   MyApp(this.client);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Container(
+///         child: StreamChat(
+///           client: client,
+///           child: ChannelListPage(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// Use [StreamChat.of] to get the current [StreamChatState] instance.
 class StreamChat extends StatefulWidget {
   final Client client;
   final Widget child;
@@ -23,6 +44,7 @@ class StreamChat extends StatefulWidget {
   @override
   StreamChatState createState() => StreamChatState();
 
+  /// Use this method to get the current [StreamChatState] instance
   static StreamChatState of(BuildContext context) {
     StreamChatState streamChatState;
 
@@ -162,22 +184,28 @@ class StreamChatState extends State<StreamChat> {
     }));
   }
 
+  /// The current user
   User get user => widget.client.state.user;
 
+  /// The current user as a stream
   Stream<User> get userStream => widget.client.state.userStream;
 
+  /// The current channel list
+  final List<Channel> channels = [];
+
+  /// The current channel list as a stream
   Stream<List<Channel>> get channelsStream => _channelsController.stream;
 
   final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
 
-  final List<Channel> channels = [];
-
   final BehaviorSubject<bool> _queryChannelsLoadingController =
       BehaviorSubject.seeded(false);
 
+  /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
       _queryChannelsLoadingController.stream;
 
+  /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sortOptions,
@@ -204,6 +232,7 @@ class StreamChatState extends State<StreamChat> {
     }
   }
 
+  /// Clear the current channel list
   void clearChannels() {
     channels.clear();
   }

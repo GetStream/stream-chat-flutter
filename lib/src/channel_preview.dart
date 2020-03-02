@@ -6,8 +6,22 @@ import 'package:stream_chat/stream_chat.dart';
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
 
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
+///
+/// It shows the current [Channel] preview.
+///
+/// The widget uses a [StreamBuilder] to render the channel information image as soon as it updates.
+///
+/// Usually you don't use this widget as it's the default channel preview used by [ChannelListView].
+///
+/// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class ChannelPreview extends StatelessWidget {
+  /// Function called when tapping this widget
   final void Function(Channel) onTap;
+
+  /// Channel displayed
   final Channel channel;
 
   ChannelPreview({

@@ -6,9 +6,45 @@ import 'channel_preview.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
 
+/// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget);
+
+/// Builder used to create a custom [ChannelPreview] from a [Channel]
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
+///
+/// It shows the list of current channels.
+///
+/// ```dart
+/// class ChannelListPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: ChannelListView(
+///         filter: {
+///           'members': {
+///             '\$in': [StreamChat.of(context).user.id],
+///           }
+///         },
+///         sort: [SortOption('last_message_at')],
+///         pagination: PaginationParams(
+///           limit: 20,
+///         ),
+///         channelWidget: ChannelPage(),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+///
+/// Make sure to have a [StreamChat] ancestor in order to provide the information about the channels.
+/// The widget uses a [ListView.custom] to render the list of channels.
+///
+/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class ChannelListView extends StatefulWidget {
   ChannelListView({
     Key key,
@@ -21,12 +57,38 @@ class ChannelListView extends StatefulWidget {
     this.channelPreviewBuilder,
   }) : super(key: key);
 
+  /// The query filters to use.
+  /// You can query on any of the custom fields you've defined on the [Channel].
+  /// You can also filter other built-in channel fields.
   final Map<String, dynamic> filter;
+
+  /// Query channels options.
+  ///
+  /// state: if true returns the Channel state
+  /// watch: if true listen to changes to this Channel in real time.
   final Map<String, dynamic> options;
+
+  /// The sorting used for the channels matching the filters.
+  /// Sorting is based on field and direction, multiple sorting options can be provided.
+  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
+  /// Direction can be ascending or descending.
   final List<SortOption> sort;
+
+  /// Pagination parameters
+  /// limit: the number of channels to return (max is 30)
+  /// offset: the offset (max is 1000)
+  /// message_limit: how many messages should be included to each channel
   final PaginationParams pagination;
+
+  /// Function called when tapping on a channel
+  /// By default it calls [Navigator.push] building a [MaterialPageRoute]
+  /// with the widget [channelWidget] as child.
   final ChannelTapCallback onChannelTap;
+
+  /// Widget used when opening a channel
   final Widget channelWidget;
+
+  /// Builder used to create a custom channel preview
   final ChannelPreviewBuilder channelPreviewBuilder;
 
   @override

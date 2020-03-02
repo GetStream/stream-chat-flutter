@@ -13,6 +13,46 @@ typedef ParentMessageBuilder = Widget Function(BuildContext, Message);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview_paint.png)
+///
+/// It shows the list of messages of the current channel.
+///
+/// ```dart
+/// class ChannelPage extends StatelessWidget {
+///   const ChannelPage({
+///     Key key,
+///   }) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: ChannelHeader(),
+///       body: Column(
+///         children: <Widget>[
+///           Expanded(
+///             child: MessageListView(
+///               threadBuilder: (_, parentMessage) {
+///                 return ThreadPage(
+///                   parent: parentMessage,
+///                 );
+///               },
+///             ),
+///           ),
+///           MessageInput(),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+///
+/// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channels.
+/// The widget uses a [ListView.custom] to render the list of channels.
+///
+/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class MessageListView extends StatefulWidget {
   MessageListView({
     Key key,
@@ -23,10 +63,20 @@ class MessageListView extends StatefulWidget {
     this.onThreadTap,
   }) : super(key: key);
 
+  /// Function used to build a custom message widget
   final MessageBuilder messageBuilder;
+
+  /// Function used to build a custom parent message widget
   final ParentMessageBuilder parentMessageBuilder;
+
+  /// Function used to build a custom thread widget
   final ThreadBuilder threadBuilder;
+
+  /// Function called when tapping on a thread
+  /// By default it calls [Navigator.push] using the widget built using [threadBuilder]
   final ThreadTapCallback onThreadTap;
+
+  /// Parent message in case of a thread
   final Message parentMessage;
 
   @override

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/channel_header.dart';
+import 'package:stream_chat_flutter/src/channel_preview.dart';
+import 'package:stream_chat_flutter/src/message_input.dart';
 
+/// Inherited widget providing the [StreamChatThemeData] to the widget tree
 class StreamChatTheme extends InheritedWidget {
   final StreamChatThemeData data;
 
@@ -17,20 +21,36 @@ class StreamChatTheme extends InheritedWidget {
     return data != old.data;
   }
 
+  /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<StreamChatTheme>().data;
   }
 }
 
+/// Theme data
 class StreamChatThemeData {
+  /// Primary color of the chat widgets
   final Color primaryColor;
+
+  /// Secondary color of the chat widgets
   final Color secondaryColor;
+
+  /// Accent color of the chat widgets
   final Color accentColor;
+
+  /// Theme of the [ChannelPreview]
   final ChannelPreviewTheme channelPreviewTheme;
+
+  /// Theme of the chat widgets dedicated to a channel
   final ChannelTheme channelTheme;
+
+  /// Theme of the current user messages
   final MessageTheme ownMessageTheme;
+
+  /// Theme of other users messages
   final MessageTheme otherMessageTheme;
 
+  /// Create a theme from scratch
   StreamChatThemeData({
     this.primaryColor,
     this.secondaryColor,
@@ -41,6 +61,7 @@ class StreamChatThemeData {
     this.ownMessageTheme,
   });
 
+  /// Create a theme from a Material [Theme]
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
     final defaultTheme = getDefaultTheme(theme);
 
@@ -67,6 +88,7 @@ class StreamChatThemeData {
     );
   }
 
+  /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
   StreamChatThemeData copyWith({
     Color primaryColor,
     Color secondaryColor,
@@ -141,6 +163,7 @@ class StreamChatThemeData {
             this.otherMessageTheme,
       );
 
+  /// Get the default Stream Chat theme
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
     final accentColor = Color(0xff006cff);
     return StreamChatThemeData(
@@ -245,11 +268,21 @@ class StreamChatThemeData {
   }
 }
 
+/// Channel theme data
 class ChannelTheme {
+  /// Theme of the [ChannelHeader] widget
   final ChannelHeaderTheme channelHeaderTheme;
+
+  /// IconTheme of the send button in [MessageInput]
   final IconThemeData messageInputButtonIconTheme;
+
+  /// Theme of the send button in [MessageInput]
   final ButtonThemeData messageInputButtonTheme;
+
+  /// Gradient of [MessageInput]
   final Gradient inputGradient;
+
+  /// Background color of [MessageInput]
   final Color inputBackground;
 
   ChannelTheme({
@@ -260,6 +293,7 @@ class ChannelTheme {
     this.inputGradient,
   });
 
+  /// Creates a copy of [ChannelTheme] with specified attributes overridden.
   ChannelTheme copyWith({
     ChannelHeaderTheme channelHeaderTheme,
     IconThemeData messageInputButtonIconTheme,

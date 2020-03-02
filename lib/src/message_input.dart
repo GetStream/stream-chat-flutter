@@ -5,10 +5,51 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 import 'stream_channel.dart';
 
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input_paint.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input2.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input2_paint.png)
+///
+/// Widget used to enter the message and add attachments
+///
+/// ```dart
+/// class ChannelPage extends StatelessWidget {
+///   const ChannelPage({
+///     Key key,
+///   }) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: ChannelHeader(),
+///       body: Column(
+///         children: <Widget>[
+///           Expanded(
+///             child: MessageListView(
+///               threadBuilder: (_, parentMessage) {
+///                 return ThreadPage(
+///                   parent: parentMessage,
+///                 );
+///               },
+///             ),
+///           ),
+///           MessageInput(),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// You usually put this widget in the same page of a [MessageListView] as the bottom widget.
+///
+/// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
   MessageInput({
     Key key,
@@ -16,7 +57,10 @@ class MessageInput extends StatefulWidget {
     this.parentMessage,
   }) : super(key: key);
 
+  /// Function called after sending the message
   final void Function(Message) onMessageSent;
+
+  /// Parent message in case of a thread
   final Message parentMessage;
 
   @override
