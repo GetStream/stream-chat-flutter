@@ -8,6 +8,24 @@ import './channel_name.dart';
 import 'channel_image.dart';
 import 'stream_channel.dart';
 
+/// Channel header
+///
+/// [screenshot](https://github.com/GetStream/stream-chat-flutter/blob/master/screenshots/channel_header.png)
+///
+/// Usually you would use this widget as an [AppBar] inside a [Scaffold].
+/// However you can also use it as a normal widget.
+///
+/// It shows the current [Channel] information.
+///
+/// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channel.
+/// Every part of the widget uses a [StreamBuilder] to render the channel information as soon as it updates.
+///
+/// By default the widget shows a backButton that calls [Navigator.pop].
+/// You can disable this button using the [showBackButton] property of just override the behaviour
+/// with [onBackPressed].
+///
+/// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
+/// Modify it to change the widget appearance.
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
   final VoidCallback onBackPressed;

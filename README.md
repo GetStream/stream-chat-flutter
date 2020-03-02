@@ -41,25 +41,24 @@ You should then run `flutter packages get`
 
 We provide 2 Widgets dedicated to business logic and state management:
 
-- `StreamChat`
-- `StreamChannel`
+- [StreamChat](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat-class.html)
+- [StreamChannel](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannel-class.html)
 
 ### UI Components
 
 These are the available Widgets that you can use to build your application UI.
 Every widget uses the `StreamChat` or `StreamChannel` widgets to manage the state and communicate with Stream services.
 
-- `ChannelHeader`
-- `ChannelImage`
-- `ChannelListView`
-- `ChannelName`
-- `ChannelPreview`
-- `MessageInput`
-- `MessageListView`
-- `MessageWidget`
-- `StreamChatTheme`
-- `ThreadHeader`
-
+- [ChannelHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelHeader-class.html)
+- [ChannelImage](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelImage-class.html)
+- [ChannelListView](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelListView-class.html)
+- [ChannelName](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelName-class.html)
+- [ChannelPreview](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ChannelPreview-class.html)
+- [MessageInput](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageInput-class.html)
+- [MessageListView](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageListView-class.html)
+- [MessageWidget](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageWidget-class.html)
+- [StreamChatTheme](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChatTheme-class.html)
+- [ThreadHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ThreadHeader-class.html)
 
 ### Customizing styles
 
