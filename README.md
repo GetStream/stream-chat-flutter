@@ -41,34 +41,34 @@ You should then run `flutter packages get`
 
 We provide 2 Widgets dedicated to business logic and state management:
 
-- StreamChat
-- StreamChannel
+- `StreamChat`
+- `StreamChannel`
 
 ### UI Components
 
 These are the available Widgets that you can use to build your application UI.
-Every widget uses the StreamChat or StreamChannel widgets to manage the state and communicate with Stream services.
+Every widget uses the `StreamChat` or `StreamChannel` widgets to manage the state and communicate with Stream services.
 
-- ChannelHeader
-- ChannelImage
-- ChannelListView
-- ChannelName
-- ChannelPreview
-- MessageInput
-- MessageListView
-- MessageWidget
-- StreamChatTheme
-- ThreadHeader
+- `ChannelHeader`
+- `ChannelImage`
+- `ChannelListView`
+- `ChannelName`
+- `ChannelPreview`
+- `MessageInput`
+- `MessageListView`
+- `MessageWidget`
+- `StreamChatTheme`
+- `ThreadHeader`
 
 
 ### Customizing styles
 
 The Flutter SDK comes with a fully designed set of widgets which you can customize to fit with your application style and typography.
-Changing the theme of Chat widgets works in a very similar way that MaterialApp and Theme do.
+Changing the theme of Chat widgets works in a very similar way that `MaterialApp` and `Theme` do.
 
 Out of the box all chat widgets use their own default styling, there are two ways to change the styling:
 
-  1. Initialize the StreamChatTheme from your existing MaterialApp style
+  1. Initialize the `StreamChatTheme` from your existing `MaterialApp` style
   ```dart
   class MyApp extends StatelessWidget {
     final Client client;
