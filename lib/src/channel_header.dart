@@ -8,14 +8,39 @@ import './channel_name.dart';
 import 'channel_image.dart';
 import 'stream_channel.dart';
 
-/// Channel header
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header_paint.png)
 ///
-/// [screenshot](https://github.com/GetStream/stream-chat-flutter/blob/master/screenshots/channel_header.png)
+/// It shows the current [Channel] information.
+///
+/// ```dart
+///
+/// class MyApp extends StatelessWidget {
+///   final Client client;
+///   final Channel channel;
+///
+///   MyApp(this.client, this.channel);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: StreamChat(
+///         client: client,
+///         child: StreamChannel(
+///           channel: channel,
+///           child: Scaffold(
+///             appBar: ChannelHeader(),
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
 ///
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
-///
-/// It shows the current [Channel] information.
 ///
 /// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channel.
 /// Every part of the widget uses a [StreamBuilder] to render the channel information as soon as it updates.
