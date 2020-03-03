@@ -233,74 +233,124 @@ class _MessageWidgetState extends State<MessageWidget>
               .copyWith(color: Color(0xffebebeb));
           return Padding(
             padding: const EdgeInsets.only(bottom: 2.0),
-            child: ClipRRect(
-              borderRadius: boxDecoration.borderRadius,
-              child: Container(
-                decoration: boxDecoration,
-                constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                child: Stack(
-                  children: <Widget>[
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: boxDecoration.borderRadius,
+                  child: Container(
+                    decoration: boxDecoration,
+                    constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                    child: Stack(
                       children: <Widget>[
-                        attachmentWidget,
-                        attachment.title != null
-                            ? Container(
-                                constraints:
-                                    BoxConstraints.loose(Size(300, 500)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        attachment.title,
-                                        overflow: TextOverflow.ellipsis,
-                                        style:
-                                            messageTheme.messageText.copyWith(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            attachmentWidget,
+                            attachment.title != null
+                                ? Container(
+                                    constraints:
+                                        BoxConstraints.loose(Size(300, 500)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            attachment.title,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: messageTheme.messageText
+                                                .copyWith(
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            Uri.parse(attachment.thumbUrl)
+                                                .authority
+                                                .split('.')
+                                                .reversed
+                                                .take(2)
+                                                .toList()
+                                                .reversed
+                                                .join('.'),
+                                            overflow: TextOverflow.ellipsis,
+                                            style: messageTheme.createdAt,
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        Uri.parse(attachment.thumbUrl)
-                                            .authority
-                                            .split('.')
-                                            .reversed
-                                            .take(2)
-                                            .toList()
-                                            .reversed
-                                            .join('.'),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: messageTheme.createdAt,
-                                      ),
-                                    ],
+                                    ),
+                                    color: Color(0xffebebeb),
+                                  )
+                                : SizedBox(),
+                          ],
+                        ),
+                        attachment.type == 'image' &&
+                                attachment.titleLink != null
+                            ? Positioned.fill(
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        _launchURL(attachment.titleLink),
                                   ),
                                 ),
-                                color: Color(0xffebebeb),
                               )
                             : SizedBox(),
                       ],
                     ),
-                    attachment.type == 'image' && attachment.titleLink != null
-                        ? Positioned.fill(
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => _launchURL(attachment.titleLink),
-                              ),
+                    margin: EdgeInsets.only(
+                      top: nOfAttachmentWidgets > 1 ? 5 : 0,
+                    ),
+                  ),
+                ),
+                if (attachment.actions != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: attachment.actions?.map((action) {
+                      if (action.style == 'primary') {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                          )
-                        : SizedBox(),
-                  ],
-                ),
-                margin: EdgeInsets.only(
-                  top: nOfAttachmentWidgets > 1 ? 5 : 0,
-                ),
-              ),
+                            child: Text('${action.text}'),
+                            color: action.style == 'primary'
+                                ? StreamChatTheme.of(context).accentColor
+                                : null,
+                            textColor: Colors.white,
+                            onPressed: () {
+                              streamChannel.channel
+                                  .sendAction(widget.message.id, {
+                                action.name: action.value,
+                              });
+                            },
+                          ),
+                        );
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: OutlineButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text('${action.text}'),
+                          color: StreamChatTheme.of(context).accentColor,
+                          onPressed: () {
+                            streamChannel.channel
+                                .sendAction(widget.message.id, {
+                              action.name: action.value,
+                            });
+                          },
+                        ),
+                      );
+                    })?.toList(),
+                  ),
+              ],
             ),
           );
         }
@@ -313,86 +363,115 @@ class _MessageWidgetState extends State<MessageWidget>
     if (widget.message.text.trim().isNotEmpty) {
       column.children.addAll(
         <Widget>[
-          IntrinsicWidth(
-            child: Column(
-              crossAxisAlignment: isMyMessage
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: <Widget>[
-                streamChannel.channel.config.reactions
-                    ? Align(
-                        child: _buildReactions(),
-                        alignment: isMyMessage
-                            ? Alignment.centerLeft
-                            : Alignment.centerRight,
-                      )
-                    : SizedBox(),
-                Stack(
-                  overflow: Overflow.visible,
-                  children: <Widget>[
-                    widget.message.reactionCounts?.isNotEmpty == true
-                        ? Positioned(
-                            left: isMyMessage ? 8 : null,
-                            right: !isMyMessage ? 8 : null,
-                            top: -6,
-                            child: CustomPaint(
-                              painter: ReactionBubblePainter(),
-                            ),
-                          )
-                        : SizedBox(),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        right: isMyMessage ? 0.0 : 8.0,
-                        left: isMyMessage ? 8.0 : 0.0,
-                      ),
-                      child: Container(
-                        decoration: _buildBoxDecoration(
-                            isLastUser || nOfAttachmentWidgets > 0),
-                        padding: EdgeInsets.all(10),
-                        constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                        child: MarkdownBody(
-                          data: '${widget.message.text}',
-                          onTapLink: (link) {
-                            _launchURL(link);
-                          },
-                          styleSheet: MarkdownStyleSheet.fromTheme(
-                            Theme.of(context).copyWith(
-                              textTheme: Theme.of(context).textTheme.apply(
-                                    bodyColor: messageTheme.messageText.color,
-                                    decoration:
-                                        messageTheme.messageText.decoration,
-                                    decorationColor: messageTheme
-                                        .messageText.decorationColor,
-                                    decorationStyle: messageTheme
-                                        .messageText.decorationStyle,
-                                    fontFamily:
-                                        messageTheme.messageText.fontFamily,
-                                  ),
-                            ),
-                          ).copyWith(
-                            p: messageTheme.messageText,
+          Column(
+            crossAxisAlignment:
+                isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: <Widget>[
+              streamChannel.channel.config.reactions
+                  ? Align(
+                      child: _buildReactions(),
+                      alignment: isMyMessage
+                          ? Alignment.centerLeft
+                          : Alignment.centerRight,
+                    )
+                  : SizedBox(),
+              Stack(
+                overflow: Overflow.visible,
+                children: <Widget>[
+                  _buildReactionPaint(),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: isMyMessage ? 0.0 : 8.0,
+                      left: isMyMessage ? 8.0 : 0.0,
+                    ),
+                    child: Container(
+                      decoration: _buildBoxDecoration(
+                          isLastUser || nOfAttachmentWidgets > 0),
+                      padding: EdgeInsets.all(10),
+                      constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                      child: MarkdownBody(
+                        data: '${widget.message.text}',
+                        onTapLink: (link) {
+                          _launchURL(link);
+                        },
+                        styleSheet: MarkdownStyleSheet.fromTheme(
+                          Theme.of(context).copyWith(
+                            textTheme: Theme.of(context).textTheme.apply(
+                                  bodyColor: messageTheme.messageText.color,
+                                  decoration:
+                                      messageTheme.messageText.decoration,
+                                  decorationColor:
+                                      messageTheme.messageText.decorationColor,
+                                  decorationStyle:
+                                      messageTheme.messageText.decorationStyle,
+                                  fontFamily:
+                                      messageTheme.messageText.fontFamily,
+                                ),
                           ),
+                        ).copyWith(
+                          p: messageTheme.messageText,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
+        ],
+      );
+    } else {
+      column.children.insert(
+        0,
+        streamChannel.channel.config.reactions
+            ? Align(
+                child: _buildReactions(),
+                alignment:
+                    isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
+              )
+            : SizedBox(),
+      );
+      column.children[1] = Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(
+              right: isMyMessage ? 0.0 : 8.0,
+              left: isMyMessage ? 8.0 : 0.0,
+            ),
+            child: column.children[1],
+          ),
+          _buildReactionPaint(),
         ],
       );
     }
 
     return GestureDetector(
-        child: column,
+        child: IntrinsicWidth(child: column),
         onLongPress: () {
+          if (widget.message.type == 'ephemeral') {
+            return;
+          }
+
           if (widget.onMessageActions != null) {
             widget.onMessageActions(context, widget.message);
           } else {
             _showMessageBottomSheet(context);
           }
         });
+  }
+
+  Widget _buildReactionPaint() {
+    return widget.message.reactionCounts?.isNotEmpty == true
+        ? Positioned(
+            left: isMyMessage ? 8 : null,
+            right: !isMyMessage ? 8 : null,
+            top: -6,
+            child: CustomPaint(
+              painter: _ReactionBubblePainter(),
+            ),
+          )
+        : SizedBox();
   }
 
   void _showMessageBottomSheet(BuildContext context) {
@@ -640,6 +719,15 @@ class _MessageWidgetState extends State<MessageWidget>
       imageUrl:
           attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
       fit: BoxFit.cover,
+      placeholder: (_, __) {
+        return SizedBox(
+          height: 200,
+          width: 300,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
     );
   }
 
@@ -743,7 +831,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 }
 
-class ReactionBubblePainter extends CustomPainter {
+class _ReactionBubblePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black;

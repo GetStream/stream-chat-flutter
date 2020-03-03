@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -82,6 +83,10 @@ class _MessageInputState extends State<MessageInput> {
 
   final _focusNode = FocusNode();
 
+  bool _modalOn = false;
+
+  OverlayEntry _commandsOverlay;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -140,6 +145,19 @@ class _MessageInputState extends State<MessageInput> {
                           setState(() {
                             _messageIsPresent = s.trim().isNotEmpty;
                           });
+
+                          if (s.startsWith('/')) {
+                            _modalOn = true;
+
+                            _commandsOverlay?.remove();
+                            _commandsOverlay = null;
+                            _commandsOverlay = _buildOverlayEntry();
+                            Overlay.of(context).insert(_commandsOverlay);
+                          } else if (!s.startsWith('/') && _modalOn) {
+                            _modalOn = false;
+                            _commandsOverlay?.remove();
+                            _commandsOverlay = null;
+                          }
                         },
                         onTap: () {
                           setState(() {
@@ -173,6 +191,79 @@ class _MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+  }
+
+  OverlayEntry _buildOverlayEntry() {
+    final text = _textController.text;
+    final commands = StreamChannel.of(context)
+        .channel
+        .config
+        .commands
+        .where((c) => c.name.startsWith(text.substring(1)))
+        .toList();
+
+    RenderBox renderBox = context.findRenderObject();
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(builder: (_) {
+      return Positioned(
+        top: offset.dy - size.height,
+        left: 0,
+        right: 0,
+        child: Material(
+          color: StreamChatTheme.of(context).primaryColor,
+          child: Flex(
+            mainAxisSize: MainAxisSize.min,
+            direction: Axis.vertical,
+            children: <Widget>[
+              ListView(
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                children: commands
+                    .map((c) => ListTile(
+                          title: Text.rich(
+                            TextSpan(
+                              text: '${c.name}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text: ' ${c.args}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          subtitle: Text(c.description),
+                          onTap: () {
+                            _setCommand(c);
+                          },
+                        ))
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  void _setCommand(Command c) {
+    setState(() {
+      _textController.value = TextEditingValue(
+        text: '/${c.name}',
+        selection: TextSelection.fromPosition(
+          TextPosition(
+            offset: c.name.length + 1,
+          ),
+        ),
+      );
+    });
+    _modalOn = false;
+    _commandsOverlay?.remove();
+    _commandsOverlay = null;
   }
 
   Gradient _getGradient(BuildContext context) {
@@ -438,6 +529,12 @@ class _MessageInputState extends State<MessageInput> {
       _messageIsPresent = false;
       _typingStarted = false;
     });
+
+    _modalOn = false;
+
+    _commandsOverlay?.remove();
+    _commandsOverlay = null;
+
     FocusScope.of(context).unfocus();
 
     if (widget.editMessage != null) {
@@ -486,9 +583,23 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
+  int _keyboardListener;
+
   @override
   void initState() {
     super.initState();
+
+    _keyboardListener = KeyboardVisibilityNotification().addNewListener(
+      onChange: (_) {
+        if (_modalOn) {
+          _commandsOverlay?.remove();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _commandsOverlay = _buildOverlayEntry();
+            Overlay.of(context).insert(_commandsOverlay);
+          });
+        }
+      },
+    );
 
     if (widget.editMessage != null) {
       _textController = TextEditingController(text: widget.editMessage.text);
@@ -510,12 +621,19 @@ class _MessageInputState extends State<MessageInput> {
     }
   }
 
-  bool _focused = false;
+  @override
+  void dispose() {
+    _commandsOverlay?.remove();
+    KeyboardVisibilityNotification().removeListener(_keyboardListener);
+    super.dispose();
+  }
+
+  bool _initialized = false;
   @override
   void didChangeDependencies() {
-    if (widget.editMessage != null && !_focused) {
+    if (widget.editMessage != null && !_initialized) {
       FocusScope.of(context).requestFocus(_focusNode);
-      _focused = true;
+      _initialized = true;
     }
     super.didChangeDependencies();
   }
