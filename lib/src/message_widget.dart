@@ -456,7 +456,7 @@ class _MessageWidgetState extends State<MessageWidget>
                           ),
                         ),
                         onPressed: () async {
-                          await Navigator.pop(context);
+                          Navigator.pop(context);
 
                           _showEditBottomSheet(context);
                         },
