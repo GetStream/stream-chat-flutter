@@ -367,7 +367,8 @@ class _MessageWidgetState extends State<MessageWidget>
             crossAxisAlignment:
                 isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: <Widget>[
-              streamChannel.channel.config.reactions
+              (streamChannel.channel.config.reactions &&
+                      nOfAttachmentWidgets == 0)
                   ? Align(
                       child: _buildReactions(),
                       alignment: isMyMessage
@@ -378,7 +379,9 @@ class _MessageWidgetState extends State<MessageWidget>
               Stack(
                 overflow: Overflow.visible,
                 children: <Widget>[
-                  _buildReactionPaint(),
+                  nOfAttachmentWidgets == 0
+                      ? _buildReactionPaint()
+                      : SizedBox(),
                   Padding(
                     padding: EdgeInsets.only(
                       right: isMyMessage ? 0.0 : 8.0,
@@ -420,7 +423,9 @@ class _MessageWidgetState extends State<MessageWidget>
           ),
         ],
       );
-    } else {
+    }
+
+    if (nOfAttachmentWidgets > 0) {
       column.children.insert(
         0,
         streamChannel.channel.config.reactions
