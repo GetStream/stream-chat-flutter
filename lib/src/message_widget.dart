@@ -574,74 +574,77 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
       ),
       builder: (context) {
-        return Flex(
-          direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 16.0,
-                left: 16.0,
-                right: 16.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'Edit message',
-                    style: Theme.of(context).textTheme.title,
-                  ),
-                  Container(
-                    height: 30,
-                    padding: const EdgeInsets.all(2.0),
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: RawMaterialButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        elevation: 0,
-                        highlightElevation: 0,
-                        focusElevation: 0,
-                        disabledElevation: 0,
-                        hoverElevation: 0,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        fillColor: Colors.black.withOpacity(.1),
-                        padding: EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.close,
-                          size: 15,
-                          color: Colors.black,
+        return StreamChannel(
+          channel: streamChannel.channel,
+          child: Flex(
+            direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Edit message',
+                      style: Theme.of(context).textTheme.title,
+                    ),
+                    Container(
+                      height: 30,
+                      padding: const EdgeInsets.all(2.0),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: RawMaterialButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          elevation: 0,
+                          highlightElevation: 0,
+                          focusElevation: 0,
+                          disabledElevation: 0,
+                          hoverElevation: 0,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          fillColor: Colors.black.withOpacity(.1),
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.close,
+                            size: 15,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: MessageInput(
+                  editMessage: widget.message,
+                  parentMessage: widget.isParent
+                      ? StreamChannel.of(context)
+                          .channel
+                          .state
+                          .messages
+                          .firstWhere((message) =>
+                              message.id == widget.message.parentId)
+                      : null,
+                  onMessageSent: (_) {
+                    Navigator.pop(context);
+                  },
+                ),
               ),
-              child: MessageInput(
-                editMessage: widget.message,
-                parentMessage: widget.isParent
-                    ? StreamChannel.of(context)
-                        .channel
-                        .state
-                        .messages
-                        .firstWhere(
-                            (message) => message.id == widget.message.parentId)
-                    : null,
-                onMessageSent: (_) {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -719,6 +722,7 @@ class _MessageWidgetState extends State<MessageWidget>
       imageUrl:
           attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
       fit: BoxFit.cover,
+      placeholderFadeInDuration: Duration(milliseconds: 300),
       placeholder: (_, __) {
         return SizedBox(
           height: 200,

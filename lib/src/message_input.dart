@@ -76,15 +76,12 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
+  final List<_SendingAttachment> _attachments = [];
+  final _focusNode = FocusNode();
+
   TextEditingController _textController;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
-  final List<_SendingAttachment> _attachments = [];
-
-  final _focusNode = FocusNode();
-
-  bool _modalOn = false;
-
   OverlayEntry _commandsOverlay;
 
   @override
@@ -95,99 +92,112 @@ class _MessageInputState extends State<MessageInput> {
         child: Stack(
           overflow: Overflow.visible,
           children: <Widget>[
-            Positioned.fill(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  gradient: _getGradient(context),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: StreamChatTheme.of(context)
-                          .channelTheme
-                          .inputBackground,
-                      borderRadius: BorderRadius.circular(10.0),
-                      border: Border.all(
-                          color: _typingStarted
-                              ? Colors.transparent
-                              : Colors.black.withOpacity(.2)),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            _buildBorder(context),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildAttachments(),
-                Flex(
-                  direction: Axis.horizontal,
-                  children: <Widget>[
-                    _buildAttachmentButton(),
-                    Expanded(
-                      child: TextField(
-                        minLines: null,
-                        maxLines: null,
-                        onSubmitted: (_) {
-                          _sendMessage(context);
-                        },
-                        controller: _textController,
-                        focusNode: _focusNode,
-                        onChanged: (s) {
-                          StreamChannel.of(context).channel.keyStroke();
-                          setState(() {
-                            _messageIsPresent = s.trim().isNotEmpty;
-                          });
-
-                          if (s.startsWith('/')) {
-                            _modalOn = true;
-
-                            _commandsOverlay?.remove();
-                            _commandsOverlay = null;
-                            _commandsOverlay = _buildOverlayEntry();
-                            Overlay.of(context).insert(_commandsOverlay);
-                          } else if (!s.startsWith('/') && _modalOn) {
-                            _modalOn = false;
-                            _commandsOverlay?.remove();
-                            _commandsOverlay = null;
-                          }
-                        },
-                        onTap: () {
-                          setState(() {
-                            _typingStarted = true;
-                          });
-                        },
-                        style: Theme.of(context).textTheme.body1,
-                        autofocus: false,
-                        decoration: InputDecoration(
-                          hintText: 'Write a message',
-                          prefixText: '   ',
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    AnimatedCrossFade(
-                      crossFadeState:
-                          (_messageIsPresent || _attachments.isNotEmpty)
-                              ? CrossFadeState.showFirst
-                              : CrossFadeState.showSecond,
-                      firstChild: _buildSendButton(context),
-                      secondChild: SizedBox(),
-                      duration: Duration(milliseconds: 300),
-                      alignment: Alignment.center,
-                    ),
-                  ],
-                ),
+                _buildTextField(context),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Flex _buildTextField(BuildContext context) {
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        _buildAttachmentButton(),
+        _buildTextInput(context),
+        _animateSendButton(context),
+      ],
+    );
+  }
+
+  AnimatedCrossFade _animateSendButton(BuildContext context) {
+    print(
+        '_messageIsPresent || _attachments.isNotEmpty: ${_messageIsPresent || _attachments.isNotEmpty}');
+    print('_attachments.isNotEmpty: ${_attachments.isNotEmpty}');
+    print('_messageIsPresent: ${_messageIsPresent}');
+    return AnimatedCrossFade(
+      crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      firstChild: _buildSendButton(context),
+      secondChild: SizedBox(),
+      duration: Duration(milliseconds: 300),
+      alignment: Alignment.center,
+    );
+  }
+
+  Expanded _buildTextInput(BuildContext context) {
+    return Expanded(
+      child: TextField(
+        minLines: null,
+        maxLines: null,
+        onSubmitted: (_) {
+          _sendMessage(context);
+        },
+        controller: _textController,
+        focusNode: _focusNode,
+        onChanged: (s) {
+          StreamChannel.of(context).channel.keyStroke();
+
+          setState(() {
+            _messageIsPresent = s.trim().isNotEmpty;
+          });
+
+          _commandsOverlay?.remove();
+          _commandsOverlay = null;
+
+          if (s.startsWith('/')) {
+            _commandsOverlay = _buildOverlayEntry();
+            Overlay.of(context).insert(_commandsOverlay);
+          }
+        },
+        onTap: () {
+          setState(() {
+            _typingStarted = true;
+          });
+        },
+        style: Theme.of(context).textTheme.body1,
+        autofocus: false,
+        decoration: InputDecoration(
+          hintText: 'Write a message',
+          prefixText: '   ',
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Positioned _buildBorder(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          gradient: _getGradient(context),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: StreamChatTheme.of(context).channelTheme.inputBackground,
+              borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(
+                  color: _typingStarted
+                      ? Colors.transparent
+                      : Colors.black.withOpacity(.2)),
+            ),
+          ),
         ),
       ),
     );
@@ -199,7 +209,7 @@ class _MessageInputState extends State<MessageInput> {
         .channel
         .config
         .commands
-        .where((c) => c.name.startsWith(text.substring(1)))
+        .where((c) => c.name.startsWith(text.replaceFirst('/', '')))
         .toList();
 
     RenderBox renderBox = context.findRenderObject();
@@ -253,15 +263,14 @@ class _MessageInputState extends State<MessageInput> {
   void _setCommand(Command c) {
     setState(() {
       _textController.value = TextEditingValue(
-        text: '/${c.name}',
+        text: '/${c.name} ',
         selection: TextSelection.fromPosition(
           TextPosition(
-            offset: c.name.length + 1,
+            offset: c.name.length + 2,
           ),
         ),
       );
     });
-    _modalOn = false;
     _commandsOverlay?.remove();
     _commandsOverlay = null;
   }
@@ -530,8 +539,6 @@ class _MessageInputState extends State<MessageInput> {
       _typingStarted = false;
     });
 
-    _modalOn = false;
-
     _commandsOverlay?.remove();
     _commandsOverlay = null;
 
@@ -541,7 +548,10 @@ class _MessageInputState extends State<MessageInput> {
       final message = widget.editMessage.copyWith(
         parentId: widget.parentMessage?.id,
         text: text,
-        attachments: _getAttachments(attachments).toList(),
+        attachments: widget.editMessage.attachments
+                .where((attachment) => attachment.type == 'giphy')
+                .toList() +
+            _getAttachments(attachments).toList(),
       );
       StreamChat.of(context).client.updateMessage(message).then((_) {
         if (widget.onMessageSent != null) {
@@ -589,17 +599,21 @@ class _MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    _keyboardListener = KeyboardVisibilityNotification().addNewListener(
-      onChange: (_) {
-        if (_modalOn) {
-          _commandsOverlay?.remove();
+    _keyboardListener =
+        KeyboardVisibilityNotification().addNewListener(onHide: () {
+      if (_commandsOverlay != null) {
+        _commandsOverlay.remove();
+      }
+    }, onShow: () {
+      if (_commandsOverlay != null) {
+        if (_textController.text.startsWith('/')) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _commandsOverlay = _buildOverlayEntry();
             Overlay.of(context).insert(_commandsOverlay);
           });
         }
-      },
-    );
+      }
+    });
 
     if (widget.editMessage != null) {
       _textController = TextEditingController(text: widget.editMessage.text);
@@ -612,6 +626,18 @@ class _MessageInputState extends State<MessageInput> {
           _attachments.add(_SendingAttachment(
             type: FileType.IMAGE,
             url: attachment.imageUrl,
+            uploaded: true,
+          ));
+        } else if (attachment.type == 'video') {
+          _attachments.add(_SendingAttachment(
+            type: FileType.VIDEO,
+            url: attachment.assetUrl,
+            uploaded: true,
+          ));
+        } else if (attachment.type != 'giphy') {
+          _attachments.add(_SendingAttachment(
+            type: FileType.ANY,
+            url: attachment.assetUrl,
             uploaded: true,
           ));
         }
