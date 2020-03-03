@@ -8,10 +8,13 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
 
+/// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input_paint.png)
+/// Focused state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input2.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input2_paint.png)
 ///
@@ -55,7 +58,11 @@ class MessageInput extends StatefulWidget {
     Key key,
     this.onMessageSent,
     this.parentMessage,
+    this.editMessage,
   }) : super(key: key);
+
+  /// Message to edit
+  final Message editMessage;
 
   /// Function called after sending the message
   final void Function(Message) onMessageSent;
@@ -68,10 +75,12 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final _textController = TextEditingController();
+  TextEditingController _textController;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   final List<_SendingAttachment> _attachments = [];
+
+  final _focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +96,7 @@ class _MessageInputState extends State<MessageInput> {
                 padding: EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
-                  gradient: _typingStarted
-                      ? StreamChatTheme.of(context).channelTheme.inputGradient
-                      : null,
+                  gradient: _getGradient(context),
                 ),
                 child: Container(
                   decoration: BoxDecoration(
@@ -127,6 +134,7 @@ class _MessageInputState extends State<MessageInput> {
                           _sendMessage(context);
                         },
                         controller: _textController,
+                        focusNode: _focusNode,
                         onChanged: (s) {
                           StreamChannel.of(context).channel.keyStroke();
                           setState(() {
@@ -165,6 +173,19 @@ class _MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+  }
+
+  Gradient _getGradient(BuildContext context) {
+    if (_typingStarted) {
+      if (widget.editMessage == null) {
+        return StreamChatTheme.of(context).channelTheme.inputGradient;
+      }
+      return LinearGradient(
+        colors: [Colors.lightGreen, Colors.green],
+      );
+    } else {
+      return null;
+    }
   }
 
   Widget _buildAttachments() {
@@ -234,10 +255,15 @@ class _MessageInputState extends State<MessageInput> {
   Widget _buildAttachment(_SendingAttachment attachment) {
     switch (attachment.type) {
       case FileType.IMAGE:
-        return Image.file(
-          attachment.file,
-          fit: BoxFit.cover,
-        );
+        return attachment.file != null
+            ? Image.file(
+                attachment.file,
+                fit: BoxFit.cover,
+              )
+            : Image.network(
+                attachment.url,
+                fit: BoxFit.cover,
+              );
         break;
       case FileType.VIDEO:
         return Container(
@@ -414,38 +440,84 @@ class _MessageInputState extends State<MessageInput> {
     });
     FocusScope.of(context).unfocus();
 
-    StreamChannel.of(context)
-        .channel
-        .sendMessage(
-          Message(
-            parentId: widget.parentMessage?.id,
-            text: text,
-            attachments: attachments.map((attachment) {
-              String type;
-              switch (attachment.type) {
-                case FileType.IMAGE:
-                  type = 'image';
-                  break;
-                case FileType.VIDEO:
-                  type = 'video';
-                  break;
-                default:
-                  type = 'file';
-              }
-              return Attachment(
-                imageUrl:
-                    attachment.type == FileType.IMAGE ? attachment.url : null,
-                assetUrl: attachment.url,
-                type: type,
-              );
-            }).toList(),
-          ),
-        )
-        .then((_) {
-      if (widget.onMessageSent != null) {
-        widget.onMessageSent(Message(text: text));
+    if (widget.editMessage != null) {
+      final message = widget.editMessage.copyWith(
+        parentId: widget.parentMessage?.id,
+        text: text,
+        attachments: _getAttachments(attachments).toList(),
+      );
+      StreamChat.of(context).client.updateMessage(message).then((_) {
+        if (widget.onMessageSent != null) {
+          widget.onMessageSent(message);
+        }
+      });
+    } else {
+      final message = Message(
+        parentId: widget.parentMessage?.id,
+        text: text,
+        attachments: _getAttachments(attachments).toList(),
+      );
+      StreamChannel.of(context).channel.sendMessage(message).then((_) {
+        if (widget.onMessageSent != null) {
+          widget.onMessageSent(message);
+        }
+      });
+    }
+  }
+
+  Iterable<Attachment> _getAttachments(List<_SendingAttachment> attachments) {
+    return attachments.map((attachment) {
+      String type;
+      switch (attachment.type) {
+        case FileType.IMAGE:
+          type = 'image';
+          break;
+        case FileType.VIDEO:
+          type = 'video';
+          break;
+        default:
+          type = 'file';
       }
+      return Attachment(
+        imageUrl: attachment.type == FileType.IMAGE ? attachment.url : null,
+        assetUrl: attachment.url,
+        type: type,
+      );
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.editMessage != null) {
+      _textController = TextEditingController(text: widget.editMessage.text);
+
+      _typingStarted = true;
+      _messageIsPresent = true;
+
+      widget.editMessage.attachments.forEach((attachment) {
+        if (attachment.type == 'image') {
+          _attachments.add(_SendingAttachment(
+            type: FileType.IMAGE,
+            url: attachment.imageUrl,
+            uploaded: true,
+          ));
+        }
+      });
+    } else {
+      _textController = TextEditingController();
+    }
+  }
+
+  bool _focused = false;
+  @override
+  void didChangeDependencies() {
+    if (widget.editMessage != null && !_focused) {
+      FocusScope.of(context).requestFocus(_focusNode);
+      _focused = true;
+    }
+    super.didChangeDependencies();
   }
 }
 
@@ -453,11 +525,12 @@ class _SendingAttachment {
   final File file;
   final FileType type;
   String url;
-  bool uploaded = false;
+  bool uploaded;
 
   _SendingAttachment({
     this.url,
     this.file,
     this.type,
+    this.uploaded = false,
   });
 }

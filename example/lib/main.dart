@@ -3,13 +3,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() async {
   final client = Client(
-    'b67pax5b2wdq',
+    's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
 
   await client.setUser(
     User(id: 'falling-mountain-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiNDE5MjI5YTMtODRhMC00MDZiLTkzNzEtN2NlOWE0ZTBhNjc2In0.J3SjGH4e4v7b3cg5EgWkljTxXj_HeHpCWn5ujEVv_H8',
   );
 
   runApp(MyApp(client));
@@ -38,11 +38,11 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelListView(
-        filter: {
-          'members': {
-            '\$in': [StreamChat.of(context).user.id],
-          }
-        },
+//        filter: {
+//          'members': {
+//            '\$in': [StreamChat.of(context).user.id],
+//          }
+//        },
         sort: [SortOption('last_message_at')],
         pagination: PaginationParams(
           limit: 20,

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -34,7 +35,11 @@ class MessageWidget extends StatefulWidget {
     @required this.nextMessage,
     this.onThreadTap,
     this.isParent = false,
+    this.onMessageEdit,
   }) : super(key: key);
+
+  /// Function called when editing a message
+  final Function(Message) onMessageEdit;
 
   /// This message
   final Message message;
@@ -399,7 +404,7 @@ class _MessageWidgetState extends State<MessageWidget>
           ),
         ),
         context: context,
-        builder: (context) {
+        builder: (_) {
           final fontSize = 30.0;
           final textStyle = TextStyle(
             fontSize: fontSize,
@@ -478,6 +483,22 @@ class _MessageWidgetState extends State<MessageWidget>
                         },
                       )
                     : SizedBox(),
+                isMyMessage
+                    ? FlatButton(
+                        child: Padding(
+                          padding: const EdgeInsets.all(28.0),
+                          child: Text(
+                            'Edit message',
+                            style: Theme.of(context).textTheme.headline,
+                          ),
+                        ),
+                        onPressed: () async {
+                          await Navigator.pop(context);
+
+                          _showEditBottomSheet(context);
+                        },
+                      )
+                    : SizedBox(),
                 streamChannel.channel.config.replies
                     ? FlatButton(
                         child: Padding(
@@ -497,6 +518,91 @@ class _MessageWidgetState extends State<MessageWidget>
             ),
           );
         });
+  }
+
+  void _showEditBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      elevation: 2,
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
+      ),
+      builder: (context) {
+        return Flex(
+          direction: Axis.vertical,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 16.0,
+                left: 16.0,
+                right: 16.0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    'Edit message',
+                    style: Theme.of(context).textTheme.title,
+                  ),
+                  Container(
+                    height: 30,
+                    padding: const EdgeInsets.all(2.0),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: RawMaterialButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        elevation: 0,
+                        highlightElevation: 0,
+                        focusElevation: 0,
+                        disabledElevation: 0,
+                        hoverElevation: 0,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        fillColor: Colors.black.withOpacity(.1),
+                        padding: EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.close,
+                          size: 15,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: MessageInput(
+                editMessage: widget.message,
+                parentMessage: widget.isParent
+                    ? StreamChannel.of(context)
+                        .channel
+                        .state
+                        .messages
+                        .firstWhere(
+                            (message) => message.id == widget.message.parentId)
+                    : null,
+                onMessageSent: (_) {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildReactions(bool isMyMessage) {
