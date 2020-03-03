@@ -10,6 +10,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
+import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
@@ -34,12 +35,12 @@ class MessageWidget extends StatefulWidget {
     @required this.message,
     @required this.nextMessage,
     this.onThreadTap,
+    this.onMessageActions,
     this.isParent = false,
-    this.onMessageEdit,
   }) : super(key: key);
 
-  /// Function called when editing a message
-  final Function(Message) onMessageEdit;
+  /// Function called on long press
+  final Function(BuildContext, Message) onMessageActions;
 
   /// This message
   final Message message;
@@ -68,6 +69,7 @@ class _MessageWidgetState extends State<MessageWidget>
   MessageTheme messageTheme;
   StreamChatState streamChat;
   StreamChannelState streamChannel;
+  bool isMyMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +82,10 @@ class _MessageWidgetState extends State<MessageWidget>
     final messageUserId = widget.message.user.id;
     final previousUserId = widget.previousMessage?.user?.id;
     final nextUserId = widget.nextMessage?.user?.id;
-    final isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
+
+    isMyMessage = messageUserId == currentUserId;
     final alignment =
         isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
@@ -100,11 +103,11 @@ class _MessageWidgetState extends State<MessageWidget>
           crossAxisAlignment:
               isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: <Widget>[
-            _buildBubble(context, isMyMessage, isLastUser),
+            _buildBubble(context, isLastUser),
             streamChannel.channel.config.replies
-                ? _buildThreadIndicator(context, isMyMessage)
+                ? _buildThreadIndicator(context)
                 : SizedBox(),
-            isNextUser ? SizedBox() : _buildTimestamp(isMyMessage, alignment),
+            isNextUser ? SizedBox() : _buildTimestamp(alignment),
           ],
         ),
         isNextUser
@@ -166,7 +169,7 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  Widget _buildThreadIndicator(BuildContext context, bool isMyMessage) {
+  Widget _buildThreadIndicator(BuildContext context) {
     var row = [
       Text(
         'Replies: ${widget.message.replyCount}',
@@ -208,7 +211,6 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildBubble(
     BuildContext context,
-    bool isMyMessage,
     bool isLastUser,
   ) {
     var nOfAttachmentWidgets = 0;
@@ -221,13 +223,13 @@ class _MessageWidgetState extends State<MessageWidget>
 
         Widget attachmentWidget;
         if (attachment.type == 'video') {
-          attachmentWidget = _buildVideo(attachment, isMyMessage, isLastUser);
+          attachmentWidget = _buildVideo(attachment, isLastUser);
         } else if (attachment.type == 'image' || attachment.type == 'giphy') {
-          attachmentWidget = _buildImage(isMyMessage, isLastUser, attachment);
+          attachmentWidget = _buildImage(isLastUser, attachment);
         }
 
         if (attachmentWidget != null) {
-          final boxDecoration = _buildBoxDecoration(isMyMessage, isLastUser)
+          final boxDecoration = _buildBoxDecoration(isLastUser)
               .copyWith(color: Color(0xffebebeb));
           return Padding(
             padding: const EdgeInsets.only(bottom: 2.0),
@@ -319,7 +321,7 @@ class _MessageWidgetState extends State<MessageWidget>
               children: <Widget>[
                 streamChannel.channel.config.reactions
                     ? Align(
-                        child: _buildReactions(isMyMessage),
+                        child: _buildReactions(),
                         alignment: isMyMessage
                             ? Alignment.centerLeft
                             : Alignment.centerRight,
@@ -344,7 +346,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         left: isMyMessage ? 8.0 : 0.0,
                       ),
                       child: Container(
-                        decoration: _buildBoxDecoration(isMyMessage,
+                        decoration: _buildBoxDecoration(
                             isLastUser || nOfAttachmentWidgets > 0),
                         padding: EdgeInsets.all(10),
                         constraints: BoxConstraints.loose(Size.fromWidth(300)),
@@ -385,11 +387,15 @@ class _MessageWidgetState extends State<MessageWidget>
     return GestureDetector(
         child: column,
         onLongPress: () {
-          _showMessageBottomSheet(context, isMyMessage);
+          if (widget.onMessageActions != null) {
+            widget.onMessageActions(context, widget.message);
+          } else {
+            _showMessageBottomSheet(context);
+          }
         });
   }
 
-  void _showMessageBottomSheet(BuildContext context, bool isMyMessage) {
+  void _showMessageBottomSheet(BuildContext context) {
     if (!streamChannel.channel.config.reactions &&
         !streamChannel.channel.config.replies) {
       return;
@@ -405,10 +411,6 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
         context: context,
         builder: (_) {
-          final fontSize = 30.0;
-          final textStyle = TextStyle(
-            fontSize: fontSize,
-          );
           return SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -417,49 +419,10 @@ class _MessageWidgetState extends State<MessageWidget>
                 Container(
                   color: Colors.black87,
                   child: streamChannel.channel.config.reactions
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: reactionToEmoji.keys.map((reactionType) {
-                            final ownReactionIndex = widget.message.ownReactions
-                                .indexWhere((reaction) =>
-                                    reaction.type == reactionType);
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                IconButton(
-                                  iconSize: fontSize + 10,
-                                  icon: Text(
-                                    reactionToEmoji[reactionType],
-                                    style: textStyle,
-                                  ),
-                                  onPressed: () {
-                                    if (ownReactionIndex != -1) {
-                                      removeReaction(reactionType);
-                                    } else {
-                                      sendReaction(reactionType);
-                                    }
-                                  },
-                                ),
-                                ownReactionIndex != -1
-                                    ? Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 4.0),
-                                        child: Text(
-                                          widget
-                                              .message
-                                              .ownReactions[ownReactionIndex]
-                                              .score
-                                              .toString(),
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      )
-                                    : SizedBox(),
-                              ],
-                            );
-                          }).toList(),
+                      ? ReactionPicker(
+                          channel: StreamChannel.of(context).channel,
+                          reactionToEmoji: reactionToEmoji,
+                          message: widget.message,
                         )
                       : SizedBox(),
                 ),
@@ -605,10 +568,14 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  Widget _buildReactions(bool isMyMessage) {
+  Widget _buildReactions() {
     return GestureDetector(
       onTap: () {
-        _showMessageBottomSheet(context, isMyMessage);
+        if (widget.onMessageActions != null) {
+          widget.onMessageActions(context, widget.message);
+        } else {
+          _showMessageBottomSheet(context);
+        }
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -665,18 +632,7 @@ class _MessageWidgetState extends State<MessageWidget>
     'wow': '😲',
   };
 
-  void sendReaction(String reactionType) {
-    streamChannel.channel.sendReaction(widget.message.id, reactionType);
-    Navigator.of(context).pop();
-  }
-
-  void removeReaction(String reactionType) {
-    streamChannel.channel.deleteReaction(widget.message.id, reactionType);
-    Navigator.of(context).pop();
-  }
-
   Widget _buildImage(
-    bool isMyMessage,
     bool isLastUser,
     Attachment attachment,
   ) {
@@ -689,7 +645,6 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildVideo(
     Attachment attachment,
-    bool isMyMessage,
     bool isLastUser,
   ) {
     VideoPlayerController videoController;
@@ -759,7 +714,7 @@ class _MessageWidgetState extends State<MessageWidget>
     super.dispose();
   }
 
-  Widget _buildTimestamp(bool isMyMessage, Alignment alignment) {
+  Widget _buildTimestamp(Alignment alignment) {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
@@ -769,7 +724,7 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  BoxDecoration _buildBoxDecoration(bool isMyMessage, bool isLastUser) {
+  BoxDecoration _buildBoxDecoration(bool isLastUser) {
     return BoxDecoration(
       border: isMyMessage ? null : Border.all(color: Colors.black.withAlpha(8)),
       borderRadius: BorderRadius.only(
