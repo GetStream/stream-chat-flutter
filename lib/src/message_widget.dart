@@ -731,16 +731,6 @@ class _MessageWidgetState extends State<MessageWidget>
       imageUrl:
           attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
       fit: BoxFit.cover,
-      placeholderFadeInDuration: Duration(milliseconds: 300),
-      placeholder: (_, __) {
-        return SizedBox(
-          height: 200,
-          width: 300,
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
     );
   }
 

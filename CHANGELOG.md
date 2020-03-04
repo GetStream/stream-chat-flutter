@@ -1,3 +1,7 @@
+## 0.1.8
+
+- Bug fix
+
 ## 0.1.7
 
 - Add chat commands
