@@ -8,6 +8,7 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/user_avatar.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -78,11 +79,12 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
   final _focusNode = FocusNode();
+  final List<User> _mentionedUsers = [];
 
   TextEditingController _textController;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
-  OverlayEntry _commandsOverlay;
+  OverlayEntry _commandsOverlay, _mentionsOverlay;
 
   @override
   Widget build(BuildContext context) {
@@ -149,10 +151,23 @@ class _MessageInputState extends State<MessageInput> {
 
           _commandsOverlay?.remove();
           _commandsOverlay = null;
+          _mentionsOverlay?.remove();
+          _mentionsOverlay = null;
 
           if (s.startsWith('/')) {
-            _commandsOverlay = _buildOverlayEntry();
+            _commandsOverlay = _buildCommandsOverlayEntry();
             Overlay.of(context).insert(_commandsOverlay);
+          }
+
+          if (_textController.selection.isCollapsed &&
+              (s[_textController.selection.start - 1] == '@' ||
+                  _textController.text
+                      .substring(0, _textController.selection.start)
+                      .split(' ')
+                      .last
+                      .contains('@'))) {
+            _mentionsOverlay = _buildMentionsOverlayEntry();
+            Overlay.of(context).insert(_mentionsOverlay);
           }
         },
         onTap: () {
@@ -200,7 +215,7 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  OverlayEntry _buildOverlayEntry() {
+  OverlayEntry _buildCommandsOverlayEntry() {
     final text = _textController.text;
     final commands = StreamChannel.of(context)
         .channel
@@ -269,17 +284,88 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
-  void _setCommand(Command c) {
-    setState(() {
-      _textController.value = TextEditingValue(
-        text: '/${c.name} ',
-        selection: TextSelection.fromPosition(
-          TextPosition(
-            offset: c.name.length + 2,
+  OverlayEntry _buildMentionsOverlayEntry() {
+    final splits = _textController.text
+        .substring(0, _textController.value.selection.start)
+        .split('@');
+    final query = splits.last.toLowerCase();
+
+    final members = StreamChannel.of(context).channel.state.members?.where((m) {
+          return m.user.name.toLowerCase().contains(query);
+        })?.toList() ??
+        [];
+
+    RenderBox renderBox = context.findRenderObject();
+    final size = renderBox.size;
+
+    return OverlayEntry(builder: (context) {
+      return Positioned(
+        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+        left: 0,
+        right: 0,
+        child: Material(
+          color: StreamChatTheme.of(context).primaryColor,
+          child: Container(
+            constraints: BoxConstraints.loose(Size.fromHeight(400)),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  spreadRadius: -8,
+                  blurRadius: 5.0,
+                  offset: Offset(0, -4),
+                ),
+              ],
+              color: StreamChatTheme.of(context).primaryColor,
+            ),
+            child: Flex(
+              mainAxisSize: MainAxisSize.min,
+              direction: Axis.vertical,
+              children: <Widget>[
+                ListView(
+                  padding: const EdgeInsets.all(0),
+                  shrinkWrap: true,
+                  children: members
+                      .map((m) => ListTile(
+                            leading: UserAvatar(
+                              user: m.user,
+                            ),
+                            title: Text('${m.user.name}'),
+                            onTap: () {
+                              _mentionedUsers.add(m.user);
+
+                              splits[splits.length - 1] = m.user.name;
+                              final rejoin = splits.join('@');
+
+                              _textController.value = TextEditingValue(
+                                text: rejoin +
+                                    _textController.text.substring(
+                                        _textController.selection.start),
+                                selection: TextSelection.collapsed(
+                                  offset: rejoin.length,
+                                ),
+                              );
+
+                              _mentionsOverlay?.remove();
+                              _mentionsOverlay = null;
+                            },
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
           ),
         ),
       );
     });
+  }
+
+  void _setCommand(Command c) {
+    _textController.value = TextEditingValue(
+      text: '/${c.name} ',
+      selection: TextSelection.collapsed(
+        offset: c.name.length + 2,
+      ),
+    );
     _commandsOverlay?.remove();
     _commandsOverlay = null;
   }
@@ -555,6 +641,8 @@ class _MessageInputState extends State<MessageInput> {
 
     _commandsOverlay?.remove();
     _commandsOverlay = null;
+    _mentionsOverlay?.remove();
+    _mentionsOverlay = null;
 
     FocusScope.of(context).unfocus();
 
@@ -566,6 +654,8 @@ class _MessageInputState extends State<MessageInput> {
                 .where((attachment) => attachment.type == 'giphy')
                 .toList() +
             _getAttachments(attachments).toList(),
+        mentionedUsers:
+            _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
       StreamChat.of(context).client.updateMessage(message).then((_) {
         if (widget.onMessageSent != null) {
@@ -577,6 +667,8 @@ class _MessageInputState extends State<MessageInput> {
         parentId: widget.parentMessage?.id,
         text: text,
         attachments: _getAttachments(attachments).toList(),
+        mentionedUsers:
+            _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
       StreamChannel.of(context).channel.sendMessage(message).then((_) {
         if (widget.onMessageSent != null) {
@@ -613,18 +705,32 @@ class _MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
+    StreamChannel.of(context).queryMembersAndWatchers();
+
     _keyboardListener = KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         if (_commandsOverlay != null) {
           _commandsOverlay.remove();
+        }
+        if (_mentionsOverlay != null) {
+          _mentionsOverlay.remove();
         }
       },
       onShow: () {
         if (_commandsOverlay != null) {
           if (_textController.text.startsWith('/')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _commandsOverlay = _buildOverlayEntry();
+              _commandsOverlay = _buildCommandsOverlayEntry();
               Overlay.of(context).insert(_commandsOverlay);
+            });
+          }
+        }
+
+        if (_mentionsOverlay != null) {
+          if (_textController.text.contains('@')) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _mentionsOverlay = _buildCommandsOverlayEntry();
+              Overlay.of(context).insert(_mentionsOverlay);
             });
           }
         }
@@ -666,6 +772,7 @@ class _MessageInputState extends State<MessageInput> {
   @override
   void dispose() {
     _commandsOverlay?.remove();
+    _mentionsOverlay?.remove();
     KeyboardVisibilityNotification().removeListener(_keyboardListener);
     super.dispose();
   }

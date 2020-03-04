@@ -361,6 +361,11 @@ class _MessageWidgetState extends State<MessageWidget>
     );
 
     if (widget.message.text.trim().isNotEmpty) {
+      String text = widget.message.text;
+      widget.message.mentionedUsers?.forEach((u) {
+        text = text.replaceAll(u.name, '**${u.name}**');
+      });
+
       column.children.addAll(
         <Widget>[
           Column(
@@ -393,7 +398,7 @@ class _MessageWidgetState extends State<MessageWidget>
                       padding: EdgeInsets.all(10),
                       constraints: BoxConstraints.loose(Size.fromWidth(300)),
                       child: MarkdownBody(
-                        data: '${widget.message.text}',
+                        data: '${text}',
                         onTapLink: (link) {
                           _launchURL(link);
                         },
