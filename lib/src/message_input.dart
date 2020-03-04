@@ -646,8 +646,10 @@ class _MessageInputState extends State<MessageInput> {
 
     FocusScope.of(context).unfocus();
 
+    Future sendingFuture;
+    Message message;
     if (widget.editMessage != null) {
-      final message = widget.editMessage.copyWith(
+      message = widget.editMessage.copyWith(
         parentId: widget.parentMessage?.id,
         text: text,
         attachments: widget.editMessage.attachments
@@ -657,25 +659,29 @@ class _MessageInputState extends State<MessageInput> {
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
-      StreamChat.of(context).client.updateMessage(message).then((_) {
-        if (widget.onMessageSent != null) {
-          widget.onMessageSent(message);
-        }
-      });
+      sendingFuture = StreamChat.of(context).client.updateMessage(message);
     } else {
-      final message = Message(
+      message = Message(
         parentId: widget.parentMessage?.id,
         text: text,
         attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
-      StreamChannel.of(context).channel.sendMessage(message).then((_) {
-        if (widget.onMessageSent != null) {
-          widget.onMessageSent(message);
-        }
-      });
+      sendingFuture = StreamChannel.of(context).channel.sendMessage(message);
     }
+
+    sendingFuture.then((_) {
+      if (widget.onMessageSent != null) {
+        widget.onMessageSent(message);
+      }
+    }).catchError((error) {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+        ),
+      );
+    });
   }
 
   Iterable<Attachment> _getAttachments(List<_SendingAttachment> attachments) {
