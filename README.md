@@ -30,7 +30,7 @@ The example is available under the [example](https://github.com/GetStream/stream
 
 ```yaml
 dependencies:
- stream_chat_flutter: ^0.1.5
+ stream_chat_flutter: ^0.1.7
 ```
 
 You should then run `flutter packages get`

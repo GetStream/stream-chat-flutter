@@ -1,3 +1,9 @@
+## 0.1.7
+
+- Add chat commands
+
+- Add edit message
+
 ## 0.1.6+4
 
 - Add some documentation
