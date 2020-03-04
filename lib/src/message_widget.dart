@@ -95,54 +95,52 @@ class _MessageWidgetState extends State<MessageWidget>
 
     Widget child;
 
-    if (widget.message.type == 'deleted') {
-      child = _buildDeletedMessage(alignment);
-    } else {
-      var row = <Widget>[
-        Column(
-          crossAxisAlignment:
-              isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildBubble(context, isLastUser),
-            streamChannel.channel.config.replies
-                ? _buildThreadIndicator(context)
-                : SizedBox(),
-            isNextUser ? SizedBox() : _buildTimestamp(alignment),
-          ],
-        ),
-        isNextUser
-            ? Container(
-                width: 40,
-              )
-            : Padding(
-                padding: EdgeInsets.only(
-                  left: isMyMessage ? 8.0 : 0,
-                  right: isMyMessage ? 0 : 8.0,
-                ),
-                child: UserAvatar(user: widget.message.user),
+    var row = <Widget>[
+      Column(
+        crossAxisAlignment:
+            isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: <Widget>[
+          widget.message.type == 'deleted'
+              ? _buildDeletedMessage(alignment)
+              : _buildBubble(context, isLastUser),
+          streamChannel.channel.config.replies
+              ? _buildThreadIndicator(context)
+              : SizedBox(),
+          isNextUser ? SizedBox() : _buildTimestamp(alignment),
+        ],
+      ),
+      isNextUser
+          ? Container(
+              width: 40,
+            )
+          : Padding(
+              padding: EdgeInsets.only(
+                left: isMyMessage ? 8.0 : 0,
+                right: isMyMessage ? 0 : 8.0,
               ),
-      ];
+              child: UserAvatar(user: widget.message.user),
+            ),
+    ];
 
-      if (!isMyMessage) {
-        row = row.reversed.toList();
-      }
-
-      child = AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        margin: EdgeInsets.only(
-          top: isLastUser ? 5 : 24,
-          bottom: widget.nextMessage == null ? 30 : 0,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment:
-              isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: row,
-        ),
-      );
+    if (!isMyMessage) {
+      row = row.reversed.toList();
     }
+
+    child = AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      margin: EdgeInsets.only(
+        top: isLastUser ? 5 : 24,
+        bottom: widget.nextMessage == null ? 30 : 0,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment:
+            isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: row,
+      ),
+    );
 
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
@@ -155,7 +153,7 @@ class _MessageWidgetState extends State<MessageWidget>
       alignment: alignment,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 54,
+          horizontal: 16,
           vertical: 14,
         ),
         child: Text(
@@ -551,7 +549,9 @@ class _MessageWidgetState extends State<MessageWidget>
                         },
                       )
                     : SizedBox(),
-                streamChannel.channel.config.replies
+                (streamChannel.channel.config.replies &&
+                        widget.message.parentId == null &&
+                        !widget.isParent)
                     ? FlatButton(
                         child: Padding(
                           padding: const EdgeInsets.all(28.0),

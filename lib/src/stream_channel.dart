@@ -103,22 +103,13 @@ class StreamChannelState extends State<StreamChannel> {
   }
 
   Future<void> queryMembersAndWatchers() async {
-    String firstMemberId;
-    if (channel.state.members?.isNotEmpty == true) {
-      firstMemberId = channel.state.members.first.userId;
-    }
-    String firstWatcherId;
-    if (channel.state.watchers?.isNotEmpty == true) {
-      firstWatcherId = channel.state.watchers.first.id;
-    }
-
     await widget.channel.query(
       membersPagination: PaginationParams(
-        lessThan: firstMemberId,
+        offset: channel.state.members?.length,
         limit: 100,
       ),
       watchersPagination: PaginationParams(
-        lessThan: firstWatcherId,
+        offset: channel.state.watchers?.length,
         limit: 100,
       ),
     );
