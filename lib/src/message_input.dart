@@ -206,7 +206,7 @@ class _MessageInputState extends State<MessageInput> {
         .channel
         .config
         .commands
-        .where((c) => c.name.startsWith(text.replaceFirst('/', '')))
+        .where((c) => c.name.contains(text.replaceFirst('/', '')))
         .toList();
 
     RenderBox renderBox = context.findRenderObject();
