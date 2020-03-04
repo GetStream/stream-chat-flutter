@@ -89,7 +89,7 @@ class ChannelPreview extends StatelessWidget {
         initialData: channel.state.typingEvents,
         builder: (context, snapshot) {
           final typings = snapshot.data;
-          final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
+          final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
           return typings.isNotEmpty
               ? _buildTypings(typings, context, opacity)
               : _buildLastMessage(context, opacity);
