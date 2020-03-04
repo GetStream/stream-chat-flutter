@@ -108,6 +108,7 @@ class _MessageListViewState extends State<MessageListView> {
         return true;
       },
       child: ListView.custom(
+        key: Key('messageListView'),
         physics: AlwaysScrollableScrollPhysics(),
         controller: _scrollController,
         reverse: true,

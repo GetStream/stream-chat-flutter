@@ -132,6 +132,7 @@ class _MessageInputState extends State<MessageInput> {
   Expanded _buildTextInput(BuildContext context) {
     return Expanded(
       child: TextField(
+        key: Key('messageInputText'),
         minLines: null,
         maxLines: null,
         onSubmitted: (_) {
@@ -524,6 +525,7 @@ class _MessageInputState extends State<MessageInput> {
         ),
         color: Colors.transparent,
         child: IconButton(
+          key: Key('sendButton'),
           onPressed: () {
             _sendMessage(context);
           },
