@@ -687,26 +687,25 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Row _buildReactionRow() {
-    final List<Widget> children =
-        widget.message.reactionCounts.keys.map((reactionType) {
-      return Text(
-        reactionToEmoji[reactionType] ?? '?',
-      ) as Widget;
-    }).toList();
-
-    children.add(Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Text(
-        widget.message.reactionCounts.values
-            .fold(0, (t, v) => v + t)
-            .toString(),
-        style: TextStyle(color: Colors.white),
-      ),
-    ));
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
-      children: children,
+      children: [
+        ...widget.message.reactionCounts.keys.map((reactionType) {
+          return Text(
+            reactionToEmoji[reactionType] ?? '?',
+          );
+        }),
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0),
+          child: Text(
+            widget.message.reactionCounts.values
+                .fold(0, (t, v) => v + t)
+                .toString(),
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 

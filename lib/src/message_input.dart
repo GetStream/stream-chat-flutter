@@ -118,10 +118,6 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   AnimatedCrossFade _animateSendButton(BuildContext context) {
-    print(
-        '_messageIsPresent || _attachments.isNotEmpty: ${_messageIsPresent || _attachments.isNotEmpty}');
-    print('_attachments.isNotEmpty: ${_attachments.isNotEmpty}');
-    print('_messageIsPresent: ${_messageIsPresent}');
     return AnimatedCrossFade(
       crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
           ? CrossFadeState.showFirst
@@ -214,46 +210,58 @@ class _MessageInputState extends State<MessageInput> {
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
 
-    return OverlayEntry(builder: (_) {
+    return OverlayEntry(builder: (context) {
       return Positioned(
-        top: offset.dy - size.height,
+        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
         child: Material(
           color: StreamChatTheme.of(context).primaryColor,
-          child: Flex(
-            mainAxisSize: MainAxisSize.min,
-            direction: Axis.vertical,
-            children: <Widget>[
-              ListView(
-                padding: const EdgeInsets.all(0),
-                shrinkWrap: true,
-                children: commands
-                    .map((c) => ListTile(
-                          title: Text.rich(
-                            TextSpan(
-                              text: '${c.name}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              children: [
-                                TextSpan(
-                                  text: ' ${c.args}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w300,
+          child: Container(
+            constraints: BoxConstraints.loose(Size.fromHeight(400)),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  spreadRadius: -8,
+                  blurRadius: 5.0,
+                  offset: Offset(0, -4),
+                ),
+              ],
+              color: StreamChatTheme.of(context).primaryColor,
+            ),
+            child: Flex(
+              mainAxisSize: MainAxisSize.min,
+              direction: Axis.vertical,
+              children: <Widget>[
+                ListView(
+                  padding: const EdgeInsets.all(0),
+                  shrinkWrap: true,
+                  children: commands
+                      .map((c) => ListTile(
+                            title: Text.rich(
+                              TextSpan(
+                                text: '${c.name}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                                children: [
+                                  TextSpan(
+                                    text: ' ${c.args}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          subtitle: Text(c.description),
-                          onTap: () {
-                            _setCommand(c);
-                          },
-                        ))
-                    .toList(),
-              ),
-            ],
+                            subtitle: Text(c.description),
+                            onTap: () {
+                              _setCommand(c);
+                            },
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -388,77 +396,81 @@ class _MessageInputState extends State<MessageInput> {
       color: Colors.transparent,
       child: IconButton(
         onPressed: () {
-          showModalBottomSheet(
-              clipBehavior: Clip.hardEdge,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(32),
-                ),
-              ),
-              context: context,
-              builder: (_) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    ListTile(
-                      title: Text(
-                        'Add a file',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.image),
-                      title: Text('Upload a photo'),
-                      onTap: () {
-                        _pickFile(FileType.IMAGE, false);
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.video_library),
-                      title: Text('Upload a video'),
-                      onTap: () {
-                        _pickFile(FileType.VIDEO, false);
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.camera_alt),
-                      title: Text('Photo from camera'),
-                      onTap: () {
-                        ImagePicker.pickImage(source: ImageSource.camera);
-                        _pickFile(FileType.IMAGE, true);
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.videocam),
-                      title: Text('Video from camera'),
-                      onTap: () {
-                        _pickFile(FileType.VIDEO, true);
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.insert_drive_file),
-                      title: Text('Upload a file'),
-                      onTap: () {
-                        _pickFile(FileType.ANY, false);
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                );
-              });
+          _showAttachmentModal();
         },
         icon: Icon(
           Icons.add_circle_outline,
         ),
       ),
     );
+  }
+
+  void _showAttachmentModal() {
+    showModalBottomSheet(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        context: context,
+        builder: (_) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                title: Text(
+                  'Add a file',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.image),
+                title: Text('Upload a photo'),
+                onTap: () {
+                  _pickFile(FileType.IMAGE, false);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.video_library),
+                title: Text('Upload a video'),
+                onTap: () {
+                  _pickFile(FileType.VIDEO, false);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Photo from camera'),
+                onTap: () {
+                  ImagePicker.pickImage(source: ImageSource.camera);
+                  _pickFile(FileType.IMAGE, true);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.videocam),
+                title: Text('Video from camera'),
+                onTap: () {
+                  _pickFile(FileType.VIDEO, true);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.insert_drive_file),
+                title: Text('Upload a file'),
+                onTap: () {
+                  _pickFile(FileType.ANY, false);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
   }
 
   void _pickFile(FileType type, bool camera) async {
@@ -599,21 +611,23 @@ class _MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    _keyboardListener =
-        KeyboardVisibilityNotification().addNewListener(onHide: () {
-      if (_commandsOverlay != null) {
-        _commandsOverlay.remove();
-      }
-    }, onShow: () {
-      if (_commandsOverlay != null) {
-        if (_textController.text.startsWith('/')) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _commandsOverlay = _buildOverlayEntry();
-            Overlay.of(context).insert(_commandsOverlay);
-          });
+    _keyboardListener = KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        if (_commandsOverlay != null) {
+          _commandsOverlay.remove();
         }
-      }
-    });
+      },
+      onShow: () {
+        if (_commandsOverlay != null) {
+          if (_textController.text.startsWith('/')) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _commandsOverlay = _buildOverlayEntry();
+              Overlay.of(context).insert(_commandsOverlay);
+            });
+          }
+        }
+      },
+    );
 
     if (widget.editMessage != null) {
       _textController = TextEditingController(text: widget.editMessage.text);
