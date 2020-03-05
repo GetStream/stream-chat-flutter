@@ -62,7 +62,7 @@ class MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<MessageWidget>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   final Map<String, ChangeNotifier> _videoControllers = {};
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
@@ -126,8 +126,7 @@ class _MessageWidgetState extends State<MessageWidget>
       row = row.reversed.toList();
     }
 
-    child = AnimatedContainer(
-      duration: Duration(milliseconds: 300),
+    child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       margin: EdgeInsets.only(
         top: isLastUser ? 5 : 24,
@@ -674,9 +673,7 @@ class _MessageWidgetState extends State<MessageWidget>
         padding: EdgeInsets.symmetric(
           vertical: widget.message.reactionCounts?.isNotEmpty == true ? 4.0 : 0,
         ),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
-          curve: Curves.decelerate,
+        child: Container(
           padding: widget.message.reactionCounts?.isNotEmpty == true
               ? const EdgeInsets.all(8)
               : EdgeInsets.zero,
@@ -685,7 +682,12 @@ class _MessageWidgetState extends State<MessageWidget>
               borderRadius: BorderRadius.all(Radius.circular(14))),
           child: (widget.message.reactionCounts != null &&
                   widget.message.reactionCounts.isNotEmpty)
-              ? _buildReactionRow()
+              ? AnimatedSize(
+                  duration: Duration(milliseconds: 300),
+                  vsync: this,
+                  curve: Curves.easeInQuad,
+                  child: _buildReactionRow(),
+                )
               : SizedBox(),
         ),
       ),

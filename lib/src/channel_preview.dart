@@ -5,6 +5,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
+import 'typing_indicator.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -88,7 +89,19 @@ class ChannelPreview extends StatelessWidget {
           final typings = snapshot.data;
           final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
           return typings.isNotEmpty
-              ? _buildTypings(typings, context, opacity)
+              ? TypingIndicator(
+                  typings: typings,
+                  style: StreamChatTheme.of(context)
+                      .channelPreviewTheme
+                      .subtitle
+                      .copyWith(
+                        color: StreamChatTheme.of(context)
+                            .channelPreviewTheme
+                            .subtitle
+                            .color
+                            .withOpacity(opacity),
+                      ),
+                )
               : _buildLastMessage(context, opacity);
         });
   }
@@ -139,20 +152,6 @@ class ChannelPreview extends StatelessWidget {
                   ),
         );
       },
-    );
-  }
-
-  Text _buildTypings(List<User> typings, BuildContext context, double opacity) {
-    return Text(
-      '${typings.map((u) => u.extraData.containsKey('name') ? u.extraData['name'] : u.id).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
-      maxLines: 1,
-      style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-            color: StreamChatTheme.of(context)
-                .channelPreviewTheme
-                .subtitle
-                .color
-                .withOpacity(opacity),
-          ),
     );
   }
 }
