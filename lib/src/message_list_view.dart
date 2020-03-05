@@ -328,7 +328,9 @@ class _MessageListViewState extends State<MessageListView> {
 
     _streamListener = stream.listen((newMessages) {
       newMessages = newMessages.reversed.toList();
-      if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
+      if (_messages.isEmpty ||
+          newMessages.isEmpty ||
+          newMessages.first.id != _messages.first.id) {
         if (!_scrollController.hasClients ||
             _scrollController.offset < _newMessageLoadingOffset) {
           setState(() {

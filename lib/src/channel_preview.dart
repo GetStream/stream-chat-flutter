@@ -1,6 +1,6 @@
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../stream_chat_flutter.dart';
@@ -67,12 +67,9 @@ class ChannelPreview extends StatelessWidget {
         if (now.year != lastMessageAt.year ||
             now.month != lastMessageAt.month ||
             now.day != lastMessageAt.day) {
-          stringDate =
-              '${lastMessageAt.day}/${lastMessageAt.month}/${lastMessageAt.year}';
-          stringDate = formatDate(lastMessageAt, [dd, '/', mm, '/', yyyy]);
+          stringDate = Jiffy(lastMessageAt.toLocal()).format('dd/MM/yyyy');
         } else {
-          stringDate = '${lastMessageAt.hour}:${lastMessageAt.minute}';
-          stringDate = formatDate(lastMessageAt, [HH, ':', nn]);
+          stringDate = Jiffy(lastMessageAt.toLocal()).format('HH:mm');
         }
 
         return Text(

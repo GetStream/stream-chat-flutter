@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
@@ -457,6 +457,7 @@ class _MessageWidgetState extends State<MessageWidget>
     return GestureDetector(
         child: IntrinsicWidth(child: column),
         onLongPress: () {
+          print('widget.message.type: ${widget.message.type}');
           if (widget.message.type == 'ephemeral') {
             return;
           }
@@ -809,7 +810,7 @@ class _MessageWidgetState extends State<MessageWidget>
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
-        formatDate(widget.message.createdAt.toLocal(), [HH, ':', nn]),
+        Jiffy(widget.message.createdAt.toLocal()).format('HH:mm'),
         style: messageTheme.createdAt,
       ),
     );

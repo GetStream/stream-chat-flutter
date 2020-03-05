@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import './channel_name.dart';
 import 'channel_image.dart';
@@ -107,7 +107,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
       builder: (context, snapshot) {
         return (snapshot.data != null)
             ? Text(
-                'Active ${timeago.format(snapshot.data)}',
+                'Active ${Jiffy(snapshot.data.toLocal()).fromNow()}',
                 style: StreamChatTheme.of(context)
                     .channelTheme
                     .channelHeaderTheme
