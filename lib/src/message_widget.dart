@@ -37,7 +37,11 @@ class MessageWidget extends StatefulWidget {
     this.onThreadTap,
     this.onMessageActions,
     this.isParent = false,
+    this.onMentionTap,
   }) : super(key: key);
+
+  /// Function called on mention tap
+  final void Function(User) onMentionTap;
 
   /// Function called on long press
   final Function(BuildContext, Message) onMessageActions;
@@ -360,7 +364,8 @@ class _MessageWidgetState extends State<MessageWidget>
     if (widget.message.text.trim().isNotEmpty) {
       String text = widget.message.text;
       widget.message.mentionedUsers?.forEach((u) {
-        text = text.replaceAll(u.name, '**${u.name}**');
+        text = text.replaceAll(
+            '@${u.name}', '[@${u.name}](@${u.name.replaceAll(' ', '')})');
       });
 
       column.children.addAll(
@@ -395,9 +400,23 @@ class _MessageWidgetState extends State<MessageWidget>
                       padding: EdgeInsets.all(10),
                       constraints: BoxConstraints.loose(Size.fromWidth(300)),
                       child: MarkdownBody(
-                        data: '${text}',
+                        data: text,
                         onTapLink: (link) {
-                          _launchURL(link);
+                          if (link.startsWith('@')) {
+                            final mentionedUser =
+                                widget.message.mentionedUsers.firstWhere(
+                              (u) => '@${u.name.replaceAll(' ', '')}' == link,
+                              orElse: () => null,
+                            );
+
+                            if (widget.onMentionTap != null) {
+                              widget.onMentionTap(mentionedUser);
+                            } else {
+                              print('tap on ${mentionedUser.name}');
+                            }
+                          } else {
+                            _launchURL(link);
+                          }
                         },
                         styleSheet: MarkdownStyleSheet.fromTheme(
                           Theme.of(context).copyWith(
@@ -456,7 +475,6 @@ class _MessageWidgetState extends State<MessageWidget>
     return GestureDetector(
         child: IntrinsicWidth(child: column),
         onLongPress: () {
-          print('widget.message.type: ${widget.message.type}');
           if (widget.message.type == 'ephemeral') {
             return;
           }

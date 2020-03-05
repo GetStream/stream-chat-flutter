@@ -20,7 +20,7 @@ dependencies:
   file_picker: ^1.4.3+2
   image_picker: ^0.6.3+4
   keyboard_visibility: ^0.5.6
-  stream_chat: ^0.1.16
+  stream_chat: ^0.1.17
 
 dev_dependencies:
   pedantic: ^1.8.0+1
