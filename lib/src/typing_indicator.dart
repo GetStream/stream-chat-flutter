@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_channel.dart';
 
 /// Widget to show the current list of typing users
 class TypingIndicator extends StatelessWidget {
   const TypingIndicator({
     Key key,
-    @required this.typings,
+    this.channel,
+    this.alternativeWidget = const SizedBox(),
     this.style,
   }) : super(key: key);
 
@@ -13,14 +15,32 @@ class TypingIndicator extends StatelessWidget {
   final TextStyle style;
 
   /// List of typing users
-  final List<User> typings;
+  final Channel channel;
+
+  /// Widget built when no typings is happening
+  final Widget alternativeWidget;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      '${typings.map((u) => u.name).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
-      maxLines: 1,
-      style: style,
+    final channelState =
+        channel?.state ?? StreamChannel.of(context).channel.state;
+    return StreamBuilder<List<User>>(
+      initialData: channelState.typingEvents,
+      stream: channelState.typingEventsStream,
+      builder: (context, snapshot) {
+        return AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: snapshot.data.isNotEmpty
+              ? Text(
+                  '${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing...',
+                  maxLines: 1,
+                  style: style,
+                )
+              : Container(
+                  child: alternativeWidget,
+                ),
+        );
+      },
     );
   }
 }

@@ -37,14 +37,11 @@ class ChannelPreview extends StatelessWidget {
       onTap: () {
         onTap(channel);
       },
-      leading: ChannelImage(
-        channel: channel,
-      ),
+      leading: ChannelImage(),
       title: ChannelName(
         textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
-        channel: channel,
       ),
-      subtitle: _buildSubtitle(),
+      subtitle: _buildSubtitle(context),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -81,29 +78,23 @@ class ChannelPreview extends StatelessWidget {
     );
   }
 
-  Widget _buildSubtitle() {
-    return StreamBuilder<List<User>>(
-        stream: channel.state.typingEventsStream,
-        initialData: channel.state.typingEvents,
-        builder: (context, snapshot) {
-          final typings = snapshot.data;
-          final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
-          return typings.isNotEmpty
-              ? TypingIndicator(
-                  typings: typings,
-                  style: StreamChatTheme.of(context)
+  Widget _buildSubtitle(BuildContext context) {
+    final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TypingIndicator(
+        channel: channel,
+        alternativeWidget: _buildLastMessage(context, opacity),
+        style:
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                  color: StreamChatTheme.of(context)
                       .channelPreviewTheme
                       .subtitle
-                      .copyWith(
-                        color: StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .subtitle
-                            .color
-                            .withOpacity(opacity),
-                      ),
-                )
-              : _buildLastMessage(context, opacity);
-        });
+                      .color
+                      .withOpacity(opacity),
+                ),
+      ),
+    );
   }
 
   Widget _buildLastMessage(BuildContext context, double opacity) {

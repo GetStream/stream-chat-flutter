@@ -65,12 +65,28 @@ class ChannelPage extends StatelessWidget {
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
-              threadBuilder: (_, parentMessage) {
-                return ThreadPage(
-                  parent: parentMessage,
-                );
-              },
+            child: Stack(
+              children: <Widget>[
+                MessageListView(
+                  threadBuilder: (_, parentMessage) {
+                    return ThreadPage(
+                      parent: parentMessage,
+                    );
+                  },
+                ),
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 4,
+                      ),
+                      child: TypingIndicator(),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           MessageInput(),
@@ -101,9 +117,10 @@ class ThreadPage extends StatelessWidget {
               parentMessage: parent,
             ),
           ),
-          MessageInput(
-            parentMessage: parent,
-          ),
+          if (parent.type != 'deleted')
+            MessageInput(
+              parentMessage: parent,
+            ),
         ],
       ),
     );

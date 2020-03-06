@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import 'stream_channel.dart';
+
 /// It shows the current [Channel] name using a [Text] widget.
 ///
 /// The widget uses a [StreamBuilder] to render the channel information image as soon as it updates.
 class ChannelName extends StatelessWidget {
   const ChannelName({
     Key key,
-    @required this.channel,
+    this.channel,
     this.textStyle,
   }) : super(key: key);
 
@@ -19,6 +21,7 @@ class ChannelName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final channel = this.channel ?? StreamChannel.of(context).channel;
     return StreamBuilder<Map<String, dynamic>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,

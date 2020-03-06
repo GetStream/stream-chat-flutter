@@ -45,7 +45,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class ChannelImage extends StatelessWidget {
   const ChannelImage({
     Key key,
-    @required this.channel,
+    this.channel,
     this.size = 40,
   }) : super(key: key);
 
@@ -57,6 +57,7 @@ class ChannelImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final channel = this.channel ?? StreamChannel.of(context).channel;
     return StreamBuilder<Map<String, dynamic>>(
         stream: channel.extraDataStream,
         initialData: channel.extraData,

@@ -78,7 +78,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: Stack(
             children: <Widget>[
-              Center(child: ChannelImage(channel: channel)),
+              Center(
+                child: ChannelImage(),
+              ),
             ],
           ),
         ),
@@ -88,7 +90,6 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           ChannelName(
-            channel: channel,
             textStyle: StreamChatTheme.of(context)
                 .channelTheme
                 .channelHeaderTheme
