@@ -9,6 +9,7 @@ class TypingIndicator extends StatelessWidget {
     this.channel,
     this.alternativeWidget = const SizedBox(),
     this.style,
+    this.alignment = Alignment.centerLeft,
   }) : super(key: key);
 
   /// Style of the text widget
@@ -19,6 +20,8 @@ class TypingIndicator extends StatelessWidget {
 
   /// Widget built when no typings is happening
   final Widget alternativeWidget;
+
+  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +34,21 @@ class TypingIndicator extends StatelessWidget {
         return AnimatedSwitcher(
           duration: Duration(milliseconds: 300),
           child: snapshot.data.isNotEmpty
-              ? Text(
-                  '${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing...',
-                  maxLines: 1,
-                  style: style,
+              ? Align(
+                  key: Key('typings'),
+                  alignment: alignment,
+                  child: Text(
+                    '${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing...',
+                    maxLines: 1,
+                    style: style,
+                  ),
                 )
-              : Container(
-                  child: alternativeWidget,
+              : Align(
+                  key: Key('alternative'),
+                  alignment: alignment,
+                  child: Container(
+                    child: alternativeWidget,
+                  ),
                 ),
         );
       },

@@ -55,7 +55,10 @@ class ChannelListView extends StatefulWidget {
     this.onChannelTap,
     this.channelWidget,
     this.channelPreviewBuilder,
+    this.errorBuilder,
   }) : super(key: key);
+
+  final Widget Function(Error error) errorBuilder;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -114,16 +117,69 @@ class _ChannelListViewState extends State<ChannelListView> {
       child: StreamBuilder<List<Channel>>(
           stream: streamChat.channelsStream,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+            if (snapshot.hasError) {
+              if (snapshot.error is Error) {
+                print((snapshot.error as Error).stackTrace);
+              }
+
+              if (widget.errorBuilder != null) {
+                return widget.errorBuilder(snapshot.error);
+              }
+
+              String message = snapshot.error.toString();
+              if (snapshot.error is DioError) {
+                final dioError = snapshot.error as DioError;
+                if (dioError.type == DioErrorType.RESPONSE) {
+                  message = dioError.message;
+                } else {
+                  message = 'Check your connection and retry';
+                }
+              }
               return Center(
-                child: CircularProgressIndicator(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 2.0,
+                              ),
+                              child: Icon(Icons.error_outline),
+                            ),
+                          ),
+                          TextSpan(text: 'Error loading channels'),
+                        ],
+                      ),
+                      style: Theme.of(context).textTheme.title,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 16.0,
+                      ),
+                      child: Text(message),
+                    ),
+                    FlatButton(
+                      onPressed: () {
+                        streamChat.queryChannels(
+                          filter: widget.filter,
+                          sortOptions: widget.sort,
+                          paginationParams: widget.pagination,
+                          options: widget.options,
+                        );
+                      },
+                      child: Text('Retry'),
+                    ),
+                  ],
+                ),
               );
             }
 
-            if (snapshot.hasError) {
-              print((snapshot.error as Error).stackTrace);
+            if (!snapshot.hasData) {
               return Center(
-                child: Text(snapshot.error.toString()),
+                child: CircularProgressIndicator(),
               );
             }
 
@@ -159,7 +215,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     if (i < channels.length) {
       final channel = channels[i];
 
-      final channelClient = streamChat.client.channels[channel.id];
+      final channelClient = streamChat.client.channels[channel.cid];
 
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {

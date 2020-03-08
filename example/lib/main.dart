@@ -23,6 +23,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          brightness: Brightness.light,
+        ),
+      ),
       home: Container(
         child: StreamChat(
           client: client,
@@ -75,14 +80,13 @@ class ChannelPage extends StatelessWidget {
                   },
                 ),
                 Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4,
-                      ),
-                      child: TypingIndicator(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4,
+                    ),
+                    child: TypingIndicator(
+                      alignment: Alignment.bottomRight,
                     ),
                   ),
                 ),

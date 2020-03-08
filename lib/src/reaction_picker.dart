@@ -30,7 +30,8 @@ class ReactionPicker extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: reactionToEmoji.keys.map((reactionType) {
         final ownReactionIndex = message.ownReactions
-            .indexWhere((reaction) => reaction.type == reactionType);
+                ?.indexWhere((reaction) => reaction.type == reactionType) ??
+            -1;
         return Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,

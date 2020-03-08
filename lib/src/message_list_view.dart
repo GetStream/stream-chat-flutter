@@ -318,7 +318,11 @@ class _MessageListViewState extends State<MessageListView> {
     Stream<List<Message>> stream;
 
     if (widget.parentMessage == null) {
-      stream = streamChannel.channel.state.messagesStream;
+      stream = streamChannel.channel.state.messagesStream.map((messages) =>
+          messages
+              .where((m) => !(m.status == MessageSendingStatus.FAILED &&
+                  m.type == 'deleted'))
+              .toList());
     } else {
       streamChannel.getReplies(widget.parentMessage.id);
       stream = streamChannel.channel.state.threadsStream
@@ -333,6 +337,9 @@ class _MessageListViewState extends State<MessageListView> {
           newMessages.first.id != _messages.first.id) {
         if (!_scrollController.hasClients ||
             _scrollController.offset < _newMessageLoadingOffset) {
+          if (streamChannel.channel.state.unreadCount > 0) {
+            streamChannel.channel.markRead();
+          }
           setState(() {
             _messages = newMessages;
           });

@@ -42,11 +42,22 @@ class ChannelPreview extends StatelessWidget {
         textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
       ),
       subtitle: _buildSubtitle(context),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _buildDate(context),
+          if (channel.state.unreadCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: CircleAvatar(
+                backgroundColor: Color(0xffd0021B),
+                radius: 6,
+                child: Text(
+                  '${channel.state.unreadCount}',
+                  style: TextStyle(fontSize: 8),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -80,20 +91,16 @@ class ChannelPreview extends StatelessWidget {
 
   Widget _buildSubtitle(BuildContext context) {
     final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: TypingIndicator(
-        channel: channel,
-        alternativeWidget: _buildLastMessage(context, opacity),
-        style:
-            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-                  color: StreamChatTheme.of(context)
-                      .channelPreviewTheme
-                      .subtitle
-                      .color
-                      .withOpacity(opacity),
-                ),
-      ),
+    return TypingIndicator(
+      channel: channel,
+      alternativeWidget: _buildLastMessage(context, opacity),
+      style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+            color: StreamChatTheme.of(context)
+                .channelPreviewTheme
+                .subtitle
+                .color
+                .withOpacity(opacity),
+          ),
     );
   }
 

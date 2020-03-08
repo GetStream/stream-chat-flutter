@@ -644,7 +644,7 @@ class _MessageInputState extends State<MessageInput> {
     _mentionsOverlay?.remove();
     _mentionsOverlay = null;
 
-    FocusScope.of(context).unfocus();
+    final channel = StreamChannel.of(context).channel;
 
     Future sendingFuture;
     Message message;
@@ -659,6 +659,11 @@ class _MessageInputState extends State<MessageInput> {
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
+
+      if (widget.editMessage.status == MessageSendingStatus.FAILED) {
+        sendingFuture = channel.sendMessage(message);
+      }
+
       sendingFuture = StreamChat.of(context).client.updateMessage(message);
     } else {
       message = Message(
@@ -668,19 +673,13 @@ class _MessageInputState extends State<MessageInput> {
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
-      sendingFuture = StreamChannel.of(context).channel.sendMessage(message);
+      sendingFuture = channel.sendMessage(message);
     }
 
-    sendingFuture.then((_) {
+    sendingFuture.whenComplete(() {
       if (widget.onMessageSent != null) {
         widget.onMessageSent(message);
       }
-    }).catchError((error) {
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString()),
-        ),
-      );
     });
   }
 

@@ -226,9 +226,10 @@ class StreamChatState extends State<StreamChat> {
       );
       channels.addAll(res);
       _channelsController.sink.add(channels);
-      _queryChannelsLoadingController.sink.add(false);
     } catch (e) {
       _channelsController.sink.addError(e);
+    } finally {
+      _queryChannelsLoadingController.sink.add(false);
     }
   }
 

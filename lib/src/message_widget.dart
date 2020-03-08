@@ -122,7 +122,58 @@ class _MessageWidgetState extends State<MessageWidget>
                 left: isMyMessage ? 8.0 : 0,
                 right: isMyMessage ? 0 : 8.0,
               ),
-              child: UserAvatar(user: widget.message.user),
+              child: Row(
+                children: <Widget>[
+                  UserAvatar(user: widget.message.user),
+                  if (isMyMessage &&
+                      widget.nextMessage == null &&
+                      widget.message.status == MessageSendingStatus.SENT)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 1.0,
+                      ),
+                      child: CircleAvatar(
+                        radius: 4,
+                        child: Icon(
+                          Icons.done,
+                          size: 4,
+                        ),
+                      ),
+                    ),
+                  if (isMyMessage &&
+                      widget.message.status == MessageSendingStatus.SENDING)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 1.0,
+                      ),
+                      child: CircleAvatar(
+                        radius: 4,
+                        backgroundColor: Colors.grey,
+                        child: Icon(
+                          Icons.access_time,
+                          size: 4,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  if (isMyMessage &&
+                      widget.message.status == MessageSendingStatus.FAILED)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 1.0,
+                      ),
+                      child: CircleAvatar(
+                        radius: 4,
+                        backgroundColor: Color(0xffd0021B).withAlpha(125),
+                        child: Icon(
+                          Icons.error_outline,
+                          size: 4,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
     ];
 
@@ -131,7 +182,8 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     child = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      padding: EdgeInsets.symmetric(
+          horizontal: (isMyMessage && widget.nextMessage == null) ? 0.0 : 10),
       margin: EdgeInsets.only(
         top: isLastUser ? 5 : 24,
         bottom: widget.nextMessage == null ? 30 : 0,
@@ -250,41 +302,52 @@ class _MessageWidgetState extends State<MessageWidget>
                           children: <Widget>[
                             attachmentWidget,
                             attachment.title != null
-                                ? Container(
-                                    constraints:
-                                        BoxConstraints.loose(Size(300, 500)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            attachment.title,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: messageTheme.messageText
-                                                .copyWith(
-                                              color: Colors.blue,
-                                              fontWeight: FontWeight.bold,
+                                ? GestureDetector(
+                                    onTap: () {
+                                      if (attachment.titleLink != null) {
+                                        _launchURL(attachment.titleLink);
+                                      }
+                                    },
+                                    child: Container(
+                                      constraints:
+                                          BoxConstraints.loose(Size(300, 500)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              attachment.title,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: messageTheme.messageText
+                                                  .copyWith(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                          Text(
-                                            Uri.parse(attachment.thumbUrl)
-                                                .authority
-                                                .split('.')
-                                                .reversed
-                                                .take(2)
-                                                .toList()
-                                                .reversed
-                                                .join('.'),
-                                            overflow: TextOverflow.ellipsis,
-                                            style: messageTheme.createdAt,
-                                          ),
-                                        ],
+                                            if (attachment.titleLink != null ||
+                                                attachment.ogScrapeUrl != null)
+                                              Text(
+                                                Uri.parse(attachment
+                                                            .titleLink ??
+                                                        attachment.ogScrapeUrl)
+                                                    .authority
+                                                    .split('.')
+                                                    .reversed
+                                                    .take(2)
+                                                    .toList()
+                                                    .reversed
+                                                    .join('.'),
+                                                overflow: TextOverflow.ellipsis,
+                                                style: messageTheme.createdAt,
+                                              ),
+                                          ],
+                                        ),
                                       ),
+                                      color: Color(0xffebebeb),
                                     ),
-                                    color: Color(0xffebebeb),
                                   )
                                 : SizedBox(),
                           ],
@@ -399,42 +462,58 @@ class _MessageWidgetState extends State<MessageWidget>
                           isLastUser || nOfAttachmentWidgets > 0),
                       padding: EdgeInsets.all(10),
                       constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                      child: MarkdownBody(
-                        data: text,
-                        onTapLink: (link) {
-                          if (link.startsWith('@')) {
-                            final mentionedUser =
-                                widget.message.mentionedUsers.firstWhere(
-                              (u) => '@${u.name.replaceAll(' ', '')}' == link,
-                              orElse: () => null,
-                            );
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          if (widget.message.status ==
+                              MessageSendingStatus.FAILED)
+                            Text(
+                              'MESSAGE FAILED · CLICK TO TRY AGAIN',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(.5),
+                                fontSize: 11,
+                              ),
+                            ),
+                          MarkdownBody(
+                            data: text,
+                            onTapLink: (link) {
+                              if (link.startsWith('@')) {
+                                final mentionedUser =
+                                    widget.message.mentionedUsers.firstWhere(
+                                  (u) =>
+                                      '@${u.name.replaceAll(' ', '')}' == link,
+                                  orElse: () => null,
+                                );
 
-                            if (widget.onMentionTap != null) {
-                              widget.onMentionTap(mentionedUser);
-                            } else {
-                              print('tap on ${mentionedUser.name}');
-                            }
-                          } else {
-                            _launchURL(link);
-                          }
-                        },
-                        styleSheet: MarkdownStyleSheet.fromTheme(
-                          Theme.of(context).copyWith(
-                            textTheme: Theme.of(context).textTheme.apply(
-                                  bodyColor: messageTheme.messageText.color,
-                                  decoration:
-                                      messageTheme.messageText.decoration,
-                                  decorationColor:
-                                      messageTheme.messageText.decorationColor,
-                                  decorationStyle:
-                                      messageTheme.messageText.decorationStyle,
-                                  fontFamily:
-                                      messageTheme.messageText.fontFamily,
-                                ),
+                                if (widget.onMentionTap != null) {
+                                  widget.onMentionTap(mentionedUser);
+                                } else {
+                                  print('tap on ${mentionedUser.name}');
+                                }
+                              } else {
+                                _launchURL(link);
+                              }
+                            },
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              Theme.of(context).copyWith(
+                                textTheme: Theme.of(context).textTheme.apply(
+                                      bodyColor: messageTheme.messageText.color,
+                                      decoration:
+                                          messageTheme.messageText.decoration,
+                                      decorationColor: messageTheme
+                                          .messageText.decorationColor,
+                                      decorationStyle: messageTheme
+                                          .messageText.decorationStyle,
+                                      fontFamily:
+                                          messageTheme.messageText.fontFamily,
+                                    ),
+                              ),
+                            ).copyWith(
+                              p: messageTheme.messageText,
+                            ),
                           ),
-                        ).copyWith(
-                          p: messageTheme.messageText,
-                        ),
+                        ],
                       ),
                     ),
                   ),
@@ -474,8 +553,15 @@ class _MessageWidgetState extends State<MessageWidget>
 
     return GestureDetector(
         child: IntrinsicWidth(child: column),
+        onTap: () {
+          if (widget.message.status == MessageSendingStatus.FAILED) {
+            StreamChannel.of(context).channel.sendMessage(widget.message);
+            return;
+          }
+        },
         onLongPress: () {
-          if (widget.message.type == 'ephemeral') {
+          if (widget.message.type == 'ephemeral' ||
+              widget.message.status == MessageSendingStatus.SENDING) {
             return;
           }
 
@@ -506,6 +592,8 @@ class _MessageWidgetState extends State<MessageWidget>
       return;
     }
 
+    final theme = Theme.of(context);
+
     showModalBottomSheet(
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
@@ -523,7 +611,8 @@ class _MessageWidgetState extends State<MessageWidget>
               children: <Widget>[
                 Container(
                   color: Colors.black87,
-                  child: streamChannel.channel.config.reactions
+                  child: (streamChannel.channel.config.reactions &&
+                          widget.message.status != MessageSendingStatus.FAILED)
                       ? ReactionPicker(
                           channel: StreamChannel.of(context).channel,
                           reactionToEmoji: reactionToEmoji,
@@ -537,17 +626,16 @@ class _MessageWidgetState extends State<MessageWidget>
                           padding: const EdgeInsets.all(28.0),
                           child: Text(
                             'Delete message',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headline
+                            style: theme.textTheme.headline
                                 .copyWith(color: Colors.red),
                           ),
                         ),
                         onPressed: () {
-                          StreamChat.of(context)
-                              .client
-                              .deleteMessage(widget.message.id);
                           Navigator.pop(context);
+                          StreamChat.of(context).client.deleteMessage(
+                                widget.message,
+                                streamChannel.channel.cid,
+                              );
                         },
                       )
                     : SizedBox(),
@@ -557,7 +645,7 @@ class _MessageWidgetState extends State<MessageWidget>
                           padding: const EdgeInsets.all(28.0),
                           child: Text(
                             'Edit message',
-                            style: Theme.of(context).textTheme.headline,
+                            style: theme.textTheme.headline,
                           ),
                         ),
                         onPressed: () async {
@@ -568,6 +656,7 @@ class _MessageWidgetState extends State<MessageWidget>
                       )
                     : SizedBox(),
                 (streamChannel.channel.config.replies &&
+                        widget.message.status != MessageSendingStatus.FAILED &&
                         widget.message.parentId == null &&
                         !widget.isParent)
                     ? FlatButton(
@@ -575,7 +664,7 @@ class _MessageWidgetState extends State<MessageWidget>
                           padding: const EdgeInsets.all(28.0),
                           child: Text(
                             'Start a thread',
-                            style: Theme.of(context).textTheme.headline,
+                            style: theme.textTheme.headline,
                           ),
                         ),
                         onPressed: () {
@@ -667,6 +756,7 @@ class _MessageWidgetState extends State<MessageWidget>
                               message.id == widget.message.parentId)
                       : null,
                   onMessageSent: (_) {
+                    FocusScope.of(context).unfocus();
                     Navigator.pop(context);
                   },
                 ),
@@ -698,15 +788,14 @@ class _MessageWidgetState extends State<MessageWidget>
           decoration: BoxDecoration(
               color: Colors.black,
               borderRadius: BorderRadius.all(Radius.circular(14))),
-          child: (widget.message.reactionCounts != null &&
-                  widget.message.reactionCounts.isNotEmpty)
-              ? AnimatedSize(
-                  duration: Duration(milliseconds: 300),
-                  vsync: this,
-                  curve: Curves.easeInQuad,
-                  child: _buildReactionRow(),
-                )
-              : SizedBox(),
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: 300),
+            reverseDuration: Duration(milliseconds: 0),
+            child: (widget.message.reactionCounts != null &&
+                    widget.message.reactionCounts.isNotEmpty)
+                ? _buildReactionRow()
+                : SizedBox(),
+          ),
         ),
       ),
     );
@@ -751,6 +840,19 @@ class _MessageWidgetState extends State<MessageWidget>
     return CachedNetworkImage(
       imageUrl:
           attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
+      errorWidget: (context, url, error) {
+        return Container(
+          width: 200,
+          height: 140,
+          color: Color(0xffd0021B).withAlpha(26),
+          child: Center(
+            child: Icon(
+              Icons.error_outline,
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
       fit: BoxFit.cover,
     );
   }
@@ -829,10 +931,12 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildTimestamp(Alignment alignment) {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
-      child: Text(
-        Jiffy(widget.message.createdAt.toLocal()).format('HH:mm'),
-        style: messageTheme.createdAt,
-      ),
+      child: widget.message.createdAt != null
+          ? Text(
+              Jiffy(widget.message.createdAt.toLocal()).format('HH:mm'),
+              style: messageTheme.createdAt,
+            )
+          : SizedBox(),
     );
   }
 
@@ -845,7 +949,9 @@ class _MessageWidgetState extends State<MessageWidget>
         topRight: Radius.circular((isMyMessage && isLastUser) ? 2 : 16),
         bottomRight: Radius.circular(isMyMessage ? 2 : 16),
       ),
-      color: messageTheme.messageBackgroundColor,
+      color: widget.message.status == MessageSendingStatus.FAILED
+          ? Color(0xffd0021B).withAlpha(26)
+          : messageTheme.messageBackgroundColor,
     );
   }
 
