@@ -116,7 +116,7 @@ class ChannelPreview extends StatelessWidget {
         }
 
         String text;
-        if (lastMessage.type == 'deleted') {
+        if (lastMessage.isDeleted) {
           text = 'This message was deleted.';
         } else {
           final prefix = lastMessage.attachments

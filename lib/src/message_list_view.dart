@@ -320,8 +320,8 @@ class _MessageListViewState extends State<MessageListView> {
     if (widget.parentMessage == null) {
       stream = streamChannel.channel.state.messagesStream.map((messages) =>
           messages
-              .where((m) => !(m.status == MessageSendingStatus.FAILED &&
-                  m.type == 'deleted'))
+              .where((m) =>
+                  !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
               .toList());
     } else {
       streamChannel.getReplies(widget.parentMessage.id);

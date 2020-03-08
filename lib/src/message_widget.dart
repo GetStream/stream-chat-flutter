@@ -70,137 +70,147 @@ class _MessageWidgetState extends State<MessageWidget>
   final Map<String, ChangeNotifier> _videoControllers = {};
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
-  MessageTheme messageTheme;
-  StreamChatState streamChat;
-  StreamChannelState streamChannel;
-  bool isMyMessage;
+  MessageTheme _messageTheme;
+  StreamChatState _streamChat;
+  StreamChannelState _streamChannel;
+  bool _isMyMessage;
+
+  String _currentUserId;
+  String _messageUserId;
+  String _previousUserId;
+  String _nextUserId;
+  bool _isLastUser;
+  bool _isNextUser;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    streamChat = StreamChat.of(context);
-    streamChannel = StreamChannel.of(context);
-
-    final currentUserId = streamChat.client.state.user.id;
-    final messageUserId = widget.message.user.id;
-    final previousUserId = widget.previousMessage?.user?.id;
-    final nextUserId = widget.nextMessage?.user?.id;
-    final isLastUser = previousUserId == messageUserId;
-    final isNextUser = nextUserId == messageUserId;
-
-    isMyMessage = messageUserId == currentUserId;
-    final alignment =
-        isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
-
-    messageTheme = isMyMessage
+    _messageTheme = _isMyMessage
         ? StreamChatTheme.of(context).ownMessageTheme
         : StreamChatTheme.of(context).otherMessageTheme;
 
-    Widget child;
+    final alignment =
+        _isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
-    var row = <Widget>[
+    List<Widget> row = <Widget>[
       Column(
         crossAxisAlignment:
-            isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
-          widget.message.type == 'deleted'
+          widget.message.isDeleted
               ? _buildDeletedMessage(alignment)
-              : _buildBubble(context, isLastUser),
-          streamChannel.channel.config.replies
-              ? _buildThreadIndicator(context)
-              : SizedBox(),
-          isNextUser ? SizedBox() : _buildTimestamp(alignment),
+              : _buildBubble(context),
+          if (_streamChannel.channel.config.replies)
+            _buildThreadIndicator(context),
+          if (!_isNextUser) _buildTimestamp(alignment),
         ],
       ),
-      isNextUser
+      _isNextUser
           ? Container(
               width: 40,
             )
-          : Padding(
-              padding: EdgeInsets.only(
-                left: isMyMessage ? 8.0 : 0,
-                right: isMyMessage ? 0 : 8.0,
-              ),
-              child: Row(
-                children: <Widget>[
-                  UserAvatar(user: widget.message.user),
-                  if (isMyMessage &&
-                      widget.nextMessage == null &&
-                      widget.message.status == MessageSendingStatus.SENT)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 1.0,
-                      ),
-                      child: CircleAvatar(
-                        radius: 4,
-                        child: Icon(
-                          Icons.done,
-                          size: 4,
-                        ),
-                      ),
-                    ),
-                  if (isMyMessage &&
-                      widget.message.status == MessageSendingStatus.SENDING)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 1.0,
-                      ),
-                      child: CircleAvatar(
-                        radius: 4,
-                        backgroundColor: Colors.grey,
-                        child: Icon(
-                          Icons.access_time,
-                          size: 4,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  if (isMyMessage &&
-                      widget.message.status == MessageSendingStatus.FAILED)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 1.0,
-                      ),
-                      child: CircleAvatar(
-                        radius: 4,
-                        backgroundColor: Color(0xffd0021B).withAlpha(125),
-                        child: Icon(
-                          Icons.error_outline,
-                          size: 4,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+          : _buildUserAvatar(),
     ];
 
-    if (!isMyMessage) {
+    if (!_isMyMessage) {
       row = row.reversed.toList();
     }
 
-    child = Container(
+    return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: (isMyMessage && widget.nextMessage == null) ? 0.0 : 10),
+        horizontal: (_isMyMessage && widget.nextMessage == null) ? 0.0 : 10,
+      ),
       margin: EdgeInsets.only(
-        top: isLastUser ? 5 : 24,
+        top: _isLastUser ? 5 : 24,
         bottom: widget.nextMessage == null ? 30 : 0,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment:
-            isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+            _isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: row,
       ),
     );
+  }
 
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      child: child,
+  Padding _buildUserAvatar() {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: _isMyMessage ? 8.0 : 0,
+        right: _isMyMessage ? 0 : 8.0,
+      ),
+      child: Row(
+        children: <Widget>[
+          UserAvatar(user: widget.message.user),
+          if (_isMyMessage &&
+              widget.nextMessage == null &&
+              widget.message.status == MessageSendingStatus.SENT)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 1.0,
+              ),
+              child: CircleAvatar(
+                radius: 4,
+                child: Icon(
+                  Icons.done,
+                  size: 4,
+                ),
+              ),
+            ),
+          if (_isMyMessage &&
+              widget.message.status == MessageSendingStatus.SENDING)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 1.0,
+              ),
+              child: CircleAvatar(
+                radius: 4,
+                backgroundColor: Colors.grey,
+                child: Icon(
+                  Icons.access_time,
+                  size: 4,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          if (_isMyMessage &&
+              widget.message.status == MessageSendingStatus.FAILED)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 1.0,
+              ),
+              child: CircleAvatar(
+                radius: 4,
+                backgroundColor: Color(0xffd0021B).withAlpha(125),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 4,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _streamChat = StreamChat.of(context);
+    _streamChannel = StreamChannel.of(context);
+
+    _currentUserId = _streamChat.client.state.user.id;
+    _messageUserId = widget.message.user.id;
+    _previousUserId = widget.previousMessage?.user?.id;
+    _nextUserId = widget.nextMessage?.user?.id;
+    _isLastUser = _previousUserId == _messageUserId;
+    _isNextUser = _nextUserId == _messageUserId;
+
+    _isMyMessage = _messageUserId == _currentUserId;
   }
 
   Align _buildDeletedMessage(Alignment alignment) {
@@ -213,7 +223,7 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
         child: Text(
           'This message was deleted...',
-          style: messageTheme.messageText.copyWith(
+          style: _messageTheme.messageText.copyWith(
             fontStyle: FontStyle.italic,
             color: Colors.black,
           ),
@@ -226,10 +236,10 @@ class _MessageWidgetState extends State<MessageWidget>
     var row = [
       Text(
         'Replies: ${widget.message.replyCount}',
-        style: messageTheme.replies,
+        style: _messageTheme.replies,
       ),
       Transform(
-        transform: Matrix4.rotationY(isMyMessage ? 0 : pi),
+        transform: Matrix4.rotationY(_isMyMessage ? 0 : pi),
         alignment: Alignment.center,
         child: Icon(
           Icons.subdirectory_arrow_left,
@@ -238,7 +248,7 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
     ];
 
-    if (!isMyMessage) {
+    if (!_isMyMessage) {
       row = row.reversed.toList();
     }
 
@@ -264,259 +274,57 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildBubble(
     BuildContext context,
-    bool isLastUser,
   ) {
     var nOfAttachmentWidgets = 0;
 
-    final column = Column(
-      crossAxisAlignment:
-          isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: List<Widget>.from(widget.message.attachments.map((attachment) {
-        nOfAttachmentWidgets++;
+    final column =
+        List<Widget>.from(widget.message.attachments.map((attachment) {
+      nOfAttachmentWidgets++;
 
-        Widget attachmentWidget;
-        if (attachment.type == 'video') {
-          attachmentWidget = _buildVideo(attachment, isLastUser);
-        } else if (attachment.type == 'image' || attachment.type == 'giphy') {
-          attachmentWidget = _buildImage(isLastUser, attachment);
-        }
+      Widget attachmentWidget;
+      if (attachment.type == 'video') {
+        attachmentWidget = _buildVideo(attachment);
+      } else if (attachment.type == 'image' || attachment.type == 'giphy') {
+        attachmentWidget = _buildImage(attachment);
+      }
 
-        if (attachmentWidget != null) {
-          final boxDecoration = _buildBoxDecoration(isLastUser)
-              .copyWith(color: Color(0xffebebeb));
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 2.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ClipRRect(
-                  borderRadius: boxDecoration.borderRadius,
-                  child: Container(
-                    decoration: boxDecoration,
-                    constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                    child: Stack(
-                      children: <Widget>[
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            attachmentWidget,
-                            attachment.title != null
-                                ? GestureDetector(
-                                    onTap: () {
-                                      if (attachment.titleLink != null) {
-                                        _launchURL(attachment.titleLink);
-                                      }
-                                    },
-                                    child: Container(
-                                      constraints:
-                                          BoxConstraints.loose(Size(300, 500)),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Text(
-                                              attachment.title,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: messageTheme.messageText
-                                                  .copyWith(
-                                                color: Colors.blue,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            if (attachment.titleLink != null ||
-                                                attachment.ogScrapeUrl != null)
-                                              Text(
-                                                Uri.parse(attachment
-                                                            .titleLink ??
-                                                        attachment.ogScrapeUrl)
-                                                    .authority
-                                                    .split('.')
-                                                    .reversed
-                                                    .take(2)
-                                                    .toList()
-                                                    .reversed
-                                                    .join('.'),
-                                                overflow: TextOverflow.ellipsis,
-                                                style: messageTheme.createdAt,
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      color: Color(0xffebebeb),
-                                    ),
-                                  )
-                                : SizedBox(),
-                          ],
-                        ),
-                        attachment.type == 'image' &&
-                                attachment.titleLink != null
-                            ? Positioned.fill(
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () =>
-                                        _launchURL(attachment.titleLink),
-                                  ),
-                                ),
-                              )
-                            : SizedBox(),
-                      ],
-                    ),
-                    margin: EdgeInsets.only(
-                      top: nOfAttachmentWidgets > 1 ? 5 : 0,
-                    ),
-                  ),
-                ),
-                if (attachment.actions != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: attachment.actions?.map((action) {
-                      if (action.style == 'primary') {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: FlatButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text('${action.text}'),
-                            color: action.style == 'primary'
-                                ? StreamChatTheme.of(context).accentColor
-                                : null,
-                            textColor: Colors.white,
-                            onPressed: () {
-                              streamChannel.channel
-                                  .sendAction(widget.message.id, {
-                                action.name: action.value,
-                              });
-                            },
-                          ),
-                        );
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: OutlineButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text('${action.text}'),
-                          color: StreamChatTheme.of(context).accentColor,
-                          onPressed: () {
-                            streamChannel.channel
-                                .sendAction(widget.message.id, {
-                              action.name: action.value,
-                            });
-                          },
-                        ),
-                      );
-                    })?.toList(),
-                  ),
-              ],
-            ),
-          );
-        }
+      if (attachmentWidget != null) {
+        return _buildAttachment(
+          attachmentWidget,
+          attachment,
+          nOfAttachmentWidgets,
+          context,
+        );
+      }
 
-        nOfAttachmentWidgets--;
-        return SizedBox();
-      })),
-    );
+      nOfAttachmentWidgets--;
+      return SizedBox();
+    }));
 
     if (widget.message.text.trim().isNotEmpty) {
       String text = widget.message.text;
-      widget.message.mentionedUsers?.forEach((u) {
-        text = text.replaceAll(
-            '@${u.name}', '[@${u.name}](@${u.name.replaceAll(' ', '')})');
-      });
+      text = _replaceMentions(text);
 
-      column.children.addAll(
+      column.addAll(
         <Widget>[
           Column(
-            crossAxisAlignment:
-                isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: _isMyMessage
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: <Widget>[
-              (streamChannel.channel.config.reactions &&
-                      nOfAttachmentWidgets == 0)
-                  ? Align(
-                      child: _buildReactions(),
-                      alignment: isMyMessage
-                          ? Alignment.centerLeft
-                          : Alignment.centerRight,
-                    )
-                  : SizedBox(),
+              if (_streamChannel.channel.config.reactions &&
+                  nOfAttachmentWidgets == 0)
+                Align(
+                  child: _buildReactions(),
+                  alignment: _isMyMessage
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                ),
               Stack(
                 overflow: Overflow.visible,
                 children: <Widget>[
-                  nOfAttachmentWidgets == 0
-                      ? _buildReactionPaint()
-                      : SizedBox(),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      right: isMyMessage ? 0.0 : 8.0,
-                      left: isMyMessage ? 8.0 : 0.0,
-                    ),
-                    child: Container(
-                      decoration: _buildBoxDecoration(
-                          isLastUser || nOfAttachmentWidgets > 0),
-                      padding: EdgeInsets.all(10),
-                      constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          if (widget.message.status ==
-                              MessageSendingStatus.FAILED)
-                            Text(
-                              'MESSAGE FAILED · CLICK TO TRY AGAIN',
-                              style: TextStyle(
-                                color: Colors.black.withOpacity(.5),
-                                fontSize: 11,
-                              ),
-                            ),
-                          MarkdownBody(
-                            data: text,
-                            onTapLink: (link) {
-                              if (link.startsWith('@')) {
-                                final mentionedUser =
-                                    widget.message.mentionedUsers.firstWhere(
-                                  (u) =>
-                                      '@${u.name.replaceAll(' ', '')}' == link,
-                                  orElse: () => null,
-                                );
-
-                                if (widget.onMentionTap != null) {
-                                  widget.onMentionTap(mentionedUser);
-                                } else {
-                                  print('tap on ${mentionedUser.name}');
-                                }
-                              } else {
-                                _launchURL(link);
-                              }
-                            },
-                            styleSheet: MarkdownStyleSheet.fromTheme(
-                              Theme.of(context).copyWith(
-                                textTheme: Theme.of(context).textTheme.apply(
-                                      bodyColor: messageTheme.messageText.color,
-                                      decoration:
-                                          messageTheme.messageText.decoration,
-                                      decorationColor: messageTheme
-                                          .messageText.decorationColor,
-                                      decorationStyle: messageTheme
-                                          .messageText.decorationStyle,
-                                      fontFamily:
-                                          messageTheme.messageText.fontFamily,
-                                    ),
-                              ),
-                            ).copyWith(
-                              p: messageTheme.messageText,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  if (nOfAttachmentWidgets == 0) _buildReactionPaint(),
+                  _buildMessageText(nOfAttachmentWidgets, text, context),
                 ],
               ),
             ],
@@ -525,26 +333,24 @@ class _MessageWidgetState extends State<MessageWidget>
       );
     }
 
-    if (nOfAttachmentWidgets > 0) {
-      column.children.insert(
+    if (_streamChannel.channel.config.reactions && nOfAttachmentWidgets > 0) {
+      column.insert(
         0,
-        streamChannel.channel.config.reactions
-            ? Align(
-                child: _buildReactions(),
-                alignment:
-                    isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
-              )
-            : SizedBox(),
+        Align(
+          child: _buildReactions(),
+          alignment:
+              _isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
+        ),
       );
-      column.children[1] = Stack(
+      column[1] = Stack(
         overflow: Overflow.visible,
         children: <Widget>[
           Padding(
             padding: EdgeInsets.only(
-              right: isMyMessage ? 0.0 : 8.0,
-              left: isMyMessage ? 8.0 : 0.0,
+              right: _isMyMessage ? 0.0 : 8.0,
+              left: _isMyMessage ? 8.0 : 0.0,
             ),
-            child: column.children[1],
+            child: column[1],
           ),
           _buildReactionPaint(),
         ],
@@ -552,32 +358,261 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     return GestureDetector(
-        child: IntrinsicWidth(child: column),
-        onTap: () {
-          if (widget.message.status == MessageSendingStatus.FAILED) {
-            StreamChannel.of(context).channel.sendMessage(widget.message);
-            return;
-          }
-        },
-        onLongPress: () {
-          if (widget.message.type == 'ephemeral' ||
-              widget.message.status == MessageSendingStatus.SENDING) {
-            return;
-          }
+      child: IntrinsicWidth(
+        child: Column(
+          children: column,
+          crossAxisAlignment:
+              _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        ),
+      ),
+      onTap: () {
+        if (widget.message.status == MessageSendingStatus.FAILED) {
+          StreamChannel.of(context).channel.sendMessage(widget.message);
+          return;
+        }
+      },
+      onLongPress: () {
+        if (widget.message.isEphemeral ||
+            widget.message.status == MessageSendingStatus.SENDING) {
+          return;
+        }
 
-          if (widget.onMessageActions != null) {
-            widget.onMessageActions(context, widget.message);
-          } else {
-            _showMessageBottomSheet(context);
-          }
-        });
+        if (widget.onMessageActions != null) {
+          widget.onMessageActions(context, widget.message);
+        } else {
+          _showMessageBottomSheet(context);
+        }
+      },
+    );
+  }
+
+  Padding _buildAttachment(
+    Widget attachmentWidget,
+    Attachment attachment,
+    int nOfAttachmentWidgets,
+    BuildContext context,
+  ) {
+    final boxDecoration = _buildBoxDecoration(_isLastUser).copyWith(
+      color: Color(0xffebebeb),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: boxDecoration.borderRadius,
+            child: Container(
+              decoration: boxDecoration,
+              constraints: BoxConstraints.loose(Size.fromWidth(300)),
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      attachmentWidget,
+                      if (attachment.title != null)
+                        _buildAttachmentTitle(attachment),
+                    ],
+                  ),
+                  if (attachment.type == 'image' &&
+                      attachment.titleLink != null)
+                    _buildPreviewInkwell(attachment),
+                ],
+              ),
+              margin: EdgeInsets.only(
+                top: nOfAttachmentWidgets > 1 ? 5 : 0,
+              ),
+            ),
+          ),
+          if (attachment.actions != null)
+            _buildAttachmentActions(attachment, context),
+        ],
+      ),
+    );
+  }
+
+  Padding _buildMessageText(
+    int nOfAttachmentWidgets,
+    String text,
+    BuildContext context,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(
+        right: _isMyMessage ? 0.0 : 8.0,
+        left: _isMyMessage ? 8.0 : 0.0,
+      ),
+      child: Container(
+        decoration:
+            _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
+        padding: EdgeInsets.all(10),
+        constraints: BoxConstraints.loose(Size.fromWidth(300)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            if (widget.message.status == MessageSendingStatus.FAILED)
+              Text(
+                'MESSAGE FAILED · CLICK TO TRY AGAIN',
+                style: _messageTheme.messageText.copyWith(
+                  color: Colors.black.withOpacity(.5),
+                  fontSize: 11,
+                ),
+              ),
+            MarkdownBody(
+              data: text,
+              onTapLink: (link) {
+                if (link.startsWith('@')) {
+                  final mentionedUser =
+                      widget.message.mentionedUsers.firstWhere(
+                    (u) => '@${u.name.replaceAll(' ', '')}' == link,
+                    orElse: () => null,
+                  );
+
+                  if (widget.onMentionTap != null) {
+                    widget.onMentionTap(mentionedUser);
+                  } else {
+                    print('tap on ${mentionedUser.name}');
+                  }
+                } else {
+                  _launchURL(link);
+                }
+              },
+              styleSheet: MarkdownStyleSheet.fromTheme(
+                Theme.of(context).copyWith(
+                  textTheme: Theme.of(context).textTheme.apply(
+                        bodyColor: _messageTheme.messageText.color,
+                        decoration: _messageTheme.messageText.decoration,
+                        decorationColor:
+                            _messageTheme.messageText.decorationColor,
+                        decorationStyle:
+                            _messageTheme.messageText.decorationStyle,
+                        fontFamily: _messageTheme.messageText.fontFamily,
+                      ),
+                ),
+              ).copyWith(
+                p: _messageTheme.messageText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _replaceMentions(String text) {
+    widget.message.mentionedUsers?.forEach((u) {
+      text = text.replaceAll(
+          '@${u.name}', '[@${u.name}](@${u.name.replaceAll(' ', '')})');
+    });
+    return text;
+  }
+
+  Row _buildAttachmentActions(Attachment attachment, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: attachment.actions?.map((action) {
+        if (action.style == 'primary') {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: FlatButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text('${action.text}'),
+              color: action.style == 'primary'
+                  ? StreamChatTheme.of(context).accentColor
+                  : null,
+              textColor: Colors.white,
+              onPressed: () {
+                _streamChannel.channel.sendAction(widget.message.id, {
+                  action.name: action.value,
+                });
+              },
+            ),
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: OutlineButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text('${action.text}'),
+            color: StreamChatTheme.of(context).accentColor,
+            onPressed: () {
+              _streamChannel.channel.sendAction(widget.message.id, {
+                action.name: action.value,
+              });
+            },
+          ),
+        );
+      })?.toList(),
+    );
+  }
+
+  Positioned _buildPreviewInkwell(Attachment attachment) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _launchURL(attachment.titleLink),
+        ),
+      ),
+    );
+  }
+
+  GestureDetector _buildAttachmentTitle(Attachment attachment) {
+    return GestureDetector(
+      onTap: () {
+        if (attachment.titleLink != null) {
+          _launchURL(attachment.titleLink);
+        }
+      },
+      child: Container(
+        constraints: BoxConstraints.loose(Size(300, 500)),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                attachment.title,
+                overflow: TextOverflow.ellipsis,
+                style: _messageTheme.messageText.copyWith(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (attachment.titleLink != null ||
+                  attachment.ogScrapeUrl != null)
+                Text(
+                  Uri.parse(attachment.titleLink ?? attachment.ogScrapeUrl)
+                      .authority
+                      .split('.')
+                      .reversed
+                      .take(2)
+                      .toList()
+                      .reversed
+                      .join('.'),
+                  overflow: TextOverflow.ellipsis,
+                  style: _messageTheme.createdAt,
+                ),
+            ],
+          ),
+        ),
+        color: Color(0xffebebeb),
+      ),
+    );
   }
 
   Widget _buildReactionPaint() {
     return widget.message.reactionCounts?.isNotEmpty == true
         ? Positioned(
-            left: isMyMessage ? 8 : null,
-            right: !isMyMessage ? 8 : null,
+            left: _isMyMessage ? 8 : null,
+            right: !_isMyMessage ? 8 : null,
             top: -6,
             child: CustomPaint(
               painter: _ReactionBubblePainter(),
@@ -587,8 +622,8 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   void _showMessageBottomSheet(BuildContext context) {
-    if (!streamChannel.channel.config.reactions &&
-        !streamChannel.channel.config.replies) {
+    if (!_streamChannel.channel.config.reactions &&
+        !_streamChannel.channel.config.replies) {
       return;
     }
 
@@ -611,7 +646,7 @@ class _MessageWidgetState extends State<MessageWidget>
               children: <Widget>[
                 Container(
                   color: Colors.black87,
-                  child: (streamChannel.channel.config.reactions &&
+                  child: (_streamChannel.channel.config.reactions &&
                           widget.message.status != MessageSendingStatus.FAILED)
                       ? ReactionPicker(
                           channel: StreamChannel.of(context).channel,
@@ -620,7 +655,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         )
                       : SizedBox(),
                 ),
-                isMyMessage
+                _isMyMessage
                     ? FlatButton(
                         child: Padding(
                           padding: const EdgeInsets.all(28.0),
@@ -634,12 +669,12 @@ class _MessageWidgetState extends State<MessageWidget>
                           Navigator.pop(context);
                           StreamChat.of(context).client.deleteMessage(
                                 widget.message,
-                                streamChannel.channel.cid,
+                                _streamChannel.channel.cid,
                               );
                         },
                       )
                     : SizedBox(),
-                isMyMessage
+                _isMyMessage
                     ? FlatButton(
                         child: Padding(
                           padding: const EdgeInsets.all(28.0),
@@ -655,7 +690,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         },
                       )
                     : SizedBox(),
-                (streamChannel.channel.config.replies &&
+                (_streamChannel.channel.config.replies &&
                         widget.message.status != MessageSendingStatus.FAILED &&
                         widget.message.parentId == null &&
                         !widget.isParent)
@@ -692,7 +727,7 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
       builder: (context) {
         return StreamChannel(
-          channel: streamChannel.channel,
+          channel: _streamChannel.channel,
           child: Flex(
             direction: Axis.vertical,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -834,7 +869,6 @@ class _MessageWidgetState extends State<MessageWidget>
   };
 
   Widget _buildImage(
-    bool isLastUser,
     Attachment attachment,
   ) {
     return CachedNetworkImage(
@@ -859,7 +893,6 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget _buildVideo(
     Attachment attachment,
-    bool isLastUser,
   ) {
     VideoPlayerController videoController;
     if (_videoControllers.containsKey(attachment.assetUrl)) {
@@ -934,24 +967,25 @@ class _MessageWidgetState extends State<MessageWidget>
       child: widget.message.createdAt != null
           ? Text(
               Jiffy(widget.message.createdAt.toLocal()).format('HH:mm'),
-              style: messageTheme.createdAt,
+              style: _messageTheme.createdAt,
             )
           : SizedBox(),
     );
   }
 
-  BoxDecoration _buildBoxDecoration(bool isLastUser) {
+  BoxDecoration _buildBoxDecoration(bool rectBorders) {
     return BoxDecoration(
-      border: isMyMessage ? null : Border.all(color: Colors.black.withAlpha(8)),
+      border:
+          _isMyMessage ? null : Border.all(color: Colors.black.withAlpha(8)),
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular((isMyMessage || !isLastUser) ? 16 : 2),
-        bottomLeft: Radius.circular(isMyMessage ? 16 : 2),
-        topRight: Radius.circular((isMyMessage && isLastUser) ? 2 : 16),
-        bottomRight: Radius.circular(isMyMessage ? 2 : 16),
+        topLeft: Radius.circular((_isMyMessage || !rectBorders) ? 16 : 2),
+        bottomLeft: Radius.circular(_isMyMessage ? 16 : 2),
+        topRight: Radius.circular((_isMyMessage && rectBorders) ? 2 : 16),
+        bottomRight: Radius.circular(_isMyMessage ? 2 : 16),
       ),
       color: widget.message.status == MessageSendingStatus.FAILED
           ? Color(0xffd0021B).withAlpha(26)
-          : messageTheme.messageBackgroundColor,
+          : _messageTheme.messageBackgroundColor,
     );
   }
 
