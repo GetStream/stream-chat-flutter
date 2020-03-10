@@ -294,7 +294,7 @@ class _MessageListViewState extends State<MessageListView> {
       key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
         _isBottom = visibility.visibleBounds != Rect.zero;
-        if (_isBottom && streamChannel.channel.config.readEvents) {
+        if (_isBottom && streamChannel.channel.config?.readEvents == true) {
           if (streamChannel.channel.state.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
