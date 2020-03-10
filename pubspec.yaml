@@ -20,7 +20,8 @@ dependencies:
   file_picker: ^1.4.3+2
   image_picker: ^0.6.3+4
   keyboard_visibility: ^0.5.6
-  stream_chat: ^0.1.18
+  stream_chat:
+    path: ../stream_chat_dart
 
 dev_dependencies:
   pedantic: ^1.9.0

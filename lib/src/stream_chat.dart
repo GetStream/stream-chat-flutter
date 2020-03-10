@@ -171,19 +171,6 @@ class StreamChatState extends State<StreamChat> {
     return theme;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _subscriptions.add(widget.client.on('message.new').listen((Event e) {
-      final index = channels.indexWhere((c) => c.cid == e.cid);
-      if (index > 0) {
-        final channel = channels.removeAt(index);
-        channels.insert(0, channel);
-        _channelsController.add(channels);
-      }
-    }));
-  }
-
   /// The current user
   User get user => widget.client.state.user;
 
@@ -191,12 +178,10 @@ class StreamChatState extends State<StreamChat> {
   Stream<User> get userStream => widget.client.state.userStream;
 
   /// The current channel list
-  final List<Channel> channels = [];
+  List<Channel> get channels => client.state.channels;
 
   /// The current channel list as a stream
-  Stream<List<Channel>> get channelsStream => _channelsController.stream;
-
-  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
+  Stream<List<Channel>> get channelsStream => client.state.channelsStream;
 
   final BehaviorSubject<bool> _queryChannelsLoadingController =
       BehaviorSubject.seeded(false);
@@ -218,16 +203,12 @@ class StreamChatState extends State<StreamChat> {
     _queryChannelsLoadingController.sink.add(true);
 
     try {
-      final res = await widget.client.queryChannels(
+      await widget.client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
       );
-      channels.addAll(res);
-      _channelsController.sink.add(channels);
-    } catch (e) {
-      _channelsController.sink.addError(e);
     } finally {
       _queryChannelsLoadingController.sink.add(false);
     }
@@ -243,7 +224,6 @@ class StreamChatState extends State<StreamChat> {
     widget.client.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _queryChannelsLoadingController.close();
-    _channelsController.close();
     super.dispose();
   }
 }

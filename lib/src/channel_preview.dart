@@ -110,15 +110,15 @@ class ChannelPreview extends StatelessWidget {
       initialData: channel.state.messages,
       builder: (context, snapshot) {
         final messages = snapshot.data;
-        final lastMessage = messages.isNotEmpty ? messages.last : null;
+        final lastMessage = messages?.isNotEmpty == true ? messages.last : null;
         if (lastMessage == null) {
           return SizedBox();
         }
 
-        String text;
+        String text = lastMessage.text;
         if (lastMessage.isDeleted) {
           text = 'This message was deleted.';
-        } else {
+        } else if (lastMessage.attachments != null) {
           final prefix = lastMessage.attachments
               .map((e) {
                 if (e.type == 'image') {

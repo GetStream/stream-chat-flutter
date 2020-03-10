@@ -101,7 +101,7 @@ class _MessageWidgetState extends State<MessageWidget>
           widget.message.isDeleted
               ? _buildDeletedMessage(alignment)
               : _buildBubble(context),
-          if (_streamChannel.channel.config.replies)
+          if (_streamChannel.channel.config?.replies == true)
             _buildThreadIndicator(context),
           if (!_isNextUser) _buildTimestamp(alignment),
         ],
@@ -146,7 +146,8 @@ class _MessageWidgetState extends State<MessageWidget>
           UserAvatar(user: widget.message.user),
           if (_isMyMessage &&
               widget.nextMessage == null &&
-              widget.message.status == MessageSendingStatus.SENT)
+              (widget.message.status == MessageSendingStatus.SENT ||
+                  widget.message.status == null))
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 1.0,
@@ -278,28 +279,30 @@ class _MessageWidgetState extends State<MessageWidget>
     var nOfAttachmentWidgets = 0;
 
     final column =
-        List<Widget>.from(widget.message.attachments.map((attachment) {
-      nOfAttachmentWidgets++;
+        List<Widget>.from(widget.message.attachments?.map((attachment) {
+              nOfAttachmentWidgets++;
 
-      Widget attachmentWidget;
-      if (attachment.type == 'video') {
-        attachmentWidget = _buildVideo(attachment);
-      } else if (attachment.type == 'image' || attachment.type == 'giphy') {
-        attachmentWidget = _buildImage(attachment);
-      }
+              Widget attachmentWidget;
+              if (attachment.type == 'video') {
+                attachmentWidget = _buildVideo(attachment);
+              } else if (attachment.type == 'image' ||
+                  attachment.type == 'giphy') {
+                attachmentWidget = _buildImage(attachment);
+              }
 
-      if (attachmentWidget != null) {
-        return _buildAttachment(
-          attachmentWidget,
-          attachment,
-          nOfAttachmentWidgets,
-          context,
-        );
-      }
+              if (attachmentWidget != null) {
+                return _buildAttachment(
+                  attachmentWidget,
+                  attachment,
+                  nOfAttachmentWidgets,
+                  context,
+                );
+              }
 
-      nOfAttachmentWidgets--;
-      return SizedBox();
-    }));
+              nOfAttachmentWidgets--;
+              return SizedBox();
+            }) ??
+            []);
 
     if (widget.message.text.trim().isNotEmpty) {
       String text = widget.message.text;
@@ -312,7 +315,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 ? CrossAxisAlignment.end
                 : CrossAxisAlignment.start,
             children: <Widget>[
-              if (_streamChannel.channel.config.reactions &&
+              if (_streamChannel.channel.config?.reactions == true &&
                   nOfAttachmentWidgets == 0)
                 Align(
                   child: _buildReactions(),
@@ -323,7 +326,9 @@ class _MessageWidgetState extends State<MessageWidget>
               Stack(
                 overflow: Overflow.visible,
                 children: <Widget>[
-                  if (nOfAttachmentWidgets == 0) _buildReactionPaint(),
+                  if (nOfAttachmentWidgets == 0 &&
+                      _streamChannel.channel.config?.reactions == true)
+                    _buildReactionPaint(),
                   _buildMessageText(nOfAttachmentWidgets, text, context),
                 ],
               ),
@@ -333,7 +338,8 @@ class _MessageWidgetState extends State<MessageWidget>
       );
     }
 
-    if (_streamChannel.channel.config.reactions && nOfAttachmentWidgets > 0) {
+    if (_streamChannel.channel.config?.reactions == true &&
+        nOfAttachmentWidgets > 0) {
       column.insert(
         0,
         Align(
@@ -991,7 +997,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   @override
   bool get wantKeepAlive {
-    return widget.message.attachments.isNotEmpty;
+    return widget.message.attachments?.isNotEmpty == true;
   }
 }
 
