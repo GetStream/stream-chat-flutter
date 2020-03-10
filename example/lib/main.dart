@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
@@ -43,11 +44,11 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelListView(
-        filter: {
-          'members': {
-            '\$in': [StreamChat.of(context).user.id],
-          }
-        },
+//        filter: {
+//          'members': {
+//            '\$in': [StreamChat.of(context).user.id],
+//          }
+//        },
         sort: [SortOption('last_message_at')],
         pagination: PaginationParams(
           limit: 20,
