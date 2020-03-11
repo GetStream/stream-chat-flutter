@@ -161,7 +161,8 @@ class _MessageWidgetState extends State<MessageWidget>
               ),
             ),
           if (_isMyMessage &&
-              widget.message.status == MessageSendingStatus.SENDING)
+              (widget.message.status == MessageSendingStatus.SENDING ||
+                  widget.message.status == MessageSendingStatus.UPDATING))
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 1.0,
@@ -177,7 +178,8 @@ class _MessageWidgetState extends State<MessageWidget>
               ),
             ),
           if (_isMyMessage &&
-              widget.message.status == MessageSendingStatus.FAILED)
+              (widget.message.status == MessageSendingStatus.FAILED ||
+                  widget.message.status == MessageSendingStatus.FAILED_UPDATE))
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 1.0,
@@ -372,8 +374,16 @@ class _MessageWidgetState extends State<MessageWidget>
         ),
       ),
       onTap: () {
+        final channel = StreamChannel.of(context).channel;
         if (widget.message.status == MessageSendingStatus.FAILED) {
-          StreamChannel.of(context).channel.sendMessage(widget.message);
+          channel.sendMessage(widget.message);
+          return;
+        }
+        if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
+          StreamChat.of(context).client.updateMessage(
+                widget.message,
+                channel.cid,
+              );
           return;
         }
       },
@@ -461,6 +471,14 @@ class _MessageWidgetState extends State<MessageWidget>
             if (widget.message.status == MessageSendingStatus.FAILED)
               Text(
                 'MESSAGE FAILED · CLICK TO TRY AGAIN',
+                style: _messageTheme.messageText.copyWith(
+                  color: Colors.black.withOpacity(.5),
+                  fontSize: 11,
+                ),
+              ),
+            if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
+              Text(
+                'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
                 style: _messageTheme.messageText.copyWith(
                   color: Colors.black.withOpacity(.5),
                   fontSize: 11,
@@ -989,7 +1007,8 @@ class _MessageWidgetState extends State<MessageWidget>
         topRight: Radius.circular((_isMyMessage && rectBorders) ? 2 : 16),
         bottomRight: Radius.circular(_isMyMessage ? 2 : 16),
       ),
-      color: widget.message.status == MessageSendingStatus.FAILED
+      color: (widget.message.status == MessageSendingStatus.FAILED ||
+              widget.message.status == MessageSendingStatus.FAILED_UPDATE)
           ? Color(0xffd0021B).withAlpha(26)
           : _messageTheme.messageBackgroundColor,
     );

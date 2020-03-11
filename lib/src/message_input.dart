@@ -664,7 +664,10 @@ class _MessageInputState extends State<MessageInput> {
         sendingFuture = channel.sendMessage(message);
       }
 
-      sendingFuture = StreamChat.of(context).client.updateMessage(message);
+      sendingFuture = StreamChat.of(context).client.updateMessage(
+            message,
+            channel.cid,
+          );
     } else {
       message = Message(
         parentId: widget.parentMessage?.id,

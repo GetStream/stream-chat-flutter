@@ -106,7 +106,6 @@ class _ChannelListViewState extends State<ChannelListView> {
     final streamChat = StreamChat.of(context);
     return RefreshIndicator(
       onRefresh: () async {
-        streamChat.clearChannels();
         return streamChat.queryChannels(
           filter: widget.filter,
           sortOptions: widget.sort,

@@ -214,11 +214,6 @@ class StreamChatState extends State<StreamChat> {
     }
   }
 
-  /// Clear the current channel list
-  void clearChannels() {
-    channels.clear();
-  }
-
   @override
   void dispose() {
     widget.client.dispose();
