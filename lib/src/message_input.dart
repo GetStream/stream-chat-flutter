@@ -586,14 +586,28 @@ class _MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    final res = await channel.sendFile(
-      MultipartFile.fromBytes(
-        bytes,
-        filename: file.path.split('/').last,
-      ),
-    );
+    String url;
 
-    attachment.url = res.file;
+    if (type == FileType.IMAGE) {
+      final res = await channel.sendImage(
+        MultipartFile.fromBytes(
+          bytes,
+          filename: file.path.split('/').last,
+          contentType: MediaType.parse('image/jpeg'),
+        ),
+      );
+      url = res.file;
+    } else {
+      final res = await channel.sendFile(
+        MultipartFile.fromBytes(
+          bytes,
+          filename: file.path.split('/').last,
+        ),
+      );
+      url = res.file;
+    }
+
+    attachment.url = url;
 
     setState(() {
       attachment.uploaded = true;

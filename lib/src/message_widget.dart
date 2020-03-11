@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/full_screen_image.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
@@ -221,7 +222,7 @@ class _MessageWidgetState extends State<MessageWidget>
       alignment: alignment,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 16,
+          horizontal: 14,
           vertical: 14,
         ),
         child: Text(
@@ -895,23 +896,44 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildImage(
     Attachment attachment,
   ) {
-    return CachedNetworkImage(
-      imageUrl:
-          attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
-      errorWidget: (context, url, error) {
-        return Container(
-          width: 200,
-          height: 140,
-          color: Color(0xffd0021B).withAlpha(26),
-          child: Center(
-            child: Icon(
-              Icons.error_outline,
-              color: Colors.white,
-            ),
-          ),
-        );
+    return GestureDetector(
+      onTap: () {
+        print(attachment.toJson());
+        Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return FullScreenImage(
+            url: attachment.imageUrl ??
+                attachment.assetUrl ??
+                attachment.thumbUrl,
+          );
+        }));
       },
-      fit: BoxFit.cover,
+      child: Hero(
+        tag: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl,
+        child: CachedNetworkImage(
+          placeholder: (_, __) {
+            return Container(
+              width: 200,
+              height: 140,
+            );
+          },
+          imageUrl:
+              attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
+          errorWidget: (context, url, error) {
+            return Container(
+              width: 200,
+              height: 140,
+              color: Color(0xffd0021B).withAlpha(26),
+              child: Center(
+                child: Icon(
+                  Icons.error_outline,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          },
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 
