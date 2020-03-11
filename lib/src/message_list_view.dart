@@ -215,9 +215,11 @@ class _MessageListViewState extends State<MessageListView> {
           initialData: false,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              print((snapshot.error as Error).stackTrace.toString());
-              return Center(
-                child: Text(snapshot.error.toString()),
+              return Container(
+                color: Color(0xffd0021B).withAlpha(26),
+                child: Center(
+                  child: Text('Error loading messages'),
+                ),
               );
             }
             if (!snapshot.data) {
