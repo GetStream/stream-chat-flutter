@@ -31,10 +31,12 @@ void main() async {
     logLevel: Level.INFO,
   );
 
-  await client.setUser(
-    User(id: 'falling-mountain-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
-  );
+  await client
+      .setUser(
+        User(id: 'falling-mountain-7'),
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
+      )
+      .catchError((e) {});
 
   final channel = client.channel('messaging', id: 'godevs');
 
