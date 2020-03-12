@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -450,6 +451,32 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  Widget _buildSendingError(Widget child) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        if (widget.message.status == MessageSendingStatus.FAILED)
+          Text(
+            'MESSAGE FAILED · CLICK TO TRY AGAIN',
+            style: _messageTheme.messageText.copyWith(
+              color: Colors.black.withOpacity(.5),
+              fontSize: 11,
+            ),
+          ),
+        if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
+          Text(
+            'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
+            style: _messageTheme.messageText.copyWith(
+              color: Colors.black.withOpacity(.5),
+              fontSize: 11,
+            ),
+          ),
+        child,
+      ],
+    );
+  }
+
   Padding _buildMessageText(
     int nOfAttachmentWidgets,
     String text,
@@ -465,62 +492,41 @@ class _MessageWidgetState extends State<MessageWidget>
             _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
         padding: EdgeInsets.all(10),
         constraints: BoxConstraints.loose(Size.fromWidth(300)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (widget.message.status == MessageSendingStatus.FAILED)
-              Text(
-                'MESSAGE FAILED · CLICK TO TRY AGAIN',
-                style: _messageTheme.messageText.copyWith(
-                  color: Colors.black.withOpacity(.5),
-                  fontSize: 11,
-                ),
-              ),
-            if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
-              Text(
-                'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
-                style: _messageTheme.messageText.copyWith(
-                  color: Colors.black.withOpacity(.5),
-                  fontSize: 11,
-                ),
-              ),
-            MarkdownBody(
-              data: text,
-              onTapLink: (link) {
-                if (link.startsWith('@')) {
-                  final mentionedUser =
-                      widget.message.mentionedUsers.firstWhere(
-                    (u) => '@${u.name.replaceAll(' ', '')}' == link,
-                    orElse: () => null,
-                  );
+        child: _buildSendingError(
+          MarkdownBody(
+            data: text,
+            onTapLink: (link) {
+              if (link.startsWith('@')) {
+                final mentionedUser = widget.message.mentionedUsers.firstWhere(
+                  (u) => '@${u.name.replaceAll(' ', '')}' == link,
+                  orElse: () => null,
+                );
 
-                  if (widget.onMentionTap != null) {
-                    widget.onMentionTap(mentionedUser);
-                  } else {
-                    print('tap on ${mentionedUser.name}');
-                  }
+                if (widget.onMentionTap != null) {
+                  widget.onMentionTap(mentionedUser);
                 } else {
-                  _launchURL(link);
+                  print('tap on ${mentionedUser.name}');
                 }
-              },
-              styleSheet: MarkdownStyleSheet.fromTheme(
-                Theme.of(context).copyWith(
-                  textTheme: Theme.of(context).textTheme.apply(
-                        bodyColor: _messageTheme.messageText.color,
-                        decoration: _messageTheme.messageText.decoration,
-                        decorationColor:
-                            _messageTheme.messageText.decorationColor,
-                        decorationStyle:
-                            _messageTheme.messageText.decorationStyle,
-                        fontFamily: _messageTheme.messageText.fontFamily,
-                      ),
-                ),
-              ).copyWith(
-                p: _messageTheme.messageText,
+              } else {
+                _launchURL(link);
+              }
+            },
+            styleSheet: MarkdownStyleSheet.fromTheme(
+              Theme.of(context).copyWith(
+                textTheme: Theme.of(context).textTheme.apply(
+                      bodyColor: _messageTheme.messageText.color,
+                      decoration: _messageTheme.messageText.decoration,
+                      decorationColor:
+                          _messageTheme.messageText.decorationColor,
+                      decorationStyle:
+                          _messageTheme.messageText.decorationStyle,
+                      fontFamily: _messageTheme.messageText.fontFamily,
+                    ),
               ),
+            ).copyWith(
+              p: _messageTheme.messageText,
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -896,42 +902,54 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildImage(
     Attachment attachment,
   ) {
-    return GestureDetector(
-      onTap: () {
-        print(attachment.toJson());
-        Navigator.push(context, MaterialPageRoute(builder: (_) {
-          return FullScreenImage(
-            url: attachment.imageUrl ??
-                attachment.assetUrl ??
-                attachment.thumbUrl,
+    return Hero(
+      tag: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl,
+      child: CachedNetworkImage(
+        imageBuilder: (context, provider) {
+          return GestureDetector(
+            child: Image(image: provider),
+            onTap: () {
+              print(attachment.toJson());
+              Navigator.push(context, MaterialPageRoute(builder: (_) {
+                return FullScreenImage(
+                  url: attachment.imageUrl ??
+                      attachment.assetUrl ??
+                      attachment.thumbUrl,
+                );
+              }));
+            },
           );
-        }));
-      },
-      child: Hero(
-        tag: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl,
-        child: CachedNetworkImage(
-          placeholder: (_, __) {
-            return Container(
-              width: 200,
-              height: 140,
-            );
-          },
-          imageUrl:
-              attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
-          errorWidget: (context, url, error) {
-            return Container(
-              width: 200,
-              height: 140,
-              color: Color(0xffd0021B).withAlpha(26),
-              child: Center(
-                child: Icon(
-                  Icons.error_outline,
-                  color: Colors.white,
-                ),
-              ),
-            );
-          },
-          fit: BoxFit.cover,
+        },
+        placeholder: (_, __) {
+          return Container(
+            width: 200,
+            height: 140,
+          );
+        },
+        imageUrl:
+            attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
+        errorWidget: (context, url, error) => _buildErrorImage(attachment),
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget _buildErrorImage(Attachment attachment) {
+    if (attachment.localUri != null) {
+      return Image.file(
+        File(attachment.localUri.path),
+      );
+    }
+    return Center(
+      child: Container(
+        width: 200,
+        height: 140,
+        color: Color(0xffd0021B).withAlpha(26),
+        child: Center(
+          child: Icon(
+            Icons.error_outline,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -956,6 +974,9 @@ class _MessageWidgetState extends State<MessageWidget>
           videoPlayerController: videoController,
           autoInitialize: true,
           errorBuilder: (_, e) {
+            if (attachment.thumbUrl == null) {
+              return _buildErrorImage(attachment);
+            }
             return Stack(
               children: <Widget>[
                 Container(

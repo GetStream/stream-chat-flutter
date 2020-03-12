@@ -573,6 +573,10 @@ class _MessageInputState extends State<MessageInput> {
       file = await FilePicker.getFile(type: type);
     }
 
+    if (file == null) {
+      return;
+    }
+
     final channel = StreamChannel.of(context).channel;
 
     final bytes = await file.readAsBytes();
@@ -717,6 +721,7 @@ class _MessageInputState extends State<MessageInput> {
         imageUrl: attachment.type == FileType.IMAGE ? attachment.url : null,
         assetUrl: attachment.url,
         type: type,
+        localUri: attachment.file.uri,
       );
     });
   }
