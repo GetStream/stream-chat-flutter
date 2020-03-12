@@ -502,6 +502,7 @@ class _MessageInputState extends State<MessageInput> {
           ),
         ),
         context: context,
+        isScrollControlled: true,
         builder: (_) {
           return Column(
             mainAxisSize: MainAxisSize.min,

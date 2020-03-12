@@ -14,7 +14,7 @@ class ReactionPicker extends StatelessWidget {
     @required this.reactionToEmoji,
     @required this.message,
     @required this.channel,
-    this.size = 40,
+    this.size = 30,
   }) : super(key: key);
 
   final Map<String, String> reactionToEmoji;
