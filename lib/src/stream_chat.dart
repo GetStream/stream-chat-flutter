@@ -203,7 +203,7 @@ class StreamChatState extends State<StreamChat> {
     _queryChannelsLoadingController.sink.add(true);
 
     try {
-      await widget.client.queryChannels(
+      widget.client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
