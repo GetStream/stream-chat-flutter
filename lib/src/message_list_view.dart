@@ -320,11 +320,7 @@ class _MessageListViewState extends State<MessageListView> {
     Stream<List<Message>> stream;
 
     if (widget.parentMessage == null) {
-      stream = streamChannel.channel.state.messagesStream.map((messages) =>
-          messages
-              .where((m) =>
-                  !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
-              .toList());
+      stream = streamChannel.channel.state.messagesStream;
     } else {
       streamChannel.getReplies(widget.parentMessage.id);
       stream = streamChannel.channel.state.threadsStream
@@ -332,7 +328,12 @@ class _MessageListViewState extends State<MessageListView> {
           .map((threads) => threads[widget.parentMessage.id]);
     }
 
-    _streamListener = stream.listen((newMessages) {
+    _streamListener = stream
+        .map((messages) => messages
+            .where((m) =>
+                !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
+            .toList())
+        .listen((newMessages) {
       newMessages = newMessages.reversed.toList();
       if (_messages.isEmpty ||
           newMessages.isEmpty ||

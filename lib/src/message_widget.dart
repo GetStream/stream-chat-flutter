@@ -909,7 +909,6 @@ class _MessageWidgetState extends State<MessageWidget>
           return GestureDetector(
             child: Image(image: provider),
             onTap: () {
-              print(attachment.toJson());
               Navigator.push(context, MaterialPageRoute(builder: (_) {
                 return FullScreenImage(
                   url: attachment.imageUrl ??
