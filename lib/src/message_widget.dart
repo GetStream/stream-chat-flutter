@@ -404,7 +404,8 @@ class _MessageWidgetState extends State<MessageWidget>
             borderRadius: boxDecoration.borderRadius,
             child: Container(
               decoration: boxDecoration,
-              constraints: BoxConstraints.loose(Size.fromWidth(300)),
+              constraints: BoxConstraints.loose(
+                  Size.fromWidth(MediaQuery.of(context).size.width * 0.7)),
               child: Stack(
                 children: <Widget>[
                   Column(
@@ -447,7 +448,8 @@ class _MessageWidgetState extends State<MessageWidget>
         decoration:
             _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
         padding: EdgeInsets.all(10),
-        constraints: BoxConstraints.loose(Size.fromWidth(300)),
+        constraints: BoxConstraints.loose(
+            Size.fromWidth(MediaQuery.of(context).size.width * 0.7)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,7 +573,12 @@ class _MessageWidgetState extends State<MessageWidget>
         }
       },
       child: Container(
-        constraints: BoxConstraints.loose(Size(300, 500)),
+        constraints: BoxConstraints.loose(
+          Size(
+            MediaQuery.of(context).size.width * 0.7,
+            500,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -582,7 +589,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 attachment.title,
                 overflow: TextOverflow.ellipsis,
                 style: _messageTheme.messageText.copyWith(
-                  color: Colors.blue,
+                  color: StreamChatTheme.of(context).accentColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -658,7 +665,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 _isMyMessage
                     ? FlatButton(
                         child: Padding(
-                          padding: const EdgeInsets.all(28.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Text(
                             'Delete message',
                             style: theme.textTheme.headline
@@ -677,7 +684,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 _isMyMessage
                     ? FlatButton(
                         child: Padding(
-                          padding: const EdgeInsets.all(28.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Text(
                             'Edit message',
                             style: theme.textTheme.headline,
@@ -696,7 +703,7 @@ class _MessageWidgetState extends State<MessageWidget>
                         !widget.isParent)
                     ? FlatButton(
                         child: Padding(
-                          padding: const EdgeInsets.all(28.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Text(
                             'Start a thread',
                             style: theme.textTheme.headline,
@@ -719,6 +726,7 @@ class _MessageWidgetState extends State<MessageWidget>
       context: context,
       elevation: 2,
       clipBehavior: Clip.hardEdge,
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),

@@ -1,3 +1,7 @@
+## 0.1.9
+
+- Fix message ui overflow
+
 ## 0.1.8
 
 - Bug fix
