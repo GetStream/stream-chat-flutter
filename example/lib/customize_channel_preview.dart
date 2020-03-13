@@ -73,11 +73,11 @@ class ChannelListPage extends StatelessWidget {
 
   Widget _channelPreviewBuilder(BuildContext context, Channel channel) {
     final lastMessage = channel.state.messages.reversed.firstWhere(
-      (message) => message.type != "deleted",
+      (message) => message.type != 'deleted',
       orElse: () => null,
     );
 
-    final subtitle = (lastMessage == null ? "nothing yet" : lastMessage.text);
+    final subtitle = (lastMessage == null ? 'nothing yet' : lastMessage.text);
     final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
 
     return ListTile(

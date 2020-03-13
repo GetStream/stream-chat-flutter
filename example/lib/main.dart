@@ -5,6 +5,7 @@ void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
+    persistenceEnabled: false,
   );
 
   await client.setUser(
@@ -41,11 +42,11 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelListView(
-//        filter: {
-//          'members': {
-//            '\$in': [StreamChat.of(context).user.id],
-//          }
-//        },
+        filter: {
+          'members': {
+            '\$in': [StreamChat.of(context).user.id],
+          }
+        },
         sort: [SortOption('last_message_at')],
         pagination: PaginationParams(
           limit: 20,
