@@ -197,20 +197,23 @@ class StreamChatState extends State<StreamChat> {
     PaginationParams paginationParams,
     Map<String, dynamic> options,
   }) async {
-    if (_queryChannelsLoadingController.value) {
+    if (_queryChannelsLoadingController.value == true) {
       return;
     }
     _queryChannelsLoadingController.sink.add(true);
 
     try {
-      widget.client.queryChannels(
+      await widget.client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
       );
-    } finally {
       _queryChannelsLoadingController.sink.add(false);
+    } catch (err, stackTrace) {
+      _queryChannelsLoadingController.addError(err, stackTrace);
+    } finally {
+//      _queryChannelsLoadingController.sink.add(false);
     }
   }
 

@@ -95,7 +95,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final alignment =
         _isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
-    List<Widget> row = <Widget>[
+    var row = List<Widget>.from([
       Column(
         crossAxisAlignment:
             _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -113,7 +113,7 @@ class _MessageWidgetState extends State<MessageWidget>
               width: 40,
             )
           : _buildUserAvatar(),
-    ];
+    ]);
 
     if (!_isMyMessage) {
       row = row.reversed.toList();
@@ -309,7 +309,7 @@ class _MessageWidgetState extends State<MessageWidget>
             []);
 
     if (widget.message.text.trim().isNotEmpty) {
-      String text = widget.message.text;
+      var text = widget.message.text;
       text = _replaceMentions(text);
 
       column.addAll(

@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
 
-  await client
-      .setUser(
-        User(id: 'super-band-9'),
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
-      )
-      .catchError((e) {});
+  await client.setUser(
+    User(id: 'super-band-9'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
+  );
 
   runApp(MyApp(client));
 }
@@ -44,11 +41,11 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ChannelListView(
-        filter: {
-          'members': {
-            '\$in': [StreamChat.of(context).user.id],
-          }
-        },
+//        filter: {
+//          'members': {
+//            '\$in': [StreamChat.of(context).user.id],
+//          }
+//        },
         sort: [SortOption('last_message_at')],
         pagination: PaginationParams(
           limit: 20,

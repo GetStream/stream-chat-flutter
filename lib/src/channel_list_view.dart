@@ -125,7 +125,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                 return widget.errorBuilder(snapshot.error);
               }
 
-              String message = snapshot.error.toString();
+              var message = snapshot.error.toString();
               if (snapshot.error is DioError) {
                 final dioError = snapshot.error as DioError;
                 if (dioError.type == DioErrorType.RESPONSE) {
@@ -287,6 +287,17 @@ class _ChannelListViewState extends State<ChannelListView> {
         stream: streamChat.queryChannelsLoading,
         initialData: false,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Container(
+              color: Color(0xffd0021B).withAlpha(26),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(
+                  child: Text('Error loading messages'),
+                ),
+              ),
+            );
+          }
           return Container(
             height: 100,
             padding: EdgeInsets.all(32),

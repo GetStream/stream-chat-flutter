@@ -25,18 +25,15 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// If you now run the simulator you will see a single channel UI.
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   final client = Client(
     'b67pax5b2wdq',
     logLevel: Level.INFO,
   );
 
-  await client
-      .setUser(
-        User(id: 'falling-mountain-7'),
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
-      )
-      .catchError((e) {});
+  await client.setUser(
+    User(id: 'falling-mountain-7'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
+  );
 
   final channel = client.channel('messaging', id: 'godevs');
 

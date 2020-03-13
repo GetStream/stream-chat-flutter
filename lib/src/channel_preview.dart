@@ -118,7 +118,7 @@ class ChannelPreview extends StatelessWidget {
           return SizedBox();
         }
 
-        String text = lastMessage.text;
+        var text = lastMessage.text;
         if (lastMessage.isDeleted) {
           text = 'This message was deleted.';
         } else if (lastMessage.attachments != null) {
