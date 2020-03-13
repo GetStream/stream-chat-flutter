@@ -156,6 +156,7 @@ class _MessageWidgetState extends State<MessageWidget>
               ),
               child: CircleAvatar(
                 radius: 4,
+                backgroundColor: StreamChatTheme.of(context).accentColor,
                 child: Icon(
                   Icons.done,
                   size: 4,

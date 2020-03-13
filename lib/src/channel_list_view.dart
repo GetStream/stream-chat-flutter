@@ -293,7 +293,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(
-                  child: Text('Error loading messages'),
+                  child: Text('Error loading channels'),
                 ),
               ),
             );
