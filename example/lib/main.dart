@@ -28,11 +28,9 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
-      home: Container(
-        child: StreamChat(
-          client: client,
-          child: ChannelListPage(),
-        ),
+      home: StreamChat(
+        client: client,
+        child: ChannelListPage(),
       ),
     );
   }
