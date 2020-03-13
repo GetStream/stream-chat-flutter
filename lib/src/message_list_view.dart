@@ -329,10 +329,12 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     _streamListener = stream
-        .map((messages) => messages
-            .where((m) =>
-                !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
-            .toList())
+        .map((messages) =>
+            messages
+                ?.where((m) =>
+                    !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
+                ?.toList() ??
+            [])
         .listen((newMessages) {
       newMessages = newMessages.reversed.toList();
       if (_messages.isEmpty ||

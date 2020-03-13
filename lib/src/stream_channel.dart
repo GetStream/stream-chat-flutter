@@ -76,7 +76,6 @@ class StreamChannelState extends State<StreamChannel> {
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(String parentId) async {
     _queryMessageController.add(true);
-    print('PARENT $parentId');
 
     String firstId;
     if (widget.channel.state.threads.containsKey(parentId)) {
