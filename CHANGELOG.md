@@ -1,3 +1,7 @@
+## 0.1.10
+
+- Do not automatically dispose Client object when disposing StreamChat widget
+
 ## 0.1.9
 
 - Fix message ui overflow
