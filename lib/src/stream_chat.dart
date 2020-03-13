@@ -216,7 +216,6 @@ class StreamChatState extends State<StreamChat> {
 
   @override
   void dispose() {
-    widget.client.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _queryChannelsLoadingController.close();
     super.dispose();
