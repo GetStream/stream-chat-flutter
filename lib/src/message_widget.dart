@@ -16,6 +16,7 @@ import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
@@ -100,7 +101,8 @@ class _MessageWidgetState extends State<MessageWidget>
         crossAxisAlignment:
             _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
-          widget.message.isDeleted
+          (widget.message.isDeleted &&
+                  widget.message.status != MessageSendingStatus.FAILED_DELETE)
               ? _buildDeletedMessage(alignment)
               : _buildBubble(context),
           if (_streamChannel.channel.config?.replies == true)
@@ -182,7 +184,8 @@ class _MessageWidgetState extends State<MessageWidget>
             ),
           if (_isMyMessage &&
               (widget.message.status == MessageSendingStatus.FAILED ||
-                  widget.message.status == MessageSendingStatus.FAILED_UPDATE))
+                  widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
+                  widget.message.status == MessageSendingStatus.FAILED_DELETE))
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 1.0,
@@ -389,6 +392,14 @@ class _MessageWidgetState extends State<MessageWidget>
               );
           return;
         }
+
+        if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
+          StreamChat.of(context).client.deleteMessage(
+                widget.message,
+                channel.cid,
+              );
+          return;
+        }
       },
       onLongPress: () {
         if (widget.message.isEphemeral ||
@@ -469,6 +480,14 @@ class _MessageWidgetState extends State<MessageWidget>
         if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
           Text(
             'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
+            style: _messageTheme.messageText.copyWith(
+              color: Colors.black.withOpacity(.5),
+              fontSize: 11,
+            ),
+          ),
+        if (widget.message.status == MessageSendingStatus.FAILED_DELETE)
+          Text(
+            'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
             style: _messageTheme.messageText.copyWith(
               color: Colors.black.withOpacity(.5),
               fontSize: 11,
@@ -1060,7 +1079,8 @@ class _MessageWidgetState extends State<MessageWidget>
         bottomRight: Radius.circular(_isMyMessage ? 2 : 16),
       ),
       color: (widget.message.status == MessageSendingStatus.FAILED ||
-              widget.message.status == MessageSendingStatus.FAILED_UPDATE)
+              widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
+              widget.message.status == MessageSendingStatus.FAILED_DELETE)
           ? Color(0xffd0021B).withAlpha(26)
           : _messageTheme.messageBackgroundColor,
     );
