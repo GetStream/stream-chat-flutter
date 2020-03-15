@@ -593,7 +593,7 @@ class _MessageInputState extends State<MessageInput> {
 
     String url;
 
-    if (type == FileType.IMAGE) {
+    if (type == FileType.image) {
       final res = await channel.sendImage(
         MultipartFile.fromBytes(
           bytes,
