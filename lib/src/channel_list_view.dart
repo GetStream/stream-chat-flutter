@@ -126,7 +126,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                 return widget.errorBuilder(snapshot.error);
               }
 
-              String message = snapshot.error.toString();
+              var message = snapshot.error.toString();
               if (snapshot.error is DioError) {
                 final dioError = snapshot.error as DioError;
                 if (dioError.type == DioErrorType.RESPONSE) {

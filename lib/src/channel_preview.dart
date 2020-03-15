@@ -68,6 +68,9 @@ class ChannelPreview extends StatelessWidget {
       stream: channel.lastMessageAtStream,
       initialData: channel.lastMessageAt,
       builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return SizedBox();
+        }
         final lastMessageAt = snapshot.data.toLocal();
 
         String stringDate;
