@@ -449,7 +449,7 @@ class _MessageInputState extends State<MessageInput> {
 
   Widget _buildAttachment(_SendingAttachment attachment) {
     switch (attachment.type) {
-      case FileType.IMAGE:
+      case FileType.image:
         return attachment.file != null
             ? Image.file(
                 attachment.file,
@@ -460,7 +460,7 @@ class _MessageInputState extends State<MessageInput> {
                 fit: BoxFit.cover,
               );
         break;
-      case FileType.VIDEO:
+      case FileType.video:
         return Container(
           child: Icon(Icons.videocam),
           color: Colors.black26,
@@ -519,7 +519,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.image),
                 title: Text('Upload a photo'),
                 onTap: () {
-                  _pickFile(FileType.IMAGE, false);
+                  _pickFile(FileType.image, false);
                   Navigator.pop(context);
                 },
               ),
@@ -527,7 +527,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.video_library),
                 title: Text('Upload a video'),
                 onTap: () {
-                  _pickFile(FileType.VIDEO, false);
+                  _pickFile(FileType.video, false);
                   Navigator.pop(context);
                 },
               ),
@@ -536,7 +536,7 @@ class _MessageInputState extends State<MessageInput> {
                 title: Text('Photo from camera'),
                 onTap: () {
                   ImagePicker.pickImage(source: ImageSource.camera);
-                  _pickFile(FileType.IMAGE, true);
+                  _pickFile(FileType.image, true);
                   Navigator.pop(context);
                 },
               ),
@@ -544,7 +544,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.videocam),
                 title: Text('Video from camera'),
                 onTap: () {
-                  _pickFile(FileType.VIDEO, true);
+                  _pickFile(FileType.video, true);
                   Navigator.pop(context);
                 },
               ),
@@ -552,7 +552,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.insert_drive_file),
                 title: Text('Upload a file'),
                 onTap: () {
-                  _pickFile(FileType.ANY, false);
+                  _pickFile(FileType.any, false);
                   Navigator.pop(context);
                 },
               ),
@@ -565,9 +565,9 @@ class _MessageInputState extends State<MessageInput> {
     File file;
 
     if (camera) {
-      if (type == FileType.IMAGE) {
+      if (type == FileType.image) {
         file = await ImagePicker.pickImage(source: ImageSource.camera);
-      } else if (type == FileType.VIDEO) {
+      } else if (type == FileType.video) {
         file = await ImagePicker.pickVideo(source: ImageSource.camera);
       }
     } else {
@@ -709,17 +709,17 @@ class _MessageInputState extends State<MessageInput> {
     return attachments.map((attachment) {
       String type;
       switch (attachment.type) {
-        case FileType.IMAGE:
+        case FileType.image:
           type = 'image';
           break;
-        case FileType.VIDEO:
+        case FileType.video:
           type = 'video';
           break;
         default:
           type = 'file';
       }
       return Attachment(
-        imageUrl: attachment.type == FileType.IMAGE ? attachment.url : null,
+        imageUrl: attachment.type == FileType.image ? attachment.url : null,
         assetUrl: attachment.url,
         type: type,
         localUri: attachment.file.uri,
@@ -774,19 +774,19 @@ class _MessageInputState extends State<MessageInput> {
       widget.editMessage.attachments.forEach((attachment) {
         if (attachment.type == 'image') {
           _attachments.add(_SendingAttachment(
-            type: FileType.IMAGE,
+            type: FileType.image,
             url: attachment.imageUrl,
             uploaded: true,
           ));
         } else if (attachment.type == 'video') {
           _attachments.add(_SendingAttachment(
-            type: FileType.VIDEO,
+            type: FileType.video,
             url: attachment.assetUrl,
             uploaded: true,
           ));
         } else if (attachment.type != 'giphy') {
           _attachments.add(_SendingAttachment(
-            type: FileType.ANY,
+            type: FileType.any,
             url: attachment.assetUrl,
             uploaded: true,
           ));

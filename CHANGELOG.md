@@ -1,3 +1,7 @@
+## 0.1.11
+
+- Fix bug in ChannelPreview when list of messages is empty
+
 ## 0.1.10
 
 - Do not automatically dispose Client object when disposing StreamChat widget

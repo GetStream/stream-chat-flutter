@@ -96,7 +96,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final alignment =
         _isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
-    var row = List<Widget>.from([
+    var row = <Widget>[
       Column(
         crossAxisAlignment:
             _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
