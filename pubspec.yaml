@@ -10,17 +10,17 @@ dependencies:
   flutter:
     sdk: flutter
   rxdart: ^0.23.1
-  flutter_widgets: ^0.1.11
   jiffy: ^3.0.1
   cached_network_image: ^2.0.0
   flutter_markdown: ^0.3.4
   url_launcher: ^5.4.2
   video_player: ^0.10.8+1
   chewie: ^0.9.10
-  file_picker: ^1.4.3+2
+  file_picker: ^1.5.0
   image_picker: ^0.6.3+4
   keyboard_visibility: ^0.5.6
   stream_chat: ^0.1.19
+  visibility_detector: ^0.1.4
 
 dev_dependencies:
   pedantic: ^1.9.0

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../stream_chat_flutter.dart';
 import 'message_widget.dart';
