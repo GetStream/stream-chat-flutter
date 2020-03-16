@@ -26,7 +26,7 @@ It teaches you how to use this SDK and also shows how to make common changes.
 This repo includes a fully functional example app with setup instructions.
 The example is available under the [example](https://github.com/GetStream/stream-chat-flutter/tree/master/example) folder.
 
-### Add dependency
+## Add dependency
 
 ```yaml
 dependencies:
@@ -34,6 +34,17 @@ dependencies:
 ```
 
 You should then run `flutter packages get`
+
+### Android
+
+All set ✅
+
+### iOS
+
+The library uses [flutter file picker plugin](https://github.com/miguelpruivo/flutter_file_picker) to pick
+files from the os.
+
+Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker) to fulfill iOS requirements.
 
 ## Docs
 
