@@ -44,7 +44,7 @@ All set ✅
 The library uses [flutter file picker plugin](https://github.com/miguelpruivo/flutter_file_picker) to pick
 files from the os.
 
-Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker) to fulfill iOS requirements.
+Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup#ios) to fulfill iOS requirements.
 
 ## Docs
 
