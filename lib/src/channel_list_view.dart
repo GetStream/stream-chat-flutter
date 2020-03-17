@@ -116,7 +116,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       child: StreamBuilder<List<Channel>>(
           stream: streamChat.channelsStream,
           builder: (context, snapshot) {
-            if (snapshot.hasError) {
+            if (false && snapshot.hasError) {
               if (snapshot.error is Error) {
                 print((snapshot.error as Error).stackTrace);
               }

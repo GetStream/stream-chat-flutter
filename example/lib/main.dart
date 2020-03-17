@@ -5,12 +5,11 @@ void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-    persistenceEnabled: false,
   );
 
   await client.setUser(
-    User(id: 'super-band-9'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
+    User(id: 'super-band-007'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC0wMDcifQ.DlbyHN6nK7jBTJDp6RJOuBJWwnYoy8Zq8208RPL4uLY',
   );
 
   runApp(MyApp(client));

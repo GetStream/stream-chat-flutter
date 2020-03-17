@@ -59,7 +59,7 @@ class StreamChat extends StatefulWidget {
   }
 }
 
-class StreamChatState extends State<StreamChat> {
+class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   final List<StreamSubscription> _subscriptions = [];
   Client get client => widget.client;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -212,8 +212,22 @@ class StreamChatState extends State<StreamChat> {
       _queryChannelsLoadingController.sink.add(false);
     } catch (err, stackTrace) {
       _queryChannelsLoadingController.addError(err, stackTrace);
-    } finally {
-//      _queryChannelsLoadingController.sink.add(false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('NEW STATE $state');
+    if (state == AppLifecycleState.paused) {
+      client.disconnect();
+    } else if (state == AppLifecycleState.resumed) {
+      client.connect();
     }
   }
 
@@ -221,6 +235,7 @@ class StreamChatState extends State<StreamChat> {
   void dispose() {
     _subscriptions.forEach((s) => s.cancel());
     _queryChannelsLoadingController.close();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
