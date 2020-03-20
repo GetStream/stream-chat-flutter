@@ -223,11 +223,12 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('NEW STATE $state');
     if (state == AppLifecycleState.paused) {
       client.disconnect();
     } else if (state == AppLifecycleState.resumed) {
-      client.connect();
+      if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
+        client.connect();
+      }
     }
   }
 

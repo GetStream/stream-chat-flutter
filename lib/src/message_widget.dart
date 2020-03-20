@@ -261,7 +261,7 @@ class _MessageWidgetState extends State<MessageWidget>
       row = row.reversed.toList();
     }
 
-    return widget.message.replyCount > 0
+    return (widget.message.replyCount ?? 0) > 0
         ? GestureDetector(
             onTap: () {
               if (widget.isParent) {
