@@ -35,14 +35,9 @@ void main() async {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.Xd4h2PUBo2NYPk12gjlXDNY71jlyJYTCuQ_moeNbnbA',
   );
 
-  final channel = client.channel('messaging', extraData: {
-    'members': [
-      'falling-mountain-7',
-      '12a73f88-4dd6-44d3-9185-014002d64b33',
-    ],
-  });
+  final channel = client.channel('messaging', id: 'godevs');
 
-  await channel.create();
+  // ignore: unawaited_futures
   channel.watch();
 
   runApp(MyApp(client, channel));
