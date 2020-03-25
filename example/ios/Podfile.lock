@@ -56,6 +56,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_apns (0.0.1):
     - Flutter
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - flutter_plugin_android_lifecycle (0.0.1):
     - Flutter
   - FMDB (2.7.5):
@@ -135,6 +137,7 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - flutter_apns (from `.symlinks/plugins/flutter_apns/ios`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - keyboard_visibility (from `.symlinks/plugins/keyboard_visibility/ios`)
@@ -182,6 +185,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_apns:
     :path: ".symlinks/plugins/flutter_apns/ios"
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_plugin_android_lifecycle:
     :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   image_picker:
@@ -218,7 +223,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   file_picker: 408623be2125b79a4539cf703be3d4b3abe5e245
   Firebase: fe7f74012742ab403451dd283e6909b8f1fb348a
-  firebase_messaging: edab61b94fb3bfb399f32f9d4dedb5196d680084
+  firebase_messaging: cffb57ce40958c6204f03fb0c81713e4cd1e240c
   FirebaseAnalytics: 572e467f3d977825266e8ccd52674aa3e6f47eac
   FirebaseAnalyticsInterop: 3f86269c38ae41f47afeb43ebf32a001f58fcdae
   FirebaseCore: ed0a24c758a57c2b88c5efa8e6a8195e868af589
@@ -229,6 +234,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 4ec33842d36b3319e062e51fb8b35a74f726950d
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_apns: f516b118e423fe7c0a38771180549c4d6cb67c2f
+  flutter_local_notifications: 9e4738ce2471c5af910d961a6b7eadcf57c50186
   flutter_plugin_android_lifecycle: 47de533a02850f070f5696a623995e93eddcdb9b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GoogleAppMeasurement: c29d405ff76e18551b5d158eaba6753fda8c7542
@@ -253,7 +259,7 @@ SPEC CHECKSUMS:
   url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
   video_player: 69c5f029fac4ffe4fc8a85ea7f7b793709661549
   video_player_web: da8cadb8274ed4f8dbee8d7171b420dedd437ce7
-  wakelock: bd3dcc6a8bcf53a1c0309780ff192dcee67c6ccb
+  wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
 
 PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
 

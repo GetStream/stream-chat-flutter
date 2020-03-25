@@ -1,7 +1,6 @@
 package com.example.example
 
 import com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin
-import com.example.path_provider.PathProviderPlugin
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
