@@ -1,10 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+Future<void> _handleBackgroundNotification(
+  Map<String, dynamic> notification,
+) async {
+  final notificationData = await NotificationService.storeMessage(notification);
+
+  final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    'Message notifications',
+    'Message notifications',
+    'Channel dedicated to message notifications',
+    importance: Importance.Max,
+    priority: Priority.High,
+  );
+
+  final androidNotificationOptions = AndroidNotificationOptions(
+    androidNotificationDetails: androidPlatformChannelSpecifics,
+    id: notificationData.message.id.hashCode,
+    title:
+        'CUSTOM ${notificationData.message.user.name} @ ${notificationData.channel.cid}',
+    body: notificationData.message.text,
+  );
+
+  await NotificationService.sendNotification(androidNotificationOptions);
+}
+
 void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
+    notificationHandler: _handleBackgroundNotification,
   );
 
   await client.setUser(
