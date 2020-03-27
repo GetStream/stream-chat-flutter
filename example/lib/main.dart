@@ -33,8 +33,8 @@ void main() async {
   );
 
   await client.setUser(
-    User(id: 'super-band-007'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC0wMDcifQ.DlbyHN6nK7jBTJDp6RJOuBJWwnYoy8Zq8208RPL4uLY',
+    User(id: 'user1'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU',
   );
 
   runApp(MyApp(client));

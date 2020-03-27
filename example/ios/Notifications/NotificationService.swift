@@ -19,16 +19,14 @@ class NotificationService: UNNotificationServiceExtension {
         defer {
             contentHandler(bestAttemptContent ?? request.content)
         }
-        print("DID RECEIVE NOTIFICATION")
-            // Modify the notification content here...
-            bestAttemptContent?.title = "\(bestAttemptContent?.title ?? "<NoContent>") [modified]"
+        // Modify the notification content here...
+        bestAttemptContent?.title = "[modified] \(bestAttemptContent?.title ?? "<NoContent>")"
     }
     
     override func serviceExtensionTimeWillExpire() {
         // Called just before the extension will be terminated by the system.
         // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
-            bestAttemptContent.title = "\(bestAttemptContent.title) [modified]"
             contentHandler(bestAttemptContent)
         }
     }
