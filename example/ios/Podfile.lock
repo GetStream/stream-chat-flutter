@@ -91,6 +91,7 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.5.2):
     - GoogleUtilities/Logger
+  - GzipSwift (5.0.0)
   - image_picker (0.0.1):
     - Flutter
   - keyboard_visibility (0.5.0):
@@ -110,6 +111,16 @@ PODS:
   - PromisesObjC (1.2.8)
   - Protobuf (3.11.4)
   - Reachability (3.2)
+  - ReachabilitySwift (4.3.1)
+  - RxAppState (1.6.0):
+    - RxCocoa (~> 5.0)
+    - RxSwift (~> 5.0)
+  - RxCocoa (5.1.1):
+    - RxRelay (~> 5)
+    - RxSwift (~> 5)
+  - RxRelay (5.1.1):
+    - RxSwift (~> 5)
+  - RxSwift (5.0.1)
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_macos (0.0.1):
@@ -119,6 +130,13 @@ PODS:
   - sqflite (0.0.1):
     - Flutter
     - FMDB (~> 2.7.2)
+  - Starscream (3.1.1)
+  - StreamChatCore (1.6.1):
+    - GzipSwift (~> 5.0.0)
+    - ReachabilitySwift (~> 4.3.0)
+    - RxAppState (~> 1.6.0)
+    - RxSwift (~> 5.0.0)
+    - Starscream (~> 3.1.0)
   - url_launcher (0.0.1):
     - Flutter
   - url_launcher_macos (0.0.1):
@@ -148,6 +166,7 @@ DEPENDENCIES:
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - StreamChatCore
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - url_launcher_macos (from `.symlinks/plugins/url_launcher_macos/ios`)
   - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
@@ -171,10 +190,18 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleDataTransportCCTSupport
     - GoogleUtilities
+    - GzipSwift
     - nanopb
     - PromisesObjC
     - Protobuf
     - Reachability
+    - ReachabilitySwift
+    - RxAppState
+    - RxCocoa
+    - RxRelay
+    - RxSwift
+    - Starscream
+    - StreamChatCore
 
 EXTERNAL SOURCES:
   file_picker:
@@ -241,6 +268,7 @@ SPEC CHECKSUMS:
   GoogleDataTransport: a857c6a002d201b524dd4bc2ed7e7355ed07e785
   GoogleDataTransportCCTSupport: 32f75fbe904c82772fcbb6b6bd4525bfb6f2a862
   GoogleUtilities: ad0f3b691c67909d03a3327cc205222ab8f42e0e
+  GzipSwift: 5592f4d62b641e04d06443ba471f8ed76b1363e4
   image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
   keyboard_visibility: 96a24de806fe6823c3ad956c01ba2ec6d056616f
   moor_ffi: d66c9470c18e9cb333423bbcb493c105c6c774c6
@@ -250,10 +278,17 @@ SPEC CHECKSUMS:
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  ReachabilitySwift: 4032e2f59586e11e3b0ebe15b167abdd587a388b
+  RxAppState: b633d7370970ecb80081912ea08a7bf3eb644b4e
+  RxCocoa: 32065309a38d29b5b0db858819b5bf9ef038b601
+  RxRelay: d77f7d771495f43c556cbc43eebd1bb54d01e8e9
+  RxSwift: e2dc62b366a3adf6a0be44ba9f405efd4c94e0c4
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  Starscream: 4bb2f9942274833f7b4d296a55504dcfc7edb7b0
+  StreamChatCore: f57cbc5bd023f5ab579ed98b9f59e3b7d0b42e99
   url_launcher: a1c0cc845906122c4784c542523d8cacbded5626
   url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
   url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
@@ -261,6 +296,6 @@ SPEC CHECKSUMS:
   video_player_web: da8cadb8274ed4f8dbee8d7171b420dedd437ce7
   wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
 
-PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
+PODFILE CHECKSUM: d834edc7a7591fcbf5e5250663b679410c448672
 
 COCOAPODS: 1.8.4

@@ -7,6 +7,7 @@
 //
 
 import UserNotifications
+import StreamChatCore
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -14,11 +15,29 @@ class NotificationService: UNNotificationServiceExtension {
     var bestAttemptContent: UNMutableNotificationContent?
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+        print("DID RECEIVE")
+        
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         defer {
             contentHandler(bestAttemptContent ?? request.content)
         }
+        
+        let apiKey = "s2dxdhpxd94g"; 
+        let userId = "user1"
+        let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU"
+        
+        let messageId = bestAttemptContent?.userInfo["message_id"] as! String
+        
+        print("REQUEST CONTENT \(messageId)")
+        
+        Client.config = .init(apiKey: apiKey, logOptions: .info)
+        Client.shared.set(user: User(id: userId, name: ""), token: token)
+        Client.shared.message(with: messageId).subscribe {res in
+            print(res)
+            Client.shared.disconnect()
+        }
+
         // Modify the notification content here...
         bestAttemptContent?.title = "[modified] \(bestAttemptContent?.title ?? "<NoContent>")"
     }

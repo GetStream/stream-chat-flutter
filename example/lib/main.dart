@@ -4,7 +4,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 Future<void> _handleBackgroundNotification(
   Map<String, dynamic> notification,
 ) async {
-  final notificationData = await NotificationService.storeMessage(notification);
+  final notificationData =
+      await NotificationService.getAndStoreMessage(notification);
 
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
     'Message notifications',
