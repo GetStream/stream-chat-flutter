@@ -1,3 +1,7 @@
+## 0.1.12
+
+- Fix dependency error on iOS using flutter_form_builder
+
 ## 0.1.11
 
 - Fix bug in ChannelPreview when list of messages is empty

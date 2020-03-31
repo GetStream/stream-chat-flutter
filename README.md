@@ -43,8 +43,12 @@ All set ✅
 
 The library uses [flutter file picker plugin](https://github.com/miguelpruivo/flutter_file_picker) to pick
 files from the os.
+Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup#ios) to fulfill iOS requirements.
 
-Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker) to fulfill iOS requirements.
+We also use [video_player](https://pub.dev/packages/video_player) to reproduce videos. Follow [this guide](https://pub.dev/packages/video_player#installation) to fulfill the requirements.
+
+To pick images from the camera we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
+Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.
 
 ## Docs
 
