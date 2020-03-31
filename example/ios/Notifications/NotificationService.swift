@@ -23,17 +23,17 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent ?? request.content)
         }
         
-        let apiKey = "s2dxdhpxd94g"; 
+        let apiKey = "s2dxdhpxd94g";
         let userId = "user1"
         let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU"
-        
+
         let messageId = bestAttemptContent?.userInfo["message_id"] as! String
-        
+
         print("REQUEST CONTENT \(messageId)")
-        
+
         Client.config = .init(apiKey: apiKey, logOptions: .info)
         Client.shared.set(user: User(id: userId, name: ""), token: token)
-        Client.shared.message(with: messageId).subscribe {res in
+        Client.shared.message(with: messageId).subscribe { res in
             print(res)
             Client.shared.disconnect()
         }
@@ -43,6 +43,7 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     override func serviceExtensionTimeWillExpire() {
+        print("serviceExtensionTimeWillExpire")
         // Called just before the extension will be terminated by the system.
         // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
