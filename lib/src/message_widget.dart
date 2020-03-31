@@ -879,21 +879,29 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildImage(
     Attachment attachment,
   ) {
+    final errorWidget = Container(
+      width: 200,
+      height: 140,
+      color: Color(0xffd0021B).withAlpha(26),
+      child: Center(
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.white,
+        ),
+      ),
+    );
+
+    if (attachment.thumbUrl == null &&
+        attachment.imageUrl == null &&
+        attachment.assetUrl == null) {
+      return errorWidget;
+    }
+
     return CachedNetworkImage(
       imageUrl:
           attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
       errorWidget: (context, url, error) {
-        return Container(
-          width: 200,
-          height: 140,
-          color: Color(0xffd0021B).withAlpha(26),
-          child: Center(
-            child: Icon(
-              Icons.error_outline,
-              color: Colors.white,
-            ),
-          ),
-        );
+        return errorWidget;
       },
       fit: BoxFit.cover,
     );
