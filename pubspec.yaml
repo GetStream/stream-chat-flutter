@@ -19,6 +19,7 @@ dependencies:
   chewie: ^0.9.10
   file_picker: ^1.5.1
   image_picker: ^0.6.4
+  flutter_keyboard_visibility: ^0.7.0
   stream_chat:
     path: ../stream_chat_dart
   visibility_detector: ^0.1.4
