@@ -59,7 +59,8 @@ class StreamChat extends StatefulWidget {
   }
 }
 
-class StreamChatState extends State<StreamChat> {
+class StreamChatState extends State<StreamChat>
+    with AutomaticKeepAliveClientMixin {
   final List<StreamSubscription> _subscriptions = [];
   Client get client => widget.client;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -245,4 +246,7 @@ class StreamChatState extends State<StreamChat> {
     _channelsController.close();
     super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
