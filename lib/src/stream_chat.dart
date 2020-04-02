@@ -59,7 +59,8 @@ class StreamChat extends StatefulWidget {
   }
 }
 
-class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
+class StreamChatState extends State<StreamChat>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   final List<StreamSubscription> _subscriptions = [];
   Client get client => widget.client;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -239,4 +240,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
