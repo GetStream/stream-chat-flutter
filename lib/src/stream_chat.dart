@@ -67,6 +67,7 @@ class StreamChatState extends State<StreamChat>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = _getTheme(context, widget.streamChatThemeData);
     return StreamChatTheme(
       data: theme,
