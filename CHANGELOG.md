@@ -1,4 +1,4 @@
-## 0.1.13
+## 0.1.14
 
 - Add automatic keep alive to streamchat
 
