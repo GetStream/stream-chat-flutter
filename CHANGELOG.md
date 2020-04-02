@@ -1,3 +1,7 @@
+## 0.1.13
+
+- Add automatic keep alive to streamchat
+
 ## 0.1.12
 
 - Fix dependency error on iOS using flutter_form_builder
