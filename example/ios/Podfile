@@ -63,7 +63,7 @@ target 'Runner' do
 
   # Keep pod path relative so it can be checked into Podfile.lock.
   pod 'Flutter', :path => 'Flutter'
-  pod 'StreamChatCore'
+  pod 'StreamChatClient', :git => 'https://github.com/GetStream/stream-chat-swift.git', :branch => 'release/2.0'
 
   # Plugin Pods
 

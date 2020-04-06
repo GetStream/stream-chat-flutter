@@ -229,6 +229,7 @@ class StreamChatState extends State<StreamChat>
       client.disconnect();
     } else if (state == AppLifecycleState.resumed) {
       if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
+        NotificationService.handleIosMessageQueue(client);
         client.connect();
       }
     }

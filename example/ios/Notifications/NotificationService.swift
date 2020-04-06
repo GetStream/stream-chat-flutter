@@ -7,48 +7,140 @@
 //
 
 import UserNotifications
-import StreamChatCore
+import StreamChatClient
 
 class NotificationService: UNNotificationServiceExtension {
 
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
-
+    
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        print("DID RECEIVE")
-        
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
-        defer {
-            contentHandler(bestAttemptContent ?? request.content)
-        }
         
-        let apiKey = "s2dxdhpxd94g";
-        let userId = "user1"
-        let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU"
-
+        let sharedDefaults = UserDefaults(suiteName: "group.io.stream.flutter")
+        let apiKey = sharedDefaults!.string(forKey: "KEY_API_KEY")!
+        let userId = sharedDefaults!.string(forKey: "KEY_USER_ID")!
+        let token = sharedDefaults!.string(forKey: "KEY_TOKEN")!
+        
         let messageId = bestAttemptContent?.userInfo["message_id"] as! String
-
-        print("REQUEST CONTENT \(messageId)")
-
-        Client.config = .init(apiKey: apiKey, logOptions: .info)
-        Client.shared.set(user: User(id: userId, name: ""), token: token)
-        Client.shared.message(with: messageId).subscribe { res in
-            print(res)
-            Client.shared.disconnect()
+        
+        Client.config = .init(apiKey: apiKey, logOptions: .error)
+        Client.shared.set(user: User(id: userId), token: token) { res in
+            if res.isConnected {
+                Client.shared.message(withId: messageId) { res in
+                    if let message = res.value?.message,
+                       let channel = res.value?.channel {
+                        let messageWrapper = MessageWrapper(id: message.id, channel: ChannelWrapper(id: channel.id, cid: channel.cid, type: channel.type, name: channel.name, imageURL: channel.imageURL, lastMessageDate: channel.lastMessageDate, created: channel.created, deleted: channel.deleted, createdBy: channel.createdBy, config: channel.config, frozen: channel.frozen, extraData: channel.extraData), type: message.type, user: message.user, created: message.created, updated: message.updated, text: message.text, command: message.command, args: message.args, attachments: message.attachments, parentId: message.parentId, showReplyInChannel: message.showReplyInChannel, mentionedUsers: message.mentionedUsers, extraData: message.extraData)
+                        if let encodedData = try? JSONEncoder.stream.encode(messageWrapper) {
+                            let storedMessages = sharedDefaults?.stringArray(forKey: "messageQueue") ?? []
+                            let encodedString = String(data: encodedData, encoding: .utf8)!
+                            sharedDefaults?.setValue(storedMessages + [encodedString], forKey: "messageQueue")
+                            
+                            // Modify the notification content here...
+                            self.bestAttemptContent?.title = "[modified] \(self.bestAttemptContent?.title ?? "<NoContent>")"
+                            contentHandler(self.bestAttemptContent ?? request.content)
+                        }
+                        Client.shared.disconnect()
+                    }
+                }
+            }
         }
-
-        // Modify the notification content here...
-        bestAttemptContent?.title = "[modified] \(bestAttemptContent?.title ?? "<NoContent>")"
     }
     
     override func serviceExtensionTimeWillExpire() {
-        print("serviceExtensionTimeWillExpire")
-        // Called just before the extension will be terminated by the system.
-        // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
         if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
             contentHandler(bestAttemptContent)
         }
     }
+}
 
+public struct MessageWrapper: Encodable {
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case channel
+        case type
+        case user
+        case created = "created_at"
+        case updated = "updated_at"
+        case text
+        case command
+        case args
+        case attachments
+        case parentId = "parent_id"
+        case showReplyInChannel = "show_in_channel"
+        case mentionedUsers = "mentioned_users"
+    }
+    
+    /// A message id.
+    public let id: String
+    /// The channel cid.
+    public let channel: ChannelWrapper?
+    /// A message type (see `MessageType`).
+    public let type: MessageType
+    /// A user (see `User`).
+    public let user: User
+    /// A created date.
+    public let created: Date
+    /// A updated date.
+    public let updated: Date
+    /// A text.
+    public let text: String
+    /// A used command name.
+    public let command: String?
+    /// A used command args.
+    public let args: String?
+    /// Attachments (see `Attachment`).
+    public let attachments: [Attachment]
+    /// A parent message id.
+    public let parentId: String?
+    /// Check if this reply message needs to show in the channel.
+    public let showReplyInChannel: Bool
+    /// Mentioned users (see `User`).
+    public let mentionedUsers: [User]
+    /// An extra data for the message.
+    public let extraData: Codable?
+}
+
+public struct ChannelWrapper: Encodable {
+    /// Coding keys for the encoding.
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case cid
+        case type
+        case name
+        case imageURL = "image"
+        case members
+        case lastMessageDate = "last_message_at"
+        case createdBy = "created_by"
+        case created = "created_at"
+        case deleted = "deleted_at"
+    }
+
+    /// A channel id.
+    public let id: String
+    /// A channel type + id.
+    public let cid: ChannelId
+    /// A channel type.
+    public let type: ChannelType
+    /// A channel name.
+    public let name: String?
+    /// An image of the channel.
+    public let imageURL: URL?
+    /// The last message date.
+    public let lastMessageDate: Date?
+    /// A channel created date.
+    public let created: Date
+    /// A channel deleted date.
+    public let deleted: Date?
+    /// A creator of the channel.
+    public let createdBy: User?
+    /// A config.
+    public let config: Channel.Config
+    /// Checks if the channel is frozen.
+    public let frozen: Bool
+    /// A list of user ids of the channel members.
+    public let members = Set<Member>()
+    /// An extra data for the channel.
+    public let extraData: Codable?
 }
