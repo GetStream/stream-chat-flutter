@@ -198,6 +198,7 @@ class StreamChatState extends State<StreamChat>
     List<SortOption> sortOptions,
     PaginationParams paginationParams,
     Map<String, dynamic> options,
+    bool onlyOffline = false,
   }) async {
     if (_queryChannelsLoadingController.value == true) {
       return;
@@ -210,6 +211,7 @@ class StreamChatState extends State<StreamChat>
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
+        onlyOffline: onlyOffline,
       );
       _queryChannelsLoadingController.sink.add(false);
     } catch (err, stackTrace) {

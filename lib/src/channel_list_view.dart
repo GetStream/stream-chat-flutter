@@ -98,7 +98,8 @@ class ChannelListView extends StatefulWidget {
   _ChannelListViewState createState() => _ChannelListViewState();
 }
 
-class _ChannelListViewState extends State<ChannelListView> {
+class _ChannelListViewState extends State<ChannelListView>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -334,6 +335,8 @@ class _ChannelListViewState extends State<ChannelListView> {
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
+
     final streamChat = StreamChat.of(context);
     streamChat.queryChannels(
       filter: widget.filter,
@@ -345,5 +348,24 @@ class _ChannelListViewState extends State<ChannelListView> {
     _scrollController.addListener(() {
       _listenChannelPagination(streamChat);
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      StreamChat.of(context).queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        paginationParams: widget.pagination,
+        options: widget.options,
+        onlyOffline: true,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
