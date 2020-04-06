@@ -63,17 +63,28 @@ class ChannelListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChannelListView(
-        filter: {
-          'members': {
-            '\$in': [StreamChat.of(context).user.id],
-          }
-        },
-        sort: [SortOption('last_message_at')],
-        pagination: PaginationParams(
-          limit: 20,
-        ),
-        channelWidget: ChannelPage(),
+      body: PageView(
+        children: <Widget>[
+          ChannelListView(
+            filter: {
+              'members': {
+                '\$in': [StreamChat.of(context).user.id],
+              }
+            },
+            sort: [SortOption('last_message_at')],
+            pagination: PaginationParams(
+              limit: 20,
+            ),
+            channelWidget: ChannelPage(),
+          ),
+          ChannelListView(
+            sort: [SortOption('last_message_at')],
+            pagination: PaginationParams(
+              limit: 20,
+            ),
+            channelWidget: ChannelPage(),
+          ),
+        ],
       ),
     );
   }

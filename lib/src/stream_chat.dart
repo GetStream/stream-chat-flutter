@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -59,15 +58,12 @@ class StreamChat extends StatefulWidget {
   }
 }
 
-class StreamChatState extends State<StreamChat>
-    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
-  final List<StreamSubscription> _subscriptions = [];
+class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   Client get client => widget.client;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final theme = _getTheme(context, widget.streamChatThemeData);
     return StreamChatTheme(
       data: theme,
@@ -179,46 +175,6 @@ class StreamChatState extends State<StreamChat>
   /// The current user as a stream
   Stream<User> get userStream => widget.client.state.userStream;
 
-  /// The current channel list
-  List<Channel> get channels => client.state.channels;
-
-  /// The current channel list as a stream
-  Stream<List<Channel>> get channelsStream => client.state.channelsStream;
-
-  final BehaviorSubject<bool> _queryChannelsLoadingController =
-      BehaviorSubject.seeded(false);
-
-  /// The stream notifying the state of queryChannel call
-  Stream<bool> get queryChannelsLoading =>
-      _queryChannelsLoadingController.stream;
-
-  /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
-  Future<void> queryChannels({
-    Map<String, dynamic> filter,
-    List<SortOption> sortOptions,
-    PaginationParams paginationParams,
-    Map<String, dynamic> options,
-    bool onlyOffline = false,
-  }) async {
-    if (_queryChannelsLoadingController.value == true) {
-      return;
-    }
-    _queryChannelsLoadingController.sink.add(true);
-
-    try {
-      await widget.client.queryChannels(
-        filter: filter,
-        sort: sortOptions,
-        options: options,
-        paginationParams: paginationParams,
-        onlyOffline: onlyOffline,
-      );
-      _queryChannelsLoadingController.sink.add(false);
-    } catch (err, stackTrace) {
-      _queryChannelsLoadingController.addError(err, stackTrace);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -239,12 +195,7 @@ class StreamChatState extends State<StreamChat>
 
   @override
   void dispose() {
-    _subscriptions.forEach((s) => s.cancel());
-    _queryChannelsLoadingController.close();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
