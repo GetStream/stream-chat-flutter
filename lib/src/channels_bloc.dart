@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 class ChannelsBloc {
   final Client client;
+  StreamSubscription _newMessagesSubscription;
 
   ChannelsBloc(this.client) {
-    client.on(EventType.messageNew).listen((e) {
+    _newMessagesSubscription = client.on(EventType.messageNew).listen((e) {
       final newChannels = List<Channel>.from(channels ?? []);
       final index = newChannels.indexWhere((c) => c.cid == e.cid);
       if (index > 0) {
@@ -80,5 +83,6 @@ class ChannelsBloc {
   void dispose() {
     _channelsController.close();
     _queryChannelsLoadingController.close();
+    _newMessagesSubscription.cancel();
   }
 }
