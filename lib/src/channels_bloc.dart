@@ -4,7 +4,17 @@ import 'package:stream_chat/stream_chat.dart';
 class ChannelsBloc {
   final Client client;
 
-  ChannelsBloc(this.client);
+  ChannelsBloc(this.client) {
+    client.on(EventType.messageNew).listen((e) {
+      final newChannels = List<Channel>.from(channels ?? []);
+      final index = newChannels.indexWhere((c) => c.cid == e.cid);
+      if (index > 0) {
+        final channel = newChannels.removeAt(index);
+        newChannels.insert(0, channel);
+        _channelsController.add(newChannels);
+      }
+    });
+  }
 
   /// The current channel list
   List<Channel> get channels => _channelsController.value;
@@ -58,6 +68,8 @@ class ChannelsBloc {
       }, onDone: () {
         _queryChannelsLoadingController.sink.add(false);
       }, onError: (err, stackTrace) {
+        print(err);
+        print(stackTrace);
         _queryChannelsLoadingController.addError(err, stackTrace);
       });
     } catch (err, stackTrace) {
