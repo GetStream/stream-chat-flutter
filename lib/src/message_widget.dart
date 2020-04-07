@@ -980,12 +980,23 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildTimestamp(Alignment alignment) {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
-      child: widget.message.createdAt != null
-          ? Text(
-              Jiffy(widget.message.createdAt.toLocal()).format('HH:mm'),
-              style: _messageTheme.createdAt,
-            )
-          : SizedBox(),
+      child: RichText(
+        text: TextSpan(
+          style: _messageTheme.createdAt,
+          children: <TextSpan>[
+            if (!_isMyMessage)
+              TextSpan(
+                text: widget.message.user.name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            if (widget.message.createdAt != null)
+              TextSpan(
+                text:
+                    Jiffy(widget.message.createdAt.toLocal()).format(' HH:mm'),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
