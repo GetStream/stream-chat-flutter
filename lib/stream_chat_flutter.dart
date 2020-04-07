@@ -5,6 +5,7 @@ export 'src/channel_image.dart';
 export 'src/channel_list_view.dart';
 export 'src/channel_name.dart';
 export 'src/channel_preview.dart';
+export 'src/channels_bloc.dart';
 export 'src/message_input.dart';
 export 'src/message_list_view.dart';
 export 'src/message_widget.dart';
