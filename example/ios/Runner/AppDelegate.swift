@@ -9,8 +9,8 @@ import Flutter
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        if let jsonMessage = sharedDefaults?.stringArray(forKey: "messageQueue") {
-            UserDefaults.standard.setValue(jsonMessage, forKey: "flutter.messageQueue")
+        if let messageQueue = sharedDefaults?.stringArray(forKey: "messageQueue") {
+            UserDefaults.standard.setValue(messageQueue, forKey: "flutter.messageQueue")
             sharedDefaults?.removeObject(forKey: "messageQueue")
         }
 
@@ -33,8 +33,8 @@ import Flutter
     }
     
     override func applicationWillEnterForeground(_ application: UIApplication) {
-        if let jsonMessage = sharedDefaults?.stringArray(forKey: "messageQueue") {
-            UserDefaults.standard.setValue(jsonMessage, forKey: "flutter.messageQueue")
+        if let messageQueue = sharedDefaults?.stringArray(forKey: "messageQueue") {
+            UserDefaults.standard.setValue(messageQueue, forKey: "flutter.messageQueue")
             sharedDefaults?.removeObject(forKey: "messageQueue")
         }
     }

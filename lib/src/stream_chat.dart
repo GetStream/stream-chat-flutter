@@ -275,8 +275,6 @@ class StreamChatState extends State<StreamChat>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
 
-    print('disposeeeeeeeeee');
-
     _channelsController.close();
     _queryChannelsLoadingController.close();
     _newMessagesSubscription.cancel();

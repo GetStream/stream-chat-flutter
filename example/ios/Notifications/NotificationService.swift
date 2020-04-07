@@ -9,8 +9,8 @@
 import UserNotifications
 import StreamChatClient
 
-class NotificationService: UNNotificationServiceExtension {
-
+final class NotificationService: UNNotificationServiceExtension {
+    
     var contentHandler: ((UNNotificationContent) -> Void)?
     var bestAttemptContent: UNMutableNotificationContent?
     
@@ -18,31 +18,34 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
-        let sharedDefaults = UserDefaults(suiteName: "group.io.stream.flutter")
-        let apiKey = sharedDefaults!.string(forKey: "KEY_API_KEY")!
-        let userId = sharedDefaults!.string(forKey: "KEY_USER_ID")!
-        let token = sharedDefaults!.string(forKey: "KEY_TOKEN")!
-        
-        let messageId = bestAttemptContent?.userInfo["message_id"] as! String
+        guard let sharedDefaults = UserDefaults(suiteName: "group.io.stream.flutter"),
+            let apiKey = sharedDefaults.string(forKey: "KEY_API_KEY"),
+            let userId = sharedDefaults.string(forKey: "KEY_USER_ID"),
+            let token = sharedDefaults.string(forKey: "KEY_TOKEN"),
+            let messageId = bestAttemptContent?.userInfo["message_id"] as? String else {
+                return
+        }
         
         Client.config = .init(apiKey: apiKey, logOptions: .error)
         Client.shared.set(user: User(id: userId), token: token) { res in
-            if res.isConnected {
-                Client.shared.message(withId: messageId) { res in
-                    if let message = res.value?.message,
-                       let channel = res.value?.channel {
-                        let messageWrapper = MessageWrapper(id: message.id, channel: ChannelWrapper(id: channel.id, cid: channel.cid, type: channel.type, name: channel.name, imageURL: channel.imageURL, lastMessageDate: channel.lastMessageDate, created: channel.created, deleted: channel.deleted, createdBy: channel.createdBy, config: channel.config, frozen: channel.frozen, extraData: channel.extraData), type: message.type, user: message.user, created: message.created, updated: message.updated, text: message.text, command: message.command, args: message.args, attachments: message.attachments, parentId: message.parentId, showReplyInChannel: message.showReplyInChannel, mentionedUsers: message.mentionedUsers, extraData: message.extraData)
-                        if let encodedData = try? JSONEncoder.stream.encode(messageWrapper) {
-                            let storedMessages = sharedDefaults?.stringArray(forKey: "messageQueue") ?? []
-                            let encodedString = String(data: encodedData, encoding: .utf8)!
-                            sharedDefaults?.setValue(storedMessages + [encodedString], forKey: "messageQueue")
-                            
-                            // Modify the notification content here...
-                            self.bestAttemptContent?.title = "[modified] \(self.bestAttemptContent?.title ?? "<NoContent>")"
-                            contentHandler(self.bestAttemptContent ?? request.content)
-                        }
-                        Client.shared.disconnect()
+            guard res.isConnected else {
+                return
+            }
+            
+            Client.shared.message(withId: messageId) { res in
+                if let message = res.value?.message,
+                    let channel = res.value?.channel {
+                    let messageWrapper = MessageWrapper(channel: channel, message: message)
+                    if let encodedData = try? JSONEncoder.stream.encode(messageWrapper),
+                        let encodedString = String(data: encodedData, encoding: .utf8) {
+                        let storedMessages = sharedDefaults.stringArray(forKey: "messageQueue") ?? []
+                        sharedDefaults.setValue(storedMessages + [encodedString], forKey: "messageQueue")
+                        
+                        // Modify the notification content here...
+                        self.bestAttemptContent?.title = "[modified] \(self.bestAttemptContent?.title ?? "<NoContent>")"
+                        contentHandler(self.bestAttemptContent ?? request.content)
                     }
+                    Client.shared.disconnect()
                 }
             }
         }
@@ -70,6 +73,23 @@ public struct MessageWrapper: Encodable {
         case parentId = "parent_id"
         case showReplyInChannel = "show_in_channel"
         case mentionedUsers = "mentioned_users"
+    }
+    
+    init(channel: Channel, message: Message) {
+        id = message.id
+        type = message.type
+        user = message.user
+        created = message.created
+        updated = message.updated
+        text = message.text
+        command = message.command
+        args = message.args
+        attachments = message.attachments
+        parentId = message.parentId
+        showReplyInChannel = message.showReplyInChannel
+        mentionedUsers = message.mentionedUsers
+        extraData = message.extraData
+        self.channel = ChannelWrapper(channel: channel)
     }
     
     /// A message id.
@@ -115,8 +135,24 @@ public struct ChannelWrapper: Encodable {
         case createdBy = "created_by"
         case created = "created_at"
         case deleted = "deleted_at"
+        case frozen
     }
-
+    
+    init(channel: Channel) {
+        id = channel.id
+        cid = channel.cid
+        type = channel.type
+        name = channel.name
+        imageURL = channel.imageURL
+        lastMessageDate = channel.lastMessageDate
+        created = channel.created
+        deleted = channel.deleted
+        createdBy = channel.createdBy
+        config = channel.config
+        frozen = channel.frozen
+        extraData = channel.extraData
+    }
+    
     /// A channel id.
     public let id: String
     /// A channel type + id.
