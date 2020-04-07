@@ -56,12 +56,13 @@ import 'stream_channel.dart';
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
-  MessageInput({
-    Key key,
-    this.onMessageSent,
-    this.parentMessage,
-    this.editMessage,
-  }) : super(key: key);
+  MessageInput(
+      {Key key,
+      this.onMessageSent,
+      this.parentMessage,
+      this.editMessage,
+      this.maxHeight = 150})
+      : super(key: key);
 
   /// Message to edit
   final Message editMessage;
@@ -71,6 +72,9 @@ class MessageInput extends StatefulWidget {
 
   /// Parent message in case of a thread
   final Message parentMessage;
+
+  /// Maximum Height for the TextField to grow before it starts scrolling
+  final double maxHeight;
 
   @override
   _MessageInputState createState() => _MessageInputState();
@@ -111,6 +115,7 @@ class _MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         _buildAttachmentButton(),
         _buildTextInput(context),
@@ -133,54 +138,57 @@ class _MessageInputState extends State<MessageInput> {
 
   Expanded _buildTextInput(BuildContext context) {
     return Expanded(
-      child: TextField(
-        key: Key('messageInputText'),
-        minLines: null,
-        maxLines: null,
-        onSubmitted: (_) {
-          _sendMessage(context);
-        },
-        controller: _textController,
-        focusNode: _focusNode,
-        onChanged: (s) {
-          StreamChannel.of(context).channel.keyStroke();
+      child: LimitedBox(
+        maxHeight: widget.maxHeight,
+        child: TextField(
+          key: Key('messageInputText'),
+          minLines: null,
+          maxLines: null,
+          onSubmitted: (_) {
+            _sendMessage(context);
+          },
+          controller: _textController,
+          focusNode: _focusNode,
+          onChanged: (s) {
+            StreamChannel.of(context).channel.keyStroke();
 
-          setState(() {
-            _messageIsPresent = s.trim().isNotEmpty;
-          });
+            setState(() {
+              _messageIsPresent = s.trim().isNotEmpty;
+            });
 
-          _commandsOverlay?.remove();
-          _commandsOverlay = null;
-          _mentionsOverlay?.remove();
-          _mentionsOverlay = null;
+            _commandsOverlay?.remove();
+            _commandsOverlay = null;
+            _mentionsOverlay?.remove();
+            _mentionsOverlay = null;
 
-          if (s.startsWith('/')) {
-            _commandsOverlay = _buildCommandsOverlayEntry();
-            Overlay.of(context).insert(_commandsOverlay);
-          }
+            if (s.startsWith('/')) {
+              _commandsOverlay = _buildCommandsOverlayEntry();
+              Overlay.of(context).insert(_commandsOverlay);
+            }
 
-          if (_textController.selection.isCollapsed &&
-              (s[_textController.selection.start - 1] == '@' ||
-                  _textController.text
-                      .substring(0, _textController.selection.start)
-                      .split(' ')
-                      .last
-                      .contains('@'))) {
-            _mentionsOverlay = _buildMentionsOverlayEntry();
-            Overlay.of(context).insert(_mentionsOverlay);
-          }
-        },
-        onTap: () {
-          setState(() {
-            _typingStarted = true;
-          });
-        },
-        style: Theme.of(context).textTheme.body1,
-        autofocus: false,
-        decoration: InputDecoration(
-          hintText: 'Write a message',
-          prefixText: '   ',
-          border: InputBorder.none,
+            if (_textController.selection.isCollapsed &&
+                (s[_textController.selection.start - 1] == '@' ||
+                    _textController.text
+                        .substring(0, _textController.selection.start)
+                        .split(' ')
+                        .last
+                        .contains('@'))) {
+              _mentionsOverlay = _buildMentionsOverlayEntry();
+              Overlay.of(context).insert(_mentionsOverlay);
+            }
+          },
+          onTap: () {
+            setState(() {
+              _typingStarted = true;
+            });
+          },
+          style: Theme.of(context).textTheme.body1,
+          autofocus: false,
+          decoration: InputDecoration(
+            hintText: 'Write a message',
+            prefixText: '   ',
+            border: InputBorder.none,
+          ),
         ),
       ),
     );
