@@ -32,7 +32,7 @@ final class NotificationService: UNNotificationServiceExtension {
                 return
             }
             
-            Client.shared.message(withId: messageId) { res in
+            Client.shared.message(withId: messageId) { [weak self] res in
                 if let message = res.value?.message,
                     let channel = res.value?.channel {
                     let messageWrapper = MessageWrapper(channel: channel, message: message)
@@ -42,8 +42,8 @@ final class NotificationService: UNNotificationServiceExtension {
                         sharedDefaults.setValue(storedMessages + [encodedString], forKey: "messageQueue")
                         
                         // Modify the notification content here...
-                        self.bestAttemptContent?.title = "[modified] \(self.bestAttemptContent?.title ?? "<NoContent>")"
-                        contentHandler(self.bestAttemptContent ?? request.content)
+                        self.bestAttemptContent?.title = "[modified] \(self?.bestAttemptContent?.title ?? "<NoContent>")"
+                        contentHandler(self?.bestAttemptContent ?? request.content)
                     }
                     Client.shared.disconnect()
                 }
