@@ -50,39 +50,48 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Container(
-        child: StreamChat(
-          client: client,
-          child: ChannelListPage(),
-        ),
+        child: ChannelListPage(client),
       ),
     );
   }
 }
 
 class ChannelListPage extends StatelessWidget {
+  final Client client;
+
+  ChannelListPage(this.client);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
         children: <Widget>[
-          ChannelListView(
-            filter: {
-              'members': {
-                '\$in': [StreamChat.of(context).user.id],
-              }
-            },
-            sort: [SortOption('last_message_at')],
-            pagination: PaginationParams(
-              limit: 20,
+          StreamChat(
+            client: client,
+            child: Builder(
+              builder: (context) => ChannelListView(
+                filter: {
+                  'members': {
+                    '\$in': [StreamChat.of(context).user.id],
+                  }
+                },
+                sort: [SortOption('last_message_at')],
+                pagination: PaginationParams(
+                  limit: 20,
+                ),
+                channelWidget: ChannelPage(),
+              ),
             ),
-            channelWidget: ChannelPage(),
           ),
-          ChannelListView(
-            sort: [SortOption('last_message_at')],
-            pagination: PaginationParams(
-              limit: 20,
+          StreamChat(
+            client: client,
+            child: ChannelListView(
+              sort: [SortOption('last_message_at')],
+              pagination: PaginationParams(
+                limit: 20,
+              ),
+              channelWidget: ChannelPage(),
             ),
-            channelWidget: ChannelPage(),
           ),
         ],
       ),

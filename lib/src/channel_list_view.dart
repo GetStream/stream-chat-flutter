@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/channels_bloc.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_preview.dart';
@@ -100,16 +99,16 @@ class ChannelListView extends StatefulWidget {
 }
 
 class _ChannelListViewState extends State<ChannelListView>
-    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
-  ChannelsBloc channelsBloc;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    final streamChat = StreamChat.of(context);
+
     return RefreshIndicator(
       onRefresh: () async {
-        return channelsBloc.queryChannels(
+        return streamChat.queryChannels(
           filter: widget.filter,
           sortOptions: widget.sort,
           paginationParams: widget.pagination,
@@ -117,7 +116,7 @@ class _ChannelListViewState extends State<ChannelListView>
         );
       },
       child: StreamBuilder<List<Channel>>(
-          stream: channelsBloc.channelsStream,
+          stream: streamChat.channelsStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               if (snapshot.error is Error) {
@@ -165,7 +164,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     ),
                     FlatButton(
                       onPressed: () {
-                        channelsBloc.queryChannels(
+                        streamChat.queryChannels(
                           filter: widget.filter,
                           sortOptions: widget.sort,
                           paginationParams: widget.pagination,
@@ -217,7 +216,7 @@ class _ChannelListViewState extends State<ChannelListView>
     if (i < channels.length) {
       final channel = channels[i];
 
-      final channelClient = channelsBloc.channels.firstWhere(
+      final channelClient = streamChat.channels.firstWhere(
         (c) => c.cid == channel.cid,
         orElse: () => null,
       );
@@ -287,7 +286,7 @@ class _ChannelListViewState extends State<ChannelListView>
 
   Widget _buildQueryProgressIndicator(context, StreamChatState streamChat) {
     return StreamBuilder<bool>(
-        stream: channelsBloc.queryChannelsLoading,
+        stream: streamChat.queryChannelsLoading,
         initialData: false,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -322,11 +321,11 @@ class _ChannelListViewState extends State<ChannelListView>
   void _listenChannelPagination(StreamChatState streamChat) {
     if (_scrollController.position.maxScrollExtent ==
         _scrollController.offset) {
-      channelsBloc.queryChannels(
+      streamChat.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
         paginationParams: widget.pagination.copyWith(
-          offset: channelsBloc.channels.length,
+          offset: streamChat.channels.length,
         ),
         options: widget.options,
       );
@@ -336,12 +335,12 @@ class _ChannelListViewState extends State<ChannelListView>
   @override
   void initState() {
     super.initState();
+
     final streamChat = StreamChat.of(context);
 
-    channelsBloc = ChannelsBloc(streamChat.client);
     WidgetsBinding.instance.addObserver(this);
 
-    channelsBloc.queryChannels(
+    streamChat.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination,
@@ -356,7 +355,7 @@ class _ChannelListViewState extends State<ChannelListView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      channelsBloc.queryChannels(
+      StreamChat.of(context).queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
         paginationParams: widget.pagination,
@@ -369,7 +368,6 @@ class _ChannelListViewState extends State<ChannelListView>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    channelsBloc.dispose();
     super.dispose();
   }
 
