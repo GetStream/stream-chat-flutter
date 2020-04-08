@@ -122,12 +122,16 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               Navigator.of(context).pop();
             }
           },
-          fillColor: Colors.black.withOpacity(.1),
+          fillColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(.1)
+              : Colors.black.withOpacity(.1),
           padding: EdgeInsets.all(4),
           child: Icon(
             Icons.close,
             size: 15,
-            color: Colors.black,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
         ),
       ),

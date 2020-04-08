@@ -205,7 +205,10 @@ class _MessageInputState extends State<MessageInput> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: StreamChatTheme.of(context)
+                .channelTheme
+                .inputBackground
+                .withAlpha(255),
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Container(
@@ -215,7 +218,9 @@ class _MessageInputState extends State<MessageInput> {
               border: Border.all(
                   color: _typingStarted
                       ? Colors.transparent
-                      : Colors.black.withOpacity(.2)),
+                      : Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(.2)
+                          : Colors.black.withOpacity(.2)),
             ),
           ),
         ),
@@ -761,7 +766,10 @@ class _MessageInputState extends State<MessageInput> {
         if (attachment.type == 'image') {
           _attachments.add(_SendingAttachment(
             type: FileType.image,
-            url: attachment.imageUrl,
+            url: attachment.imageUrl ??
+                attachment.assetUrl ??
+                attachment.thumbUrl ??
+                attachment.ogScrapeUrl,
             uploaded: true,
           ));
         } else if (attachment.type == 'video') {

@@ -146,7 +146,7 @@ class _MessageListViewState extends State<MessageListView> {
                             'Start of thread',
                             textAlign: TextAlign.center,
                           ),
-                          color: Theme.of(context).primaryColorLight,
+                          color: Theme.of(context).accentColor.withAlpha(50),
                         ),
                       ),
                     ],

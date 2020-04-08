@@ -72,33 +72,37 @@ class StreamChatState extends State<StreamChat>
     return StreamChatTheme(
       data: theme,
       child: Builder(
-        builder: (context) => Theme(
-          data: Theme.of(context).copyWith(
-            accentColor: StreamChatTheme.of(context).accentColor,
-            scaffoldBackgroundColor: Colors.white,
-            backgroundColor: Colors.white,
-          ),
-          child: WillPopScope(
-            onWillPop: () async {
-              if (_navigatorKey.currentState.canPop()) {
-                _navigatorKey.currentState.pop();
-                return false;
-              } else {
-                return true;
-              }
-            },
-            child: Navigator(
-              initialRoute: '/',
-              key: _navigatorKey,
-              onGenerateRoute: (settings) {
-                return MaterialPageRoute(
-                  settings: settings,
-                  builder: (_) => widget.child,
-                );
-              },
+        builder: (context) {
+          final materialTheme = Theme.of(context);
+          final isDark = materialTheme.brightness == Brightness.dark;
+          return Theme(
+            data: materialTheme.copyWith(
+              accentColor: StreamChatTheme.of(context).accentColor,
+              scaffoldBackgroundColor: isDark ? Colors.black : Colors.white,
+              backgroundColor: isDark ? Colors.black : Colors.white,
             ),
-          ),
-        ),
+            child: WillPopScope(
+              onWillPop: () async {
+                if (_navigatorKey.currentState.canPop()) {
+                  _navigatorKey.currentState.pop();
+                  return false;
+                } else {
+                  return true;
+                }
+              },
+              child: Navigator(
+                initialRoute: '/',
+                key: _navigatorKey,
+                onGenerateRoute: (settings) {
+                  return MaterialPageRoute(
+                    settings: settings,
+                    builder: (_) => widget.child,
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }

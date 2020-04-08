@@ -166,9 +166,10 @@ class StreamChatThemeData {
   /// Get the default Stream Chat theme
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
     final accentColor = Color(0xff006cff);
+    final isDark = theme.brightness == Brightness.dark;
     return StreamChatThemeData(
       accentColor: accentColor,
-      primaryColor: Colors.white,
+      primaryColor: isDark ? Colors.black : Colors.white,
       channelPreviewTheme: ChannelPreviewTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
@@ -179,15 +180,17 @@ class StreamChatThemeData {
         ),
         title: TextStyle(
           fontSize: 14,
-          color: Colors.black,
+          color: isDark ? Colors.white : Colors.black,
         ),
         subtitle: TextStyle(
           fontSize: 13,
-          color: Colors.black,
+          color: isDark ? Colors.white : Colors.black,
         ),
         lastMessageAt: TextStyle(
           fontSize: 11,
-          color: Colors.black.withOpacity(.5),
+          color: isDark
+              ? Colors.white.withOpacity(.5)
+              : Colors.black.withOpacity(.5),
         ),
       ),
       channelTheme: ChannelTheme(
@@ -202,17 +205,20 @@ class StreamChatThemeData {
               width: 40,
             ),
           ),
-          color: Colors.white,
+          color: isDark ? Colors.black : Colors.white,
           title: TextStyle(
             fontSize: 14,
-            color: Colors.black,
+            color: isDark ? Colors.white : Colors.black,
           ),
           lastMessageAt: TextStyle(
             fontSize: 11,
-            color: Colors.black.withOpacity(.5),
+            color: isDark
+                ? Colors.white.withOpacity(.5)
+                : Colors.black.withOpacity(.5),
           ),
         ),
-        inputBackground: Colors.black.withAlpha(12),
+        inputBackground:
+            isDark ? Colors.black.withAlpha(12) : Colors.white.withAlpha(12),
         inputGradient: LinearGradient(colors: [
           Color(0xFF00AEFF),
           Color(0xFF0076FF),
@@ -221,10 +227,12 @@ class StreamChatThemeData {
       ownMessageTheme: MessageTheme(
         messageText: TextStyle(
           fontSize: 15,
-          color: Colors.black,
+          color: isDark ? Colors.white : Colors.black,
         ),
         createdAt: TextStyle(
-          color: Colors.black.withOpacity(.5),
+          color: isDark
+              ? Colors.white.withOpacity(.5)
+              : Colors.black.withOpacity(.5),
           fontSize: 11,
         ),
         replies: TextStyle(
@@ -232,7 +240,7 @@ class StreamChatThemeData {
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
-        messageBackgroundColor: Color(0xffebebeb),
+        messageBackgroundColor: Color(0x33ebebeb),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -244,10 +252,12 @@ class StreamChatThemeData {
       otherMessageTheme: MessageTheme(
         messageText: TextStyle(
           fontSize: 15,
-          color: Colors.black,
+          color: isDark ? Colors.white : Colors.black,
         ),
         createdAt: TextStyle(
-          color: Colors.black.withOpacity(.5),
+          color: isDark
+              ? Colors.white.withOpacity(.5)
+              : Colors.black.withOpacity(.5),
           fontSize: 11,
         ),
         replies: TextStyle(
@@ -255,7 +265,7 @@ class StreamChatThemeData {
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
-        messageBackgroundColor: Colors.white,
+        messageBackgroundColor: isDark ? Colors.black : Colors.white,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
