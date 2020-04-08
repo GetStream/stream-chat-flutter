@@ -38,6 +38,7 @@ class MessageWidget extends StatefulWidget {
     this.onMessageActions,
     this.isParent = false,
     this.onMentionTap,
+    this.showOtherMessageUsername = false,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -45,6 +46,9 @@ class MessageWidget extends StatefulWidget {
 
   /// Function called on long press
   final Function(BuildContext, Message) onMessageActions;
+
+  /// If true show the other users username next to the timestamp of the message
+  final bool showOtherMessageUsername;
 
   /// This message
   final Message message;
@@ -984,7 +988,7 @@ class _MessageWidgetState extends State<MessageWidget>
         text: TextSpan(
           style: _messageTheme.createdAt,
           children: <TextSpan>[
-            if (!_isMyMessage)
+            if (!_isMyMessage && widget.showOtherMessageUsername)
               TextSpan(
                 text: widget.message.user.name,
                 style: TextStyle(fontWeight: FontWeight.bold),
