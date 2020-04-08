@@ -231,7 +231,9 @@ class _MessageWidgetState extends State<MessageWidget>
           'This message was deleted...',
           style: _messageTheme.messageText.copyWith(
             fontStyle: FontStyle.italic,
-            color: Colors.black,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
         ),
       ),
