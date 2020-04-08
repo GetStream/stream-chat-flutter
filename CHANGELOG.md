@@ -1,3 +1,7 @@
+## 0.1.18
+
+- Add message list date separators
+
 ## 0.1.17
 
 - Add dark theme
