@@ -1,3 +1,7 @@
+## 0.1.17
+
+- Add dark theme
+
 ## 0.1.16
 
 - Add possibility to show the other users username next to the message timestamp
