@@ -41,6 +41,7 @@ class MessageWidget extends StatefulWidget {
     this.onMessageActions,
     this.isParent = false,
     this.onMentionTap,
+    this.showOtherMessageUsername = false,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -48,6 +49,9 @@ class MessageWidget extends StatefulWidget {
 
   /// Function called on long press
   final Function(BuildContext, Message) onMessageActions;
+
+  /// If true show the other users username next to the timestamp of the message
+  final bool showOtherMessageUsername;
 
   /// This message
   final Message message;
@@ -161,6 +165,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 backgroundColor: StreamChatTheme.of(context).accentColor,
                 child: Icon(
                   Icons.done,
+                  color: Colors.white,
                   size: 4,
                 ),
               ),
@@ -192,7 +197,7 @@ class _MessageWidgetState extends State<MessageWidget>
               ),
               child: CircleAvatar(
                 radius: 4,
-                backgroundColor: Color(0xffd0021B).withAlpha(125),
+                backgroundColor: Color(0xffd0021B).withOpacity(.1),
                 child: Icon(
                   Icons.error_outline,
                   size: 4,
@@ -234,7 +239,9 @@ class _MessageWidgetState extends State<MessageWidget>
           'This message was deleted...',
           style: _messageTheme.messageText.copyWith(
             fontStyle: FontStyle.italic,
-            color: Colors.black,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
           ),
         ),
       ),
@@ -252,7 +259,9 @@ class _MessageWidgetState extends State<MessageWidget>
         alignment: Alignment.center,
         child: Icon(
           Icons.subdirectory_arrow_left,
-          color: Colors.black12,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white12
+              : Colors.black12,
         ),
       ),
     ];
@@ -422,9 +431,7 @@ class _MessageWidgetState extends State<MessageWidget>
     int nOfAttachmentWidgets,
     BuildContext context,
   ) {
-    final boxDecoration = _buildBoxDecoration(_isLastUser).copyWith(
-      color: Color(0xffebebeb),
-    );
+    final boxDecoration = _buildBoxDecoration(_isLastUser);
     return Padding(
       padding: const EdgeInsets.only(bottom: 2.0),
       child: Column(
@@ -435,7 +442,8 @@ class _MessageWidgetState extends State<MessageWidget>
             child: Container(
               decoration: boxDecoration,
               constraints: BoxConstraints.loose(
-                  Size.fromWidth(MediaQuery.of(context).size.width * 0.7)),
+                Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
+              ),
               child: Stack(
                 children: <Widget>[
                   Column(
@@ -513,6 +521,7 @@ class _MessageWidgetState extends State<MessageWidget>
             _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
         padding: EdgeInsets.all(10),
         constraints: BoxConstraints.loose(
+<<<<<<< HEAD
           Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
         ),
         child: _buildSendingError(
@@ -527,6 +536,38 @@ class _MessageWidgetState extends State<MessageWidget>
 
                 if (widget.onMentionTap != null) {
                   widget.onMentionTap(mentionedUser);
+=======
+            Size.fromWidth(MediaQuery.of(context).size.width * 0.7)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            if (widget.message.status == MessageSendingStatus.FAILED)
+              Text(
+                'MESSAGE FAILED · CLICK TO TRY AGAIN',
+                style: _messageTheme.messageText.copyWith(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(.5)
+                      : Colors.black.withOpacity(.5),
+                  fontSize: 11,
+                ),
+              ),
+            MarkdownBody(
+              data: text,
+              onTapLink: (link) {
+                if (link.startsWith('@')) {
+                  final mentionedUser =
+                      widget.message.mentionedUsers.firstWhere(
+                    (u) => '@${u.name.replaceAll(' ', '')}' == link,
+                    orElse: () => null,
+                  );
+
+                  if (widget.onMentionTap != null) {
+                    widget.onMentionTap(mentionedUser);
+                  } else {
+                    print('tap on ${mentionedUser.name}');
+                  }
+>>>>>>> master
                 } else {
                   print('tap on ${mentionedUser.name}');
                 }
@@ -662,7 +703,6 @@ class _MessageWidgetState extends State<MessageWidget>
             ],
           ),
         ),
-        color: Color(0xffebebeb),
       ),
     );
   }
@@ -674,7 +714,11 @@ class _MessageWidgetState extends State<MessageWidget>
             right: !_isMyMessage ? 8 : null,
             top: -6,
             child: CustomPaint(
-              painter: _ReactionBubblePainter(),
+              painter: _ReactionBubblePainter(
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
+              ),
             ),
           )
         : SizedBox();
@@ -823,12 +867,18 @@ class _MessageWidgetState extends State<MessageWidget>
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          fillColor: Colors.black.withOpacity(.1),
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white.withOpacity(.1)
+                                  : Colors.black.withOpacity(.1),
                           padding: EdgeInsets.all(4),
                           child: Icon(
                             Icons.close,
                             size: 15,
-                            color: Colors.black,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                           ),
                         ),
                       ),
@@ -881,7 +931,9 @@ class _MessageWidgetState extends State<MessageWidget>
               ? const EdgeInsets.all(8)
               : EdgeInsets.zero,
           decoration: BoxDecoration(
-              color: Colors.black,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
               borderRadius: BorderRadius.all(Radius.circular(14))),
           child: AnimatedSwitcher(
             duration: Duration(milliseconds: 300),
@@ -912,7 +964,11 @@ class _MessageWidgetState extends State<MessageWidget>
             widget.message.reactionCounts.values
                 .fold(0, (t, v) => v + t)
                 .toString(),
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
+            ),
           ),
         ),
       ],
@@ -931,6 +987,7 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildImage(
     Attachment attachment,
   ) {
+<<<<<<< HEAD
     return Hero(
       tag: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl,
       child: CachedNetworkImage(
@@ -958,6 +1015,17 @@ class _MessageWidgetState extends State<MessageWidget>
             attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
         errorWidget: (context, url, error) => _buildErrorImage(attachment),
         fit: BoxFit.cover,
+=======
+    final errorWidget = Container(
+      width: 200,
+      height: 140,
+      color: Color(0xffd0021B).withOpacity(.1),
+      child: Center(
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.white,
+        ),
+>>>>>>> master
       ),
     );
   }
@@ -1059,29 +1127,49 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildTimestamp(Alignment alignment) {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
-      child: widget.message.createdAt != null
-          ? Text(
-              Jiffy(widget.message.createdAt.toLocal()).format('HH:mm'),
-              style: _messageTheme.createdAt,
-            )
-          : SizedBox(),
+      child: RichText(
+        text: TextSpan(
+          style: _messageTheme.createdAt,
+          children: <TextSpan>[
+            if (!_isMyMessage && widget.showOtherMessageUsername)
+              TextSpan(
+                text: widget.message.user.name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            if (widget.message.createdAt != null)
+              TextSpan(
+                text:
+                    Jiffy(widget.message.createdAt.toLocal()).format(' HH:mm'),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
   BoxDecoration _buildBoxDecoration(bool rectBorders) {
     return BoxDecoration(
-      border:
-          _isMyMessage ? null : Border.all(color: Colors.black.withAlpha(8)),
+      border: _isMyMessage
+          ? null
+          : Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withAlpha(24)
+                  : Colors.black.withAlpha(24)),
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular((_isMyMessage || !rectBorders) ? 16 : 2),
         bottomLeft: Radius.circular(_isMyMessage ? 16 : 2),
         topRight: Radius.circular((_isMyMessage && rectBorders) ? 2 : 16),
         bottomRight: Radius.circular(_isMyMessage ? 2 : 16),
       ),
+<<<<<<< HEAD
       color: (widget.message.status == MessageSendingStatus.FAILED ||
               widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
               widget.message.status == MessageSendingStatus.FAILED_DELETE)
           ? Color(0xffd0021B).withAlpha(26)
+=======
+      color: widget.message.status == MessageSendingStatus.FAILED
+          ? Color(0xffd0021B).withOpacity(.1)
+>>>>>>> master
           : _messageTheme.messageBackgroundColor,
     );
   }
@@ -1093,9 +1181,13 @@ class _MessageWidgetState extends State<MessageWidget>
 }
 
 class _ReactionBubblePainter extends CustomPainter {
+  final Color color;
+
+  _ReactionBubblePainter(this.color);
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black;
+    final paint = Paint()..color = color;
     final path = Path();
     path.arcToPoint(Offset(-6, -6));
     path.arcToPoint(Offset(0, 10));

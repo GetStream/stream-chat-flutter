@@ -1,3 +1,15 @@
+## 0.1.17
+
+- Add dark theme
+
+## 0.1.16
+
+- Add possibility to show the other users username next to the message timestamp
+
+## 0.1.15
+
+- Fix MessageInput overflow
+
 ## 0.1.14
 
 - Add automatic keep alive to streamchat

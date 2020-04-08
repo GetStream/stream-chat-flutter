@@ -61,6 +61,7 @@ class MessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
+    this.showOtherMessageUsername = false,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -78,6 +79,9 @@ class MessageListView extends StatefulWidget {
 
   /// Parent message in case of a thread
   final Message parentMessage;
+
+  /// If true show the other users username next to the timestamp of the message
+  final bool showOtherMessageUsername;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -142,7 +146,7 @@ class _MessageListViewState extends State<MessageListView> {
                             'Start of thread',
                             textAlign: TextAlign.center,
                           ),
-                          color: Theme.of(context).primaryColorLight,
+                          color: Theme.of(context).accentColor.withAlpha(50),
                         ),
                       ),
                     ],
@@ -193,6 +197,7 @@ class _MessageListViewState extends State<MessageListView> {
               message: message,
               nextMessage: nextMessage,
               onThreadTap: _onThreadTap,
+              showOtherMessageUsername: widget.showOtherMessageUsername,
             );
           },
           childCount: _messages.length + 2,
