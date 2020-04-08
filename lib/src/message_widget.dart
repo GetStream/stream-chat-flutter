@@ -400,9 +400,7 @@ class _MessageWidgetState extends State<MessageWidget>
     int nOfAttachmentWidgets,
     BuildContext context,
   ) {
-    final boxDecoration = _buildBoxDecoration(_isLastUser).copyWith(
-      color: Color(0xffebebeb),
-    );
+    final boxDecoration = _buildBoxDecoration(_isLastUser);
     return Padding(
       padding: const EdgeInsets.only(bottom: 2.0),
       child: Column(
@@ -413,7 +411,8 @@ class _MessageWidgetState extends State<MessageWidget>
             child: Container(
               decoration: boxDecoration,
               constraints: BoxConstraints.loose(
-                  Size.fromWidth(MediaQuery.of(context).size.width * 0.7)),
+                Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
+              ),
               child: Stack(
                 children: <Widget>[
                   Column(
@@ -620,7 +619,6 @@ class _MessageWidgetState extends State<MessageWidget>
             ],
           ),
         ),
-        color: Color(0xffebebeb),
       ),
     );
   }
