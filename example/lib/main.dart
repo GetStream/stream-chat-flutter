@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-Future<void> _handleBackgroundNotification(
+Future<void> _handleAndroidNotification(
   Map<String, dynamic> notification,
 ) async {
   final notificationData =
@@ -30,7 +30,7 @@ void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-    customAndroidNotificationHandler: _handleBackgroundNotification,
+    androidNotificationHandler: _handleAndroidNotification,
   );
 
   await client.setUser(

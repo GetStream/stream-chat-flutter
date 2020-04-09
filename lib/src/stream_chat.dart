@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,7 @@ class StreamChat extends StatefulWidget {
 class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   Client get client => widget.client;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  Timer _disconnectTimer;
 
   @override
   Widget build(BuildContext context) {
@@ -185,14 +187,35 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
+  StreamSubscription _newMessageSubscription;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      client.disconnect();
+      if (Platform.isAndroid) {
+        _newMessageSubscription =
+            client.on(EventType.messageNew).listen((event) {
+          client.androidNotificationHandler({
+            'data': {
+              'message_id': event.message.id,
+            },
+          });
+        });
+        _disconnectTimer = Timer(Duration(minutes: 1), () {
+          client.disconnect();
+        });
+      } else {
+        client.disconnect();
+      }
     } else if (state == AppLifecycleState.resumed) {
-      if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
-        NotificationService.handleIosMessageQueue(client);
-        client.connect();
+      _newMessageSubscription?.cancel();
+      if (_disconnectTimer?.isActive == true) {
+        _disconnectTimer.cancel();
+      } else {
+        if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
+          NotificationService.handleIosMessageQueue(client);
+          client.connect();
+        }
       }
     }
   }
