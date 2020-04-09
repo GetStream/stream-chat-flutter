@@ -5,9 +5,12 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 
+/// Widget dedicated to the management of a channel list with pagination
 class ChannelsBloc extends StatefulWidget {
+  /// The widget child
   final Widget child;
 
+  /// Instantiate a new ChannelsBloc
   const ChannelsBloc({
     Key key,
     this.child,
@@ -16,6 +19,7 @@ class ChannelsBloc extends StatefulWidget {
   @override
   ChannelsBlocState createState() => ChannelsBlocState();
 
+  /// Use this method to get the current [ChannelsBlocState] instance
   static ChannelsBlocState of(BuildContext context) {
     ChannelsBlocState streamChatState;
 
@@ -29,6 +33,7 @@ class ChannelsBloc extends StatefulWidget {
   }
 }
 
+/// The current state of the [ChannelsBloc]
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
   @override

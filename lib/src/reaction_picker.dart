@@ -67,11 +67,13 @@ class ReactionPicker extends StatelessWidget {
     );
   }
 
+  /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
     channel.sendReaction(message.id, reactionType);
     Navigator.of(context).pop();
   }
 
+  /// Remove a reaction from the message
   void removeReaction(BuildContext context, String reactionType) {
     channel.deleteReaction(message.id, reactionType);
     Navigator.of(context).pop();

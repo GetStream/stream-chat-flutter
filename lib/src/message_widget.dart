@@ -32,6 +32,7 @@ import 'stream_chat.dart';
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageWidget extends StatefulWidget {
+  /// Instantiate a new MessageWidget
   const MessageWidget({
     Key key,
     @required this.previousMessage,

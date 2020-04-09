@@ -55,6 +55,7 @@ typedef ThreadTapCallback = void Function(Message, Widget);
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageListView extends StatefulWidget {
+  /// Instantiate a new MessageListView
   MessageListView({
     Key key,
     this.messageBuilder,

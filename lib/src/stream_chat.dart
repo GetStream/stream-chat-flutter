@@ -59,6 +59,7 @@ class StreamChat extends StatefulWidget {
   }
 }
 
+/// The current state of the StreamChat widget
 class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   Client get client => widget.client;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();

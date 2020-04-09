@@ -62,6 +62,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// The message parent of this thread
   final Message parent;
 
+  /// Instantiate a new ThreadHeader
   ThreadHeader({
     Key key,
     @required this.parent,

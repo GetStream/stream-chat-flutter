@@ -56,13 +56,14 @@ import 'stream_channel.dart';
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
-  MessageInput(
-      {Key key,
-      this.onMessageSent,
-      this.parentMessage,
-      this.editMessage,
-      this.maxHeight = 150})
-      : super(key: key);
+  /// Instantiate a new MessageInput
+  MessageInput({
+    Key key,
+    this.onMessageSent,
+    this.parentMessage,
+    this.editMessage,
+    this.maxHeight = 150,
+  }) : super(key: key);
 
   /// Message to edit
   final Message editMessage;

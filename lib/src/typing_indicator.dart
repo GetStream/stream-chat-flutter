@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/src/stream_channel.dart';
 
 /// Widget to show the current list of typing users
 class TypingIndicator extends StatelessWidget {
+  /// Instantiate a new TypingIndicator
   const TypingIndicator({
     Key key,
     this.channel,

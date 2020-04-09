@@ -101,6 +101,7 @@ class StreamChannelState extends State<StreamChannel> {
     });
   }
 
+  /// Query the channel members and watchers
   Future<void> queryMembersAndWatchers() async {
     await widget.channel.query(
       membersPagination: PaginationParams(

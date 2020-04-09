@@ -23,7 +23,7 @@ Future<void> _handleAndroidNotification(
     body: notificationData.message.text,
   );
 
-  await NotificationService.sendNotification(androidNotificationOptions);
+  await NotificationService.showNotification(androidNotificationOptions);
 }
 
 void main() async {

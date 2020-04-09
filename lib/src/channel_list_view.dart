@@ -47,6 +47,7 @@ typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class ChannelListView extends StatefulWidget {
+  /// Instantiate a new ChannelListView
   ChannelListView({
     Key key,
     this.filter,
@@ -59,6 +60,7 @@ class ChannelListView extends StatefulWidget {
     this.errorBuilder,
   }) : super(key: key);
 
+  /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
 
   /// The query filters to use.

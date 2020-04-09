@@ -25,6 +25,7 @@ class ChannelPreview extends StatelessWidget {
   /// Channel displayed
   final Channel channel;
 
+  /// Instantiate a new ChannelPreview
   ChannelPreview({
     @required this.channel,
     Key key,
