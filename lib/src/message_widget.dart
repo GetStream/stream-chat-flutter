@@ -481,7 +481,9 @@ class _MessageWidgetState extends State<MessageWidget>
           Text(
             'MESSAGE FAILED · CLICK TO TRY AGAIN',
             style: _messageTheme.messageText.copyWith(
-              color: Colors.black.withOpacity(.5),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(.5)
+                  : Colors.black.withOpacity(.5),
               fontSize: 11,
             ),
           ),
@@ -489,7 +491,9 @@ class _MessageWidgetState extends State<MessageWidget>
           Text(
             'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
             style: _messageTheme.messageText.copyWith(
-              color: Colors.black.withOpacity(.5),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(.5)
+                  : Colors.black.withOpacity(.5),
               fontSize: 11,
             ),
           ),
@@ -497,7 +501,9 @@ class _MessageWidgetState extends State<MessageWidget>
           Text(
             'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
             style: _messageTheme.messageText.copyWith(
-              color: Colors.black.withOpacity(.5),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(.5)
+                  : Colors.black.withOpacity(.5),
               fontSize: 11,
             ),
           ),
@@ -521,7 +527,6 @@ class _MessageWidgetState extends State<MessageWidget>
             _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
         padding: EdgeInsets.all(10),
         constraints: BoxConstraints.loose(
-<<<<<<< HEAD
           Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
         ),
         child: _buildSendingError(
@@ -536,38 +541,6 @@ class _MessageWidgetState extends State<MessageWidget>
 
                 if (widget.onMentionTap != null) {
                   widget.onMentionTap(mentionedUser);
-=======
-            Size.fromWidth(MediaQuery.of(context).size.width * 0.7)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (widget.message.status == MessageSendingStatus.FAILED)
-              Text(
-                'MESSAGE FAILED · CLICK TO TRY AGAIN',
-                style: _messageTheme.messageText.copyWith(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withOpacity(.5)
-                      : Colors.black.withOpacity(.5),
-                  fontSize: 11,
-                ),
-              ),
-            MarkdownBody(
-              data: text,
-              onTapLink: (link) {
-                if (link.startsWith('@')) {
-                  final mentionedUser =
-                      widget.message.mentionedUsers.firstWhere(
-                    (u) => '@${u.name.replaceAll(' ', '')}' == link,
-                    orElse: () => null,
-                  );
-
-                  if (widget.onMentionTap != null) {
-                    widget.onMentionTap(mentionedUser);
-                  } else {
-                    print('tap on ${mentionedUser.name}');
-                  }
->>>>>>> master
                 } else {
                   print('tap on ${mentionedUser.name}');
                 }
@@ -987,7 +960,12 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildImage(
     Attachment attachment,
   ) {
-<<<<<<< HEAD
+    if (attachment.thumbUrl == null &&
+        attachment.imageUrl == null &&
+        attachment.assetUrl == null) {
+      return _buildErrorImage(attachment);
+    }
+
     return Hero(
       tag: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl,
       child: CachedNetworkImage(
@@ -1015,17 +993,6 @@ class _MessageWidgetState extends State<MessageWidget>
             attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
         errorWidget: (context, url, error) => _buildErrorImage(attachment),
         fit: BoxFit.cover,
-=======
-    final errorWidget = Container(
-      width: 200,
-      height: 140,
-      color: Color(0xffd0021B).withOpacity(.1),
-      child: Center(
-        child: Icon(
-          Icons.error_outline,
-          color: Colors.white,
-        ),
->>>>>>> master
       ),
     );
   }
@@ -1040,7 +1007,7 @@ class _MessageWidgetState extends State<MessageWidget>
       child: Container(
         width: 200,
         height: 140,
-        color: Color(0xffd0021B).withAlpha(26),
+        color: Color(0xffd0021B).withOpacity(.1),
         child: Center(
           child: Icon(
             Icons.error_outline,
@@ -1154,22 +1121,18 @@ class _MessageWidgetState extends State<MessageWidget>
           : Border.all(
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white.withAlpha(24)
-                  : Colors.black.withAlpha(24)),
+                  : Colors.black.withAlpha(24),
+            ),
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular((_isMyMessage || !rectBorders) ? 16 : 2),
         bottomLeft: Radius.circular(_isMyMessage ? 16 : 2),
         topRight: Radius.circular((_isMyMessage && rectBorders) ? 2 : 16),
         bottomRight: Radius.circular(_isMyMessage ? 2 : 16),
       ),
-<<<<<<< HEAD
       color: (widget.message.status == MessageSendingStatus.FAILED ||
               widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
               widget.message.status == MessageSendingStatus.FAILED_DELETE)
-          ? Color(0xffd0021B).withAlpha(26)
-=======
-      color: widget.message.status == MessageSendingStatus.FAILED
           ? Color(0xffd0021B).withOpacity(.1)
->>>>>>> master
           : _messageTheme.messageBackgroundColor,
     );
   }

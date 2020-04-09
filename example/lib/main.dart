@@ -30,7 +30,7 @@ void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-    notificationHandler: _handleBackgroundNotification,
+    customAndroidNotificationHandler: _handleBackgroundNotification,
   );
 
   await client.setUser(
@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       home: Container(
         child: StreamChat(
           client: client,
