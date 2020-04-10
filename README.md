@@ -38,7 +38,7 @@ You should then run `flutter packages get`
 
 ### Alpha version
 
-Use version `^0.2.0-alpha` to use the latest available version.
+Use version `^0.2.0-alpha+1` to use the latest available version.
 
 Note that this is still an alpha version. There may be some bugs and the api can change in breaking ways.
 

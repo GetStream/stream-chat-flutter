@@ -1,4 +1,4 @@
-## 0.2.0-alpha.1
+## 0.2.0-alpha+1
 
 - fix video loading and error
 
