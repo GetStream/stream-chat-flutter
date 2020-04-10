@@ -9,6 +9,7 @@
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
 ![CI](https://github.com/GetStream/stream-chat-flutter/workflows/CI/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/GetStream/stream-chat-flutter/branch/master/graph/badge.svg)](https://codecov.io/gh/GetStream/stream-chat-flutter)
+[![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 **Quick Links**
 
