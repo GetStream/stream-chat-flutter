@@ -1,3 +1,21 @@
+## 0.1.19
+
+- Fix video aspect ratio
+
+- Add property to decide whether to enable video fullscreen
+
+- Add property to hide the attachment button
+
+- Do not show send button if an attachment is still uploading
+
+- Unfocus and disable the TextField before opening the camera (workaround for flutter/flutter#42417)
+
+- Add gesture (vertical drag down) to close the keyboard
+
+- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will even close the keyboard)
+
+The property showVideoFullScreen was added mainly because of this issue brianegan/chewie#261
+
 ## 0.1.18
 
 - Add message list date separators
