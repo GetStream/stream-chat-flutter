@@ -42,7 +42,7 @@ final class NotificationService: UNNotificationServiceExtension {
                         sharedDefaults.setValue(storedMessages + [encodedString], forKey: "messageQueue")
                         
                         // Modify the notification content here...
-                        self.bestAttemptContent?.title = "[modified] \(self?.bestAttemptContent?.title ?? "<NoContent>")"
+                        self?.bestAttemptContent?.title = "[modified] \(self?.bestAttemptContent?.title ?? "<NoContent>")"
                         contentHandler(self?.bestAttemptContent ?? request.content)
                     }
                     Client.shared.disconnect()
