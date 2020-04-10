@@ -39,6 +39,7 @@ class MessageWidget extends StatefulWidget {
     this.isParent = false,
     this.onMentionTap,
     this.showOtherMessageUsername = false,
+    this.showVideoFullScreen = true,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -64,6 +65,9 @@ class MessageWidget extends StatefulWidget {
 
   /// True if this is the parent of the thread being showed
   final bool isParent;
+
+  /// True if the video player will allow fullscreen mode
+  final bool showVideoFullScreen;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -944,42 +948,53 @@ class _MessageWidgetState extends State<MessageWidget>
       _videoControllers[attachment.assetUrl] = videoController;
     }
 
-    ChewieController chewieController;
-    if (_chuwieControllers.containsKey(attachment.assetUrl)) {
-      chewieController = _chuwieControllers[attachment.assetUrl];
-    } else {
-      chewieController = ChewieController(
-          videoPlayerController: videoController,
-          autoInitialize: true,
-          errorBuilder: (_, e) {
-            return Stack(
-              children: <Widget>[
-                Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: CachedNetworkImageProvider(
-                        attachment.thumbUrl,
+    return FutureBuilder<void>(
+      future: videoController.initialize(),
+      builder: (_, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        ChewieController chewieController;
+        if (_chuwieControllers.containsKey(attachment.assetUrl)) {
+          chewieController = _chuwieControllers[attachment.assetUrl];
+        } else {
+          chewieController = ChewieController(
+              allowFullScreen: widget.showVideoFullScreen,
+              videoPlayerController: videoController,
+              autoInitialize: false,
+              aspectRatio: videoController.value.aspectRatio,
+              errorBuilder: (_, e) {
+                return Stack(
+                  children: <Widget>[
+                    Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: CachedNetworkImageProvider(
+                            attachment.thumbUrl,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _launchURL(attachment.titleLink),
-                  ),
-                ),
-              ],
-            );
-          });
-      _chuwieControllers[attachment.assetUrl] = chewieController;
-    }
-
-    return Chewie(
-      key: ValueKey<String>(
-          'ATTACHMENT-${attachment.title}-${widget.message.id}'),
-      controller: chewieController,
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _launchURL(attachment.titleLink),
+                      ),
+                    ),
+                  ],
+                );
+              });
+          _chuwieControllers[attachment.assetUrl] = chewieController;
+        }
+        return Chewie(
+          key: ValueKey<String>(
+              'ATTACHMENT-${attachment.title}-${widget.message.id}'),
+          controller: chewieController,
+        );
+      },
     );
   }
 

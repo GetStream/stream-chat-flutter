@@ -10,8 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   rxdart: ^0.23.1
-
-
   jiffy: ^3.0.1
   cached_network_image: ^2.0.0
   flutter_markdown: ^0.3.4

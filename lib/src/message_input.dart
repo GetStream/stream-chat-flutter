@@ -56,13 +56,15 @@ import 'stream_channel.dart';
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
-  MessageInput(
-      {Key key,
-      this.onMessageSent,
-      this.parentMessage,
-      this.editMessage,
-      this.maxHeight = 150})
-      : super(key: key);
+  MessageInput({
+    Key key,
+    this.onMessageSent,
+    this.parentMessage,
+    this.editMessage,
+    this.maxHeight = 150,
+    this.keyboardType = TextInputType.multiline,
+    this.disableAttachments = false,
+  }) : super(key: key);
 
   /// Message to edit
   final Message editMessage;
@@ -76,6 +78,12 @@ class MessageInput extends StatefulWidget {
   /// Maximum Height for the TextField to grow before it starts scrolling
   final double maxHeight;
 
+  /// The keyboard type assigned to the TextField
+  final TextInputType keyboardType;
+
+  /// If true the attachments button will not be displayed
+  final bool disableAttachments;
+
   @override
   _MessageInputState createState() => _MessageInputState();
 }
@@ -86,6 +94,7 @@ class _MessageInputState extends State<MessageInput> {
   final List<User> _mentionedUsers = [];
 
   TextEditingController _textController;
+  bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
@@ -93,20 +102,27 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            _buildBorder(context),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAttachments(),
-                _buildTextField(context),
-              ],
-            ),
-          ],
+      child: GestureDetector(
+        onPanUpdate: (details) {
+          if (details.delta.dy > 0) {
+            _focusNode.unfocus();
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Stack(
+            overflow: Overflow.visible,
+            children: <Widget>[
+              _buildBorder(context),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAttachments(),
+                  _buildTextField(context),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -117,7 +133,7 @@ class _MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        _buildAttachmentButton(),
+        if (!widget.disableAttachments) _buildAttachmentButton(),
         _buildTextInput(context),
         _animateSendButton(context),
       ],
@@ -126,7 +142,8 @@ class _MessageInputState extends State<MessageInput> {
 
   AnimatedCrossFade _animateSendButton(BuildContext context) {
     return AnimatedCrossFade(
-      crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
+      crossFadeState: ((_messageIsPresent || _attachments.isNotEmpty) &&
+              _attachments.every((a) => a.uploaded == true))
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
@@ -142,11 +159,13 @@ class _MessageInputState extends State<MessageInput> {
         maxHeight: widget.maxHeight,
         child: TextField(
           key: Key('messageInputText'),
+          enabled: _inputEnabled,
           minLines: null,
           maxLines: null,
           onSubmitted: (_) {
             _sendMessage(context);
           },
+          keyboardType: widget.keyboardType,
           controller: _textController,
           focusNode: _focusNode,
           onChanged: (s) {
@@ -506,6 +525,10 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _showAttachmentModal() {
+    if (_focusNode.hasFocus) {
+      _focusNode.unfocus();
+    }
+
     showModalBottomSheet(
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
@@ -548,7 +571,6 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.camera_alt),
                 title: Text('Photo from camera'),
                 onTap: () {
-                  ImagePicker.pickImage(source: ImageSource.camera);
                   _pickFile(FileType.image, true);
                   Navigator.pop(context);
                 },
@@ -575,6 +597,10 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _pickFile(FileType type, bool camera) async {
+    setState(() {
+      _inputEnabled = false;
+    });
+
     File file;
 
     if (camera) {
@@ -585,6 +611,14 @@ class _MessageInputState extends State<MessageInput> {
       }
     } else {
       file = await FilePicker.getFile(type: type);
+    }
+
+    setState(() {
+      _inputEnabled = true;
+    });
+
+    if (file == null) {
+      return;
     }
 
     final channel = StreamChannel.of(context).channel;
