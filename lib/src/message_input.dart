@@ -147,6 +147,7 @@ class _MessageInputState extends State<MessageInput> {
           onSubmitted: (_) {
             _sendMessage(context);
           },
+          keyboardType: TextInputType.text,
           controller: _textController,
           focusNode: _focusNode,
           onChanged: (s) {
