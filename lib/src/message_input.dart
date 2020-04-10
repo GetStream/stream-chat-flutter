@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -634,14 +635,30 @@ class _MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    final res = await channel.sendFile(
-      MultipartFile.fromBytes(
-        bytes,
-        filename: file.path.split('/').last,
-      ),
-    );
+    String url;
+    final filename = file.path.split('/').last;
 
-    attachment.url = res.file;
+    if (type == FileType.image) {
+      final res = await channel.sendImage(
+        MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+          contentType: MediaType.parse(lookupMimeType(filename)),
+        ),
+      );
+      url = res.file;
+    } else {
+      final res = await channel.sendFile(
+        MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+          contentType: MediaType.parse(lookupMimeType(filename)),
+        ),
+      );
+      url = res.file;
+    }
+
+    attachment.url = url;
 
     setState(() {
       attachment.uploaded = true;
