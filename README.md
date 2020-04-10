@@ -146,6 +146,69 @@ Out of the box all chat widgets use their own default styling, there are two way
     }
   }
   ```
+  
+### Offline storage 
+
+By default the library saves information about channels and messages in a SQLite DB.
+
+Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
+
+### Push notifications
+
+To enable push notifications set the property `pushNotificationsEnabled` to `true`.
+
+#### Android
+
+Follow the guide at (this link)[https://pub.dev/packages/firebase_messaging#android-integration] to setup Firebase for Android.
+
+Set the notification template on your GetStream dashboard to be like this:
+```json
+template = {}
+
+data template = {
+    "message_id": "{{ message.id }}"
+}
+```
+
+Create a Application.kt file to be like this:
+```kotlin
+class Application : FlutterApplication(), PluginRegistrantCallback {
+    override fun onCreate() {
+        super.onCreate()
+        FlutterFirebaseMessagingService.setPluginRegistrant(this)
+    }
+
+    override fun registerWith(registry: PluginRegistry?) {
+        PathProviderPlugin.registerWith(registry?.registrarFor(
+                "io.flutter.plugins.pathprovider.PathProviderPlugin"))
+        SharedPreferencesPlugin.registerWith(registry?.registrarFor(
+                "io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin"))
+        FlutterLocalNotificationsPlugin.registerWith(registry?.registrarFor(
+                "com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin"))
+        FirebaseMessagingPlugin.registerWith(registry?.registrarFor("io.flutter.plugins.firebasemessaging.FirebaseMessagingPlugin"))
+    }
+}
+```
+
+Update the `AndroidManifest.xml` file to set the application class:
+```xml
+...
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application
+        android:name=".Application"
+        android:label="example"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+...
+```
+
+#### iOS
+
+Make sure you have correctly configured your app to support push notifications, and that you have generated certificate/token for sending pushes.
+
+To enable offline notification support on iOS a guide will be released soon on our website.
 
 ## Contributing
 
