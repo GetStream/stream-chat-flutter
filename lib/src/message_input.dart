@@ -90,6 +90,7 @@ class _MessageInputState extends State<MessageInput> {
   final List<User> _mentionedUsers = [];
 
   TextEditingController _textController;
+  bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
@@ -153,6 +154,7 @@ class _MessageInputState extends State<MessageInput> {
         maxHeight: widget.maxHeight,
         child: TextField(
           key: Key('messageInputText'),
+          enabled: _inputEnabled,
           minLines: null,
           maxLines: null,
           onSubmitted: (_) {
@@ -590,6 +592,10 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _pickFile(FileType type, bool camera) async {
+    setState(() {
+      _inputEnabled = false;
+    });
+
     File file;
 
     if (camera) {
@@ -601,6 +607,10 @@ class _MessageInputState extends State<MessageInput> {
     } else {
       file = await FilePicker.getFile(type: type);
     }
+
+    setState(() {
+      _inputEnabled = true;
+    });
 
     if (file == null) {
       return;
