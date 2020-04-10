@@ -194,14 +194,16 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       if (Platform.isAndroid) {
-        _newMessageSubscription =
-            client.on(EventType.messageNew).listen((event) {
-          client.androidNotificationHandler({
-            'data': {
-              'message_id': event.message.id,
-            },
+        if (client.pushNotificationsEnabled) {
+          _newMessageSubscription =
+              client.on(EventType.messageNew).listen((event) {
+            client.androidNotificationHandler({
+              'data': {
+                'message_id': event.message.id,
+              },
+            });
           });
-        });
+        }
         _disconnectTimer = Timer(Duration(minutes: 1), () {
           client.disconnect();
         });
@@ -214,7 +216,9 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         _disconnectTimer.cancel();
       } else {
         if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
-          NotificationService.handleIosMessageQueue(client);
+          if (client.pushNotificationsEnabled) {
+            NotificationService.handleIosMessageQueue(client);
+          }
           client.connect();
         }
       }

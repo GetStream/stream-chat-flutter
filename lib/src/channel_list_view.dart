@@ -326,7 +326,8 @@ class _ChannelListViewState extends State<ChannelListView>
 
   void _listenChannelPagination(ChannelsBlocState channelsProvider) {
     if (_scrollController.position.maxScrollExtent ==
-        _scrollController.offset) {
+            _scrollController.offset &&
+        _scrollController.offset != 0) {
       channelsProvider.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
@@ -342,11 +343,11 @@ class _ChannelListViewState extends State<ChannelListView>
   void initState() {
     super.initState();
 
-    final channelsProvider = ChannelsBloc.of(context);
+    final channelsBloc = ChannelsBloc.of(context);
 
     WidgetsBinding.instance.addObserver(this);
 
-    channelsProvider.queryChannels(
+    channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination,
@@ -354,7 +355,11 @@ class _ChannelListViewState extends State<ChannelListView>
     );
 
     _scrollController.addListener(() {
-      _listenChannelPagination(channelsProvider);
+      channelsBloc.queryChannelsLoading.first.then((loading) {
+        if (!loading) {
+          _listenChannelPagination(channelsBloc);
+        }
+      });
     });
   }
 
