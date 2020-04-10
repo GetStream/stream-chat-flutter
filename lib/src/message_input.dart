@@ -63,6 +63,7 @@ class MessageInput extends StatefulWidget {
     this.editMessage,
     this.maxHeight = 150,
     this.keyboardType = TextInputType.multiline,
+    this.disableAttachments = false,
   }) : super(key: key);
 
   /// Message to edit
@@ -79,6 +80,9 @@ class MessageInput extends StatefulWidget {
 
   /// The keyboard type assigned to the TextField
   final TextInputType keyboardType;
+
+  /// If true the attachments button will not be displayed
+  final bool disableAttachments;
 
   @override
   _MessageInputState createState() => _MessageInputState();
@@ -129,7 +133,7 @@ class _MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        _buildAttachmentButton(),
+        if (!widget.disableAttachments) _buildAttachmentButton(),
         _buildTextInput(context),
         _animateSendButton(context),
       ],
