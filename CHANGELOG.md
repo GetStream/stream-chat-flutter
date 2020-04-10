@@ -1,3 +1,7 @@
+## 0.1.21
+
+- Fix video loading and error
+
 ## 0.1.20
 
 - Add message configuration properties to MessageListView
