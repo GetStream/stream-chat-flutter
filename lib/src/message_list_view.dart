@@ -63,6 +63,9 @@ class MessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.showOtherMessageUsername = false,
+    this.showVideoFullScreen = true,
+    this.onMentionTap,
+    this.onMessageActions,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -83,6 +86,15 @@ class MessageListView extends StatefulWidget {
 
   /// If true show the other users username next to the timestamp of the message
   final bool showOtherMessageUsername;
+
+  /// True if the video player will allow fullscreen mode
+  final bool showVideoFullScreen;
+
+  /// Function called on message mention tap
+  final void Function(User) onMentionTap;
+
+  /// Function called on message long press
+  final Function(BuildContext, Message) onMessageActions;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -138,6 +150,11 @@ class _MessageListViewState extends State<MessageListView> {
                         nextMessage: null,
                         onThreadTap: _onThreadTap,
                         isParent: true,
+                        showVideoFullScreen: widget.showVideoFullScreen,
+                        showOtherMessageUsername:
+                            widget.showOtherMessageUsername,
+                        onMentionTap: widget.onMentionTap,
+                        onMessageActions: widget.onMessageActions,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -197,6 +214,9 @@ class _MessageListViewState extends State<MessageListView> {
                   nextMessage: nextMessage,
                   onThreadTap: _onThreadTap,
                   showOtherMessageUsername: widget.showOtherMessageUsername,
+                  showVideoFullScreen: widget.showVideoFullScreen,
+                  onMentionTap: widget.onMentionTap,
+                  onMessageActions: widget.onMessageActions,
                 );
               }
             }
@@ -330,6 +350,10 @@ class _MessageListViewState extends State<MessageListView> {
         message: message,
         nextMessage: nextMessage,
         onThreadTap: _onThreadTap,
+        showVideoFullScreen: widget.showVideoFullScreen,
+        showOtherMessageUsername: widget.showOtherMessageUsername,
+        onMentionTap: widget.onMentionTap,
+        onMessageActions: widget.onMessageActions,
       );
     }
 
@@ -365,6 +389,10 @@ class _MessageListViewState extends State<MessageListView> {
         message: message,
         nextMessage: null,
         onThreadTap: _onThreadTap,
+        showVideoFullScreen: widget.showVideoFullScreen,
+        showOtherMessageUsername: widget.showOtherMessageUsername,
+        onMentionTap: widget.onMentionTap,
+        onMessageActions: widget.onMessageActions,
       );
     }
 
