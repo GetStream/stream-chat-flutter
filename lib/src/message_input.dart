@@ -56,13 +56,13 @@ import 'stream_channel.dart';
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
-  MessageInput(
-      {Key key,
-      this.onMessageSent,
-      this.parentMessage,
-      this.editMessage,
-      this.maxHeight = 150})
-      : super(key: key);
+  MessageInput({
+    Key key,
+    this.onMessageSent,
+    this.parentMessage,
+    this.editMessage,
+    this.maxHeight = 150,
+  }) : super(key: key);
 
   /// Message to edit
   final Message editMessage;
@@ -506,6 +506,10 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _showAttachmentModal() {
+    if (_focusNode.hasFocus) {
+      _focusNode.unfocus();
+    }
+
     showModalBottomSheet(
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
@@ -548,7 +552,6 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.camera_alt),
                 title: Text('Photo from camera'),
                 onTap: () {
-                  ImagePicker.pickImage(source: ImageSource.camera);
                   _pickFile(FileType.image, true);
                   Navigator.pop(context);
                 },
@@ -585,6 +588,10 @@ class _MessageInputState extends State<MessageInput> {
       }
     } else {
       file = await FilePicker.getFile(type: type);
+    }
+
+    if (file == null) {
+      return;
     }
 
     final channel = StreamChannel.of(context).channel;
