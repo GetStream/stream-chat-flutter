@@ -167,7 +167,7 @@ To enable push notifications set the property `pushNotificationsEnabled` to `tru
 
 #### Android
 
-Follow the guide at (this link)[https://pub.dev/packages/firebase_messaging#android-integration] to setup Firebase for Android.
+Follow the guide at [this link](https://pub.dev/packages/firebase_messaging#android-integration) to setup Firebase for Android.
 
 Set the notification template on your GetStream dashboard to be like this:
 ```json
