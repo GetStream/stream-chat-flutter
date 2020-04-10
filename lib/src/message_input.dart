@@ -138,7 +138,8 @@ class _MessageInputState extends State<MessageInput> {
 
   AnimatedCrossFade _animateSendButton(BuildContext context) {
     return AnimatedCrossFade(
-      crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
+      crossFadeState: ((_messageIsPresent || _attachments.isNotEmpty) &&
+              _attachments.every((a) => a.uploaded == true))
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
