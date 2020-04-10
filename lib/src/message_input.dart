@@ -62,6 +62,7 @@ class MessageInput extends StatefulWidget {
     this.parentMessage,
     this.editMessage,
     this.maxHeight = 150,
+    this.keyboardType = TextInputType.multiline,
   }) : super(key: key);
 
   /// Message to edit
@@ -75,6 +76,9 @@ class MessageInput extends StatefulWidget {
 
   /// Maximum Height for the TextField to grow before it starts scrolling
   final double maxHeight;
+
+  /// The keyboard type assigned to the TextField
+  final TextInputType keyboardType;
 
   @override
   _MessageInputState createState() => _MessageInputState();
@@ -93,20 +97,27 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            _buildBorder(context),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildAttachments(),
-                _buildTextField(context),
-              ],
-            ),
-          ],
+      child: GestureDetector(
+        onPanUpdate: (details) {
+          if (details.delta.dy > 0) {
+            _focusNode.unfocus();
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Stack(
+            overflow: Overflow.visible,
+            children: <Widget>[
+              _buildBorder(context),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildAttachments(),
+                  _buildTextField(context),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -147,7 +158,7 @@ class _MessageInputState extends State<MessageInput> {
           onSubmitted: (_) {
             _sendMessage(context);
           },
-          keyboardType: TextInputType.text,
+          keyboardType: widget.keyboardType,
           controller: _textController,
           focusNode: _focusNode,
           onChanged: (s) {
