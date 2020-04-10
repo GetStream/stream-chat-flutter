@@ -1035,7 +1035,9 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     return FutureBuilder<void>(
-      future: videoController.initialize(),
+      future: videoController.value.initialized
+          ? Future.value(true)
+          : videoController.initialize(),
       builder: (_, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Container(

@@ -21,6 +21,7 @@ dependencies:
   image_picker: ^0.6.4
   flutter_keyboard_visibility: ^0.8.0
   stream_chat: ^0.2.0-alpha
+  mime: ^0.9.6+3
   visibility_detector: ^0.1.4
 
 dev_dependencies:
