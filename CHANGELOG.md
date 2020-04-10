@@ -1,3 +1,7 @@
+## 0.1.22
+
+- Better mime type detection
+
 ## 0.1.21
 
 - Fix video loading and error
