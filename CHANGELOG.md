@@ -1,3 +1,11 @@
+## 0.2.0-alpha
+
+- Offline storage
+
+- Push notifications
+
+- Minor bug fixes
+
 ## 0.1.20
 
 - Add message configuration properties to MessageListView
