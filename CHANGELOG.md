@@ -1,3 +1,7 @@
+## 0.1.20
+
+- Add message configuration properties to MessageListView
+
 ## 0.1.19
 
 - Fix video aspect ratio
