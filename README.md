@@ -221,7 +221,7 @@ Make sure you have correctly configured your app to support push notifications, 
 - open the XCode project
 - create a new target of type `Notification service extension`
 - add `App Groups` capability to the `Runner` target and the just created one
-- add the line `  pod 'StreamChatClient', :git => 'https://github.com/GetStream/stream-chat-swift.git', :branch => 'release/2.0'` to the Podfile
+- add the line `pod 'StreamChatClient'` to the Podfile
 - run `pod install`
 - substitute the code in the `Notification service` with [this one](https://gist.github.com/imtoori/d37611faefef036e1a6c017b1a09e91f) and substitute APPGROUP with the just created one
 - do the same with `AppDelegate.swift` using [this template](https://gist.github.com/imtoori/f95b30f25b745c5f777bfff1085176ef)
