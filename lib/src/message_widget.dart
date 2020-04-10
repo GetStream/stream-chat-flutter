@@ -1038,8 +1038,12 @@ class _MessageWidgetState extends State<MessageWidget>
       future: videoController.initialize(),
       builder: (_, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return Center(
-            child: CircularProgressIndicator(),
+          return Container(
+            height: 100,
+            width: 100,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
         ChewieController chewieController;
@@ -1052,26 +1056,31 @@ class _MessageWidgetState extends State<MessageWidget>
               autoInitialize: false,
               aspectRatio: videoController.value.aspectRatio,
               errorBuilder: (_, e) {
-                return Stack(
-                  children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: CachedNetworkImageProvider(
-                            attachment.thumbUrl,
+                if (attachment.thumbUrl != null) {
+                  return Stack(
+                    children: <Widget>[
+                      Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: CachedNetworkImageProvider(
+                              attachment.thumbUrl,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => _launchURL(attachment.titleLink),
-                      ),
-                    ),
-                  ],
-                );
+                      if (attachment.titleLink != null)
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => _launchURL(attachment.titleLink),
+                          ),
+                        ),
+                    ],
+                  );
+                }
+
+                return _buildErrorImage(attachment);
               });
           _chuwieControllers[attachment.assetUrl] = chewieController;
         }
