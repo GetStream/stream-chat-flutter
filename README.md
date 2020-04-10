@@ -220,7 +220,7 @@ Make sure you have correctly configured your app to support push notifications, 
 
 - open the XCode project
 - create a new target of type `Notification service extension`
-- add `App Groups` capability to the `Runner` target and the just created one
+- add `App Groups` capability to the `Runner` target and the just created one and create one common group
 - add the line `pod 'StreamChatClient'` to the Podfile
 - run `pod install`
 - substitute the code in the `Notification service` with [this one](https://gist.github.com/imtoori/d37611faefef036e1a6c017b1a09e91f) and substitute APPGROUP with the just created one
