@@ -937,6 +937,22 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  Widget _buildErrorImage(Attachment attachment) {
+    return Center(
+      child: Container(
+        width: 200,
+        height: 140,
+        color: Color(0xffd0021B).withOpacity(.1),
+        child: Center(
+          child: Icon(
+            Icons.error_outline,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildVideo(
     Attachment attachment,
   ) {

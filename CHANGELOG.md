@@ -1,3 +1,7 @@
+## 0.1.23
+
+- Hotfix
+
 ## 0.1.22
 
 - Better mime type detection
