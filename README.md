@@ -63,10 +63,11 @@ Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check 
 
 ### Business logic components
 
-We provide 2 Widgets dedicated to business logic and state management:
+We provide 3 Widgets dedicated to business logic and state management:
 
 - [StreamChat](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat-class.html)
 - [StreamChannel](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannel-class.html)
+- [ChannelsBloc](https://pub.dev/documentation/stream_chat_flutter/0.2.0-alpha+2/stream_chat_flutter/ChannelsBloc-class.html)
 
 ### UI Components
 
