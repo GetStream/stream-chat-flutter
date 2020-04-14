@@ -213,11 +213,55 @@ Update the `AndroidManifest.xml` file to set the application class:
 ...
 ```
 
+##### Customizing notifications
+
+To customize notifications pass a function as the named parameter `androidNotificationHandler` to the `Client` constructor.
+
+It has to be a top-level function or a static method.
+
+The class `NotificationService` provides some helper methods to use to handle the notification.
+
+You can start from this template to write the `androidNotificationHandler` function:
+
+```dart
+Future<void> _handleAndroidNotification(
+  Map<String, dynamic> notification,
+) async {
+  // get message information from the backend and store it in the offline storage
+  final notificationData = await NotificationService.getAndStoreMessage(notification);
+
+  // define the android channel specifics
+  final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    'Message notifications',
+    'Message notifications',
+    'Channel dedicated to message notifications',
+    importance: Importance.Max,
+    priority: Priority.High,
+  );
+
+  // define the appearance of the notification
+  final androidNotificationOptions = AndroidNotificationOptions(
+    androidNotificationDetails: androidPlatformChannelSpecifics,
+    id: notificationData.message.id.hashCode,
+    title:
+        'CUSTOM ${notificationData.message.user.name} @ ${notificationData.channel.cid}',
+    body: notificationData.message.text,
+  );
+
+  // actually show the notification
+  await NotificationService.showNotification(androidNotificationOptions);
+}
+```
+
 #### iOS
 
 Make sure you have correctly configured your app to support push notifications, and that you have generated certificate/token for sending pushes.
 
-##### Offline support for push notifications
+##### Offline support and customizing notifications
+
+On iOS we need to create a notification service extension.
+
+Follow these points to configure it
 
 - open the XCode project
 - create a new target of type `Notification service extension`
@@ -242,6 +286,10 @@ template = {
 }
 ```
 Of course you can change the `alert` object as you want. Just make sure it has the last three lines.
+
+To customize notifications on iOS you need to do it in the Notification service. 
+
+There is no way of doing it using Dart code at the moment because of framework restrictions.
 
 ## Contributing
 
