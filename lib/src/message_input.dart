@@ -280,37 +280,33 @@ class _MessageInputState extends State<MessageInput> {
               ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
-            child: Flex(
-              mainAxisSize: MainAxisSize.min,
-              direction: Axis.vertical,
-              children: <Widget>[
-                ListView(
-                  padding: const EdgeInsets.all(0),
-                  shrinkWrap: true,
-                  children: commands
-                      .map((c) => ListTile(
-                            title: Text.rich(
-                              TextSpan(
-                                text: '${c.name}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                                children: [
-                                  TextSpan(
-                                    text: ' ${c.args}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                ],
+            child: ListView(
+              padding: const EdgeInsets.all(0),
+              shrinkWrap: true,
+              children: commands
+                  .map(
+                    (c) => ListTile(
+                      title: Text.rich(
+                        TextSpan(
+                          text: '${c.name}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          children: [
+                            TextSpan(
+                              text: ' ${c.args}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w300,
                               ),
                             ),
-                            subtitle: Text(c.description),
-                            onTap: () {
-                              _setCommand(c);
-                            },
-                          ))
-                      .toList(),
-                ),
-              ],
+                          ],
+                        ),
+                      ),
+                      subtitle: Text(c.description),
+                      onTap: () {
+                        _setCommand(c);
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ),
@@ -351,41 +347,35 @@ class _MessageInputState extends State<MessageInput> {
               ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
-            child: Flex(
-              mainAxisSize: MainAxisSize.min,
-              direction: Axis.vertical,
-              children: <Widget>[
-                ListView(
-                  padding: const EdgeInsets.all(0),
-                  shrinkWrap: true,
-                  children: members
-                      .map((m) => ListTile(
-                            leading: UserAvatar(
-                              user: m.user,
+            child: ListView(
+              padding: const EdgeInsets.all(0),
+              shrinkWrap: true,
+              children: members
+                  .map((m) => ListTile(
+                        leading: UserAvatar(
+                          user: m.user,
+                        ),
+                        title: Text('${m.user.name}'),
+                        onTap: () {
+                          _mentionedUsers.add(m.user);
+
+                          splits[splits.length - 1] = m.user.name;
+                          final rejoin = splits.join('@');
+
+                          _textController.value = TextEditingValue(
+                            text: rejoin +
+                                _textController.text
+                                    .substring(_textController.selection.start),
+                            selection: TextSelection.collapsed(
+                              offset: rejoin.length,
                             ),
-                            title: Text('${m.user.name}'),
-                            onTap: () {
-                              _mentionedUsers.add(m.user);
+                          );
 
-                              splits[splits.length - 1] = m.user.name;
-                              final rejoin = splits.join('@');
-
-                              _textController.value = TextEditingValue(
-                                text: rejoin +
-                                    _textController.text.substring(
-                                        _textController.selection.start),
-                                selection: TextSelection.collapsed(
-                                  offset: rejoin.length,
-                                ),
-                              );
-
-                              _mentionsOverlay?.remove();
-                              _mentionsOverlay = null;
-                            },
-                          ))
-                      .toList(),
-                ),
-              ],
+                          _mentionsOverlay?.remove();
+                          _mentionsOverlay = null;
+                        },
+                      ))
+                  .toList(),
             ),
           ),
         ),
