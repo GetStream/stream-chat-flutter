@@ -1,3 +1,7 @@
+## 0.1.24
+
+- Fx overflow in mentions overlay
+
 ## 0.1.23
 
 - Hotfix
