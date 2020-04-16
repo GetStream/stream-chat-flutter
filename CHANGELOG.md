@@ -1,4 +1,4 @@
-## 0.1.24
+## 0.1.25
 
 - Fx overflow in mentions overlay
 
