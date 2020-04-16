@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -193,18 +192,41 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      if (Platform.isAndroid) {
-        if (client.pushNotificationsEnabled) {
-          _newMessageSubscription =
-              client.on(EventType.messageNew).listen((event) {
-            client.androidNotificationHandler({
-              'data': {
-                'message_id': event.message.id,
-              },
-            });
-          });
-        }
-        _disconnectTimer = Timer(Duration(minutes: 1), () {
+      if (client.showFakeNotification != null) {
+        _newMessageSubscription = client
+            .on(EventType.messageNew)
+            .where((e) => e.user.id != user.id)
+            .listen((event) async {
+          var channel = client.state.channels[event.cid];
+
+          if (channel == null) {
+            channel = client.channel(
+              event.type,
+              id: event.cid.split(':')[1],
+            );
+            await channel.query();
+          }
+
+          client.showFakeNotification(
+            event.message,
+            ChannelModel(
+              id: channel.id,
+              createdAt: channel.createdAt,
+              extraData: channel.extraData,
+              type: channel.type,
+              members: channel.state.members,
+              memberCount: channel.memberCount,
+              frozen: channel.frozen,
+              cid: channel.cid,
+              deletedAt: channel.deletedAt,
+              config: channel.config,
+              createdBy: channel.createdBy,
+              updatedAt: channel.updatedAt,
+              lastMessageAt: channel.lastMessageAt,
+            ),
+          );
+        });
+        _disconnectTimer = Timer(client.backgroundKeepAlive, () {
           client.disconnect();
         });
       } else {
@@ -216,9 +238,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         _disconnectTimer.cancel();
       } else {
         if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
-          if (client.pushNotificationsEnabled) {
-            NotificationService.handleIosMessageQueue(client);
-          }
+          NotificationService.handleIosMessageQueue(client);
           client.connect();
         }
       }

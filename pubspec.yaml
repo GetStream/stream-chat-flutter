@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   photo_view: ^0.9.2
-  rxdart: ^0.23.1
   jiffy: ^3.0.1
   cached_network_image: ^2.1.0+1
   flutter_markdown: ^0.3.4
@@ -20,7 +19,8 @@ dependencies:
   file_picker: ^1.6.2
   image_picker: ^0.6.5
   flutter_keyboard_visibility: ^0.8.0
-  stream_chat: ^0.2.0-alpha
+  stream_chat:
+    path: ../stream_chat_dart
   mime: ^0.9.6+3
   visibility_detector: ^0.1.4
   http_parser: ^3.1.4
