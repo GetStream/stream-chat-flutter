@@ -1,3 +1,9 @@
+## 0.2.0-alpha+4
+
+- Remove dependencies on notification service
+
+- Expose some helping method for integrate offline storage with push notifications
+
 ## 0.2.0-alpha+3
 
 - Fix overflow in mentions overlay
