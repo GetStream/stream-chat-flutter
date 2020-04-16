@@ -1,7 +1,7 @@
 name: stream_chat_flutter
 homepage: https://github.com/GetStream/stream-chat-flutter
 description: Stream Chat official Flutter SDK. Build your own chat experience using Dart and Flutter.
-version: 0.2.0-alpha+2
+version: 0.2.0-alpha+3
 
 environment:
   sdk: ">=2.3.0 <3.0.0"
@@ -23,6 +23,7 @@ dependencies:
   stream_chat: ^0.2.0-alpha
   mime: ^0.9.6+3
   visibility_detector: ^0.1.4
+  http_parser: ^3.1.4
 
 dev_dependencies:
   pedantic: ^1.9.0

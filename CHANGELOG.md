@@ -1,3 +1,7 @@
+## 0.2.0-alpha+3
+
+- Fix overflow in mentions overlay
+
 ## 0.2.0-alpha+2
 
 - Add better mime detection
