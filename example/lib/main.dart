@@ -17,7 +17,7 @@ void showLocalNotification(Message message, ChannelModel channel) async {
     initializationSettingsIOS,
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  flutterLocalNotificationsPlugin.show(
+  await flutterLocalNotificationsPlugin.show(
     message.id.hashCode,
     '${message.user.name} @ ${channel.name}',
     message.text,
@@ -37,8 +37,6 @@ void showLocalNotification(Message message, ChannelModel channel) async {
 Future backgroundHandler(Map<String, dynamic> notification) async {
   final messageId = notification['data']['message_id'];
 
-  print('messageId: ${messageId}');
-
   final notificationData =
       await NotificationService.getAndStoreMessage(messageId);
 
@@ -48,18 +46,7 @@ Future backgroundHandler(Map<String, dynamic> notification) async {
   );
 }
 
-void main() async {
-  final client = Client(
-    's2dxdhpxd94g',
-    logLevel: Level.INFO,
-    showFakeNotification: Platform.isAndroid ? showLocalNotification : null,
-  );
-
-  await client.setUser(
-    User(id: 'user1'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU',
-  );
-
+void _initNotifications(Client client) {
   final connector = createPushConnector();
   connector.configure(
     onBackgroundMessage: backgroundHandler,
@@ -74,6 +61,21 @@ void main() async {
       );
     }
   });
+}
+
+void main() async {
+  final client = Client(
+    's2dxdhpxd94g',
+    logLevel: Level.INFO,
+    showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
+  );
+
+  await client.setUser(
+    User(id: 'user1'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU',
+  );
+
+  _initNotifications(client);
 
   runApp(MyApp(client));
 }

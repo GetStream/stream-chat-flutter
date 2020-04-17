@@ -192,7 +192,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      if (client.showFakeNotification != null) {
+      if (client.showLocalNotification != null) {
         _newMessageSubscription = client
             .on(EventType.messageNew)
             .where((e) => e.user.id != user.id)
@@ -207,7 +207,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
             await channel.query();
           }
 
-          client.showFakeNotification(
+          client.showLocalNotification(
             event.message,
             ChannelModel(
               id: channel.id,
