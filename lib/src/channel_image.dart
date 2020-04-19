@@ -64,11 +64,13 @@ class ChannelImage extends StatelessWidget {
         initialData: channel.extraData,
         builder: (context, snapshot) {
           var image = '';
-          if (snapshot.data?.containsKey('image') ?? false) {
+          if (snapshot.data?.containsKey('image') == true) {
             image = snapshot.data['image'];
           } else if (channel.state.members.length == 2) {
-            final otherMemberIndex = channel.state.members[0].user.id == client.user.id ? 1 : 0;
-            image = channel.state.members[otherMemberIndex].user.image;
+            final otherMember = channel.state.members.firstWhere(
+              (member) => member.user.id != client.user.id
+            );
+            image = otherMember.user.image;
           }
 
           return ClipRRect(

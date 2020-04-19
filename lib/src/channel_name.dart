@@ -30,8 +30,10 @@ class ChannelName extends StatelessWidget {
       builder: (context, snapshot) {
         var title;
         if (snapshot.data['name'] == null && channel.state.members.length == 2) {
-          final otherMemberIndex = channel.state.members[0].user.id == client.user.id ? 1 : 0;
-          title = channel.state.members[otherMemberIndex].user.name;
+          final otherMember = channel.state.members.firstWhere(
+            (member) => member.user.id != client.user.id
+          );
+          title = otherMember.user.name;
         } else {
           title = snapshot.data['name'] ?? channel.id;
         }
