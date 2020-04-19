@@ -1,4 +1,4 @@
-## 0.1.26
+## 0.1.27
 
 - Show other member user's name and image in one to one channels
 

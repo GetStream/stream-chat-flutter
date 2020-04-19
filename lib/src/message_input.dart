@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -760,7 +761,7 @@ class _MessageInputState extends State<MessageInput> {
     });
   }
 
-  int _keyboardListener;
+  StreamSubscription _keyboardListener;
 
   @override
   void initState() {
@@ -768,16 +769,8 @@ class _MessageInputState extends State<MessageInput> {
 
     StreamChannel.of(context).queryMembersAndWatchers();
 
-    _keyboardListener = KeyboardVisibilityNotification().addNewListener(
-      onHide: () {
-        if (_commandsOverlay != null) {
-          _commandsOverlay.remove();
-        }
-        if (_mentionsOverlay != null) {
-          _mentionsOverlay.remove();
-        }
-      },
-      onShow: () {
+    _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
+      if (visible) {
         if (_commandsOverlay != null) {
           if (_textController.text.startsWith('/')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -795,8 +788,15 @@ class _MessageInputState extends State<MessageInput> {
             });
           }
         }
-      },
-    );
+      } else {
+        if (_commandsOverlay != null) {
+          _commandsOverlay.remove();
+        }
+        if (_mentionsOverlay != null) {
+          _mentionsOverlay.remove();
+        }
+      }
+    });
 
     if (widget.editMessage != null) {
       _textController = TextEditingController(text: widget.editMessage.text);
@@ -837,7 +837,7 @@ class _MessageInputState extends State<MessageInput> {
   void dispose() {
     _commandsOverlay?.remove();
     _mentionsOverlay?.remove();
-    KeyboardVisibilityNotification().removeListener(_keyboardListener);
+    _keyboardListener.cancel();
     super.dispose();
   }
 
