@@ -8,11 +8,11 @@ class UserAvatar extends StatelessWidget {
   const UserAvatar({
     Key key,
     @required this.user,
-    this.radius = 16,
+    this.constraints,
   }) : super(key: key);
 
   final User user;
-  final double radius;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class UserAvatar extends StatelessWidget {
       borderRadius:
           StreamChatTheme.of(context).ownMessageTheme.avatarTheme.borderRadius,
       child: Container(
-        constraints:
+        constraints: constraints ??
             StreamChatTheme.of(context).ownMessageTheme.avatarTheme.constraints,
         decoration: BoxDecoration(
           color: StreamChatTheme.of(context).accentColor,

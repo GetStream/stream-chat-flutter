@@ -38,7 +38,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget uses a [StreamBuilder] to render the channel information image as soon as it updates.
 ///
 /// By default the widget radius size is 40x40 pixels.
-/// Set the property [size] to set a custom dimension.
+/// Set the property [constraints] to set a custom dimension.
 ///
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
@@ -46,14 +46,14 @@ class ChannelImage extends StatelessWidget {
   const ChannelImage({
     Key key,
     this.channel,
-    this.size = 40,
+    this.constraints,
   }) : super(key: key);
 
   /// The channel to show the image of
   final Channel channel;
 
   /// The diameter of the image
-  final double size;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +63,13 @@ class ChannelImage extends StatelessWidget {
         stream: channel.extraDataStream,
         initialData: channel.extraData,
         builder: (context, snapshot) {
-          var image = '';
+          String image;
           if (snapshot.data?.containsKey('image') == true) {
             image = snapshot.data['image'];
           } else if (channel.state.members.length == 2) {
-            final otherMember = channel.state.members.firstWhere(
-              (member) => member.user.id != client.user.id
-            );
-            image = otherMember.user.image;
+            final otherMember = channel.state.members
+                .firstWhere((member) => member.user.id != client.user.id);
+            image = otherMember.user.extraData['image'];
           }
 
           return ClipRRect(
@@ -79,14 +78,15 @@ class ChannelImage extends StatelessWidget {
                 .avatarTheme
                 .borderRadius,
             child: Container(
-              constraints: StreamChatTheme.of(context)
-                  .channelPreviewTheme
-                  .avatarTheme
-                  .constraints,
+              constraints: constraints ??
+                  StreamChatTheme.of(context)
+                      .channelPreviewTheme
+                      .avatarTheme
+                      .constraints,
               decoration: BoxDecoration(
                 color: StreamChatTheme.of(context).accentColor,
               ),
-              child: image != ''
+              child: image != null
                   ? CachedNetworkImage(
                       imageUrl: image,
                       errorWidget: (_, __, ___) {

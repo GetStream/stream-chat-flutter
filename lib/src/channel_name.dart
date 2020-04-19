@@ -28,17 +28,18 @@ class ChannelName extends StatelessWidget {
       stream: channel.extraDataStream,
       initialData: channel.extraData,
       builder: (context, snapshot) {
-        var title;
-        if (snapshot.data['name'] == null && channel.state.members.length == 2) {
-          final otherMember = channel.state.members.firstWhere(
-            (member) => member.user.id != client.user.id
-          );
+        String title;
+        if (snapshot.data['name'] == null &&
+            channel.state.members.length == 2) {
+          final otherMember = channel.state.members
+              .firstWhere((member) => member.user.id != client.user.id);
           title = otherMember.user.name;
         } else {
           title = snapshot.data['name'] ?? channel.id;
         }
 
-        return Text(title,
+        return Text(
+          title,
           style: textStyle,
         );
       },
