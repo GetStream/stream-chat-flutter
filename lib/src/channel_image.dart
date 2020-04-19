@@ -57,11 +57,20 @@ class ChannelImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final client = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
     return StreamBuilder<Map<String, dynamic>>(
         stream: channel.extraDataStream,
         initialData: channel.extraData,
         builder: (context, snapshot) {
+          var image = '';
+          if (snapshot.data?.containsKey('image') ?? false) {
+            image = snapshot.data['image'];
+          } else if (channel.state.members.length == 2) {
+            final otherMemberIndex = channel.state.members[0].user.id == client.user.id ? 1 : 0;
+            image = channel.state.members[otherMemberIndex].user.image;
+          }
+
           return ClipRRect(
             borderRadius: StreamChatTheme.of(context)
                 .channelPreviewTheme
@@ -75,9 +84,9 @@ class ChannelImage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: StreamChatTheme.of(context).accentColor,
               ),
-              child: snapshot.data?.containsKey('image') ?? false
+              child: image != ''
                   ? CachedNetworkImage(
-                      imageUrl: snapshot.data['image'],
+                      imageUrl: image,
                       errorWidget: (_, __, ___) {
                         return Center(
                           child: Text(
