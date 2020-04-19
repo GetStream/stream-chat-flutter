@@ -1,3 +1,7 @@
+## 0.1.26
+
+- Show other member user's name and image in one to one channels
+
 ## 0.1.25
 
 - Fx overflow in mentions overlay
