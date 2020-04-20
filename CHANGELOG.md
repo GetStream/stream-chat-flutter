@@ -1,10 +1,18 @@
+## 0.1.28
+
+- Add `onTap` to `ChannelImage`
+
+- Add `onImageTap` and `onTitleTap` to `ChannelHeader`
+
+- Add `onImageTap` to `ChannelListView`
+
 ## 0.1.27
 
 - Show other member user's name and image in one to one channels
 
 ## 0.1.25
 
-- Fx overflow in mentions overlay
+- Fix overflow in mentions overlay
 
 ## 0.1.23
 
