@@ -46,7 +46,8 @@ class ReactionPicker extends StatelessWidget {
               ),
               onPressed: () {
                 if (ownReactionIndex != -1) {
-                  removeReaction(context, reactionType);
+                  removeReaction(
+                      context, message.ownReactions[ownReactionIndex]);
                 } else {
                   sendReaction(context, reactionType);
                 }
@@ -69,13 +70,13 @@ class ReactionPicker extends StatelessWidget {
 
   /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
-    channel.sendReaction(message.id, reactionType);
+    channel.sendReaction(message, reactionType);
     Navigator.of(context).pop();
   }
 
   /// Remove a reaction from the message
-  void removeReaction(BuildContext context, String reactionType) {
-    channel.deleteReaction(message.id, reactionType);
+  void removeReaction(BuildContext context, Reaction reaction) {
+    channel.deleteReaction(message, reaction);
     Navigator.of(context).pop();
   }
 }

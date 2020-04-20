@@ -599,7 +599,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   : null,
               textColor: Colors.white,
               onPressed: () {
-                _streamChannel.channel.sendAction(widget.message.id, {
+                _streamChannel.channel.sendAction(widget.message, {
                   action.name: action.value,
                 });
               },
@@ -615,7 +615,7 @@ class _MessageWidgetState extends State<MessageWidget>
             child: Text('${action.text}'),
             color: StreamChatTheme.of(context).accentColor,
             onPressed: () {
-              _streamChannel.channel.sendAction(widget.message.id, {
+              _streamChannel.channel.sendAction(widget.message, {
                 action.name: action.value,
               });
             },
