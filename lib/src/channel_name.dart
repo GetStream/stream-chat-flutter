@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
 
 /// It shows the current [Channel] name using a [Text] widget.
@@ -22,15 +23,24 @@ class ChannelName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final client = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
     return StreamBuilder<Map<String, dynamic>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
       builder: (context, snapshot) {
+        String title;
+        if (snapshot.data['name'] == null &&
+            channel.state.members.length == 2) {
+          final otherMember = channel.state.members
+              .firstWhere((member) => member.user.id != client.user.id);
+          title = otherMember.user.name;
+        } else {
+          title = snapshot.data['name'] ?? channel.id;
+        }
+
         return Text(
-          snapshot.data != null
-              ? (snapshot.data['name'] ?? channel.cid)
-              : channel.cid,
+          title,
           style: textStyle,
         );
       },

@@ -214,7 +214,6 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
               createdAt: channel.createdAt,
               extraData: channel.extraData,
               type: channel.type,
-              members: channel.state.members,
               memberCount: channel.memberCount,
               frozen: channel.frozen,
               cid: channel.cid,
