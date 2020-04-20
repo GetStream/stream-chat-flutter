@@ -57,11 +57,15 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
+  /// Callback to call when pressing the header is tapped.
+  final VoidCallback onTitleTap;
+
   /// Creates a channel header
   ChannelHeader({
     Key key,
     this.showBackButton = true,
     this.onBackPressed,
+    this.onTitleTap,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -86,17 +90,25 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
       centerTitle: true,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          ChannelName(
-            textStyle: StreamChatTheme.of(context)
-                .channelTheme
-                .channelHeaderTheme
-                .title,
+      title: InkWell(
+        onTap: () {},
+        child: Container(
+          height: preferredSize.height,
+          width: preferredSize.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ChannelName(
+                textStyle: StreamChatTheme.of(context)
+                    .channelTheme
+                    .channelHeaderTheme
+                    .title,
+              ),
+              _buildLastActive(context, channel),
+            ],
           ),
-          _buildLastActive(context, channel),
-        ],
+        ),
       ),
     );
   }
