@@ -57,8 +57,11 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
-  /// Callback to call when pressing the header is tapped.
+  /// Callback to call when the header is tapped.
   final VoidCallback onTitleTap;
+
+  /// Callback to call when the image is tapped.
+  final VoidCallback onImageTap;
 
   /// Creates a channel header
   ChannelHeader({
@@ -66,6 +69,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = true,
     this.onBackPressed,
     this.onTitleTap,
+    this.onImageTap,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -80,18 +84,16 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: <Widget>[
         Padding(
           padding: const EdgeInsets.only(right: 10.0),
-          child: Stack(
-            children: <Widget>[
-              Center(
-                child: ChannelImage(),
-              ),
-            ],
+          child: Center(
+            child: ChannelImage(
+              onTap: onImageTap,
+            ),
           ),
         ),
       ],
       centerTitle: true,
       title: InkWell(
-        onTap: () {},
+        onTap: onTitleTap,
         child: Container(
           height: preferredSize.height,
           width: preferredSize.width,
