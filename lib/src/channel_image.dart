@@ -47,6 +47,7 @@ class ChannelImage extends StatelessWidget {
     Key key,
     this.channel,
     this.constraints,
+    this.onTap,
   }) : super(key: key);
 
   /// The channel to show the image of
@@ -54,6 +55,9 @@ class ChannelImage extends StatelessWidget {
 
   /// The diameter of the image
   final BoxConstraints constraints;
+
+  /// The function called when the image is tapped
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -86,25 +90,36 @@ class ChannelImage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: StreamChatTheme.of(context).accentColor,
               ),
-              child: image != null
-                  ? CachedNetworkImage(
-                      imageUrl: image,
-                      errorWidget: (_, __, ___) {
-                        return Center(
-                          child: Text(
-                            snapshot.data?.containsKey('name') ?? false
-                                ? snapshot.data['name'][0]
-                                : '',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
-                      },
-                      fit: BoxFit.cover,
-                    )
-                  : SizedBox(),
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  image != null
+                      ? CachedNetworkImage(
+                          imageUrl: image,
+                          errorWidget: (_, __, ___) {
+                            return Center(
+                              child: Text(
+                                snapshot.data?.containsKey('name') ?? false
+                                    ? snapshot.data['name'][0]
+                                    : '',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          },
+                          fit: BoxFit.cover,
+                        )
+                      : SizedBox(),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onTap,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         });

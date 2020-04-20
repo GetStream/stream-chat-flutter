@@ -25,10 +25,14 @@ class ChannelPreview extends StatelessWidget {
   /// Channel displayed
   final Channel channel;
 
+  /// The function called when the image is tapped
+  final VoidCallback onImageTap;
+
   ChannelPreview({
     @required this.channel,
     Key key,
     this.onTap,
+    this.onImageTap,
   }) : super(key: key);
 
   @override
@@ -37,7 +41,9 @@ class ChannelPreview extends StatelessWidget {
       onTap: () {
         onTap(channel);
       },
-      leading: ChannelImage(),
+      leading: ChannelImage(
+        onTap: onImageTap,
+      ),
       title: ChannelName(
         textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
       ),
