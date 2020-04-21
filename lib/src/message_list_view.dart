@@ -241,8 +241,18 @@ class _MessageListViewState extends State<MessageListView> {
               } else if (Jiffy(createdAt)
                   .isSame(now.subtract(Duration(days: 1)), Units.DAY)) {
                 dayInfo = 'YESTERDAY';
-              } else {
+              } else if (Jiffy(createdAt).isAfter(
+                now.subtract(Duration(days: 7)),
+                Units.DAY,
+              )) {
                 dayInfo = createdAt.format('EEEE').toUpperCase();
+              } else if (Jiffy(createdAt).isAfter(
+                Jiffy(now).subtract(years: 1),
+                Units.DAY,
+              )) {
+                dayInfo = createdAt.format('dd/MM').toUpperCase();
+              } else {
+                dayInfo = createdAt.format('dd/MM/yyyy').toUpperCase();
               }
 
               return Column(
