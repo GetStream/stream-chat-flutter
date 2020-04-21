@@ -154,7 +154,8 @@ class _MessageWidgetState extends State<MessageWidget>
           UserAvatar(user: widget.message.user),
           if (_isMyMessage &&
               widget.nextMessage == null &&
-              widget.message.status == MessageSendingStatus.SENT)
+              (widget.message.status == MessageSendingStatus.SENT ||
+                  widget.message.status == null))
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 1.0,
