@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
@@ -13,6 +12,7 @@ import 'package:stream_chat_flutter/src/full_screen_image.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
+import 'package:stream_chat_flutter/src/reply_indicator.dart';
 import 'package:stream_chat_flutter/src/sending_indicator.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -206,45 +206,19 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildThreadIndicator(BuildContext context) {
-    var row = [
-      Text(
-        'Replies: ${widget.message.replyCount}',
-        style: _messageTheme.replies,
-      ),
-      Transform(
-        transform: Matrix4.rotationY(_isMyMessage ? 0 : pi),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.subdirectory_arrow_left,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white12
-              : Colors.black12,
-        ),
-      ),
-    ];
-
-    if (!_isMyMessage) {
-      row = row.reversed.toList();
-    }
-
-    return (widget.message.replyCount ?? 0) > 0
-        ? GestureDetector(
-            onTap: () {
-              if (widget.isParent) {
-                return;
-              }
-              if (widget.onThreadTap != null) {
+    if (widget.message?.replyCount != null && widget.message.replyCount > 0) {
+      return ReplyIndicator(
+        onTap: widget.isParent
+            ? () {
                 widget.onThreadTap(widget.message);
               }
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Row(
-                children: row,
-              ),
-            ),
-          )
-        : SizedBox();
+            : null,
+        message: widget.message,
+        messageTheme: _messageTheme,
+        reversed: _isMyMessage,
+      );
+    }
+    return SizedBox();
   }
 
   Widget _buildBubble(

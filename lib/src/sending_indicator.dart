@@ -19,7 +19,7 @@ class SendingIndicator extends StatelessWidget {
         ),
         child: CircleAvatar(
           radius: 4,
-          backgroundColor: Theme.of(context).accentColor,
+          backgroundColor: StreamChatTheme.of(context).accentColor,
           child: Icon(
             Icons.done,
             color: Colors.white,
