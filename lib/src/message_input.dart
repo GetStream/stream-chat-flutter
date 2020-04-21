@@ -16,6 +16,8 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
 
+typedef FileUploader = Future<String> Function(File, Channel);
+
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input_paint.png)
@@ -67,6 +69,8 @@ class MessageInput extends StatefulWidget {
     this.maxHeight = 150,
     this.keyboardType = TextInputType.multiline,
     this.disableAttachments = false,
+    this.doImageUploadRequest,
+    this.doFileUploadRequest,
   }) : super(key: key);
 
   /// Message to edit
@@ -87,20 +91,39 @@ class MessageInput extends StatefulWidget {
   /// If true the attachments button will not be displayed
   final bool disableAttachments;
 
+  /// Override image upload request
+  final FileUploader doImageUploadRequest;
+
+  /// Override file upload request
+  final FileUploader doFileUploadRequest;
+
   @override
-  _MessageInputState createState() => _MessageInputState();
+  _MessageInputState createState() => _MessageInputState(
+        doFileUploadRequest: doFileUploadRequest,
+        doImageUploadRequest: doImageUploadRequest,
+      );
 }
 
 class _MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
   final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
+  FileUploader doImageUploadRequest;
+  FileUploader doFileUploadRequest;
 
   TextEditingController _textController;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
+
+  _MessageInputState({
+    this.doImageUploadRequest,
+    this.doFileUploadRequest,
+  }) {
+    doImageUploadRequest ??= _uploadImage;
+    doFileUploadRequest ??= _uploadFile;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -616,8 +639,6 @@ class _MessageInputState extends State<MessageInput> {
 
     final channel = StreamChannel.of(context).channel;
 
-    final bytes = await file.readAsBytes();
-
     final attachment = _SendingAttachment(
       file: file,
       type: type,
@@ -627,34 +648,53 @@ class _MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    String url;
-    final filename = file.path.split('/').last;
-
-    if (type == FileType.image) {
-      final res = await channel.sendImage(
-        MultipartFile.fromBytes(
-          bytes,
-          filename: filename,
-          contentType: MediaType.parse(lookupMimeType(filename)),
-        ),
-      );
-      url = res.file;
-    } else {
-      final res = await channel.sendFile(
-        MultipartFile.fromBytes(
-          bytes,
-          filename: filename,
-          contentType: MediaType.parse(lookupMimeType(filename)),
-        ),
-      );
-      url = res.file;
-    }
+    final url = await _uploadAttachment(file, type, channel);
 
     attachment.url = url;
 
     setState(() {
       attachment.uploaded = true;
     });
+  }
+
+  Future<String> _uploadAttachment(
+    File file,
+    FileType type,
+    Channel channel,
+  ) async {
+    String url;
+    if (type == FileType.image) {
+      url = await doImageUploadRequest(file, channel);
+    } else {
+      url = await doFileUploadRequest(file, channel);
+    }
+    return url;
+  }
+
+  Future<String> _uploadImage(File file, Channel channel) async {
+    final filename = file.path.split('/').last;
+    final bytes = await file.readAsBytes();
+    final res = await channel.sendImage(
+      MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: MediaType.parse(lookupMimeType(filename)),
+      ),
+    );
+    return res.file;
+  }
+
+  Future<String> _uploadFile(File file, Channel channel) async {
+    final filename = file.path.split('/').last;
+    final bytes = await file.readAsBytes();
+    final res = await channel.sendFile(
+      MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: MediaType.parse(lookupMimeType(filename)),
+      ),
+    );
+    return res.file;
   }
 
   Widget _buildSendButton(BuildContext context) {
