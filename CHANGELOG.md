@@ -1,3 +1,7 @@
+## 0.1.29
+
+- Add `doImageUploadRequest` and `doFileUploadRequest` to `MessageInput` to let users customize file uploading (eg: custom cdn)
+
 ## 0.1.28
 
 - Add `onTap` to `ChannelImage`
