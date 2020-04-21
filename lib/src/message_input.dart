@@ -71,10 +71,14 @@ class MessageInput extends StatefulWidget {
     this.disableAttachments = false,
     this.doImageUploadRequest,
     this.doFileUploadRequest,
+    this.initialMessage,
   }) : super(key: key);
 
   /// Message to edit
   final Message editMessage;
+
+  /// Message to start with
+  final Message initialMessage;
 
   /// Function called after sending the message
   final void Function(Message) onMessageSent;
@@ -763,7 +767,7 @@ class _MessageInputState extends State<MessageInput> {
 
       sendingFuture = StreamChat.of(context).client.updateMessage(message);
     } else {
-      message = Message(
+      message = (widget.initialMessage ?? Message()).copyWith(
         parentId: widget.parentMessage?.id,
         text: text,
         attachments: _getAttachments(attachments).toList(),
@@ -839,38 +843,44 @@ class _MessageInputState extends State<MessageInput> {
     });
 
     if (widget.editMessage != null) {
-      _textController = TextEditingController(text: widget.editMessage.text);
-
-      _typingStarted = true;
-      _messageIsPresent = true;
-
-      widget.editMessage.attachments.forEach((attachment) {
-        if (attachment.type == 'image') {
-          _attachments.add(_SendingAttachment(
-            type: FileType.image,
-            url: attachment.imageUrl ??
-                attachment.assetUrl ??
-                attachment.thumbUrl ??
-                attachment.ogScrapeUrl,
-            uploaded: true,
-          ));
-        } else if (attachment.type == 'video') {
-          _attachments.add(_SendingAttachment(
-            type: FileType.video,
-            url: attachment.assetUrl,
-            uploaded: true,
-          ));
-        } else if (attachment.type != 'giphy') {
-          _attachments.add(_SendingAttachment(
-            type: FileType.any,
-            url: attachment.assetUrl,
-            uploaded: true,
-          ));
-        }
-      });
+      _parseExistingMessage(widget.editMessage);
+    } else if (widget.initialMessage != null) {
+      _parseExistingMessage(widget.initialMessage);
     } else {
       _textController = TextEditingController();
     }
+  }
+
+  void _parseExistingMessage(Message message) {
+    _textController = TextEditingController(text: message.text);
+
+    _typingStarted = true;
+    _messageIsPresent = true;
+
+    message.attachments?.forEach((attachment) {
+      if (attachment.type == 'image') {
+        _attachments.add(_SendingAttachment(
+          type: FileType.image,
+          url: attachment.imageUrl ??
+              attachment.assetUrl ??
+              attachment.thumbUrl ??
+              attachment.ogScrapeUrl,
+          uploaded: true,
+        ));
+      } else if (attachment.type == 'video') {
+        _attachments.add(_SendingAttachment(
+          type: FileType.video,
+          url: attachment.assetUrl,
+          uploaded: true,
+        ));
+      } else if (attachment.type != 'giphy') {
+        _attachments.add(_SendingAttachment(
+          type: FileType.any,
+          url: attachment.assetUrl,
+          uploaded: true,
+        ));
+      }
+    });
   }
 
   @override
