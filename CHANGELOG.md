@@ -1,3 +1,7 @@
+## 0.1.30
+
+- Add simple rendering of file attachments
+
 ## 0.1.29
 
 - Add `doImageUploadRequest` and `doFileUploadRequest` to `MessageInput` to let users customize file uploading (eg: custom cdn)
