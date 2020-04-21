@@ -301,6 +301,21 @@ class _MessageWidgetState extends State<MessageWidget>
         attachmentWidget = _buildVideo(attachment);
       } else if (attachment.type == 'image' || attachment.type == 'giphy') {
         attachmentWidget = _buildImage(attachment);
+      } else if (attachment.type == 'file') {
+        attachmentWidget = Material(
+          child: InkWell(
+            onTap: () {
+              _launchURL(attachment.assetUrl);
+            },
+            child: Container(
+              width: 100,
+              height: 100,
+              child: Center(
+                child: Icon(Icons.attach_file),
+              ),
+            ),
+          ),
+        );
       }
 
       if (attachmentWidget != null) {
