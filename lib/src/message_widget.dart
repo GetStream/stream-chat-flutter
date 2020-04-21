@@ -13,6 +13,7 @@ import 'package:stream_chat_flutter/src/full_screen_image.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
+import 'package:stream_chat_flutter/src/sending_indicator.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
@@ -157,58 +158,9 @@ class _MessageWidgetState extends State<MessageWidget>
       child: Row(
         children: <Widget>[
           UserAvatar(user: widget.message.user),
-          if (_isMyMessage &&
-              widget.nextMessage == null &&
-              (widget.message.status == MessageSendingStatus.SENT ||
-                  widget.message.status == null))
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 1.0,
-              ),
-              child: CircleAvatar(
-                radius: 4,
-                backgroundColor: StreamChatTheme.of(context).accentColor,
-                child: Icon(
-                  Icons.done,
-                  color: Colors.white,
-                  size: 4,
-                ),
-              ),
-            ),
-          if (_isMyMessage &&
-              (widget.message.status == MessageSendingStatus.SENDING ||
-                  widget.message.status == MessageSendingStatus.UPDATING))
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 1.0,
-              ),
-              child: CircleAvatar(
-                radius: 4,
-                backgroundColor: Colors.grey,
-                child: Icon(
-                  Icons.access_time,
-                  size: 4,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          if (_isMyMessage &&
-              (widget.message.status == MessageSendingStatus.FAILED ||
-                  widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
-                  widget.message.status == MessageSendingStatus.FAILED_DELETE))
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 1.0,
-              ),
-              child: CircleAvatar(
-                radius: 4,
-                backgroundColor: Color(0xffd0021B).withOpacity(.1),
-                child: Icon(
-                  Icons.error_outline,
-                  size: 4,
-                  color: Colors.white,
-                ),
-              ),
+          if (_isMyMessage && widget.nextMessage == null)
+            SendingIndicator(
+              message: widget.message,
             ),
         ],
       ),
