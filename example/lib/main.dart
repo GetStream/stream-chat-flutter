@@ -65,16 +65,15 @@ void _initNotifications(Client client) {
 
 void main() async {
   final client = Client(
-    's2dxdhpxd94g',
+    'b67pax5b2wdq',
     logLevel: Level.INFO,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
   );
 
   await client.setUser(
-    User(id: 'user1'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidXNlcjEifQ.NGZPyPMx7KSVisJmh4tJhOIv7ZjCaMQpOh4gTINvCaU',
+    User(id: 'falling-mountain-7'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
   );
-
   _initNotifications(client);
 
   runApp(MyApp(client));
