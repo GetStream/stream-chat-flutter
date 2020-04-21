@@ -1,3 +1,7 @@
+## 0.1.31
+
+- Add `initialMessage` property to `MessageInput`
+
 ## 0.1.30
 
 - Add simple rendering of file attachments
