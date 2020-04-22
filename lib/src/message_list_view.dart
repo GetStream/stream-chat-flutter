@@ -68,6 +68,7 @@ class MessageListView extends StatefulWidget {
     this.showVideoFullScreen = true,
     this.onMentionTap,
     this.onMessageActions,
+    this.attachmentBuilders,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -97,6 +98,9 @@ class MessageListView extends StatefulWidget {
 
   /// Function called on message long press
   final Function(BuildContext, Message) onMessageActions;
+
+  /// Map that defines a builder for an attachment type
+  final Map<String, AttachmentBuilder> attachmentBuilders;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -157,6 +161,7 @@ class _MessageListViewState extends State<MessageListView> {
                             widget.showOtherMessageUsername,
                         onMentionTap: widget.onMentionTap,
                         onMessageActions: widget.onMessageActions,
+                        attachmentBuilders: widget.attachmentBuilders,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -219,6 +224,7 @@ class _MessageListViewState extends State<MessageListView> {
                   showVideoFullScreen: widget.showVideoFullScreen,
                   onMentionTap: widget.onMentionTap,
                   onMessageActions: widget.onMessageActions,
+                  attachmentBuilders: widget.attachmentBuilders,
                 );
               }
             }
@@ -297,6 +303,7 @@ class _MessageListViewState extends State<MessageListView> {
         showOtherMessageUsername: widget.showOtherMessageUsername,
         onMentionTap: widget.onMentionTap,
         onMessageActions: widget.onMessageActions,
+        attachmentBuilders: widget.attachmentBuilders,
       );
     }
 
@@ -336,6 +343,7 @@ class _MessageListViewState extends State<MessageListView> {
         showOtherMessageUsername: widget.showOtherMessageUsername,
         onMentionTap: widget.onMentionTap,
         onMessageActions: widget.onMessageActions,
+        attachmentBuilders: widget.attachmentBuilders,
       );
     }
 

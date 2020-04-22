@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/file_attachment.dart';
 import 'package:stream_chat_flutter/src/giphy_attachment.dart';
 import 'package:stream_chat_flutter/src/image_attachment.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
@@ -19,8 +20,9 @@ import 'package:stream_chat_flutter/src/video_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'deleted_message.dart';
-import 'file_attachment.dart';
 import 'stream_chat.dart';
+
+typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget_paint.png)
@@ -44,6 +46,7 @@ class MessageWidget extends StatefulWidget {
     this.onMentionTap,
     this.showOtherMessageUsername = false,
     this.showVideoFullScreen = true,
+    this.attachmentBuilders,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -73,8 +76,11 @@ class MessageWidget extends StatefulWidget {
   /// True if the video player will allow fullscreen mode
   final bool showVideoFullScreen;
 
+  /// Map that defines a builder for an attachment type
+  final Map<String, AttachmentBuilder> attachmentBuilders;
+
   @override
-  _MessageWidgetState createState() => _MessageWidgetState();
+  _MessageWidgetState createState() => _MessageWidgetState(attachmentBuilders);
 }
 
 class _MessageWidgetState extends State<MessageWidget>
@@ -90,6 +96,38 @@ class _MessageWidgetState extends State<MessageWidget>
   String _nextUserId;
   bool _isLastUser;
   bool _isNextUser;
+
+  Map<String, AttachmentBuilder> _attachmentBuilders;
+
+  _MessageWidgetState(Map<String, AttachmentBuilder> attachmentBuilders) {
+    _attachmentBuilders = {
+      'image': (context, message, attachment) {
+        return ImageAttachment(
+          attachment: attachment,
+          messageTheme: _messageTheme,
+        );
+      },
+      'video': (context, message, attachment) {
+        return VideoAttachment(
+          enableFullScreen: widget.showVideoFullScreen,
+          attachment: attachment,
+          messageTheme: _messageTheme,
+        );
+      },
+      'giphy': (context, message, attachment) {
+        return GiphyAttachment(
+          attachment: attachment,
+          messageTheme: _messageTheme,
+          message: message,
+        );
+      },
+      'file': (context, message, attachment) {
+        return FileAttachment(
+          attachment: attachment,
+        );
+      },
+    }..addAll(attachmentBuilders ?? {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,28 +251,37 @@ class _MessageWidgetState extends State<MessageWidget>
               nOfAttachmentWidgets++;
 
               Widget attachmentWidget;
-              if (attachment.type == 'video') {
-                attachmentWidget = VideoAttachment(
-                  attachment: attachment,
-                  messageTheme: _messageTheme,
-                  enableFullScreen: widget.showVideoFullScreen,
-                );
-              } else if (attachment.type == 'giphy') {
-                attachmentWidget = GiphyAttachment(
-                  attachment: attachment,
-                  message: widget.message,
-                  messageTheme: _messageTheme,
-                );
-              } else if (attachment.type == 'image') {
-                attachmentWidget = ImageAttachment(
-                  attachment: attachment,
-                  messageTheme: _messageTheme,
-                );
-              } else if (attachment.type == 'file') {
-                attachmentWidget = FileAttachment(
-                  attachment: attachment,
-                );
+              final attachmentBuilder = _attachmentBuilders[attachment.type];
+              if (attachmentBuilder == null) {
+                return SizedBox();
               }
+              attachmentWidget = attachmentBuilder(
+                context,
+                widget.message,
+                attachment,
+              );
+//              if (attachment.type == 'video') {
+//                attachmentWidget = VideoAttachment(
+//                  attachment: attachment,
+//                  messageTheme: _messageTheme,
+//                  enableFullScreen: widget.showVideoFullScreen,
+//                );
+//              } else if (attachment.type == 'giphy') {
+//                attachmentWidget = GiphyAttachment(
+//                  attachment: attachment,
+//                  message: widget.message,
+//                  messageTheme: _messageTheme,
+//                );
+//              } else if (attachment.type == 'image') {
+//                attachmentWidget = ImageAttachment(
+//                  attachment: attachment,
+//                  messageTheme: _messageTheme,
+//                );
+//              } else if (attachment.type == 'file') {
+//                attachmentWidget = FileAttachment(
+//                  attachment: attachment,
+//                );
+//              }
 
               if (attachmentWidget != null) {
                 return _buildAttachment(
