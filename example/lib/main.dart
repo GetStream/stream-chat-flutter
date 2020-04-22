@@ -137,6 +137,7 @@ class ChannelPage extends StatelessWidget {
             child: Stack(
               children: <Widget>[
                 MessageListView(
+                  showOtherMessageUsername: true,
                   showVideoFullScreen: false,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(

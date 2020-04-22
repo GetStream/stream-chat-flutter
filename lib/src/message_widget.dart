@@ -21,6 +21,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import 'deleted_message.dart';
 import 'stream_chat.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget.png)
@@ -184,24 +185,10 @@ class _MessageWidgetState extends State<MessageWidget>
     _isMyMessage = _messageUserId == _currentUserId;
   }
 
-  Align _buildDeletedMessage(Alignment alignment) {
-    return Align(
+  Widget _buildDeletedMessage(Alignment alignment) {
+    return DeletedMessage(
+      messageTheme: _messageTheme,
       alignment: alignment,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
-        ),
-        child: Text(
-          'This message was deleted...',
-          style: _messageTheme.messageText.copyWith(
-            fontStyle: FontStyle.italic,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black,
-          ),
-        ),
-      ),
     );
   }
 
