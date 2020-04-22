@@ -1,3 +1,7 @@
+## 0.1.32
+
+- Update llc version
+
 ## 0.1.31
 
 - Add `initialMessage` property to `MessageInput`
