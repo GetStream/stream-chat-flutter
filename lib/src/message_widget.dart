@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/attachment_error.dart';
-import 'package:stream_chat_flutter/src/full_screen_image.dart';
+import 'package:stream_chat_flutter/src/giphy_attachment.dart';
+import 'package:stream_chat_flutter/src/image_attachment.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
@@ -20,6 +19,7 @@ import 'package:stream_chat_flutter/src/video_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'deleted_message.dart';
+import 'file_attachment.dart';
 import 'stream_chat.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget.png)
@@ -216,25 +216,23 @@ class _MessageWidgetState extends State<MessageWidget>
               if (attachment.type == 'video') {
                 attachmentWidget = VideoAttachment(
                   attachment: attachment,
+                  messageTheme: _messageTheme,
                   enableFullScreen: widget.showVideoFullScreen,
                 );
-              } else if (attachment.type == 'image' ||
-                  attachment.type == 'giphy') {
-                attachmentWidget = _buildImage(attachment);
+              } else if (attachment.type == 'giphy') {
+                attachmentWidget = GiphyAttachment(
+                  attachment: attachment,
+                  message: widget.message,
+                  messageTheme: _messageTheme,
+                );
+              } else if (attachment.type == 'image') {
+                attachmentWidget = ImageAttachment(
+                  attachment: attachment,
+                  messageTheme: _messageTheme,
+                );
               } else if (attachment.type == 'file') {
-                attachmentWidget = Material(
-                  child: InkWell(
-                    onTap: () {
-                      launchURL(context, attachment.assetUrl);
-                    },
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      child: Center(
-                        child: Icon(Icons.attach_file),
-                      ),
-                    ),
-                  ),
+                attachmentWidget = FileAttachment(
+                  attachment: attachment,
                 );
               }
 
@@ -375,29 +373,12 @@ class _MessageWidgetState extends State<MessageWidget>
               constraints: BoxConstraints.loose(
                 Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
               ),
-              child: Stack(
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      attachmentWidget,
-                      if (attachment.title != null)
-                        _buildAttachmentTitle(attachment),
-                    ],
-                  ),
-                  if (attachment.type == 'image' &&
-                      attachment.titleLink != null)
-                    _buildPreviewInkwell(attachment),
-                ],
-              ),
+              child: attachmentWidget,
               margin: EdgeInsets.only(
                 top: nOfAttachmentWidgets > 1 ? 5 : 0,
               ),
             ),
           ),
-          if (attachment.actions != null)
-            _buildAttachmentActions(attachment, context),
         ],
       ),
     );
@@ -506,109 +487,6 @@ class _MessageWidgetState extends State<MessageWidget>
           '@${u.name}', '[@${u.name}](@${u.name.replaceAll(' ', '')})');
     });
     return text;
-  }
-
-  Row _buildAttachmentActions(Attachment attachment, BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: attachment.actions?.map((action) {
-        if (action.style == 'primary') {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text('${action.text}'),
-              color: action.style == 'primary'
-                  ? StreamChatTheme.of(context).accentColor
-                  : null,
-              textColor: Colors.white,
-              onPressed: () {
-                _streamChannel.channel.sendAction(widget.message, {
-                  action.name: action.value,
-                });
-              },
-            ),
-          );
-        }
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: OutlineButton(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text('${action.text}'),
-            color: StreamChatTheme.of(context).accentColor,
-            onPressed: () {
-              _streamChannel.channel.sendAction(widget.message, {
-                action.name: action.value,
-              });
-            },
-          ),
-        );
-      })?.toList(),
-    );
-  }
-
-  Positioned _buildPreviewInkwell(Attachment attachment) {
-    return Positioned.fill(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => launchURL(context, attachment.titleLink),
-        ),
-      ),
-    );
-  }
-
-  GestureDetector _buildAttachmentTitle(Attachment attachment) {
-    return GestureDetector(
-      onTap: () {
-        if (attachment.titleLink != null) {
-          launchURL(context, attachment.titleLink);
-        }
-      },
-      child: Container(
-        constraints: BoxConstraints.loose(
-          Size(
-            MediaQuery.of(context).size.width * 0.7,
-            500,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                attachment.title,
-                overflow: TextOverflow.ellipsis,
-                style: _messageTheme.messageText.copyWith(
-                  color: StreamChatTheme.of(context).accentColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (attachment.titleLink != null ||
-                  attachment.ogScrapeUrl != null)
-                Text(
-                  Uri.parse(attachment.titleLink ?? attachment.ogScrapeUrl)
-                      .authority
-                      .split('.')
-                      .reversed
-                      .take(2)
-                      .toList()
-                      .reversed
-                      .join('.'),
-                  overflow: TextOverflow.ellipsis,
-                  style: _messageTheme.createdAt,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildReactionPaint() {
@@ -887,50 +765,6 @@ class _MessageWidgetState extends State<MessageWidget>
     'angry': '😡',
     'wow': '😲',
   };
-
-  Widget _buildImage(
-    Attachment attachment,
-  ) {
-    if (attachment.thumbUrl == null &&
-        attachment.imageUrl == null &&
-        attachment.assetUrl == null) {
-      return AttachmentError(
-        attachment: attachment,
-      );
-    }
-
-    return Hero(
-      tag: attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl,
-      child: CachedNetworkImage(
-        imageBuilder: (context, provider) {
-          return GestureDetector(
-            child: Image(image: provider),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) {
-                return FullScreenImage(
-                  url: attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl,
-                );
-              }));
-            },
-          );
-        },
-        placeholder: (_, __) {
-          return Container(
-            width: 200,
-            height: 140,
-          );
-        },
-        imageUrl:
-            attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
-        errorWidget: (context, url, error) => AttachmentError(
-          attachment: attachment,
-        ),
-        fit: BoxFit.cover,
-      ),
-    );
-  }
 
   @override
   void dispose() {

@@ -6,14 +6,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 import 'attachment_error.dart';
+import 'attachment_title.dart';
 
 class VideoAttachment extends StatefulWidget {
   final Attachment attachment;
   final bool enableFullScreen;
+  final MessageTheme messageTheme;
 
   VideoAttachment({
     Key key,
     @required this.attachment,
+    @required this.messageTheme,
     this.enableFullScreen = true,
   }) : super(key: key);
 
@@ -72,8 +75,19 @@ class _VideoAttachmentState extends State<VideoAttachment> {
           );
         });
 
-    return Chewie(
-      controller: _chewieController,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Chewie(
+          controller: _chewieController,
+        ),
+        if (widget.attachment.title != null)
+          AttachmentTitle(
+            messageTheme: widget.messageTheme,
+            attachment: widget.attachment,
+          ),
+      ],
     );
   }
 
@@ -82,12 +96,10 @@ class _VideoAttachmentState extends State<VideoAttachment> {
     super.initState();
     _videoPlayerController = VideoPlayerController.network(
         widget.attachment.localUri ?? widget.attachment.assetUrl);
-    _videoPlayerController.initialize().then((_) {
-      if (_videoPlayerController.value.initialized) {
-        setState(() {
-          initialized = true;
-        });
-      }
+    _videoPlayerController.initialize().whenComplete(() {
+      setState(() {
+        initialized = true;
+      });
     });
   }
 
