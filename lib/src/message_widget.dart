@@ -214,7 +214,7 @@ class _MessageWidgetState extends State<MessageWidget>
     var nOfAttachmentWidgets = 0;
 
     final column =
-        List<Widget>.from(widget.message.attachments?.map((attachment) {
+        List<Widget>.from(widget.message.attachments.map((attachment) {
               nOfAttachmentWidgets++;
 
               Widget attachmentWidget;
@@ -223,6 +223,21 @@ class _MessageWidgetState extends State<MessageWidget>
               } else if (attachment.type == 'image' ||
                   attachment.type == 'giphy') {
                 attachmentWidget = _buildImage(attachment);
+              } else if (attachment.type == 'file') {
+                attachmentWidget = Material(
+                  child: InkWell(
+                    onTap: () {
+                      _launchURL(attachment.assetUrl);
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      child: Center(
+                        child: Icon(Icons.attach_file),
+                      ),
+                    ),
+                  ),
+                );
               }
 
               if (attachmentWidget != null) {

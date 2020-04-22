@@ -58,6 +58,7 @@ class ChannelListView extends StatefulWidget {
     this.channelWidget,
     this.channelPreviewBuilder,
     this.errorBuilder,
+    this.onImageTap,
   }) : super(key: key);
 
   /// The builder that will be used in case of error
@@ -96,6 +97,9 @@ class ChannelListView extends StatefulWidget {
 
   /// Builder used to create a custom channel preview
   final ChannelPreviewBuilder channelPreviewBuilder;
+
+  /// The function called when the image is tapped
+  final Function(Channel) onImageTap;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -219,11 +223,6 @@ class _ChannelListViewState extends State<ChannelListView>
     if (i < channels.length) {
       final channel = channels[i];
 
-      final channelClient = channelsProvider.channels.firstWhere(
-        (c) => c.cid == channel.cid,
-        orElse: () => null,
-      );
-
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {
         onTap = widget.onChannelTap;
@@ -244,11 +243,11 @@ class _ChannelListViewState extends State<ChannelListView>
       }
 
       return StreamChannel(
-        key: ValueKey<String>('CHANNEL-${channelClient.id}'),
-        channel: channelClient,
+        key: ValueKey<String>('CHANNEL-${channel.id}'),
+        channel: channel,
         child: StreamBuilder<DateTime>(
-          initialData: channelClient.updatedAt,
-          stream: channelClient.updatedAtStream,
+          initialData: channel.updatedAt,
+          stream: channel.updatedAtStream,
           builder: (context, snapshot) {
             Widget child;
             if (widget.channelPreviewBuilder != null) {
@@ -256,14 +255,14 @@ class _ChannelListViewState extends State<ChannelListView>
                 children: [
                   widget.channelPreviewBuilder(
                     context,
-                    channelClient,
+                    channel,
                   ),
                   Positioned.fill(
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () {
-                          onTap(channelClient, widget.channelWidget);
+                          onTap(channel, widget.channelWidget);
                         },
                       ),
                     ),
@@ -272,9 +271,14 @@ class _ChannelListViewState extends State<ChannelListView>
               );
             } else {
               child = ChannelPreview(
-                channel: channelClient,
-                onTap: (channelClient) {
-                  onTap(channelClient, widget.channelWidget);
+                channel: channel,
+                onImageTap: widget.onImageTap != null
+                    ? () {
+                        widget.onImageTap(channel);
+                      }
+                    : null,
+                onTap: (channel) {
+                  onTap(channel, widget.channelWidget);
                 },
               );
             }
