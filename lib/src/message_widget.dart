@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chewie/chewie.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/attachment_error.dart';
 import 'package:stream_chat_flutter/src/full_screen_image.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
@@ -17,9 +15,9 @@ import 'package:stream_chat_flutter/src/sending_indicator.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter/src/video_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:video_player/video_player.dart';
 
 import 'deleted_message.dart';
 import 'stream_chat.dart';
@@ -81,9 +79,6 @@ class MessageWidget extends StatefulWidget {
 
 class _MessageWidgetState extends State<MessageWidget>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-  final Map<String, ChangeNotifier> _videoControllers = {};
-  final Map<String, ChangeNotifier> _chuwieControllers = {};
-
   MessageTheme _messageTheme;
   StreamChatState _streamChat;
   StreamChannelState _streamChannel;
@@ -219,7 +214,10 @@ class _MessageWidgetState extends State<MessageWidget>
 
               Widget attachmentWidget;
               if (attachment.type == 'video') {
-                attachmentWidget = _buildVideo(attachment);
+                attachmentWidget = VideoAttachment(
+                  attachment: attachment,
+                  enableFullScreen: widget.showVideoFullScreen,
+                );
               } else if (attachment.type == 'image' ||
                   attachment.type == 'giphy') {
                 attachmentWidget = _buildImage(attachment);
@@ -227,7 +225,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 attachmentWidget = Material(
                   child: InkWell(
                     onTap: () {
-                      _launchURL(attachment.assetUrl);
+                      launchURL(context, attachment.assetUrl);
                     },
                     child: Container(
                       width: 100,
@@ -478,7 +476,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   print('tap on ${mentionedUser.name}');
                 }
               } else {
-                _launchURL(link);
+                launchURL(context, link);
               }
             },
             styleSheet: MarkdownStyleSheet.fromTheme(
@@ -558,7 +556,7 @@ class _MessageWidgetState extends State<MessageWidget>
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _launchURL(attachment.titleLink),
+          onTap: () => launchURL(context, attachment.titleLink),
         ),
       ),
     );
@@ -568,7 +566,7 @@ class _MessageWidgetState extends State<MessageWidget>
     return GestureDetector(
       onTap: () {
         if (attachment.titleLink != null) {
-          _launchURL(attachment.titleLink);
+          launchURL(context, attachment.titleLink);
         }
       },
       child: Container(
@@ -896,7 +894,9 @@ class _MessageWidgetState extends State<MessageWidget>
     if (attachment.thumbUrl == null &&
         attachment.imageUrl == null &&
         attachment.assetUrl == null) {
-      return _buildErrorImage(attachment);
+      return AttachmentError(
+        attachment: attachment,
+      );
     }
 
     return Hero(
@@ -924,122 +924,16 @@ class _MessageWidgetState extends State<MessageWidget>
         },
         imageUrl:
             attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
-        errorWidget: (context, url, error) => _buildErrorImage(attachment),
+        errorWidget: (context, url, error) => AttachmentError(
+          attachment: attachment,
+        ),
         fit: BoxFit.cover,
       ),
     );
   }
 
-  Widget _buildErrorImage(Attachment attachment) {
-    if (attachment.localUri != null) {
-      return Image.file(
-        File(attachment.localUri.path),
-      );
-    }
-    return Center(
-      child: Container(
-        width: 200,
-        height: 140,
-        color: Color(0xffd0021B).withOpacity(.1),
-        child: Center(
-          child: Icon(
-            Icons.error_outline,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideo(
-    Attachment attachment,
-  ) {
-    VideoPlayerController videoController;
-    if (_videoControllers.containsKey(attachment.assetUrl)) {
-      videoController = _videoControllers[attachment.assetUrl];
-    } else {
-      videoController = VideoPlayerController.network(attachment.assetUrl);
-      _videoControllers[attachment.assetUrl] = videoController;
-    }
-
-    return FutureBuilder<void>(
-      future: videoController.value.initialized
-          ? Future.value(true)
-          : videoController.initialize(),
-      builder: (_, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return Container(
-            height: 100,
-            width: 100,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        ChewieController chewieController;
-        if (_chuwieControllers.containsKey(attachment.assetUrl)) {
-          chewieController = _chuwieControllers[attachment.assetUrl];
-        } else {
-          chewieController = ChewieController(
-              allowFullScreen: widget.showVideoFullScreen,
-              videoPlayerController: videoController,
-              autoInitialize: false,
-              aspectRatio: videoController.value.aspectRatio,
-              errorBuilder: (_, e) {
-                if (attachment.thumbUrl != null) {
-                  return Stack(
-                    children: <Widget>[
-                      Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: CachedNetworkImageProvider(
-                              attachment.thumbUrl,
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (attachment.titleLink != null)
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _launchURL(attachment.titleLink),
-                          ),
-                        ),
-                    ],
-                  );
-                }
-
-                return _buildErrorImage(attachment);
-              });
-          _chuwieControllers[attachment.assetUrl] = chewieController;
-        }
-        return Chewie(
-          key: ValueKey<String>(
-              'ATTACHMENT-${attachment.title}-${widget.message.id}'),
-          controller: chewieController,
-        );
-      },
-    );
-  }
-
-  Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      Scaffold.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cannot launch the url'),
-        ),
-      );
-    }
-  }
-
   @override
   void dispose() {
-    _videoControllers.values.forEach((element) {
-      element.dispose();
-    });
     super.dispose();
   }
 
