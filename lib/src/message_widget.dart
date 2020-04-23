@@ -155,13 +155,9 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
       child: Row(
         children: <Widget>[
-          GestureDetector(
-            onTap: () {
-              if (widget.onUserAvatarTap != null) {
-                widget.onUserAvatarTap(widget.message.user);
-              }
-            },
-            child: UserAvatar(user: widget.message.user),
+          UserAvatar(
+            user: widget.message.user,
+            onUserAvatarTap: widget.onUserAvatarTap,
           ),
           if (_isMyMessage &&
               widget.nextMessage == null &&
