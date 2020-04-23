@@ -4,9 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/file_attachment.dart';
-import 'package:stream_chat_flutter/src/giphy_attachment.dart';
-import 'package:stream_chat_flutter/src/image_attachment.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
@@ -20,6 +17,9 @@ import 'package:stream_chat_flutter/src/video_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'deleted_message.dart';
+import 'file_attachment.dart';
+import 'giphy_attachment.dart';
+import 'image_attachment.dart';
 import 'stream_chat.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
@@ -80,7 +80,7 @@ class MessageWidget extends StatefulWidget {
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
   @override
-  _MessageWidgetState createState() => _MessageWidgetState(attachmentBuilders);
+  _MessageWidgetState createState() => _MessageWidgetState();
 }
 
 class _MessageWidgetState extends State<MessageWidget>
@@ -98,36 +98,6 @@ class _MessageWidgetState extends State<MessageWidget>
   bool _isNextUser;
 
   Map<String, AttachmentBuilder> _attachmentBuilders;
-
-  _MessageWidgetState(Map<String, AttachmentBuilder> attachmentBuilders) {
-    _attachmentBuilders = {
-      'image': (context, message, attachment) {
-        return ImageAttachment(
-          attachment: attachment,
-          messageTheme: _messageTheme,
-        );
-      },
-      'video': (context, message, attachment) {
-        return VideoAttachment(
-          enableFullScreen: widget.showVideoFullScreen,
-          attachment: attachment,
-          messageTheme: _messageTheme,
-        );
-      },
-      'giphy': (context, message, attachment) {
-        return GiphyAttachment(
-          attachment: attachment,
-          messageTheme: _messageTheme,
-          message: message,
-        );
-      },
-      'file': (context, message, attachment) {
-        return FileAttachment(
-          attachment: attachment,
-        );
-      },
-    }..addAll(attachmentBuilders ?? {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,6 +186,45 @@ class _MessageWidgetState extends State<MessageWidget>
     _isNextUser = _nextUserId == _messageUserId;
 
     _isMyMessage = _messageUserId == _currentUserId;
+
+    _mergeAttachmentBuilders();
+  }
+
+  @override
+  void didUpdateWidget(MessageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    _mergeAttachmentBuilders();
+  }
+
+  void _mergeAttachmentBuilders() {
+    _attachmentBuilders = {
+      'image': (context, message, attachment) {
+        return ImageAttachment(
+          attachment: attachment,
+          messageTheme: _messageTheme,
+        );
+      },
+      'video': (context, message, attachment) {
+        return VideoAttachment(
+          enableFullScreen: widget.showVideoFullScreen,
+          attachment: attachment,
+          messageTheme: _messageTheme,
+        );
+      },
+      'giphy': (context, message, attachment) {
+        return GiphyAttachment(
+          attachment: attachment,
+          messageTheme: _messageTheme,
+          message: message,
+        );
+      },
+      'file': (context, message, attachment) {
+        return FileAttachment(
+          attachment: attachment,
+        );
+      },
+    }..addAll(widget.attachmentBuilders ?? {});
   }
 
   Widget _buildDeletedMessage(Alignment alignment) {
