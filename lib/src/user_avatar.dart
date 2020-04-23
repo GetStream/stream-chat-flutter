@@ -43,7 +43,7 @@ class UserAvatar extends StatelessWidget {
                 },
                 fit: BoxFit.cover,
               )
-            : SizedBox(),
+            : StreamChatTheme.of(context).defaultUserImage(context, user),
       ),
     );
   }
