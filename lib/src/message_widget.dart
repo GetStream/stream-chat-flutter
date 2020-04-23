@@ -255,33 +255,12 @@ class _MessageWidgetState extends State<MessageWidget>
               if (attachmentBuilder == null) {
                 return SizedBox();
               }
+
               attachmentWidget = attachmentBuilder(
                 context,
                 widget.message,
                 attachment,
               );
-//              if (attachment.type == 'video') {
-//                attachmentWidget = VideoAttachment(
-//                  attachment: attachment,
-//                  messageTheme: _messageTheme,
-//                  enableFullScreen: widget.showVideoFullScreen,
-//                );
-//              } else if (attachment.type == 'giphy') {
-//                attachmentWidget = GiphyAttachment(
-//                  attachment: attachment,
-//                  message: widget.message,
-//                  messageTheme: _messageTheme,
-//                );
-//              } else if (attachment.type == 'image') {
-//                attachmentWidget = ImageAttachment(
-//                  attachment: attachment,
-//                  messageTheme: _messageTheme,
-//                );
-//              } else if (attachment.type == 'file') {
-//                attachmentWidget = FileAttachment(
-//                  attachment: attachment,
-//                );
-//              }
 
               if (attachmentWidget != null) {
                 return _buildAttachment(
