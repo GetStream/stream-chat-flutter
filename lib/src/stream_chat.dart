@@ -115,6 +115,7 @@ class StreamChatState extends State<StreamChat>
     final theme = defaultTheme.copyWith(
       primaryColor: themeData?.primaryColor,
       defaultChannelImage: themeData?.defaultChannelImage,
+      defaultUserImage: themeData?.defaultUserImage,
       channelTheme: defaultTheme.channelTheme.copyWith(
         channelHeaderTheme:
             defaultTheme.channelTheme.channelHeaderTheme.copyWith(

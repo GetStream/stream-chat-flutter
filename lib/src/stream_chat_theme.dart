@@ -54,6 +54,9 @@ class StreamChatThemeData {
   /// The widget that will be built when the channel image is unavailable
   final Widget Function(BuildContext, Channel) defaultChannelImage;
 
+  /// The widget that will be built when the user image is unavailable
+  final Widget Function(BuildContext, User) defaultUserImage;
+
   /// Create a theme from scratch
   StreamChatThemeData({
     this.primaryColor,
@@ -64,6 +67,7 @@ class StreamChatThemeData {
     this.otherMessageTheme,
     this.ownMessageTheme,
     this.defaultChannelImage,
+    this.defaultUserImage,
   });
 
   /// Create a theme from a Material [Theme]
@@ -103,12 +107,14 @@ class StreamChatThemeData {
     MessageTheme ownMessageTheme,
     MessageTheme otherMessageTheme,
     Widget Function(BuildContext, Channel) defaultChannelImage,
+    Widget Function(BuildContext, User) defaultUserImage,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
         accentColor: accentColor ?? this.accentColor,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
+        defaultUserImage: defaultUserImage ?? this.defaultUserImage,
         channelPreviewTheme: channelPreviewTheme?.copyWith(
               title:
                   channelPreviewTheme.title ?? this.channelPreviewTheme.title,
@@ -178,6 +184,12 @@ class StreamChatThemeData {
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
       defaultChannelImage: (context, channel) => SizedBox(),
+      defaultUserImage: (context, user) => Center(
+        child: Text(
+          user.name?.substring(0, 1) ?? '',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
       channelPreviewTheme: ChannelPreviewTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
