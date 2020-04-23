@@ -1,3 +1,7 @@
+## 0.2.0-alpha+8
+
+- Add `attachmentBuilders` to `MessageWidget` and `MessageListView`
+
 ## 0.2.0-alpha+7
 
 - Update llc dependency
