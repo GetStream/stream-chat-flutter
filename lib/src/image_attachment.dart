@@ -40,7 +40,11 @@ class ImageAttachment extends StatelessWidget {
               child: CachedNetworkImage(
                 imageBuilder: (context, provider) {
                   return GestureDetector(
-                    child: Image(image: provider),
+                    child: Image(
+                      image: provider,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      fit: BoxFit.cover,
+                    ),
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
                         return FullScreenImage(

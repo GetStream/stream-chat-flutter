@@ -1,4 +1,4 @@
-## 0.2.0-alpha+8
+## 0.2.0-alpha+9
 
 - Add `attachmentBuilders` to `MessageWidget` and `MessageListView`
 
