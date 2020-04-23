@@ -1,3 +1,7 @@
+## 0.1.33
+
+- Add default user and channel image to `StreamChatTheme`
+
 ## 0.1.32
 
 - Update llc version
