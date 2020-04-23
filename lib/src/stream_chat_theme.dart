@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
@@ -50,6 +51,9 @@ class StreamChatThemeData {
   /// Theme of other users messages
   final MessageTheme otherMessageTheme;
 
+  /// The widget that will be built when the channel image is unavailable
+  final Widget Function(BuildContext, Channel) defaultChannelImage;
+
   /// Create a theme from scratch
   StreamChatThemeData({
     this.primaryColor,
@@ -59,6 +63,7 @@ class StreamChatThemeData {
     this.channelTheme,
     this.otherMessageTheme,
     this.ownMessageTheme,
+    this.defaultChannelImage,
   });
 
   /// Create a theme from a Material [Theme]
@@ -97,11 +102,13 @@ class StreamChatThemeData {
     ChannelTheme channelTheme,
     MessageTheme ownMessageTheme,
     MessageTheme otherMessageTheme,
+    Widget Function(BuildContext, Channel) defaultChannelImage,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
         accentColor: accentColor ?? this.accentColor,
+        defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         channelPreviewTheme: channelPreviewTheme?.copyWith(
               title:
                   channelPreviewTheme.title ?? this.channelPreviewTheme.title,
@@ -170,6 +177,7 @@ class StreamChatThemeData {
     return StreamChatThemeData(
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
+      defaultChannelImage: (context, channel) => SizedBox(),
       channelPreviewTheme: ChannelPreviewTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),

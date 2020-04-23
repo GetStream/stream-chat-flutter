@@ -111,7 +111,8 @@ class ChannelImage extends StatelessWidget {
                           },
                           fit: BoxFit.cover,
                         )
-                      : SizedBox(),
+                      : StreamChatTheme.of(context)
+                          .defaultChannelImage(context, channel),
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
