@@ -128,7 +128,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                     .channelHeaderTheme
                     .lastMessageAt,
               )
-            : Container();
+            : SizedBox();
       },
     );
   }

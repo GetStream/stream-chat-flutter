@@ -92,6 +92,13 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       home: Container(
         child: StreamChat(
+          streamChatThemeData: StreamChatThemeData(
+            defaultChannelImage: (context, channel) {
+              return Center(
+                child: Text('AAA'),
+              );
+            },
+          ),
           client: client,
           child: ChannelListPage(),
         ),
