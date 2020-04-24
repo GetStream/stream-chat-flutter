@@ -65,6 +65,7 @@ class MessageListView extends StatefulWidget {
     this.showOtherMessageUsername = false,
     this.showVideoFullScreen = true,
     this.onMentionTap,
+    this.onUserAvatarTap,
     this.onMessageActions,
   }) : super(key: key);
 
@@ -92,6 +93,9 @@ class MessageListView extends StatefulWidget {
 
   /// Function called on message mention tap
   final void Function(User) onMentionTap;
+
+  /// Function called on User Avatar tap
+  final void Function(User) onUserAvatarTap;
 
   /// Function called on message long press
   final Function(BuildContext, Message) onMessageActions;
@@ -154,6 +158,7 @@ class _MessageListViewState extends State<MessageListView> {
                         showOtherMessageUsername:
                             widget.showOtherMessageUsername,
                         onMentionTap: widget.onMentionTap,
+                        onUserAvatarTap: widget.onUserAvatarTap,
                         onMessageActions: widget.onMessageActions,
                       ),
                       Padding(
@@ -216,6 +221,7 @@ class _MessageListViewState extends State<MessageListView> {
                   showOtherMessageUsername: widget.showOtherMessageUsername,
                   showVideoFullScreen: widget.showVideoFullScreen,
                   onMentionTap: widget.onMentionTap,
+                  onUserAvatarTap: widget.onUserAvatarTap,
                   onMessageActions: widget.onMessageActions,
                 );
               }
@@ -363,6 +369,7 @@ class _MessageListViewState extends State<MessageListView> {
         showVideoFullScreen: widget.showVideoFullScreen,
         showOtherMessageUsername: widget.showOtherMessageUsername,
         onMentionTap: widget.onMentionTap,
+        onUserAvatarTap: widget.onUserAvatarTap,
         onMessageActions: widget.onMessageActions,
       );
     }
@@ -402,6 +409,7 @@ class _MessageListViewState extends State<MessageListView> {
         showVideoFullScreen: widget.showVideoFullScreen,
         showOtherMessageUsername: widget.showOtherMessageUsername,
         onMentionTap: widget.onMentionTap,
+        onUserAvatarTap: widget.onUserAvatarTap,
         onMessageActions: widget.onMessageActions,
       );
     }

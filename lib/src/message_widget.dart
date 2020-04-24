@@ -35,6 +35,7 @@ class MessageWidget extends StatefulWidget {
     @required this.message,
     @required this.nextMessage,
     this.onThreadTap,
+    this.onUserAvatarTap,
     this.onMessageActions,
     this.isParent = false,
     this.onMentionTap,
@@ -62,6 +63,9 @@ class MessageWidget extends StatefulWidget {
 
   /// The function called when tapping on replies
   final void Function(Message) onThreadTap;
+
+  /// The function called when tapping on UserAvatar
+  final void Function(User) onUserAvatarTap;
 
   /// True if this is the parent of the thread being showed
   final bool isParent;
@@ -151,7 +155,10 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
       child: Row(
         children: <Widget>[
-          UserAvatar(user: widget.message.user),
+          UserAvatar(
+            user: widget.message.user,
+            onTap: widget.onUserAvatarTap,
+          ),
           if (_isMyMessage &&
               widget.nextMessage == null &&
               (widget.message.status == MessageSendingStatus.SENT ||
