@@ -1,3 +1,9 @@
+## 0.2.0-alpha+10
+
+- Add date divider builder
+
+- Fix reply indicator tap
+
 ## 0.2.0-alpha+9
 
 - Add `attachmentBuilders` to `MessageWidget` and `MessageListView`
