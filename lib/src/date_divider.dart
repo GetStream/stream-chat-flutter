@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// It shows a date divider depending on the date difference
 class DateDivider extends StatelessWidget {
+  final DateTime dateTime;
+
   const DateDivider({
     Key key,
-    @required this.nextMessage,
-    @required this.messageWidget,
+    @required this.dateTime,
   }) : super(key: key);
-
-  final Message nextMessage;
-  final Widget messageWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +19,7 @@ class DateDivider extends StatelessWidget {
       ),
     );
 
-    final createdAt = Jiffy(nextMessage.createdAt.toLocal());
+    final createdAt = Jiffy(dateTime);
     final now = DateTime.now();
     final hourInfo = createdAt.format('h:mm a');
 
@@ -46,46 +43,39 @@ class DateDivider extends StatelessWidget {
       dayInfo = createdAt.format('dd/MM/yyyy').toUpperCase();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        messageWidget,
-        Padding(
-          padding: const EdgeInsets.only(top: 24.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              divider,
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Text.rich(
+    return Padding(
+      padding: const EdgeInsets.only(top: 24.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          divider,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Text.rich(
+              TextSpan(
+                children: [
                   TextSpan(
-                    children: [
-                      TextSpan(
-                        text: dayInfo,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(text: ' AT'),
-                      TextSpan(text: ' $hourInfo'),
-                    ],
+                    text: dayInfo,
                     style: TextStyle(
-                      fontWeight: FontWeight.normal,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color:
-                        Theme.of(context).textTheme.title.color.withOpacity(.5),
-                  ),
+                  TextSpan(text: ' AT'),
+                  TextSpan(text: ' $hourInfo'),
+                ],
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
                 ),
               ),
-              divider,
-            ],
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).textTheme.title.color.withOpacity(.5),
+              ),
+            ),
           ),
-        ),
-      ],
+          divider,
+        ],
+      ),
     );
   }
 }

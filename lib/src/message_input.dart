@@ -719,6 +719,7 @@ class _MessageInputState extends State<MessageInput> {
           },
           icon: Icon(
             Icons.send,
+            color: StreamChatTheme.of(context).accentColor,
           ),
         ),
       ),

@@ -237,7 +237,7 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildThreadIndicator(BuildContext context) {
     if (widget.message?.replyCount != null && widget.message.replyCount > 0) {
       return ReplyIndicator(
-        onTap: widget.isParent
+        onTap: !widget.isParent
             ? () {
                 widget.onThreadTap(widget.message);
               }

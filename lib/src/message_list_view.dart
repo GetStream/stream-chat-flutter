@@ -69,6 +69,7 @@ class MessageListView extends StatefulWidget {
     this.onMentionTap,
     this.onMessageActions,
     this.attachmentBuilders,
+    this.dateDividerBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -101,6 +102,9 @@ class MessageListView extends StatefulWidget {
 
   /// Map that defines a builder for an attachment type
   final Map<String, AttachmentBuilder> attachmentBuilders;
+
+  /// Builder used to render date dividers
+  final Widget Function(DateTime) dateDividerBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -232,9 +236,17 @@ class _MessageListViewState extends State<MessageListView> {
             if (nextMessage != null &&
                 !Jiffy(message.createdAt.toLocal())
                     .isSame(nextMessage.createdAt.toLocal(), Units.DAY)) {
-              return DateDivider(
-                messageWidget: messageWidget,
-                nextMessage: nextMessage,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  messageWidget,
+                  widget.dateDividerBuilder != null
+                      ? widget
+                          .dateDividerBuilder(nextMessage.createdAt.toLocal())
+                      : DateDivider(
+                          dateTime: nextMessage.createdAt.toLocal(),
+                        ),
+                ],
               );
             }
 
