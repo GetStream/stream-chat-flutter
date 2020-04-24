@@ -1,3 +1,7 @@
+## 0.1.34
+
+- Add `onUserAvatarTap`
+
 ## 0.1.33
 
 - Add default user and channel image to `StreamChatTheme`
