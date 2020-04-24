@@ -157,7 +157,7 @@ class _MessageWidgetState extends State<MessageWidget>
         children: <Widget>[
           UserAvatar(
             user: widget.message.user,
-            onUserAvatarTap: widget.onUserAvatarTap,
+            onTap: widget.onUserAvatarTap,
           ),
           if (_isMyMessage &&
               widget.nextMessage == null &&

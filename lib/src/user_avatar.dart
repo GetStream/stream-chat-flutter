@@ -9,19 +9,19 @@ class UserAvatar extends StatelessWidget {
     Key key,
     @required this.user,
     this.constraints,
-    this.onUserAvatarTap,
+    this.onTap,
   }) : super(key: key);
 
   final User user;
   final BoxConstraints constraints;
-  final void Function(User) onUserAvatarTap;
+  final void Function(User) onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (onUserAvatarTap != null) {
-          onUserAvatarTap(user);
+        if (onTap != null) {
+          onTap(user);
         }
       },
       child: ClipRRect(
