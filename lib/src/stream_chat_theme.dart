@@ -191,6 +191,7 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
+        unreadCounterColor: Color(0xffd0021B),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -415,12 +416,14 @@ class ChannelPreviewTheme {
   final TextStyle subtitle;
   final TextStyle lastMessageAt;
   final AvatarTheme avatarTheme;
+  final Color unreadCounterColor;
 
   const ChannelPreviewTheme({
     this.title,
     this.subtitle,
     this.lastMessageAt,
     this.avatarTheme,
+    this.unreadCounterColor,
   });
 
   ChannelPreviewTheme copyWith({
@@ -428,12 +431,14 @@ class ChannelPreviewTheme {
     TextStyle subtitle,
     TextStyle lastMessageAt,
     AvatarTheme avatarTheme,
+    Color unreadCounterColor,
   }) =>
       ChannelPreviewTheme(
         title: title ?? this.title,
         subtitle: subtitle ?? this.subtitle,
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
+        unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
       );
 }
 

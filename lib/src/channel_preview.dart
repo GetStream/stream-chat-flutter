@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
@@ -53,16 +54,8 @@ class ChannelPreview extends StatelessWidget {
         children: <Widget>[
           _buildDate(context),
           if (channel.state.unreadCount > 0)
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: CircleAvatar(
-                backgroundColor: Color(0xffd0021B),
-                radius: 6,
-                child: Text(
-                  '${channel.state.unreadCount}',
-                  style: TextStyle(fontSize: 8),
-                ),
-              ),
+            UnreadIndicator(
+              channel: channel,
             ),
         ],
       ),

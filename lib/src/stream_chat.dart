@@ -172,6 +172,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         title: themeData?.channelPreviewTheme?.title,
         lastMessageAt: themeData?.channelPreviewTheme?.lastMessageAt,
         subtitle: themeData?.channelPreviewTheme?.subtitle,
+        unreadCounterColor: themeData?.channelPreviewTheme?.unreadCounterColor,
       ),
     );
     return theme;
