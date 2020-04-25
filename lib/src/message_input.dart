@@ -476,7 +476,6 @@ class _MessageInputState extends State<MessageInput> {
                           child: Icon(
                             Icons.close,
                             size: 15,
-                            color: Colors.black,
                           ),
                         ),
                       ),

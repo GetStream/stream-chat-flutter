@@ -71,6 +71,8 @@ class MessageListView extends StatefulWidget {
     this.onMessageActions,
     this.attachmentBuilders,
     this.dateDividerBuilder,
+    this.showAvatar = true,
+    this.customClipperBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -109,6 +111,13 @@ class MessageListView extends StatefulWidget {
 
   /// Builder used to render date dividers
   final Widget Function(DateTime) dateDividerBuilder;
+
+  /// if true shows the user avatar
+  final bool showAvatar;
+
+  /// Custom clipper applied to the message bubble
+  final CustomClipper Function(BuildContext, Message, int index)
+      customClipperBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -171,6 +180,14 @@ class _MessageListViewState extends State<MessageListView> {
                         onUserAvatarTap: widget.onUserAvatarTap,
                         onMessageActions: widget.onMessageActions,
                         attachmentBuilders: widget.attachmentBuilders,
+                        showAvatar: widget.showAvatar,
+                        customClipperBuilder: (message) {
+                          return widget.customClipperBuilder(
+                            context,
+                            message,
+                            i,
+                          );
+                        },
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -235,6 +252,12 @@ class _MessageListViewState extends State<MessageListView> {
                   onUserAvatarTap: widget.onUserAvatarTap,
                   onMessageActions: widget.onMessageActions,
                   attachmentBuilders: widget.attachmentBuilders,
+                  showAvatar: widget.showAvatar,
+                  customClipperBuilder: (message) {
+                    if (widget.customClipperBuilder != null) {
+                      return widget.customClipperBuilder(context, message, i);
+                    }
+                  },
                 );
               }
             }
@@ -308,7 +331,8 @@ class _MessageListViewState extends State<MessageListView> {
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
         key: ValueKey<String>('MESSAGE-${message.id}'),
-        builder: (_) => widget.messageBuilder(context, message, 0),
+        builder: (_) =>
+            widget.messageBuilder(context, message, _messages.length - 1),
       );
     } else {
       messageWidget = MessageWidget(
@@ -323,6 +347,11 @@ class _MessageListViewState extends State<MessageListView> {
         onUserAvatarTap: widget.onUserAvatarTap,
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
+        showAvatar: widget.showAvatar,
+        customClipperBuilder: (message) {
+          return widget.customClipperBuilder(
+              context, message, _messages.length - 1);
+        },
       );
     }
 
@@ -364,6 +393,10 @@ class _MessageListViewState extends State<MessageListView> {
         onUserAvatarTap: widget.onUserAvatarTap,
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
+        showAvatar: widget.showAvatar,
+        customClipperBuilder: (message) {
+          return widget.customClipperBuilder(context, message, 0);
+        },
       );
     }
 

@@ -48,6 +48,8 @@ class MessageWidget extends StatefulWidget {
     this.showOtherMessageUsername = false,
     this.showVideoFullScreen = true,
     this.attachmentBuilders,
+    this.showAvatar = true,
+    this.customClipperBuilder,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -82,6 +84,12 @@ class MessageWidget extends StatefulWidget {
 
   /// Map that defines a builder for an attachment type
   final Map<String, AttachmentBuilder> attachmentBuilders;
+
+  /// if true shows the user avatar
+  final bool showAvatar;
+
+  /// Custom clipper applied to the message bubble
+  final CustomClipper Function(Message) customClipperBuilder;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -130,7 +138,7 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
       _isNextUser
           ? Container(
-              width: 40,
+              width: widget.showAvatar ? 40 : 8,
             )
           : _buildUserAvatar(),
     ]);
@@ -164,11 +172,13 @@ class _MessageWidgetState extends State<MessageWidget>
         right: _isMyMessage ? 0 : 8.0,
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          UserAvatar(
-            user: widget.message.user,
-            onTap: widget.onUserAvatarTap,
-          ),
+          if (widget.showAvatar)
+            UserAvatar(
+              user: widget.message.user,
+              onTap: widget.onUserAvatarTap,
+            ),
           if (_isMyMessage && widget.nextMessage == null)
             SendingIndicator(
               message: widget.message,
@@ -466,7 +476,7 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  Padding _buildMessageText(
+  Widget _buildMessageText(
     int nOfAttachmentWidgets,
     String text,
     BuildContext context,
@@ -476,46 +486,57 @@ class _MessageWidgetState extends State<MessageWidget>
         right: _isMyMessage ? 0.0 : 8.0,
         left: _isMyMessage ? 8.0 : 0.0,
       ),
-      child: Container(
-        decoration:
-            _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
-        padding: EdgeInsets.all(10),
-        constraints: BoxConstraints.loose(
-          Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
-        ),
-        child: _buildSendingError(
-          MarkdownBody(
-            data: text,
-            onTapLink: (link) {
-              if (link.startsWith('@')) {
-                final mentionedUser = widget.message.mentionedUsers.firstWhere(
-                  (u) => '@${u.name.replaceAll(' ', '')}' == link,
-                  orElse: () => null,
-                );
+      child: ClipPath(
+        clipper: widget.customClipperBuilder != null
+            ? widget.customClipperBuilder(widget.message)
+            : null,
+        clipBehavior: Clip.hardEdge,
+        child: Container(
+          decoration:
+              _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0)
+                  .copyWith(
+                      borderRadius: widget.customClipperBuilder != null
+                          ? BorderRadius.circular(0)
+                          : null),
+          padding: EdgeInsets.all(10),
+          constraints: BoxConstraints.loose(
+            Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
+          ),
+          child: _buildSendingError(
+            MarkdownBody(
+              data: text,
+              onTapLink: (link) {
+                if (link.startsWith('@')) {
+                  final mentionedUser =
+                      widget.message.mentionedUsers.firstWhere(
+                    (u) => '@${u.name.replaceAll(' ', '')}' == link,
+                    orElse: () => null,
+                  );
 
-                if (widget.onMentionTap != null) {
-                  widget.onMentionTap(mentionedUser);
+                  if (widget.onMentionTap != null) {
+                    widget.onMentionTap(mentionedUser);
+                  } else {
+                    print('tap on ${mentionedUser.name}');
+                  }
                 } else {
-                  print('tap on ${mentionedUser.name}');
+                  launchURL(context, link);
                 }
-              } else {
-                launchURL(context, link);
-              }
-            },
-            styleSheet: MarkdownStyleSheet.fromTheme(
-              Theme.of(context).copyWith(
-                textTheme: Theme.of(context).textTheme.apply(
-                      bodyColor: _messageTheme.messageText.color,
-                      decoration: _messageTheme.messageText.decoration,
-                      decorationColor:
-                          _messageTheme.messageText.decorationColor,
-                      decorationStyle:
-                          _messageTheme.messageText.decorationStyle,
-                      fontFamily: _messageTheme.messageText.fontFamily,
-                    ),
+              },
+              styleSheet: MarkdownStyleSheet.fromTheme(
+                Theme.of(context).copyWith(
+                  textTheme: Theme.of(context).textTheme.apply(
+                        bodyColor: _messageTheme.messageText.color,
+                        decoration: _messageTheme.messageText.decoration,
+                        decorationColor:
+                            _messageTheme.messageText.decorationColor,
+                        decorationStyle:
+                            _messageTheme.messageText.decorationStyle,
+                        fontFamily: _messageTheme.messageText.fontFamily,
+                      ),
+                ),
+              ).copyWith(
+                p: _messageTheme.messageText,
               ),
-            ).copyWith(
-              p: _messageTheme.messageText,
             ),
           ),
         ),

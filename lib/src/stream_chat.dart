@@ -73,9 +73,11 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         builder: (context) {
           final materialTheme = Theme.of(context);
           final isDark = materialTheme.brightness == Brightness.dark;
+          final streamTheme = StreamChatTheme.of(context);
           return Theme(
             data: materialTheme.copyWith(
-              accentColor: StreamChatTheme.of(context).accentColor,
+              primaryIconTheme: streamTheme.primaryIconTheme,
+              accentColor: streamTheme.accentColor,
               scaffoldBackgroundColor: isDark ? Colors.black : Colors.white,
               backgroundColor: isDark ? Colors.black : Colors.white,
             ),
@@ -113,6 +115,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
     final theme = defaultTheme.copyWith(
       primaryColor: themeData?.primaryColor,
       defaultChannelImage: themeData?.defaultChannelImage,
+      primaryIconTheme: themeData?.primaryIconTheme,
       defaultUserImage: themeData?.defaultUserImage,
       channelTheme: defaultTheme.channelTheme.copyWith(
         channelHeaderTheme:
