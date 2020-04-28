@@ -104,14 +104,15 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
   }
 
-  StreamSubscription _newMessagesSubscription;
+  final List<StreamSubscription> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
 
-    _newMessagesSubscription =
-        StreamChat.of(context).client.on(EventType.messageNew).listen((e) {
+    final client = StreamChat.of(context).client;
+
+    _subscriptions.add(client.on(EventType.messageNew).listen((e) {
       final newChannels = List<Channel>.from(channels ?? []);
       final index = newChannels.indexWhere((c) => c.cid == e.cid);
       if (index > 0) {
@@ -119,14 +120,20 @@ class ChannelsBlocState extends State<ChannelsBloc>
         newChannels.insert(0, channel);
         _channelsController.add(newChannels);
       }
-    });
+    }));
+
+    _subscriptions.add(client.on(EventType.channelDeleted).listen((e) {
+      final channel = e.channel;
+      _channelsController
+          .add(channels..removeWhere((c) => c.cid == channel.cid));
+    }));
   }
 
   @override
   void dispose() {
     _channelsController.close();
     _queryChannelsLoadingController.close();
-    _newMessagesSubscription.cancel();
+    _subscriptions.forEach((s) => s.cancel());
     super.dispose();
   }
 
