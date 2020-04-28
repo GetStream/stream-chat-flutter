@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       home: Container(
         child: StreamChat(
           client: client,

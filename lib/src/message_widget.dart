@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -49,7 +51,6 @@ class MessageWidget extends StatefulWidget {
     this.showVideoFullScreen = true,
     this.attachmentBuilders,
     this.showAvatar = true,
-    this.customClipperBuilder,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -87,9 +88,6 @@ class MessageWidget extends StatefulWidget {
 
   /// if true shows the user avatar
   final bool showAvatar;
-
-  /// Custom clipper applied to the message bubble
-  final CustomClipper Function(Message) customClipperBuilder;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -486,57 +484,46 @@ class _MessageWidgetState extends State<MessageWidget>
         right: _isMyMessage ? 0.0 : 8.0,
         left: _isMyMessage ? 8.0 : 0.0,
       ),
-      child: ClipPath(
-        clipper: widget.customClipperBuilder != null
-            ? widget.customClipperBuilder(widget.message)
-            : null,
-        clipBehavior: Clip.hardEdge,
-        child: Container(
-          decoration:
-              _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0)
-                  .copyWith(
-                      borderRadius: widget.customClipperBuilder != null
-                          ? BorderRadius.circular(0)
-                          : null),
-          padding: EdgeInsets.all(10),
-          constraints: BoxConstraints.loose(
-            Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
-          ),
-          child: _buildSendingError(
-            MarkdownBody(
-              data: text,
-              onTapLink: (link) {
-                if (link.startsWith('@')) {
-                  final mentionedUser =
-                      widget.message.mentionedUsers.firstWhere(
-                    (u) => '@${u.name.replaceAll(' ', '')}' == link,
-                    orElse: () => null,
-                  );
+      child: Container(
+        decoration:
+            _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
+        padding: EdgeInsets.all(10),
+        constraints: BoxConstraints.loose(
+          Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
+        ),
+        child: _buildSendingError(
+          MarkdownBody(
+            data: text,
+            onTapLink: (link) {
+              if (link.startsWith('@')) {
+                final mentionedUser = widget.message.mentionedUsers.firstWhere(
+                  (u) => '@${u.name.replaceAll(' ', '')}' == link,
+                  orElse: () => null,
+                );
 
-                  if (widget.onMentionTap != null) {
-                    widget.onMentionTap(mentionedUser);
-                  } else {
-                    print('tap on ${mentionedUser.name}');
-                  }
+                if (widget.onMentionTap != null) {
+                  widget.onMentionTap(mentionedUser);
                 } else {
-                  launchURL(context, link);
+                  print('tap on ${mentionedUser.name}');
                 }
-              },
-              styleSheet: MarkdownStyleSheet.fromTheme(
-                Theme.of(context).copyWith(
-                  textTheme: Theme.of(context).textTheme.apply(
-                        bodyColor: _messageTheme.messageText.color,
-                        decoration: _messageTheme.messageText.decoration,
-                        decorationColor:
-                            _messageTheme.messageText.decorationColor,
-                        decorationStyle:
-                            _messageTheme.messageText.decorationStyle,
-                        fontFamily: _messageTheme.messageText.fontFamily,
-                      ),
-                ),
-              ).copyWith(
-                p: _messageTheme.messageText,
+              } else {
+                launchURL(context, link);
+              }
+            },
+            styleSheet: MarkdownStyleSheet.fromTheme(
+              Theme.of(context).copyWith(
+                textTheme: Theme.of(context).textTheme.apply(
+                      bodyColor: _messageTheme.messageText.color,
+                      decoration: _messageTheme.messageText.decoration,
+                      decorationColor:
+                          _messageTheme.messageText.decorationColor,
+                      decorationStyle:
+                          _messageTheme.messageText.decorationStyle,
+                      fontFamily: _messageTheme.messageText.fontFamily,
+                    ),
               ),
+            ).copyWith(
+              p: _messageTheme.messageText,
             ),
           ),
         ),
@@ -555,14 +542,19 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget _buildReactionPaint() {
     return widget.message.reactionCounts?.isNotEmpty == true
         ? Positioned(
-            left: _isMyMessage ? 8 : null,
-            right: !_isMyMessage ? 8 : null,
+            left: _isMyMessage ? 4 : null,
+            right: !_isMyMessage ? 4 : null,
             top: -6,
-            child: CustomPaint(
-              painter: _ReactionBubblePainter(
-                Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
+            child: Transform(
+              transform:
+                  !_isMyMessage ? Matrix4.rotationY(pi) : Matrix4.identity(),
+              alignment: Alignment.center,
+              child: CustomPaint(
+                painter: _ReactionBubblePainter(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
               ),
             ),
           )
@@ -895,9 +887,10 @@ class _ReactionBubblePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color;
     final path = Path();
-    path.arcToPoint(Offset(-6, -6));
-    path.arcToPoint(Offset(0, 10));
-    path.arcToPoint(Offset(6, -6));
+    path.lineTo(-2, -6);
+    path.lineTo(0, 10);
+    path.lineTo(10, -6);
+    path.lineTo(-2, -6);
     canvas.drawPath(path, paint);
   }
 

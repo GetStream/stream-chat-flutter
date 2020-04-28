@@ -1,3 +1,7 @@
+## 0.2.0-alpha+11
+
+- Fix message builder and add messageList to it
+
 ## 0.2.0-alpha+10
 
 - Add date divider builder

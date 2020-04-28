@@ -130,9 +130,6 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           child: Icon(
             Icons.close,
             size: 15,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black,
           ),
         ),
       ),

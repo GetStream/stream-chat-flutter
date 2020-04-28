@@ -10,7 +10,8 @@ import 'date_divider.dart';
 import 'message_widget.dart';
 import 'stream_channel.dart';
 
-typedef MessageBuilder = Widget Function(BuildContext, Message, int index);
+typedef MessageBuilder = Widget Function(
+    BuildContext, Message, List<Message>, int index);
 typedef ParentMessageBuilder = Widget Function(BuildContext, Message);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
@@ -72,7 +73,6 @@ class MessageListView extends StatefulWidget {
     this.attachmentBuilders,
     this.dateDividerBuilder,
     this.showAvatar = true,
-    this.customClipperBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -114,10 +114,6 @@ class MessageListView extends StatefulWidget {
 
   /// if true shows the user avatar
   final bool showAvatar;
-
-  /// Custom clipper applied to the message bubble
-  final CustomClipper Function(BuildContext, Message, int index)
-      customClipperBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -181,13 +177,6 @@ class _MessageListViewState extends State<MessageListView> {
                         onMessageActions: widget.onMessageActions,
                         attachmentBuilders: widget.attachmentBuilders,
                         showAvatar: widget.showAvatar,
-                        customClipperBuilder: (message) {
-                          return widget.customClipperBuilder(
-                            context,
-                            message,
-                            i,
-                          );
-                        },
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -237,7 +226,8 @@ class _MessageListViewState extends State<MessageListView> {
               if (widget.messageBuilder != null) {
                 messageWidget = Builder(
                   key: ValueKey<String>('MESSAGE-${message.id}'),
-                  builder: (_) => widget.messageBuilder(context, message, i),
+                  builder: (_) =>
+                      widget.messageBuilder(context, message, _messages, i),
                 );
               } else {
                 messageWidget = MessageWidget(
@@ -253,11 +243,6 @@ class _MessageListViewState extends State<MessageListView> {
                   onMessageActions: widget.onMessageActions,
                   attachmentBuilders: widget.attachmentBuilders,
                   showAvatar: widget.showAvatar,
-                  customClipperBuilder: (message) {
-                    if (widget.customClipperBuilder != null) {
-                      return widget.customClipperBuilder(context, message, i);
-                    }
-                  },
                 );
               }
             }
@@ -331,8 +316,12 @@ class _MessageListViewState extends State<MessageListView> {
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
         key: ValueKey<String>('MESSAGE-${message.id}'),
-        builder: (_) =>
-            widget.messageBuilder(context, message, _messages.length - 1),
+        builder: (_) => widget.messageBuilder(
+          context,
+          message,
+          _messages,
+          _messages.length - 1,
+        ),
       );
     } else {
       messageWidget = MessageWidget(
@@ -348,10 +337,6 @@ class _MessageListViewState extends State<MessageListView> {
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
         showAvatar: widget.showAvatar,
-        customClipperBuilder: (message) {
-          return widget.customClipperBuilder(
-              context, message, _messages.length - 1);
-        },
       );
     }
 
@@ -378,7 +363,7 @@ class _MessageListViewState extends State<MessageListView> {
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
         key: ValueKey<String>('MESSAGE-${message.id}'),
-        builder: (_) => widget.messageBuilder(context, message, 0),
+        builder: (_) => widget.messageBuilder(context, message, _messages, 0),
       );
     } else {
       messageWidget = MessageWidget(
@@ -394,9 +379,6 @@ class _MessageListViewState extends State<MessageListView> {
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
         showAvatar: widget.showAvatar,
-        customClipperBuilder: (message) {
-          return widget.customClipperBuilder(context, message, 0);
-        },
       );
     }
 
