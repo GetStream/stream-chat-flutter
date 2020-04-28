@@ -1,3 +1,7 @@
+## 0.2.0-alpha+13
+
+- Handle channel deleted event
+
 ## 0.2.0-alpha+11
 
 - Fix message builder and add messageList to it
