@@ -18,6 +18,11 @@ import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(File, Channel);
 
+enum ActionsLocation {
+  LEFT,
+  RIGHT,
+}
+
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input_paint.png)
@@ -73,6 +78,9 @@ class MessageInput extends StatefulWidget {
     this.doImageUploadRequest,
     this.doFileUploadRequest,
     this.initialMessage,
+    this.textEditingController,
+    this.actions,
+    this.actionsLocation = ActionsLocation.LEFT,
   }) : super(key: key);
 
   /// Message to edit
@@ -102,6 +110,15 @@ class MessageInput extends StatefulWidget {
   /// Override file upload request
   final FileUploader doFileUploadRequest;
 
+  /// The text controller of the TextField
+  final TextEditingController textEditingController;
+
+  /// List of action widgets
+  final List<Widget> actions;
+
+  /// The location of the custom actions
+  final ActionsLocation actionsLocation;
+
   @override
   _MessageInputState createState() => _MessageInputState(
         doFileUploadRequest: doFileUploadRequest,
@@ -116,7 +133,7 @@ class _MessageInputState extends State<MessageInput> {
   FileUploader doImageUploadRequest;
   FileUploader doFileUploadRequest;
 
-  TextEditingController _textController;
+  TextEditingController textEditingController;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
@@ -165,8 +182,12 @@ class _MessageInputState extends State<MessageInput> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         if (!widget.disableAttachments) _buildAttachmentButton(),
+        if (widget.actionsLocation == ActionsLocation.LEFT)
+          ...widget.actions ?? [],
         _buildTextInput(context),
         _animateSendButton(context),
+        if (widget.actionsLocation == ActionsLocation.RIGHT)
+          ...widget.actions ?? [],
       ],
     );
   }
@@ -197,7 +218,7 @@ class _MessageInputState extends State<MessageInput> {
             _sendMessage(context);
           },
           keyboardType: widget.keyboardType,
-          controller: _textController,
+          controller: textEditingController,
           focusNode: _focusNode,
           onChanged: (s) {
             StreamChannel.of(context).channel.keyStroke();
@@ -216,10 +237,10 @@ class _MessageInputState extends State<MessageInput> {
               Overlay.of(context).insert(_commandsOverlay);
             }
 
-            if (_textController.selection.isCollapsed &&
-                (s[_textController.selection.start - 1] == '@' ||
-                    _textController.text
-                        .substring(0, _textController.selection.start)
+            if (textEditingController.selection.isCollapsed &&
+                (s[textEditingController.selection.start - 1] == '@' ||
+                    textEditingController.text
+                        .substring(0, textEditingController.selection.start)
                         .split(' ')
                         .last
                         .contains('@'))) {
@@ -279,7 +300,7 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry _buildCommandsOverlayEntry() {
-    final text = _textController.text;
+    final text = textEditingController.text;
     final commands = StreamChannel.of(context)
         .channel
         .config
@@ -344,8 +365,8 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
-    final splits = _textController.text
-        .substring(0, _textController.value.selection.start)
+    final splits = textEditingController.text
+        .substring(0, textEditingController.value.selection.start)
         .split('@');
     final query = splits.last.toLowerCase();
 
@@ -391,10 +412,10 @@ class _MessageInputState extends State<MessageInput> {
                           splits[splits.length - 1] = m.user.name;
                           final rejoin = splits.join('@');
 
-                          _textController.value = TextEditingValue(
+                          textEditingController.value = TextEditingValue(
                             text: rejoin +
-                                _textController.text
-                                    .substring(_textController.selection.start),
+                                textEditingController.text.substring(
+                                    textEditingController.selection.start),
                             selection: TextSelection.collapsed(
                               offset: rejoin.length,
                             ),
@@ -413,7 +434,7 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _setCommand(Command c) {
-    _textController.value = TextEditingValue(
+    textEditingController.value = TextEditingValue(
       text: '/${c.name} ',
       selection: TextSelection.collapsed(
         offset: c.name.length + 2,
@@ -726,14 +747,14 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _sendMessage(BuildContext context) {
-    final text = _textController.text.trim();
+    final text = textEditingController.text.trim();
     if (text.isEmpty && _attachments.isEmpty) {
       return;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
 
-    _textController.clear();
+    textEditingController.clear();
     _attachments.clear();
 
     setState(() {
@@ -821,7 +842,7 @@ class _MessageInputState extends State<MessageInput> {
     _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
       if (visible) {
         if (_commandsOverlay != null) {
-          if (_textController.text.startsWith('/')) {
+          if (textEditingController.text.startsWith('/')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _commandsOverlay = _buildCommandsOverlayEntry();
               Overlay.of(context).insert(_commandsOverlay);
@@ -830,7 +851,7 @@ class _MessageInputState extends State<MessageInput> {
         }
 
         if (_mentionsOverlay != null) {
-          if (_textController.text.contains('@')) {
+          if (textEditingController.text.contains('@')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _mentionsOverlay = _buildCommandsOverlayEntry();
               Overlay.of(context).insert(_mentionsOverlay);
@@ -847,17 +868,17 @@ class _MessageInputState extends State<MessageInput> {
       }
     });
 
+    textEditingController =
+        widget.textEditingController ?? TextEditingController();
     if (widget.editMessage != null) {
       _parseExistingMessage(widget.editMessage);
     } else if (widget.initialMessage != null) {
       _parseExistingMessage(widget.initialMessage);
-    } else {
-      _textController = TextEditingController();
     }
   }
 
   void _parseExistingMessage(Message message) {
-    _textController = TextEditingController(text: message.text);
+    textEditingController.text = message.text;
 
     _typingStarted = true;
     _messageIsPresent = true;
