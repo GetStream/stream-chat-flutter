@@ -604,7 +604,7 @@ class MessageInputState extends State<MessageInput> {
       color: Colors.transparent,
       child: IconButton(
         onPressed: () {
-          _showAttachmentModal();
+          showAttachmentModal();
         },
         icon: Icon(
           Icons.add_circle_outline,
@@ -613,7 +613,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  void _showAttachmentModal() {
+  void showAttachmentModal() {
     if (_focusNode.hasFocus) {
       _focusNode.unfocus();
     }
