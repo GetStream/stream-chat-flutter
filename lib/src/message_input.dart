@@ -547,6 +547,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachment(_SendingAttachment attachment) {
+    print('attachment.attachment.toJson(): ${attachment.attachment.toJson()}');
+    print(
+        'widget.attachmentThumbnailBuilder: ${widget.attachmentThumbnailBuilder}');
     if (widget.attachmentThumbnailBuilder
             ?.containsKey(attachment.attachment.type) ==
         true) {
@@ -944,8 +947,7 @@ class MessageInputState extends State<MessageInput> {
     textEditingController =
         widget.textEditingController ?? TextEditingController();
     if (widget.editMessage != null || widget.initialMessage != null) {
-      _parseExistingMessage(
-          widget.editMessage ?? widget.initialMessage != null);
+      _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
     }
   }
 
@@ -956,6 +958,7 @@ class MessageInputState extends State<MessageInput> {
     _messageIsPresent = true;
 
     message.attachments?.forEach((attachment) {
+      print('attachment: ${attachment.toJson()}');
       _attachments.add(_SendingAttachment(
         attachment: attachment,
         uploaded: true,

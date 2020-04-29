@@ -712,10 +712,6 @@ class _MessageWidgetState extends State<MessageWidget>
                           child: Icon(
                             Icons.close,
                             size: 15,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
                           ),
                         ),
                       ),

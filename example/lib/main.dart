@@ -67,7 +67,6 @@ void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-    persistenceEnabled: false,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
   );
 
