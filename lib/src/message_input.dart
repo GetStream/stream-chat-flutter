@@ -139,10 +139,7 @@ class MessageInput extends StatefulWidget {
   final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilder;
 
   @override
-  MessageInputState createState() => MessageInputState(
-        doFileUploadRequest: doFileUploadRequest,
-        doImageUploadRequest: doImageUploadRequest,
-      );
+  MessageInputState createState() => MessageInputState();
 
   /// Use this method to get the current [StreamChatState] instance
   static MessageInputState of(BuildContext context) {
@@ -163,22 +160,14 @@ class MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
   final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
-  FileUploader doImageUploadRequest;
-  FileUploader doFileUploadRequest;
 
-  TextEditingController textEditingController;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
 
-  MessageInputState({
-    this.doImageUploadRequest,
-    this.doFileUploadRequest,
-  }) {
-    doImageUploadRequest ??= _uploadImage;
-    doFileUploadRequest ??= _uploadFile;
-  }
+  /// The editing controller passed to the input TextField
+  TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
@@ -613,6 +602,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
+  /// Show the attachment modal, making the user choose where to pick a media from
   void showAttachmentModal() {
     if (_focusNode.hasFocus) {
       _focusNode.unfocus();
@@ -778,9 +768,17 @@ class MessageInputState extends State<MessageInput> {
   ) async {
     String url;
     if (type == DefaultAttachmentTypes.image) {
-      url = await doImageUploadRequest(file, channel);
+      if (widget.doImageUploadRequest != null) {
+        url = await widget.doImageUploadRequest(file, channel);
+      } else {
+        url = await _uploadImage(file, channel);
+      }
     } else {
-      url = await doFileUploadRequest(file, channel);
+      if (widget.doFileUploadRequest != null) {
+        url = await widget.doFileUploadRequest(file, channel);
+      } else {
+        url = await _uploadFile(file, channel);
+      }
     }
     return url;
   }
