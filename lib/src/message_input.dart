@@ -18,11 +18,19 @@ import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(File, Channel);
 typedef AttachmentThumbnailBuilder = Widget Function(
-    BuildContext, _SendingAttachment);
+  BuildContext,
+  _SendingAttachment,
+);
 
 enum ActionsLocation {
-  LEFT,
-  RIGHT,
+  left,
+  right,
+}
+
+enum DefaultAttachmentTypes {
+  image,
+  video,
+  file,
 }
 
 /// Inactive state
@@ -83,7 +91,7 @@ class MessageInput extends StatefulWidget {
     this.initialMessage,
     this.textEditingController,
     this.actions,
-    this.actionsLocation = ActionsLocation.LEFT,
+    this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilder,
   }) : super(key: key);
 
@@ -207,11 +215,11 @@ class MessageInputState extends State<MessageInput> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         if (!widget.disableAttachments) _buildAttachmentButton(),
-        if (widget.actionsLocation == ActionsLocation.LEFT)
+        if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
         _animateSendButton(context),
-        if (widget.actionsLocation == ActionsLocation.RIGHT)
+        if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
       ],
     );
@@ -558,15 +566,18 @@ class MessageInputState extends State<MessageInput> {
         attachment,
       );
     }
+
     switch (attachment.attachment.type) {
       case 'image':
+      case 'giphy':
         return attachment.file != null
             ? Image.file(
                 attachment.file,
                 fit: BoxFit.cover,
               )
             : Image.network(
-                attachment.attachment.imageUrl,
+                attachment.attachment.imageUrl ??
+                    attachment.attachment.thumbUrl,
                 fit: BoxFit.cover,
               );
         break;
@@ -633,7 +644,7 @@ class MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.image),
                 title: Text('Upload a photo'),
                 onTap: () {
-                  pickFile('image', false);
+                  pickFile(DefaultAttachmentTypes.image, false);
                   Navigator.pop(context);
                 },
               ),
@@ -641,7 +652,7 @@ class MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.video_library),
                 title: Text('Upload a video'),
                 onTap: () {
-                  pickFile('video', false);
+                  pickFile(DefaultAttachmentTypes.video, false);
                   Navigator.pop(context);
                 },
               ),
@@ -649,7 +660,7 @@ class MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.camera_alt),
                 title: Text('Photo from camera'),
                 onTap: () {
-                  pickFile('image', true);
+                  pickFile(DefaultAttachmentTypes.image, true);
                   Navigator.pop(context);
                 },
               ),
@@ -657,7 +668,7 @@ class MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.videocam),
                 title: Text('Video from camera'),
                 onTap: () {
-                  pickFile('video', true);
+                  pickFile(DefaultAttachmentTypes.video, true);
                   Navigator.pop(context);
                 },
               ),
@@ -665,7 +676,7 @@ class MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.insert_drive_file),
                 title: Text('Upload a file'),
                 onTap: () {
-                  pickFile('file', false);
+                  pickFile(DefaultAttachmentTypes.file, false);
                   Navigator.pop(context);
                 },
               ),
@@ -686,30 +697,38 @@ class MessageInputState extends State<MessageInput> {
   }
 
   /// Pick a file from the device
-  /// The [attachmentType] should be one of 'image', 'video' or 'file'
   /// If [camera] is true then the camera will open
-  void pickFile(String attachmentType, [bool camera = false]) async {
+  void pickFile(DefaultAttachmentTypes fileType, [bool camera = false]) async {
     setState(() {
       _inputEnabled = false;
     });
 
     File file;
-    FileType type;
-    if (attachmentType == 'image') {
-      type = FileType.image;
-    } else if (attachmentType == 'video') {
-      type = FileType.video;
-    } else if (attachmentType == 'file') {
-      type = FileType.any;
+    String attachmentType;
+
+    if (fileType == DefaultAttachmentTypes.image) {
+      attachmentType = 'image';
+    } else if (fileType == DefaultAttachmentTypes.video) {
+      attachmentType = 'video';
+    } else if (fileType == DefaultAttachmentTypes.file) {
+      attachmentType = 'file';
     }
 
     if (camera) {
-      if (type == FileType.image) {
+      if (fileType == DefaultAttachmentTypes.image) {
         file = await ImagePicker.pickImage(source: ImageSource.camera);
-      } else if (type == FileType.video) {
+      } else if (fileType == DefaultAttachmentTypes.video) {
         file = await ImagePicker.pickVideo(source: ImageSource.camera);
       }
     } else {
+      FileType type;
+      if (fileType == DefaultAttachmentTypes.image) {
+        type = FileType.image;
+      } else if (fileType == DefaultAttachmentTypes.video) {
+        type = FileType.video;
+      } else if (fileType == DefaultAttachmentTypes.file) {
+        type = FileType.any;
+      }
       file = await FilePicker.getFile(type: type);
     }
 
@@ -735,9 +754,9 @@ class MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    final url = await _uploadAttachment(file, type, channel);
+    final url = await _uploadAttachment(file, fileType, channel);
 
-    if (attachmentType == 'image') {
+    if (fileType == DefaultAttachmentTypes.image) {
       attachment.attachment = attachment.attachment.copyWith(
         imageUrl: url,
       );
@@ -754,11 +773,11 @@ class MessageInputState extends State<MessageInput> {
 
   Future<String> _uploadAttachment(
     File file,
-    FileType type,
+    DefaultAttachmentTypes type,
     Channel channel,
   ) async {
     String url;
-    if (type == FileType.image) {
+    if (type == DefaultAttachmentTypes.image) {
       url = await doImageUploadRequest(file, channel);
     } else {
       url = await doFileUploadRequest(file, channel);
@@ -846,10 +865,7 @@ class MessageInputState extends State<MessageInput> {
       message = widget.editMessage.copyWith(
         parentId: widget.parentMessage?.id,
         text: text,
-        attachments: widget.editMessage.attachments
-                .where((attachment) => attachment.type == 'giphy')
-                .toList() +
-            _getAttachments(attachments).toList(),
+        attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
