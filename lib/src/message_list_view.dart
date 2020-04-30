@@ -73,6 +73,7 @@ class MessageListView extends StatefulWidget {
     this.attachmentBuilders,
     this.dateDividerBuilder,
     this.showAvatar = true,
+    this.editMessageInputBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -114,6 +115,9 @@ class MessageListView extends StatefulWidget {
 
   /// if true shows the user avatar
   final bool showAvatar;
+
+  /// Builder used to build the message input to edit a message
+  final Widget Function(BuildContext, Message) editMessageInputBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -177,6 +181,7 @@ class _MessageListViewState extends State<MessageListView> {
                         onMessageActions: widget.onMessageActions,
                         attachmentBuilders: widget.attachmentBuilders,
                         showAvatar: widget.showAvatar,
+                        editMessageInputBuilder: widget.editMessageInputBuilder,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -243,6 +248,7 @@ class _MessageListViewState extends State<MessageListView> {
                   onMessageActions: widget.onMessageActions,
                   attachmentBuilders: widget.attachmentBuilders,
                   showAvatar: widget.showAvatar,
+                  editMessageInputBuilder: widget.editMessageInputBuilder,
                 );
               }
             }
@@ -337,6 +343,7 @@ class _MessageListViewState extends State<MessageListView> {
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
         showAvatar: widget.showAvatar,
+        editMessageInputBuilder: widget.editMessageInputBuilder,
       );
     }
 
@@ -379,6 +386,7 @@ class _MessageListViewState extends State<MessageListView> {
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
         showAvatar: widget.showAvatar,
+        editMessageInputBuilder: widget.editMessageInputBuilder,
       );
     }
 

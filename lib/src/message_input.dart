@@ -92,7 +92,7 @@ class MessageInput extends StatefulWidget {
     this.textEditingController,
     this.actions,
     this.actionsLocation = ActionsLocation.left,
-    this.attachmentThumbnailBuilder,
+    this.attachmentThumbnailBuilders,
   }) : super(key: key);
 
   /// Message to edit
@@ -135,8 +135,8 @@ class MessageInput extends StatefulWidget {
   /// The location of the custom actions
   final ActionsLocation actionsLocation;
 
-  /// Map that defines a builder for an attachment type
-  final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilder;
+  /// Map that defines a thumbnail builder for an attachment type
+  final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -547,13 +547,10 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachment(_SendingAttachment attachment) {
-    print('attachment.attachment.toJson(): ${attachment.attachment.toJson()}');
-    print(
-        'widget.attachmentThumbnailBuilder: ${widget.attachmentThumbnailBuilder}');
-    if (widget.attachmentThumbnailBuilder
+    if (widget.attachmentThumbnailBuilders
             ?.containsKey(attachment.attachment.type) ==
         true) {
-      return widget.attachmentThumbnailBuilder[attachment.attachment.type](
+      return widget.attachmentThumbnailBuilders[attachment.attachment.type](
         context,
         attachment,
       );
@@ -897,6 +894,10 @@ class MessageInputState extends State<MessageInput> {
     return sendingFuture.whenComplete(() {
       if (widget.onMessageSent != null) {
         widget.onMessageSent(message);
+      } else {
+        if (widget.editMessage != null) {
+          Navigator.pop(context);
+        }
       }
     });
   }
@@ -958,7 +959,6 @@ class MessageInputState extends State<MessageInput> {
     _messageIsPresent = true;
 
     message.attachments?.forEach((attachment) {
-      print('attachment: ${attachment.toJson()}');
       _attachments.add(_SendingAttachment(
         attachment: attachment,
         uploaded: true,
