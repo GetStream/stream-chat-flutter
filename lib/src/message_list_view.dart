@@ -73,6 +73,7 @@ class MessageListView extends StatefulWidget {
     this.attachmentBuilders,
     this.dateDividerBuilder,
     this.showAvatar = true,
+    this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -115,6 +116,9 @@ class MessageListView extends StatefulWidget {
   /// if true shows the user avatar
   final bool showAvatar;
 
+  /// The ScrollPhysics used by the ListView
+  final ScrollPhysics scrollPhysics;
+
   @override
   _MessageListViewState createState() => _MessageListViewState();
 }
@@ -145,7 +149,8 @@ class _MessageListViewState extends State<MessageListView> {
       },
       child: ListView.custom(
         key: Key('messageListView'),
-        physics: AlwaysScrollableScrollPhysics(),
+        shrinkWrap: true,
+        physics: widget.scrollPhysics,
         controller: _scrollController,
         reverse: true,
         childrenDelegate: SliverChildBuilderDelegate(
