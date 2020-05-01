@@ -73,6 +73,7 @@ class MessageListView extends StatefulWidget {
     this.attachmentBuilders,
     this.dateDividerBuilder,
     this.showAvatar = true,
+    this.editMessageInputBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
   }) : super(key: key);
 
@@ -116,8 +117,13 @@ class MessageListView extends StatefulWidget {
   /// if true shows the user avatar
   final bool showAvatar;
 
+
+  /// Builder used to build the message input to edit a message
+  final Widget Function(BuildContext, Message) editMessageInputBuilder;
+  
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
+
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -182,6 +188,7 @@ class _MessageListViewState extends State<MessageListView> {
                         onMessageActions: widget.onMessageActions,
                         attachmentBuilders: widget.attachmentBuilders,
                         showAvatar: widget.showAvatar,
+                        editMessageInputBuilder: widget.editMessageInputBuilder,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -248,6 +255,7 @@ class _MessageListViewState extends State<MessageListView> {
                   onMessageActions: widget.onMessageActions,
                   attachmentBuilders: widget.attachmentBuilders,
                   showAvatar: widget.showAvatar,
+                  editMessageInputBuilder: widget.editMessageInputBuilder,
                 );
               }
             }
@@ -342,6 +350,7 @@ class _MessageListViewState extends State<MessageListView> {
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
         showAvatar: widget.showAvatar,
+        editMessageInputBuilder: widget.editMessageInputBuilder,
       );
     }
 
@@ -384,6 +393,7 @@ class _MessageListViewState extends State<MessageListView> {
         onMessageActions: widget.onMessageActions,
         attachmentBuilders: widget.attachmentBuilders,
         showAvatar: widget.showAvatar,
+        editMessageInputBuilder: widget.editMessageInputBuilder,
       );
     }
 

@@ -51,6 +51,7 @@ class MessageWidget extends StatefulWidget {
     this.showVideoFullScreen = true,
     this.attachmentBuilders,
     this.showAvatar = true,
+    this.editMessageInputBuilder,
   }) : super(key: key);
 
   /// Function called on mention tap
@@ -88,6 +89,9 @@ class MessageWidget extends StatefulWidget {
 
   /// if true shows the user avatar
   final bool showAvatar;
+
+  /// Builder used to build the message input to edit a message
+  final Widget Function(BuildContext, Message) editMessageInputBuilder;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -712,10 +716,6 @@ class _MessageWidgetState extends State<MessageWidget>
                           child: Icon(
                             Icons.close,
                             size: 15,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
                           ),
                         ),
                       ),
@@ -727,21 +727,23 @@ class _MessageWidgetState extends State<MessageWidget>
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                child: MessageInput(
-                  editMessage: widget.message,
-                  parentMessage: widget.isParent
-                      ? StreamChannel.of(context)
-                          .channel
-                          .state
-                          .messages
-                          .firstWhere((message) =>
-                              message.id == widget.message.parentId)
-                      : null,
-                  onMessageSent: (_) {
-                    FocusScope.of(context).unfocus();
-                    Navigator.pop(context);
-                  },
-                ),
+                child: widget.editMessageInputBuilder != null
+                    ? widget.editMessageInputBuilder(context, widget.message)
+                    : MessageInput(
+                        editMessage: widget.message,
+                        parentMessage: widget.isParent
+                            ? StreamChannel.of(context)
+                                .channel
+                                .state
+                                .messages
+                                .firstWhere((message) =>
+                                    message.id == widget.message.parentId)
+                            : null,
+                        onMessageSent: (_) {
+                          FocusScope.of(context).unfocus();
+                          Navigator.pop(context);
+                        },
+                      ),
               ),
             ],
           ),
