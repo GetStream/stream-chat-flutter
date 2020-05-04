@@ -1,3 +1,21 @@
+## 0.2.0-alpha+14
+
+Added some parameters to `MessageInput`
+- add actions parameter
+- add textEditingController parameter
+- add actionsLocation (RIGHT or LEFT) parameter
+- add attachmentThumbnailBuilders
+- add editMessageInputBuilder to customize the MessageInput while editing messages
+- expose MessageInputState
+
+Using attachmentThumbnailBuilders it's possible to render custom attachment thumbnails both for standard and custom attachment types
+Using MessageInput.of or a GlobalKey<MessageInputState> it's possible to call these methods:
+
+- `sendMessage` to send the message
+- `pickFile` to open the gallery/camera to pick a file
+- `addAttachment` to add a custom attachment to the message
+- `showAttachmentModal` to show the modal (that's the behaviour of the attachmentButton)
+
 ## 0.2.0-alpha+13
 
 - Handle channel deleted event
@@ -46,7 +64,7 @@
 
 - Minor bug fixes
 
-## 0.1.20
+## 0.1.20s
 
 - Add message configuration properties to MessageListView
 

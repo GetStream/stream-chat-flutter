@@ -155,7 +155,6 @@ class _MessageListViewState extends State<MessageListView> {
       },
       child: ListView.custom(
         key: Key('messageListView'),
-        shrinkWrap: true,
         physics: widget.scrollPhysics,
         controller: _scrollController,
         reverse: true,
