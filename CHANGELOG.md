@@ -1,36 +1,6 @@
-## 0.1.35
+## 0.2.0-alpha+15
 
-- Add backgroundColor as part of StreamChatThemeData
-
-## 0.1.34
-
-- Add `onUserAvatarTap`
-
-## 0.1.33
-
-- Add default user and channel image to `StreamChatTheme`
-
-## 0.1.32
-
-- Update llc version
-
-## 0.1.31
-
-Added some parameters to `MessageInput`
-- add actions parameter
-- add textEditingController parameter
-- add actionsLocation (RIGHT or LEFT) parameter
-- add attachmentThumbnailBuilders
-- add editMessageInputBuilder to customize the MessageInput while editing messages
-- expose MessageInputState
-
-Using attachmentThumbnailBuilders it's possible to render custom attachment thumbnails both for standard and custom attachment types
-Using MessageInput.of or a GlobalKey<MessageInputState> it's possible to call these methods:
-
-- `sendMessage` to send the message
-- `pickFile` to open the gallery/camera to pick a file
-- `addAttachment` to add a custom attachment to the message
-- `showAttachmentModal` to show the modal (that's the behaviour of the attachmentButton)
+- Add background color in StreamChatTheme
 
 ## 0.2.0-alpha+13
 

@@ -716,6 +716,9 @@ class _MessageWidgetState extends State<MessageWidget>
                           child: Icon(
                             Icons.close,
                             size: 15,
+                            color: StreamChatTheme.of(context)
+                                .primaryIconTheme
+                                .color,
                           ),
                         ),
                       ),
