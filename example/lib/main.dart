@@ -68,6 +68,7 @@ void main() async {
     's2dxdhpxd94g',
     logLevel: Level.INFO,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
+    backgroundKeepAlive: Duration.zero,
   );
 
   await client.setUser(
@@ -87,13 +88,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData();
     return MaterialApp(
-      theme: theme,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
       home: Container(
         child: StreamChat(
-          streamChatThemeData: StreamChatThemeData.fromTheme(theme),
           client: client,
           child: ChannelListPage(),
         ),

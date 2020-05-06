@@ -23,6 +23,9 @@ class ChannelPreview extends StatelessWidget {
   /// Function called when tapping this widget
   final void Function(Channel) onTap;
 
+  /// Function called when long pressing this widget
+  final void Function(Channel) onLongPress;
+
   /// Channel displayed
   final Channel channel;
 
@@ -33,6 +36,7 @@ class ChannelPreview extends StatelessWidget {
     @required this.channel,
     Key key,
     this.onTap,
+    this.onLongPress,
     this.onImageTap,
   }) : super(key: key);
 
@@ -40,7 +44,14 @@ class ChannelPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        onTap(channel);
+        if (onTap != null) {
+          onTap(channel);
+        }
+      },
+      onLongPress: () {
+        if (onLongPress != null) {
+          onLongPress(channel);
+        }
       },
       leading: ChannelImage(
         onTap: onImageTap,

@@ -55,6 +55,7 @@ class ChannelListView extends StatefulWidget {
     this.sort,
     this.pagination,
     this.onChannelTap,
+    this.onChannelLongPress,
     this.channelWidget,
     this.channelPreviewBuilder,
     this.errorBuilder,
@@ -91,6 +92,9 @@ class ChannelListView extends StatefulWidget {
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
   /// with the widget [channelWidget] as child.
   final ChannelTapCallback onChannelTap;
+
+  /// Function called when long pressing on a channel
+  final Function(Channel) onChannelLongPress;
 
   /// Widget used when opening a channel
   final Widget channelWidget;
@@ -271,6 +275,7 @@ class _ChannelListViewState extends State<ChannelListView>
               );
             } else {
               child = ChannelPreview(
+                onLongPress: widget.onChannelLongPress,
                 channel: channel,
                 onImageTap: widget.onImageTap != null
                     ? () {
