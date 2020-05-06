@@ -72,14 +72,12 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
       child: Builder(
         builder: (context) {
           final materialTheme = Theme.of(context);
-          final isDark = materialTheme.brightness == Brightness.dark;
           final streamTheme = StreamChatTheme.of(context);
           return Theme(
             data: materialTheme.copyWith(
               primaryIconTheme: streamTheme.primaryIconTheme,
               accentColor: streamTheme.accentColor,
-              scaffoldBackgroundColor: isDark ? Colors.black : Colors.white,
-              backgroundColor: isDark ? Colors.black : Colors.white,
+              scaffoldBackgroundColor: streamTheme.backgroundColor,
             ),
             child: WillPopScope(
               onWillPop: () async {
@@ -117,6 +115,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
       defaultChannelImage: themeData?.defaultChannelImage,
       primaryIconTheme: themeData?.primaryIconTheme,
       defaultUserImage: themeData?.defaultUserImage,
+      backgroundColor: themeData?.backgroundColor,
       channelTheme: defaultTheme.channelTheme.copyWith(
         channelHeaderTheme:
             defaultTheme.channelTheme.channelHeaderTheme.copyWith(

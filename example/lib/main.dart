@@ -87,12 +87,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeData();
     return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      theme: theme,
       themeMode: ThemeMode.system,
       home: Container(
         child: StreamChat(
+          streamChatThemeData: StreamChatThemeData.fromTheme(theme),
           client: client,
           child: ChannelListPage(),
         ),

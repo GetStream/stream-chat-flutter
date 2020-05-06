@@ -39,6 +39,9 @@ class StreamChatThemeData {
   /// Accent color of the chat widgets
   final Color accentColor;
 
+  /// Background color of the chat widgets
+  final Color backgroundColor;
+
   /// Theme of the [ChannelPreview]
   final ChannelPreviewTheme channelPreviewTheme;
 
@@ -65,6 +68,7 @@ class StreamChatThemeData {
     this.primaryColor,
     this.secondaryColor,
     this.accentColor,
+    this.backgroundColor,
     this.channelPreviewTheme,
     this.channelTheme,
     this.otherMessageTheme,
@@ -83,6 +87,7 @@ class StreamChatThemeData {
       primaryIconTheme: theme.primaryIconTheme,
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       channelTheme: ChannelTheme(
         inputGradient: LinearGradient(colors: [
           theme.accentColor.withOpacity(.5),
@@ -107,6 +112,7 @@ class StreamChatThemeData {
     Color primaryColor,
     Color secondaryColor,
     Color accentColor,
+    Color backgroundColor,
     ChannelPreviewTheme channelPreviewTheme,
     ChannelTheme channelTheme,
     MessageTheme ownMessageTheme,
@@ -122,6 +128,7 @@ class StreamChatThemeData {
         accentColor: accentColor ?? this.accentColor,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
+        backgroundColor: backgroundColor ?? this.backgroundColor,
         channelPreviewTheme: channelPreviewTheme?.copyWith(
               title:
                   channelPreviewTheme.title ?? this.channelPreviewTheme.title,
@@ -193,6 +200,7 @@ class StreamChatThemeData {
       primaryIconTheme:
           IconThemeData(color: isDark ? Colors.white : Colors.black),
       defaultChannelImage: (context, channel) => SizedBox(),
+      backgroundColor: isDark ? Colors.black : Colors.white,
       defaultUserImage: (context, user) => Center(
         child: Text(
           user.name?.substring(0, 1) ?? '',

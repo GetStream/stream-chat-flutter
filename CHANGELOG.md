@@ -1,4 +1,20 @@
-## 0.2.0-alpha+14
+## 0.1.35
+
+- Add backgroundColor as part of StreamChatThemeData
+
+## 0.1.34
+
+- Add `onUserAvatarTap`
+
+## 0.1.33
+
+- Add default user and channel image to `StreamChatTheme`
+
+## 0.1.32
+
+- Update llc version
+
+## 0.1.31
 
 Added some parameters to `MessageInput`
 - add actions parameter

@@ -1,15 +1,17 @@
-# Flutter Chat Components
+# Official Flutter SDK for [Stream Chat](https://getstream.io/chat/)
 
-<a href="https://getstream.io/chat/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" /></a>
+<p align="center">
+  <a href="https://getstream.io/tutorials/ios-chat/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" width="60%" /></a>
+</p>
 
 > The official Flutter components for Stream Chat, a service for
 > building chat applications.
 
 [![Pub](https://img.shields.io/pub/v/stream_chat_flutter.svg)](https://pub.dartlang.org/packages/stream_chat_flutter)
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
-![CI](https://github.com/GetStream/stream-chat-flutter/workflows/CI/badge.svg?branch=master)
-[![codecov](https://codecov.io/gh/GetStream/stream-chat-flutter/branch/master/graph/badge.svg)](https://codecov.io/gh/GetStream/stream-chat-flutter)
 [![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+<img align="right" src="https://getstream.imgix.net/images/ios-chat-tutorial/iphone_chat_art@1x.png?auto=format,enhance" width="50%" />
 
 **Quick Links**
 
@@ -20,7 +22,7 @@
 ## Flutter Chat Tutorial
 
 The best place to start is the [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/).
-It teaches you how to use this SDK and also shows how to make common changes.
+It teaches you how to use this SDK and also shows how to make frequently required changes.
 
 ## Example App
 
@@ -40,7 +42,7 @@ You should then run `flutter packages get`
 
 Use version `^0.2.0-alpha+2` to use the latest available version.
 
-Note that this is still an alpha version. There may be some bugs and the api can change in breaking ways.
+Note that this is still an alpha version. There may be some bugs, and the API can change in breaking ways.
 
 Thanks to whoever tries these versions and reports bugs or suggestions.
 
@@ -56,7 +58,7 @@ Follow [this wiki](https://github.com/miguelpruivo/flutter_file_picker/wiki/Setu
 
 We also use [video_player](https://pub.dev/packages/video_player) to reproduce videos. Follow [this guide](https://pub.dev/packages/video_player#installation) to fulfill the requirements.
 
-To pick images from the camera we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
+To pick images from the camera, we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
 Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.
 
 ## Docs
@@ -87,10 +89,10 @@ Every widget uses the `StreamChat` or `StreamChannel` widgets to manage the stat
 
 ### Customizing styles
 
-The Flutter SDK comes with a fully designed set of widgets which you can customize to fit with your application style and typography.
+The Flutter SDK comes with a fully designed set of widgets that you can customize to fit with your application style and typography.
 Changing the theme of Chat widgets works in a very similar way that `MaterialApp` and `Theme` do.
 
-Out of the box all chat widgets use their own default styling, there are two ways to change the styling:
+Out of the box, all chat widgets use their default styling, and there are two ways to change the styling:
 
   1. Initialize the `StreamChatTheme` from your existing `MaterialApp` style
   ```dart
@@ -166,6 +168,6 @@ Set the property `persistenceEnabled` to false if you don't want to use the offl
 
 We welcome code changes that improve this library or fix a problem,
 please make sure to follow all best practices and add tests if applicable before submitting a Pull Request on Github.
-We are very happy to merge your code in the official repository.
+We are pleased to merge your code into the official repository.
 Make sure to sign our [Contributor License Agreement (CLA)](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) first.
 See our license file for more details.
