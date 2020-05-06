@@ -74,12 +74,11 @@ class StreamChatState extends State<StreamChat>
       child: Builder(
         builder: (context) {
           final materialTheme = Theme.of(context);
-          final isDark = materialTheme.brightness == Brightness.dark;
+          final streamChatTheme = StreamChatTheme.of(context);
           return Theme(
             data: materialTheme.copyWith(
-              accentColor: StreamChatTheme.of(context).accentColor,
-              scaffoldBackgroundColor: isDark ? Colors.black : Colors.white,
-              backgroundColor: isDark ? Colors.black : Colors.white,
+              accentColor: streamChatTheme.accentColor,
+              scaffoldBackgroundColor: streamChatTheme.backgroundColor,
             ),
             child: WillPopScope(
               onWillPop: () async {
@@ -116,6 +115,7 @@ class StreamChatState extends State<StreamChat>
       primaryColor: themeData?.primaryColor,
       defaultChannelImage: themeData?.defaultChannelImage,
       defaultUserImage: themeData?.defaultUserImage,
+      backgroundColor: themeData?.backgroundColor,
       channelTheme: defaultTheme.channelTheme.copyWith(
         channelHeaderTheme:
             defaultTheme.channelTheme.channelHeaderTheme.copyWith(
