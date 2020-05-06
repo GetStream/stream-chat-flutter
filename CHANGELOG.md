@@ -1,3 +1,7 @@
+## 0.1.35
+
+- Add backgroundColor as part of StreamChatThemeData
+
 ## 0.1.34
 
 - Add `onUserAvatarTap`
