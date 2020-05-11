@@ -47,6 +47,7 @@ class ReplyIndicator extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.0),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: row,
         ),
       ),

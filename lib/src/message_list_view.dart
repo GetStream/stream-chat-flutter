@@ -3,18 +3,45 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
-import 'message_widget.dart';
 import 'stream_channel.dart';
 
 typedef MessageBuilder = Widget Function(
-    BuildContext, Message, List<Message>, int index);
-typedef ParentMessageBuilder = Widget Function(BuildContext, Message);
+  BuildContext,
+  MessageDetails,
+  List<Message>,
+);
+typedef ParentMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
+
+class MessageDetails {
+  bool isMyMessage;
+  bool isLastUser;
+  bool isNextUser;
+  Message message;
+  int index;
+
+  MessageDetails(
+    BuildContext context,
+    this.message,
+    List<Message> messages,
+    this.index,
+  ) {
+    isMyMessage = message.user.id == StreamChat.of(context).user.id;
+    isLastUser = index + 1 < messages.length &&
+        message.user.id == messages[index + 1]?.user?.id;
+    isNextUser =
+        index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
+  }
+}
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview_paint.png)
@@ -65,15 +92,7 @@ class MessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
-    this.showOtherMessageUsername = false,
-    this.showVideoFullScreen = true,
-    this.onMentionTap,
-    this.onUserAvatarTap,
-    this.onMessageActions,
-    this.attachmentBuilders,
     this.dateDividerBuilder,
-    this.showAvatar = true,
-    this.editMessageInputBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
   }) : super(key: key);
 
@@ -93,37 +112,11 @@ class MessageListView extends StatefulWidget {
   /// Parent message in case of a thread
   final Message parentMessage;
 
-  /// If true show the other users username next to the timestamp of the message
-  final bool showOtherMessageUsername;
-
-  /// True if the video player will allow fullscreen mode
-  final bool showVideoFullScreen;
-
-  /// Function called on message mention tap
-  final void Function(User) onMentionTap;
-
-  /// Function called on User Avatar tap
-  final void Function(User) onUserAvatarTap;
-
-  /// Function called on message long press
-  final Function(BuildContext, Message) onMessageActions;
-
-  /// Map that defines a builder for an attachment type
-  final Map<String, AttachmentBuilder> attachmentBuilders;
-
   /// Builder used to render date dividers
   final Widget Function(DateTime) dateDividerBuilder;
 
-  /// if true shows the user avatar
-  final bool showAvatar;
-
-
-  /// Builder used to build the message input to edit a message
-  final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
-
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -171,24 +164,7 @@ class _MessageListViewState extends State<MessageListView> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      MessageWidget(
-                        key: ValueKey<String>(
-                            'PARENT-MESSAGE-${widget.parentMessage.id}'),
-                        previousMessage: null,
-                        message: widget.parentMessage,
-                        nextMessage: null,
-                        onThreadTap: _onThreadTap,
-                        isParent: true,
-                        showVideoFullScreen: widget.showVideoFullScreen,
-                        showOtherMessageUsername:
-                            widget.showOtherMessageUsername,
-                        onMentionTap: widget.onMentionTap,
-                        onUserAvatarTap: widget.onUserAvatarTap,
-                        onMessageActions: widget.onMessageActions,
-                        attachmentBuilders: widget.attachmentBuilders,
-                        showAvatar: widget.showAvatar,
-                        editMessageInputBuilder: widget.editMessageInputBuilder,
-                      ),
+                      buildParentMessage(widget.parentMessage),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Container(
@@ -212,50 +188,40 @@ class _MessageListViewState extends State<MessageListView> {
               return _buildLoadingIndicator(streamChannel);
             }
             final message = _messages[i];
-
-            final previousMessage =
-                i < _messages.length - 1 ? _messages[i + 1] : null;
             final nextMessage = i > 0 ? _messages[i - 1] : null;
 
             Widget messageWidget;
 
             if (i == 0) {
               messageWidget = _buildBottomMessage(
-                streamChannel,
-                previousMessage,
-                message,
                 context,
+                message,
+                _messages,
+                streamChannel,
               );
             } else if (i == _messages.length - 1) {
               messageWidget = _buildTopMessage(
-                message,
-                nextMessage,
-                streamChannel,
                 context,
+                message,
+                _messages,
+                streamChannel,
               );
             } else {
               if (widget.messageBuilder != null) {
                 messageWidget = Builder(
                   key: ValueKey<String>('MESSAGE-${message.id}'),
-                  builder: (_) =>
-                      widget.messageBuilder(context, message, _messages, i),
+                  builder: (_) => widget.messageBuilder(
+                      context,
+                      MessageDetails(
+                        context,
+                        message,
+                        _messages,
+                        i,
+                      ),
+                      _messages),
                 );
               } else {
-                messageWidget = MessageWidget(
-                  key: ValueKey<String>('MESSAGE-${message.id}'),
-                  previousMessage: previousMessage,
-                  message: message,
-                  nextMessage: nextMessage,
-                  onThreadTap: _onThreadTap,
-                  showOtherMessageUsername: widget.showOtherMessageUsername,
-                  showVideoFullScreen: widget.showVideoFullScreen,
-                  onMentionTap: widget.onMentionTap,
-                  onUserAvatarTap: widget.onUserAvatarTap,
-                  onMessageActions: widget.onMessageActions,
-                  attachmentBuilders: widget.attachmentBuilders,
-                  showAvatar: widget.showAvatar,
-                  editMessageInputBuilder: widget.editMessageInputBuilder,
-                );
+                messageWidget = buildMessage(message, _messages, i);
               }
             }
 
@@ -319,38 +285,28 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildTopMessage(
-    Message message,
-    Message nextMessage,
-    StreamChannelState streamChannelState,
     BuildContext context,
+    Message message,
+    List<Message> messages,
+    StreamChannelState streamChannel,
   ) {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
+        key: ValueKey<String>('TOP-MESSAGE'),
         builder: (_) => widget.messageBuilder(
           context,
-          message,
+          MessageDetails(
+            context,
+            message,
+            _messages,
+            _messages.length - 1,
+          ),
           _messages,
-          _messages.length - 1,
         ),
       );
     } else {
-      messageWidget = MessageWidget(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        previousMessage: null,
-        message: message,
-        nextMessage: nextMessage,
-        onThreadTap: _onThreadTap,
-        showVideoFullScreen: widget.showVideoFullScreen,
-        showOtherMessageUsername: widget.showOtherMessageUsername,
-        onMentionTap: widget.onMentionTap,
-        onUserAvatarTap: widget.onUserAvatarTap,
-        onMessageActions: widget.onMessageActions,
-        attachmentBuilders: widget.attachmentBuilders,
-        showAvatar: widget.showAvatar,
-        editMessageInputBuilder: widget.editMessageInputBuilder,
-      );
+      messageWidget = buildMessage(message, messages, _messages.length - 1);
     }
 
     return VisibilityDetector(
@@ -359,7 +315,7 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
         if (topIsVisible && !_topWasVisible) {
-          streamChannelState.queryMessages();
+          streamChannel.queryMessages();
         }
         _topWasVisible = topIsVisible;
       },
@@ -367,33 +323,28 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildBottomMessage(
-    StreamChannelState streamChannel,
-    Message previousMessage,
-    Message message,
     BuildContext context,
+    Message message,
+    List<Message> messages,
+    StreamChannelState streamChannel,
   ) {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        builder: (_) => widget.messageBuilder(context, message, _messages, 0),
+        key: ValueKey<String>('BOTTOM-MESSAGE'),
+        builder: (_) => widget.messageBuilder(
+          context,
+          MessageDetails(
+            context,
+            message,
+            _messages,
+            0,
+          ),
+          _messages,
+        ),
       );
     } else {
-      messageWidget = MessageWidget(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        previousMessage: previousMessage,
-        message: message,
-        nextMessage: null,
-        onThreadTap: _onThreadTap,
-        showVideoFullScreen: widget.showVideoFullScreen,
-        showOtherMessageUsername: widget.showOtherMessageUsername,
-        onMentionTap: widget.onMentionTap,
-        onUserAvatarTap: widget.onUserAvatarTap,
-        onMessageActions: widget.onMessageActions,
-        attachmentBuilders: widget.attachmentBuilders,
-        showAvatar: widget.showAvatar,
-        editMessageInputBuilder: widget.editMessageInputBuilder,
-      );
+      messageWidget = buildMessage(message, messages, 0);
     }
 
     return VisibilityDetector(
@@ -407,6 +358,84 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       child: messageWidget,
+    );
+  }
+
+  Widget buildParentMessage(
+    Message message,
+  ) {
+    final isMyMessage = message.user.id == StreamChat.of(context).user.id;
+
+    return MessageWidget(
+      showReplyIndicator: false,
+      message: message,
+      reverse: isMyMessage,
+      showUsername: !isMyMessage,
+      padding: EdgeInsets.only(
+        top: 8.0,
+        left: 8.0,
+        right: 8.0,
+        bottom: 16.0,
+      ),
+      showSendingIndicator: DisplayWidget.hide,
+      onThreadTap: _onThreadTap,
+      showEditMessage: false,
+      showDeleteMessage: false,
+      borderRadiusGeometry: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        bottomLeft: Radius.circular(2),
+        topRight: Radius.circular(16),
+        bottomRight: Radius.circular(16),
+      ),
+      borderSide: isMyMessage ? BorderSide.none : null,
+      showUserAvatar: DisplayWidget.show,
+      messageTheme: isMyMessage
+          ? StreamChatTheme.of(context).ownMessageTheme
+          : StreamChatTheme.of(context).otherMessageTheme,
+    );
+  }
+
+  Widget buildMessage(
+    Message message,
+    List<Message> messages,
+    int index,
+  ) {
+    final isMyMessage = message.user.id == StreamChat.of(context).user.id;
+    final isLastUser = index + 1 < messages.length &&
+        message.user.id == messages[index + 1]?.user?.id;
+    final isNextUser =
+        index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
+
+    return MessageWidget(
+      message: message,
+      reverse: isMyMessage,
+      showReactions: !message.isDeleted,
+      padding: EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        bottom: index == 0 ? 30 : (isLastUser ? 5 : 10),
+      ),
+      showUsername: !isMyMessage && !isNextUser,
+      showSendingIndicator: isMyMessage &&
+              (index == 0 || message.status != MessageSendingStatus.SENT)
+          ? DisplayWidget.show
+          : DisplayWidget.hide,
+      showTimestamp: !isNextUser,
+      showEditMessage: isMyMessage,
+      showDeleteMessage: isMyMessage,
+      borderSide: isMyMessage ? BorderSide.none : null,
+      onThreadTap: _onThreadTap,
+      attachmentBorderRadiusGeometry: BorderRadius.circular(16),
+      borderRadiusGeometry: BorderRadius.only(
+        topLeft: Radius.circular(isLastUser ? 2 : 16),
+        bottomLeft: Radius.circular(2),
+        topRight: Radius.circular(16),
+        bottomRight: Radius.circular(16),
+      ),
+      showUserAvatar: isNextUser ? DisplayWidget.hide : DisplayWidget.show,
+      messageTheme: isMyMessage
+          ? StreamChatTheme.of(context).ownMessageTheme
+          : StreamChatTheme.of(context).otherMessageTheme,
     );
   }
 

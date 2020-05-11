@@ -22,43 +22,33 @@ class AttachmentTitle extends StatelessWidget {
           launchURL(context, attachment.titleLink);
         }
       },
-      child: Container(
-        constraints: BoxConstraints.loose(
-          Size(
-            MediaQuery.of(context).size.width * 0.7,
-            500,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                attachment.title,
-                overflow: TextOverflow.ellipsis,
-                style: messageTheme.messageText.copyWith(
-                  color: StreamChatTheme.of(context).accentColor,
-                  fontWeight: FontWeight.bold,
-                ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              attachment.title,
+              overflow: TextOverflow.ellipsis,
+              style: messageTheme.messageText.copyWith(
+                color: StreamChatTheme.of(context).accentColor,
+                fontWeight: FontWeight.bold,
               ),
-              if (attachment.titleLink != null ||
-                  attachment.ogScrapeUrl != null)
-                Text(
-                  Uri.parse(attachment.titleLink ?? attachment.ogScrapeUrl)
-                      .authority
-                      .split('.')
-                      .reversed
-                      .take(2)
-                      .toList()
-                      .reversed
-                      .join('.'),
-                  overflow: TextOverflow.ellipsis,
-                  style: messageTheme.createdAt,
-                ),
-            ],
-          ),
+            ),
+            if (attachment.titleLink != null || attachment.ogScrapeUrl != null)
+              Text(
+                Uri.parse(attachment.titleLink ?? attachment.ogScrapeUrl)
+                    .authority
+                    .split('.')
+                    .reversed
+                    .take(2)
+                    .toList()
+                    .reversed
+                    .join('.'),
+                style: messageTheme.createdAt,
+              ),
+          ],
         ),
       ),
     );

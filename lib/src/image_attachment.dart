@@ -26,10 +26,9 @@ class ImageAttachment extends StatelessWidget {
         attachment: attachment,
       );
     }
-
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Stack(
           children: <Widget>[
@@ -42,7 +41,6 @@ class ImageAttachment extends StatelessWidget {
                   return GestureDetector(
                     child: Image(
                       image: provider,
-                      width: MediaQuery.of(context).size.width * 0.7,
                       fit: BoxFit.cover,
                     ),
                     onTap: () {

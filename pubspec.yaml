@@ -12,18 +12,19 @@ dependencies:
   photo_view: ^0.9.2
   rxdart: ^0.24.0
   jiffy: ^3.0.1
-  cached_network_image: ^2.2.0
+  flutter_portal: ^0.1.0
+  cached_network_image: ^2.2.0+1
   flutter_markdown: ^0.3.5
   url_launcher: ^5.4.5
-  video_player: ^0.10.9+1
+  video_player: ^0.10.10
   chewie: ^0.9.10
   file_picker: ^1.8.0+2
-  image_picker: ^0.6.5+3
+  image_picker: ^0.6.6+1
   flutter_keyboard_visibility: ^2.0.0
   stream_chat:
     path: ../stream_chat_dart
   mime: ^0.9.6+3
-  visibility_detector: ^0.1.4
+  visibility_detector: ^0.1.5
   http_parser: ^3.1.4
 
 dev_dependencies:

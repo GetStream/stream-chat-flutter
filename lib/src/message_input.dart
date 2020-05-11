@@ -861,7 +861,6 @@ class MessageInputState extends State<MessageInput> {
     Message message;
     if (widget.editMessage != null) {
       message = widget.editMessage.copyWith(
-        parentId: widget.parentMessage?.id,
         text: text,
         attachments: _getAttachments(attachments).toList(),
         mentionedUsers:

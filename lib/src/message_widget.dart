@@ -1,822 +1,53 @@
 import 'dart:math';
+import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/message_input.dart';
-import 'package:stream_chat_flutter/src/message_list_view.dart';
-import 'package:stream_chat_flutter/src/reaction_picker.dart';
-import 'package:stream_chat_flutter/src/reply_indicator.dart';
-import 'package:stream_chat_flutter/src/sending_indicator.dart';
-import 'package:stream_chat_flutter/src/stream_channel.dart';
-import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/user_avatar.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
-import 'package:stream_chat_flutter/src/video_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'deleted_message.dart';
-import 'file_attachment.dart';
-import 'giphy_attachment.dart';
-import 'image_attachment.dart';
-import 'stream_chat.dart';
+import 'message_actions_bottom_sheet.dart';
+import 'message_text.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget.png)
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget_paint.png)
-///
-/// It shows a message with reactions, replies and user avatar.
-///
-/// Usually you don't use this widget as it's the default message widget used by [MessageListView].
-///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
-/// Modify it to change the widget appearance.
-class MessageWidget extends StatefulWidget {
-  /// Instantiate a new MessageWidget
-  const MessageWidget({
-    Key key,
-    @required this.previousMessage,
-    @required this.message,
-    @required this.nextMessage,
-    this.onThreadTap,
-    this.onUserAvatarTap,
-    this.onMessageActions,
-    this.isParent = false,
-    this.onMentionTap,
-    this.showOtherMessageUsername = false,
-    this.showVideoFullScreen = true,
-    this.attachmentBuilders,
-    this.showAvatar = true,
-    this.editMessageInputBuilder,
-  }) : super(key: key);
-
-  /// Function called on mention tap
-  final void Function(User) onMentionTap;
-
-  /// Function called on long press
-  final Function(BuildContext, Message) onMessageActions;
-
-  /// If true show the other users username next to the timestamp of the message
-  final bool showOtherMessageUsername;
-
-  /// This message
-  final Message message;
-
-  /// The previous message
-  final Message previousMessage;
-
-  /// The next message
-  final Message nextMessage;
-
-  /// The function called when tapping on replies
-  final void Function(Message) onThreadTap;
-
-  /// The function called when tapping on UserAvatar
-  final void Function(User) onUserAvatarTap;
-
-  /// True if this is the parent of the thread being showed
-  final bool isParent;
-
-  /// True if the video player will allow fullscreen mode
-  final bool showVideoFullScreen;
-
-  /// Map that defines a builder for an attachment type
-  final Map<String, AttachmentBuilder> attachmentBuilders;
-
-  /// if true shows the user avatar
-  final bool showAvatar;
-
-  /// Builder used to build the message input to edit a message
-  final Widget Function(BuildContext, Message) editMessageInputBuilder;
-
-  @override
-  _MessageWidgetState createState() => _MessageWidgetState();
+enum DisplayWidget {
+  hide,
+  gone,
+  show,
 }
 
-class _MessageWidgetState extends State<MessageWidget>
-    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-  MessageTheme _messageTheme;
-  StreamChatState _streamChat;
-  StreamChannelState _streamChannel;
-  bool _isMyMessage;
-
-  String _currentUserId;
-  String _messageUserId;
-  String _previousUserId;
-  String _nextUserId;
-  bool _isLastUser;
-  bool _isNextUser;
-
-  Map<String, AttachmentBuilder> _attachmentBuilders;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    _messageTheme = _isMyMessage
-        ? StreamChatTheme.of(context).ownMessageTheme
-        : StreamChatTheme.of(context).otherMessageTheme;
-
-    final alignment =
-        _isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
-
-    var row = List<Widget>.from([
-      Column(
-        crossAxisAlignment:
-            _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: <Widget>[
-          (widget.message.isDeleted &&
-                  widget.message.status != MessageSendingStatus.FAILED_DELETE)
-              ? _buildDeletedMessage(alignment)
-              : _buildBubble(context),
-          if (_streamChannel.channel.config?.replies == true)
-            _buildThreadIndicator(context),
-          if (!_isNextUser) _buildTimestamp(alignment),
-        ],
-      ),
-      _isNextUser
-          ? Container(
-              width: widget.showAvatar ? 40 : 8,
-            )
-          : _buildUserAvatar(),
-    ]);
-
-    if (!_isMyMessage) {
-      row = row.reversed.toList();
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: (_isMyMessage && widget.nextMessage == null) ? 0.0 : 10,
-      ),
-      margin: EdgeInsets.only(
-        top: _isLastUser ? 5 : 24,
-        bottom: widget.nextMessage == null ? 30 : 0,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment:
-            _isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: row,
-      ),
-    );
-  }
-
-  Padding _buildUserAvatar() {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: _isMyMessage ? 8.0 : 0,
-        right: _isMyMessage ? 0 : 8.0,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          if (widget.showAvatar)
-            UserAvatar(
-              user: widget.message.user,
-              onTap: widget.onUserAvatarTap,
-            ),
-          if (_isMyMessage && widget.nextMessage == null)
-            SendingIndicator(
-              message: widget.message,
-            ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _streamChat = StreamChat.of(context);
-    _streamChannel = StreamChannel.of(context);
-
-    _currentUserId = _streamChat.client.state.user.id;
-    _messageUserId = widget.message.user.id;
-    _previousUserId = widget.previousMessage?.user?.id;
-    _nextUserId = widget.nextMessage?.user?.id;
-    _isLastUser = _previousUserId == _messageUserId;
-    _isNextUser = _nextUserId == _messageUserId;
-
-    _isMyMessage = _messageUserId == _currentUserId;
-
-    _mergeAttachmentBuilders();
-  }
-
-  @override
-  void didUpdateWidget(MessageWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    _mergeAttachmentBuilders();
-  }
-
-  void _mergeAttachmentBuilders() {
-    _attachmentBuilders = {
-      'image': (context, message, attachment) {
-        return ImageAttachment(
-          attachment: attachment,
-          messageTheme: _messageTheme,
-        );
-      },
-      'video': (context, message, attachment) {
-        return VideoAttachment(
-          enableFullScreen: widget.showVideoFullScreen,
-          attachment: attachment,
-          messageTheme: _messageTheme,
-        );
-      },
-      'giphy': (context, message, attachment) {
-        return GiphyAttachment(
-          attachment: attachment,
-          messageTheme: _messageTheme,
-          message: message,
-        );
-      },
-      'file': (context, message, attachment) {
-        return FileAttachment(
-          attachment: attachment,
-        );
-      },
-    }..addAll(widget.attachmentBuilders ?? {});
-  }
-
-  Widget _buildDeletedMessage(Alignment alignment) {
-    return DeletedMessage(
-      messageTheme: _messageTheme,
-      alignment: alignment,
-    );
-  }
-
-  Widget _buildThreadIndicator(BuildContext context) {
-    if (widget.message?.replyCount != null && widget.message.replyCount > 0) {
-      return ReplyIndicator(
-        onTap: !widget.isParent
-            ? () {
-                widget.onThreadTap(widget.message);
-              }
-            : null,
-        message: widget.message,
-        messageTheme: _messageTheme,
-        reversed: _isMyMessage,
-      );
-    }
-    return SizedBox();
-  }
-
-  Widget _buildBubble(
-    BuildContext context,
-  ) {
-    var nOfAttachmentWidgets = 0;
-
-    final column =
-        List<Widget>.from(widget.message.attachments.map((attachment) {
-              nOfAttachmentWidgets++;
-
-              Widget attachmentWidget;
-              final attachmentBuilder = _attachmentBuilders[attachment.type];
-              if (attachmentBuilder == null) {
-                return SizedBox();
-              }
-
-              attachmentWidget = attachmentBuilder(
-                context,
-                widget.message,
-                attachment,
-              );
-
-              if (attachmentWidget != null) {
-                return _buildAttachment(
-                  attachmentWidget,
-                  attachment,
-                  nOfAttachmentWidgets,
-                  context,
-                );
-              }
-
-              nOfAttachmentWidgets--;
-              return SizedBox();
-            }) ??
-            []);
-
-    if (widget.message.text.trim().isNotEmpty) {
-      var text = widget.message.text;
-      text = _replaceMentions(text);
-
-      column.addAll(
-        <Widget>[
-          Column(
-            crossAxisAlignment: _isMyMessage
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
-            children: <Widget>[
-              if (_streamChannel.channel.config?.reactions == true &&
-                  nOfAttachmentWidgets == 0)
-                Align(
-                  child: _buildReactions(),
-                  alignment: _isMyMessage
-                      ? Alignment.centerLeft
-                      : Alignment.centerRight,
-                ),
-              Stack(
-                overflow: Overflow.visible,
-                children: <Widget>[
-                  if (nOfAttachmentWidgets == 0 &&
-                      _streamChannel.channel.config?.reactions == true)
-                    _buildReactionPaint(),
-                  _buildMessageText(nOfAttachmentWidgets, text, context),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
-    if (_streamChannel.channel.config?.reactions == true &&
-        nOfAttachmentWidgets > 0) {
-      column.insert(
-        0,
-        Align(
-          child: _buildReactions(),
-          alignment:
-              _isMyMessage ? Alignment.centerLeft : Alignment.centerRight,
-        ),
-      );
-      column[1] = Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(
-              right: _isMyMessage ? 0.0 : 8.0,
-              left: _isMyMessage ? 8.0 : 0.0,
-            ),
-            child: column[1],
-          ),
-          _buildReactionPaint(),
-        ],
-      );
-    }
-
-    return GestureDetector(
-      child: IntrinsicWidth(
-        child: Column(
-          children: column,
-          crossAxisAlignment:
-              _isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        ),
-      ),
-      onTap: () {
-        final channel = StreamChannel.of(context).channel;
-        if (widget.message.status == MessageSendingStatus.FAILED) {
-          channel.sendMessage(widget.message);
-          return;
-        }
-        if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
-          StreamChat.of(context).client.updateMessage(
-                widget.message,
-                channel.cid,
-              );
-          return;
-        }
-
-        if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
-          StreamChat.of(context).client.deleteMessage(
-                widget.message,
-                channel.cid,
-              );
-          return;
-        }
-      },
-      onLongPress: () {
-        if (widget.message.isEphemeral ||
-            widget.message.status == MessageSendingStatus.SENDING) {
-          return;
-        }
-
-        if (widget.onMessageActions != null) {
-          widget.onMessageActions(context, widget.message);
-        } else {
-          _showMessageBottomSheet(context);
-        }
-      },
-    );
-  }
-
-  Padding _buildAttachment(
-    Widget attachmentWidget,
-    Attachment attachment,
-    int nOfAttachmentWidgets,
-    BuildContext context,
-  ) {
-    final boxDecoration = _buildBoxDecoration(_isLastUser);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: boxDecoration.borderRadius,
-            child: Container(
-              decoration: boxDecoration,
-              constraints: BoxConstraints.loose(
-                Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
-              ),
-              child: attachmentWidget,
-              margin: EdgeInsets.only(
-                top: nOfAttachmentWidgets > 1 ? 5 : 0,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSendingError(Widget child) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        if (widget.message.status == MessageSendingStatus.FAILED)
-          Text(
-            'MESSAGE FAILED · CLICK TO TRY AGAIN',
-            style: _messageTheme.messageText.copyWith(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(.5)
-                  : Colors.black.withOpacity(.5),
-              fontSize: 11,
-            ),
-          ),
-        if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
-          Text(
-            'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
-            style: _messageTheme.messageText.copyWith(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(.5)
-                  : Colors.black.withOpacity(.5),
-              fontSize: 11,
-            ),
-          ),
-        if (widget.message.status == MessageSendingStatus.FAILED_DELETE)
-          Text(
-            'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
-            style: _messageTheme.messageText.copyWith(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(.5)
-                  : Colors.black.withOpacity(.5),
-              fontSize: 11,
-            ),
-          ),
-        child,
-      ],
-    );
-  }
-
-  Widget _buildMessageText(
-    int nOfAttachmentWidgets,
-    String text,
-    BuildContext context,
-  ) {
-    return Padding(
-      padding: EdgeInsets.only(
-        right: _isMyMessage ? 0.0 : 8.0,
-        left: _isMyMessage ? 8.0 : 0.0,
-      ),
-      child: Container(
-        decoration:
-            _buildBoxDecoration(_isLastUser || nOfAttachmentWidgets > 0),
-        padding: EdgeInsets.all(10),
-        constraints: BoxConstraints.loose(
-          Size.fromWidth(MediaQuery.of(context).size.width * 0.7),
-        ),
-        child: _buildSendingError(
-          MarkdownBody(
-            data: text,
-            onTapLink: (link) {
-              if (link.startsWith('@')) {
-                final mentionedUser = widget.message.mentionedUsers.firstWhere(
-                  (u) => '@${u.name.replaceAll(' ', '')}' == link,
-                  orElse: () => null,
-                );
-
-                if (widget.onMentionTap != null) {
-                  widget.onMentionTap(mentionedUser);
-                } else {
-                  print('tap on ${mentionedUser.name}');
-                }
-              } else {
-                launchURL(context, link);
-              }
-            },
-            styleSheet: MarkdownStyleSheet.fromTheme(
-              Theme.of(context).copyWith(
-                textTheme: Theme.of(context).textTheme.apply(
-                      bodyColor: _messageTheme.messageText.color,
-                      decoration: _messageTheme.messageText.decoration,
-                      decorationColor:
-                          _messageTheme.messageText.decorationColor,
-                      decorationStyle:
-                          _messageTheme.messageText.decorationStyle,
-                      fontFamily: _messageTheme.messageText.fontFamily,
-                    ),
-              ),
-            ).copyWith(
-              p: _messageTheme.messageText,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _replaceMentions(String text) {
-    widget.message.mentionedUsers?.forEach((u) {
-      text = text.replaceAll(
-          '@${u.name}', '[@${u.name}](@${u.name.replaceAll(' ', '')})');
-    });
-    return text;
-  }
-
-  Widget _buildReactionPaint() {
-    return widget.message.reactionCounts?.isNotEmpty == true
-        ? Positioned(
-            left: _isMyMessage ? 4 : null,
-            right: !_isMyMessage ? 4 : null,
-            top: -6,
-            child: Transform(
-              transform:
-                  !_isMyMessage ? Matrix4.rotationY(pi) : Matrix4.identity(),
-              alignment: Alignment.center,
-              child: CustomPaint(
-                painter: _ReactionBubblePainter(
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,
-                ),
-              ),
-            ),
-          )
-        : SizedBox();
-  }
-
-  void _showMessageBottomSheet(BuildContext context) {
-    if (!_streamChannel.channel.config.reactions &&
-        !_streamChannel.channel.config.replies) {
-      return;
-    }
-
-    final theme = Theme.of(context);
-
-    showModalBottomSheet(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
-          ),
-        ),
-        context: context,
-        builder: (_) {
-          return SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Container(
-                  color: Colors.black87,
-                  child: (_streamChannel.channel.config.reactions &&
-                          widget.message.status != MessageSendingStatus.FAILED)
-                      ? ReactionPicker(
-                          channel: StreamChannel.of(context).channel,
-                          reactionToEmoji: reactionToEmoji,
-                          message: widget.message,
-                        )
-                      : SizedBox(),
-                ),
-                _isMyMessage
-                    ? FlatButton(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            'Delete message',
-                            style: theme.textTheme.headline
-                                .copyWith(color: Colors.red),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          StreamChat.of(context).client.deleteMessage(
-                                widget.message,
-                                _streamChannel.channel.cid,
-                              );
-                        },
-                      )
-                    : SizedBox(),
-                _isMyMessage
-                    ? FlatButton(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            'Edit message',
-                            style: theme.textTheme.headline,
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.pop(context);
-
-                          _showEditBottomSheet(context);
-                        },
-                      )
-                    : SizedBox(),
-                (_streamChannel.channel.config.replies &&
-                        widget.message.status != MessageSendingStatus.FAILED &&
-                        widget.message.parentId == null &&
-                        !widget.isParent)
-                    ? FlatButton(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            'Start a thread',
-                            style: theme.textTheme.headline,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          widget.onThreadTap(widget.message);
-                        },
-                      )
-                    : SizedBox(),
-              ],
-            ),
-          );
-        });
-  }
-
-  void _showEditBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      elevation: 2,
-      clipBehavior: Clip.hardEdge,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
-        ),
-      ),
-      builder: (context) {
-        return StreamChannel(
-          channel: _streamChannel.channel,
-          child: Flex(
-            direction: Axis.vertical,
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 16.0,
-                  left: 16.0,
-                  right: 16.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Edit message',
-                      style: Theme.of(context).textTheme.title,
-                    ),
-                    Container(
-                      height: 30,
-                      padding: const EdgeInsets.all(2.0),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: RawMaterialButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          elevation: 0,
-                          highlightElevation: 0,
-                          focusElevation: 0,
-                          disabledElevation: 0,
-                          hoverElevation: 0,
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          fillColor:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white.withOpacity(.1)
-                                  : Colors.black.withOpacity(.1),
-                          padding: EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.close,
-                            size: 15,
-                            color: StreamChatTheme.of(context)
-                                .primaryIconTheme
-                                .color,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: widget.editMessageInputBuilder != null
-                    ? widget.editMessageInputBuilder(context, widget.message)
-                    : MessageInput(
-                        editMessage: widget.message,
-                        parentMessage: widget.isParent
-                            ? StreamChannel.of(context)
-                                .channel
-                                .state
-                                .messages
-                                .firstWhere((message) =>
-                                    message.id == widget.message.parentId)
-                            : null,
-                        onMessageSent: (_) {
-                          FocusScope.of(context).unfocus();
-                          Navigator.pop(context);
-                        },
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildReactions() {
-    return GestureDetector(
-      onTap: () {
-        if (widget.onMessageActions != null) {
-          widget.onMessageActions(context, widget.message);
-        } else {
-          _showMessageBottomSheet(context);
-        }
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: widget.message.reactionCounts?.isNotEmpty == true ? 4.0 : 0,
-        ),
-        child: Container(
-          padding: widget.message.reactionCounts?.isNotEmpty == true
-              ? const EdgeInsets.all(8)
-              : EdgeInsets.zero,
-          decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-              borderRadius: BorderRadius.all(Radius.circular(14))),
-          child: AnimatedSwitcher(
-            duration: Duration(milliseconds: 300),
-            reverseDuration: Duration(milliseconds: 0),
-            child: (widget.message.reactionCounts != null &&
-                    widget.message.reactionCounts.isNotEmpty)
-                ? _buildReactionRow()
-                : SizedBox(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Row _buildReactionRow() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        ...widget.message.reactionCounts.keys.map((reactionType) {
-          return Text(
-            reactionToEmoji[reactionType] ?? '?',
-          );
-        }),
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0),
-          child: Text(
-            widget.message.reactionCounts.values
-                .fold(0, (t, v) => v + t)
-                .toString(),
-            style: TextStyle(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black
-                  : Colors.white,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
+class MessageWidget extends StatelessWidget {
+  final void Function(User) onMentionTap;
+  final void Function(Message) onThreadTap;
+  final Widget Function(BuildContext, Message) editMessageInputBuilder;
+  final Widget Function(BuildContext, Message) textBuilder;
+  final void Function(BuildContext, Message) onMessageActions;
+  final Message message;
+  final MessageTheme messageTheme;
+  final bool reverse;
+  final ShapeBorder shape;
+  final ShapeBorder attachmentShape;
+  final BorderSide borderSide;
+  final BorderSide attachmentBorderSide;
+  final BorderRadiusGeometry borderRadiusGeometry;
+  final BorderRadiusGeometry attachmentBorderRadiusGeometry;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry textPadding;
+  final EdgeInsetsGeometry attachmentPadding;
+  final DisplayWidget showUserAvatar;
+  final DisplayWidget showSendingIndicator;
+  final bool showReactions;
+  final bool showReplyIndicator;
+  final bool isParent;
+  final bool showUsername;
+  final bool showVideoFullScreen;
+  final bool showTimestamp;
+  final bool showDeleteMessage;
+  final bool showEditMessage;
+  final Map<String, AttachmentBuilder> attachmentBuilders;
   final Map<String, String> reactionToEmoji = {
     'love': '❤️️',
     'haha': '😂',
@@ -826,67 +57,566 @@ class _MessageWidgetState extends State<MessageWidget>
     'wow': '😲',
   };
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  MessageWidget({
+    Key key,
+    @required this.message,
+    @required this.messageTheme,
+    this.reverse = false,
+    this.shape,
+    this.attachmentShape,
+    this.borderSide,
+    this.attachmentBorderSide,
+    this.borderRadiusGeometry,
+    this.attachmentBorderRadiusGeometry,
+    this.onMentionTap,
+    this.showUserAvatar = DisplayWidget.show,
+    this.showSendingIndicator = DisplayWidget.show,
+    this.showReplyIndicator = true,
+    this.isParent = false,
+    this.onThreadTap,
+    this.showUsername = true,
+    this.showTimestamp = true,
+    this.showReactions = true,
+    this.showDeleteMessage = true,
+    this.showEditMessage = true,
+    this.onMessageActions,
+    this.editMessageInputBuilder,
+    this.textBuilder,
+    Map<String, AttachmentBuilder> customAttachmentBuilders,
+    this.showVideoFullScreen = true,
+    this.padding,
+    this.textPadding = const EdgeInsets.all(8.0),
+    this.attachmentPadding = EdgeInsets.zero,
+  })  : attachmentBuilders = {
+          'image': (context, message, attachment) {
+            return ImageAttachment(
+              attachment: attachment,
+              messageTheme: messageTheme,
+            );
+          },
+          'video': (context, message, attachment) {
+            return VideoAttachment(
+              enableFullScreen: showVideoFullScreen,
+              attachment: attachment,
+              messageTheme: messageTheme,
+            );
+          },
+          'giphy': (context, message, attachment) {
+            return GiphyAttachment(
+              attachment: attachment,
+              messageTheme: messageTheme,
+              message: message,
+            );
+          },
+          'file': (context, message, attachment) {
+            return FileAttachment(
+              attachment: attachment,
+            );
+          },
+        }..addAll(customAttachmentBuilders ?? {}),
+        super(key: key);
 
-  Widget _buildTimestamp(Alignment alignment) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5.0),
-      child: RichText(
-        text: TextSpan(
-          style: _messageTheme.createdAt,
-          children: <TextSpan>[
-            if (!_isMyMessage && widget.showOtherMessageUsername)
-              TextSpan(
-                text: widget.message.user.name,
-                style: TextStyle(fontWeight: FontWeight.bold),
+  @override
+  Widget build(BuildContext context) {
+    final leftPadding = showUserAvatar != DisplayWidget.gone
+        ? messageTheme.avatarTheme.constraints.maxWidth + 22.0
+        : 12.0;
+    return Portal(
+      child: Padding(
+        padding: padding ?? EdgeInsets.all(8),
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.rotationY(reverse ? pi : 0),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              constraints: BoxConstraints.loose(
+                Size.fromWidth(MediaQuery.of(context).size.width * 0.8),
               ),
-            if (widget.message.createdAt != null)
-              TextSpan(
-                text:
-                    Jiffy(widget.message.createdAt.toLocal()).format(' HH:mm'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  IntrinsicWidth(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            if (showSendingIndicator == DisplayWidget.show)
+                              _buildSendingIndicator(),
+                            SizedBox(
+                              width: 2,
+                            ),
+                            if (showSendingIndicator == DisplayWidget.hide)
+                              SizedBox(
+                                width: 6,
+                              ),
+                            if (showUserAvatar == DisplayWidget.show)
+                              _buildUserAvatar(),
+                            SizedBox(
+                              width: 6,
+                            ),
+                            if (showUserAvatar == DisplayWidget.hide)
+                              SizedBox(
+                                width: messageTheme
+                                        .avatarTheme.constraints.maxWidth +
+                                    10,
+                              ),
+                            Flexible(
+                              child: Padding(
+                                padding: (message.reactionCounts?.isNotEmpty ==
+                                            true &&
+                                        showReactions)
+                                    ? EdgeInsets.only(
+                                        top: _getReactionsTopPadding())
+                                    : EdgeInsets.zero,
+                                child: PortalEntry(
+                                  portalAnchor: Alignment(0, 1),
+                                  childAnchor: Alignment.topRight,
+                                  portal: _buildReactionIndicator(context),
+                                  child: (message.isDeleted &&
+                                          message.status !=
+                                              MessageSendingStatus
+                                                  .FAILED_DELETE)
+                                      ? Transform(
+                                          alignment: Alignment.center,
+                                          transform: Matrix4.rotationY(
+                                              reverse ? pi : 0),
+                                          child: DeletedMessage(
+                                            messageTheme: messageTheme,
+                                          ),
+                                        )
+                                      : Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            ..._parseAttachments(context),
+                                            if (message.text.trim().isNotEmpty)
+                                              _buildTextBubble(context),
+                                          ],
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (showReplyIndicator && message.replyCount > 0)
+                          _buildReplyIndicator(leftPadding),
+                      ],
+                    ),
+                  ),
+                  if ((message.createdAt != null && showTimestamp) ||
+                      showUsername)
+                    _buildUsernameAndTimestamp(leftPadding),
+                ],
               ),
-          ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  BoxDecoration _buildBoxDecoration(bool rectBorders) {
-    return BoxDecoration(
-      border: _isMyMessage
-          ? null
-          : Border.all(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withAlpha(24)
-                  : Colors.black.withAlpha(24),
-            ),
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular((_isMyMessage || !rectBorders) ? 16 : 2),
-        bottomLeft: Radius.circular(_isMyMessage ? 16 : 2),
-        topRight: Radius.circular((_isMyMessage && rectBorders) ? 2 : 16),
-        bottomRight: Radius.circular(_isMyMessage ? 2 : 16),
-      ),
-      color: (widget.message.status == MessageSendingStatus.FAILED ||
-              widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
-              widget.message.status == MessageSendingStatus.FAILED_DELETE)
-          ? Color(0xffd0021B).withOpacity(.1)
-          : _messageTheme.messageBackgroundColor,
+  double _getReactionsTopPadding() {
+    return 36.0 *
+        ((message.reactionCounts.values
+                    .where((element) => element > 0)
+                    .length ~/
+                4) +
+            1);
+  }
+
+  Widget _buildReactionsTail(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: message.reactionCounts?.isNotEmpty == true
+          ? Transform.translate(
+              offset: Offset(4, 0),
+              child: CustomPaint(
+                painter: ReactionBubblePainter(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+              ),
+            )
+          : SizedBox(),
     );
   }
 
-  @override
-  bool get wantKeepAlive {
-    return widget.message.attachments?.isNotEmpty == true;
+  Padding _buildUsernameAndTimestamp(double leftPadding) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: leftPadding,
+        top: 2,
+      ),
+      child: Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.rotationY(reverse ? pi : 0),
+        child: RichText(
+          text: TextSpan(
+            style: messageTheme.createdAt,
+            children: <TextSpan>[
+              if (showUsername)
+                TextSpan(
+                  text: message.user.name,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              if (message.createdAt != null && showTimestamp)
+                TextSpan(
+                  text: Jiffy(message.createdAt.toLocal()).format(' HH:mm'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReactionIndicator(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: (showReactions &&
+              message.reactionCounts?.isNotEmpty == true &&
+              !message.isDeleted)
+          ? Container(
+              child: GestureDetector(
+                onTap: () => onLongPress(context),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  padding: const EdgeInsets.only(
+                    bottom: 4.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Transform(
+                        transform: Matrix4.rotationY(reverse ? pi : 0),
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                          ),
+                          child: _buildReactionsText(context),
+                        ),
+                      ),
+                      _buildReactionsTail(context),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : SizedBox(),
+    );
+  }
+
+  Text _buildReactionsText(BuildContext context) {
+    return Text(
+      message.reactionCounts.keys.map((reactionType) {
+            return reactionToEmoji[reactionType] ?? '?';
+          }).join(' ') +
+          ' ${message.reactionCounts.values.fold(0, (t, v) => v + t).toString()}',
+      style: TextStyle(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black
+            : Colors.white,
+      ),
+      textAlign: TextAlign.justify,
+    );
+  }
+
+  void _showMessageBottomSheet(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    showModalBottomSheet(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        context: context,
+        builder: (context) {
+          return StreamChannel(
+            channel: channel,
+            child: MessageActionsBottomSheet(
+              showDeleteMessage: showDeleteMessage,
+              message: message,
+              editMessageInputBuilder: editMessageInputBuilder,
+              onThreadTap: onThreadTap,
+              showEditMessage: showEditMessage,
+              showReactions: showReactions,
+              showReply: showReplyIndicator,
+            ),
+          );
+        });
+  }
+
+  List<Widget> _parseAttachments(BuildContext context) {
+    return message.attachments?.map((attachment) {
+          final attachmentBuilder = attachmentBuilders[attachment.type];
+
+          if (attachmentBuilder == null) {
+            return SizedBox();
+          }
+
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: 4,
+            ),
+            child: GestureDetector(
+              onTap: () => retryMessage(context),
+              onLongPress: () => onLongPress(context),
+              child: Material(
+                color: _getBackgroundColor(),
+                clipBehavior: Clip.hardEdge,
+                shape: attachmentShape ??
+                    shape ??
+                    ContinuousRectangleBorder(
+                      side: attachmentBorderSide ??
+                          borderSide ??
+                          BorderSide(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white.withAlpha(24)
+                                    : Colors.black.withAlpha(24),
+                          ),
+                      borderRadius: attachmentBorderRadiusGeometry ??
+                          borderRadiusGeometry ??
+                          BorderRadius.zero,
+                    ),
+                child: Padding(
+                  padding: attachmentPadding,
+                  child: Transform(
+                    transform: Matrix4.rotationY(reverse ? pi : 0),
+                    alignment: Alignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        getFailedMessageWidget(
+                          context,
+                          padding: const EdgeInsets.all(8.0),
+                        ),
+                        attachmentBuilder(
+                          context,
+                          message,
+                          attachment,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        })?.toList() ??
+        [];
+  }
+
+  void onLongPress(BuildContext context) {
+    if (message.isEphemeral || message.status == MessageSendingStatus.SENDING) {
+      return;
+    }
+
+    if (onMessageActions != null) {
+      onMessageActions(context, message);
+    } else {
+      _showMessageBottomSheet(context);
+    }
+    return;
+  }
+
+  Widget _buildReplyIndicator(double leftPadding) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: leftPadding,
+      ),
+      child: Transform(
+        transform: Matrix4.rotationY(reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: ReplyIndicator(
+          message: message,
+          reversed: reverse,
+          messageTheme: messageTheme,
+          onTap: onThreadTap != null
+              ? () {
+                  onThreadTap(message);
+                }
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSendingIndicator() {
+    return Transform.translate(
+      offset: Offset(
+        0,
+        4,
+      ),
+      child: Transform(
+        transform: Matrix4.rotationY(reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: SendingIndicator(
+          message: message,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserAvatar() => Transform(
+        transform: Matrix4.rotationY(reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: Transform.translate(
+            offset:
+                Offset(0, messageTheme.avatarTheme.constraints.maxHeight / 2),
+            child: UserAvatar(
+              user: message.user,
+              constraints: messageTheme.avatarTheme.constraints,
+            ),
+          ),
+        ),
+      );
+
+  Widget getFailedMessageWidget(
+    BuildContext context, {
+    EdgeInsetsGeometry padding,
+  }) {
+    Widget widget;
+    if (message.status == MessageSendingStatus.FAILED)
+      widget = Text(
+        'MESSAGE FAILED · CLICK TO TRY AGAIN',
+        style: messageTheme.messageText.copyWith(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(.5)
+              : Colors.black.withOpacity(.5),
+          fontSize: 11,
+        ),
+      );
+    if (message.status == MessageSendingStatus.FAILED_UPDATE)
+      widget = Text(
+        'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
+        style: messageTheme.messageText.copyWith(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(.5)
+              : Colors.black.withOpacity(.5),
+          fontSize: 11,
+        ),
+      );
+    if (message.status == MessageSendingStatus.FAILED_DELETE)
+      widget = Text(
+        'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
+        style: messageTheme.messageText.copyWith(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(.5)
+              : Colors.black.withOpacity(.5),
+          fontSize: 11,
+        ),
+      );
+
+    if (widget != null) {
+      return Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: widget,
+      );
+    }
+
+    return SizedBox();
+  }
+
+  Widget _buildTextBubble(BuildContext context) {
+    return GestureDetector(
+      onTap: () => retryMessage(context),
+      onLongPress: () => onLongPress(context),
+      child: Material(
+        shape: shape ??
+            ContinuousRectangleBorder(
+              side: borderSide ??
+                  BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withAlpha(24)
+                        : Colors.black.withAlpha(24),
+                  ),
+              borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
+            ),
+        color: _getBackgroundColor(),
+        child: Transform(
+          transform: Matrix4.rotationY(reverse ? pi : 0),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: textPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                getFailedMessageWidget(context),
+                _buildText(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getBackgroundColor() {
+    return (message.status == MessageSendingStatus.FAILED ||
+            message.status == MessageSendingStatus.FAILED_UPDATE ||
+            message.status == MessageSendingStatus.FAILED_DELETE)
+        ? Color(0xffd0021B).withOpacity(.1)
+        : messageTheme.messageBackgroundColor;
+  }
+
+  void retryMessage(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    if (message.status == MessageSendingStatus.FAILED) {
+      channel.sendMessage(message);
+      return;
+    }
+    if (message.status == MessageSendingStatus.FAILED_UPDATE) {
+      StreamChat.of(context).client.updateMessage(
+            message,
+            channel.cid,
+          );
+      return;
+    }
+
+    if (message.status == MessageSendingStatus.FAILED_DELETE) {
+      StreamChat.of(context).client.deleteMessage(
+            message,
+            channel.cid,
+          );
+      return;
+    }
+  }
+
+  Widget _buildText(BuildContext context) {
+    return textBuilder != null
+        ? textBuilder(context, message)
+        : MessageText(
+            message: message,
+            onMentionTap: onMentionTap,
+            messageTheme: messageTheme,
+          );
   }
 }
 
-class _ReactionBubblePainter extends CustomPainter {
+class ReactionBubblePainter extends CustomPainter {
   final Color color;
 
-  _ReactionBubblePainter(this.color);
+  ReactionBubblePainter(this.color);
 
   @override
   void paint(Canvas canvas, Size size) {

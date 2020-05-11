@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/apns.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
@@ -66,9 +67,11 @@ void _initNotifications(Client client) {
 void main() async {
   final client = Client(
     's2dxdhpxd94g',
-    logLevel: Level.INFO,
+    logLevel: Level.SEVERE,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
     backgroundKeepAlive: Duration.zero,
+    persistenceEnabled: true,
+//    baseURL: 'chat-us-east-staging.stream-io-api.com',
   );
 
   await client.setUser(
@@ -108,11 +111,11 @@ class ChannelListPage extends StatelessWidget {
     return Scaffold(
       body: ChannelsBloc(
         child: ChannelListView(
-          filter: {
-            'members': {
-              '\$in': [StreamChat.of(context).user.id],
-            }
-          },
+//          filter: {
+//            'members': {
+//              '\$in': [StreamChat.of(context).user.id],
+//            }
+//          },
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
             limit: 20,
@@ -139,8 +142,6 @@ class ChannelPage extends StatelessWidget {
             child: Stack(
               children: <Widget>[
                 MessageListView(
-                  showOtherMessageUsername: true,
-                  showVideoFullScreen: false,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,

@@ -13,6 +13,7 @@ export 'src/giphy_attachment.dart';
 export 'src/image_attachment.dart';
 export 'src/message_input.dart';
 export 'src/message_list_view.dart';
+export 'src/message_text.dart';
 export 'src/message_widget.dart';
 export 'src/reaction_picker.dart';
 export 'src/reply_indicator.dart';

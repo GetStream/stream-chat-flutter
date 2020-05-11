@@ -24,47 +24,50 @@ class ReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: reactionToEmoji.keys.map((reactionType) {
-        final ownReactionIndex = message.ownReactions
-                ?.indexWhere((reaction) => reaction.type == reactionType) ??
-            -1;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            IconButton(
-              iconSize: size,
-              icon: Text(
-                reactionToEmoji[reactionType],
-                style: TextStyle(
-                  fontSize: size - 10,
+    return Container(
+      color: Colors.black87,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: reactionToEmoji.keys.map((reactionType) {
+          final ownReactionIndex = message.ownReactions
+                  ?.indexWhere((reaction) => reaction.type == reactionType) ??
+              -1;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              IconButton(
+                iconSize: size,
+                icon: Text(
+                  reactionToEmoji[reactionType],
+                  style: TextStyle(
+                    fontSize: size - 10,
+                  ),
                 ),
+                onPressed: () {
+                  if (ownReactionIndex != -1) {
+                    removeReaction(
+                        context, message.ownReactions[ownReactionIndex]);
+                  } else {
+                    sendReaction(context, reactionType);
+                  }
+                },
               ),
-              onPressed: () {
-                if (ownReactionIndex != -1) {
-                  removeReaction(
-                      context, message.ownReactions[ownReactionIndex]);
-                } else {
-                  sendReaction(context, reactionType);
-                }
-              },
-            ),
-            ownReactionIndex != -1
-                ? Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: Text(
-                      message.ownReactions[ownReactionIndex].score.toString(),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  )
-                : SizedBox(),
-          ],
-        );
-      }).toList(),
+              ownReactionIndex != -1
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text(
+                        message.ownReactions[ownReactionIndex].score.toString(),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  : SizedBox(),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 
