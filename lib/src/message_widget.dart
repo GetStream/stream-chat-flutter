@@ -173,7 +173,8 @@ class MessageWidget extends StatelessWidget {
                                             true &&
                                         showReactions)
                                     ? EdgeInsets.only(
-                                        top: _getReactionsTopPadding())
+                                        top: _getReactionsTopPadding(),
+                                      )
                                     : EdgeInsets.zero,
                                 child: PortalEntry(
                                   portalAnchor: Alignment(0, 1),

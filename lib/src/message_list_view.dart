@@ -232,12 +232,15 @@ class _MessageListViewState extends State<MessageListView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   messageWidget,
-                  widget.dateDividerBuilder != null
-                      ? widget
-                          .dateDividerBuilder(nextMessage.createdAt.toLocal())
-                      : DateDivider(
-                          dateTime: nextMessage.createdAt.toLocal(),
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    child: widget.dateDividerBuilder != null
+                        ? widget
+                            .dateDividerBuilder(nextMessage.createdAt.toLocal())
+                        : DateDivider(
+                            dateTime: nextMessage.createdAt.toLocal(),
+                          ),
+                  ),
                 ],
               );
             }
@@ -413,7 +416,7 @@ class _MessageListViewState extends State<MessageListView> {
       padding: EdgeInsets.only(
         left: 8.0,
         right: 8.0,
-        bottom: index == 0 ? 30 : (isLastUser ? 5 : 10),
+        bottom: index == 0 ? 30 : (isNextUser ? 5 : 10),
       ),
       showUsername: !isMyMessage && !isNextUser,
       showSendingIndicator: isMyMessage &&

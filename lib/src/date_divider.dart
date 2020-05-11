@@ -43,39 +43,36 @@ class DateDivider extends StatelessWidget {
       dayInfo = createdAt.format('dd/MM/yyyy').toUpperCase();
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          divider,
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: dayInfo,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        divider,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: dayInfo,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
-                  TextSpan(text: ' AT'),
-                  TextSpan(text: ' $hourInfo'),
-                ],
-                style: TextStyle(
-                  fontWeight: FontWeight.normal,
                 ),
-              ),
+                TextSpan(text: ' AT'),
+                TextSpan(text: ' $hourInfo'),
+              ],
               style: TextStyle(
-                fontSize: 10,
-                color: Theme.of(context).textTheme.title.color.withOpacity(.5),
+                fontWeight: FontWeight.normal,
               ),
             ),
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(context).textTheme.title.color.withOpacity(.5),
+            ),
           ),
-          divider,
-        ],
-      ),
+        ),
+        divider,
+      ],
     );
   }
 }

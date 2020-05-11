@@ -11,13 +11,16 @@ class DeletedMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'This message was deleted...',
-      style: messageTheme.messageText.copyWith(
-        fontStyle: FontStyle.italic,
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white
-            : Colors.black,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        'This message was deleted...',
+        style: messageTheme.messageText.copyWith(
+          fontStyle: FontStyle.italic,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
+        ),
       ),
     );
   }
