@@ -201,6 +201,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         _newMessageSubscription = client
             .on(EventType.messageNew)
             .where((e) => e.user?.id != user.id)
+            .where((e) => e.message.silent != true)
             .listen((event) async {
           var channel = client.state.channels[event.cid];
 
