@@ -10,11 +10,13 @@ import 'utils.dart';
 class ImageAttachment extends StatelessWidget {
   final Attachment attachment;
   final MessageTheme messageTheme;
+  final Size size;
 
   const ImageAttachment({
     Key key,
     this.attachment,
     this.messageTheme,
+    this.size,
   }) : super(key: key);
 
   @override
@@ -26,38 +28,34 @@ class ImageAttachment extends StatelessWidget {
         attachment: attachment,
       );
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Stack(
-          children: <Widget>[
-            Hero(
-              tag: attachment.imageUrl ??
-                  attachment.assetUrl ??
-                  attachment.thumbUrl,
-              child: CachedNetworkImage(
-                imageBuilder: (context, provider) {
-                  return GestureDetector(
-                    child: Image(
-                      image: provider,
-                      fit: BoxFit.cover,
-                    ),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return FullScreenImage(
-                          url: attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl,
-                        );
-                      }));
-                    },
+    return SizedBox.fromSize(
+      size: size,
+      child: Stack(
+        children: <Widget>[
+          Hero(
+            tag: attachment.imageUrl ??
+                attachment.assetUrl ??
+                attachment.thumbUrl,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) {
+                  return FullScreenImage(
+                    url: attachment.imageUrl ??
+                        attachment.assetUrl ??
+                        attachment.thumbUrl,
                   );
-                },
+                }));
+              },
+              child: CachedNetworkImage(
+                height: size?.height,
+                width: size?.width,
                 placeholder: (_, __) {
                   return Container(
-                    width: 200,
-                    height: 140,
+                    width: size?.width,
+                    height: size?.height,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   );
                 },
                 imageUrl: attachment.thumbUrl ??
@@ -65,30 +63,38 @@ class ImageAttachment extends StatelessWidget {
                     attachment.assetUrl,
                 errorWidget: (context, url, error) => AttachmentError(
                   attachment: attachment,
+                  size: size,
                 ),
                 fit: BoxFit.cover,
               ),
             ),
-            if (attachment.titleLink != null || attachment.ogScrapeUrl != null)
-              Positioned.fill(
+          ),
+          if (attachment.title != null)
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.bottomCenter,
                 child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => launchURL(
-                      context,
-                      attachment.titleLink ?? attachment.ogScrapeUrl,
-                    ),
+                  child: AttachmentTitle(
+                    messageTheme: messageTheme,
+                    attachment: attachment,
                   ),
                 ),
               ),
-          ],
-        ),
-        if (attachment.title != null)
-          AttachmentTitle(
-            messageTheme: messageTheme,
-            attachment: attachment,
-          ),
-      ],
+            ),
+          if (attachment.titleLink != null || attachment.ogScrapeUrl != null)
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => launchURL(
+                    context,
+                    attachment.titleLink ?? attachment.ogScrapeUrl,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

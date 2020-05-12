@@ -5,19 +5,20 @@ import 'package:stream_chat_flutter/src/attachment_actions.dart';
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
 import 'attachment_title.dart';
-import 'full_screen_image.dart';
 import 'utils.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;
   final MessageTheme messageTheme;
   final Message message;
+  final Size size;
 
   const GiphyAttachment({
     Key key,
     this.attachment,
     this.messageTheme,
     this.message,
+    this.size,
   }) : super(key: key);
 
   @override
@@ -36,39 +37,26 @@ class GiphyAttachment extends StatelessWidget {
       children: <Widget>[
         Stack(
           children: <Widget>[
-            Hero(
-              tag: attachment.imageUrl ??
-                  attachment.assetUrl ??
-                  attachment.thumbUrl,
-              child: CachedNetworkImage(
-                imageBuilder: (context, provider) {
-                  return GestureDetector(
-                    child: Image(image: provider),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return FullScreenImage(
-                          url: attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl,
-                        );
-                      }));
-                    },
-                  );
-                },
-                placeholder: (_, __) {
-                  return Container(
-                    width: 200,
-                    height: 140,
-                  );
-                },
-                imageUrl: attachment.thumbUrl ??
-                    attachment.imageUrl ??
-                    attachment.assetUrl,
-                errorWidget: (context, url, error) => AttachmentError(
-                  attachment: attachment,
-                ),
-                fit: BoxFit.cover,
+            CachedNetworkImage(
+              height: size?.height,
+              width: size?.width,
+              placeholder: (_, __) {
+                return Container(
+                  width: size?.width,
+                  height: size?.height,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              imageUrl: attachment.thumbUrl ??
+                  attachment.imageUrl ??
+                  attachment.assetUrl,
+              errorWidget: (context, url, error) => AttachmentError(
+                attachment: attachment,
+                size: size,
               ),
+              fit: BoxFit.cover,
             ),
             if (attachment.titleLink != null || attachment.ogScrapeUrl != null)
               Positioned.fill(
@@ -85,9 +73,14 @@ class GiphyAttachment extends StatelessWidget {
           ],
         ),
         if (attachment.title != null)
-          AttachmentTitle(
-            messageTheme: messageTheme,
-            attachment: attachment,
+          Container(
+            alignment: Alignment.bottomCenter,
+            child: Material(
+              child: AttachmentTitle(
+                messageTheme: messageTheme,
+                attachment: attachment,
+              ),
+            ),
           ),
         if (attachment.actions != null)
           AttachmentActions(

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/full_screen_video.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -10,14 +11,14 @@ import 'attachment_title.dart';
 
 class VideoAttachment extends StatefulWidget {
   final Attachment attachment;
-  final bool enableFullScreen;
   final MessageTheme messageTheme;
+  final Size size;
 
   VideoAttachment({
     Key key,
     @required this.attachment,
     @required this.messageTheme,
-    this.enableFullScreen = true,
+    this.size,
   }) : super(key: key);
 
   @override
@@ -33,23 +34,25 @@ class _VideoAttachmentState extends State<VideoAttachment> {
   Widget build(BuildContext context) {
     if (!initialized) {
       return Container(
-        height: 100,
-        width: 100,
+        height: widget.size?.height ?? 100,
+        width: widget.size?.width ?? 100,
         child: Center(
           child: CircularProgressIndicator(),
         ),
       );
     }
     _chewieController = ChewieController(
-        allowFullScreen: widget.enableFullScreen,
         videoPlayerController: _videoPlayerController,
         autoInitialize: false,
+        showControls: false,
         aspectRatio: _videoPlayerController.value.aspectRatio,
         errorBuilder: (_, e) {
           if (widget.attachment.thumbUrl != null) {
             return Stack(
               children: <Widget>[
                 Container(
+                  height: widget.size?.height,
+                  width: widget.size?.width,
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       fit: BoxFit.cover,
@@ -72,22 +75,62 @@ class _VideoAttachmentState extends State<VideoAttachment> {
           }
           return AttachmentError(
             attachment: widget.attachment,
+            size: widget.size,
           );
         });
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Chewie(
-          controller: _chewieController,
-        ),
-        if (widget.attachment.title != null)
-          AttachmentTitle(
-            messageTheme: widget.messageTheme,
-            attachment: widget.attachment,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FullScreenVideo(
+              attachment: widget.attachment,
+            ),
           ),
-      ],
+        );
+      },
+      child: Container(
+        height: widget.size?.height,
+        width: widget.size?.width,
+        child: Flex(
+          direction: Axis.vertical,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: Stack(
+                  children: <Widget>[
+                    Chewie(
+                      controller: _chewieController,
+                    ),
+                    Positioned.fill(
+                      child: Center(
+                        child: Material(
+                          shape: CircleBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Icon(Icons.play_arrow),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (widget.attachment.title != null)
+              Material(
+                child: AttachmentTitle(
+                  messageTheme: widget.messageTheme,
+                  attachment: widget.attachment,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

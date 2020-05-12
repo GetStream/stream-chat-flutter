@@ -43,7 +43,6 @@ class MessageWidget extends StatelessWidget {
   final bool showReplyIndicator;
   final bool isParent;
   final bool showUsername;
-  final bool showVideoFullScreen;
   final bool showTimestamp;
   final bool showDeleteMessage;
   final bool showEditMessage;
@@ -83,7 +82,6 @@ class MessageWidget extends StatelessWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
-    this.showVideoFullScreen = true,
     this.padding,
     this.textPadding = const EdgeInsets.all(8.0),
     this.attachmentPadding = EdgeInsets.zero,
@@ -92,13 +90,20 @@ class MessageWidget extends StatelessWidget {
             return ImageAttachment(
               attachment: attachment,
               messageTheme: messageTheme,
+              size: Size(
+                MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
+              ),
             );
           },
           'video': (context, message, attachment) {
             return VideoAttachment(
-              enableFullScreen: showVideoFullScreen,
               attachment: attachment,
               messageTheme: messageTheme,
+              size: Size(
+                MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
+              ),
             );
           },
           'giphy': (context, message, attachment) {
@@ -106,11 +111,19 @@ class MessageWidget extends StatelessWidget {
               attachment: attachment,
               messageTheme: messageTheme,
               message: message,
+              size: Size(
+                MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
+              ),
             );
           },
           'file': (context, message, attachment) {
             return FileAttachment(
               attachment: attachment,
+              size: Size(
+                MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
+              ),
             );
           },
         }..addAll(customAttachmentBuilders ?? {}),
@@ -165,7 +178,7 @@ class MessageWidget extends StatelessWidget {
                               SizedBox(
                                 width: messageTheme
                                         .avatarTheme.constraints.maxWidth +
-                                    10,
+                                    8,
                               ),
                             Flexible(
                               child: Padding(
@@ -228,7 +241,7 @@ class MessageWidget extends StatelessWidget {
         ((message.reactionCounts.values
                     .where((element) => element > 0)
                     .length ~/
-                4) +
+                5) +
             1);
   }
 

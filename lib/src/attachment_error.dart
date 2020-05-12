@@ -5,10 +5,12 @@ import 'package:stream_chat/stream_chat.dart';
 
 class AttachmentError extends StatelessWidget {
   final Attachment attachment;
+  final Size size;
 
   const AttachmentError({
     Key key,
     @required this.attachment,
+    this.size,
   }) : super(key: key);
 
   @override
@@ -20,8 +22,8 @@ class AttachmentError extends StatelessWidget {
     }
     return Center(
       child: Container(
-        width: 200,
-        height: 140,
+        width: size?.width,
+        height: size?.height,
         color: Color(0xffd0021B).withOpacity(.1),
         child: Center(
           child: Icon(
