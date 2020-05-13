@@ -32,7 +32,6 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
               child: CircularProgressIndicator(),
             );
           }
-
           return Chewie(
             controller: _chewieController,
           );
@@ -49,28 +48,28 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
     _videoPlayerController.initialize().whenComplete(() {
       setState(() {
         initialized = true;
+        _chewieController = ChewieController(
+          videoPlayerController: _videoPlayerController,
+          autoInitialize: false,
+          aspectRatio: _videoPlayerController.value.aspectRatio,
+        );
       });
     });
 
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoInitialize: false,
-      aspectRatio: _videoPlayerController.value.aspectRatio,
-    );
-    _videoPlayerController.addListener(() {
+    VoidCallback errorListener;
+    errorListener = () {
       if (_videoPlayerController.value.hasError) {
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          Navigator.pop(context);
-          launchURL(context, widget.attachment.titleLink);
-        });
+        Navigator.pop(context);
+        launchURL(context, widget.attachment.titleLink);
       }
-    });
+      _videoPlayerController.removeListener(errorListener);
+    };
+    _videoPlayerController.addListener(errorListener);
   }
 
   @override
   void dispose() {
     _videoPlayerController.dispose();
-    _chewieController.dispose();
     super.dispose();
   }
 }

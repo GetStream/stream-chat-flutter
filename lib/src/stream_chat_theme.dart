@@ -24,7 +24,16 @@ class StreamChatTheme extends InheritedWidget {
 
   /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<StreamChatTheme>().data;
+    final streamChatTheme =
+        context.dependOnInheritedWidgetOfExactType<StreamChatTheme>();
+
+    if (streamChatTheme == null) {
+      throw Exception(
+        'You must have a StreamChatTheme widget at the top of your widget tree',
+      );
+    }
+
+    return streamChatTheme.data;
   }
 }
 

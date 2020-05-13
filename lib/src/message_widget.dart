@@ -13,41 +13,98 @@ import 'message_text.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
+/// The display behaviour of a widget
 enum DisplayWidget {
+  /// Hides the widget replacing its space with a spacer
   hide,
+
+  /// Hides the widget not replacing its space
   gone,
+
+  /// Shows the widget normally
   show,
 }
 
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget.png)
+/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_widget_paint.png)
+///
+/// It shows a message with reactions, replies and user avatar.
+///
+/// Usually you don't use this widget as it's the default message widget used by [MessageListView].
+///
+/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class MessageWidget extends StatelessWidget {
+  /// Function called on mention tap
   final void Function(User) onMentionTap;
+
+  /// The function called when tapping on replies
   final void Function(Message) onThreadTap;
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
   final Widget Function(BuildContext, Message) textBuilder;
+
+  /// Function called on long press
   final void Function(BuildContext, Message) onMessageActions;
+
+  /// The message
   final Message message;
+
+  /// The message theme
   final MessageTheme messageTheme;
+
+  /// If true the widget will be mirrored
   final bool reverse;
+
+  /// The shape of the message text
   final ShapeBorder shape;
+
+  /// The shape of an attachment
   final ShapeBorder attachmentShape;
+
+  /// The borderside of the message text
   final BorderSide borderSide;
+
+  /// The borderside of an attachment
   final BorderSide attachmentBorderSide;
+
+  /// The border radius of the message text
   final BorderRadiusGeometry borderRadiusGeometry;
+
+  /// The border radius of an attachment
   final BorderRadiusGeometry attachmentBorderRadiusGeometry;
+
+  /// The padding of the widget
   final EdgeInsetsGeometry padding;
+
+  /// The internal padding of the message text
   final EdgeInsetsGeometry textPadding;
+
+  /// The internal padding of an attachment
   final EdgeInsetsGeometry attachmentPadding;
+
+  /// It controls the display behaviour of the user avatar
   final DisplayWidget showUserAvatar;
+
+  /// It controls the display behaviour of the sending indicator
   final DisplayWidget showSendingIndicator;
+
+  /// If true the widget will show the reactions
   final bool showReactions;
+
+  /// If true the widget will show the reply indicator
   final bool showReplyIndicator;
-  final bool isParent;
+
+  /// The function called when tapping on UserAvatar
+  final void Function(User) onUserAvatarTap;
+
+  /// If true show the users username next to the timestamp of the message
   final bool showUsername;
   final bool showTimestamp;
   final bool showDeleteMessage;
   final bool showEditMessage;
   final Map<String, AttachmentBuilder> attachmentBuilders;
-  final Map<String, String> reactionToEmoji = {
+
+  final Map<String, String> _reactionToEmoji = {
     'love': '❤️️',
     'haha': '😂',
     'like': '👍',
@@ -71,13 +128,13 @@ class MessageWidget extends StatelessWidget {
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = DisplayWidget.show,
     this.showReplyIndicator = true,
-    this.isParent = false,
     this.onThreadTap,
     this.showUsername = true,
     this.showTimestamp = true,
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
+    this.onUserAvatarTap,
     this.onMessageActions,
     this.editMessageInputBuilder,
     this.textBuilder,
@@ -338,7 +395,7 @@ class MessageWidget extends StatelessWidget {
   Text _buildReactionsText(BuildContext context) {
     return Text(
       message.reactionCounts.keys.map((reactionType) {
-            return reactionToEmoji[reactionType] ?? '?';
+            return _reactionToEmoji[reactionType] ?? '?';
           }).join(' ') +
           ' ${message.reactionCounts.values.fold(0, (t, v) => v + t).toString()}',
       style: TextStyle(
@@ -499,6 +556,7 @@ class MessageWidget extends StatelessWidget {
                 Offset(0, messageTheme.avatarTheme.constraints.maxHeight / 2),
             child: UserAvatar(
               user: message.user,
+              onTap: onUserAvatarTap,
               constraints: messageTheme.avatarTheme.constraints,
             ),
           ),

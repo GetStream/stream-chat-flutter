@@ -9,6 +9,7 @@ export 'src/channels_bloc.dart';
 export 'src/date_divider.dart';
 export 'src/deleted_message.dart';
 export 'src/file_attachment.dart';
+export 'src/full_screen_video.dart';
 export 'src/giphy_attachment.dart';
 export 'src/image_attachment.dart';
 export 'src/message_input.dart';

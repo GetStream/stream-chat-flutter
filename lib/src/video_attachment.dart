@@ -43,7 +43,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
     }
     _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
-        autoInitialize: false,
+        autoInitialize: true,
         showControls: false,
         aspectRatio: _videoPlayerController.value.aspectRatio,
         errorBuilder: (_, e) {
@@ -137,8 +137,8 @@ class _VideoAttachmentState extends State<VideoAttachment> {
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.network(
-        widget.attachment.localUri ?? widget.attachment.assetUrl);
+    _videoPlayerController =
+        VideoPlayerController.network(widget.attachment.assetUrl);
     _videoPlayerController.initialize().whenComplete(() {
       setState(() {
         initialized = true;
