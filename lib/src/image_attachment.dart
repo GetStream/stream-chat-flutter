@@ -74,15 +74,10 @@ class ImageAttachment extends StatelessWidget {
                 ),
               ),
               if (attachment.title != null)
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Material(
-                      child: AttachmentTitle(
-                        messageTheme: messageTheme,
-                        attachment: attachment,
-                      ),
-                    ),
+                Material(
+                  child: AttachmentTitle(
+                    messageTheme: messageTheme,
+                    attachment: attachment,
                   ),
                 ),
             ],

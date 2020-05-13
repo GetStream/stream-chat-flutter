@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/attachment_actions.dart';
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
 import 'attachment_title.dart';
-import 'utils.dart';
+import 'full_screen_image.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;
@@ -37,39 +37,38 @@ class GiphyAttachment extends StatelessWidget {
       children: <Widget>[
         Stack(
           children: <Widget>[
-            CachedNetworkImage(
-              height: size?.height,
-              width: size?.width,
-              placeholder: (_, __) {
-                return Container(
-                  width: size?.width,
-                  height: size?.height,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) {
+                  return FullScreenImage(
+                    url: attachment.imageUrl ??
+                        attachment.assetUrl ??
+                        attachment.thumbUrl,
+                  );
+                }));
               },
-              imageUrl: attachment.thumbUrl ??
-                  attachment.imageUrl ??
-                  attachment.assetUrl,
-              errorWidget: (context, url, error) => AttachmentError(
-                attachment: attachment,
-                size: size,
-              ),
-              fit: BoxFit.cover,
-            ),
-            if (attachment.titleLink != null || attachment.ogScrapeUrl != null)
-              Positioned.fill(
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => launchURL(
-                      context,
-                      attachment.titleLink ?? attachment.ogScrapeUrl,
+              child: CachedNetworkImage(
+                height: size?.height,
+                width: size?.width,
+                placeholder: (_, __) {
+                  return Container(
+                    width: size?.width,
+                    height: size?.height,
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
-                  ),
+                  );
+                },
+                imageUrl: attachment.thumbUrl ??
+                    attachment.imageUrl ??
+                    attachment.assetUrl,
+                errorWidget: (context, url, error) => AttachmentError(
+                  attachment: attachment,
+                  size: size,
                 ),
+                fit: BoxFit.cover,
               ),
+            ),
           ],
         ),
         if (attachment.title != null)

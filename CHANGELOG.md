@@ -1,3 +1,10 @@
+## 0.2.1-alpha
+
+- New message widget
+- Moved some properties from `MessageListView` to `MessageWidget`
+- Added `MessageDetails` property to `MessageBuilder`
+- Added example to customize the message using `MessageWidget` (`customize_message_widget.dart`)
+
 ## 0.2.0-alpha+15
 
 - Add background color in StreamChatTheme

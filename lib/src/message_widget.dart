@@ -188,9 +188,12 @@ class MessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final leftPadding = showUserAvatar != DisplayWidget.gone
-        ? messageTheme.avatarTheme.constraints.maxWidth + 22.0
+    var leftPadding = showUserAvatar != DisplayWidget.gone
+        ? messageTheme.avatarTheme.constraints.maxWidth + 23.0
         : 12.0;
+    if (showSendingIndicator == DisplayWidget.gone) {
+      leftPadding -= 7;
+    }
     return Portal(
       child: Padding(
         padding: padding ?? EdgeInsets.all(8),
@@ -428,7 +431,7 @@ class MessageWidget extends StatelessWidget {
               onThreadTap: onThreadTap,
               showEditMessage: showEditMessage,
               showReactions: showReactions,
-              showReply: showReplyIndicator,
+              showReply: showReplyIndicator && onThreadTap != null,
             ),
           );
         });

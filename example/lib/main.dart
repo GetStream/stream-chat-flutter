@@ -67,7 +67,7 @@ void _initNotifications(Client client) {
 void main() async {
   final client = Client(
     's2dxdhpxd94g',
-    logLevel: Level.SEVERE,
+    logLevel: Level.INFO,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
     backgroundKeepAlive: Duration.zero,
     persistenceEnabled: true,
@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       home: Container(
         child: StreamChat(
           client: client,

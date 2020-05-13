@@ -23,10 +23,19 @@ typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
 class MessageDetails {
+  /// True if the message belongs to the current user
   bool isMyMessage;
+
+  /// True if the user message is the same of the previous message
   bool isLastUser;
+
+  /// True if the user message is the same of the next message
   bool isNextUser;
+
+  /// The message
   Message message;
+
+  /// The index of the message
   int index;
 
   MessageDetails(
