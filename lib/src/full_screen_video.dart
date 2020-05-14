@@ -21,11 +21,13 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
   ChewieController _chewieController;
   VideoPlayerController _videoPlayerController;
   bool initialized = false;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Builder(
+        key: _scaffoldKey,
         builder: (context) {
           if (!initialized) {
             return Center(
@@ -60,7 +62,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
     errorListener = () {
       if (_videoPlayerController.value.hasError) {
         Navigator.pop(context);
-        launchURL(context, widget.attachment.titleLink);
+        launchURL(_scaffoldKey.currentContext, widget.attachment.titleLink);
       }
       _videoPlayerController.removeListener(errorListener);
     };
@@ -70,6 +72,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
   @override
   void dispose() {
     _videoPlayerController.dispose();
+    _chewieController.dispose();
     super.dispose();
   }
 }

@@ -45,23 +45,22 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       theme: theme,
-      home: Container(
-        child: StreamChat(
-          streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
-            ownMessageTheme: MessageTheme(
-              messageBackgroundColor: Colors.black,
-              messageText: TextStyle(
-                color: Colors.white,
-              ),
-              avatarTheme: AvatarTheme(
-                borderRadius: BorderRadius.circular(8),
-              ),
+      builder: (context, child) => StreamChat(
+        child: child,
+        client: client,
+        streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
+          ownMessageTheme: MessageTheme(
+            messageBackgroundColor: Colors.black,
+            messageText: TextStyle(
+              color: Colors.white,
+            ),
+            avatarTheme: AvatarTheme(
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
-          client: client,
-          child: ChannelListPage(),
         ),
       ),
+      home: ChannelListPage(),
     );
   }
 }

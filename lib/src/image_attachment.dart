@@ -75,6 +75,7 @@ class ImageAttachment extends StatelessWidget {
               ),
               if (attachment.title != null)
                 Material(
+                  color: messageTheme.messageBackgroundColor,
                   child: AttachmentTitle(
                     messageTheme: messageTheme,
                     attachment: attachment,

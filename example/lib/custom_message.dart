@@ -36,12 +36,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Container(
-        child: StreamChat(
-          client: client,
-          child: ChannelListPage(),
-        ),
+      builder: (context, child) => StreamChat(
+        child: child,
+        client: client,
       ),
+      home: ChannelListPage(),
     );
   }
 }

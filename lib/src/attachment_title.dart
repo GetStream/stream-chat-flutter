@@ -46,7 +46,7 @@ class AttachmentTitle extends StatelessWidget {
                     .toList()
                     .reversed
                     .join('.'),
-                style: messageTheme.createdAt,
+                style: messageTheme.messageText,
               ),
           ],
         ),

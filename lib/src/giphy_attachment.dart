@@ -47,26 +47,31 @@ class GiphyAttachment extends StatelessWidget {
                   );
                 }));
               },
-              child: CachedNetworkImage(
-                height: size?.height,
-                width: size?.width,
-                placeholder: (_, __) {
-                  return Container(
-                    width: size?.width,
-                    height: size?.height,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                },
-                imageUrl: attachment.thumbUrl ??
-                    attachment.imageUrl ??
-                    attachment.assetUrl,
-                errorWidget: (context, url, error) => AttachmentError(
-                  attachment: attachment,
-                  size: size,
+              child: Hero(
+                tag: attachment.imageUrl ??
+                    attachment.assetUrl ??
+                    attachment.thumbUrl,
+                child: CachedNetworkImage(
+                  height: size?.height,
+                  width: size?.width,
+                  placeholder: (_, __) {
+                    return Container(
+                      width: size?.width,
+                      height: size?.height,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  },
+                  imageUrl: attachment.thumbUrl ??
+                      attachment.imageUrl ??
+                      attachment.assetUrl,
+                  errorWidget: (context, url, error) => AttachmentError(
+                    attachment: attachment,
+                    size: size,
+                  ),
+                  fit: BoxFit.cover,
                 ),
-                fit: BoxFit.cover,
               ),
             ),
           ],
@@ -75,6 +80,7 @@ class GiphyAttachment extends StatelessWidget {
           Container(
             alignment: Alignment.bottomCenter,
             child: Material(
+              color: messageTheme.messageBackgroundColor,
               child: AttachmentTitle(
                 messageTheme: messageTheme,
                 attachment: attachment,

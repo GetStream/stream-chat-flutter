@@ -149,6 +149,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
   @override
   void dispose() {
     _videoPlayerController.dispose();
+    _chewieController.dispose();
     super.dispose();
   }
 }

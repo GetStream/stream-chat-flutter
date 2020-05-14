@@ -61,7 +61,6 @@ class StreamChat extends StatefulWidget {
 /// The current state of the StreamChat widget
 class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   Client get client => widget.client;
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   Timer _disconnectTimer;
 
   @override
@@ -79,26 +78,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
               accentColor: streamTheme.accentColor,
               scaffoldBackgroundColor: streamTheme.backgroundColor,
             ),
-            child: WillPopScope(
-              onWillPop: () async {
-                if (_navigatorKey.currentState.canPop()) {
-                  _navigatorKey.currentState.pop();
-                  return false;
-                } else {
-                  return true;
-                }
-              },
-              child: Navigator(
-                initialRoute: '/',
-                key: _navigatorKey,
-                onGenerateRoute: (settings) {
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) => widget.child,
-                  );
-                },
-              ),
-            ),
+            child: widget.child,
           );
         },
       ),

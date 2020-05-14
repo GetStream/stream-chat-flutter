@@ -50,8 +50,14 @@ class StreamChannelState extends State<StreamChannel> {
   /// The stream notifying the state of queryMessage call
   Stream<bool> get queryMessage => _queryMessageController.stream;
 
+  bool _paginationEnded = false;
+
   /// Calls [channel.query] updating [queryMessage] stream
   void queryMessages() {
+    if (_paginationEnded) {
+      return;
+    }
+
     _queryMessageController.add(true);
 
     String firstId;
@@ -67,6 +73,10 @@ class StreamChannelState extends State<StreamChannel> {
       ),
     )
         .then((res) {
+      print('res.messages.length: ${res.messages.length}');
+      if (res.messages.isEmpty) {
+        _paginationEnded = true;
+      }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
       _queryMessageController.addError(e, stack);
@@ -75,6 +85,10 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(String parentId) async {
+    if (_paginationEnded) {
+      return;
+    }
+
     _queryMessageController.add(true);
 
     String firstId;
@@ -95,6 +109,9 @@ class StreamChannelState extends State<StreamChannel> {
       ),
     )
         .then((res) {
+      if (res.messages.isEmpty) {
+        _paginationEnded = true;
+      }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
       _queryMessageController.addError(e, stack);

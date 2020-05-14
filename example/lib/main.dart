@@ -95,12 +95,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
-      home: Container(
-        child: StreamChat(
+      builder: (context, widget) {
+        return StreamChat(
+          child: widget,
           client: client,
-          child: ChannelListPage(),
-        ),
-      ),
+        );
+      },
+      home: ChannelListPage(),
     );
   }
 }

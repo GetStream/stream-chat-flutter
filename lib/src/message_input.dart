@@ -913,8 +913,6 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    StreamChannel.of(context).queryMembersAndWatchers();
-
     _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
       if (visible) {
         if (_commandsOverlay != null) {
