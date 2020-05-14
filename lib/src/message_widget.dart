@@ -34,7 +34,7 @@ enum DisplayWidget {
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends StatefulWidget {
   /// Function called on mention tap
   final void Function(User) onMentionTap;
 
@@ -103,15 +103,6 @@ class MessageWidget extends StatelessWidget {
   final bool showDeleteMessage;
   final bool showEditMessage;
   final Map<String, AttachmentBuilder> attachmentBuilders;
-
-  final Map<String, String> _reactionToEmoji = {
-    'love': '❤️️',
-    'haha': '😂',
-    'like': '👍',
-    'sad': '😕',
-    'angry': '😡',
-    'wow': '😲',
-  };
 
   MessageWidget({
     Key key,
@@ -187,19 +178,36 @@ class MessageWidget extends StatelessWidget {
         super(key: key);
 
   @override
+  _MessageWidgetState createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends State<MessageWidget> {
+  final Map<String, String> _reactionToEmoji = {
+    'love': '❤️️',
+    'haha': '😂',
+    'like': '👍',
+    'sad': '😕',
+    'angry': '😡',
+    'wow': '😲',
+  };
+
+  final GlobalKey _reactionPickerKey = GlobalKey();
+  double _reactionPadding = 0;
+
+  @override
   Widget build(BuildContext context) {
-    var leftPadding = showUserAvatar != DisplayWidget.gone
-        ? messageTheme.avatarTheme.constraints.maxWidth + 23.0
+    var leftPadding = widget.showUserAvatar != DisplayWidget.gone
+        ? widget.messageTheme.avatarTheme.constraints.maxWidth + 23.0
         : 12.0;
-    if (showSendingIndicator == DisplayWidget.gone) {
+    if (widget.showSendingIndicator == DisplayWidget.gone) {
       leftPadding -= 7;
     }
     return Portal(
       child: Padding(
-        padding: padding ?? EdgeInsets.all(8),
+        padding: widget.padding ?? EdgeInsets.all(8),
         child: Transform(
           alignment: Alignment.center,
-          transform: Matrix4.rotationY(reverse ? pi : 0),
+          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
           child: Container(
             alignment: Alignment.centerLeft,
             child: Container(
@@ -220,31 +228,31 @@ class MessageWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            if (showSendingIndicator == DisplayWidget.show)
+                            if (widget.showSendingIndicator ==
+                                DisplayWidget.show)
                               _buildSendingIndicator(),
                             SizedBox(
                               width: 2,
                             ),
-                            if (showSendingIndicator == DisplayWidget.hide)
+                            if (widget.showSendingIndicator ==
+                                DisplayWidget.hide)
                               SizedBox(
                                 width: 6,
                               ),
-                            if (showUserAvatar == DisplayWidget.show)
+                            if (widget.showUserAvatar == DisplayWidget.show)
                               _buildUserAvatar(),
                             SizedBox(
                               width: 6,
                             ),
-                            if (showUserAvatar == DisplayWidget.hide)
+                            if (widget.showUserAvatar == DisplayWidget.hide)
                               SizedBox(
-                                width: messageTheme
-                                        .avatarTheme.constraints.maxWidth +
+                                width: widget.messageTheme.avatarTheme
+                                        .constraints.maxWidth +
                                     8,
                               ),
                             Flexible(
                               child: Padding(
-                                padding: (message.reactionCounts?.isNotEmpty ==
-                                            true &&
-                                        showReactions)
+                                padding: widget.showReactions
                                     ? EdgeInsets.only(
                                         top: _getReactionsTopPadding(),
                                       )
@@ -253,16 +261,16 @@ class MessageWidget extends StatelessWidget {
                                   portalAnchor: Alignment(0, 1),
                                   childAnchor: Alignment.topRight,
                                   portal: _buildReactionIndicator(context),
-                                  child: (message.isDeleted &&
-                                          message.status !=
+                                  child: (widget.message.isDeleted &&
+                                          widget.message.status !=
                                               MessageSendingStatus
                                                   .FAILED_DELETE)
                                       ? Transform(
                                           alignment: Alignment.center,
                                           transform: Matrix4.rotationY(
-                                              reverse ? pi : 0),
+                                              widget.reverse ? pi : 0),
                                           child: DeletedMessage(
-                                            messageTheme: messageTheme,
+                                            messageTheme: widget.messageTheme,
                                           ),
                                         )
                                       : Column(
@@ -270,7 +278,9 @@ class MessageWidget extends StatelessWidget {
                                               CrossAxisAlignment.start,
                                           children: <Widget>[
                                             ..._parseAttachments(context),
-                                            if (message.text.trim().isNotEmpty)
+                                            if (widget.message.text
+                                                .trim()
+                                                .isNotEmpty)
                                               _buildTextBubble(context),
                                           ],
                                         ),
@@ -279,13 +289,15 @@ class MessageWidget extends StatelessWidget {
                             ),
                           ],
                         ),
-                        if (showReplyIndicator && message.replyCount > 0)
+                        if (widget.showReplyIndicator &&
+                            widget.message.replyCount > 0)
                           _buildReplyIndicator(leftPadding),
                       ],
                     ),
                   ),
-                  if ((message.createdAt != null && showTimestamp) ||
-                      showUsername)
+                  if ((widget.message.createdAt != null &&
+                          widget.showTimestamp) ||
+                      widget.showUsername)
                     _buildUsernameAndTimestamp(leftPadding),
                 ],
               ),
@@ -297,18 +309,49 @@ class MessageWidget extends StatelessWidget {
   }
 
   double _getReactionsTopPadding() {
+    return _reactionPadding;
     return 36.0 *
-        ((message.reactionCounts.values
+        ((widget.message.reactionCounts.values
                     .where((element) => element > 0)
                     .length ~/
                 5) +
             1);
   }
 
+  @override
+  void didUpdateWidget(MessageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateReactionPadding();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateReactionPadding();
+  }
+
+  void _updateReactionPadding() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (_reactionPickerKey.currentContext != null &&
+          widget.message.reactionCounts.values
+                  .where((element) => element > 0)
+                  .length >
+              0) {
+        setState(() {
+          _reactionPadding = _reactionPickerKey.currentContext.size.height;
+        });
+      } else {
+        setState(() {
+          _reactionPadding = 0;
+        });
+      }
+    });
+  }
+
   Widget _buildReactionsTail(BuildContext context) {
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
-      child: message.reactionCounts?.isNotEmpty == true
+      child: widget.message.reactionCounts?.isNotEmpty == true
           ? Transform.translate(
               offset: Offset(4, 0),
               child: CustomPaint(
@@ -331,19 +374,20 @@ class MessageWidget extends StatelessWidget {
       ),
       child: Transform(
         alignment: Alignment.center,
-        transform: Matrix4.rotationY(reverse ? pi : 0),
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         child: RichText(
           text: TextSpan(
-            style: messageTheme.createdAt,
+            style: widget.messageTheme.createdAt,
             children: <TextSpan>[
-              if (showUsername)
+              if (widget.showUsername)
                 TextSpan(
-                  text: message.user.name,
+                  text: widget.message.user.name,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              if (message.createdAt != null && showTimestamp)
+              if (widget.message.createdAt != null && widget.showTimestamp)
                 TextSpan(
-                  text: Jiffy(message.createdAt.toLocal()).format(' HH:mm'),
+                  text: Jiffy(widget.message.createdAt.toLocal())
+                      .format(' HH:mm'),
                 ),
             ],
           ),
@@ -354,10 +398,11 @@ class MessageWidget extends StatelessWidget {
 
   Widget _buildReactionIndicator(BuildContext context) {
     return AnimatedSwitcher(
+      key: _reactionPickerKey,
       duration: Duration(milliseconds: 300),
-      child: (showReactions &&
-              message.reactionCounts?.isNotEmpty == true &&
-              !message.isDeleted)
+      child: (widget.showReactions &&
+              widget.message.reactionCounts?.isNotEmpty == true &&
+              !widget.message.isDeleted)
           ? Container(
               child: GestureDetector(
                 onTap: () => onLongPress(context),
@@ -371,7 +416,7 @@ class MessageWidget extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Transform(
-                        transform: Matrix4.rotationY(reverse ? pi : 0),
+                        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
                         alignment: Alignment.center,
                         child: Container(
                           padding: const EdgeInsets.all(8),
@@ -397,10 +442,10 @@ class MessageWidget extends StatelessWidget {
 
   Text _buildReactionsText(BuildContext context) {
     return Text(
-      message.reactionCounts.keys.map((reactionType) {
+      widget.message.reactionCounts.keys.map((reactionType) {
             return _reactionToEmoji[reactionType] ?? '?';
           }).join(' ') +
-          ' ${message.reactionCounts.values.fold(0, (t, v) => v + t).toString()}',
+          ' ${widget.message.reactionCounts.values.fold(0, (t, v) => v + t).toString()}',
       style: TextStyle(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.black
@@ -425,21 +470,22 @@ class MessageWidget extends StatelessWidget {
           return StreamChannel(
             channel: channel,
             child: MessageActionsBottomSheet(
-              showDeleteMessage: showDeleteMessage,
-              message: message,
-              editMessageInputBuilder: editMessageInputBuilder,
-              onThreadTap: onThreadTap,
-              showEditMessage: showEditMessage,
-              showReactions: showReactions,
-              showReply: showReplyIndicator && onThreadTap != null,
+              showDeleteMessage: widget.showDeleteMessage,
+              message: widget.message,
+              editMessageInputBuilder: widget.editMessageInputBuilder,
+              onThreadTap: widget.onThreadTap,
+              showEditMessage: widget.showEditMessage,
+              showReactions: widget.showReactions,
+              showReply:
+                  widget.showReplyIndicator && widget.onThreadTap != null,
             ),
           );
         });
   }
 
   List<Widget> _parseAttachments(BuildContext context) {
-    return message.attachments?.map((attachment) {
-          final attachmentBuilder = attachmentBuilders[attachment.type];
+    return widget.message.attachments?.map((attachment) {
+          final attachmentBuilder = widget.attachmentBuilders[attachment.type];
 
           if (attachmentBuilder == null) {
             return SizedBox();
@@ -455,27 +501,28 @@ class MessageWidget extends StatelessWidget {
               child: Material(
                 color: _getBackgroundColor(),
                 clipBehavior: Clip.hardEdge,
-                shape: attachmentShape ??
-                    shape ??
+                shape: widget.attachmentShape ??
+                    widget.shape ??
                     ContinuousRectangleBorder(
-                      side: attachmentBorderSide ??
-                          borderSide ??
+                      side: widget.attachmentBorderSide ??
+                          widget.borderSide ??
                           BorderSide(
                             color:
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Colors.white.withAlpha(24)
                                     : Colors.black.withAlpha(24),
                           ),
-                      borderRadius: attachmentBorderRadiusGeometry ??
-                          borderRadiusGeometry ??
+                      borderRadius: widget.attachmentBorderRadiusGeometry ??
+                          widget.borderRadiusGeometry ??
                           BorderRadius.zero,
                     ),
                 child: Padding(
-                  padding: attachmentPadding,
+                  padding: widget.attachmentPadding,
                   child: Transform(
-                    transform: Matrix4.rotationY(reverse ? pi : 0),
+                    transform: Matrix4.rotationY(widget.reverse ? pi : 0),
                     alignment: Alignment.center,
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         getFailedMessageWidget(
@@ -484,7 +531,7 @@ class MessageWidget extends StatelessWidget {
                         ),
                         attachmentBuilder(
                           context,
-                          message,
+                          widget.message,
                           attachment,
                         ),
                       ],
@@ -499,12 +546,13 @@ class MessageWidget extends StatelessWidget {
   }
 
   void onLongPress(BuildContext context) {
-    if (message.isEphemeral || message.status == MessageSendingStatus.SENDING) {
+    if (widget.message.isEphemeral ||
+        widget.message.status == MessageSendingStatus.SENDING) {
       return;
     }
 
-    if (onMessageActions != null) {
-      onMessageActions(context, message);
+    if (widget.onMessageActions != null) {
+      widget.onMessageActions(context, widget.message);
     } else {
       _showMessageBottomSheet(context);
     }
@@ -517,15 +565,15 @@ class MessageWidget extends StatelessWidget {
         left: leftPadding,
       ),
       child: Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         alignment: Alignment.center,
         child: ReplyIndicator(
-          message: message,
-          reversed: reverse,
-          messageTheme: messageTheme,
-          onTap: onThreadTap != null
+          message: widget.message,
+          reversed: widget.reverse,
+          messageTheme: widget.messageTheme,
+          onTap: widget.onThreadTap != null
               ? () {
-                  onThreadTap(message);
+                  widget.onThreadTap(widget.message);
                 }
               : null,
         ),
@@ -540,27 +588,27 @@ class MessageWidget extends StatelessWidget {
         4,
       ),
       child: Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         alignment: Alignment.center,
         child: SendingIndicator(
-          message: message,
+          message: widget.message,
         ),
       ),
     );
   }
 
   Widget _buildUserAvatar() => Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         alignment: Alignment.center,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: Transform.translate(
-            offset:
-                Offset(0, messageTheme.avatarTheme.constraints.maxHeight / 2),
+            offset: Offset(
+                0, widget.messageTheme.avatarTheme.constraints.maxHeight / 2),
             child: UserAvatar(
-              user: message.user,
-              onTap: onUserAvatarTap,
-              constraints: messageTheme.avatarTheme.constraints,
+              user: widget.message.user,
+              onTap: widget.onUserAvatarTap,
+              constraints: widget.messageTheme.avatarTheme.constraints,
             ),
           ),
         ),
@@ -570,31 +618,31 @@ class MessageWidget extends StatelessWidget {
     BuildContext context, {
     EdgeInsetsGeometry padding,
   }) {
-    Widget widget;
-    if (message.status == MessageSendingStatus.FAILED)
-      widget = Text(
+    Widget failedWidget;
+    if (widget.message.status == MessageSendingStatus.FAILED)
+      failedWidget = Text(
         'MESSAGE FAILED · CLICK TO TRY AGAIN',
-        style: messageTheme.messageText.copyWith(
+        style: widget.messageTheme.messageText.copyWith(
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.white.withOpacity(.5)
               : Colors.black.withOpacity(.5),
           fontSize: 11,
         ),
       );
-    if (message.status == MessageSendingStatus.FAILED_UPDATE)
-      widget = Text(
+    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
+      failedWidget = Text(
         'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
-        style: messageTheme.messageText.copyWith(
+        style: widget.messageTheme.messageText.copyWith(
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.white.withOpacity(.5)
               : Colors.black.withOpacity(.5),
           fontSize: 11,
         ),
       );
-    if (message.status == MessageSendingStatus.FAILED_DELETE)
-      widget = Text(
+    if (widget.message.status == MessageSendingStatus.FAILED_DELETE)
+      failedWidget = Text(
         'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
-        style: messageTheme.messageText.copyWith(
+        style: widget.messageTheme.messageText.copyWith(
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.white.withOpacity(.5)
               : Colors.black.withOpacity(.5),
@@ -602,10 +650,10 @@ class MessageWidget extends StatelessWidget {
         ),
       );
 
-    if (widget != null) {
+    if (failedWidget != null) {
       return Padding(
         padding: padding ?? EdgeInsets.zero,
-        child: widget,
+        child: failedWidget,
       );
     }
 
@@ -617,22 +665,22 @@ class MessageWidget extends StatelessWidget {
       onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
       child: Material(
-        shape: shape ??
+        shape: widget.shape ??
             ContinuousRectangleBorder(
-              side: borderSide ??
+              side: widget.borderSide ??
                   BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withAlpha(24)
                         : Colors.black.withAlpha(24),
                   ),
-              borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
+              borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
             ),
         color: _getBackgroundColor(),
         child: Transform(
-          transform: Matrix4.rotationY(reverse ? pi : 0),
+          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
           alignment: Alignment.center,
           child: Padding(
-            padding: textPadding,
+            padding: widget.textPadding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -647,30 +695,30 @@ class MessageWidget extends StatelessWidget {
   }
 
   Color _getBackgroundColor() {
-    return (message.status == MessageSendingStatus.FAILED ||
-            message.status == MessageSendingStatus.FAILED_UPDATE ||
-            message.status == MessageSendingStatus.FAILED_DELETE)
+    return (widget.message.status == MessageSendingStatus.FAILED ||
+            widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
+            widget.message.status == MessageSendingStatus.FAILED_DELETE)
         ? Color(0xffd0021B).withOpacity(.1)
-        : messageTheme.messageBackgroundColor;
+        : widget.messageTheme.messageBackgroundColor;
   }
 
   void retryMessage(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    if (message.status == MessageSendingStatus.FAILED) {
-      channel.sendMessage(message);
+    if (widget.message.status == MessageSendingStatus.FAILED) {
+      channel.sendMessage(widget.message);
       return;
     }
-    if (message.status == MessageSendingStatus.FAILED_UPDATE) {
+    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
       StreamChat.of(context).client.updateMessage(
-            message,
+            widget.message,
             channel.cid,
           );
       return;
     }
 
-    if (message.status == MessageSendingStatus.FAILED_DELETE) {
+    if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
       StreamChat.of(context).client.deleteMessage(
-            message,
+            widget.message,
             channel.cid,
           );
       return;
@@ -678,12 +726,12 @@ class MessageWidget extends StatelessWidget {
   }
 
   Widget _buildText(BuildContext context) {
-    return textBuilder != null
-        ? textBuilder(context, message)
+    return widget.textBuilder != null
+        ? widget.textBuilder(context, widget.message)
         : MessageText(
-            message: message,
-            onMentionTap: onMentionTap,
-            messageTheme: messageTheme,
+            message: widget.message,
+            onMentionTap: widget.onMentionTap,
+            messageTheme: widget.messageTheme,
           );
   }
 }
