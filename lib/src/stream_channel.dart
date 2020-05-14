@@ -73,7 +73,6 @@ class StreamChannelState extends State<StreamChannel> {
       ),
     )
         .then((res) {
-      print('res.messages.length: ${res.messages.length}');
       if (res.messages.isEmpty) {
         _paginationEnded = true;
       }

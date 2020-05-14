@@ -69,7 +69,6 @@ void main() async {
     's2dxdhpxd94g',
     logLevel: Level.INFO,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
-    backgroundKeepAlive: Duration.zero,
     persistenceEnabled: true,
 //    baseURL: 'chat-us-east-staging.stream-io-api.com',
   );

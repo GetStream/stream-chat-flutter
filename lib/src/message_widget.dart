@@ -237,7 +237,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                             if (widget.showSendingIndicator ==
                                 DisplayWidget.hide)
                               SizedBox(
-                                width: 6,
+                                width: 8,
                               ),
                             if (widget.showUserAvatar == DisplayWidget.show)
                               _buildUserAvatar(),
@@ -332,7 +332,11 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   void _updateReactionPadding() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!mounted) {
+        return;
+      }
       if (_reactionPickerKey.currentContext != null &&
+          widget.message.reactionCounts != null &&
           widget.message.reactionCounts.values
                   .where((element) => element > 0)
                   .length >

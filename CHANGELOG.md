@@ -1,3 +1,8 @@
+## 0.2.1-alpha+2
+
+- Fixed reactions bubble going below other messages
+- Updated llc dependency
+
 ## 0.2.1-alpha+1
 
 - Removed the additional `Navigator` in `StreamChat` widget.
