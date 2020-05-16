@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   photo_view: ^0.9.2
-  rxdart: ^0.24.0
+  rxdart: ^0.24.1
   jiffy: ^3.0.1
   flutter_portal: ^0.1.0
   cached_network_image: ^2.2.0+1

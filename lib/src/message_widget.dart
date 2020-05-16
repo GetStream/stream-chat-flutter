@@ -137,6 +137,7 @@ class MessageWidget extends StatefulWidget {
           'image': (context, message, attachment) {
             return ImageAttachment(
               attachment: attachment,
+              message: message,
               messageTheme: messageTheme,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,

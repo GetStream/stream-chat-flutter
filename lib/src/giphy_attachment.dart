@@ -48,9 +48,8 @@ class GiphyAttachment extends StatelessWidget {
                 }));
               },
               child: Hero(
-                tag: attachment.imageUrl ??
-                    attachment.assetUrl ??
-                    attachment.thumbUrl,
+                tag:
+                    '${message.id} - ${attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl}',
                 child: CachedNetworkImage(
                   height: size?.height,
                   width: size?.width,

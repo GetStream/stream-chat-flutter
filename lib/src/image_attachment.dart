@@ -9,12 +9,14 @@ import 'utils.dart';
 
 class ImageAttachment extends StatelessWidget {
   final Attachment attachment;
+  final Message message;
   final MessageTheme messageTheme;
   final Size size;
 
   const ImageAttachment({
     Key key,
-    this.attachment,
+    @required this.attachment,
+    @required this.message,
     this.messageTheme,
     this.size,
   }) : super(key: key);
@@ -36,9 +38,8 @@ class ImageAttachment extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Hero(
-                  tag: attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl,
+                  tag:
+                      '${message.id} - ${attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl}',
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
