@@ -38,8 +38,7 @@ class ImageAttachment extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Hero(
-                  tag:
-                      '${message.id} - ${attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl}',
+                  tag: getAttachmentHeroTag(message, attachment),
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {

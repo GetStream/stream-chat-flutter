@@ -165,7 +165,7 @@ class _ChannelListViewState extends State<ChannelListView>
                           TextSpan(text: 'Error loading channels'),
                         ],
                       ),
-                      style: Theme.of(context).textTheme.title,
+                      style: Theme.of(context).textTheme.headline6,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(

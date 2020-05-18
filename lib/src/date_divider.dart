@@ -67,7 +67,8 @@ class DateDivider extends StatelessWidget {
             ),
             style: TextStyle(
               fontSize: 10,
-              color: Theme.of(context).textTheme.title.color.withOpacity(.5),
+              color:
+                  Theme.of(context).textTheme.headline6.color.withOpacity(.5),
             ),
           ),
         ),

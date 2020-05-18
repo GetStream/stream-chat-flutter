@@ -21,7 +21,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
   ChewieController _chewieController;
   VideoPlayerController _videoPlayerController;
   bool initialized = false;
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +71,8 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
-    _chewieController.dispose();
+    _videoPlayerController?.dispose();
+    _chewieController?.dispose();
     super.dispose();
   }
 }

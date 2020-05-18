@@ -6,6 +6,7 @@ import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
 import 'attachment_title.dart';
 import 'full_screen_image.dart';
+import 'utils.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;
@@ -48,8 +49,7 @@ class GiphyAttachment extends StatelessWidget {
                 }));
               },
               child: Hero(
-                tag:
-                    '${message.id} - ${attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl}',
+                tag: getAttachmentHeroTag(message, attachment),
                 child: CachedNetworkImage(
                   height: size?.height,
                   width: size?.width,

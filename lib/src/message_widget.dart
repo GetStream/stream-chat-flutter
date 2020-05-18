@@ -339,9 +339,8 @@ class _MessageWidgetState extends State<MessageWidget> {
       if (_reactionPickerKey.currentContext != null &&
           widget.message.reactionCounts != null &&
           widget.message.reactionCounts.values
-                  .where((element) => element > 0)
-                  .length >
-              0) {
+              .where((element) => element > 0)
+              .isNotEmpty) {
         setState(() {
           _reactionPadding = _reactionPickerKey.currentContext.size.height;
         });
@@ -624,7 +623,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     EdgeInsetsGeometry padding,
   }) {
     Widget failedWidget;
-    if (widget.message.status == MessageSendingStatus.FAILED)
+    if (widget.message.status == MessageSendingStatus.FAILED) {
       failedWidget = Text(
         'MESSAGE FAILED · CLICK TO TRY AGAIN',
         style: widget.messageTheme.messageText.copyWith(
@@ -634,7 +633,8 @@ class _MessageWidgetState extends State<MessageWidget> {
           fontSize: 11,
         ),
       );
-    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE)
+    }
+    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
       failedWidget = Text(
         'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
         style: widget.messageTheme.messageText.copyWith(
@@ -644,7 +644,8 @@ class _MessageWidgetState extends State<MessageWidget> {
           fontSize: 11,
         ),
       );
-    if (widget.message.status == MessageSendingStatus.FAILED_DELETE)
+    }
+    if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
       failedWidget = Text(
         'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
         style: widget.messageTheme.messageText.copyWith(
@@ -654,6 +655,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           fontSize: 11,
         ),
       );
+    }
 
     if (failedWidget != null) {
       return Padding(

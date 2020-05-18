@@ -1,3 +1,9 @@
+## 0.2.1-alpha+3
+
+- Update llc dependency
+
+- Fix hero tag generation for attachment
+
 ## 0.2.1-alpha+2
 
 - Fixed reactions bubble going below other messages
