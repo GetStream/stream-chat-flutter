@@ -78,6 +78,19 @@ void main() async {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
 
+//  final client = Client(
+//    'qk4nn7rpcn75',
+//    logLevel: Level.INFO,
+//    showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
+//    persistenceEnabled: true,
+//    baseURL: '127.0.0.1:3030',
+//  );
+//
+//  await client.setUser(
+//    User(id: 'super-band-9'),
+//    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXItdHJhbXAtOSJ9.BbcxsR3FsK9c1q1ijhbBWvlXRwRpZ1RoHMKscKWZklk',
+//  );
+
   _initNotifications(client);
 
   runApp(MyApp(client));

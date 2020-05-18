@@ -149,14 +149,18 @@ class StreamChannelState extends State<StreamChannel> {
       initialData: widget.channel.state != null,
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data) {
-          return Scaffold(
-            body: Center(
+          return Container(
+            height: 30,
+            child: Center(
               child: CircularProgressIndicator(),
             ),
           );
         } else if (snapshot.hasError) {
-          return Center(
-            child: Text(snapshot.error),
+          return Container(
+            height: 30,
+            child: Center(
+              child: Text(snapshot.error),
+            ),
           );
         } else {
           return widget.child;

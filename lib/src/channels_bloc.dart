@@ -125,7 +125,20 @@ class ChannelsBlocState extends State<ChannelsBloc>
     _subscriptions.add(client.on(EventType.channelDeleted).listen((e) {
       final channel = e.channel;
       _channelsController
-          .add(channels..removeWhere((c) => c.cid == channel.cid));
+          .add(List.from(channels..removeWhere((c) => c.cid == channel.cid)));
+    }));
+
+    _subscriptions
+        .add(client.on(EventType.notificationAddedToChannel).listen((e) async {
+      final channelModel = e.channel;
+      final channel = Channel(
+        client,
+        channelModel.type,
+        channelModel.id,
+        channelModel.extraData,
+      );
+      await channel.watch();
+      _channelsController.add(List.from(channels..insert(0, channel)));
     }));
   }
 
