@@ -255,7 +255,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                               child: Padding(
                                 padding: widget.showReactions
                                     ? EdgeInsets.only(
-                                        top: _getReactionsTopPadding(),
+                                        top: _reactionPadding,
                                       )
                                     : EdgeInsets.zero,
                                 child: PortalEntry(
@@ -307,16 +307,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         ),
       ),
     );
-  }
-
-  double _getReactionsTopPadding() {
-    return _reactionPadding;
-    return 36.0 *
-        ((widget.message.reactionCounts.values
-                    .where((element) => element > 0)
-                    .length ~/
-                5) +
-            1);
   }
 
   @override
