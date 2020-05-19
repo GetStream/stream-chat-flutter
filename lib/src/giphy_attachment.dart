@@ -6,7 +6,6 @@ import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
 import 'attachment_title.dart';
 import 'full_screen_image.dart';
-import 'utils.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;
@@ -48,29 +47,26 @@ class GiphyAttachment extends StatelessWidget {
                   );
                 }));
               },
-              child: Hero(
-                tag: getAttachmentHeroTag(message, attachment),
-                child: CachedNetworkImage(
-                  height: size?.height,
-                  width: size?.width,
-                  placeholder: (_, __) {
-                    return Container(
-                      width: size?.width,
-                      height: size?.height,
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  },
-                  imageUrl: attachment.thumbUrl ??
-                      attachment.imageUrl ??
-                      attachment.assetUrl,
-                  errorWidget: (context, url, error) => AttachmentError(
-                    attachment: attachment,
-                    size: size,
-                  ),
-                  fit: BoxFit.cover,
+              child: CachedNetworkImage(
+                height: size?.height,
+                width: size?.width,
+                placeholder: (_, __) {
+                  return Container(
+                    width: size?.width,
+                    height: size?.height,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+                imageUrl: attachment.thumbUrl ??
+                    attachment.imageUrl ??
+                    attachment.assetUrl,
+                errorWidget: (context, url, error) => AttachmentError(
+                  attachment: attachment,
+                  size: size,
                 ),
+                fit: BoxFit.cover,
               ),
             ),
           ],

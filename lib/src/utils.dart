@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> launchURL(BuildContext context, String url) async {
@@ -12,8 +11,4 @@ Future<void> launchURL(BuildContext context, String url) async {
       ),
     );
   }
-}
-
-String getAttachmentHeroTag(Message message, Attachment attachment) {
-  return '${message.id}-${attachment.imageUrl ?? attachment.assetUrl ?? attachment.thumbUrl ?? attachment.ogScrapeUrl}';
 }

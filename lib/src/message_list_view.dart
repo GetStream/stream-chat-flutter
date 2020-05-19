@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
+import 'package:stream_chat_flutter/src/system_message.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../stream_chat_flutter.dart';
@@ -412,6 +413,12 @@ class _MessageListViewState extends State<MessageListView> {
     List<Message> messages,
     int index,
   ) {
+    if (message.type == 'system' && message.text?.isNotEmpty == true) {
+      return SystemMessage(
+        message: message,
+      );
+    }
+
     final isMyMessage = message.user.id == StreamChat.of(context).user.id;
     final isLastUser = index + 1 < messages.length &&
         message.user.id == messages[index + 1]?.user?.id;

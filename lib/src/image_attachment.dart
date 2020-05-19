@@ -37,39 +37,36 @@ class ImageAttachment extends StatelessWidget {
           Column(
             children: <Widget>[
               Expanded(
-                child: Hero(
-                  tag: getAttachmentHeroTag(message, attachment),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return FullScreenImage(
-                          url: attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl,
-                        );
-                      }));
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) {
+                      return FullScreenImage(
+                        url: attachment.imageUrl ??
+                            attachment.assetUrl ??
+                            attachment.thumbUrl,
+                      );
+                    }));
+                  },
+                  child: CachedNetworkImage(
+                    height: size?.height,
+                    width: size?.width,
+                    placeholder: (_, __) {
+                      return Container(
+                        width: size?.width,
+                        height: size?.height,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     },
-                    child: CachedNetworkImage(
-                      height: size?.height,
-                      width: size?.width,
-                      placeholder: (_, __) {
-                        return Container(
-                          width: size?.width,
-                          height: size?.height,
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      },
-                      imageUrl: attachment.thumbUrl ??
-                          attachment.imageUrl ??
-                          attachment.assetUrl,
-                      errorWidget: (context, url, error) => AttachmentError(
-                        attachment: attachment,
-                        size: size,
-                      ),
-                      fit: BoxFit.cover,
+                    imageUrl: attachment.thumbUrl ??
+                        attachment.imageUrl ??
+                        attachment.assetUrl,
+                    errorWidget: (context, url, error) => AttachmentError(
+                      attachment: attachment,
+                      size: size,
                     ),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

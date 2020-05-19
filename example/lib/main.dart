@@ -79,16 +79,16 @@ void main() async {
   );
 
 //  final client = Client(
-//    'qk4nn7rpcn75',
+//    '892s22ypvt6m',
 //    logLevel: Level.INFO,
 //    showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
 //    persistenceEnabled: true,
-//    baseURL: '127.0.0.1:3030',
+//    baseURL: '10.0.2.2:3030',
 //  );
 //
 //  await client.setUser(
 //    User(id: 'super-band-9'),
-//    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXItdHJhbXAtOSJ9.BbcxsR3FsK9c1q1ijhbBWvlXRwRpZ1RoHMKscKWZklk',
+//    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.MfmkavyPRSztKxcxpOk8Wud3WrzQ4YdNfXqoVjtIoRM',
 //  );
 
   _initNotifications(client);
