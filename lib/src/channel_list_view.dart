@@ -370,6 +370,23 @@ class _ChannelListViewState extends State<ChannelListView>
         }
       });
     });
+
+    final client = StreamChat.of(context).client;
+
+    client
+        .on(
+      EventType.connectionRecovered,
+      EventType.notificationAddedToChannel,
+      EventType.channelVisible,
+    )
+        .listen((event) {
+      channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        paginationParams: widget.pagination,
+        options: widget.options,
+      );
+    });
   }
 
   @override

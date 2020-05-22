@@ -122,30 +122,12 @@ class ChannelsBlocState extends State<ChannelsBloc>
       }
     }));
 
-    _subscriptions.add(client.on(EventType.channelDeleted).listen((e) {
+    _subscriptions.add(client
+        .on(EventType.channelDeleted, EventType.notificationRemovedFromChannel)
+        .listen((e) {
       final channel = e.channel;
       _channelsController
           .add(List.from(channels..removeWhere((c) => c.cid == channel.cid)));
-    }));
-
-    _subscriptions
-        .add(client.on(EventType.notificationAddedToChannel).listen((e) async {
-      final channelModel = e.channel;
-      final channel = Channel(
-        client,
-        channelModel.type,
-        channelModel.id,
-        channelModel.extraData,
-      );
-      await channel.watch();
-      _channelsController.add(List.from(channels..insert(0, channel)));
-    }));
-
-    _subscriptions.add(
-        client.on(EventType.notificationRemovedFromChannel).listen((e) async {
-      final channelModel = e.channel;
-      _channelsController.add(
-          List.from(channels..removeWhere((c) => c.cid == channelModel.cid)));
     }));
   }
 
