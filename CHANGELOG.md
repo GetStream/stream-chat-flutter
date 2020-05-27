@@ -1,3 +1,8 @@
+## 0.2.1-alpha+6
+
+- Update llc dependency
+- Minor bugfix
+
 ## 0.2.1-alpha+4
 
 - Update llc dependency

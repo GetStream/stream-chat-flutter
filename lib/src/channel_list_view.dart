@@ -390,19 +390,6 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ChannelsBloc.of(context).queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination,
-        options: widget.options,
-        onlyOffline: true,
-      );
-    }
-  }
-
-  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

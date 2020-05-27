@@ -70,26 +70,12 @@ void main() async {
     logLevel: Level.INFO,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
     persistenceEnabled: true,
-//    baseURL: 'chat-us-east-staging.stream-io-api.com',
   );
 
   await client.setUser(
     User(id: 'super-band-9'),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
-
-//  final client = Client(
-//    '892s22ypvt6m',
-//    logLevel: Level.INFO,
-//    showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
-//    persistenceEnabled: true,
-//    baseURL: '10.0.2.2:3030',
-//  );
-//
-//  await client.setUser(
-//    User(id: 'super-band-9'),
-//    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.MfmkavyPRSztKxcxpOk8Wud3WrzQ4YdNfXqoVjtIoRM',
-//  );
 
   _initNotifications(client);
 
