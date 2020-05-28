@@ -11,13 +11,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Now we can open threads and create new ones as well, if you long press a message you can tap on Reply and it will open the same [ThreadPage].
 void main() async {
   final client = Client(
-    'b67pax5b2wdq',
+    's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
 
   await client.setUser(
-    User(id: 'falling-mountain-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
+    User(id: 'super-band-9'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
 
   runApp(MyApp(client));

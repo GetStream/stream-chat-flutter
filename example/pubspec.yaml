@@ -12,7 +12,7 @@ dependencies:
   stream_chat_flutter:
     path: ../
   flutter_apns: ^1.1.0
-  flutter_local_notifications: ^1.4.1
+  flutter_local_notifications: ^1.4.3
 
 dev_dependencies:
   flutter_test:

@@ -31,8 +31,8 @@ void main() async {
   );
 
   await client.setUser(
-    User(id: 'falling-mountain-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.Xd4h2PUBo2NYPk12gjlXDNY71jlyJYTCuQ_moeNbnbA',
+    User(id: 'super-band-9'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
 
   final channel = client.channel('messaging', id: 'godevs');
