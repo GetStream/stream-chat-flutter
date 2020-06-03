@@ -126,7 +126,7 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (6.5.2):
     - GoogleUtilities/Logger
-  - GzipSwift (5.0.0)
+  - GzipSwift (5.1.1)
   - image_picker (0.0.1):
     - Flutter
   - moor_ffi (0.0.1):
@@ -142,7 +142,7 @@ PODS:
     - Flutter
   - PromisesObjC (1.2.8)
   - Protobuf (3.11.4)
-  - ReachabilitySwift (4.3.1)
+  - ReachabilitySwift (5.0.0)
   - SDWebImage (5.8.0):
     - SDWebImage/Core (= 5.8.0)
   - SDWebImage/Core (5.8.0)
@@ -159,10 +159,10 @@ PODS:
     - Flutter
     - FMDB (~> 2.7.2)
   - Starscream (3.1.1)
-  - StreamChatClient (2.0.0):
-    - GzipSwift (~> 5.0.0)
-    - ReachabilitySwift (~> 4.3.0)
-    - Starscream (~> 3.1.0)
+  - StreamChatClient (2.0.1):
+    - GzipSwift (~> 5.1)
+    - ReachabilitySwift (~> 5.0)
+    - Starscream (~> 3.1)
   - url_launcher (0.0.1):
     - Flutter
   - url_launcher_macos (0.0.1):
@@ -192,7 +192,7 @@ DEPENDENCIES:
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - StreamChatClient (from `https://github.com/GetStream/stream-chat-swift.git`, branch `release/2.0`)
+  - StreamChatClient
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - url_launcher_macos (from `.symlinks/plugins/url_launcher_macos/ios`)
   - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
@@ -227,6 +227,7 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageFLPlugin
     - Starscream
+    - StreamChatClient
 
 EXTERNAL SOURCES:
   file_picker:
@@ -259,9 +260,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_web/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
-  StreamChatClient:
-    :branch: release/2.0
-    :git: https://github.com/GetStream/stream-chat-swift.git
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
   url_launcher_macos:
@@ -275,17 +273,12 @@ EXTERNAL SOURCES:
   wakelock:
     :path: ".symlinks/plugins/wakelock/ios"
 
-CHECKOUT OPTIONS:
-  StreamChatClient:
-    :commit: 941fed4d692712fe32a8c3fa7a3acc01a4b6f60e
-    :git: https://github.com/GetStream/stream-chat-swift.git
-
 SPEC CHECKSUMS:
   DKImagePickerController: 4a3e7948a848c4348e600b3fe5ce41478835fa10
   DKPhotoGallery: 0290d32343574f06eaa4c26f8f2f8a1035e916be
   file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
   Firebase: fe7f74012742ab403451dd283e6909b8f1fb348a
-  firebase_messaging: 1069878b13fd61e296607e83897aee0ca0fc1f2e
+  firebase_messaging: 21344b3b3a7d9d325d63a70e3750c0c798fe1e03
   FirebaseAnalytics: 572e467f3d977825266e8ccd52674aa3e6f47eac
   FirebaseAnalyticsInterop: 3f86269c38ae41f47afeb43ebf32a001f58fcdae
   FirebaseCore: ed0a24c758a57c2b88c5efa8e6a8195e868af589
@@ -305,7 +298,7 @@ SPEC CHECKSUMS:
   GoogleDataTransport: a857c6a002d201b524dd4bc2ed7e7355ed07e785
   GoogleDataTransportCCTSupport: 32f75fbe904c82772fcbb6b6bd4525bfb6f2a862
   GoogleUtilities: ad0f3b691c67909d03a3327cc205222ab8f42e0e
-  GzipSwift: 5592f4d62b641e04d06443ba471f8ed76b1363e4
+  GzipSwift: 893f3e48e597a1a4f62fafcb6514220fcf8287fa
   image_picker: 66aa71bc96850a90590a35d4c4a2907b0d823109
   moor_ffi: d66c9470c18e9cb333423bbcb493c105c6c774c6
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
@@ -313,7 +306,7 @@ SPEC CHECKSUMS:
   path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
-  ReachabilitySwift: 4032e2f59586e11e3b0ebe15b167abdd587a388b
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   SDWebImage: 84000f962cbfa70c07f19d2234cbfcf5d779b5dc
   SDWebImageFLPlugin: 6c2295fb1242d44467c6c87dc5db6b0a13228fd8
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
@@ -321,7 +314,7 @@ SPEC CHECKSUMS:
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   Starscream: 4bb2f9942274833f7b4d296a55504dcfc7edb7b0
-  StreamChatClient: a5b5a85b0bcccf3ccb26a6847f110912a8c05e92
+  StreamChatClient: 91b0f585e7dc92ade58e657daffafb16d485b2a6
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
   url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
@@ -329,6 +322,6 @@ SPEC CHECKSUMS:
   video_player_web: da8cadb8274ed4f8dbee8d7171b420dedd437ce7
   wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
 
-PODFILE CHECKSUM: fc856097c8855a277ba9200358b7361bf84ee637
+PODFILE CHECKSUM: 5cc7e2f1316491ee530029e2e8391f4100d41fbd
 
 COCOAPODS: 1.8.4
