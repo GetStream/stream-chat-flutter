@@ -1,3 +1,7 @@
+## 0.2.1-alpha+8
+
+- User queryMembers for mentions
+
 ## 0.2.1-alpha+7
 
 - Update llc dependency
