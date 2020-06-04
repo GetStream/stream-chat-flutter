@@ -392,6 +392,16 @@ class MessageInputState extends State<MessageInput> {
         .split('@');
     final query = splits.last.toLowerCase();
 
+    Future<List<Member>> queryMembers;
+
+    if (query.isNotEmpty) {
+      queryMembers = StreamChannel.of(context).channel.queryMembers(filter: {
+        'name': {
+          '\$autocomplete': query,
+        },
+      }).then((res) => res.members);
+    }
+
     final members = StreamChannel.of(context).channel.state.members?.where((m) {
           return m.user.name.toLowerCase().contains(query);
         })?.toList() ??
@@ -419,36 +429,42 @@ class MessageInputState extends State<MessageInput> {
               ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
-            child: ListView(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              children: members
-                  .map((m) => ListTile(
-                        leading: UserAvatar(
-                          user: m.user,
-                        ),
-                        title: Text('${m.user.name}'),
-                        onTap: () {
-                          _mentionedUsers.add(m.user);
+            child: FutureBuilder<List<Member>>(
+                future: queryMembers ?? Future.value(members),
+                initialData: members,
+                builder: (context, snapshot) {
+                  return ListView(
+                    padding: const EdgeInsets.all(0),
+                    shrinkWrap: true,
+                    children: snapshot.data
+                        .map((m) => ListTile(
+                              leading: UserAvatar(
+                                user: m.user,
+                              ),
+                              title: Text('${m.user.name}'),
+                              onTap: () {
+                                _mentionedUsers.add(m.user);
 
-                          splits[splits.length - 1] = m.user.name;
-                          final rejoin = splits.join('@');
+                                splits[splits.length - 1] = m.user.name;
+                                final rejoin = splits.join('@');
 
-                          textEditingController.value = TextEditingValue(
-                            text: rejoin +
-                                textEditingController.text.substring(
-                                    textEditingController.selection.start),
-                            selection: TextSelection.collapsed(
-                              offset: rejoin.length,
-                            ),
-                          );
+                                textEditingController.value = TextEditingValue(
+                                  text: rejoin +
+                                      textEditingController.text.substring(
+                                          textEditingController
+                                              .selection.start),
+                                  selection: TextSelection.collapsed(
+                                    offset: rejoin.length,
+                                  ),
+                                );
 
-                          _mentionsOverlay?.remove();
-                          _mentionsOverlay = null;
-                        },
-                      ))
-                  .toList(),
-            ),
+                                _mentionsOverlay?.remove();
+                                _mentionsOverlay = null;
+                              },
+                            ))
+                        .toList(),
+                  );
+                }),
           ),
         ),
       );
