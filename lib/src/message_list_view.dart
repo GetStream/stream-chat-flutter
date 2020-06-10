@@ -425,6 +425,16 @@ class _MessageListViewState extends State<MessageListView> {
     final isNextUser =
         index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
 
+    final readList = StreamChannel.of(context)
+        .channel
+        .state
+        .read
+        .where((read) =>
+            read.lastRead.isAfter(message.createdAt) &&
+            (index == 0 ||
+                read.lastRead.isBefore(messages[index - 1].createdAt)))
+        .toList();
+
     return MessageWidget(
       message: message,
       reverse: isMyMessage,
@@ -439,7 +449,7 @@ class _MessageListViewState extends State<MessageListView> {
               (index == 0 || message.status != MessageSendingStatus.SENT)
           ? DisplayWidget.show
           : DisplayWidget.hide,
-      showTimestamp: !isNextUser,
+      showTimestamp: !isNextUser || readList.isNotEmpty,
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
@@ -455,6 +465,7 @@ class _MessageListViewState extends State<MessageListView> {
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
+      readList: readList,
     );
   }
 

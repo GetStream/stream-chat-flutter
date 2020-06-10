@@ -97,6 +97,8 @@ class MessageWidget extends StatefulWidget {
   /// The function called when tapping on UserAvatar
   final void Function(User) onUserAvatarTap;
 
+  final List<Read> readList;
+
   /// If true show the users username next to the timestamp of the message
   final bool showUsername;
   final bool showTimestamp;
@@ -130,6 +132,7 @@ class MessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
+    this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.all(8.0),
     this.attachmentPadding = EdgeInsets.zero,
@@ -298,8 +301,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                   ),
                   if ((widget.message.createdAt != null &&
                           widget.showTimestamp) ||
-                      widget.showUsername)
-                    _buildUsernameAndTimestamp(leftPadding),
+                      widget.showUsername ||
+                      widget.readList?.isNotEmpty == true)
+                    _buildBottomRow(leftPadding),
                 ],
               ),
             ),
@@ -360,33 +364,76 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Padding _buildUsernameAndTimestamp(double leftPadding) {
+  Padding _buildBottomRow(double leftPadding) {
     return Padding(
       padding: EdgeInsets.only(
         left: leftPadding,
         top: 2,
       ),
-      child: Transform(
-        alignment: Alignment.center,
-        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-        child: RichText(
-          text: TextSpan(
-            style: widget.messageTheme.createdAt,
-            children: <TextSpan>[
-              if (widget.showUsername)
-                TextSpan(
-                  text: widget.message.user.name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              if (widget.message.createdAt != null && widget.showTimestamp)
-                TextSpan(
-                  text: Jiffy(widget.message.createdAt.toLocal())
-                      .format(' HH:mm'),
-                ),
-            ],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+            child: RichText(
+              text: TextSpan(
+                style: widget.messageTheme.createdAt,
+                children: <TextSpan>[
+                  if (widget.showUsername)
+                    TextSpan(
+                      text: widget.message.user.name,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  if (widget.message.createdAt != null && widget.showTimestamp)
+                    TextSpan(
+                      text: Jiffy(widget.message.createdAt.toLocal())
+                          .format(' HH:mm'),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
+          if (widget.readList?.isNotEmpty == true)
+            SizedBox.fromSize(
+              size: Size(widget.readList.length * 20.0, 17),
+              child: Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: _buildReadIndicator(),
+                ),
+              ),
+            ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildReadIndicator() {
+    var padding = 0.0;
+    return Stack(
+      children: widget.readList.map((e) {
+        padding += 10.0;
+        return Positioned(
+          left: padding - 10,
+          bottom: 0,
+          top: 0,
+          child: Material(
+            color: Colors.white,
+            shape: CircleBorder(),
+            child: Padding(
+              padding: const EdgeInsets.all(1.0),
+              child: UserAvatar(
+                user: e.user,
+                constraints: BoxConstraints.loose(Size.fromRadius(16)),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
