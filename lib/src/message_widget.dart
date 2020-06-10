@@ -397,7 +397,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           ),
           if (widget.readList?.isNotEmpty == true)
             SizedBox.fromSize(
-              size: Size(widget.readList.length * 20.0, 17),
+              size: Size((widget.readList.length * 10.0) + 10, 17),
               child: Transform(
                 alignment: Alignment.center,
                 transform: Matrix4.rotationY(widget.reverse ? pi : 0),

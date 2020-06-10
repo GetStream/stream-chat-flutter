@@ -419,7 +419,8 @@ class _MessageListViewState extends State<MessageListView> {
       );
     }
 
-    final isMyMessage = message.user.id == StreamChat.of(context).user.id;
+    final userId = StreamChat.of(context).user.id;
+    final isMyMessage = message.user.id == userId;
     final isLastUser = index + 1 < messages.length &&
         message.user.id == messages[index + 1]?.user?.id;
     final isNextUser =
@@ -429,6 +430,7 @@ class _MessageListViewState extends State<MessageListView> {
         .channel
         .state
         .read
+        .where((element) => element.user.id != userId)
         .where((read) =>
             read.lastRead.isAfter(message.createdAt) &&
             (index == 0 ||
