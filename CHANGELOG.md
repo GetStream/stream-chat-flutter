@@ -1,3 +1,8 @@
+## 0.2.1-alpha+9
+
+- Add read indicators
+- Update llc dependency
+
 ## 0.2.1-alpha+8
 
 - User queryMembers for mentions
