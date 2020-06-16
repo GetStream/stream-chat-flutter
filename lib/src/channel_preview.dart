@@ -56,19 +56,30 @@ class ChannelPreview extends StatelessWidget {
       leading: ChannelImage(
         onTap: onImageTap,
       ),
-      title: ChannelName(
-        textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
-      ),
-      subtitle: _buildSubtitle(context),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          _buildDate(context),
+          Flexible(
+            child: ChannelName(
+              textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
+            ),
+          ),
           if (channel.state.unreadCount > 0)
             UnreadIndicator(
               channel: channel,
             ),
         ],
+      ),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Flexible(child: _buildSubtitle(context)),
+          _buildDate(context),
+        ],
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[],
       ),
     );
   }
