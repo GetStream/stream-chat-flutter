@@ -463,7 +463,9 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
-      showUserAvatar: isNextUser ? DisplayWidget.hide : DisplayWidget.show,
+      showUserAvatar: isMyMessage
+          ? DisplayWidget.gone
+          : (isNextUser ? DisplayWidget.hide : DisplayWidget.show),
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,

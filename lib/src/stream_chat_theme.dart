@@ -287,7 +287,7 @@ class StreamChatThemeData {
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
-        messageBackgroundColor: Color(0x33ebebeb),
+        messageBackgroundColor: Color(0xffE6E6E6),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(

@@ -201,8 +201,8 @@ class _MessageWidgetState extends State<MessageWidget> {
   @override
   Widget build(BuildContext context) {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
-        ? widget.messageTheme.avatarTheme.constraints.maxWidth + 23.0
-        : 12.0;
+        ? widget.messageTheme.avatarTheme.constraints.maxWidth + 16.0
+        : 6.0;
     if (widget.showSendingIndicator == DisplayWidget.gone) {
       leftPadding -= 7;
     }
@@ -232,17 +232,6 @@ class _MessageWidgetState extends State<MessageWidget> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            if (widget.showSendingIndicator ==
-                                DisplayWidget.show)
-                              _buildSendingIndicator(),
-                            SizedBox(
-                              width: 2,
-                            ),
-                            if (widget.showSendingIndicator ==
-                                DisplayWidget.hide)
-                              SizedBox(
-                                width: 8,
-                              ),
                             if (widget.showUserAvatar == DisplayWidget.show)
                               _buildUserAvatar(),
                             SizedBox(
@@ -389,12 +378,14 @@ class _MessageWidgetState extends State<MessageWidget> {
                   if (widget.message.createdAt != null && widget.showTimestamp)
                     TextSpan(
                       text: Jiffy(widget.message.createdAt.toLocal())
-                          .format(' HH:mm'),
+                          .format('  HH:mm'),
                     ),
                 ],
               ),
             ),
           ),
+          if (widget.showSendingIndicator == DisplayWidget.show)
+            _buildSendingIndicator(),
           if (widget.readList?.isNotEmpty == true)
             SizedBox.fromSize(
               size: Size((widget.readList.length * 10.0) + 10, 17),
@@ -623,17 +614,11 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildSendingIndicator() {
-    return Transform.translate(
-      offset: Offset(
-        0,
-        4,
-      ),
-      child: Transform(
-        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-        alignment: Alignment.center,
-        child: SendingIndicator(
-          message: widget.message,
-        ),
+    return Transform(
+      transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+      alignment: Alignment.center,
+      child: SendingIndicator(
+        message: widget.message,
       ),
     );
   }
