@@ -91,6 +91,8 @@ class MessageWidget extends StatefulWidget {
   /// If true the widget will show the reactions
   final bool showReactions;
 
+  final bool allRead;
+
   /// If true the widget will show the reply indicator
   final bool showReplyIndicator;
 
@@ -136,6 +138,7 @@ class MessageWidget extends StatefulWidget {
     this.padding,
     this.textPadding = const EdgeInsets.all(8.0),
     this.attachmentPadding = EdgeInsets.zero,
+    this.allRead = false,
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
             return ImageAttachment(
@@ -203,9 +206,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
         ? widget.messageTheme.avatarTheme.constraints.maxWidth + 16.0
         : 6.0;
-    if (widget.showSendingIndicator == DisplayWidget.gone) {
-      leftPadding -= 7;
-    }
     return Portal(
       child: Padding(
         padding: widget.padding ?? EdgeInsets.all(8),
@@ -614,11 +614,15 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildSendingIndicator() {
-    return Transform(
-      transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-      alignment: Alignment.center,
-      child: SendingIndicator(
-        message: widget.message,
+    return Padding(
+      padding: const EdgeInsets.only(right: 4.0),
+      child: Transform(
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: SendingIndicator(
+          message: widget.message,
+          allRead: widget.allRead,
+        ),
       ),
     );
   }

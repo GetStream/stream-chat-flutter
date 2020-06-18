@@ -329,7 +329,6 @@ class _ChannelListViewState extends State<ChannelListView>
       color: Theme.of(context).brightness == Brightness.dark
           ? Colors.white.withOpacity(0.1)
           : Colors.black.withOpacity(0.1),
-      margin: EdgeInsets.symmetric(horizontal: 16),
     );
   }
 

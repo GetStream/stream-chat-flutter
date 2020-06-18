@@ -426,16 +426,16 @@ class _MessageListViewState extends State<MessageListView> {
     final isNextUser =
         index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
 
-    final readList = StreamChannel.of(context)
-        .channel
-        .state
-        .read
+    var channel = StreamChannel.of(context).channel;
+    final readList = channel.state.read
         .where((element) => element.user.id != userId)
         .where((read) =>
             read.lastRead.isAfter(message.createdAt) &&
             (index == 0 ||
                 read.lastRead.isBefore(messages[index - 1].createdAt)))
         .toList();
+
+    final allRead = readList.length == channel.memberCount - 1;
 
     return MessageWidget(
       message: message,
@@ -470,6 +470,7 @@ class _MessageListViewState extends State<MessageListView> {
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
       readList: readList,
+      allRead: allRead,
     );
   }
 

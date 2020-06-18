@@ -74,12 +74,28 @@ class ChannelPreview extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Flexible(child: _buildSubtitle(context)),
+          Builder(
+            builder: (context) {
+              final lastMessage = channel.state.messages.last;
+              if (channel.state?.messages?.isNotEmpty == true &&
+                  lastMessage.user.id == StreamChat.of(context).user.id) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 4.0),
+                  child: SendingIndicator(
+                    message: lastMessage,
+                    allRead: channel.state.read
+                            .where((element) =>
+                                element.lastRead.isAfter(lastMessage.createdAt))
+                            .length ==
+                        channel.memberCount - 1,
+                  ),
+                );
+              }
+              return SizedBox();
+            },
+          ),
           _buildDate(context),
         ],
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[],
       ),
     );
   }

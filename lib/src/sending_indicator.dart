@@ -4,14 +4,22 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Used to show the sending status of the message
 class SendingIndicator extends StatelessWidget {
   final Message message;
+  final bool allRead;
 
   const SendingIndicator({
     Key key,
     this.message,
+    this.allRead = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (allRead) {
+      return Icon(
+        Icons.done_all,
+        size: 8,
+      );
+    }
     if (message.status == MessageSendingStatus.SENT || message.status == null) {
       return Icon(
         Icons.done,
