@@ -136,7 +136,10 @@ class MessageWidget extends StatefulWidget {
     Map<String, AttachmentBuilder> customAttachmentBuilders,
     this.readList,
     this.padding,
-    this.textPadding = const EdgeInsets.all(8.0),
+    this.textPadding = const EdgeInsets.symmetric(
+      horizontal: 16.0,
+      vertical: 8.0,
+    ),
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
   })  : attachmentBuilders = {
@@ -373,7 +376,10 @@ class _MessageWidgetState extends State<MessageWidget> {
                   if (widget.showUsername)
                     TextSpan(
                       text: widget.message.user.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: widget.messageTheme.createdAt.color
+                              .withOpacity(1)),
                     ),
                   if (widget.message.createdAt != null && widget.showTimestamp)
                     TextSpan(
@@ -550,23 +556,26 @@ class _MessageWidgetState extends State<MessageWidget> {
                     ),
                 child: Padding(
                   padding: widget.attachmentPadding,
-                  child: Transform(
-                    transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        getFailedMessageWidget(
-                          context,
-                          padding: const EdgeInsets.all(8.0),
-                        ),
-                        attachmentBuilder(
-                          context,
-                          widget.message,
-                          attachment,
-                        ),
-                      ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Transform(
+                      transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          getFailedMessageWidget(
+                            context,
+                            padding: const EdgeInsets.all(8.0),
+                          ),
+                          attachmentBuilder(
+                            context,
+                            widget.message,
+                            attachment,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

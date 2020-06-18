@@ -401,7 +401,7 @@ class _MessageListViewState extends State<MessageListView> {
         bottomRight: Radius.circular(16),
       ),
       borderSide: isMyMessage ? BorderSide.none : null,
-      showUserAvatar: DisplayWidget.show,
+      showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
@@ -421,8 +421,6 @@ class _MessageListViewState extends State<MessageListView> {
 
     final userId = StreamChat.of(context).user.id;
     final isMyMessage = message.user.id == userId;
-    final isLastUser = index + 1 < messages.length &&
-        message.user.id == messages[index + 1]?.user?.id;
     final isNextUser =
         index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
 
@@ -457,9 +455,10 @@ class _MessageListViewState extends State<MessageListView> {
       borderSide: isMyMessage ? BorderSide.none : null,
       onThreadTap: _onThreadTap,
       attachmentBorderRadiusGeometry: BorderRadius.circular(16),
+      attachmentPadding: const EdgeInsets.all(2),
       borderRadiusGeometry: BorderRadius.only(
-        topLeft: Radius.circular(isLastUser ? 2 : 16),
-        bottomLeft: Radius.circular(2),
+        topLeft: Radius.circular(16),
+        bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
