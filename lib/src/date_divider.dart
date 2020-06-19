@@ -12,16 +12,8 @@ class DateDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final divider = Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Divider(),
-      ),
-    );
-
     final createdAt = Jiffy(dateTime);
     final now = DateTime.now();
-    final hourInfo = createdAt.format('h:mm a');
 
     String dayInfo;
     if (Jiffy(createdAt).isSame(now, Units.DAY)) {
@@ -38,42 +30,29 @@ class DateDivider extends StatelessWidget {
       Jiffy(now).subtract(years: 1),
       Units.DAY,
     )) {
-      dayInfo = createdAt.format('dd/MM').toUpperCase();
+      dayInfo = createdAt.format('MMMM d').toUpperCase();
     } else {
-      dayInfo = createdAt.format('dd/MM/yyyy').toUpperCase();
+      dayInfo = createdAt.format('MMMM d').toUpperCase();
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        divider,
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: dayInfo,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(text: ' AT'),
-                TextSpan(text: ' $hourInfo'),
-              ],
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            style: TextStyle(
-              fontSize: 10,
-              color:
-                  Theme.of(context).textTheme.headline6.color.withOpacity(.5),
-            ),
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(
+            8,
           ),
         ),
-        divider,
-      ],
+        child: Text(
+          dayInfo,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }
