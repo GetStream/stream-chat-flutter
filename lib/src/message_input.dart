@@ -161,6 +161,7 @@ class MessageInputState extends State<MessageInput> {
   final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
 
+  final _imagePicker = ImagePicker();
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
@@ -721,11 +722,13 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if (camera) {
+      PickedFile pickedFile;
       if (fileType == DefaultAttachmentTypes.image) {
-        file = await ImagePicker.pickImage(source: ImageSource.camera);
+        pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
       } else if (fileType == DefaultAttachmentTypes.video) {
-        file = await ImagePicker.pickVideo(source: ImageSource.camera);
+        pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
       }
+      file = File(pickedFile.path);
     } else {
       FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
