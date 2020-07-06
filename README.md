@@ -33,18 +33,10 @@ The example is available under the [example](https://github.com/GetStream/stream
 
 ```yaml
 dependencies:
- stream_chat_flutter: ^0.1.19
+ stream_chat_flutter: ^0.2.0
 ```
 
 You should then run `flutter packages get`
-
-### Alpha version
-
-Use version `^0.2.0-alpha+2` to use the latest available version.
-
-Note that this is still an alpha version. There may be some bugs, and the API can change in breaking ways.
-
-Thanks to whoever tries these versions and reports bugs or suggestions.
 
 ### Android
 
@@ -86,6 +78,7 @@ Every widget uses the `StreamChat` or `StreamChannel` widgets to manage the stat
 - [MessageWidget](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/MessageWidget-class.html)
 - [StreamChatTheme](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChatTheme-class.html)
 - [ThreadHeader](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/ThreadHeader-class.html)
+- ...
 
 ### Customizing styles
 
@@ -109,14 +102,13 @@ Out of the box, all chat widgets use their default styling, and there are two wa
 
       return MaterialApp(
         theme: theme,
-        home: Container(
-          child: StreamChat(
-           streamChatThemeData: StreamChatThemeData.fromTheme(theme),
-            client: client,
-            child: ChannelListPage(),
-          ),
+        builder: (context, child) => StreamChat(
+         child: child,
+         client: client,
+         streamChatThemeData: StreamChatThemeData.fromTheme(theme),
         ),
-      );
+        home: ChannelListPage(),
+        );
     }
   }
   ```
@@ -136,24 +128,23 @@ Out of the box, all chat widgets use their default styling, and there are two wa
 
       return MaterialApp(
         theme: theme,
-        home: Container(
-          child: StreamChat(
-            streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
-              ownMessageTheme: MessageTheme(
-                messageBackgroundColor: Colors.black,
-                messageText: TextStyle(
-                  color: Colors.white,
-                ),
-                avatarTheme: AvatarTheme(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+        builder: (context, child) => StreamChat(
+         child: child,
+         client: client,
+         streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
+            ownMessageTheme: MessageTheme(
+            messageBackgroundColor: Colors.black,
+            messageText: TextStyle(
+              color: Colors.white,
             ),
-            client: client,
-            child: ChannelListPage(),
-          ),
+            avatarTheme: AvatarTheme(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            ),
+         ),
         ),
-      );
+        home: ChannelListPage(),
+        );
     }
   }
   ```

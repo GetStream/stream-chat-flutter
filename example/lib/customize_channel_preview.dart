@@ -59,7 +59,7 @@ class ChannelListPage extends StatelessWidget {
           filter: {
             'members': {
               '\$in': [StreamChat.of(context).user.id],
-            },
+            }
           },
           channelPreviewBuilder: _channelPreviewBuilder,
           sort: [SortOption('last_message_at')],
@@ -73,17 +73,18 @@ class ChannelListPage extends StatelessWidget {
   }
 
   Widget _channelPreviewBuilder(BuildContext context, Channel channel) {
-    final lastMessage = channel.state.messages.reversed.firstWhere(
-      (message) => message.type != 'deleted',
-      orElse: () => null,
-    );
+    final lastMessage = channel.state.messages.reversed
+        .firstWhere((message) => !message.isDeleted);
 
-    final subtitle = (lastMessage == null ? 'nothing yet' : lastMessage.text);
+    final subtitle = (lastMessage == null ? "nothing yet" : lastMessage.text);
     final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
 
     return ListTile(
-      leading: ChannelImage(),
+      leading: ChannelImage(
+        channel: channel,
+      ),
       title: ChannelName(
+        channel: channel,
         textStyle:
             StreamChatTheme.of(context).channelPreviewTheme.title.copyWith(
                   color: Colors.black.withOpacity(opacity),

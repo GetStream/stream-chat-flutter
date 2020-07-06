@@ -1,3 +1,11 @@
+## 0.2.1
+
+- Better ui components
+- Add read indicators
+- Add system messages
+- Use llc 0.2
+- Add `ChannelsBloc` widget to manage a list of channels with pagination
+
 ## 0.2.1-alpha+11
 
 - Update llc dependency
