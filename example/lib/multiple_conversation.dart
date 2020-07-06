@@ -20,13 +20,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// [ChannelListView] handles pagination and updates automatically out of the box when new channels are created or when a new message is added to a channel.
 void main() async {
   final client = Client(
-    'b67pax5b2wdq',
+    's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
 
   await client.setUser(
-    User(id: 'falling-mountain-7'),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZmFsbGluZy1tb3VudGFpbi03In0.AKgRXHMQQMz6vJAKszXdY8zMFfsAgkoUeZHlI-Szz9E',
+    User(id: 'super-band-9'),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
 
   runApp(MyApp(client));
@@ -40,12 +40,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Container(
-        child: StreamChat(
-          client: client,
-          child: ChannelListPage(),
-        ),
+      builder: (context, child) => StreamChat(
+        client: client,
+        child: child,
       ),
+      home: ChannelListPage(),
     );
   }
 }
@@ -54,17 +53,19 @@ class ChannelListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChannelListView(
-        filter: {
-          'members': {
-            '\$in': [StreamChat.of(context).user.id],
-          }
-        },
-        sort: [SortOption('last_message_at')],
-        pagination: PaginationParams(
-          limit: 20,
+      body: ChannelsBloc(
+        child: ChannelListView(
+          filter: {
+            'members': {
+              '\$in': [StreamChat.of(context).user.id],
+            }
+          },
+          sort: [SortOption('last_message_at')],
+          pagination: PaginationParams(
+            limit: 20,
+          ),
+          channelWidget: ChannelPage(),
         ),
-        channelWidget: ChannelPage(),
       ),
     );
   }

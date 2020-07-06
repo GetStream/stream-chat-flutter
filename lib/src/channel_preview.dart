@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
@@ -22,6 +23,9 @@ class ChannelPreview extends StatelessWidget {
   /// Function called when tapping this widget
   final void Function(Channel) onTap;
 
+  /// Function called when long pressing this widget
+  final void Function(Channel) onLongPress;
+
   /// Channel displayed
   final Channel channel;
 
@@ -32,6 +36,7 @@ class ChannelPreview extends StatelessWidget {
     @required this.channel,
     Key key,
     this.onTap,
+    this.onLongPress,
     this.onImageTap,
   }) : super(key: key);
 
@@ -39,7 +44,14 @@ class ChannelPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        onTap(channel);
+        if (onTap != null) {
+          onTap(channel);
+        }
+      },
+      onLongPress: () {
+        if (onLongPress != null) {
+          onLongPress(channel);
+        }
       },
       leading: ChannelImage(
         onTap: onImageTap,
@@ -53,16 +65,8 @@ class ChannelPreview extends StatelessWidget {
         children: <Widget>[
           _buildDate(context),
           if (channel.state.unreadCount > 0)
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: CircleAvatar(
-                backgroundColor: Color(0xffd0021B),
-                radius: 6,
-                child: Text(
-                  '${channel.state.unreadCount}',
-                  style: TextStyle(fontSize: 8),
-                ),
-              ),
+            UnreadIndicator(
+              channel: channel,
             ),
         ],
       ),
@@ -118,16 +122,15 @@ class ChannelPreview extends StatelessWidget {
       stream: channel.state.messagesStream,
       initialData: channel.state.messages,
       builder: (context, snapshot) {
-        final messages = snapshot.data;
-        final lastMessage = messages.isNotEmpty ? messages.last : null;
+        final lastMessage = channel.state.lastMessage;
         if (lastMessage == null) {
           return SizedBox();
         }
 
-        String text;
+        var text = lastMessage.text;
         if (lastMessage.isDeleted) {
           text = 'This message was deleted.';
-        } else {
+        } else if (lastMessage.attachments != null) {
           final prefix = lastMessage.attachments
               .map((e) {
                 if (e.type == 'image') {

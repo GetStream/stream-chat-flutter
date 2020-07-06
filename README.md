@@ -33,14 +33,14 @@ The example is available under the [example](https://github.com/GetStream/stream
 
 ```yaml
 dependencies:
- stream_chat_flutter: ^0.1.21
+ stream_chat_flutter: ^0.1.19
 ```
 
 You should then run `flutter packages get`
 
 ### Alpha version
 
-Use version `^0.2.0-alpha+1` to use the latest available version.
+Use version `^0.2.0-alpha+2` to use the latest available version.
 
 Note that this is still an alpha version. There may be some bugs, and the API can change in breaking ways.
 
@@ -65,10 +65,11 @@ Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check 
 
 ### Business logic components
 
-We provide 2 Widgets dedicated to business logic and state management:
+We provide 3 Widgets dedicated to business logic and state management:
 
 - [StreamChat](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat-class.html)
 - [StreamChannel](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannel-class.html)
+- [ChannelsBloc](https://pub.dev/documentation/stream_chat_flutter/0.2.0-alpha+2/stream_chat_flutter/ChannelsBloc-class.html)
 
 ### UI Components
 
@@ -156,6 +157,12 @@ Out of the box, all chat widgets use their default styling, and there are two wa
     }
   }
   ```
+  
+### Offline storage 
+
+By default the library saves information about channels and messages in a SQLite DB.
+
+Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
 
 ## Contributing
 

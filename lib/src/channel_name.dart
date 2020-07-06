@@ -8,6 +8,7 @@ import 'stream_channel.dart';
 ///
 /// The widget uses a [StreamBuilder] to render the channel information image as soon as it updates.
 class ChannelName extends StatelessWidget {
+  /// Instantiate a new ChannelName
   const ChannelName({
     Key key,
     this.channel,

@@ -40,7 +40,9 @@ class MyApp extends StatelessWidget {
         child: child,
         client: client,
       ),
-      home: ChannelListPage(),
+      home: Container(
+        child: ChannelListPage(),
+      ),
     );
   }
 }
@@ -95,30 +97,37 @@ class ChannelPage extends StatelessWidget {
     List<Message> messages,
   ) {
     final message = details.message;
-    final isCurrentUser = StreamChat.of(context).user.id == message.user.id;
-    final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
-    final color = isCurrentUser ? Colors.blueGrey : Colors.blue;
-
-    return Padding(
-      padding: EdgeInsets.all(5.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: color, width: 1),
-          borderRadius: BorderRadius.all(
-            Radius.circular(5.0),
-          ),
-        ),
-        child: ListTile(
-          title: Text(
-            message.text,
-            textAlign: textAlign,
-          ),
-          subtitle: Text(
-            message.user.extraData['name'],
-            textAlign: textAlign,
-          ),
-        ),
+    final color = details.isMyMessage ? Colors.blueGrey : Colors.blue;
+    if (message.isSystem) {
+      return SizedBox();
+    }
+    return MessageWidget(
+      message: message,
+      messageTheme: details.isMyMessage
+          ? StreamChatTheme.of(context).ownMessageTheme
+          : StreamChatTheme.of(context).otherMessageTheme,
+      borderSide: BorderSide(
+        color: color,
+        width: 2,
       ),
+      padding: const EdgeInsets.all(2),
+      attachmentBorderSide: BorderSide(
+        color: color,
+        width: 2,
+      ),
+      attachmentPadding: EdgeInsets.all(8),
+      borderRadiusGeometry: BorderRadius.vertical(
+        top: !details.isLastUser ? Radius.circular(16) : Radius.zero,
+        bottom: !details.isNextUser ? Radius.circular(16) : Radius.zero,
+      ),
+      showSendingIndicator: DisplayWidget.gone,
+      reverse: false,
+      showUserAvatar:
+          details.isNextUser ? DisplayWidget.hide : DisplayWidget.show,
+      showTimestamp: !details.isNextUser,
+      showUsername: !details.isNextUser,
+      showReactions: false,
+      showReplyIndicator: false,
     );
   }
 }

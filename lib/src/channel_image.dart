@@ -43,6 +43,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class ChannelImage extends StatelessWidget {
+  /// Instantiate a new ChannelImage
   const ChannelImage({
     Key key,
     this.channel,

@@ -50,8 +50,14 @@ class StreamChannelState extends State<StreamChannel> {
   /// The stream notifying the state of queryMessage call
   Stream<bool> get queryMessage => _queryMessageController.stream;
 
+  bool _paginationEnded = false;
+
   /// Calls [channel.query] updating [queryMessage] stream
   void queryMessages() {
+    if (_paginationEnded) {
+      return;
+    }
+
     _queryMessageController.add(true);
 
     String firstId;
@@ -67,6 +73,9 @@ class StreamChannelState extends State<StreamChannel> {
       ),
     )
         .then((res) {
+      if (res.messages.isEmpty) {
+        _paginationEnded = true;
+      }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
       _queryMessageController.addError(e, stack);
@@ -75,8 +84,11 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(String parentId) async {
+    if (_paginationEnded) {
+      return;
+    }
+
     _queryMessageController.add(true);
-    print('PARENT $parentId');
 
     String firstId;
     if (widget.channel.state.threads.containsKey(parentId)) {
@@ -96,12 +108,16 @@ class StreamChannelState extends State<StreamChannel> {
       ),
     )
         .then((res) {
+      if (res.messages.isEmpty) {
+        _paginationEnded = true;
+      }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
       _queryMessageController.addError(e, stack);
     });
   }
 
+  /// Query the channel members and watchers
   Future<void> queryMembersAndWatchers() async {
     await widget.channel.query(
       membersPagination: PaginationParams(
@@ -133,14 +149,18 @@ class StreamChannelState extends State<StreamChannel> {
       initialData: widget.channel.state != null,
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data) {
-          return Scaffold(
-            body: Center(
+          return Container(
+            height: 30,
+            child: Center(
               child: CircularProgressIndicator(),
             ),
           );
         } else if (snapshot.hasError) {
-          return Center(
-            child: Text(snapshot.error),
+          return Container(
+            height: 30,
+            child: Center(
+              child: Text(snapshot.error),
+            ),
           );
         } else {
           return widget.child;

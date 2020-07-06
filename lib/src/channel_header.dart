@@ -157,9 +157,6 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         child: Icon(
           Icons.arrow_back_ios,
           size: 15,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black,
         ),
       ),
     );

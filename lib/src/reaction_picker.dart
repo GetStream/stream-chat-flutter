@@ -24,56 +24,62 @@ class ReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: reactionToEmoji.keys.map((reactionType) {
-        final ownReactionIndex = message.ownReactions
-                ?.indexWhere((reaction) => reaction.type == reactionType) ??
-            -1;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            IconButton(
-              iconSize: size,
-              icon: Text(
-                reactionToEmoji[reactionType],
-                style: TextStyle(
-                  fontSize: size - 10,
+    return Container(
+      color: Colors.black87,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: reactionToEmoji.keys.map((reactionType) {
+          final ownReactionIndex = message.ownReactions
+                  ?.indexWhere((reaction) => reaction.type == reactionType) ??
+              -1;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              IconButton(
+                iconSize: size,
+                icon: Text(
+                  reactionToEmoji[reactionType],
+                  style: TextStyle(
+                    fontSize: size - 10,
+                  ),
                 ),
+                onPressed: () {
+                  if (ownReactionIndex != -1) {
+                    removeReaction(
+                        context, message.ownReactions[ownReactionIndex]);
+                  } else {
+                    sendReaction(context, reactionType);
+                  }
+                },
               ),
-              onPressed: () {
-                if (ownReactionIndex != -1) {
-                  removeReaction(context, reactionType);
-                } else {
-                  sendReaction(context, reactionType);
-                }
-              },
-            ),
-            ownReactionIndex != -1
-                ? Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: Text(
-                      message.ownReactions[ownReactionIndex].score.toString(),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  )
-                : SizedBox(),
-          ],
-        );
-      }).toList(),
+              ownReactionIndex != -1
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text(
+                        message.ownReactions[ownReactionIndex].score.toString(),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
+                  : SizedBox(),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 
+  /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
-    channel.sendReaction(message.id, reactionType);
+    channel.sendReaction(message, reactionType);
     Navigator.of(context).pop();
   }
 
-  void removeReaction(BuildContext context, String reactionType) {
-    channel.deleteReaction(message.id, reactionType);
+  /// Remove a reaction from the message
+  void removeReaction(BuildContext context, Reaction reaction) {
+    channel.deleteReaction(message, reaction);
     Navigator.of(context).pop();
   }
 }

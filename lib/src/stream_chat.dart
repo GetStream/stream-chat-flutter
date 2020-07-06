@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -59,47 +58,27 @@ class StreamChat extends StatefulWidget {
   }
 }
 
-class StreamChatState extends State<StreamChat>
-    with AutomaticKeepAliveClientMixin {
-  final List<StreamSubscription> _subscriptions = [];
+/// The current state of the StreamChat widget
+class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   Client get client => widget.client;
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  Timer _disconnectTimer;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final theme = _getTheme(context, widget.streamChatThemeData);
     return StreamChatTheme(
       data: theme,
       child: Builder(
         builder: (context) {
           final materialTheme = Theme.of(context);
-          final streamChatTheme = StreamChatTheme.of(context);
+          final streamTheme = StreamChatTheme.of(context);
           return Theme(
             data: materialTheme.copyWith(
-              accentColor: streamChatTheme.accentColor,
-              scaffoldBackgroundColor: streamChatTheme.backgroundColor,
+              primaryIconTheme: streamTheme.primaryIconTheme,
+              accentColor: streamTheme.accentColor,
+              scaffoldBackgroundColor: streamTheme.backgroundColor,
             ),
-            child: WillPopScope(
-              onWillPop: () async {
-                if (_navigatorKey.currentState.canPop()) {
-                  _navigatorKey.currentState.pop();
-                  return false;
-                } else {
-                  return true;
-                }
-              },
-              child: Navigator(
-                initialRoute: '/',
-                key: _navigatorKey,
-                onGenerateRoute: (settings) {
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) => widget.child,
-                  );
-                },
-              ),
-            ),
+            child: widget.child,
           );
         },
       ),
@@ -114,6 +93,7 @@ class StreamChatState extends State<StreamChat>
     final theme = defaultTheme.copyWith(
       primaryColor: themeData?.primaryColor,
       defaultChannelImage: themeData?.defaultChannelImage,
+      primaryIconTheme: themeData?.primaryIconTheme,
       defaultUserImage: themeData?.defaultUserImage,
       backgroundColor: themeData?.backgroundColor,
       channelTheme: defaultTheme.channelTheme.copyWith(
@@ -174,22 +154,10 @@ class StreamChatState extends State<StreamChat>
         title: themeData?.channelPreviewTheme?.title,
         lastMessageAt: themeData?.channelPreviewTheme?.lastMessageAt,
         subtitle: themeData?.channelPreviewTheme?.subtitle,
+        unreadCounterColor: themeData?.channelPreviewTheme?.unreadCounterColor,
       ),
     );
     return theme;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _subscriptions.add(widget.client.on('message.new').listen((Event e) {
-      final index = channels.indexWhere((c) => c.cid == e.cid);
-      if (index > 0) {
-        final channel = channels.removeAt(index);
-        channels.insert(0, channel);
-        _channelsController.add(channels);
-      }
-    }));
   }
 
   /// The current user
@@ -198,62 +166,73 @@ class StreamChatState extends State<StreamChat>
   /// The current user as a stream
   Stream<User> get userStream => widget.client.state.userStream;
 
-  /// The current channel list
-  final List<Channel> channels = [];
-
-  /// The current channel list as a stream
-  Stream<List<Channel>> get channelsStream => _channelsController.stream;
-
-  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
-
-  final BehaviorSubject<bool> _queryChannelsLoadingController =
-      BehaviorSubject.seeded(false);
-
-  /// The stream notifying the state of queryChannel call
-  Stream<bool> get queryChannelsLoading =>
-      _queryChannelsLoadingController.stream;
-
-  /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
-  Future<void> queryChannels({
-    Map<String, dynamic> filter,
-    List<SortOption> sortOptions,
-    PaginationParams paginationParams,
-    Map<String, dynamic> options,
-  }) async {
-    if (_queryChannelsLoadingController.value) {
-      return;
-    }
-    _queryChannelsLoadingController.sink.add(true);
-
-    try {
-      final res = await widget.client.queryChannels(
-        filter: filter,
-        sort: sortOptions,
-        options: options,
-        paginationParams: paginationParams,
-      );
-      channels.addAll(res);
-      _channelsController.sink.add(channels);
-    } catch (e) {
-      _channelsController.sink.addError(e);
-    } finally {
-      _queryChannelsLoadingController.sink.add(false);
-    }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
   }
 
-  /// Clear the current channel list
-  void clearChannels() {
-    channels.clear();
+  StreamSubscription _newMessageSubscription;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      if (client.showLocalNotification != null) {
+        _newMessageSubscription = client
+            .on(EventType.messageNew)
+            .where((e) => e.user?.id != user.id)
+            .where((e) => e.message.silent != true)
+            .listen((event) async {
+          var channel = client.state.channels[event.cid];
+
+          if (channel == null) {
+            channel = client.channel(
+              event.type,
+              id: event.cid.split(':')[1],
+            );
+            await channel.query();
+          }
+
+          client.showLocalNotification(
+            event.message,
+            ChannelModel(
+              id: channel.id,
+              createdAt: channel.createdAt,
+              extraData: channel.extraData,
+              type: channel.type,
+              memberCount: channel.memberCount,
+              frozen: channel.frozen,
+              cid: channel.cid,
+              deletedAt: channel.deletedAt,
+              config: channel.config,
+              createdBy: channel.createdBy,
+              updatedAt: channel.updatedAt,
+              lastMessageAt: channel.lastMessageAt,
+            ),
+          );
+        });
+        _disconnectTimer = Timer(client.backgroundKeepAlive, () {
+          client.disconnect();
+        });
+      } else {
+        client.disconnect();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      _newMessageSubscription?.cancel();
+      if (_disconnectTimer?.isActive == true) {
+        _disconnectTimer.cancel();
+      } else {
+        if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
+          NotificationService.handleIosMessageQueue(client);
+          client.connect();
+        }
+      }
+    }
   }
 
   @override
   void dispose() {
-    _subscriptions.forEach((s) => s.cancel());
-    _queryChannelsLoadingController.close();
-    _channelsController.close();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

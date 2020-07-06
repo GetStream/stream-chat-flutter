@@ -1,60 +1,135 @@
-## 0.1.35
+## 0.2.1-alpha+11
 
-- Add backgroundColor as part of StreamChatThemeData
+- Update llc dependency
 
-## 0.1.34
+## 0.2.1-alpha+10
 
-- Add `onUserAvatarTap`
+- Update llc dependency
 
-## 0.1.33
+## 0.2.1-alpha+9
 
-- Add default user and channel image to `StreamChatTheme`
+- Add read indicators
+- Update llc dependency
 
-## 0.1.32
+## 0.2.1-alpha+8
 
-- Update llc version
+- User queryMembers for mentions
 
-## 0.1.31
+## 0.2.1-alpha+7
 
-- Add `initialMessage` property to `MessageInput`
+- Update llc dependency
 
-## 0.1.30
+## 0.2.1-alpha+6
 
-- Add simple rendering of file attachments
+- Update llc dependency
+- Minor bugfix
 
-## 0.1.29
+## 0.2.1-alpha+4
 
-- Add `doImageUploadRequest` and `doFileUploadRequest` to `MessageInput` to let users customize file uploading (eg: custom cdn)
+- Update llc dependency
 
-## 0.1.28
+- Add system messages
 
-- Add `onTap` to `ChannelImage`
+## 0.2.1-alpha+3
 
-- Add `onImageTap` and `onTitleTap` to `ChannelHeader`
+- Update llc dependency
 
-- Add `onImageTap` to `ChannelListView`
+- Fix hero tag generation for attachment
 
-## 0.1.27
+## 0.2.1-alpha+2
 
-- Show other member user's name and image in one to one channels
+- Fixed reactions bubble going below other messages
+- Updated llc dependency
 
-## 0.1.25
+## 0.2.1-alpha+1
+
+- Removed the additional `Navigator` in `StreamChat` widget.
+    It was added to make the app have the `StreamChat` widget as ancestor in every route.
+    Now the recommended way to add `StreamChat` to your app is using the `builder` property of your `MaterialApp` widget.
+    Otherwise you can use it in the usual way, but you need to add a `StreamChat` widget to every route of your app.
+    Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more information.
+
+```dart
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
+      builder: (context, widget) {
+        return StreamChat(
+          child: widget,
+          client: client,
+        );
+      },
+      home: ChannelListPage(),
+    );
+```
+
+- Fix reaction bubble going below previous message on iOS
+
+- Fix message list view reloading messages even if the pagination is ended
+
+## 0.2.1-alpha
+
+- New message widget
+- Moved some properties from `MessageListView` to `MessageWidget`
+- Added `MessageDetails` property to `MessageBuilder`
+- Added example to customize the message using `MessageWidget` (`customize_message_widget.dart`)
+
+## 0.2.0-alpha+15
+
+- Add background color in StreamChatTheme
+
+## 0.2.0-alpha+13
+
+- Handle channel deleted event
+
+## 0.2.0-alpha+11
+
+- Fix message builder and add messageList to it
+
+## 0.2.0-alpha+10
+
+- Add date divider builder
+
+- Fix reply indicator tap
+
+## 0.2.0-alpha+9
+
+- Add `attachmentBuilders` to `MessageWidget` and `MessageListView`
+
+## 0.2.0-alpha+7
+
+- Update llc dependency
+
+## 0.2.0-alpha+5
+
+- Remove dependencies on notification service
+
+- Expose some helping method for integrate offline storage with push notifications
+
+## 0.2.0-alpha+3
 
 - Fix overflow in mentions overlay
 
-## 0.1.23
+## 0.2.0-alpha+2
 
-- Hotfix
+- Add better mime detection
 
-## 0.1.22
-
-- Better mime type detection
-
-## 0.1.21
+## 0.2.0-alpha+1
 
 - Fix video loading and error
 
-## 0.1.20
+## 0.2.0-alpha
+
+- Offline storage
+
+- Push notifications
+
+- Minor bug fixes
+
+## 0.1.20s
 
 - Add message configuration properties to MessageListView
 

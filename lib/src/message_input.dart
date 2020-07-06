@@ -17,6 +17,21 @@ import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(File, Channel);
+typedef AttachmentThumbnailBuilder = Widget Function(
+  BuildContext,
+  _SendingAttachment,
+);
+
+enum ActionsLocation {
+  left,
+  right,
+}
+
+enum DefaultAttachmentTypes {
+  image,
+  video,
+  file,
+}
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -61,9 +76,11 @@ typedef FileUploader = Future<String> Function(File, Channel);
 /// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
+  /// Instantiate a new MessageInput
   MessageInput({
     Key key,
     this.onMessageSent,
+    this.preMessageSending,
     this.parentMessage,
     this.editMessage,
     this.maxHeight = 150,
@@ -72,6 +89,10 @@ class MessageInput extends StatefulWidget {
     this.doImageUploadRequest,
     this.doFileUploadRequest,
     this.initialMessage,
+    this.textEditingController,
+    this.actions,
+    this.actionsLocation = ActionsLocation.left,
+    this.attachmentThumbnailBuilders,
   }) : super(key: key);
 
   /// Message to edit
@@ -82,6 +103,10 @@ class MessageInput extends StatefulWidget {
 
   /// Function called after sending the message
   final void Function(Message) onMessageSent;
+
+  /// Function called right before sending the message
+  /// Use this to transform the message
+  final FutureOr<Message> Function(Message) preMessageSending;
 
   /// Parent message in case of a thread
   final Message parentMessage;
@@ -101,33 +126,49 @@ class MessageInput extends StatefulWidget {
   /// Override file upload request
   final FileUploader doFileUploadRequest;
 
+  /// The text controller of the TextField
+  final TextEditingController textEditingController;
+
+  /// List of action widgets
+  final List<Widget> actions;
+
+  /// The location of the custom actions
+  final ActionsLocation actionsLocation;
+
+  /// Map that defines a thumbnail builder for an attachment type
+  final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
+
   @override
-  _MessageInputState createState() => _MessageInputState(
-        doFileUploadRequest: doFileUploadRequest,
-        doImageUploadRequest: doImageUploadRequest,
-      );
+  MessageInputState createState() => MessageInputState();
+
+  /// Use this method to get the current [StreamChatState] instance
+  static MessageInputState of(BuildContext context) {
+    MessageInputState messageInputState;
+
+    messageInputState = context.findAncestorStateOfType<MessageInputState>();
+
+    if (messageInputState == null) {
+      throw Exception(
+          'You must have a MessageInput widget as anchestor of your widget tree');
+    }
+
+    return messageInputState;
+  }
 }
 
-class _MessageInputState extends State<MessageInput> {
+class MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
   final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
-  FileUploader doImageUploadRequest;
-  FileUploader doFileUploadRequest;
 
-  TextEditingController _textController;
+  final _imagePicker = ImagePicker();
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
 
-  _MessageInputState({
-    this.doImageUploadRequest,
-    this.doFileUploadRequest,
-  }) {
-    doImageUploadRequest ??= _uploadImage;
-    doFileUploadRequest ??= _uploadFile;
-  }
+  /// The editing controller passed to the input TextField
+  TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
@@ -164,8 +205,12 @@ class _MessageInputState extends State<MessageInput> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         if (!widget.disableAttachments) _buildAttachmentButton(),
+        if (widget.actionsLocation == ActionsLocation.left)
+          ...widget.actions ?? [],
         _buildTextInput(context),
         _animateSendButton(context),
+        if (widget.actionsLocation == ActionsLocation.right)
+          ...widget.actions ?? [],
       ],
     );
   }
@@ -193,10 +238,10 @@ class _MessageInputState extends State<MessageInput> {
           minLines: null,
           maxLines: null,
           onSubmitted: (_) {
-            _sendMessage(context);
+            sendMessage();
           },
           keyboardType: widget.keyboardType,
-          controller: _textController,
+          controller: textEditingController,
           focusNode: _focusNode,
           onChanged: (s) {
             StreamChannel.of(context).channel.keyStroke();
@@ -215,10 +260,10 @@ class _MessageInputState extends State<MessageInput> {
               Overlay.of(context).insert(_commandsOverlay);
             }
 
-            if (_textController.selection.isCollapsed &&
-                (s[_textController.selection.start - 1] == '@' ||
-                    _textController.text
-                        .substring(0, _textController.selection.start)
+            if (textEditingController.selection.isCollapsed &&
+                (s[textEditingController.selection.start - 1] == '@' ||
+                    textEditingController.text
+                        .substring(0, textEditingController.selection.start)
                         .split(' ')
                         .last
                         .contains('@'))) {
@@ -231,7 +276,7 @@ class _MessageInputState extends State<MessageInput> {
               _typingStarted = true;
             });
           },
-          style: Theme.of(context).textTheme.body1,
+          style: Theme.of(context).textTheme.bodyText2,
           autofocus: false,
           decoration: InputDecoration(
             hintText: 'Write a message',
@@ -278,7 +323,7 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry _buildCommandsOverlayEntry() {
-    final text = _textController.text;
+    final text = textEditingController.text;
     final commands = StreamChannel.of(context)
         .channel
         .config
@@ -343,10 +388,20 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
-    final splits = _textController.text
-        .substring(0, _textController.value.selection.start)
+    final splits = textEditingController.text
+        .substring(0, textEditingController.value.selection.start)
         .split('@');
     final query = splits.last.toLowerCase();
+
+    Future<List<Member>> queryMembers;
+
+    if (query.isNotEmpty) {
+      queryMembers = StreamChannel.of(context).channel.queryMembers(filter: {
+        'name': {
+          '\$autocomplete': query,
+        },
+      }).then((res) => res.members);
+    }
 
     final members = StreamChannel.of(context).channel.state.members?.where((m) {
           return m.user.name.toLowerCase().contains(query);
@@ -375,36 +430,42 @@ class _MessageInputState extends State<MessageInput> {
               ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
-            child: ListView(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              children: members
-                  .map((m) => ListTile(
-                        leading: UserAvatar(
-                          user: m.user,
-                        ),
-                        title: Text('${m.user.name}'),
-                        onTap: () {
-                          _mentionedUsers.add(m.user);
+            child: FutureBuilder<List<Member>>(
+                future: queryMembers ?? Future.value(members),
+                initialData: members,
+                builder: (context, snapshot) {
+                  return ListView(
+                    padding: const EdgeInsets.all(0),
+                    shrinkWrap: true,
+                    children: snapshot.data
+                        .map((m) => ListTile(
+                              leading: UserAvatar(
+                                user: m.user,
+                              ),
+                              title: Text('${m.user.name}'),
+                              onTap: () {
+                                _mentionedUsers.add(m.user);
 
-                          splits[splits.length - 1] = m.user.name;
-                          final rejoin = splits.join('@');
+                                splits[splits.length - 1] = m.user.name;
+                                final rejoin = splits.join('@');
 
-                          _textController.value = TextEditingValue(
-                            text: rejoin +
-                                _textController.text
-                                    .substring(_textController.selection.start),
-                            selection: TextSelection.collapsed(
-                              offset: rejoin.length,
-                            ),
-                          );
+                                textEditingController.value = TextEditingValue(
+                                  text: rejoin +
+                                      textEditingController.text.substring(
+                                          textEditingController
+                                              .selection.start),
+                                  selection: TextSelection.collapsed(
+                                    offset: rejoin.length,
+                                  ),
+                                );
 
-                          _mentionsOverlay?.remove();
-                          _mentionsOverlay = null;
-                        },
-                      ))
-                  .toList(),
-            ),
+                                _mentionsOverlay?.remove();
+                                _mentionsOverlay = null;
+                              },
+                            ))
+                        .toList(),
+                  );
+                }),
           ),
         ),
       );
@@ -412,7 +473,7 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _setCommand(Command c) {
-    _textController.value = TextEditingValue(
+    textEditingController.value = TextEditingValue(
       text: '/${c.name} ',
       selection: TextSelection.collapsed(
         offset: c.name.length + 2,
@@ -451,35 +512,7 @@ class _MessageInputState extends State<MessageInput> {
                       width: 50,
                       child: _buildAttachment(attachment),
                     ),
-                    Positioned(
-                      height: 16,
-                      width: 16,
-                      top: 4,
-                      right: 4,
-                      child: RawMaterialButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                        highlightElevation: 0,
-                        focusElevation: 0,
-                        disabledElevation: 0,
-                        hoverElevation: 0,
-                        onPressed: () {
-                          setState(() {
-                            _attachments.remove(attachment);
-                          });
-                        },
-                        fillColor: Colors.white.withOpacity(.5),
-                        child: Center(
-                          child: Icon(
-                            Icons.close,
-                            size: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
+                    _buildRemoveButton(attachment),
                     attachment.uploaded
                         ? SizedBox()
                         : Positioned.fill(
@@ -499,20 +532,62 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
+  Positioned _buildRemoveButton(_SendingAttachment attachment) {
+    return Positioned(
+      height: 16,
+      width: 16,
+      top: 4,
+      right: 4,
+      child: RawMaterialButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        highlightElevation: 0,
+        focusElevation: 0,
+        disabledElevation: 0,
+        hoverElevation: 0,
+        onPressed: () {
+          setState(() {
+            _attachments.remove(attachment);
+          });
+        },
+        fillColor: Colors.white.withOpacity(.5),
+        child: Center(
+          child: Icon(
+            Icons.close,
+            size: 15,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildAttachment(_SendingAttachment attachment) {
-    switch (attachment.type) {
-      case FileType.image:
+    if (widget.attachmentThumbnailBuilders
+            ?.containsKey(attachment.attachment.type) ==
+        true) {
+      return widget.attachmentThumbnailBuilders[attachment.attachment.type](
+        context,
+        attachment,
+      );
+    }
+
+    switch (attachment.attachment.type) {
+      case 'image':
+      case 'giphy':
         return attachment.file != null
             ? Image.file(
                 attachment.file,
                 fit: BoxFit.cover,
               )
             : Image.network(
-                attachment.url,
+                attachment.attachment.imageUrl ??
+                    attachment.attachment.thumbUrl,
                 fit: BoxFit.cover,
               );
         break;
-      case FileType.video:
+      case 'video':
         return Container(
           child: Icon(Icons.videocam),
           color: Colors.black26,
@@ -535,7 +610,7 @@ class _MessageInputState extends State<MessageInput> {
       color: Colors.transparent,
       child: IconButton(
         onPressed: () {
-          _showAttachmentModal();
+          showAttachmentModal();
         },
         icon: Icon(
           Icons.add_circle_outline,
@@ -544,7 +619,8 @@ class _MessageInputState extends State<MessageInput> {
     );
   }
 
-  void _showAttachmentModal() {
+  /// Show the attachment modal, making the user choose where to pick a media from
+  void showAttachmentModal() {
     if (_focusNode.hasFocus) {
       _focusNode.unfocus();
     }
@@ -575,7 +651,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.image),
                 title: Text('Upload a photo'),
                 onTap: () {
-                  _pickFile(FileType.image, false);
+                  pickFile(DefaultAttachmentTypes.image, false);
                   Navigator.pop(context);
                 },
               ),
@@ -583,7 +659,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.video_library),
                 title: Text('Upload a video'),
                 onTap: () {
-                  _pickFile(FileType.video, false);
+                  pickFile(DefaultAttachmentTypes.video, false);
                   Navigator.pop(context);
                 },
               ),
@@ -591,7 +667,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.camera_alt),
                 title: Text('Photo from camera'),
                 onTap: () {
-                  _pickFile(FileType.image, true);
+                  pickFile(DefaultAttachmentTypes.image, true);
                   Navigator.pop(context);
                 },
               ),
@@ -599,7 +675,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.videocam),
                 title: Text('Video from camera'),
                 onTap: () {
-                  _pickFile(FileType.video, true);
+                  pickFile(DefaultAttachmentTypes.video, true);
                   Navigator.pop(context);
                 },
               ),
@@ -607,7 +683,7 @@ class _MessageInputState extends State<MessageInput> {
                 leading: Icon(Icons.insert_drive_file),
                 title: Text('Upload a file'),
                 onTap: () {
-                  _pickFile(FileType.any, false);
+                  pickFile(DefaultAttachmentTypes.file, false);
                   Navigator.pop(context);
                 },
               ),
@@ -616,20 +692,52 @@ class _MessageInputState extends State<MessageInput> {
         });
   }
 
-  void _pickFile(FileType type, bool camera) async {
+  /// Add an attachment to the sending message
+  /// Use this to add custom type attachments
+  void addAttachment(Attachment attachment) {
+    setState(() {
+      _attachments.add(_SendingAttachment(
+        attachment: attachment,
+        uploaded: true,
+      ));
+    });
+  }
+
+  /// Pick a file from the device
+  /// If [camera] is true then the camera will open
+  void pickFile(DefaultAttachmentTypes fileType, [bool camera = false]) async {
     setState(() {
       _inputEnabled = false;
     });
 
     File file;
+    String attachmentType;
+
+    if (fileType == DefaultAttachmentTypes.image) {
+      attachmentType = 'image';
+    } else if (fileType == DefaultAttachmentTypes.video) {
+      attachmentType = 'video';
+    } else if (fileType == DefaultAttachmentTypes.file) {
+      attachmentType = 'file';
+    }
 
     if (camera) {
-      if (type == FileType.image) {
-        file = await ImagePicker.pickImage(source: ImageSource.camera);
-      } else if (type == FileType.video) {
-        file = await ImagePicker.pickVideo(source: ImageSource.camera);
+      PickedFile pickedFile;
+      if (fileType == DefaultAttachmentTypes.image) {
+        pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
+      } else if (fileType == DefaultAttachmentTypes.video) {
+        pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
       }
+      file = File(pickedFile.path);
     } else {
+      FileType type;
+      if (fileType == DefaultAttachmentTypes.image) {
+        type = FileType.image;
+      } else if (fileType == DefaultAttachmentTypes.video) {
+        type = FileType.video;
+      } else if (fileType == DefaultAttachmentTypes.file) {
+        type = FileType.any;
+      }
       file = await FilePicker.getFile(type: type);
     }
 
@@ -645,16 +753,27 @@ class _MessageInputState extends State<MessageInput> {
 
     final attachment = _SendingAttachment(
       file: file,
-      type: type,
+      attachment: Attachment(
+        localUri: file.uri,
+        type: attachmentType,
+      ),
     );
 
     setState(() {
       _attachments.add(attachment);
     });
 
-    final url = await _uploadAttachment(file, type, channel);
+    final url = await _uploadAttachment(file, fileType, channel);
 
-    attachment.url = url;
+    if (fileType == DefaultAttachmentTypes.image) {
+      attachment.attachment = attachment.attachment.copyWith(
+        imageUrl: url,
+      );
+    } else {
+      attachment.attachment = attachment.attachment.copyWith(
+        assetUrl: url,
+      );
+    }
 
     setState(() {
       attachment.uploaded = true;
@@ -663,14 +782,22 @@ class _MessageInputState extends State<MessageInput> {
 
   Future<String> _uploadAttachment(
     File file,
-    FileType type,
+    DefaultAttachmentTypes type,
     Channel channel,
   ) async {
     String url;
-    if (type == FileType.image) {
-      url = await doImageUploadRequest(file, channel);
+    if (type == DefaultAttachmentTypes.image) {
+      if (widget.doImageUploadRequest != null) {
+        url = await widget.doImageUploadRequest(file, channel);
+      } else {
+        url = await _uploadImage(file, channel);
+      }
     } else {
-      url = await doFileUploadRequest(file, channel);
+      if (widget.doFileUploadRequest != null) {
+        url = await widget.doFileUploadRequest(file, channel);
+      } else {
+        url = await _uploadFile(file, channel);
+      }
     }
     return url;
   }
@@ -714,25 +841,27 @@ class _MessageInputState extends State<MessageInput> {
         child: IconButton(
           key: Key('sendButton'),
           onPressed: () {
-            _sendMessage(context);
+            sendMessage();
           },
           icon: Icon(
             Icons.send,
+            color: StreamChatTheme.of(context).accentColor,
           ),
         ),
       ),
     );
   }
 
-  void _sendMessage(BuildContext context) {
-    final text = _textController.text.trim();
+  /// Sends the current message
+  void sendMessage() async {
+    final text = textEditingController.text.trim();
     if (text.isEmpty && _attachments.isEmpty) {
       return;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
 
-    _textController.clear();
+    textEditingController.clear();
     _attachments.clear();
 
     setState(() {
@@ -751,21 +880,11 @@ class _MessageInputState extends State<MessageInput> {
     Message message;
     if (widget.editMessage != null) {
       message = widget.editMessage.copyWith(
-        parentId: widget.parentMessage?.id,
         text: text,
-        attachments: widget.editMessage.attachments
-                .where((attachment) => attachment.type == 'giphy')
-                .toList() +
-            _getAttachments(attachments).toList(),
+        attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
-
-      if (widget.editMessage.status == MessageSendingStatus.FAILED) {
-        sendingFuture = channel.sendMessage(message);
-      }
-
-      sendingFuture = StreamChat.of(context).client.updateMessage(message);
     } else {
       message = (widget.initialMessage ?? Message()).copyWith(
         parentId: widget.parentMessage?.id,
@@ -774,34 +893,36 @@ class _MessageInputState extends State<MessageInput> {
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
-      sendingFuture = channel.sendMessage(message);
     }
 
-    sendingFuture.whenComplete(() {
+    if (widget.preMessageSending != null) {
+      message = await widget.preMessageSending(message);
+    }
+
+    if (widget.editMessage == null ||
+        widget.editMessage.status == MessageSendingStatus.FAILED) {
+      sendingFuture = channel.sendMessage(message);
+    } else {
+      sendingFuture = StreamChat.of(context).client.updateMessage(
+            message,
+            channel.cid,
+          );
+    }
+
+    return sendingFuture.whenComplete(() {
       if (widget.onMessageSent != null) {
         widget.onMessageSent(message);
+      } else {
+        if (widget.editMessage != null) {
+          Navigator.pop(context);
+        }
       }
     });
   }
 
   Iterable<Attachment> _getAttachments(List<_SendingAttachment> attachments) {
     return attachments.map((attachment) {
-      String type;
-      switch (attachment.type) {
-        case FileType.image:
-          type = 'image';
-          break;
-        case FileType.video:
-          type = 'video';
-          break;
-        default:
-          type = 'file';
-      }
-      return Attachment(
-        imageUrl: attachment.type == FileType.image ? attachment.url : null,
-        assetUrl: attachment.url,
-        type: type,
-      );
+      return attachment.attachment;
     });
   }
 
@@ -811,12 +932,10 @@ class _MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    StreamChannel.of(context).queryMembersAndWatchers();
-
     _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
       if (visible) {
         if (_commandsOverlay != null) {
-          if (_textController.text.startsWith('/')) {
+          if (textEditingController.text.startsWith('/')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _commandsOverlay = _buildCommandsOverlayEntry();
               Overlay.of(context).insert(_commandsOverlay);
@@ -825,7 +944,7 @@ class _MessageInputState extends State<MessageInput> {
         }
 
         if (_mentionsOverlay != null) {
-          if (_textController.text.contains('@')) {
+          if (textEditingController.text.contains('@')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _mentionsOverlay = _buildCommandsOverlayEntry();
               Overlay.of(context).insert(_mentionsOverlay);
@@ -842,44 +961,24 @@ class _MessageInputState extends State<MessageInput> {
       }
     });
 
-    if (widget.editMessage != null) {
-      _parseExistingMessage(widget.editMessage);
-    } else if (widget.initialMessage != null) {
-      _parseExistingMessage(widget.initialMessage);
-    } else {
-      _textController = TextEditingController();
+    textEditingController =
+        widget.textEditingController ?? TextEditingController();
+    if (widget.editMessage != null || widget.initialMessage != null) {
+      _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
     }
   }
 
   void _parseExistingMessage(Message message) {
-    _textController = TextEditingController(text: message.text);
+    textEditingController.text = message.text;
 
     _typingStarted = true;
     _messageIsPresent = true;
 
     message.attachments?.forEach((attachment) {
-      if (attachment.type == 'image') {
-        _attachments.add(_SendingAttachment(
-          type: FileType.image,
-          url: attachment.imageUrl ??
-              attachment.assetUrl ??
-              attachment.thumbUrl ??
-              attachment.ogScrapeUrl,
-          uploaded: true,
-        ));
-      } else if (attachment.type == 'video') {
-        _attachments.add(_SendingAttachment(
-          type: FileType.video,
-          url: attachment.assetUrl,
-          uploaded: true,
-        ));
-      } else if (attachment.type != 'giphy') {
-        _attachments.add(_SendingAttachment(
-          type: FileType.any,
-          url: attachment.assetUrl,
-          uploaded: true,
-        ));
-      }
+      _attachments.add(_SendingAttachment(
+        attachment: attachment,
+        uploaded: true,
+      ));
     });
   }
 
@@ -903,15 +1002,13 @@ class _MessageInputState extends State<MessageInput> {
 }
 
 class _SendingAttachment {
-  final File file;
-  final FileType type;
-  String url;
+  File file;
+  Attachment attachment;
   bool uploaded;
 
   _SendingAttachment({
-    this.url,
     this.file,
-    this.type,
+    this.attachment,
     this.uploaded = false,
   });
 }

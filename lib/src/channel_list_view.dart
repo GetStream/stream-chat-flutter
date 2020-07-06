@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/channels_bloc.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_preview.dart';
@@ -46,6 +47,7 @@ typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class ChannelListView extends StatefulWidget {
+  /// Instantiate a new ChannelListView
   ChannelListView({
     Key key,
     this.filter,
@@ -53,12 +55,14 @@ class ChannelListView extends StatefulWidget {
     this.sort,
     this.pagination,
     this.onChannelTap,
+    this.onChannelLongPress,
     this.channelWidget,
     this.channelPreviewBuilder,
     this.errorBuilder,
     this.onImageTap,
   }) : super(key: key);
 
+  /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
 
   /// The query filters to use.
@@ -89,6 +93,9 @@ class ChannelListView extends StatefulWidget {
   /// with the widget [channelWidget] as child.
   final ChannelTapCallback onChannelTap;
 
+  /// Function called when long pressing on a channel
+  final Function(Channel) onChannelLongPress;
+
   /// Widget used when opening a channel
   final Widget channelWidget;
 
@@ -102,16 +109,17 @@ class ChannelListView extends StatefulWidget {
   _ChannelListViewState createState() => _ChannelListViewState();
 }
 
-class _ChannelListViewState extends State<ChannelListView> {
+class _ChannelListViewState extends State<ChannelListView>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    final streamChat = StreamChat.of(context);
+    final channelsProvider = ChannelsBloc.of(context);
+
     return RefreshIndicator(
       onRefresh: () async {
-        streamChat.clearChannels();
-        return streamChat.queryChannels(
+        return channelsProvider.queryChannels(
           filter: widget.filter,
           sortOptions: widget.sort,
           paginationParams: widget.pagination,
@@ -119,7 +127,7 @@ class _ChannelListViewState extends State<ChannelListView> {
         );
       },
       child: StreamBuilder<List<Channel>>(
-          stream: streamChat.channelsStream,
+          stream: channelsProvider.channelsStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               if (snapshot.error is Error) {
@@ -157,7 +165,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                           TextSpan(text: 'Error loading channels'),
                         ],
                       ),
-                      style: Theme.of(context).textTheme.title,
+                      style: Theme.of(context).textTheme.headline6,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
@@ -167,7 +175,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ),
                     FlatButton(
                       onPressed: () {
-                        streamChat.queryChannels(
+                        channelsProvider.queryChannels(
                           filter: widget.filter,
                           sortOptions: widget.sort,
                           paginationParams: widget.pagination,
@@ -215,7 +223,7 @@ class _ChannelListViewState extends State<ChannelListView> {
 
     i = i ~/ 2;
 
-    final streamChat = StreamChat.of(context);
+    final channelsProvider = ChannelsBloc.of(context);
     if (i < channels.length) {
       final channel = channels[i];
 
@@ -267,6 +275,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               );
             } else {
               child = ChannelPreview(
+                onLongPress: widget.onChannelLongPress,
                 channel: channel,
                 onImageTap: widget.onImageTap != null
                     ? () {
@@ -283,15 +292,27 @@ class _ChannelListViewState extends State<ChannelListView> {
         ),
       );
     } else {
-      return _buildQueryProgressIndicator(context, streamChat);
+      return _buildQueryProgressIndicator(context, channelsProvider);
     }
   }
 
-  Widget _buildQueryProgressIndicator(context, StreamChatState streamChat) {
+  Widget _buildQueryProgressIndicator(
+      context, ChannelsBlocState channelsProvider) {
     return StreamBuilder<bool>(
-        stream: streamChat.queryChannelsLoading,
+        stream: channelsProvider.queryChannelsLoading,
         initialData: false,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Container(
+              color: Color(0xffd0021B).withAlpha(26),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Center(
+                  child: Text('Error loading channels'),
+                ),
+              ),
+            );
+          }
           return Container(
             height: 100,
             padding: EdgeInsets.all(32),
@@ -312,14 +333,15 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
   }
 
-  void _listenChannelPagination(StreamChatState streamChat) {
+  void _listenChannelPagination(ChannelsBlocState channelsProvider) {
     if (_scrollController.position.maxScrollExtent ==
-        _scrollController.offset) {
-      streamChat.queryChannels(
+            _scrollController.offset &&
+        _scrollController.offset != 0) {
+      channelsProvider.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
         paginationParams: widget.pagination.copyWith(
-          offset: streamChat.channels.length,
+          offset: channelsProvider.channels.length,
         ),
         options: widget.options,
       );
@@ -330,8 +352,11 @@ class _ChannelListViewState extends State<ChannelListView> {
   void initState() {
     super.initState();
 
-    final streamChat = StreamChat.of(context);
-    streamChat.queryChannels(
+    final channelsBloc = ChannelsBloc.of(context);
+
+    WidgetsBinding.instance.addObserver(this);
+
+    channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination,
@@ -339,7 +364,34 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
 
     _scrollController.addListener(() {
-      _listenChannelPagination(streamChat);
+      channelsBloc.queryChannelsLoading.first.then((loading) {
+        if (!loading) {
+          _listenChannelPagination(channelsBloc);
+        }
+      });
     });
+
+    final client = StreamChat.of(context).client;
+
+    client
+        .on(
+      EventType.connectionRecovered,
+      EventType.notificationAddedToChannel,
+      EventType.channelVisible,
+    )
+        .listen((event) {
+      channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        paginationParams: widget.pagination,
+        options: widget.options,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

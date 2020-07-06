@@ -24,7 +24,16 @@ class StreamChatTheme extends InheritedWidget {
 
   /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<StreamChatTheme>().data;
+    final streamChatTheme =
+        context.dependOnInheritedWidgetOfExactType<StreamChatTheme>();
+
+    if (streamChatTheme == null) {
+      throw Exception(
+        'You must have a StreamChatTheme widget at the top of your widget tree',
+      );
+    }
+
+    return streamChatTheme.data;
   }
 }
 
@@ -60,6 +69,9 @@ class StreamChatThemeData {
   /// The widget that will be built when the user image is unavailable
   final Widget Function(BuildContext, User) defaultUserImage;
 
+  /// Primary icon theme
+  final IconThemeData primaryIconTheme;
+
   /// Create a theme from scratch
   StreamChatThemeData({
     this.primaryColor,
@@ -72,6 +84,7 @@ class StreamChatThemeData {
     this.ownMessageTheme,
     this.defaultChannelImage,
     this.defaultUserImage,
+    this.primaryIconTheme,
   });
 
   /// Create a theme from a Material [Theme]
@@ -80,6 +93,7 @@ class StreamChatThemeData {
 
     return defaultTheme.copyWith(
       accentColor: theme.accentColor,
+      primaryIconTheme: theme.primaryIconTheme,
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -114,10 +128,12 @@ class StreamChatThemeData {
     MessageTheme otherMessageTheme,
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
+    IconThemeData primaryIconTheme,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
+        primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
         accentColor: accentColor ?? this.accentColor,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
@@ -190,6 +206,8 @@ class StreamChatThemeData {
     return StreamChatThemeData(
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
+      primaryIconTheme:
+          IconThemeData(color: isDark ? Colors.white : Colors.black),
       defaultChannelImage: (context, channel) => SizedBox(),
       backgroundColor: isDark ? Colors.black : Colors.white,
       defaultUserImage: (context, user) => Center(
@@ -199,6 +217,7 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
+        unreadCounterColor: Color(0xffd0021B),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -423,12 +442,14 @@ class ChannelPreviewTheme {
   final TextStyle subtitle;
   final TextStyle lastMessageAt;
   final AvatarTheme avatarTheme;
+  final Color unreadCounterColor;
 
   const ChannelPreviewTheme({
     this.title,
     this.subtitle,
     this.lastMessageAt,
     this.avatarTheme,
+    this.unreadCounterColor,
   });
 
   ChannelPreviewTheme copyWith({
@@ -436,12 +457,14 @@ class ChannelPreviewTheme {
     TextStyle subtitle,
     TextStyle lastMessageAt,
     AvatarTheme avatarTheme,
+    Color unreadCounterColor,
   }) =>
       ChannelPreviewTheme(
         title: title ?? this.title,
         subtitle: subtitle ?? this.subtitle,
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
+        unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
       );
 }
 
