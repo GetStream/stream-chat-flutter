@@ -161,21 +161,21 @@ class ChannelPreview extends StatelessWidget {
         if (lastMessage.isDeleted) {
           text = 'This message was deleted.';
         } else if (lastMessage.attachments != null) {
-          final prefix = lastMessage.attachments
-              .map((e) {
-                if (e.type == 'image') {
-                  return '📷';
-                } else if (e.type == 'video') {
-                  return '🎬';
-                } else if (e.type == 'giphy') {
-                  return 'GIF';
-                }
-                return null;
-              })
-              .where((e) => e != null)
-              .join(' ');
+          final parts = <String>[
+            ...lastMessage.attachments.map((e) {
+              if (e.type == 'image') {
+                return '📷';
+              } else if (e.type == 'video') {
+                return '🎬';
+              } else if (e.type == 'giphy') {
+                return '[GIF]';
+              }
+              return null;
+            }).where((e) => e != null),
+            lastMessage.text ?? '',
+          ];
 
-          text = '$prefix ${lastMessage.text ?? ''}';
+          text = parts.join(' ');
         }
 
         return Text(

@@ -24,6 +24,7 @@ class SendingIndicator extends StatelessWidget {
       return Icon(
         Icons.done,
         size: 8,
+        color: IconTheme.of(context).color.withOpacity(0.5),
       );
     }
     if (message.status == MessageSendingStatus.SENDING ||
