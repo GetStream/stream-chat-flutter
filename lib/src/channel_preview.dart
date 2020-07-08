@@ -76,16 +76,15 @@ class ChannelPreview extends StatelessWidget {
           Flexible(child: _buildSubtitle(context)),
           Builder(
             builder: (context) {
-              final lastMessage = channel.state.messages.last;
-              if (channel.state?.messages?.isNotEmpty == true &&
-                  lastMessage.user.id == StreamChat.of(context).user.id) {
+              if (channel.state.lastMessage?.user?.id ==
+                  StreamChat.of(context).user.id) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 4.0),
                   child: SendingIndicator(
-                    message: lastMessage,
+                    message: channel.state.lastMessage,
                     allRead: channel.state.read
-                            .where((element) =>
-                                element.lastRead.isAfter(lastMessage.createdAt))
+                            .where((element) => element.lastRead
+                                .isAfter(channel.state.lastMessage.createdAt))
                             .length ==
                         channel.memberCount - 1,
                   ),
@@ -189,6 +188,9 @@ class ChannelPreview extends StatelessWidget {
                         .subtitle
                         .color
                         .withOpacity(0.5),
+                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                        ? FontStyle.italic
+                        : FontStyle.normal,
                   ),
         );
       },
