@@ -49,6 +49,7 @@ class ChannelImage extends StatelessWidget {
     this.channel,
     this.constraints,
     this.onTap,
+    this.showOnlineStatus = true,
   }) : super(key: key);
 
   /// The channel to show the image of
@@ -60,9 +61,11 @@ class ChannelImage extends StatelessWidget {
   /// The function called when the image is tapped
   final VoidCallback onTap;
 
+  final bool showOnlineStatus;
+
   @override
   Widget build(BuildContext context) {
-    final client = StreamChat.of(context);
+    final streamChat = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
     return StreamBuilder<Map<String, dynamic>>(
         stream: channel.extraDataStream,
@@ -73,8 +76,26 @@ class ChannelImage extends StatelessWidget {
             image = snapshot.data['image'];
           } else if (channel.state.members.length == 2) {
             final otherMember = channel.state.members
-                .firstWhere((member) => member.user.id != client.user.id);
-            image = otherMember.user.extraData['image'];
+                .firstWhere((member) => member.user.id != streamChat.user.id);
+            return StreamBuilder<User>(
+                stream: streamChat.client.state.usersStream
+                    .map((users) => users[otherMember.userId]),
+                initialData: otherMember.user,
+                builder: (context, snapshot) {
+                  return UserAvatar(
+                    user: snapshot.data ?? otherMember.user,
+                    constraints: constraints ??
+                        StreamChatTheme.of(context)
+                            .channelPreviewTheme
+                            .avatarTheme
+                            .constraints,
+                    onTap: onTap != null
+                        ? (_) {
+                            onTap();
+                          }
+                        : null,
+                  );
+                });
           }
 
           return ClipRRect(

@@ -426,6 +426,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               child: UserAvatar(
                 user: e.user,
                 constraints: BoxConstraints.loose(Size.fromRadius(16)),
+                showOnlineStatus: false,
               ),
             ),
           ),
@@ -648,6 +649,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               user: widget.message.user,
               onTap: widget.onUserAvatarTap,
               constraints: widget.messageTheme.avatarTheme.constraints,
+              showOnlineStatus: false,
             ),
           ),
         ),

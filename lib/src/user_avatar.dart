@@ -9,55 +9,88 @@ class UserAvatar extends StatelessWidget {
     Key key,
     @required this.user,
     this.constraints,
+    this.onlineIndicatorConstraints,
     this.onTap,
+    this.showOnlineStatus = true,
   }) : super(key: key);
 
   final User user;
   final BoxConstraints constraints;
+  final BoxConstraints onlineIndicatorConstraints;
   final void Function(User) onTap;
+  final bool showOnlineStatus;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        if (onTap != null) {
-          onTap(user);
-        }
-      },
-      child: ClipRRect(
-        borderRadius: StreamChatTheme.of(context)
-            .ownMessageTheme
-            .avatarTheme
-            .borderRadius,
-        child: Container(
-          constraints: constraints ??
-              StreamChatTheme.of(context)
-                  .ownMessageTheme
-                  .avatarTheme
-                  .constraints,
-          decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).accentColor,
+      onTap: onTap != null
+          ? () {
+              if (onTap != null) {
+                onTap(user);
+              }
+            }
+          : null,
+      child: Stack(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: StreamChatTheme.of(context)
+                .ownMessageTheme
+                .avatarTheme
+                .borderRadius,
+            child: Container(
+              constraints: constraints ??
+                  StreamChatTheme.of(context)
+                      .ownMessageTheme
+                      .avatarTheme
+                      .constraints,
+              decoration: BoxDecoration(
+                color: StreamChatTheme.of(context).accentColor,
+              ),
+              child: user.extraData?.containsKey('image') ?? false
+                  ? CachedNetworkImage(
+                      imageUrl: user.extraData['image'],
+                      errorWidget: (_, __, ___) {
+                        return Center(
+                          child: Text(
+                            user.extraData?.containsKey('name') ?? false
+                                ? user.extraData['name'][0]
+                                : '',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      },
+                      fit: BoxFit.cover,
+                    )
+                  : StreamChatTheme.of(context).defaultUserImage(context, user),
+            ),
           ),
-          child: user.extraData?.containsKey('image') ?? false
-              ? CachedNetworkImage(
-                  imageUrl: user.extraData['image'],
-                  errorWidget: (_, __, ___) {
-                    return Center(
-                      child: Text(
-                        user.extraData?.containsKey('name') ?? false
-                            ? user.extraData['name'][0]
-                            : '',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+          if (showOnlineStatus && user.online)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Material(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(2.0),
+                    constraints: onlineIndicatorConstraints ??
+                        BoxConstraints.tightFor(
+                          width: 12,
+                          height: 12,
                         ),
-                      ),
-                    );
-                  },
-                  fit: BoxFit.cover,
-                )
-              : StreamChatTheme.of(context).defaultUserImage(context, user),
-        ),
+                    child: Material(
+                      shape: CircleBorder(),
+                      color: Color(0xff20E070),
+                    ),
+                  ),
+                ),
+                shape: CircleBorder(),
+                color: Colors.white,
+              ),
+            ),
+        ],
       ),
     );
   }
