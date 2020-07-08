@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/group_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_image.png)
@@ -96,6 +97,23 @@ class ChannelImage extends StatelessWidget {
                         : null,
                   );
                 });
+          } else {
+            final images = channel.state.members
+                .where((member) =>
+                    member.user.id != streamChat.user.id &&
+                    member.user.extraData['image'] != null)
+                .take(4)
+                .map((e) => e.user.extraData['image'] as String)
+                .toList();
+            return GroupImage(
+              images: images,
+              constraints: constraints ??
+                  StreamChatTheme.of(context)
+                      .channelPreviewTheme
+                      .avatarTheme
+                      .constraints,
+              onTap: onTap,
+            );
           }
 
           return ClipRRect(
