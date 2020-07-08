@@ -33,9 +33,8 @@ class ChannelName extends StatelessWidget {
         if (snapshot.data['name'] == null) {
           final otherMembers = channel.state.members
               .where((member) => member.userId != client.user.id);
-          if (otherMembers.length > 0) {
+          if (otherMembers.isNotEmpty) {
             final exceedingMembers = otherMembers.length - 5;
-            print('exceedingMembers: ${exceedingMembers}');
             title =
                 '${otherMembers.take(5).map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
           } else {
