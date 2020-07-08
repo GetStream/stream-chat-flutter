@@ -45,10 +45,13 @@ class GroupImage extends StatelessWidget {
           ),
           child: Flex(
             direction: Axis.vertical,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Flexible(
+                fit: FlexFit.tight,
                 child: Flex(
                   direction: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: images
                       .take(2)
                       .map((url) => Flexible(
@@ -61,21 +64,24 @@ class GroupImage extends StatelessWidget {
                       .toList(),
                 ),
               ),
-              Flexible(
-                child: Flex(
-                  direction: Axis.horizontal,
-                  children: images
-                      .skip(2)
-                      .map((url) => Flexible(
-                            fit: FlexFit.tight,
-                            child: CachedNetworkImage(
-                              imageUrl: url,
-                              fit: BoxFit.cover,
-                            ),
-                          ))
-                      .toList(),
-                ),
-              )
+              if (images.length > 2)
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: images
+                        .skip(2)
+                        .map((url) => Flexible(
+                              fit: FlexFit.tight,
+                              child: CachedNetworkImage(
+                                imageUrl: url,
+                                fit: BoxFit.cover,
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                )
             ],
           ),
         ),
