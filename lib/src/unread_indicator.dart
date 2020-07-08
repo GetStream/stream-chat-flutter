@@ -17,10 +17,13 @@ class UnreadIndicator extends StatelessWidget {
       child: CircleAvatar(
         backgroundColor:
             StreamChatTheme.of(context).channelPreviewTheme.unreadCounterColor,
-        radius: 6,
+        radius: 8,
         child: Text(
           '${channel.state.unreadCount}',
-          style: TextStyle(fontSize: 8),
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.white,
+          ),
         ),
       ),
     );
