@@ -30,13 +30,19 @@ class ChannelName extends StatelessWidget {
       initialData: channel.extraData,
       builder: (context, snapshot) {
         String title;
-        if (snapshot.data['name'] == null &&
-            channel.state.members.length == 2) {
-          final otherMember = channel.state.members
-              .firstWhere((member) => member.user.id != client.user.id);
-          title = otherMember.user.name;
+        if (snapshot.data['name'] == null) {
+          final otherMembers = channel.state.members
+              .where((member) => member.userId != client.user.id);
+          if (otherMembers.length > 0) {
+            final exceedingMembers = otherMembers.length - 5;
+            print('exceedingMembers: ${exceedingMembers}');
+            title =
+                '${otherMembers.take(5).map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+          } else {
+            title = channel.id;
+          }
         } else {
-          title = snapshot.data['name'] ?? channel.id;
+          title = snapshot.data['name'];
         }
 
         return Text(
