@@ -130,21 +130,20 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildSubtitle(BuildContext context) {
-    final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
     return TypingIndicator(
       channel: channel,
-      alternativeWidget: _buildLastMessage(context, opacity),
+      alternativeWidget: _buildLastMessage(context),
       style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
             color: StreamChatTheme.of(context)
                 .channelPreviewTheme
                 .subtitle
                 .color
-                .withOpacity(opacity),
+                .withOpacity(0.5),
           ),
     );
   }
 
-  Widget _buildLastMessage(BuildContext context, double opacity) {
+  Widget _buildLastMessage(BuildContext context) {
     return StreamBuilder<List<Message>>(
       stream: channel.state.messagesStream,
       initialData: channel.state.messages,
@@ -189,7 +188,7 @@ class ChannelPreview extends StatelessWidget {
                         .channelPreviewTheme
                         .subtitle
                         .color
-                        .withOpacity(opacity),
+                        .withOpacity(0.5),
                   ),
         );
       },
