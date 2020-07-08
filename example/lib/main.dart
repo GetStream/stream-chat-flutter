@@ -67,7 +67,7 @@ void _initNotifications(Client client) {
 void main() async {
   final client = Client(
     's2dxdhpxd94g',
-    logLevel: Level.INFO,
+    logLevel: Level.FINEST,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
     persistenceEnabled: true,
   );
@@ -91,6 +91,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 //      debugShowMaterialGrid: true,
+//      debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
@@ -115,6 +116,9 @@ class ChannelListPage extends StatelessWidget {
             'members': {
               '\$in': [StreamChat.of(context).user.id],
             }
+          },
+          options: {
+            'presence': true,
           },
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
