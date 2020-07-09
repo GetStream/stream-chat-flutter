@@ -231,7 +231,7 @@ class StreamChatThemeData {
         ),
         subtitle: TextStyle(
           fontSize: 12.5,
-          color: isDark ? Colors.white : Colors.black,
+          color: (isDark ? Colors.white : Colors.black).withOpacity(0.5),
         ),
         lastMessageAt: TextStyle(
           fontSize: 11,

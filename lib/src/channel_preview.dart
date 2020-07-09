@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
@@ -42,59 +43,63 @@ class ChannelPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-        if (onTap != null) {
-          onTap(channel);
-        }
-      },
-      onLongPress: () {
-        if (onLongPress != null) {
-          onLongPress(channel);
-        }
-      },
-      leading: ChannelImage(
-        onTap: onImageTap,
-      ),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Flexible(
-            child: ChannelName(
-              textStyle: StreamChatTheme.of(context).channelPreviewTheme.title,
+    return Opacity(
+      opacity: channel.isMuted ? 0.5 : 1,
+      child: ListTile(
+        onTap: () {
+          if (onTap != null) {
+            onTap(channel);
+          }
+        },
+        onLongPress: () {
+          if (onLongPress != null) {
+            onLongPress(channel);
+          }
+        },
+        leading: ChannelImage(
+          onTap: onImageTap,
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(
+              child: ChannelName(
+                textStyle:
+                    StreamChatTheme.of(context).channelPreviewTheme.title,
+              ),
             ),
-          ),
-          if (channel.state.unreadCount > 0)
-            UnreadIndicator(
-              channel: channel,
+            if (channel.state.unreadCount > 0)
+              UnreadIndicator(
+                channel: channel,
+              ),
+          ],
+        ),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(child: _buildSubtitle(context)),
+            Builder(
+              builder: (context) {
+                if (channel.state.lastMessage?.user?.id ==
+                    StreamChat.of(context).user.id) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 4.0),
+                    child: SendingIndicator(
+                      message: channel.state.lastMessage,
+                      allRead: channel.state.read
+                              .where((element) => element.lastRead
+                                  .isAfter(channel.state.lastMessage.createdAt))
+                              .length ==
+                          channel.memberCount - 1,
+                    ),
+                  );
+                }
+                return SizedBox();
+              },
             ),
-        ],
-      ),
-      subtitle: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Flexible(child: _buildSubtitle(context)),
-          Builder(
-            builder: (context) {
-              if (channel.state.lastMessage?.user?.id ==
-                  StreamChat.of(context).user.id) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 4.0),
-                  child: SendingIndicator(
-                    message: channel.state.lastMessage,
-                    allRead: channel.state.read
-                            .where((element) => element.lastRead
-                                .isAfter(channel.state.lastMessage.createdAt))
-                            .length ==
-                        channel.memberCount - 1,
-                  ),
-                );
-              }
-              return SizedBox();
-            },
-          ),
-          _buildDate(context),
-        ],
+            _buildDate(context),
+          ],
+        ),
       ),
     );
   }
@@ -129,15 +134,35 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildSubtitle(BuildContext context) {
+    if (channel.isMuted) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Icon(
+            LineAwesomeIcons.volume_off,
+            size: 15,
+          ),
+          Text(
+            'Channel is muted',
+            style: StreamChatTheme.of(context)
+                .channelPreviewTheme
+                .subtitle
+                .copyWith(
+                  color: StreamChatTheme.of(context)
+                      .channelPreviewTheme
+                      .subtitle
+                      .color,
+                ),
+          ),
+        ],
+      );
+    }
     return TypingIndicator(
       channel: channel,
       alternativeWidget: _buildLastMessage(context),
       style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-            color: StreamChatTheme.of(context)
-                .channelPreviewTheme
-                .subtitle
-                .color
-                .withOpacity(0.5),
+            color:
+                StreamChatTheme.of(context).channelPreviewTheme.subtitle.color,
           ),
     );
   }
@@ -186,8 +211,7 @@ class ChannelPreview extends StatelessWidget {
                     color: StreamChatTheme.of(context)
                         .channelPreviewTheme
                         .subtitle
-                        .color
-                        .withOpacity(0.5),
+                        .color,
                     fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                         ? FontStyle.italic
                         : FontStyle.normal,
