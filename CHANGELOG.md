@@ -1,3 +1,7 @@
+## 0.1.36
+
+- Fix search messages response class
+
 ## 0.1.35
 
 - Add backgroundColor as part of StreamChatThemeData
