@@ -24,6 +24,7 @@ dependencies:
   stream_chat: ^0.2.0-alpha+20
   mime: ^0.9.6+3
   visibility_detector: ^0.1.5
+  line_awesome_icons: ^1.0.4+2
   http_parser: ^3.1.4
 
 dev_dependencies:
