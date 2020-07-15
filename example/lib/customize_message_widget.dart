@@ -98,6 +98,9 @@ class ChannelPage extends StatelessWidget {
   ) {
     final message = details.message;
     final color = details.isMyMessage ? Colors.blueGrey : Colors.blue;
+    if (message.isSystem) {
+      return SizedBox();
+    }
     return MessageWidget(
       message: message,
       messageTheme: details.isMyMessage

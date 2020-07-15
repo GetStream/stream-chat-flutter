@@ -424,14 +424,14 @@ class _MessageListViewState extends State<MessageListView> {
     final isNextUser =
         index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
 
-    var channel = StreamChannel.of(context).channel;
-    final readList = channel.state.read
-        .where((element) => element.user.id != userId)
-        .where((read) =>
+    final channel = StreamChannel.of(context).channel;
+    final readList = channel.state?.read
+        ?.where((element) => element.user.id != userId)
+        ?.where((read) =>
             read.lastRead.isAfter(message.createdAt) &&
             (index == 0 ||
                 read.lastRead.isBefore(messages[index - 1].createdAt)))
-        .toList();
+        ?.toList();
 
     final allRead = readList.length == channel.memberCount - 1;
 
@@ -449,7 +449,7 @@ class _MessageListViewState extends State<MessageListView> {
               (index == 0 || message.status != MessageSendingStatus.SENT)
           ? DisplayWidget.show
           : DisplayWidget.hide,
-      showTimestamp: !isNextUser || readList.isNotEmpty,
+      showTimestamp: !isNextUser || readList?.isNotEmpty == true,
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,

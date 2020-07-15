@@ -172,11 +172,7 @@ class ChannelPreview extends StatelessWidget {
       stream: channel.state.messagesStream,
       initialData: channel.state.messages,
       builder: (context, snapshot) {
-        final messages = snapshot.data;
-        final lastMessage = messages?.isNotEmpty == true
-            ? messages.lastWhere((m) =>
-                !(m.isDeleted && m.status == MessageSendingStatus.FAILED))
-            : null;
+        final lastMessage = channel.state.lastMessage;
         if (lastMessage == null) {
           return SizedBox();
         }
