@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -107,29 +107,15 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                     .channelHeaderTheme
                     .title,
               ),
-              _buildLastActive(context, channel),
+              ChannelInfo(
+                channel: channel,
+                textStyle:
+                    StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLastActive(BuildContext context, Channel channel) {
-    return StreamBuilder<DateTime>(
-      stream: channel.lastMessageAtStream,
-      initialData: channel.lastMessageAt,
-      builder: (context, snapshot) {
-        return (snapshot.data != null)
-            ? Text(
-                'Active ${Jiffy(snapshot.data.toLocal()).fromNow()}',
-                style: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .lastMessageAt,
-              )
-            : SizedBox();
-      },
     );
   }
 

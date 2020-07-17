@@ -12,10 +12,12 @@ class UserAvatar extends StatelessWidget {
     this.onlineIndicatorConstraints,
     this.onTap,
     this.showOnlineStatus = true,
+    this.borderRadius,
   }) : super(key: key);
 
   final User user;
   final BoxConstraints constraints;
+  final BorderRadius borderRadius;
   final BoxConstraints onlineIndicatorConstraints;
   final void Function(User) onTap;
   final bool showOnlineStatus;
@@ -33,10 +35,11 @@ class UserAvatar extends StatelessWidget {
       child: Stack(
         children: <Widget>[
           ClipRRect(
-            borderRadius: StreamChatTheme.of(context)
-                .ownMessageTheme
-                .avatarTheme
-                .borderRadius,
+            borderRadius: borderRadius ??
+                StreamChatTheme.of(context)
+                    .ownMessageTheme
+                    .avatarTheme
+                    .borderRadius,
             child: Container(
               constraints: constraints ??
                   StreamChatTheme.of(context)

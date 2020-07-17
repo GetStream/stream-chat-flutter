@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
 
 import '../stream_chat_flutter.dart';
+import 'channel_bottom_sheet.dart';
 import 'channel_preview.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
@@ -60,10 +62,14 @@ class ChannelListView extends StatefulWidget {
     this.channelPreviewBuilder,
     this.errorBuilder,
     this.onImageTap,
+    this.swipeToAction = false,
   }) : super(key: key);
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
+
+  /// If true a default swipe to action behaviour will be added to this widget
+  final bool swipeToAction;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -274,17 +280,55 @@ class _ChannelListViewState extends State<ChannelListView>
                 ],
               );
             } else {
-              child = ChannelPreview(
-                onLongPress: widget.onChannelLongPress,
-                channel: channel,
-                onImageTap: widget.onImageTap != null
-                    ? () {
-                        widget.onImageTap(channel);
-                      }
-                    : null,
-                onTap: (channel) {
-                  onTap(channel, widget.channelWidget);
-                },
+              child = Slidable(
+                enabled: widget.swipeToAction,
+                actionPane: SlidableBehindActionPane(),
+                actionExtentRatio: 0.12,
+                closeOnScroll: true,
+                secondaryActions: <Widget>[
+                  IconSlideAction(
+                    color: Color(0xffEBEBEB),
+                    icon: Icons.more_horiz,
+                    onTap: () {
+                      showModalBottomSheet(
+                        clipBehavior: Clip.hardEdge,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(32),
+                            topRight: Radius.circular(32),
+                          ),
+                        ),
+                        context: context,
+                        builder: (context) {
+                          return ChannelBottomSheet(channel: channel);
+                        },
+                      );
+                    },
+                  ),
+                  IconSlideAction(
+                    color: Color(0xffEBEBEB),
+                    icon: Icons.notifications_none,
+                  ),
+                  IconSlideAction(
+                    color: Color(0xffEBEBEB),
+                    icon: Icons.delete,
+                  ),
+                ],
+                child: Container(
+                  color: StreamChatTheme.of(context).backgroundColor,
+                  child: ChannelPreview(
+                    onLongPress: widget.onChannelLongPress,
+                    channel: channel,
+                    onImageTap: widget.onImageTap != null
+                        ? () {
+                            widget.onImageTap(channel);
+                          }
+                        : null,
+                    onTap: (channel) {
+                      onTap(channel, widget.channelWidget);
+                    },
+                  ),
+                ),
               );
             }
             return child;

@@ -51,7 +51,10 @@ class ChannelImage extends StatelessWidget {
     this.constraints,
     this.onTap,
     this.showOnlineStatus = true,
+    this.borderRadius,
   }) : super(key: key);
+
+  final BorderRadius borderRadius;
 
   /// The channel to show the image of
   final Channel channel;
@@ -84,6 +87,7 @@ class ChannelImage extends StatelessWidget {
                 initialData: otherMember.user,
                 builder: (context, snapshot) {
                   return UserAvatar(
+                    borderRadius: borderRadius,
                     user: snapshot.data ?? otherMember.user,
                     constraints: constraints ??
                         StreamChatTheme.of(context)
@@ -117,10 +121,11 @@ class ChannelImage extends StatelessWidget {
           }
 
           return ClipRRect(
-            borderRadius: StreamChatTheme.of(context)
-                .channelPreviewTheme
-                .avatarTheme
-                .borderRadius,
+            borderRadius: borderRadius ??
+                StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .avatarTheme
+                    .borderRadius,
             child: Container(
               constraints: constraints ??
                   StreamChatTheme.of(context)
@@ -131,7 +136,6 @@ class ChannelImage extends StatelessWidget {
                 color: StreamChatTheme.of(context).accentColor,
               ),
               child: Stack(
-                fit: StackFit.expand,
                 children: <Widget>[
                   image != null
                       ? CachedNetworkImage(

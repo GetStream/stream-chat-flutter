@@ -43,65 +43,71 @@ class ChannelPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: channel.isMuted ? 0.5 : 1,
-      child: ListTile(
-        onTap: () {
-          if (onTap != null) {
-            onTap(channel);
-          }
-        },
-        onLongPress: () {
-          if (onLongPress != null) {
-            onLongPress(channel);
-          }
-        },
-        leading: ChannelImage(
-          onTap: onImageTap,
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Flexible(
-              child: ChannelName(
-                textStyle:
-                    StreamChatTheme.of(context).channelPreviewTheme.title,
-              ),
-            ),
-            if (channel.state.unreadCount > 0)
-              UnreadIndicator(
-                channel: channel,
-              ),
-          ],
-        ),
-        subtitle: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Flexible(child: _buildSubtitle(context)),
-            Builder(
-              builder: (context) {
-                if (channel.state.lastMessage?.user?.id ==
-                    StreamChat.of(context).user.id) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: SendingIndicator(
-                      message: channel.state.lastMessage,
-                      allRead: channel.state.read
-                              .where((element) => element.lastRead
-                                  .isAfter(channel.state.lastMessage.createdAt))
-                              .length ==
-                          channel.memberCount - 1,
-                    ),
-                  );
+    return StreamBuilder<bool>(
+        stream: channel.isMutedStream,
+        initialData: channel.isMuted,
+        builder: (context, snapshot) {
+          return Opacity(
+            opacity: snapshot.data ? 0.5 : 1,
+            child: ListTile(
+              onTap: () {
+                if (onTap != null) {
+                  onTap(channel);
                 }
-                return SizedBox();
               },
+              onLongPress: () {
+                if (onLongPress != null) {
+                  onLongPress(channel);
+                }
+              },
+              leading: ChannelImage(
+                onTap: onImageTap,
+              ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Flexible(
+                    child: ChannelName(
+                      textStyle:
+                          StreamChatTheme.of(context).channelPreviewTheme.title,
+                    ),
+                  ),
+                  if (channel.state.unreadCount > 0)
+                    UnreadIndicator(
+                      channel: channel,
+                    ),
+                ],
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Flexible(child: _buildSubtitle(context)),
+                  Builder(
+                    builder: (context) {
+                      if (channel.state.lastMessage?.user?.id ==
+                          StreamChat.of(context).user.id) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 4.0),
+                          child: SendingIndicator(
+                            message: channel.state.lastMessage,
+                            allRead: channel.state.read
+                                    .where((element) => element.lastRead
+                                        .isAfter(channel
+                                            .state.lastMessage.createdAt))
+                                    .length ==
+                                channel.memberCount - 1,
+                          ),
+                        );
+                      }
+                      return SizedBox();
+                    },
+                  ),
+                  _buildDate(context),
+                ],
+              ),
             ),
-            _buildDate(context),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   Widget _buildDate(BuildContext context) {
