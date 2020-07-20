@@ -56,9 +56,13 @@ jobs:
       - uses: subosito/flutter-action@v1.3.2
         with:
           flutter-version: ${{ env.flutter_version }}
-      - run: flutter pub get
+      - run: |
+          cd example
+          flutter pub get
       - name: Build
-        run: flutter build apk
+        run: |
+          cd example
+          flutter build apk
       - name: Upload
         uses: actions/upload-artifact@master
         with:
