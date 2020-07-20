@@ -2,14 +2,14 @@ name: CI
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-  release:
-    types:
-      - created
+#    branches:
+#      - master
+#  pull_request:
+#    branches:
+#      - master
+#  release:
+#    types:
+#      - created
 
 env:
   flutter_version: "1.12.13+hotfix.5"
