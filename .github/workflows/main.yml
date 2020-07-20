@@ -12,7 +12,7 @@ on:
 #      - created
 
 env:
-  flutter_version: "1.12.13+hotfix.5"
+  flutter_version: "1.17.5"
 
 jobs:
   test:
