@@ -10,7 +10,7 @@ on:
   release:
     types:
       - created
-        
+
 env:
   flutter_version: "1.12.13+hotfix.5"
 
@@ -18,29 +18,57 @@ jobs:
   test:
     runs-on: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2  
-    - name: Cache Flutter dependencies
-      id: cache
-      uses: actions/cache@v1
-      with:
-        path: /opt/hostedtoolcache/flutter
-        key: ${{ runner.OS }}-flutter-install-cache-${{ env.flutter_version }}
-    - name: Flutter action
-      uses: subosito/flutter-action@v1.1.1
-      with:
-        flutter-version: ${{ env.flutter_version }}
-    - name: Get dependencies
-      run: flutter pub get
-    - name: Coverage fix
-      run: |
-        file=test/coverage_helper_test.dart
-        echo "// Helper file to make coverage work for all dart files\n" > $file
-        echo "// ignore_for_file: unused_import" >> $file
-        find lib -name '*.dart' | grep -e '[^g]\.dart' | grep -v '_html.dart' | cut -c4- | awk -v package=stream_chat_flutter '{printf "import '\''package:%s%s'\'';\n", package, $1}' >> $file
-        echo "" >> $file
-        echo "void main(){}" >> $file
-        cat $file
-    - name: Run tests
-      run: flutter test --coverage
-    - name: Codecov
-      run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f coverage/lcov.info -F flutter_tool
+      - uses: actions/checkout@v2
+      - name: Cache Flutter dependencies
+        id: cache
+        uses: actions/cache@v1
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ runner.OS }}-flutter-install-cache-${{ env.flutter_version }}
+      - name: Flutter action
+        uses: subosito/flutter-action@v1.1.1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+      - name: Get dependencies
+        run: flutter pub get
+      - name: Coverage fix
+        run: |
+          file=test/coverage_helper_test.dart
+          echo "// Helper file to make coverage work for all dart files\n" > $file
+          echo "// ignore_for_file: unused_import" >> $file
+          find lib -name '*.dart' | grep -e '[^g]\.dart' | grep -v '_html.dart' | cut -c4- | awk -v package=stream_chat_flutter '{printf "import '\''package:%s%s'\'';\n", package, $1}' >> $file
+          echo "" >> $file
+          echo "void main(){}" >> $file
+          cat $file
+      - name: Run tests
+        run: flutter test --coverage
+      - name: Codecov
+        run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f coverage/lcov.info -F flutter_tool
+  build_and_deploy:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - uses: subosito/flutter-action@v1.1.1
+        with:
+          flutter-version: ${{ env.flutter_version }}
+      - run: flutter pub get
+      - name: Build
+        run: flutter build apk
+      - name: Upload
+        uses: actions/upload-artifact@master
+        with:
+          name: apk-build
+          path: example/build/app/outputs/bundle/release
+      - name: Deploy
+        #if: github.base_ref == 'master'
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
+        with:
+          appId: ${{secrets.FIREBASE_ANDROID_APPID}}
+          token: ${{secrets.FIREBASE_TOKEN}}
+          groups: stream-testers
+          file: example/build/app/outputs/apk/release/app-release.apk
