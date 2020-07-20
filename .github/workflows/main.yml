@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: /opt/hostedtoolcache/flutter
-          key: ${{ runner.OS }}-flutter-install-cache-${{ env.flutter_version }}
+          key: ${{ runner.OS }}-flutter-cache-${{ env.flutter_version }}
       - name: Flutter action
         uses: subosito/flutter-action@v1.3.2
         with:
