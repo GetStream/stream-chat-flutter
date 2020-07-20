@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
+import 'package:stream_chat_flutter/src/utils.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_bottom_sheet.dart';
@@ -307,12 +310,55 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   IconSlideAction(
                     color: Color(0xffEBEBEB),
-                    icon: Icons.notifications_none,
+                    icon: LineAwesomeIcons.volume_off,
+                    onTap: () async {
+                      if (!channel.isMuted) {
+                        await channel.mute();
+                      } else {
+                        await channel.unmute();
+                      }
+                    },
                   ),
-                  IconSlideAction(
-                    color: Color(0xffEBEBEB),
-                    icon: Icons.delete,
-                  ),
+                  if (channel.isGroup && !channel.isDistinct)
+                    IconSlideAction(
+                      color: Color(0xffEBEBEB),
+                      iconWidget: SvgPicture.asset(
+                        'assets/icon_user_minus.svg',
+                        package: 'stream_chat_flutter',
+                        width: 22,
+                      ),
+                      onTap: () async {
+                        final confirm = await showConfirmationDialog(
+                          context,
+                          'Do you want to leave the group?',
+                        );
+                        if (confirm == true) {
+                          await channel.removeMembers(channel.state.members
+                              .where((element) =>
+                                  element.userId ==
+                                  StreamChat.of(context).user.id)
+                              .toList());
+                        }
+                      },
+                    ),
+                  if (!channel.isGroup && !channel.isDistinct)
+                    IconSlideAction(
+                      color: Color(0xffEBEBEB),
+                      icon: Icons.delete_outline,
+                      onTap: () async {
+                        final confirm = await showConfirmationDialog(
+                          context,
+                          'Do you want to delete the chat?',
+                        );
+                        if (confirm == true) {
+                          await channel.removeMembers(channel.state.members
+                              .where((element) =>
+                                  element.userId ==
+                                  StreamChat.of(context).user.id)
+                              .toList());
+                        }
+                      },
+                    ),
                 ],
                 child: Container(
                   color: StreamChatTheme.of(context).backgroundColor,

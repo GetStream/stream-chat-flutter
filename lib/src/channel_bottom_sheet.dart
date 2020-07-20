@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/utils.dart';
 
 import 'channel_info.dart';
 import 'channel_name.dart';
@@ -70,26 +73,74 @@ class ChannelBottomSheet extends StatelessWidget {
                 stream: channel.isMutedStream,
                 initialData: channel.isMuted,
                 builder: (context, snapshot) {
-                  return SwitchListTile(
-                    onChanged: (bool muted) async {
-                      if (muted) {
-                        await channel.mute();
-                      } else {
-                        await channel.unmute();
-                      }
-                    },
-                    value: snapshot.data,
-                    title: Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(right: 22.0),
-                          child: Icon(LineAwesomeIcons.volume_off),
-                        ),
-                        Text('Mute'),
-                      ],
+                  return ListTile(
+                    leading: Icon(
+                      LineAwesomeIcons.volume_off,
+                      size: 22,
+                      color: StreamChatTheme.of(context).primaryIconTheme.color,
+                    ),
+                    title: Text('Mute ${channel.isGroup ? 'group' : 'user'}'),
+                    trailing: Switch(
+                      onChanged: (bool muted) async {
+                        if (muted) {
+                          await channel.mute();
+                        } else {
+                          await channel.unmute();
+                        }
+                      },
+                      value: snapshot.data,
                     ),
                   );
                 }),
+            Divider(),
+            if (channel.isGroup && !channel.isDistinct)
+              ListTile(
+                leading: SvgPicture.asset(
+                  'assets/icon_user_minus.svg',
+                  package: 'stream_chat_flutter',
+                  width: 22,
+                ),
+                title: Text('Leave Group'),
+                onTap: () async {
+                  final confirm = await showConfirmationDialog(
+                    context,
+                    'Do you want to leave the group?',
+                  );
+                  if (confirm == true) {
+                    await channel.removeMembers(channel.state.members
+                        .where((element) =>
+                            element.userId == StreamChat.of(context).user.id)
+                        .toList());
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+            if (!channel.isGroup && !channel.isDistinct)
+              ListTile(
+                leading: Icon(
+                  Icons.delete_outline,
+                  color: Color(0xFFFF3742),
+                ),
+                title: Text(
+                  'Delete chat',
+                  style: TextStyle(
+                    color: Color(0xFFFF3742),
+                  ),
+                ),
+                onTap: () async {
+                  final confirm = await showConfirmationDialog(
+                    context,
+                    'Do you want to delete the chat?',
+                  );
+                  if (confirm == true) {
+                    await channel.removeMembers(channel.state.members
+                        .where((element) =>
+                            element.userId == StreamChat.of(context).user.id)
+                        .toList());
+                    Navigator.pop(context);
+                  }
+                },
+              ),
           ],
         ),
       ),

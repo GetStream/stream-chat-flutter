@@ -12,3 +12,33 @@ Future<void> launchURL(BuildContext context, String url) async {
     );
   }
 }
+
+Future<bool> showConfirmationDialog(
+  BuildContext context,
+  String question,
+) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(question),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Ok'),
+            onPressed: () => Navigator.pop(
+              context,
+              true,
+            ),
+          ),
+          FlatButton(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(
+              context,
+              false,
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
