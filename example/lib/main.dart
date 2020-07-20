@@ -67,7 +67,7 @@ void _initNotifications(Client client) {
 void main() async {
   final client = Client(
     's2dxdhpxd94g',
-    logLevel: Level.FINEST,
+    logLevel: Level.ALL,
     showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
     persistenceEnabled: true,
   );
@@ -112,6 +112,7 @@ class ChannelListPage extends StatelessWidget {
     return Scaffold(
       body: ChannelsBloc(
         child: ChannelListView(
+          swipeToAction: true,
           filter: {
             'members': {
               '\$in': [StreamChat.of(context).user.id],
