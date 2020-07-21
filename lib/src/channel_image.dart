@@ -136,6 +136,8 @@ class ChannelImage extends StatelessWidget {
                 color: StreamChatTheme.of(context).accentColor,
               ),
               child: Stack(
+                alignment: Alignment.center,
+                fit: StackFit.expand,
                 children: <Widget>[
                   image != null
                       ? CachedNetworkImage(
