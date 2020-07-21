@@ -97,19 +97,25 @@ class StreamChatThemeData {
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
       backgroundColor: theme.scaffoldBackgroundColor,
-      channelTheme: ChannelTheme(
+      channelTheme: defaultTheme.channelTheme.copyWith(
         inputGradient: LinearGradient(colors: [
           theme.accentColor.withOpacity(.5),
           theme.accentColor,
         ]),
       ),
-      ownMessageTheme: MessageTheme(
+      ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
         replies: defaultTheme.ownMessageTheme.replies.copyWith(
           color: theme.accentColor,
         ),
+        messageLinks: TextStyle(
+          color: theme.accentColor,
+        ),
       ),
-      otherMessageTheme: MessageTheme(
-        replies: defaultTheme.ownMessageTheme.replies.copyWith(
+      otherMessageTheme: defaultTheme.otherMessageTheme.copyWith(
+        replies: defaultTheme.otherMessageTheme.replies.copyWith(
+          color: theme.accentColor,
+        ),
+        messageLinks: TextStyle(
           color: theme.accentColor,
         ),
       ),
@@ -314,6 +320,9 @@ class StreamChatThemeData {
           color: accentColor,
           fontWeight: FontWeight.bold,
           fontSize: 12,
+        ),
+        messageLinks: TextStyle(
+          color: accentColor,
         ),
         messageBackgroundColor: isDark ? Colors.black : Colors.white,
         avatarTheme: AvatarTheme(
