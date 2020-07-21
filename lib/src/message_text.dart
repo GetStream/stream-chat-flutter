@@ -49,6 +49,7 @@ class MessageText extends StatelessWidget {
               ),
         ),
       ).copyWith(
+        a: messageTheme.messageLinks,
         p: messageTheme.messageText,
       ),
     );
