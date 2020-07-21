@@ -168,7 +168,7 @@ class StreamChatThemeData {
                   this.ownMessageTheme.messageText,
               messageAuthor: ownMessageTheme?.messageAuthor ??
                   this.ownMessageTheme.messageAuthor,
-              messageMention: ownMessageTheme?.messageLinks ??
+              messageLinks: ownMessageTheme?.messageLinks ??
                   this.ownMessageTheme.messageLinks,
               createdAt:
                   ownMessageTheme?.createdAt ?? this.ownMessageTheme.createdAt,
@@ -184,7 +184,7 @@ class StreamChatThemeData {
                   this.otherMessageTheme.messageText,
               messageAuthor: otherMessageTheme?.messageAuthor ??
                   this.otherMessageTheme.messageAuthor,
-              messageMention: otherMessageTheme?.messageLinks ??
+              messageLinks: otherMessageTheme?.messageLinks ??
                   this.otherMessageTheme.messageLinks,
               createdAt: otherMessageTheme?.createdAt ??
                   this.otherMessageTheme.createdAt,
@@ -421,7 +421,7 @@ class MessageTheme {
   MessageTheme copyWith({
     TextStyle messageText,
     TextStyle messageAuthor,
-    TextStyle messageMention,
+    TextStyle messageLinks,
     TextStyle createdAt,
     TextStyle replies,
     Color messageBackgroundColor,
@@ -431,7 +431,7 @@ class MessageTheme {
       MessageTheme(
         messageText: messageText ?? this.messageText,
         messageAuthor: messageAuthor ?? this.messageAuthor,
-        messageLinks: messageMention ?? this.messageLinks,
+        messageLinks: messageLinks ?? this.messageLinks,
         createdAt: createdAt ?? this.createdAt,
         messageBackgroundColor:
             messageBackgroundColor ?? this.messageBackgroundColor,

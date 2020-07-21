@@ -124,7 +124,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         messageBackgroundColor:
             themeData?.ownMessageTheme?.messageBackgroundColor,
         messageAuthor: themeData?.ownMessageTheme?.messageAuthor,
-        messageMention: themeData?.ownMessageTheme?.messageLinks,
+        messageLinks: themeData?.ownMessageTheme?.messageLinks,
         avatarTheme: defaultTheme.ownMessageTheme.avatarTheme.copyWith(
           constraints: themeData?.ownMessageTheme?.avatarTheme?.constraints,
           borderRadius: themeData?.ownMessageTheme?.avatarTheme?.borderRadius,
@@ -137,7 +137,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         messageBackgroundColor:
             themeData?.otherMessageTheme?.messageBackgroundColor,
         messageAuthor: themeData?.otherMessageTheme?.messageAuthor,
-        messageMention: themeData?.otherMessageTheme?.messageLinks,
+        messageLinks: themeData?.otherMessageTheme?.messageLinks,
         avatarTheme: defaultTheme.otherMessageTheme.avatarTheme.copyWith(
           constraints: themeData?.otherMessageTheme?.avatarTheme?.constraints,
           borderRadius: themeData?.otherMessageTheme?.avatarTheme?.borderRadius,
