@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Add `messageLinks` property to `MessageTheme` to customize links color
+
 ## 0.2.1+2
 
 - Update llc dependency
