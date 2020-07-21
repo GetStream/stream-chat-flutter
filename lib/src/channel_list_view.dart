@@ -283,6 +283,10 @@ class _ChannelListViewState extends State<ChannelListView>
                 ],
               );
             } else {
+              final backgroundColor =
+                  Theme.of(context).brightness == Brightness.light
+                      ? Color(0xffEBEBEB)
+                      : Color(0xff141414);
               child = Slidable(
                 enabled: widget.swipeToAction,
                 actionPane: SlidableBehindActionPane(),
@@ -290,7 +294,7 @@ class _ChannelListViewState extends State<ChannelListView>
                 closeOnScroll: true,
                 secondaryActions: <Widget>[
                   IconSlideAction(
-                    color: Color(0xffEBEBEB),
+                    color: backgroundColor,
                     icon: Icons.more_horiz,
                     onTap: () {
                       showModalBottomSheet(
@@ -309,7 +313,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     },
                   ),
                   IconSlideAction(
-                    color: Color(0xffEBEBEB),
+                    color: backgroundColor,
                     icon: LineAwesomeIcons.volume_off,
                     onTap: () async {
                       if (!channel.isMuted) {
@@ -321,10 +325,12 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   if (channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
-                      color: Color(0xffEBEBEB),
+                      color: backgroundColor,
                       iconWidget: SvgPicture.asset(
                         'assets/icon_user_minus.svg',
                         package: 'stream_chat_flutter',
+                        color:
+                            StreamChatTheme.of(context).primaryIconTheme.color,
                         width: 22,
                       ),
                       onTap: () async {
@@ -343,7 +349,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     ),
                   if (!channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
-                      color: Color(0xffEBEBEB),
+                      color: backgroundColor,
                       icon: Icons.delete_outline,
                       onTap: () async {
                         final confirm = await showConfirmationDialog(

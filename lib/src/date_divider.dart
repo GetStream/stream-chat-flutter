@@ -39,7 +39,10 @@ class DateDivider extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
+          color: (Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white)
+              .withOpacity(0.5),
           borderRadius: BorderRadius.circular(
             8,
           ),
