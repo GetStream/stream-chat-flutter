@@ -123,6 +123,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
             ),
             if (widget.attachment.title != null)
               Material(
+                color: widget.messageTheme.messageBackgroundColor,
                 child: AttachmentTitle(
                   messageTheme: widget.messageTheme,
                   attachment: widget.attachment,

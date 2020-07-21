@@ -97,19 +97,25 @@ class StreamChatThemeData {
       primaryColor: theme.colorScheme.primary,
       secondaryColor: theme.colorScheme.secondary,
       backgroundColor: theme.scaffoldBackgroundColor,
-      channelTheme: ChannelTheme(
+      channelTheme: defaultTheme.channelTheme.copyWith(
         inputGradient: LinearGradient(colors: [
           theme.accentColor.withOpacity(.5),
           theme.accentColor,
         ]),
       ),
-      ownMessageTheme: MessageTheme(
+      ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
         replies: defaultTheme.ownMessageTheme.replies.copyWith(
           color: theme.accentColor,
         ),
+        messageLinks: TextStyle(
+          color: theme.accentColor,
+        ),
       ),
-      otherMessageTheme: MessageTheme(
-        replies: defaultTheme.ownMessageTheme.replies.copyWith(
+      otherMessageTheme: defaultTheme.otherMessageTheme.copyWith(
+        replies: defaultTheme.otherMessageTheme.replies.copyWith(
+          color: theme.accentColor,
+        ),
+        messageLinks: TextStyle(
           color: theme.accentColor,
         ),
       ),
@@ -168,8 +174,8 @@ class StreamChatThemeData {
                   this.ownMessageTheme.messageText,
               messageAuthor: ownMessageTheme?.messageAuthor ??
                   this.ownMessageTheme.messageAuthor,
-              messageMention: ownMessageTheme?.messageMention ??
-                  this.ownMessageTheme.messageMention,
+              messageLinks: ownMessageTheme?.messageLinks ??
+                  this.ownMessageTheme.messageLinks,
               createdAt:
                   ownMessageTheme?.createdAt ?? this.ownMessageTheme.createdAt,
               replies: ownMessageTheme?.replies ?? this.ownMessageTheme.replies,
@@ -184,8 +190,8 @@ class StreamChatThemeData {
                   this.otherMessageTheme.messageText,
               messageAuthor: otherMessageTheme?.messageAuthor ??
                   this.otherMessageTheme.messageAuthor,
-              messageMention: otherMessageTheme?.messageMention ??
-                  this.otherMessageTheme.messageMention,
+              messageLinks: otherMessageTheme?.messageLinks ??
+                  this.otherMessageTheme.messageLinks,
               createdAt: otherMessageTheme?.createdAt ??
                   this.otherMessageTheme.createdAt,
               replies:
@@ -295,6 +301,9 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
+        messageLinks: TextStyle(
+          color: accentColor,
+        ),
       ),
       otherMessageTheme: MessageTheme(
         messageText: TextStyle(
@@ -311,6 +320,9 @@ class StreamChatThemeData {
           color: accentColor,
           fontWeight: FontWeight.bold,
           fontSize: 12,
+        ),
+        messageLinks: TextStyle(
+          color: accentColor,
         ),
         messageBackgroundColor: isDark ? Colors.black : Colors.white,
         avatarTheme: AvatarTheme(
@@ -399,7 +411,7 @@ class AvatarTheme {
 class MessageTheme {
   final TextStyle messageText;
   final TextStyle messageAuthor;
-  final TextStyle messageMention;
+  final TextStyle messageLinks;
   final TextStyle createdAt;
   final TextStyle replies;
   final Color messageBackgroundColor;
@@ -409,7 +421,7 @@ class MessageTheme {
     this.replies,
     this.messageText,
     this.messageAuthor,
-    this.messageMention,
+    this.messageLinks,
     this.messageBackgroundColor,
     this.avatarTheme,
     this.createdAt,
@@ -418,7 +430,7 @@ class MessageTheme {
   MessageTheme copyWith({
     TextStyle messageText,
     TextStyle messageAuthor,
-    TextStyle messageMention,
+    TextStyle messageLinks,
     TextStyle createdAt,
     TextStyle replies,
     Color messageBackgroundColor,
@@ -428,7 +440,7 @@ class MessageTheme {
       MessageTheme(
         messageText: messageText ?? this.messageText,
         messageAuthor: messageAuthor ?? this.messageAuthor,
-        messageMention: messageMention ?? this.messageMention,
+        messageLinks: messageLinks ?? this.messageLinks,
         createdAt: createdAt ?? this.createdAt,
         messageBackgroundColor:
             messageBackgroundColor ?? this.messageBackgroundColor,
