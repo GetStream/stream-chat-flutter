@@ -15,14 +15,12 @@ class FullScreenImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: PhotoView(
-        imageProvider: CachedNetworkImageProvider(url),
-        maxScale: PhotoViewComputedScale.covered,
-        minScale: PhotoViewComputedScale.contained,
-        heroAttributes: PhotoViewHeroAttributes(
-          tag: url,
-        ),
+    return PhotoView(
+      imageProvider: CachedNetworkImageProvider(url),
+      maxScale: PhotoViewComputedScale.covered,
+      minScale: PhotoViewComputedScale.contained,
+      heroAttributes: PhotoViewHeroAttributes(
+        tag: url,
       ),
     );
   }

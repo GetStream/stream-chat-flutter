@@ -530,17 +530,16 @@ class _MessageWidgetState extends State<MessageWidget> {
         .toList();
 
     if (images.length > 1) {
-      final imageBuilder = widget.attachmentBuilders['image'];
       return [
         wrapAttachmentWidget(
           context,
           Material(
             color: widget.messageTheme.messageBackgroundColor,
             child: ImageGroup(
-              size: Size.fromWidth(
+              size: Size(
                 MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
               ),
-              imageBuilder: imageBuilder,
               images: images,
               message: widget.message,
             ),

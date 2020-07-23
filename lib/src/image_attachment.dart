@@ -39,13 +39,18 @@ class ImageAttachment extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return FullScreenImage(
-                        url: attachment.imageUrl ??
-                            attachment.assetUrl ??
-                            attachment.thumbUrl,
-                      );
-                    }));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) {
+                          return FullScreenImage(
+                            url: attachment.imageUrl ??
+                                attachment.assetUrl ??
+                                attachment.thumbUrl,
+                          );
+                        },
+                      ),
+                    );
                   },
                   child: CachedNetworkImage(
                     height: size?.height,
