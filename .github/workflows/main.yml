@@ -83,7 +83,7 @@ jobs:
     - name: Upload IPA
       uses: wzieba/Firebase-Distribution-Github-Action@v1.0.0
       with:
-        appId: io.getstream.ChatExample
+        appId: "1:674907137625:ios:cafb9fb076a453c4d7f348"
         token: ${{secrets.FIREBASE_TOKEN}}
         groups: ios-stream-testers
         file: Runner.ipa
