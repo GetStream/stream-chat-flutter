@@ -66,7 +66,7 @@ jobs:
         name: ios-build
         path: example/build/ios/iphoneos
 
-  deploy ios:
+  deploy_ios:
     name: Upload iOS to Firebase App Distribution
     needs: [build_ios]
     runs-on: ubuntu-latest
