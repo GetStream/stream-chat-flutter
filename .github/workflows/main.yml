@@ -80,6 +80,9 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: ios-build
+    - run: |
+        ls -l /home/runner/work/stream-chat-flutter/stream-chat-flutter
+        ls -l .
     - name: Upload IPA
       uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
       with:
