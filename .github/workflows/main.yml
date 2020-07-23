@@ -87,6 +87,7 @@ jobs:
         token: ${{secrets.FIREBASE_TOKEN}}
         groups: ios-stream-testers
         file: Runner.ipa
+        debug: true
   build_and_deploy_android:
     name: Build and deploy android
     runs-on: ubuntu-latest
