@@ -44,8 +44,51 @@ jobs:
         run: flutter test --coverage
       - name: Codecov
         run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f coverage/lcov.info -F flutter_tool
-  build_and_deploy:
-    name: Build
+  build_ios:
+    name: Build iOS
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '12.x'
+    - uses: subosito/flutter-action@v1.3.2
+      with:
+        flutter-version: ${{ env.flutter_version }}
+    - run: |
+        cd example
+        flutter pub get
+        flutter clean
+        flutter build ios --release --no-codesign
+    - name: Upload iPA
+      uses: actions/upload-artifact@v2
+      with:
+        name: ios-build
+        path: example/build/ios/iphoneos
+
+  deploy ios:
+    name: Upload iOS to Firebase App Distribution
+    needs: [build_ios]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Download Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ios-build
+    - name: Upload IPA
+      uses: wzieba/Firebase-Distribution-Github-Action@v1.0.0
+      with:
+        appId: io.getstream.ChatExample
+        token: ${{secrets.FIREBASE_TOKEN}}
+        group: ios-stream-testers
+        file: Runner.ipa
+  build_and_deploy_android:
+    name: Build and deploy android
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -64,7 +107,7 @@ jobs:
           cd example
           flutter build apk
       - name: Upload
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v2
         with:
           name: apk-build
           path: example/build/app/outputs/bundle/release
