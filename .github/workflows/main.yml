@@ -60,11 +60,16 @@ jobs:
         flutter pub get
         flutter clean
         flutter build ios --release --no-codesign
+        cd ios
+        xcodebuild -workspace Runner.xcworkspace -scheme Runner -sdk iphoneos -configuration Release archive -archivePath $PWD/build/Runner.xcarchive
+        xcodebuild -exportArchive -archivePath $PWD/build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath $PWD/build/Runner.ipa
+        cd ..
+
     - name: Upload iPA
       uses: actions/upload-artifact@v2.1.0
       with:
         name: ios-build
-        path: ./example/build/ios/iphoneos/
+        path: ios/build/Runner.ipa/Runner.ipa
 
   deploy_ios:
     name: Upload iOS to Firebase App Distribution
