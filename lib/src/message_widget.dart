@@ -8,6 +8,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'image_group.dart';
 import 'message_actions_bottom_sheet.dart';
 import 'message_text.dart';
 
@@ -272,6 +273,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                       : Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
                                             ..._parseAttachments(context),
                                             if (widget.message.text
@@ -523,6 +525,30 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   List<Widget> _parseAttachments(BuildContext context) {
+    final images = widget.message.attachments
+        .where((element) => element.type == 'image')
+        .toList();
+
+    if (images.length > 1) {
+      final imageBuilder = widget.attachmentBuilders['image'];
+      return [
+        wrapAttachmentWidget(
+          context,
+          Material(
+            color: widget.messageTheme.messageBackgroundColor,
+            child: ImageGroup(
+              size: Size.fromWidth(
+                MediaQuery.of(context).size.width * 0.8,
+              ),
+              imageBuilder: imageBuilder,
+              images: images,
+              message: widget.message,
+            ),
+          ),
+        ),
+      ];
+    }
+
     return widget.message.attachments?.map((attachment) {
           final attachmentBuilder = widget.attachmentBuilders[attachment.type];
 
@@ -530,61 +556,65 @@ class _MessageWidgetState extends State<MessageWidget> {
             return SizedBox();
           }
 
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: 4,
-            ),
-            child: GestureDetector(
-              onTap: () => retryMessage(context),
-              onLongPress: () => onLongPress(context),
-              child: Material(
-                color: _getBackgroundColor(),
-                clipBehavior: Clip.hardEdge,
-                shape: widget.attachmentShape ??
-                    widget.shape ??
-                    ContinuousRectangleBorder(
-                      side: widget.attachmentBorderSide ??
-                          widget.borderSide ??
-                          BorderSide(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white.withAlpha(24)
-                                    : Colors.black.withAlpha(24),
-                          ),
-                      borderRadius: widget.attachmentBorderRadiusGeometry ??
-                          widget.borderRadiusGeometry ??
-                          BorderRadius.zero,
+          final attachmentWidget = attachmentBuilder(
+            context,
+            widget.message,
+            attachment,
+          );
+          return wrapAttachmentWidget(context, attachmentWidget);
+        })?.toList() ??
+        [];
+  }
+
+  Padding wrapAttachmentWidget(BuildContext context, Widget attachmentWidget) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: 4,
+      ),
+      child: GestureDetector(
+        onTap: () => retryMessage(context),
+        onLongPress: () => onLongPress(context),
+        child: Material(
+          color: _getBackgroundColor(),
+          clipBehavior: Clip.hardEdge,
+          shape: widget.attachmentShape ??
+              widget.shape ??
+              ContinuousRectangleBorder(
+                side: widget.attachmentBorderSide ??
+                    widget.borderSide ??
+                    BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withAlpha(24)
+                          : Colors.black.withAlpha(24),
                     ),
-                child: Padding(
-                  padding: widget.attachmentPadding,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Transform(
-                      transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                      alignment: Alignment.center,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          getFailedMessageWidget(
-                            context,
-                            padding: const EdgeInsets.all(8.0),
-                          ),
-                          attachmentBuilder(
-                            context,
-                            widget.message,
-                            attachment,
-                          ),
-                        ],
-                      ),
+                borderRadius: widget.attachmentBorderRadiusGeometry ??
+                    widget.borderRadiusGeometry ??
+                    BorderRadius.zero,
+              ),
+          child: Padding(
+            padding: widget.attachmentPadding,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Transform(
+                transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    getFailedMessageWidget(
+                      context,
+                      padding: const EdgeInsets.all(8.0),
                     ),
-                  ),
+                    attachmentWidget,
+                  ],
                 ),
               ),
             ),
-          );
-        })?.toList() ??
-        [];
+          ),
+        ),
+      ),
+    );
   }
 
   void onLongPress(BuildContext context) {

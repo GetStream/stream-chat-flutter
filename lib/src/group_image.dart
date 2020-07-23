@@ -17,16 +17,6 @@ class GroupImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondRow = images
-        .skip(2)
-        .map((url) => Flexible(
-              child: CachedNetworkImage(
-                imageUrl: url,
-                fit: BoxFit.cover,
-              ),
-            ))
-        .toList();
-
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -81,7 +71,7 @@ class GroupImage extends StatelessWidget {
                             ))
                         .toList(),
                   ),
-                )
+                ),
             ],
           ),
         ),

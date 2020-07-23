@@ -17,8 +17,8 @@ class ImageAttachment extends StatelessWidget {
     Key key,
     @required this.attachment,
     @required this.message,
+    @required this.size,
     this.messageTheme,
-    this.size,
   }) : super(key: key);
 
   @override
@@ -30,8 +30,8 @@ class ImageAttachment extends StatelessWidget {
         attachment: attachment,
       );
     }
-    return SizedBox.fromSize(
-      size: size,
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(size),
       child: Stack(
         children: <Widget>[
           Column(
