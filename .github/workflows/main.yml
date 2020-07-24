@@ -59,7 +59,7 @@ jobs:
         cd example
         flutter pub get
         flutter clean
-        flutter build ios --release --no-codesign
+        flutter build ios --release
         cd ios
         xcodebuild -workspace Runner.xcworkspace -scheme Runner -sdk iphoneos -configuration Release archive -archivePath $PWD/build/Runner.xcarchive
         xcodebuild -exportArchive -archivePath $PWD/build/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath $PWD/build/Runner.ipa
