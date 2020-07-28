@@ -2,7 +2,9 @@ git_url("https://github.com/GetStream/ios-certificates")
 
 storage_mode("git")
 
-username("imtoori")
+username("salvatore@getstream.io")
+
+type("adhoc")
 
 team_id("EHV7XZLAHA")
 
