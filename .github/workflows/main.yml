@@ -45,7 +45,7 @@ jobs:
       - name: Codecov
         run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f coverage/lcov.info -F flutter_tool
   build_and_deploy_ios:
-    runs-on: [macos-latest]
+      runs-on: [macos-latest]
       steps:
       - uses: actions/checkout@v1
       - name: Cache RubyGems
