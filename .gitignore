@@ -60,3 +60,4 @@ doc/api/
 *.js.map
 
 fvm
+example/ios/dist
