@@ -45,7 +45,8 @@ jobs:
       - name: Codecov
         run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f coverage/lcov.info -F flutter_tool
   build_and_deploy_ios:
-    steps:
+    runs-on: [macos-latest]
+      steps:
       - uses: actions/checkout@v1
       - name: Cache RubyGems
         uses: actions/cache@v1
@@ -73,7 +74,6 @@ jobs:
           cd ios
           bundle exec fastlane deploy_to_firebase
   build_and_deploy_android:
-    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -92,7 +92,7 @@ jobs:
           cd example
           flutter build apk
       - name: Upload
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v2
         with:
           name: apk-build
           path: example/build/app/outputs/bundle/release
