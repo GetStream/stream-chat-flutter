@@ -58,7 +58,7 @@ jobs:
       - name: Install RubyGems
         if: steps.rubygem-cache.outputs.cache-hit != 'true'
         run: |
-          cd ios
+          cd example/ios
           bundle install
       - uses: subosito/flutter-action@v1.3.2
         with:
