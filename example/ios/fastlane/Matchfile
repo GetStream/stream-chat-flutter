@@ -4,8 +4,6 @@ storage_mode("git")
 
 username("salvatore@getstream.io")
 
-type("adhoc")
-
 team_id("EHV7XZLAHA")
 
 # app_identifier(["tools.fastlane.app", "tools.fastlane.app2"])
