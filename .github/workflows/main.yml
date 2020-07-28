@@ -65,6 +65,7 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
       - name: Flutter setup
         run: |
+          cd example
           flutter pub get
           flutter build ios --release --no-codesign
       - name: Build
