@@ -1,6 +1,12 @@
 fastlane_version "2.68.0"
 default_platform :ios
 
+before_all do
+  if is_ci
+    setup_ci()
+  end
+end
+
 desc "Installs all Certs and Profiles necessary for development and ad-hoc"
 lane :match_me do
   match(
