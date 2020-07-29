@@ -7,9 +7,9 @@
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>io.getstream.flutter</key>
-		<string>flutter example</string>
+		<string>match Development io.getstream.flutter</string>
 		<key>io.getstream.flutter.Notifications</key>
-        <string>flutter example notifications</string>
+        <string>match Development io.getstream.flutter.Notifications</string>
     </dict>
 </dict>
 </plist>
