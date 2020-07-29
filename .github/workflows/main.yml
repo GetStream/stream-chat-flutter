@@ -63,6 +63,8 @@ jobs:
       - uses: subosito/flutter-action@v1.3.2
         with:
           flutter-version: ${{ env.flutter_version }}
+      - name: Install firebase-tools
+        run: npm install -g firebase-tools
       - name: Flutter setup
         run: |
           cd example
