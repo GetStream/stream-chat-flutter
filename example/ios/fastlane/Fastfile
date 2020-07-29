@@ -46,7 +46,7 @@ platform :ios do
 
         firebase_app_distribution(
             app: "1:674907137625:ios:cafb9fb076a453c4d7f348",
-            groups: "ios-stream-testers",
+            groups: "ios-stream-testers"
         )
     end
 end
