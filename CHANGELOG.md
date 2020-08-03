@@ -1,3 +1,7 @@
+## 0.2.2+1
+
+- Fix some components to implement a splitview example
+
 ## 0.2.2
 
 - Add `messageLinks` property to `MessageTheme` to customize links color
