@@ -216,90 +216,83 @@ class _MessageWidgetState extends State<MessageWidget> {
         child: Transform(
           alignment: Alignment.center,
           transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-          child: Container(
+          child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
-            child: Container(
-              constraints: BoxConstraints.loose(
-                Size.fromWidth(MediaQuery.of(context).size.width * 0.8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  IntrinsicWidth(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            widthFactor: 0.75,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            if (widget.showUserAvatar == DisplayWidget.show)
-                              _buildUserAvatar(),
-                            SizedBox(
-                              width: 6,
-                            ),
-                            if (widget.showUserAvatar == DisplayWidget.hide)
-                              SizedBox(
-                                width: widget.messageTheme.avatarTheme
-                                        .constraints.maxWidth +
-                                    8,
-                              ),
-                            Flexible(
-                              child: Padding(
-                                padding: widget.showReactions
-                                    ? EdgeInsets.only(
-                                        top: _reactionPadding,
-                                      )
-                                    : EdgeInsets.zero,
-                                child: PortalEntry(
-                                  portalAnchor: Alignment(0, 1),
-                                  childAnchor: Alignment.topRight,
-                                  portal: _buildReactionIndicator(context),
-                                  child: (widget.message.isDeleted &&
-                                          widget.message.status !=
-                                              MessageSendingStatus
-                                                  .FAILED_DELETE)
-                                      ? Transform(
-                                          alignment: Alignment.center,
-                                          transform: Matrix4.rotationY(
-                                              widget.reverse ? pi : 0),
-                                          child: DeletedMessage(
-                                            messageTheme: widget.messageTheme,
-                                          ),
-                                        )
-                                      : Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            ..._parseAttachments(context),
-                                            if (widget.message.text
-                                                .trim()
-                                                .isNotEmpty)
-                                              _buildTextBubble(context),
-                                          ],
-                                        ),
-                                ),
-                              ),
-                            ),
-                          ],
+                        if (widget.showUserAvatar == DisplayWidget.show)
+                          _buildUserAvatar(),
+                        SizedBox(
+                          width: 6,
                         ),
-                        if (widget.showReplyIndicator &&
-                            widget.message.replyCount > 0)
-                          _buildReplyIndicator(leftPadding),
+                        if (widget.showUserAvatar == DisplayWidget.hide)
+                          SizedBox(
+                            width: widget.messageTheme.avatarTheme.constraints
+                                    .maxWidth +
+                                8,
+                          ),
+                        Flexible(
+                          child: Padding(
+                            padding: widget.showReactions
+                                ? EdgeInsets.only(
+                                    top: _reactionPadding,
+                                  )
+                                : EdgeInsets.zero,
+                            child: PortalEntry(
+                              portalAnchor: Alignment(0, 1),
+                              childAnchor: Alignment.topRight,
+                              portal: _buildReactionIndicator(context),
+                              child: (widget.message.isDeleted &&
+                                      widget.message.status !=
+                                          MessageSendingStatus.FAILED_DELETE)
+                                  ? Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.rotationY(
+                                          widget.reverse ? pi : 0),
+                                      child: DeletedMessage(
+                                        messageTheme: widget.messageTheme,
+                                      ),
+                                    )
+                                  : Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        ..._parseAttachments(context),
+                                        if (widget.message.text
+                                            .trim()
+                                            .isNotEmpty)
+                                          _buildTextBubble(context),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  if ((widget.message.createdAt != null &&
-                          widget.showTimestamp) ||
-                      widget.showUsername ||
-                      widget.readList?.isNotEmpty == true)
-                    _buildBottomRow(leftPadding),
-                ],
-              ),
+                    if (widget.showReplyIndicator &&
+                        widget.message.replyCount > 0)
+                      _buildReplyIndicator(leftPadding),
+                  ],
+                ),
+                if ((widget.message.createdAt != null &&
+                        widget.showTimestamp) ||
+                    widget.showUsername ||
+                    widget.readList?.isNotEmpty == true)
+                  _buildBottomRow(leftPadding),
+              ],
             ),
           ),
         ),
@@ -447,32 +440,35 @@ class _MessageWidgetState extends State<MessageWidget> {
           ? Container(
               child: GestureDetector(
                 onTap: () => onLongPress(context),
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  padding: const EdgeInsets.only(
-                    bottom: 4.0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Transform(
-                        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                            borderRadius: BorderRadius.all(Radius.circular(14)),
+                child: FractionallySizedBox(
+                  widthFactor: 0.3,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 4.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Transform(
+                          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+                          alignment: Alignment.center,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(14)),
+                            ),
+                            child: _buildReactionsText(context),
                           ),
-                          child: _buildReactionsText(context),
                         ),
-                      ),
-                      _buildReactionsTail(context),
-                    ],
+                        _buildReactionsTail(context),
+                      ],
+                    ),
                   ),
                 ),
               ),

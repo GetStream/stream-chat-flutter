@@ -56,20 +56,20 @@ class _SplitViewState extends State<SplitView> {
           flex: 1,
         ),
         Flexible(
-          child: selectedChannel != null
-              ? StreamChannel(
-                  key: ValueKey(selectedChannel.cid),
-                  child: ChannelPage(),
-                  channel: selectedChannel,
-                )
-              : Scaffold(
-                  body: Center(
+          child: Scaffold(
+            body: selectedChannel != null
+                ? StreamChannel(
+                    key: ValueKey(selectedChannel.cid),
+                    child: ChannelPage(),
+                    channel: selectedChannel,
+                  )
+                : Center(
                     child: Text(
                       'Pick a channel to show the messages 💬',
-                      style: Theme.of(context).textTheme.headline,
+                      style: Theme.of(context).textTheme.headline5,
                     ),
                   ),
-                ),
+          ),
           flex: 2,
         ),
       ],
@@ -101,7 +101,6 @@ class ChannelListPage extends StatelessWidget {
           pagination: PaginationParams(
             limit: 20,
           ),
-          channelWidget: ChannelPage(),
         ),
       ),
     );
@@ -115,18 +114,26 @@ class ChannelPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: ChannelHeader(
-        showBackButton: false,
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: MessageListView(),
-          ),
-          MessageInput(),
-        ],
-      ),
+    return Navigator(
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) {
+            return Scaffold(
+              appBar: ChannelHeader(
+                showBackButton: false,
+              ),
+              body: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: MessageListView(),
+                  ),
+                  MessageInput(),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
