@@ -10,7 +10,7 @@ class ImageGroup extends StatelessWidget {
     Key key,
     @required this.images,
     @required this.message,
-    this.size,
+    @required this.size,
   }) : super(key: key);
 
   final List<Attachment> images;
