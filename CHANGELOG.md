@@ -1,3 +1,9 @@
+## 0.2.2+2
+
+- Fix `ChannelListView` channel hidden behaviour
+
+- Refresh `ChannelListView` on new message from hidden channel
+
 ## 0.2.2+1
 
 - Fix some components to implement a splitview example
