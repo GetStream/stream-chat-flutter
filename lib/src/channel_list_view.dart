@@ -377,6 +377,7 @@ class _ChannelListViewState extends State<ChannelListView>
         .on(
       EventType.connectionRecovered,
       EventType.notificationAddedToChannel,
+      EventType.notificationMessageNew,
       EventType.channelVisible,
     )
         .listen((event) {

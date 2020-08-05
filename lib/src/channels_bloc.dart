@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget dedicated to the management of a channel list with pagination
 class ChannelsBloc extends StatefulWidget {
@@ -57,6 +58,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
       _queryChannelsLoadingController.stream;
+
+  List<Channel> _hiddenChannels = [];
 
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
@@ -118,6 +121,23 @@ class ChannelsBlocState extends State<ChannelsBloc>
       if (index > 0) {
         final channel = newChannels.removeAt(index);
         newChannels.insert(0, channel);
+        _channelsController.add(newChannels);
+      } else {
+        final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
+        if (hiddenIndex > -1) {
+          newChannels.insert(0, _hiddenChannels[hiddenIndex]);
+          _hiddenChannels.removeAt(hiddenIndex);
+          _channelsController.add(newChannels);
+        }
+      }
+    }));
+
+    _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
+      final newChannels = List<Channel>.from(channels);
+      final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
+      if (channelIndex > -1) {
+        final channel = newChannels.removeAt(channelIndex);
+        _hiddenChannels.add(channel);
         _channelsController.add(newChannels);
       }
     }));
