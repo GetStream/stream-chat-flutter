@@ -1,3 +1,7 @@
+## 0.2.3
+
+- Add `lockChannelsOrder` parameter to `ChannelsBloc`
+
 ## 0.2.2+3
 
 - Fix `ChannelListView` channel hidden behaviour
