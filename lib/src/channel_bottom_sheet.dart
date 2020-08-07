@@ -107,10 +107,8 @@ class ChannelBottomSheet extends StatelessWidget {
                     'Do you want to leave the group?',
                   );
                   if (confirm == true) {
-                    await channel.removeMembers(channel.state.members
-                        .where((element) =>
-                            element.userId == StreamChat.of(context).user.id)
-                        .toList());
+                    await channel
+                        .removeMembers([StreamChat.of(context).user.id]);
                     Navigator.pop(context);
                   }
                 },
@@ -133,10 +131,8 @@ class ChannelBottomSheet extends StatelessWidget {
                     'Do you want to delete the chat?',
                   );
                   if (confirm == true) {
-                    await channel.removeMembers(channel.state.members
-                        .where((element) =>
-                            element.userId == StreamChat.of(context).user.id)
-                        .toList());
+                    await channel
+                        .removeMembers([StreamChat.of(context).user.id]);
                     Navigator.pop(context);
                   }
                 },

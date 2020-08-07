@@ -4,16 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget dedicated to the management of a channel list with pagination
 class ChannelsBloc extends StatefulWidget {
   /// The widget child
   final Widget child;
 
+  /// Set this to false to prevent channels to be brought to the top of the list when a new message arrives
+  final bool lockChannelsOrder;
+
   /// Instantiate a new ChannelsBloc
   const ChannelsBloc({
     Key key,
     this.child,
+    this.lockChannelsOrder = false,
   }) : super(key: key);
 
   @override
@@ -57,6 +62,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
       _queryChannelsLoadingController.stream;
+
+  final List<Channel> _hiddenChannels = [];
 
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
@@ -112,12 +119,31 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
     final client = StreamChat.of(context).client;
 
-    _subscriptions.add(client.on(EventType.messageNew).listen((e) {
-      final newChannels = List<Channel>.from(channels ?? []);
-      final index = newChannels.indexWhere((c) => c.cid == e.cid);
-      if (index > 0) {
-        final channel = newChannels.removeAt(index);
-        newChannels.insert(0, channel);
+    if (!widget.lockChannelsOrder) {
+      _subscriptions.add(client.on(EventType.messageNew).listen((e) {
+        final newChannels = List<Channel>.from(channels ?? []);
+        final index = newChannels.indexWhere((c) => c.cid == e.cid);
+        if (index > 0) {
+          final channel = newChannels.removeAt(index);
+          newChannels.insert(0, channel);
+          _channelsController.add(newChannels);
+        } else {
+          final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
+          if (hiddenIndex > -1) {
+            newChannels.insert(0, _hiddenChannels[hiddenIndex]);
+            _hiddenChannels.removeAt(hiddenIndex);
+            _channelsController.add(newChannels);
+          }
+        }
+      }));
+    }
+
+    _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
+      final newChannels = List<Channel>.from(channels);
+      final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
+      if (channelIndex > -1) {
+        final channel = newChannels.removeAt(channelIndex);
+        _hiddenChannels.add(channel);
         _channelsController.add(newChannels);
       }
     }));

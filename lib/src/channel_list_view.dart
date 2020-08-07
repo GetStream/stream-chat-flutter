@@ -339,11 +339,8 @@ class _ChannelListViewState extends State<ChannelListView>
                           'Do you want to leave the group?',
                         );
                         if (confirm == true) {
-                          await channel.removeMembers(channel.state.members
-                              .where((element) =>
-                                  element.userId ==
-                                  StreamChat.of(context).user.id)
-                              .toList());
+                          await channel
+                              .removeMembers([StreamChat.of(context).user.id]);
                         }
                       },
                     ),
@@ -357,11 +354,8 @@ class _ChannelListViewState extends State<ChannelListView>
                           'Do you want to delete the chat?',
                         );
                         if (confirm == true) {
-                          await channel.removeMembers(channel.state.members
-                              .where((element) =>
-                                  element.userId ==
-                                  StreamChat.of(context).user.id)
-                              .toList());
+                          await channel
+                              .removeMembers([StreamChat.of(context).user.id]);
                         }
                       },
                     ),
@@ -472,6 +466,7 @@ class _ChannelListViewState extends State<ChannelListView>
         .on(
       EventType.connectionRecovered,
       EventType.notificationAddedToChannel,
+      EventType.notificationMessageNew,
       EventType.channelVisible,
     )
         .listen((event) {

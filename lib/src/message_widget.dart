@@ -208,8 +208,8 @@ class _MessageWidgetState extends State<MessageWidget> {
   @override
   Widget build(BuildContext context) {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
-        ? widget.messageTheme.avatarTheme.constraints.maxWidth + 16.0
-        : 6.0;
+        ? widget.messageTheme.avatarTheme.constraints.maxWidth + 24.0
+        : 16.0;
     return Portal(
       child: Padding(
         padding: widget.padding ?? EdgeInsets.all(8),
@@ -232,6 +232,15 @@ class _MessageWidgetState extends State<MessageWidget> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
+                        if (widget.showSendingIndicator == DisplayWidget.show)
+                          _buildSendingIndicator(),
+                        SizedBox(
+                          width: 2,
+                        ),
+                        if (widget.showSendingIndicator == DisplayWidget.hide)
+                          SizedBox(
+                            width: 8,
+                          ),
                         if (widget.showUserAvatar == DisplayWidget.show)
                           _buildUserAvatar(),
                         SizedBox(
