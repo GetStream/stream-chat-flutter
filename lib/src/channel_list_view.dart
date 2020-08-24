@@ -352,10 +352,9 @@ class _ChannelListViewState extends State<ChannelListView>
   void initState() {
     super.initState();
 
-    final channelsBloc = ChannelsBloc.of(context);
-
     WidgetsBinding.instance.addObserver(this);
 
+    final channelsBloc = ChannelsBloc.of(context);
     channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
@@ -388,6 +387,24 @@ class _ChannelListViewState extends State<ChannelListView>
         options: widget.options,
       );
     });
+  }
+
+  @override
+  void didUpdateWidget(ChannelListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.filter != oldWidget.filter ||
+        widget.sort != oldWidget.sort ||
+        widget.pagination != oldWidget.pagination ||
+        widget.options != oldWidget.options) {
+      final channelsBloc = ChannelsBloc.of(context);
+      channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        paginationParams: widget.pagination,
+        options: widget.options,
+      );
+    }
   }
 
   @override
