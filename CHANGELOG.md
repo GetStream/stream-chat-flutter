@@ -1,3 +1,7 @@
+## 0.2.4
+
+- Update llc dependency
+
 ## 0.2.3
 
 - Add `lockChannelsOrder` parameter to `ChannelsBloc`
