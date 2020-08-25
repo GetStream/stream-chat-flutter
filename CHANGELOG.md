@@ -1,3 +1,8 @@
+## 0.2.6
+
+- Add `pullToRefresh` property to `ChannelListView`
+- Add `onLinkTap` to `MessageWidget`
+
 ## 0.2.5
 
 - Implement `didUpdateWidget` in `ChannelListView` to react to setState
