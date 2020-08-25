@@ -11,10 +11,12 @@ class MessageText extends StatelessWidget {
     @required this.message,
     @required this.messageTheme,
     this.onMentionTap,
+    this.onLinkTap,
   }) : super(key: key);
 
   final Message message;
   final void Function(User) onMentionTap;
+  final void Function(String) onLinkTap;
   final MessageTheme messageTheme;
 
   @override
@@ -35,7 +37,11 @@ class MessageText extends StatelessWidget {
             print('tap on ${mentionedUser.name}');
           }
         } else {
-          launchURL(context, link);
+          if (onLinkTap != null) {
+            onLinkTap(link);
+          } else {
+            launchURL(context, link);
+          }
         }
       },
       styleSheet: MarkdownStyleSheet.fromTheme(
