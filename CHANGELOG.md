@@ -1,3 +1,7 @@
+## 0.2.6+1
+
+- Update llc dependency
+
 ## 0.2.6
 
 - Add `pullToRefresh` property to `ChannelListView`
