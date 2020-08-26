@@ -134,6 +134,15 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          var channel = StreamChannel.of(context).channel;
+          Future.delayed(Duration(seconds: 2)).then((value) {
+            channel.update({}, Message(text: 'System message test'));
+          });
+        },
+      ),
       appBar: ChannelHeader(),
       body: Column(
         children: <Widget>[
