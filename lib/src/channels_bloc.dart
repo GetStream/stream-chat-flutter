@@ -11,7 +11,7 @@ class ChannelsBloc extends StatefulWidget {
   /// The widget child
   final Widget child;
 
-  /// Set this to false to prevent channels to be brought to the top of the list when a new message arrives
+  /// Set this to true to prevent channels to be brought to the top of the list when a new message arrives
   final bool lockChannelsOrder;
 
   /// Instantiate a new ChannelsBloc
