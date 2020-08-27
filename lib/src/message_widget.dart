@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'image_group.dart';
-import 'message_actions_bottom_sheet.dart';
 import 'message_text.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
@@ -492,21 +492,17 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  void _showMessageBottomSheet(BuildContext context) {
+  void _showMessageModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    showModalBottomSheet(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
-          ),
-        ),
+    showDialog(
         context: context,
         builder: (context) {
           return StreamChannel(
             channel: channel,
-            child: MessageActionsBottomSheet(
+            child: MessageActionsModal(
+              messageTheme: widget.messageTheme,
+              messageShape: widget.shape ?? _getDefaultShape(context),
+              reverse: widget.reverse,
               showDeleteMessage: widget.showDeleteMessage,
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
@@ -518,6 +514,21 @@ class _MessageWidgetState extends State<MessageWidget> {
             ),
           );
         });
+  }
+
+  ContinuousRectangleBorder _getDefaultShape(BuildContext context) {
+    return ContinuousRectangleBorder(
+      side: widget.attachmentBorderSide ??
+          widget.borderSide ??
+          BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withAlpha(24)
+                : Colors.black.withAlpha(24),
+          ),
+      borderRadius: widget.attachmentBorderRadiusGeometry ??
+          widget.borderRadiusGeometry ??
+          BorderRadius.zero,
+    );
   }
 
   List<Widget> _parseAttachments(BuildContext context) {
@@ -574,18 +585,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           clipBehavior: Clip.hardEdge,
           shape: widget.attachmentShape ??
               widget.shape ??
-              ContinuousRectangleBorder(
-                side: widget.attachmentBorderSide ??
-                    widget.borderSide ??
-                    BorderSide(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withAlpha(24)
-                          : Colors.black.withAlpha(24),
-                    ),
-                borderRadius: widget.attachmentBorderRadiusGeometry ??
-                    widget.borderRadiusGeometry ??
-                    BorderRadius.zero,
-              ),
+              _getDefaultShape(context),
           child: Padding(
             padding: widget.attachmentPadding,
             child: ClipRRect(
@@ -621,7 +621,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     if (widget.onMessageActions != null) {
       widget.onMessageActions(context, widget.message);
     } else {
-      _showMessageBottomSheet(context);
+      _showMessageModalBottomSheet(context);
     }
     return;
   }

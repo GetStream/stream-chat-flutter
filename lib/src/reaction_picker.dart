@@ -24,7 +24,7 @@ class ReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Material(
       color: Colors.black87,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,0 +1,278 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/reaction_picker.dart';
+import 'package:stream_chat_flutter/src/stream_channel.dart';
+
+import '../stream_chat_flutter.dart';
+import 'message_input.dart';
+import 'stream_chat.dart';
+
+class MessageActionsModal extends StatelessWidget {
+  final Widget Function(BuildContext, Message) editMessageInputBuilder;
+  final void Function(Message) onThreadTap;
+  final Message message;
+  final MessageTheme messageTheme;
+  final bool showReactions;
+  final bool showDeleteMessage;
+  final bool showEditMessage;
+  final bool showReply;
+  final bool reverse;
+  final ShapeBorder messageShape;
+  final Map<String, String> reactionToEmoji = const {
+    'love': '❤️️',
+    'haha': '😂',
+    'like': '👍',
+    'sad': '😕',
+    'angry': '😡',
+    'wow': '😲',
+  };
+
+  const MessageActionsModal({
+    Key key,
+    @required this.message,
+    @required this.messageTheme,
+    this.showReactions,
+    this.showDeleteMessage,
+    this.showEditMessage,
+    this.onThreadTap,
+    this.showReply,
+    this.editMessageInputBuilder,
+    this.messageShape,
+    this.reverse,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 10,
+                sigmaY: 10,
+              ),
+              child: Container(
+                color: Colors.transparent,
+              ),
+            ),
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (showReactions &&
+                (message.status == MessageSendingStatus.SENT ||
+                    message.status == null))
+              ReactionPicker(
+                channel: channel,
+                reactionToEmoji: reactionToEmoji,
+                message: message,
+              ),
+            AbsorbPointer(
+              child: MessageWidget(
+                reverse: reverse,
+                message: message,
+                messageTheme: messageTheme,
+                showReactions: false,
+                showUsername: false,
+                showReplyIndicator: false,
+                showTimestamp: false,
+                showSendingIndicator: DisplayWidget.gone,
+                shape: messageShape,
+              ),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 48.0,
+              ),
+              child: Material(
+                clipBehavior: Clip.hardEdge,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: ListTile.divideTiles(
+                    context: context,
+                    tiles: [
+                      if (showEditMessage) _buildEditMessage(context),
+                      if (showReply &&
+                          (message.status == MessageSendingStatus.SENT ||
+                              message.status == null) &&
+                          message.parentId == null)
+                        _buildReplyButton(context),
+                      if (showDeleteMessage) _buildDeleteButton(context),
+                    ],
+                  ).toList(),
+                ),
+              ),
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeleteButton(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Delete message',
+        style:
+            Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
+      ),
+      leading: Icon(
+        Icons.delete_outline,
+        color: Colors.red,
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        StreamChat.of(context).client.deleteMessage(
+              message,
+              StreamChannel.of(context).channel.cid,
+            );
+      },
+    );
+  }
+
+  Widget _buildEditMessage(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Edit message',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: SvgPicture.asset(
+        'assets/icon_edit.svg',
+        alignment: Alignment.center,
+        package: 'stream_chat_flutter',
+        color: StreamChatTheme.of(context).primaryIconTheme.color,
+        width: 17,
+      ),
+      onTap: () async {
+        Navigator.pop(context);
+        _showEditBottomSheet(context);
+      },
+    );
+  }
+
+  void _showEditBottomSheet(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    showModalBottomSheet(
+      context: context,
+      elevation: 2,
+      clipBehavior: Clip.hardEdge,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
+      ),
+      builder: (context) {
+        return StreamChannel(
+          channel: channel,
+          child: Flex(
+            direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 16.0,
+                  left: 16.0,
+                  right: 16.0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Edit message',
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                    Container(
+                      height: 30,
+                      padding: const EdgeInsets.all(2.0),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: RawMaterialButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          elevation: 0,
+                          highlightElevation: 0,
+                          focusElevation: 0,
+                          disabledElevation: 0,
+                          hoverElevation: 0,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white.withOpacity(.1)
+                                  : Colors.black.withOpacity(.1),
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.close,
+                            size: 15,
+                            color: StreamChatTheme.of(context)
+                                .primaryIconTheme
+                                .color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: editMessageInputBuilder != null
+                    ? editMessageInputBuilder(context, message)
+                    : MessageInput(
+                        editMessage: message,
+                        onMessageSent: (_) {
+                          FocusScope.of(context).unfocus();
+                          Navigator.pop(context);
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildReplyButton(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Start a thread',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: Icon(
+        Icons.reply,
+        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        if (onThreadTap != null) {
+          onThreadTap(message);
+        }
+      },
+    );
+  }
+}
