@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -193,15 +194,6 @@ class MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<MessageWidget> {
-  final Map<String, String> _reactionToEmoji = {
-    'love': '❤️️',
-    'haha': '😂',
-    'like': '👍',
-    'sad': '😕',
-    'angry': '😡',
-    'wow': '😲',
-  };
-
   final GlobalKey _reactionPickerKey = GlobalKey();
   double _reactionPadding = 0;
 
@@ -341,9 +333,9 @@ class _MessageWidgetState extends State<MessageWidget> {
               offset: Offset(4, 0),
               child: CustomPaint(
                 painter: ReactionBubblePainter(
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,
+                  widget.messageTheme.reactionsBackgroundColor,
+                  widget.messageTheme.reactionsBorderColor,
+                  widget.message.reactionCounts.length,
                 ),
               ),
             )
@@ -456,14 +448,23 @@ class _MessageWidgetState extends State<MessageWidget> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
+                              border: widget.messageTheme
+                                          .reactionsBackgroundColor ==
+                                      StreamChatTheme.of(context)
+                                          .backgroundColor
+                                  ? Border.all(
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white.withAlpha(24)
+                                          : Colors.black.withAlpha(24),
+                                    )
+                                  : null,
+                              color:
+                                  widget.messageTheme.reactionsBackgroundColor,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(14)),
                             ),
-                            child: _buildReactionsText(context),
+                            child: _buildReactions(context),
                           ),
                         ),
                         _buildReactionsTail(context),
@@ -477,18 +478,33 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Text _buildReactionsText(BuildContext context) {
-    return Text(
-      widget.message.reactionCounts.keys.map((reactionType) {
-            return _reactionToEmoji[reactionType] ?? '?';
-          }).join(' ') +
-          ' ${widget.message.reactionCounts.values.fold(0, (t, v) => v + t).toString()}',
-      style: TextStyle(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black
-            : Colors.white,
-      ),
-      textAlign: TextAlign.justify,
+  Widget _buildReactions(BuildContext context) {
+    final reactionAssets = StreamChatTheme.of(context).reactionAssets;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...widget.message.reactionCounts.keys.map((reactionType) {
+          final reactionAsset = reactionAssets.firstWhere(
+            (reactionAsset) => reactionAsset.type == reactionType,
+            orElse: () => null,
+          );
+          if (reactionAsset == null) {
+            return Text(
+              '?',
+              style: TextStyle(
+                color: StreamChatTheme.of(context).accentColor,
+              ),
+            );
+          }
+
+          return SvgPicture.asset(
+            reactionAsset.svgAsset,
+            package: reactionAsset.package,
+            height: 16,
+            color: StreamChatTheme.of(context).accentColor,
+          );
+        }).toList(),
+      ],
     );
   }
 
@@ -807,17 +823,89 @@ class _MessageWidgetState extends State<MessageWidget> {
 
 class ReactionBubblePainter extends CustomPainter {
   final Color color;
+  final Color borderColor;
+  final int reactionsCount;
 
-  ReactionBubblePainter(this.color);
+  ReactionBubblePainter(
+    this.color,
+    this.borderColor,
+    this.reactionsCount,
+  );
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
+    _drawArc(size, canvas);
+
+    _drawBorder(size, canvas);
+
+    _drawOval(size, canvas);
+
+    _drawOvalBorder(size, canvas);
+  }
+
+  void _drawOvalBorder(Size size, Canvas canvas) {
+    final paint = Paint()
+      ..color = borderColor
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
     final path = Path();
-    path.lineTo(-2, -6);
-    path.lineTo(0, 10);
-    path.lineTo(10, -6);
-    path.lineTo(-2, -6);
+    path.addOval(
+      Rect.fromCircle(
+        center: Offset(0, 3),
+        radius: 2,
+      ),
+    );
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawOval(Size size, Canvas canvas) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+
+    final path = Path();
+    path.addOval(Rect.fromCircle(
+      center: Offset(0, 3),
+      radius: 2,
+    ));
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawBorder(Size size, Canvas canvas) {
+    final paint = Paint()
+      ..color = borderColor
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final dy = reactionsCount > 1 ? -2.0 : -3.0;
+    final path = Path();
+    path.addArc(
+      Rect.fromCircle(
+        center: Offset(-4, dy),
+        radius: 4,
+      ),
+      -pi * 1.15,
+      -pi / 1.4,
+    );
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawArc(Size size, Canvas canvas) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+
+    final dy = reactionsCount > 1 ? -2.0 : -3.0;
+    final path = Path();
+    path.addArc(
+      Rect.fromCircle(
+        center: Offset(-4, dy),
+        radius: 4,
+      ),
+      -pi,
+      -pi,
+    );
     canvas.drawPath(path, paint);
   }
 

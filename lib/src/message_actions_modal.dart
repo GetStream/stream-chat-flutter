@@ -6,9 +6,10 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 
-import '../stream_chat_flutter.dart';
 import 'message_input.dart';
+import 'message_widget.dart';
 import 'stream_chat.dart';
+import 'stream_chat_theme.dart';
 
 class MessageActionsModal extends StatelessWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -21,14 +22,6 @@ class MessageActionsModal extends StatelessWidget {
   final bool showReply;
   final bool reverse;
   final ShapeBorder messageShape;
-  final Map<String, String> reactionToEmoji = const {
-    'love': '❤️️',
-    'haha': '😂',
-    'like': '👍',
-    'sad': '😕',
-    'angry': '😡',
-    'wow': '😲',
-  };
 
   const MessageActionsModal({
     Key key,
@@ -73,10 +66,12 @@ class MessageActionsModal extends StatelessWidget {
             if (showReactions &&
                 (message.status == MessageSendingStatus.SENT ||
                     message.status == null))
-              ReactionPicker(
-                channel: channel,
-                reactionToEmoji: reactionToEmoji,
-                message: message,
+              Center(
+                child: ReactionPicker(
+                  channel: channel,
+                  message: message,
+                  messageTheme: messageTheme,
+                ),
               ),
             AbsorbPointer(
               child: MessageWidget(
@@ -158,7 +153,7 @@ class MessageActionsModal extends StatelessWidget {
         alignment: Alignment.center,
         package: 'stream_chat_flutter',
         color: StreamChatTheme.of(context).primaryIconTheme.color,
-        width: 17,
+        width: 24,
       ),
       onTap: () async {
         Navigator.pop(context);

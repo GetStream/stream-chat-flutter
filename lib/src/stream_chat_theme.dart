@@ -4,6 +4,8 @@ import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 
+import 'reaction_asset.dart';
+
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
 class StreamChatTheme extends InheritedWidget {
   final StreamChatThemeData data;
@@ -72,6 +74,9 @@ class StreamChatThemeData {
   /// Primary icon theme
   final IconThemeData primaryIconTheme;
 
+  /// Assets used for rendering reactions
+  final List<ReactionAsset> reactionAssets;
+
   /// Create a theme from scratch
   StreamChatThemeData({
     this.primaryColor,
@@ -85,6 +90,7 @@ class StreamChatThemeData {
     this.defaultChannelImage,
     this.defaultUserImage,
     this.primaryIconTheme,
+    this.reactionAssets,
   });
 
   /// Create a theme from a Material [Theme]
@@ -135,6 +141,7 @@ class StreamChatThemeData {
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
+    List<ReactionAsset> reactionAssets,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
@@ -203,6 +210,7 @@ class StreamChatThemeData {
                   this.otherMessageTheme.avatarTheme,
             ) ??
             this.otherMessageTheme,
+        reactionAssets: reactionAssets ?? this.reactionAssets,
       );
 
   /// Get the default Stream Chat theme
@@ -293,7 +301,9 @@ class StreamChatThemeData {
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
-        messageBackgroundColor: isDark ? Color(0xff191919) : Color(0xffE6E6E6),
+        messageBackgroundColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        reactionsBackgroundColor: isDark ? Colors.black : Colors.white,
+        reactionsBorderColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -306,6 +316,9 @@ class StreamChatThemeData {
         ),
       ),
       otherMessageTheme: MessageTheme(
+        reactionsBackgroundColor:
+            isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        reactionsBorderColor: theme.scaffoldBackgroundColor,
         messageText: TextStyle(
           fontSize: 15,
           color: isDark ? Colors.white : Colors.black,
@@ -333,6 +346,33 @@ class StreamChatThemeData {
           ),
         ),
       ),
+      reactionAssets: [
+        ReactionAsset(
+          type: 'love',
+          svgAsset: 'assets/Icon_love_reaction.svg',
+          package: 'stream_chat_flutter',
+        ),
+        ReactionAsset(
+          type: 'thumbs_up',
+          svgAsset: 'assets/Icon_thumbs_up_reaction.svg',
+          package: 'stream_chat_flutter',
+        ),
+        ReactionAsset(
+          type: 'thumbs_down',
+          svgAsset: 'assets/Icon_thumbs_down_reaction.svg',
+          package: 'stream_chat_flutter',
+        ),
+        ReactionAsset(
+          type: 'lol',
+          svgAsset: 'assets/Icon_LOL_reaction.svg',
+          package: 'stream_chat_flutter',
+        ),
+        ReactionAsset(
+          type: 'wut',
+          svgAsset: 'assets/Icon_wut_reaction.svg',
+          package: 'stream_chat_flutter',
+        ),
+      ],
     );
   }
 }
@@ -415,6 +455,8 @@ class MessageTheme {
   final TextStyle createdAt;
   final TextStyle replies;
   final Color messageBackgroundColor;
+  final Color reactionsBackgroundColor;
+  final Color reactionsBorderColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
@@ -423,6 +465,8 @@ class MessageTheme {
     this.messageAuthor,
     this.messageLinks,
     this.messageBackgroundColor,
+    this.reactionsBackgroundColor,
+    this.reactionsBorderColor,
     this.avatarTheme,
     this.createdAt,
   });
@@ -436,6 +480,8 @@ class MessageTheme {
     Color messageBackgroundColor,
     Color otherMessageBackgroundColor,
     AvatarTheme avatarTheme,
+    Color reactionsBackgroundColor,
+    Color reactionsBorderColor,
   }) =>
       MessageTheme(
         messageText: messageText ?? this.messageText,
@@ -446,6 +492,9 @@ class MessageTheme {
             messageBackgroundColor ?? this.messageBackgroundColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         replies: replies ?? this.replies,
+        reactionsBackgroundColor:
+            reactionsBackgroundColor ?? this.reactionsBackgroundColor,
+        reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
       );
 }
 

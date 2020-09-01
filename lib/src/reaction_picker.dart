@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../stream_chat_flutter.dart';
 
@@ -11,60 +12,54 @@ import '../stream_chat_flutter.dart';
 class ReactionPicker extends StatelessWidget {
   const ReactionPicker({
     Key key,
-    @required this.reactionToEmoji,
     @required this.message,
     @required this.channel,
-    this.size = 30,
+    @required this.messageTheme,
   }) : super(key: key);
 
-  final Map<String, String> reactionToEmoji;
   final Message message;
-  final double size;
+  final MessageTheme messageTheme;
   final Channel channel;
 
   @override
   Widget build(BuildContext context) {
+    final reactionAssets = StreamChatTheme.of(context).reactionAssets;
     return Material(
-      color: Colors.black87,
+      color: messageTheme.reactionsBackgroundColor,
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
-        children: reactionToEmoji.keys.map((reactionType) {
-          final ownReactionIndex = message.ownReactions
-                  ?.indexWhere((reaction) => reaction.type == reactionType) ??
+        children: reactionAssets.map((reactionAsset) {
+          final ownReactionIndex = message.ownReactions?.indexWhere(
+                  (reaction) => reaction.type == reactionAsset.type) ??
               -1;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              IconButton(
-                iconSize: size,
-                icon: Text(
-                  reactionToEmoji[reactionType],
-                  style: TextStyle(
-                    fontSize: size - 10,
-                  ),
-                ),
-                onPressed: () {
-                  if (ownReactionIndex != -1) {
-                    removeReaction(
-                        context, message.ownReactions[ownReactionIndex]);
-                  } else {
-                    sendReaction(context, reactionType);
-                  }
-                },
-              ),
-              ownReactionIndex != -1
-                  ? Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(
-                        message.ownReactions[ownReactionIndex].score.toString(),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )
-                  : SizedBox(),
-            ],
+          return IconButton(
+            iconSize: 24,
+            icon: SvgPicture.asset(
+              reactionAsset.svgAsset,
+              package: reactionAsset.package,
+              color: ownReactionIndex != -1
+                  ? StreamChatTheme.of(context).accentColor
+                  : Colors.black,
+            ),
+            onPressed: () {
+              if (ownReactionIndex != -1) {
+                removeReaction(
+                  context,
+                  message.ownReactions[ownReactionIndex],
+                );
+              } else {
+                sendReaction(
+                  context,
+                  reactionAsset.type,
+                );
+              }
+            },
           );
         }).toList(),
       ),
