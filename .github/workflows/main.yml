@@ -1,9 +1,10 @@
 name: CI
 
 on:
-  release:
-    types:
-      - created
+  push:
+    branches:
+      - master
+      - feature/new-ui
 
 env:
   flutter_version: "1.17.5"
