@@ -211,6 +211,25 @@ class _ChannelListViewState extends State<ChannelListView>
           }
 
           final channels = snapshot.data;
+
+          if (channels.isEmpty) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: Text('You have no channels currently'),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
           return ListView.custom(
             physics: AlwaysScrollableScrollPhysics(),
             controller: _scrollController,
