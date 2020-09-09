@@ -909,9 +909,9 @@ class MessageInputState extends State<MessageInput> {
           );
     }
 
-    return sendingFuture.whenComplete(() {
+    return sendingFuture.then((resp) {
       if (widget.onMessageSent != null) {
-        widget.onMessageSent(message);
+        widget.onMessageSent(resp.message);
       } else {
         if (widget.editMessage != null) {
           Navigator.pop(context);
