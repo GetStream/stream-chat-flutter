@@ -1,3 +1,8 @@
+## 0.2.7
+
+- Update llc dependency
+- Fixed a bug that made the SDK crash if it went to background while not connected
+
 ## 0.2.6+1
 
 - Update llc dependency
