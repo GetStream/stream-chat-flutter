@@ -56,8 +56,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   final BehaviorSubject<bool> _queryChannelsLoadingController =
       BehaviorSubject.seeded(false);
 
-  final BehaviorSubject<List<Channel>> _channelsController =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -73,7 +72,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
     Map<String, dynamic> options,
     bool onlyOffline = false,
   }) async {
-    if (_queryChannelsLoadingController.value == true) {
+    final client = StreamChat.of(context).client;
+
+    if (client.state?.user == null ||
+        _queryChannelsLoadingController.value == true) {
       return;
     }
     _queryChannelsLoadingController.sink.add(true);
@@ -82,16 +84,15 @@ class ChannelsBlocState extends State<ChannelsBloc>
       final clear = paginationParams == null ||
           paginationParams.offset == null ||
           paginationParams.offset == 0;
-      final oldChannels = List<Channel>.from(channels);
-      StreamChat.of(context)
-          .client
+      final oldChannels = List<Channel>.from(channels ?? []);
+      client
           .queryChannels(
-            filter: filter,
-            sort: sortOptions,
-            options: options,
-            paginationParams: paginationParams,
-            onlyOffline: onlyOffline,
-          )
+        filter: filter,
+        sort: sortOptions,
+        options: options,
+        paginationParams: paginationParams,
+        onlyOffline: onlyOffline,
+      )
           .listen((channels) {
         if (clear) {
           _channelsController.add(channels);
@@ -139,7 +140,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
 
     _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
-      final newChannels = List<Channel>.from(channels);
+      final newChannels = List<Channel>.from(channels ?? []);
       final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
       if (channelIndex > -1) {
         final channel = newChannels.removeAt(channelIndex);

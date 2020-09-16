@@ -205,8 +205,20 @@ class _ChannelListViewState extends State<ChannelListView>
           }
 
           if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              },
             );
           }
 
@@ -374,7 +386,7 @@ class _ChannelListViewState extends State<ChannelListView>
         filter: widget.filter,
         sortOptions: widget.sort,
         paginationParams: widget.pagination.copyWith(
-          offset: channelsProvider.channels.length,
+          offset: channelsProvider.channels?.length ?? 0,
         ),
         options: widget.options,
       );
@@ -426,7 +438,7 @@ class _ChannelListViewState extends State<ChannelListView>
   void didUpdateWidget(ChannelListView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.filter != oldWidget.filter ||
+    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         widget.sort != oldWidget.sort ||
         widget.pagination != oldWidget.pagination ||
         widget.options != oldWidget.options) {
