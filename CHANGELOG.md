@@ -1,3 +1,8 @@
+## 0.2.7+1
+
+- Fix channellistview loading when client is not initialized
+- Update LLC dependency
+
 ## 0.2.7
 
 - Update llc dependency
