@@ -104,6 +104,7 @@ class MessageListView extends StatefulWidget {
     this.onThreadTap,
     this.dateDividerBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -127,6 +128,9 @@ class MessageListView extends StatefulWidget {
 
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
+
+  /// The [ScrollViewKeyboardDismissBehavior] used by the ListView
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -159,6 +163,7 @@ class _MessageListViewState extends State<MessageListView> {
       child: ListView.custom(
         key: Key('messageListView'),
         physics: widget.scrollPhysics,
+        keyboardDismissBehavior: widget.keyboardDismissBehavior,
         controller: _scrollController,
         reverse: true,
         childrenDelegate: SliverChildBuilderDelegate(
