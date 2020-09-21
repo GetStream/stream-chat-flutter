@@ -11,24 +11,15 @@ on:
     types:
       - created
         
-env:
-  flutter_version: "1.12.13+hotfix.5"
-
 jobs:
   test:
     runs-on: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2  
-    - name: Cache Flutter dependencies
-      id: cache
-      uses: actions/cache@v1
-      with:
-        path: /opt/hostedtoolcache/flutter
-        key: ${{ runner.OS }}-flutter-install-cache-${{ env.flutter_version }}
     - name: Flutter action
-      uses: subosito/flutter-action@v1.1.1
+      uses: subosito/flutter-action@v1.3.2
       with:
-        flutter-version: ${{ env.flutter_version }}
+        channel: 'stable'
     - name: Get dependencies
       run: flutter pub get
     - name: Coverage fix

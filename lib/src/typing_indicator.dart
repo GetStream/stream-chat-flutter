@@ -34,7 +34,7 @@ class TypingIndicator extends StatelessWidget {
       builder: (context, snapshot) {
         return AnimatedSwitcher(
           duration: Duration(milliseconds: 300),
-          child: snapshot.data.isNotEmpty
+          child: snapshot.data?.isNotEmpty == true
               ? Align(
                   key: Key('typings'),
                   alignment: alignment,
