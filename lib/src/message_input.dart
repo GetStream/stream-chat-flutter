@@ -738,7 +738,10 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.file) {
         type = FileType.any;
       }
-      file = await FilePicker.getFile(type: type);
+      final res = await FilePicker.platform.pickFiles(type: type);
+      if (res?.files?.isNotEmpty == true) {
+        file = File(res.files.first.path);
+      }
     }
 
     setState(() {
