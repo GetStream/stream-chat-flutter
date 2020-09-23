@@ -1,3 +1,8 @@
+## 0.2.8+1
+
+- Update LLC dependency
+- Update file_picker dependency
+
 ## 0.2.8
 
 - Update LLC dependency
