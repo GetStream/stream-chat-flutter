@@ -15,8 +15,14 @@ class FullScreenImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: PhotoView(
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+      ),
+      body: PhotoView(
         imageProvider: CachedNetworkImageProvider(url),
         maxScale: PhotoViewComputedScale.covered,
         minScale: PhotoViewComputedScale.contained,
