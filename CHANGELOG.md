@@ -1,3 +1,7 @@
+## 0.2.8+2
+
+- Add back button to the full-screen view
+
 ## 0.2.8+1
 
 - Update LLC dependency
