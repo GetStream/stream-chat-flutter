@@ -42,6 +42,7 @@ class ChannelName extends StatelessWidget {
         return Text(
           title,
           style: textStyle,
+          overflow: TextOverflow.ellipsis,
         );
       },
     );
