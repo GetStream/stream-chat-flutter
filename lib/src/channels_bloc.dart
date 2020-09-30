@@ -124,18 +124,23 @@ class ChannelsBlocState extends State<ChannelsBloc>
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {
         final newChannels = List<Channel>.from(channels ?? []);
         final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index > 0) {
-          final channel = newChannels.removeAt(index);
-          newChannels.insert(0, channel);
-          _channelsController.add(newChannels);
+        if (index > -1) {
+          if (index > 0) {
+            final channel = newChannels.removeAt(index);
+            newChannels.insert(0, channel);
+          }
         } else {
           final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
           if (hiddenIndex > -1) {
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
-            _channelsController.add(newChannels);
+          } else {
+            if (client.state.channels[e.cid] != null) {
+              newChannels.insert(0, client.state.channels[e.cid]);
+            }
           }
         }
+        _channelsController.add(newChannels);
       }));
     }
 

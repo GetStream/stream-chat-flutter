@@ -120,15 +120,17 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
       stream: channel.lastMessageAtStream,
       initialData: channel.lastMessageAt,
       builder: (context, snapshot) {
-        return (snapshot.data != null)
-            ? Text(
-                'Active ${Jiffy(snapshot.data.toLocal()).fromNow()}',
-                style: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .lastMessageAt,
-              )
-            : SizedBox();
+        if (snapshot.data == null) {
+          return SizedBox();
+        }
+        final jiffyDate = Jiffy(snapshot.data?.toLocal());
+        return Text(
+          'Active ${jiffyDate.isBefore(Jiffy()) ? jiffyDate.fromNow() : 'now'}',
+          style: StreamChatTheme.of(context)
+              .channelTheme
+              .channelHeaderTheme
+              .lastMessageAt,
+        );
       },
     );
   }
