@@ -1,3 +1,9 @@
+## 0.2.8+3
+
+- Add simple example of channel creation in sample app
+- Add back button to the full-screen video view
+- Update llc version
+
 ## 0.2.8+2
 
 - Add back button to the full-screen view
