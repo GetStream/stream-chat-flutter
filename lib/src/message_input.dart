@@ -182,7 +182,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Stack(
-            overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             children: <Widget>[
               _buildBorder(context),
               Column(
