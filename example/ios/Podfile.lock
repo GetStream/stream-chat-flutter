@@ -245,7 +245,7 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_apns: f516b118e423fe7c0a38771180549c4d6cb67c2f
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
-  flutter_local_notifications: 9e4738ce2471c5af910d961a6b7eadcf57c50186
+  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GoogleDataTransport: b7f406340a291370045a270c599e53c6fa6ec20f
   GoogleUtilities: 7f2f5a07f888cdb145101d6042bc4422f57e70b3
