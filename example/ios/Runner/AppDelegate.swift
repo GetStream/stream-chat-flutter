@@ -3,7 +3,7 @@ import Flutter
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
-    let sharedDefaults = UserDefaults(suiteName: "group.io.stream.flutter")
+    let sharedDefaults = UserDefaults(suiteName: "group.io.getstream.flutter")
     
     override func application(
         _ application: UIApplication,

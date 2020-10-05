@@ -18,7 +18,7 @@ final class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
-        guard let sharedDefaults = UserDefaults(suiteName: "group.io.stream.flutter"),
+        guard let sharedDefaults = UserDefaults(suiteName: "group.io.getstream.flutter"),
             let apiKey = sharedDefaults.string(forKey: "KEY_API_KEY"),
             let userId = sharedDefaults.string(forKey: "KEY_USER_ID"),
             let token = sharedDefaults.string(forKey: "KEY_TOKEN"),
