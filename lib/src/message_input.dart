@@ -182,7 +182,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Stack(
-            overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             children: <Widget>[
               _buildBorder(context),
               Column(
@@ -738,7 +738,10 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.file) {
         type = FileType.any;
       }
-      file = await FilePicker.getFile(type: type);
+      final res = await FilePicker.platform.pickFiles(type: type);
+      if (res?.files?.isNotEmpty == true) {
+        file = File(res.files.first.path);
+      }
     }
 
     setState(() {
@@ -909,9 +912,9 @@ class MessageInputState extends State<MessageInput> {
           );
     }
 
-    return sendingFuture.whenComplete(() {
+    return sendingFuture.then((resp) {
       if (widget.onMessageSent != null) {
-        widget.onMessageSent(message);
+        widget.onMessageSent(resp.message);
       } else {
         if (widget.editMessage != null) {
           Navigator.pop(context);

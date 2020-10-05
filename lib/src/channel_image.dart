@@ -78,7 +78,7 @@ class ChannelImage extends StatelessWidget {
           String image;
           if (snapshot.data?.containsKey('image') == true) {
             image = snapshot.data['image'];
-          } else if (channel.state.members.length == 2) {
+          } else if (channel.state.members?.length == 2) {
             final otherMember = channel.state.members
                 .firstWhere((member) => member.user.id != streamChat.user.id);
             return StreamBuilder<User>(

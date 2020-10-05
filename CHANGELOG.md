@@ -1,3 +1,45 @@
+## 0.2.8+3
+
+- Add simple example of channel creation in sample app
+- Add back button to the full-screen video view
+- Update llc version
+
+## 0.2.8+2
+
+- Add back button to the full-screen view
+
+## 0.2.8+1
+
+- Update LLC dependency
+- Update file_picker dependency
+
+## 0.2.8
+
+- Update LLC dependency
+
+## 0.2.7+2
+
+- Fix channellistview loading when client is not initialized
+- Update LLC dependency
+
+## 0.2.7
+
+- Update llc dependency
+- Fixed a bug that made the SDK crash if it went to background while not connected
+
+## 0.2.6+1
+
+- Update llc dependency
+
+## 0.2.6
+
+- Add `pullToRefresh` property to `ChannelListView`
+- Add `onLinkTap` to `MessageWidget`
+
+## 0.2.5
+
+- Implement `didUpdateWidget` in `ChannelListView` to react to setState
+
 ## 0.2.4
 
 - Update llc dependency

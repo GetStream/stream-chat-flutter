@@ -26,6 +26,12 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+      ),
       body: Builder(
         key: _scaffoldKey,
         builder: (context) {

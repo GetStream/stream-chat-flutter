@@ -11,7 +11,7 @@ class ChannelsBloc extends StatefulWidget {
   /// The widget child
   final Widget child;
 
-  /// Set this to false to prevent channels to be brought to the top of the list when a new message arrives
+  /// Set this to true to prevent channels to be brought to the top of the list when a new message arrives
   final bool lockChannelsOrder;
 
   /// Instantiate a new ChannelsBloc
@@ -56,8 +56,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   final BehaviorSubject<bool> _queryChannelsLoadingController =
       BehaviorSubject.seeded(false);
 
-  final BehaviorSubject<List<Channel>> _channelsController =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -73,7 +72,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
     Map<String, dynamic> options,
     bool onlyOffline = false,
   }) async {
-    if (_queryChannelsLoadingController.value == true) {
+    final client = StreamChat.of(context).client;
+
+    if (client.state?.user == null ||
+        _queryChannelsLoadingController.value == true) {
       return;
     }
     _queryChannelsLoadingController.sink.add(true);
@@ -82,16 +84,15 @@ class ChannelsBlocState extends State<ChannelsBloc>
       final clear = paginationParams == null ||
           paginationParams.offset == null ||
           paginationParams.offset == 0;
-      final oldChannels = List<Channel>.from(channels);
-      StreamChat.of(context)
-          .client
+      final oldChannels = List<Channel>.from(channels ?? []);
+      client
           .queryChannels(
-            filter: filter,
-            sort: sortOptions,
-            options: options,
-            paginationParams: paginationParams,
-            onlyOffline: onlyOffline,
-          )
+        filter: filter,
+        sort: sortOptions,
+        options: options,
+        paginationParams: paginationParams,
+        onlyOffline: onlyOffline,
+      )
           .listen((channels) {
         if (clear) {
           _channelsController.add(channels);
@@ -123,23 +124,28 @@ class ChannelsBlocState extends State<ChannelsBloc>
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {
         final newChannels = List<Channel>.from(channels ?? []);
         final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index > 0) {
-          final channel = newChannels.removeAt(index);
-          newChannels.insert(0, channel);
-          _channelsController.add(newChannels);
+        if (index > -1) {
+          if (index > 0) {
+            final channel = newChannels.removeAt(index);
+            newChannels.insert(0, channel);
+          }
         } else {
           final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
           if (hiddenIndex > -1) {
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
-            _channelsController.add(newChannels);
+          } else {
+            if (client.state.channels[e.cid] != null) {
+              newChannels.insert(0, client.state.channels[e.cid]);
+            }
           }
         }
+        _channelsController.add(newChannels);
       }));
     }
 
     _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
-      final newChannels = List<Channel>.from(channels);
+      final newChannels = List<Channel>.from(channels ?? []);
       final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
       if (channelIndex > -1) {
         final channel = newChannels.removeAt(channelIndex);

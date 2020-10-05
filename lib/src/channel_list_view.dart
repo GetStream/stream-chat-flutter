@@ -66,6 +66,7 @@ class ChannelListView extends StatefulWidget {
     this.errorBuilder,
     this.onImageTap,
     this.swipeToAction = false,
+    this.pullToRefresh = true,
   }) : super(key: key);
 
   /// The builder that will be used in case of error
@@ -114,6 +115,9 @@ class ChannelListView extends StatefulWidget {
   /// The function called when the image is tapped
   final Function(Channel) onImageTap;
 
+  /// Set it to false to disable the pull-to-refresh widget
+  final bool pullToRefresh;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -124,105 +128,146 @@ class _ChannelListViewState extends State<ChannelListView>
 
   @override
   Widget build(BuildContext context) {
-    final channelsProvider = ChannelsBloc.of(context);
+    final channelsBloc = ChannelsBloc.of(context);
+
+    if (!widget.pullToRefresh) {
+      return _buildListView(channelsBloc);
+    }
 
     return RefreshIndicator(
       onRefresh: () async {
-        return channelsProvider.queryChannels(
+        return channelsBloc.queryChannels(
           filter: widget.filter,
           sortOptions: widget.sort,
           paginationParams: widget.pagination,
           options: widget.options,
         );
       },
-      child: StreamBuilder<List<Channel>>(
-          stream: channelsProvider.channelsStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              if (snapshot.error is Error) {
-                print((snapshot.error as Error).stackTrace);
-              }
+      child: _buildListView(channelsBloc),
+    );
+  }
 
-              if (widget.errorBuilder != null) {
-                return widget.errorBuilder(snapshot.error);
-              }
+  StreamBuilder<List<Channel>> _buildListView(
+    ChannelsBlocState channelsBlocState,
+  ) {
+    return StreamBuilder<List<Channel>>(
+        stream: channelsBlocState.channelsStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            if (snapshot.error is Error) {
+              print((snapshot.error as Error).stackTrace);
+            }
 
-              var message = snapshot.error.toString();
-              if (snapshot.error is DioError) {
-                final dioError = snapshot.error as DioError;
-                if (dioError.type == DioErrorType.RESPONSE) {
-                  message = dioError.message;
-                } else {
-                  message = 'Check your connection and retry';
-                }
+            if (widget.errorBuilder != null) {
+              return widget.errorBuilder(snapshot.error);
+            }
+
+            var message = snapshot.error.toString();
+            if (snapshot.error is DioError) {
+              final dioError = snapshot.error as DioError;
+              if (dioError.type == DioErrorType.RESPONSE) {
+                message = dioError.message;
+              } else {
+                message = 'Check your connection and retry';
               }
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                right: 2.0,
-                              ),
-                              child: Icon(Icons.error_outline),
+            }
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        WidgetSpan(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              right: 2.0,
                             ),
+                            child: Icon(Icons.error_outline),
                           ),
-                          TextSpan(text: 'Error loading channels'),
-                        ],
-                      ),
-                      style: Theme.of(context).textTheme.headline6,
+                        ),
+                        TextSpan(text: 'Error loading channels'),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 16.0,
-                      ),
-                      child: Text(message),
+                    style: Theme.of(context).textTheme.headline6,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 16.0,
                     ),
-                    FlatButton(
-                      onPressed: () {
-                        channelsProvider.queryChannels(
-                          filter: widget.filter,
-                          sortOptions: widget.sort,
-                          paginationParams: widget.pagination,
-                          options: widget.options,
-                        );
-                      },
-                      child: Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            final channels = snapshot.data;
-            return ListView.custom(
-              physics: AlwaysScrollableScrollPhysics(),
-              controller: _scrollController,
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  return _itemBuilder(context, i, channels);
-                },
-                childCount: (channels.length * 2) + 1,
-                findChildIndexCallback: (key) {
-                  final ValueKey<String> valueKey = key;
-                  final index = channels.indexWhere(
-                      (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
-                  return index != -1 ? (index * 2) : null;
-                },
+                    child: Text(message),
+                  ),
+                  FlatButton(
+                    onPressed: () {
+                      channelsBlocState.queryChannels(
+                        filter: widget.filter,
+                        sortOptions: widget.sort,
+                        paginationParams: widget.pagination,
+                        options: widget.options,
+                      );
+                    },
+                    child: Text('Retry'),
+                  ),
+                ],
               ),
             );
-          }),
-    );
+          }
+
+          if (!snapshot.hasData) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
+          final channels = snapshot.data;
+
+          if (channels.isEmpty) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: Text('You have no channels currently'),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+
+          return ListView.custom(
+            physics: AlwaysScrollableScrollPhysics(),
+            controller: _scrollController,
+            childrenDelegate: SliverChildBuilderDelegate(
+              (context, i) {
+                return _itemBuilder(context, i, channels);
+              },
+              childCount: (channels.length * 2) + 1,
+              findChildIndexCallback: (key) {
+                final ValueKey<String> valueKey = key;
+                final index = channels.indexWhere(
+                    (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
+                return index != -1 ? (index * 2) : null;
+              },
+            ),
+          );
+        });
   }
 
   Widget _itemBuilder(context, int i, List<Channel> channels) {
@@ -430,7 +475,7 @@ class _ChannelListViewState extends State<ChannelListView>
         filter: widget.filter,
         sortOptions: widget.sort,
         paginationParams: widget.pagination.copyWith(
-          offset: channelsProvider.channels.length,
+          offset: channelsProvider.channels?.length ?? 0,
         ),
         options: widget.options,
       );
@@ -482,7 +527,7 @@ class _ChannelListViewState extends State<ChannelListView>
   void didUpdateWidget(ChannelListView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.filter != oldWidget.filter ||
+    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         widget.sort != oldWidget.sort ||
         widget.pagination != oldWidget.pagination ||
         widget.options != oldWidget.options) {

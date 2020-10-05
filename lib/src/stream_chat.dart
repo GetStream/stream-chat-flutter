@@ -176,55 +176,58 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      if (client.showLocalNotification != null) {
-        _newMessageSubscription = client
-            .on(EventType.messageNew)
-            .where((e) => e.user?.id != user.id)
-            .where((e) => e.message.silent != true)
-            .listen((event) async {
-          var channel = client.state.channels[event.cid];
+    if (client.state?.user != null) {
+      if (state == AppLifecycleState.paused) {
+        if (client.showLocalNotification != null) {
+          _newMessageSubscription = client
+              .on(EventType.messageNew)
+              .where((e) => e.user?.id != user.id)
+              .where((e) => e.message.silent != true)
+              .listen((event) async {
+            var channel = client.state.channels[event.cid];
 
-          if (channel == null) {
-            channel = client.channel(
-              event.type,
-              id: event.cid.split(':')[1],
+            if (channel == null) {
+              channel = client.channel(
+                event.type,
+                id: event.cid.split(':')[1],
+              );
+              await channel.query();
+            }
+
+            client.showLocalNotification(
+              event.message,
+              ChannelModel(
+                id: channel.id,
+                createdAt: channel.createdAt,
+                extraData: channel.extraData,
+                type: channel.type,
+                memberCount: channel.memberCount,
+                frozen: channel.frozen,
+                cid: channel.cid,
+                deletedAt: channel.deletedAt,
+                config: channel.config,
+                createdBy: channel.createdBy,
+                updatedAt: channel.updatedAt,
+                lastMessageAt: channel.lastMessageAt,
+              ),
             );
-            await channel.query();
-          }
-
-          client.showLocalNotification(
-            event.message,
-            ChannelModel(
-              id: channel.id,
-              createdAt: channel.createdAt,
-              extraData: channel.extraData,
-              type: channel.type,
-              memberCount: channel.memberCount,
-              frozen: channel.frozen,
-              cid: channel.cid,
-              deletedAt: channel.deletedAt,
-              config: channel.config,
-              createdBy: channel.createdBy,
-              updatedAt: channel.updatedAt,
-              lastMessageAt: channel.lastMessageAt,
-            ),
-          );
-        });
-        _disconnectTimer = Timer(client.backgroundKeepAlive, () {
+          });
+          _disconnectTimer = Timer(client.backgroundKeepAlive, () {
+            client.disconnect();
+          });
+        } else {
           client.disconnect();
-        });
-      } else {
-        client.disconnect();
-      }
-    } else if (state == AppLifecycleState.resumed) {
-      _newMessageSubscription?.cancel();
-      if (_disconnectTimer?.isActive == true) {
-        _disconnectTimer.cancel();
-      } else {
-        if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
-          NotificationService.handleIosMessageQueue(client);
-          client.connect();
+        }
+      } else if (state == AppLifecycleState.resumed) {
+        _newMessageSubscription?.cancel();
+        if (_disconnectTimer?.isActive == true) {
+          _disconnectTimer.cancel();
+        } else {
+          if (client.wsConnectionStatus.value ==
+              ConnectionStatus.disconnected) {
+            NotificationService.handleIosMessageQueue(client);
+            client.connect();
+          }
         }
       }
     }
