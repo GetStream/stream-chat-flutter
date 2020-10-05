@@ -5,6 +5,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class MockClient extends Mock implements Client {}
 
+class MockClientState extends Mock implements ClientState {}
+
 class MockChannel extends Mock implements Channel {}
 
 class MockChannelState extends Mock implements ChannelClientState {}
@@ -14,18 +16,28 @@ void main() {
     'it should show basic channel information',
     (WidgetTester tester) async {
       final client = MockClient();
+      final clientState = MockClientState();
       final channel = MockChannel();
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
       when(channel.lastMessageAt).thenReturn(lastMessageAt);
       when(channel.state).thenReturn(channelState);
+      when(channel.isMuted).thenReturn(false);
+      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+            'name': 'test name',
+          }));
       when(channel.extraData).thenReturn({
         'name': 'test name',
       });
       when(channelState.unreadCount).thenReturn(1);
+      when(channelState.members).thenReturn([]);
       when(channelState.lastMessage).thenReturn(Message(
         text: 'hello',
+        user: User(id: 'other-user'),
       ));
 
       await tester.pumpWidget(MaterialApp(
