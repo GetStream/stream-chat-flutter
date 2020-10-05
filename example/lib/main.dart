@@ -14,8 +14,8 @@ void showLocalNotification(Message message, ChannelModel channel) async {
       AndroidInitializationSettings('launch_background');
   final initializationSettingsIOS = IOSInitializationSettings();
   final initializationSettings = InitializationSettings(
-    initializationSettingsAndroid,
-    initializationSettingsIOS,
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   await flutterLocalNotificationsPlugin.show(
@@ -23,14 +23,14 @@ void showLocalNotification(Message message, ChannelModel channel) async {
     '${message.user.name} @ ${channel.name}',
     message.text,
     NotificationDetails(
-      AndroidNotificationDetails(
+      android: AndroidNotificationDetails(
         'message channel',
         'Message channel',
         'Channel used for showing messages',
-        priority: Priority.High,
-        importance: Importance.High,
+        priority: Priority.high,
+        importance: Importance.high,
       ),
-      IOSNotificationDetails(),
+      iOS: IOSNotificationDetails(),
     ),
   );
 }

@@ -14,7 +14,7 @@ dependencies:
   photo_view: ^0.10.1
   rxdart: ^0.24.1
   jiffy: ^3.0.1
-  flutter_portal: ^0.1.0
+  flutter_portal: ^0.3.0
   cached_network_image: ^2.2.0+1
   flutter_markdown: ^0.4.2
   url_launcher: ^5.4.11
