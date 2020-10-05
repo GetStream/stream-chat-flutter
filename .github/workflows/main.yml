@@ -45,7 +45,7 @@ jobs:
         run: |
           cd example
           flutter build ios --release --no-codesign
-          cd example/ios
+          cd ios
           bundle exec fastlane deploy_to_firebase
   build_and_deploy_android:
     runs-on: ubuntu-latest
