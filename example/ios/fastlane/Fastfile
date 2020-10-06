@@ -14,7 +14,8 @@ lane :match_me do
     app_identifier: [
       "io.getstream.flutter",
       "io.getstream.flutter.Notifications"
-    ]
+    ],
+    readonly: true
   )
 
   match(
@@ -22,7 +23,8 @@ lane :match_me do
     app_identifier: [
         "io.getstream.flutter",
         "io.getstream.flutter.Notifications"
-    ]
+    ],
+    readonly: true
   )
 end
 
