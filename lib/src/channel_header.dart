@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -78,7 +79,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     final channel = StreamChannel.of(context).channel;
     return AppBar(
       elevation: 1,
-      leading: showBackButton ? _buildBackButton(context) : Container(),
+      leading: showBackButton
+          ? StreamBackButton(onPressed: onBackPressed)
+          : SizedBox(),
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
       actions: <Widget>[
@@ -132,38 +135,6 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
               .lastMessageAt,
         );
       },
-    );
-  }
-
-  Padding _buildBackButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(14.0),
-      child: RawMaterialButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        disabledElevation: 0,
-        hoverElevation: 0,
-        onPressed: () {
-          if (onBackPressed != null) {
-            onBackPressed();
-          } else {
-            Navigator.of(context).pop();
-          }
-        },
-        fillColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white.withOpacity(.1)
-            : Colors.black.withOpacity(.1),
-        padding: EdgeInsets.all(4),
-        child: Icon(
-          Icons.arrow_back_ios,
-          size: 15,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black,
-        ),
-      ),
     );
   }
 
