@@ -1,4 +1,4 @@
-fastlane_version "2.68.0"
+fastlane_version "2.162.0"
 default_platform :ios
 
 before_all do
