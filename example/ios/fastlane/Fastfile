@@ -10,15 +10,6 @@ end
 desc "Installs all Certs and Profiles necessary for development and ad-hoc"
 lane :match_me do
   match(
-    type: "development",
-    app_identifier: [
-      "io.getstream.flutter",
-      "io.getstream.flutter.Notifications"
-    ],
-    readonly: true
-  )
-
-  match(
     type: "adhoc",
     app_identifier: [
         "io.getstream.flutter",
