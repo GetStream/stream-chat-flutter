@@ -5,47 +5,42 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: Verifying fastlane version" time="0.000515">
+      <testcase classname="fastlane.lanes" name="0: Verifying fastlane version" time="0.000445">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: default_platform" time="0.000213">
+      <testcase classname="fastlane.lanes" name="1: default_platform" time="0.000174">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: is_ci" time="0.000279">
+      <testcase classname="fastlane.lanes" name="2: is_ci" time="0.000169">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: Switch to ios match_me lane" time="0.000864">
+      <testcase classname="fastlane.lanes" name="3: Switch to ios match_me lane" time="0.000159">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: match" time="11.659984">
+      <testcase classname="fastlane.lanes" name="4: match" time="2.626808">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="5: match" time="27.409512">
+      <testcase classname="fastlane.lanes" name="5: gym" time="108.769073">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="6: gym" time="121.134488">
+      <testcase classname="fastlane.lanes" name="6: changelog_from_git_commits" time="0.023007">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="7: changelog_from_git_commits" time="0.023193">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="8: firebase_app_distribution" time="57.204694">
+      <testcase classname="fastlane.lanes" name="7: firebase_app_distribution" time="3.435275">
         
       </testcase>
     

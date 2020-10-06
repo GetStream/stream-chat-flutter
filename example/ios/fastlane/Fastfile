@@ -15,7 +15,8 @@ lane :match_me do
         "io.getstream.flutter",
         "io.getstream.flutter.Notifications"
     ],
-    readonly: true
+    readonly: is_ci,
+    force_for_new_devices: true
   )
 end
 
