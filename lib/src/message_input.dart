@@ -283,6 +283,7 @@ class MessageInputState extends State<MessageInput> {
             prefixText: '   ',
             border: InputBorder.none,
           ),
+          textCapitalization: TextCapitalization.sentences,
         ),
       ),
     );
