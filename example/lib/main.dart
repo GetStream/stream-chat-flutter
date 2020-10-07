@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/apns.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
@@ -68,7 +69,8 @@ void main() async {
   final client = Client(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-    showLocalNotification: Platform.isAndroid ? showLocalNotification : null,
+    showLocalNotification:
+        (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
     persistenceEnabled: true,
   );
 
@@ -77,7 +79,9 @@ void main() async {
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
 
-  _initNotifications(client);
+  if (!kIsWeb) {
+    _initNotifications(client);
+  }
 
   runApp(MyApp(client));
 }
