@@ -1,3 +1,8 @@
+## 0.2.9
+
+- Update llc dependency
+- Fix example to run on Flutter web
+
 ## 0.2.8+3
 
 - Add simple example of channel creation in sample app
