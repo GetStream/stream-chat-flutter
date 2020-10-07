@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
@@ -439,9 +442,10 @@ class _ChannelListViewState extends State<ChannelListView>
     super.didUpdateWidget(oldWidget);
 
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
-        widget.sort != oldWidget.sort ||
-        widget.pagination != oldWidget.pagination ||
-        widget.options != oldWidget.options) {
+        jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
+        widget.pagination?.toJson()?.toString() !=
+            oldWidget.pagination?.toJson()?.toString() ||
+        widget.options?.toString() != oldWidget.options?.toString()) {
       final channelsBloc = ChannelsBloc.of(context);
       channelsBloc.queryChannels(
         filter: widget.filter,

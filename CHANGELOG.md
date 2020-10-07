@@ -1,3 +1,8 @@
+## 0.2.9
+
+- Update llc dependency
+- Fix example to run on Flutter web
+
 ## 0.2.8+4
 
 - fix: Auto capitalize the start of sentences in MessageInput
