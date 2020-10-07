@@ -1,3 +1,8 @@
+## 0.2.8+4
+
+- fix: Auto capitalize the start of sentences in MessageInput
+- Update dependencies
+
 ## 0.2.8+3
 
 - Add simple example of channel creation in sample app
