@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
+import 'package:stream_chat_flutter/src/user_reaction_display.dart';
 
 import '../stream_chat_flutter.dart';
 import 'message_input.dart';
@@ -43,6 +44,14 @@ class MessageActionsBottomSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          if (showReactions &&
+              (message.status == MessageSendingStatus.SENT ||
+                  message.status == null) &&
+              message.latestReactions.isNotEmpty)
+            UserReactionDisplay(
+              reactionToEmoji: reactionToEmoji,
+              message: message,
+            ),
           if (showReactions &&
               (message.status == MessageSendingStatus.SENT ||
                   message.status == null))

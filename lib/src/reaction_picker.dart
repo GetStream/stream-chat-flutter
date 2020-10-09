@@ -31,7 +31,7 @@ class ReactionPicker extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: reactionToEmoji.keys.map((reactionType) {
-          final ownReactionIndex = message.ownReactions
+          final ownReactionIndex = message.latestReactions
                   ?.indexWhere((reaction) => reaction.type == reactionType) ??
               -1;
           return Column(
@@ -49,7 +49,7 @@ class ReactionPicker extends StatelessWidget {
                 onPressed: () {
                   if (ownReactionIndex != -1) {
                     removeReaction(
-                        context, message.ownReactions[ownReactionIndex]);
+                        context, message.latestReactions[ownReactionIndex]);
                   } else {
                     sendReaction(context, reactionType);
                   }
@@ -59,7 +59,8 @@ class ReactionPicker extends StatelessWidget {
                   ? Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),
                       child: Text(
-                        message.ownReactions[ownReactionIndex].score.toString(),
+                        message.latestReactions[ownReactionIndex].score
+                            .toString(),
                         style: TextStyle(color: Colors.white),
                       ),
                     )
