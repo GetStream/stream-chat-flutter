@@ -135,7 +135,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
           } else {
-            if (client.state.channels[e.cid] != null) {
+            if (client.state?.channels != null &&
+                client.state?.channels[e.cid] != null) {
               newChannels.insert(0, client.state.channels[e.cid]);
             }
           }

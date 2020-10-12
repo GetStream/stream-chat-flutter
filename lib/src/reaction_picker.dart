@@ -35,7 +35,7 @@ class ReactionPicker extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: reactionAssets.map((reactionAsset) {
-          final ownReactionIndex = message.ownReactions?.indexWhere(
+          final ownReactionIndex = message.latestReactions?.indexWhere(
                   (reaction) => reaction.type == reactionAsset.type) ??
               -1;
           return IconButton(
