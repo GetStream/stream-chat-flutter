@@ -1,3 +1,8 @@
+## 0.2.9+1
+
+- Update llc dependency
+- Minor bug fixes
+
 ## 0.2.9
 
 - Update llc dependency

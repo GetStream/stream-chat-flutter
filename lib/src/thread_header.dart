@@ -82,9 +82,12 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: <Widget>[
         Container(
           child: showBackButton
-              ? StreamBackButton(
-                  onPressed: onBackPressed,
-                  icon: Icons.close,
+              ? AspectRatio(
+                  aspectRatio: 1,
+                  child: StreamBackButton(
+                    onPressed: onBackPressed,
+                    icon: Icons.close,
+                  ),
                 )
               : SizedBox(),
         ),

@@ -54,7 +54,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Calls [channel.query] updating [queryMessage] stream
   void queryMessages() {
-    if (_paginationEnded) {
+    if (_queryMessageController.value == true || _paginationEnded) {
       return;
     }
 
@@ -65,15 +65,18 @@ class StreamChannelState extends State<StreamChannel> {
       firstId = channel.state.messages.first.id;
     }
 
+    final messageLimit = 50;
+
     widget.channel
         .query(
       messagesPagination: PaginationParams(
         lessThan: firstId,
-        limit: 100,
+        limit: messageLimit,
       ),
+      preferOffline: true,
     )
         .then((res) {
-      if (res.messages.isEmpty) {
+      if (res.messages.isEmpty || res.messages.length < messageLimit) {
         _paginationEnded = true;
       }
       _queryMessageController.add(false);
@@ -84,7 +87,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(String parentId) async {
-    if (_paginationEnded) {
+    if (_queryMessageController.value == true || _paginationEnded) {
       return;
     }
 
@@ -99,16 +102,18 @@ class StreamChannelState extends State<StreamChannel> {
       }
     }
 
+    final messageLimit = 50;
     return widget.channel
         .getReplies(
       parentId,
       PaginationParams(
         lessThan: firstId,
-        limit: 100,
+        limit: messageLimit,
       ),
+      preferOffline: true,
     )
         .then((res) {
-      if (res.messages.isEmpty) {
+      if (res.messages.isEmpty || res.messages.length < messageLimit) {
         _paginationEnded = true;
       }
       _queryMessageController.add(false);
