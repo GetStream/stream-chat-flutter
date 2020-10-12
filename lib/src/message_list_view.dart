@@ -139,7 +139,7 @@ class MessageListView extends StatefulWidget {
 class _MessageListViewState extends State<MessageListView> {
   static const _newMessageLoadingOffset = 100;
   final ScrollController _scrollController = ScrollController();
-  bool _isBottom = true;
+  bool _bottomWasVisible = true;
   bool _topWasVisible = false;
   List<Message> _messages = [];
   List<Message> _newMessageList = [];
@@ -333,7 +333,11 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
         if (topIsVisible && !_topWasVisible) {
-          streamChannel.queryMessages();
+          if (widget.parentMessage == null) {
+            streamChannel.queryMessages();
+          } else {
+            streamChannel.getReplies(widget.parentMessage.id);
+          }
         }
         _topWasVisible = topIsVisible;
       },
@@ -368,12 +372,15 @@ class _MessageListViewState extends State<MessageListView> {
     return VisibilityDetector(
       key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
-        _isBottom = visibility.visibleBounds != Rect.zero;
-        if (_isBottom && streamChannel.channel.config?.readEvents == true) {
+        final isVisible = visibility.visibleBounds != Rect.zero;
+        if (isVisible &&
+            !_bottomWasVisible &&
+            streamChannel.channel.config?.readEvents == true) {
           if (streamChannel.channel.state.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
         }
+        _bottomWasVisible = isVisible;
       },
       child: messageWidget,
     );
@@ -437,7 +444,8 @@ class _MessageListViewState extends State<MessageListView> {
         ?.read
         ?.where((element) => element.user.id != userId)
         ?.where((read) =>
-            read.lastRead.isAfter(message.createdAt) &&
+            (read.lastRead.isAfter(message.createdAt) ||
+                read.lastRead.isAtSameMomentAs(message.createdAt)) &&
             (index == 0 ||
                 read.lastRead.isBefore(messages[index - 1].createdAt)))
         ?.toList();
@@ -483,9 +491,6 @@ class _MessageListViewState extends State<MessageListView> {
     super.initState();
 
     final streamChannel = StreamChannel.of(context);
-    if (streamChannel.channel.state.unreadCount > 0) {
-      streamChannel.channel.markRead();
-    }
 
     Stream<List<Message>> stream;
 
