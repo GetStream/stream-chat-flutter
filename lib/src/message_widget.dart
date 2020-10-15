@@ -244,7 +244,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                     top: widget.message.reactionCounts
                                                 ?.isNotEmpty ==
                                             true
-                                        ? 16
+                                        ? 12
                                         : 0,
                                   )
                                 : EdgeInsets.zero,
