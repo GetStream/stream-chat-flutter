@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
+import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -437,7 +438,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               !widget.message.isDeleted)
           ? Container(
               child: GestureDetector(
-                onTap: () => onLongPress(context),
+                onTap: () => _showMessageReactionsModalBottomSheet(context),
                 child: FractionallySizedBox(
                   widthFactor: 0.5,
                   child: Row(
@@ -452,7 +453,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  void _showMessageModalBottomSheet(BuildContext context) {
+  void _showMessageActionModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showDialog(
         context: context,
@@ -460,6 +461,30 @@ class _MessageWidgetState extends State<MessageWidget> {
           return StreamChannel(
             channel: channel,
             child: MessageActionsModal(
+              messageTheme: widget.messageTheme,
+              messageShape: widget.shape ?? _getDefaultShape(context),
+              reverse: widget.reverse,
+              showDeleteMessage: widget.showDeleteMessage,
+              message: widget.message,
+              editMessageInputBuilder: widget.editMessageInputBuilder,
+              onThreadTap: widget.onThreadTap,
+              showEditMessage: widget.showEditMessage,
+              showReactions: widget.showReactions,
+              showReply:
+                  widget.showReplyIndicator && widget.onThreadTap != null,
+            ),
+          );
+        });
+  }
+
+  void _showMessageReactionsModalBottomSheet(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    showDialog(
+        context: context,
+        builder: (context) {
+          return StreamChannel(
+            channel: channel,
+            child: MessageReactionsModal(
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
               reverse: widget.reverse,
@@ -581,7 +606,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     if (widget.onMessageActions != null) {
       widget.onMessageActions(context, widget.message);
     } else {
-      _showMessageModalBottomSheet(context);
+      _showMessageActionModalBottomSheet(context);
     }
     return;
   }

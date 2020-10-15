@@ -75,7 +75,9 @@ void main() async {
   );
 
   await client.setUser(
-    User(id: 'super-band-9'),
+    User(id: 'super-band-9', extraData: {
+      'name': 'John Doe',
+    }),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
 
