@@ -25,7 +25,7 @@ class ReactionPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final reactionAssets = StreamChatTheme.of(context).reactionAssets;
     return Material(
-      color: messageTheme.reactionsBackgroundColor,
+      color: messageTheme.ownReactionsBackgroundColor,
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
@@ -35,7 +35,7 @@ class ReactionPicker extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: reactionAssets.map((reactionAsset) {
-          final ownReactionIndex = message.latestReactions?.indexWhere(
+          final ownReactionIndex = message.ownReactions?.indexWhere(
                   (reaction) => reaction.type == reactionAsset.type) ??
               -1;
           return IconButton(
@@ -45,7 +45,7 @@ class ReactionPicker extends StatelessWidget {
               package: reactionAsset.package,
               color: ownReactionIndex != -1
                   ? StreamChatTheme.of(context).accentColor
-                  : Colors.black,
+                  : Theme.of(context).iconTheme.color,
             ),
             onPressed: () {
               if (ownReactionIndex != -1) {

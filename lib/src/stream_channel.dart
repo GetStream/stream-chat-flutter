@@ -81,7 +81,9 @@ class StreamChannelState extends State<StreamChannel> {
       }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
-      _queryMessageController.addError(e, stack);
+      if (!_queryMessageController.isClosed) {
+        _queryMessageController.addError(e, stack);
+      }
     });
   }
 

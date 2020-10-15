@@ -24,7 +24,7 @@ dependencies:
   image_picker: ^0.6.7+2
   flutter_keyboard_visibility: ^3.2.1
   flutter_svg: ^0.18.0
-  stream_chat: ^0.2.7+1
+  stream_chat: ^0.2.8
   mime: ^0.9.6+3
   visibility_detector: ^0.1.5
   line_awesome_icons: ^1.0.4+2

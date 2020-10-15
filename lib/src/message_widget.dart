@@ -2,12 +2,13 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
+import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'image_group.dart';
@@ -198,9 +199,6 @@ class MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<MessageWidget> {
-  final GlobalKey _reactionPickerKey = GlobalKey();
-  double _reactionPadding = 0;
-
   @override
   Widget build(BuildContext context) {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
@@ -243,11 +241,15 @@ class _MessageWidgetState extends State<MessageWidget> {
                           child: Padding(
                             padding: widget.showReactions
                                 ? EdgeInsets.only(
-                                    top: _reactionPadding,
+                                    top: widget.message.reactionCounts
+                                                ?.isNotEmpty ==
+                                            true
+                                        ? 16
+                                        : 0,
                                   )
                                 : EdgeInsets.zero,
                             child: PortalEntry(
-                              portalAnchor: Alignment(0, 1),
+                              portalAnchor: Alignment(-0.81, 0),
                               childAnchor: Alignment.topRight,
                               portal: _buildReactionIndicator(context),
                               child: (widget.message.isDeleted &&
@@ -293,57 +295,6 @@ class _MessageWidgetState extends State<MessageWidget> {
           ),
         ),
       ),
-    );
-  }
-
-  @override
-  void didUpdateWidget(MessageWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateReactionPadding();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateReactionPadding();
-  }
-
-  void _updateReactionPadding() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!mounted) {
-        return;
-      }
-      if (_reactionPickerKey.currentContext != null &&
-          widget.message.reactionCounts != null &&
-          widget.message.reactionCounts.values
-              .where((element) => element > 0)
-              .isNotEmpty) {
-        setState(() {
-          _reactionPadding = _reactionPickerKey.currentContext.size.height;
-        });
-      } else {
-        setState(() {
-          _reactionPadding = 0;
-        });
-      }
-    });
-  }
-
-  Widget _buildReactionsTail(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      child: widget.message.reactionCounts?.isNotEmpty == true
-          ? Transform.translate(
-              offset: Offset(4, 0),
-              child: CustomPaint(
-                painter: ReactionBubblePainter(
-                  widget.messageTheme.reactionsBackgroundColor,
-                  widget.messageTheme.reactionsBorderColor,
-                  widget.message.reactionCounts.length,
-                ),
-              ),
-            )
-          : SizedBox(),
     );
   }
 
@@ -427,88 +378,77 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildReactionIndicator(BuildContext context) {
+    final otherReactions = widget.message.latestReactions
+            ?.where(
+                (element) => element.user.id != StreamChat.of(context).user.id)
+            ?.toList() ??
+        [];
+
+    var rowChildren = [
+      if (widget.message.ownReactions?.isNotEmpty == true) ...[
+        Transform.translate(
+          offset: Offset(
+            widget.reverse ? -6 : 0,
+            0,
+          ),
+          child: ReactionBubble(
+            key: ValueKey('${widget.message.id}.own'),
+            reverse: widget.reverse,
+            backgroundColor: widget.messageTheme.ownReactionsBackgroundColor,
+            borderColor: widget.messageTheme.ownReactionsBorderColor,
+            reactions: widget.message.ownReactions,
+          ),
+        ),
+        if (otherReactions.isEmpty)
+          Container(
+            width: 18,
+          ),
+      ],
+      if (otherReactions?.isNotEmpty == true) ...[
+        if (widget.message.ownReactions?.isEmpty == true)
+          Container(
+            width: 18,
+          ),
+        Transform.translate(
+          offset: Offset(
+            widget.reverse ? 0 : -6,
+            0,
+          ),
+          child: ReactionBubble(
+            key: ValueKey('${widget.message.id}.other'),
+            reactions: otherReactions,
+            reverse: widget.reverse,
+            flipTail: true,
+            backgroundColor: widget.messageTheme.otherReactionsBackgroundColor,
+            borderColor: widget.messageTheme.otherReactionsBorderColor,
+          ),
+        ),
+      ]
+    ];
+
+    if (widget.reverse) {
+      rowChildren = rowChildren.reversed.toList();
+    }
     return AnimatedSwitcher(
-      key: _reactionPickerKey,
       duration: Duration(milliseconds: 300),
       child: (widget.showReactions &&
-              widget.message.reactionCounts?.isNotEmpty == true &&
+              (widget.message.reactionCounts?.isNotEmpty == true ||
+                  otherReactions.isNotEmpty) &&
               !widget.message.isDeleted)
           ? Container(
               child: GestureDetector(
                 onTap: () => onLongPress(context),
                 child: FractionallySizedBox(
-                  widthFactor: 0.3,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 4.0,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Transform(
-                          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                          alignment: Alignment.center,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              border: widget.messageTheme
-                                          .reactionsBackgroundColor ==
-                                      StreamChatTheme.of(context)
-                                          .backgroundColor
-                                  ? Border.all(
-                                      color: Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.white.withAlpha(24)
-                                          : Colors.black.withAlpha(24),
-                                    )
-                                  : null,
-                              color:
-                                  widget.messageTheme.reactionsBackgroundColor,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(14)),
-                            ),
-                            child: _buildReactions(context),
-                          ),
-                        ),
-                        _buildReactionsTail(context),
-                      ],
-                    ),
+                  widthFactor: 0.5,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: rowChildren,
                   ),
                 ),
               ),
             )
           : SizedBox(),
-    );
-  }
-
-  Widget _buildReactions(BuildContext context) {
-    final reactionAssets = StreamChatTheme.of(context).reactionAssets;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...widget.message.reactionCounts.keys.map((reactionType) {
-          final reactionAsset = reactionAssets.firstWhere(
-            (reactionAsset) => reactionAsset.type == reactionType,
-            orElse: () => null,
-          );
-          if (reactionAsset == null) {
-            return Text(
-              '?',
-              style: TextStyle(
-                color: StreamChatTheme.of(context).accentColor,
-              ),
-            );
-          }
-
-          return SvgPicture.asset(
-            reactionAsset.svgAsset,
-            package: reactionAsset.package,
-            height: 16,
-            color: StreamChatTheme.of(context).accentColor,
-          );
-        }).toList(),
-      ],
     );
   }
 
@@ -823,99 +763,5 @@ class _MessageWidgetState extends State<MessageWidget> {
             onMentionTap: widget.onMentionTap,
             messageTheme: widget.messageTheme,
           );
-  }
-}
-
-class ReactionBubblePainter extends CustomPainter {
-  final Color color;
-  final Color borderColor;
-  final int reactionsCount;
-
-  ReactionBubblePainter(
-    this.color,
-    this.borderColor,
-    this.reactionsCount,
-  );
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    _drawArc(size, canvas);
-
-    _drawBorder(size, canvas);
-
-    _drawOval(size, canvas);
-
-    _drawOvalBorder(size, canvas);
-  }
-
-  void _drawOvalBorder(Size size, Canvas canvas) {
-    final paint = Paint()
-      ..color = borderColor
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    final path = Path();
-    path.addOval(
-      Rect.fromCircle(
-        center: Offset(0, 3),
-        radius: 2,
-      ),
-    );
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawOval(Size size, Canvas canvas) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-
-    final path = Path();
-    path.addOval(Rect.fromCircle(
-      center: Offset(0, 3),
-      radius: 2,
-    ));
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawBorder(Size size, Canvas canvas) {
-    final paint = Paint()
-      ..color = borderColor
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
-    final dy = reactionsCount > 1 ? -2.0 : -3.0;
-    final path = Path();
-    path.addArc(
-      Rect.fromCircle(
-        center: Offset(-4, dy),
-        radius: 4,
-      ),
-      -pi * 1.15,
-      -pi / 1.4,
-    );
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawArc(Size size, Canvas canvas) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-
-    final dy = reactionsCount > 1 ? -2.0 : -3.0;
-    final path = Path();
-    path.addArc(
-      Rect.fromCircle(
-        center: Offset(-4, dy),
-        radius: 4,
-      ),
-      -pi,
-      -pi,
-    );
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
   }
 }
