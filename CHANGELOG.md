@@ -1,3 +1,8 @@
+## 0.2.10
+
+- Update llc dependency
+- Add `separatorBuilder` to `ChannelListView`
+
 ## 0.2.9+1
 
 - Update llc dependency

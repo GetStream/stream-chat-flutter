@@ -61,6 +61,7 @@ class ChannelListView extends StatefulWidget {
     this.onChannelLongPress,
     this.channelWidget,
     this.channelPreviewBuilder,
+    this.separatorBuilder,
     this.errorBuilder,
     this.onImageTap,
     this.pullToRefresh = true,
@@ -105,6 +106,9 @@ class ChannelListView extends StatefulWidget {
 
   /// Builder used to create a custom channel preview
   final ChannelPreviewBuilder channelPreviewBuilder;
+
+  /// Builder used to create a custom item separator
+  final Function(BuildContext, int) separatorBuilder;
 
   /// The function called when the image is tapped
   final Function(Channel) onImageTap;
@@ -266,6 +270,9 @@ class _ChannelListViewState extends State<ChannelListView>
 
   Widget _itemBuilder(context, int i, List<Channel> channels) {
     if (i % 2 != 0) {
+      if (widget.separatorBuilder != null) {
+        return widget.separatorBuilder(context, i);
+      }
       return _separatorBuilder(context, i);
     }
 
