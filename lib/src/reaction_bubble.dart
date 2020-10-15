@@ -26,7 +26,8 @@ class ReactionBubble extends StatelessWidget {
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment:
+            flipTail ? CrossAxisAlignment.start : CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
@@ -71,7 +72,7 @@ class ReactionBubble extends StatelessWidget {
 
   Widget _buildReactionsTail(BuildContext context) {
     final tail = Transform.translate(
-      offset: Offset(4, 0),
+      offset: Offset(reactions.length > 1 ? -9 : -9, 0),
       child: CustomPaint(
         painter: ReactionBubblePainter(
           backgroundColor,
@@ -152,7 +153,7 @@ class ReactionBubblePainter extends CustomPainter {
 
     final dy = reactionsCount > 1 ? -2.0 : -3.0;
     final startAngle = reactionsCount > 1 ? 1.08 : 1.16;
-    final sweepAngle = reactionsCount > 1 ? 1.18 : 1.1;
+    final sweepAngle = reactionsCount > 1 ? 0.95 : 1.1;
     final path = Path();
     path.addArc(
       Rect.fromCircle(
@@ -171,7 +172,8 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1;
 
     final dy = reactionsCount > 1 ? -2.0 : -3.0;
-    final startAngle = reactionsCount > 1 ? 1.05 : 1.16;
+    final startAngle = reactionsCount > 1 ? 1 : 1.16;
+    final sweepAngle = reactionsCount > 1 ? 1.2 : 1;
     final path = Path();
     path.addArc(
       Rect.fromCircle(
@@ -179,7 +181,7 @@ class ReactionBubblePainter extends CustomPainter {
         radius: 4,
       ),
       -pi * startAngle,
-      -pi,
+      -pi * sweepAngle,
     );
     canvas.drawPath(path, paint);
   }
