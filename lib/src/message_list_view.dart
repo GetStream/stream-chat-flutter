@@ -446,7 +446,7 @@ class _MessageListViewState extends State<MessageListView> {
                 read.lastRead.isBefore(messages[index - 1].createdAt)))
         ?.toList();
 
-    final allRead = readList.length == channel.memberCount - 1;
+    final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
 
     return MessageWidget(
       message: message,
