@@ -839,20 +839,25 @@ class MessageInputState extends State<MessageInput> {
     return IconTheme(
       data:
       StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Material(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-        color: Colors.grey,
-        child: IconButton(
-          key: Key('sendButton'),
-          onPressed: () {
-            sendMessage();
-          },
-          icon: Icon(
-            Icons.arrow_forward,
-            color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            color: Colors.grey,
+            child: IconButton(
+              key: Key('sendButton'),
+              onPressed: () {
+                sendMessage();
+              },
+              icon: Icon(
+                Icons.arrow_forward,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ),
@@ -863,20 +868,25 @@ class MessageInputState extends State<MessageInput> {
     return IconTheme(
       data:
           StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Material(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-        color: StreamChatTheme.of(context).accentColor,
-        child: IconButton(
-          key: Key('sendButton'),
-          onPressed: () {
-            sendMessage();
-          },
-          icon: Icon(
-            Icons.arrow_upward,
-            color: Colors.white,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            color: StreamChatTheme.of(context).accentColor,
+            child: IconButton(
+              key: Key('sendButton'),
+              onPressed: () {
+                sendMessage();
+              },
+              icon: Icon(
+                Icons.arrow_upward,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ),
