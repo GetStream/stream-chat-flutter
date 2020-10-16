@@ -449,7 +449,7 @@ class MessageInputState extends State<MessageInput> {
                               ),
                               title: Text('${m.user.name}', style: TextStyle(fontWeight: FontWeight.bold),),
                               subtitle: Text('${m.userId}'),
-                              trailing: Icon(Icons.alternate_email, color: StreamChatTheme.of(context).primaryColor,),
+                              trailing: Icon(Icons.alternate_email, color: StreamChatTheme.of(context).accentColor,),
                               onTap: () {
                                 _mentionedUsers.add(m.user);
 
