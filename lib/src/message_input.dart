@@ -184,7 +184,7 @@ class MessageInputState extends State<MessageInput> {
           child: Stack(
             clipBehavior: Clip.none,
             children: <Widget>[
-              _buildBorder(context),
+              //_buildBorder(context),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -281,7 +281,7 @@ class MessageInputState extends State<MessageInput> {
           decoration: InputDecoration(
             hintText: 'Write a message',
             prefixText: '   ',
-            border: InputBorder.none,
+            border: OutlineInputBorder(),
           ),
           textCapitalization: TextCapitalization.sentences,
         ),
@@ -613,8 +613,11 @@ class MessageInputState extends State<MessageInput> {
         onPressed: () {
           showAttachmentModal();
         },
-        icon: Icon(
-          Icons.add_circle_outline,
+        icon: Transform.rotate(
+          child: Icon(
+            Icons.attach_file_sharp,
+          ),
+          angle: - 0.3,
         ),
       ),
     );
