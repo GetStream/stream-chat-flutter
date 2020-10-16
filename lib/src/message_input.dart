@@ -222,7 +222,7 @@ class MessageInputState extends State<MessageInput> {
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
-      secondChild: SizedBox(),
+      secondChild: _buildIdleSendButton(context),
       duration: Duration(milliseconds: 300),
       alignment: Alignment.center,
     );
@@ -617,7 +617,7 @@ class MessageInputState extends State<MessageInput> {
           child: Icon(
             Icons.attach_file_sharp,
           ),
-          angle: - 0.3,
+          angle: 0.4,
         ),
       ),
     );
@@ -835,6 +835,30 @@ class MessageInputState extends State<MessageInput> {
     return res.file;
   }
 
+  Widget _buildIdleSendButton(BuildContext context) {
+    return IconTheme(
+      data:
+      StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+      child: Material(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32),
+        ),
+        color: Colors.grey,
+        child: IconButton(
+          key: Key('sendButton'),
+          onPressed: () {
+            sendMessage();
+          },
+          icon: Icon(
+            Icons.arrow_forward,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSendButton(BuildContext context) {
     return IconTheme(
       data:
@@ -844,15 +868,15 @@ class MessageInputState extends State<MessageInput> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(32),
         ),
-        color: Colors.transparent,
+        color: StreamChatTheme.of(context).accentColor,
         child: IconButton(
           key: Key('sendButton'),
           onPressed: () {
             sendMessage();
           },
           icon: Icon(
-            Icons.send,
-            color: StreamChatTheme.of(context).accentColor,
+            Icons.arrow_upward,
+            color: Colors.white,
           ),
         ),
       ),
