@@ -618,24 +618,14 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildGiphyButton() {
     return Center(
-      child: Material(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-        color: Colors.transparent,
-        child: IconButton(
-          onPressed: () {
-            setState(() {
-              _giphyEnabled = true;
-            });
-          },
-          icon: Transform.rotate(
-            child: Icon(
-              StreamIcons.lightning,
-            ),
-            angle: 0.4,
-          ),
+      child: IconButton(
+        onPressed: () {
+          setState(() {
+            _giphyEnabled = true;
+          });
+        },
+        icon: Icon(
+          StreamIcons.lightning,
         ),
       ),
     );
@@ -643,23 +633,11 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildAttachmentButton() {
     return Center(
-      child: Material(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-        color: Colors.transparent,
-        child: IconButton(
-          onPressed: () {
-            showAttachmentModal();
-          },
-          icon: Transform.rotate(
-            child: Icon(
-              Icons.attach_file_sharp,
-            ),
-            angle: 0.4,
-          ),
-        ),
+      child: IconButton(
+        onPressed: () {
+          showAttachmentModal();
+        },
+        icon: Icon(StreamIcons.attach),
       ),
     );
   }
@@ -891,7 +869,6 @@ class MessageInputState extends State<MessageInput> {
             icon: Icon(
               StreamIcons.send_message,
               color: Colors.grey,
-              size: 16.0,
             ),
           ),
         ),
@@ -914,7 +891,6 @@ class MessageInputState extends State<MessageInput> {
             icon: Icon(
               StreamIcons.send_message,
               color: StreamChatTheme.of(context).accentColor,
-              size: 16.0,
             ),
           ),
         ),
