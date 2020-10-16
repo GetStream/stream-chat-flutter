@@ -295,7 +295,7 @@ class MessageInputState extends State<MessageInput> {
                 borderRadius: BorderRadius.circular(32),
               ),
               contentPadding: EdgeInsets.all(4),
-              prefix: Chip(
+              prefix: _giphyEnabled ? Chip(
                 backgroundColor: StreamChatTheme.of(context).accentColor,
                 label: Row(
                   children: [
@@ -304,7 +304,7 @@ class MessageInputState extends State<MessageInput> {
                     Text('GIPHY', style: TextStyle(color: Colors.white),),
                   ],
                 )
-              ),
+              ) : null,
               suffixIcon: IconButton(
                 icon: Icon(Icons.cancel_outlined),
                 onPressed: () {
