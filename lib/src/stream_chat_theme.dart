@@ -3,6 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
+import 'package:stream_chat_flutter/src/stream_icons.dart';
 
 import 'reaction_asset.dart';
 
@@ -75,7 +76,7 @@ class StreamChatThemeData {
   final IconThemeData primaryIconTheme;
 
   /// Assets used for rendering reactions
-  final List<ReactionAsset> reactionAssets;
+  final List<ReactionIcon> reactionIcons;
 
   /// Create a theme from scratch
   StreamChatThemeData({
@@ -90,7 +91,7 @@ class StreamChatThemeData {
     this.defaultChannelImage,
     this.defaultUserImage,
     this.primaryIconTheme,
-    this.reactionAssets,
+    this.reactionIcons,
   });
 
   /// Create a theme from a Material [Theme]
@@ -141,7 +142,7 @@ class StreamChatThemeData {
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
-    List<ReactionAsset> reactionAssets,
+    List<ReactionIcon> reactionAssets,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
@@ -210,7 +211,7 @@ class StreamChatThemeData {
                   this.otherMessageTheme.avatarTheme,
             ) ??
             this.otherMessageTheme,
-        reactionAssets: reactionAssets ?? this.reactionAssets,
+        reactionIcons: reactionAssets ?? this.reactionIcons,
       );
 
   /// Get the default Stream Chat theme
@@ -353,31 +354,26 @@ class StreamChatThemeData {
           ),
         ),
       ),
-      reactionAssets: [
-        ReactionAsset(
+      reactionIcons: [
+        ReactionIcon(
           type: 'love',
-          svgAsset: 'assets/Icon_love_reaction.svg',
-          package: 'stream_chat_flutter',
+          iconData: StreamIcons.love_reaction,
         ),
-        ReactionAsset(
+        ReactionIcon(
           type: 'thumbs_up',
-          svgAsset: 'assets/Icon_thumbs_up_reaction.svg',
-          package: 'stream_chat_flutter',
+          iconData: StreamIcons.thumbs_up_reaction,
         ),
-        ReactionAsset(
+        ReactionIcon(
           type: 'thumbs_down',
-          svgAsset: 'assets/Icon_thumbs_down_reaction.svg',
-          package: 'stream_chat_flutter',
+          iconData: StreamIcons.thumbs_up_reaction_1,
         ),
-        ReactionAsset(
+        ReactionIcon(
           type: 'lol',
-          svgAsset: 'assets/Icon_LOL_reaction.svg',
-          package: 'stream_chat_flutter',
+          iconData: StreamIcons.LOL_reaction,
         ),
-        ReactionAsset(
+        ReactionIcon(
           type: 'wut',
-          svgAsset: 'assets/Icon_wut_reaction.svg',
-          package: 'stream_chat_flutter',
+          iconData: StreamIcons.wut_reaction,
         ),
       ],
     );

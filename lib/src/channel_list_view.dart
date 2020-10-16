@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
@@ -362,7 +360,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: LineAwesomeIcons.volume_off,
+                    icon: StreamIcons.mute,
                     onTap: () async {
                       if (!channel.isMuted) {
                         await channel.mute();
@@ -374,13 +372,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   if (channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
                       color: backgroundColor,
-                      iconWidget: SvgPicture.asset(
-                        'assets/icon_user_minus.svg',
-                        package: 'stream_chat_flutter',
-                        color:
-                            StreamChatTheme.of(context).primaryIconTheme.color,
-                        width: 22,
-                      ),
+                      icon: StreamIcons.user_minus,
                       onTap: () async {
                         final confirm = await showConfirmationDialog(
                           context,

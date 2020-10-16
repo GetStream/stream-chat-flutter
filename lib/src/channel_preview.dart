@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
@@ -145,11 +144,11 @@ class ChannelPreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           Icon(
-            LineAwesomeIcons.volume_off,
-            size: 15,
+            StreamIcons.mute,
+            size: 16,
           ),
           Text(
-            'Channel is muted',
+            '  Channel is muted',
             style: StreamChatTheme.of(context)
                 .channelPreviewTheme
                 .subtitle
