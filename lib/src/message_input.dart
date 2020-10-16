@@ -290,7 +290,7 @@ class MessageInputState extends State<MessageInput> {
             autofocus: false,
             decoration: InputDecoration(
               hintText: 'Write a message',
-              prefixText: '   ',
+              prefixText: _giphyEnabled ? null : '   ',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
