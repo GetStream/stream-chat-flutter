@@ -30,20 +30,19 @@ class MessageActionsModal extends StatelessWidget {
     Key key,
     @required this.message,
     @required this.messageTheme,
-    this.showReactions,
-    this.showDeleteMessage,
-    this.showEditMessage,
+    this.showReactions = true,
+    this.showDeleteMessage = true,
+    this.showEditMessage = true,
     this.onThreadTap,
     this.showCopyMessage = true,
-    this.showReply,
+    this.showReply = true,
     this.editMessageInputBuilder,
     this.messageShape,
-    this.reverse,
+    this.reverse = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
     return Stack(
       children: [
         Positioned.fill(
@@ -78,6 +77,7 @@ class MessageActionsModal extends StatelessWidget {
               ),
             AbsorbPointer(
               child: MessageWidget(
+                key: Key('MessageWidget'),
                 reverse: reverse,
                 message: message,
                 messageTheme: messageTheme,
@@ -277,7 +277,7 @@ class MessageActionsModal extends StatelessWidget {
         style: Theme.of(context).textTheme.headline6,
       ),
       leading: Icon(
-        StreamIcons.Thread_Reply,
+        StreamIcons.sorting_up,
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () {

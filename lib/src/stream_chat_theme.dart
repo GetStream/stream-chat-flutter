@@ -365,7 +365,7 @@ class StreamChatThemeData {
         ),
         ReactionIcon(
           type: 'thumbs_down',
-          iconData: StreamIcons.thumbs_up_reaction_1,
+          iconData: StreamIcons.thumbs_down_reaction,
         ),
         ReactionIcon(
           type: 'lol',

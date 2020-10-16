@@ -15,11 +15,8 @@ class MessageReactionsModal extends StatelessWidget {
   final void Function(Message) onThreadTap;
   final Message message;
   final MessageTheme messageTheme;
-  final bool showReactions;
-  final bool showDeleteMessage;
-  final bool showEditMessage;
-  final bool showReply;
   final bool reverse;
+  final bool showReactions;
   final ShapeBorder messageShape;
   final void Function(User) onUserAvatarTap;
 
@@ -28,10 +25,7 @@ class MessageReactionsModal extends StatelessWidget {
     @required this.message,
     @required this.messageTheme,
     this.showReactions = true,
-    this.showDeleteMessage,
-    this.showEditMessage,
     this.onThreadTap,
-    this.showReply,
     this.editMessageInputBuilder,
     this.messageShape,
     this.reverse = false,
@@ -74,6 +68,7 @@ class MessageReactionsModal extends StatelessWidget {
               ),
             AbsorbPointer(
               child: MessageWidget(
+                key: Key('MessageWidget'),
                 reverse: reverse,
                 message: message,
                 messageTheme: messageTheme,

@@ -489,14 +489,10 @@ class _MessageWidgetState extends State<MessageWidget> {
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
               reverse: widget.reverse,
-              showDeleteMessage: widget.showDeleteMessage,
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
-              showEditMessage: widget.showEditMessage,
               showReactions: widget.showReactions,
-              showReply:
-                  widget.showReplyIndicator && widget.onThreadTap != null,
             ),
           );
         });

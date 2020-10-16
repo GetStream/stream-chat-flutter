@@ -17,21 +17,21 @@ void main() {
           theme: themeData,
           home: StreamChatTheme(
             data: streamTheme,
-            child: Container(
-              child: MessageReactionsModal(
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'test-user',
-                  ),
+            child: MessageReactionsModal(
+              message: Message(
+                id: 'test',
+                text: 'test message',
+                user: User(
+                  id: 'test-user',
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
               ),
+              messageTheme: streamTheme.ownMessageTheme,
             ),
           ),
         ),
       );
 
+      expect(find.byKey(Key('MessageWidget')), findsOneWidget);
       expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsOneWidget);
     },
   );
@@ -47,41 +47,42 @@ void main() {
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final testUserId = 'test user';
+
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
-              child: MessageReactionsModal(
-                message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'test-user',
-                  ),
-                  latestReactions: [
-                    Reaction(
-                      type: 'thumbs_up',
-                      user: User(id: 'test'),
-                    ),
-                    Reaction(
-                      type: 'love',
-                      user: User(id: 'test'),
-                    ),
-                  ],
+            child: MessageReactionsModal(
+              message: Message(
+                text: 'test message',
+                user: User(
+                  id: 'test-user',
                 ),
-                messageTheme: streamTheme.ownMessageTheme,
+                latestReactions: [
+                  Reaction(
+                    type: 'thumbs_up',
+                    user: User(id: testUserId),
+                  ),
+                  Reaction(
+                    type: 'love',
+                    user: User(id: testUserId),
+                  ),
+                ],
               ),
+              messageTheme: streamTheme.ownMessageTheme,
             ),
           ),
         ),
       );
       await tester.pump();
 
+      expect(find.byKey(Key('MessageWidget')), findsOneWidget);
       expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsNWidgets(2));
       expect(find.byIcon(StreamIcons.love_reaction), findsNWidgets(2));
-      expect(find.text('test'), findsNWidgets(2));
+      expect(find.text(testUserId), findsNWidgets(2));
     },
   );
 }
