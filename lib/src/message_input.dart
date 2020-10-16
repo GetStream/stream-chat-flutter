@@ -282,7 +282,9 @@ class MessageInputState extends State<MessageInput> {
             decoration: InputDecoration(
               hintText: 'Write a message',
               prefixText: '   ',
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+              ),
             ),
             textCapitalization: TextCapitalization.sentences,
           ),
@@ -860,7 +862,7 @@ class MessageInputState extends State<MessageInput> {
               icon: Icon(
                 Icons.arrow_forward,
                 color: Colors.white,
-                size: 18.0,
+                size: 16.0,
               ),
             ),
           ),
@@ -890,7 +892,11 @@ class MessageInputState extends State<MessageInput> {
               icon: Icon(
                 Icons.arrow_upward,
                 color: Colors.white,
-                size: 18.0,
+                size: 16.0,
+              ),
+              constraints: BoxConstraints(
+                maxWidth: 24.0,
+                maxHeight: 24.0,
               ),
             ),
           ),
