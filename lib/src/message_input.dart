@@ -206,7 +206,7 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (_giphyEnabled)
+        if (!_giphyEnabled)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -305,14 +305,14 @@ class MessageInputState extends State<MessageInput> {
                   ],
                 )
               ) : null,
-              suffixIcon: IconButton(
+              suffixIcon: _giphyEnabled ? IconButton(
                 icon: Icon(Icons.cancel_outlined),
                 onPressed: () {
                   setState(() {
                     _giphyEnabled = false;
                   });
                 },
-              )
+              ) : null,
             ),
             textCapitalization: TextCapitalization.sentences,
           ),
