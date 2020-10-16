@@ -622,7 +622,7 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 5.0, right: 10.0),
           child: Icon(StreamIcons.lightning),
         ),
         onTap: () {
@@ -638,7 +638,7 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 10.0, right: 5.0),
           child: Icon(StreamIcons.attach),
         ),
         onTap: () {
