@@ -202,7 +202,7 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         if (!widget.disableAttachments) _buildAttachmentButton(),
         if (widget.actionsLocation == ActionsLocation.left)
