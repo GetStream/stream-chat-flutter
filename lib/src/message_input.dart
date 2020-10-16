@@ -447,9 +447,7 @@ class MessageInputState extends State<MessageInput> {
                               leading: UserAvatar(
                                 user: m.user,
                               ),
-                              title: Text('${m.user.name}', style: TextStyle(fontWeight: FontWeight.bold),),
-                              subtitle: Text('${m.userId}'),
-                              trailing: Icon(Icons.alternate_email, color: StreamChatTheme.of(context).accentColor,),
+                              title: Text('${m.user.name}'),
                               onTap: () {
                                 _mentionedUsers.add(m.user);
 
@@ -895,6 +893,10 @@ class MessageInputState extends State<MessageInput> {
                 Icons.arrow_upward,
                 color: Colors.white,
                 size: 16.0,
+              ),
+              constraints: BoxConstraints(
+                maxWidth: 24.0,
+                maxHeight: 24.0,
               ),
             ),
           ),
