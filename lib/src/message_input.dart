@@ -230,60 +230,62 @@ class MessageInputState extends State<MessageInput> {
 
   Expanded _buildTextInput(BuildContext context) {
     return Expanded(
-      child: LimitedBox(
-        maxHeight: widget.maxHeight,
-        child: TextField(
-          key: Key('messageInputText'),
-          enabled: _inputEnabled,
-          minLines: null,
-          maxLines: null,
-          onSubmitted: (_) {
-            sendMessage();
-          },
-          keyboardType: widget.keyboardType,
-          controller: textEditingController,
-          focusNode: _focusNode,
-          onChanged: (s) {
-            StreamChannel.of(context).channel.keyStroke();
+      child: Center(
+        child: LimitedBox(
+          maxHeight: widget.maxHeight,
+          child: TextField(
+            key: Key('messageInputText'),
+            enabled: _inputEnabled,
+            minLines: null,
+            maxLines: null,
+            onSubmitted: (_) {
+              sendMessage();
+            },
+            keyboardType: widget.keyboardType,
+            controller: textEditingController,
+            focusNode: _focusNode,
+            onChanged: (s) {
+              StreamChannel.of(context).channel.keyStroke();
 
-            setState(() {
-              _messageIsPresent = s.trim().isNotEmpty;
-            });
+              setState(() {
+                _messageIsPresent = s.trim().isNotEmpty;
+              });
 
-            _commandsOverlay?.remove();
-            _commandsOverlay = null;
-            _mentionsOverlay?.remove();
-            _mentionsOverlay = null;
+              _commandsOverlay?.remove();
+              _commandsOverlay = null;
+              _mentionsOverlay?.remove();
+              _mentionsOverlay = null;
 
-            if (s.startsWith('/')) {
-              _commandsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_commandsOverlay);
-            }
+              if (s.startsWith('/')) {
+                _commandsOverlay = _buildCommandsOverlayEntry();
+                Overlay.of(context).insert(_commandsOverlay);
+              }
 
-            if (textEditingController.selection.isCollapsed &&
-                (s[textEditingController.selection.start - 1] == '@' ||
-                    textEditingController.text
-                        .substring(0, textEditingController.selection.start)
-                        .split(' ')
-                        .last
-                        .contains('@'))) {
-              _mentionsOverlay = _buildMentionsOverlayEntry();
-              Overlay.of(context).insert(_mentionsOverlay);
-            }
-          },
-          onTap: () {
-            setState(() {
-              _typingStarted = true;
-            });
-          },
-          style: Theme.of(context).textTheme.bodyText2,
-          autofocus: false,
-          decoration: InputDecoration(
-            hintText: 'Write a message',
-            prefixText: '   ',
-            border: OutlineInputBorder(),
+              if (textEditingController.selection.isCollapsed &&
+                  (s[textEditingController.selection.start - 1] == '@' ||
+                      textEditingController.text
+                          .substring(0, textEditingController.selection.start)
+                          .split(' ')
+                          .last
+                          .contains('@'))) {
+                _mentionsOverlay = _buildMentionsOverlayEntry();
+                Overlay.of(context).insert(_mentionsOverlay);
+              }
+            },
+            onTap: () {
+              setState(() {
+                _typingStarted = true;
+              });
+            },
+            style: Theme.of(context).textTheme.bodyText2,
+            autofocus: false,
+            decoration: InputDecoration(
+              hintText: 'Write a message',
+              prefixText: '   ',
+              border: OutlineInputBorder(),
+            ),
+            textCapitalization: TextCapitalization.sentences,
           ),
-          textCapitalization: TextCapitalization.sentences,
         ),
       ),
     );
@@ -602,22 +604,24 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Material _buildAttachmentButton() {
-    return Material(
-      clipBehavior: Clip.hardEdge,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(32),
-      ),
-      color: Colors.transparent,
-      child: IconButton(
-        onPressed: () {
-          showAttachmentModal();
-        },
-        icon: Transform.rotate(
-          child: Icon(
-            Icons.attach_file_sharp,
+  Widget _buildAttachmentButton() {
+    return Center(
+      child: Material(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32),
+        ),
+        color: Colors.transparent,
+        child: IconButton(
+          onPressed: () {
+            showAttachmentModal();
+          },
+          icon: Transform.rotate(
+            child: Icon(
+              Icons.attach_file_sharp,
+            ),
+            angle: 0.4,
           ),
-          angle: 0.4,
         ),
       ),
     );
@@ -845,7 +849,7 @@ class MessageInputState extends State<MessageInput> {
           child: Material(
             clipBehavior: Clip.hardEdge,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(32),
             ),
             color: Colors.grey,
             child: IconButton(
@@ -856,6 +860,7 @@ class MessageInputState extends State<MessageInput> {
               icon: Icon(
                 Icons.arrow_forward,
                 color: Colors.white,
+                size: 18.0,
               ),
             ),
           ),
@@ -874,7 +879,7 @@ class MessageInputState extends State<MessageInput> {
           child: Material(
             clipBehavior: Clip.hardEdge,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(32),
             ),
             color: StreamChatTheme.of(context).accentColor,
             child: IconButton(
@@ -885,6 +890,7 @@ class MessageInputState extends State<MessageInput> {
               icon: Icon(
                 Icons.arrow_upward,
                 color: Colors.white,
+                size: 18.0,
               ),
             ),
           ),
