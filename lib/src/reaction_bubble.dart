@@ -21,7 +21,7 @@ class ReactionBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reactionAssets = StreamChatTheme.of(context).reactionIcons;
+    final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     return Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
@@ -42,11 +42,11 @@ class ReactionBubble extends StatelessWidget {
             child: Wrap(
               children: [
                 ...reactions.map((reaction) {
-                  final reactionAsset = reactionAssets.firstWhere(
-                    (reactionAsset) => reactionAsset.type == reaction.type,
+                  final reactionIcon = reactionIcons.firstWhere(
+                    (r) => r.type == reaction.type,
                     orElse: () => null,
                   );
-                  if (reactionAsset == null) {
+                  if (reactionIcon == null) {
                     return Text(
                       '?',
                       style: TextStyle(
@@ -56,7 +56,7 @@ class ReactionBubble extends StatelessWidget {
                   }
 
                   return Icon(
-                    reactionAsset.iconData,
+                    reactionIcon.iconData,
                     size: 16,
                     color: StreamChatTheme.of(context).accentColor,
                   );

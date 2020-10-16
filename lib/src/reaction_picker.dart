@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 
@@ -25,7 +23,7 @@ class ReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reactionAssets = StreamChatTheme.of(context).reactionIcons;
+    final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     return Stack(
       fit: StackFit.passthrough,
       children: [
@@ -39,7 +37,7 @@ class ReactionPicker extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            children: reactionAssets.map((reactionIcon) {
+            children: reactionIcons.map((reactionIcon) {
               final ownReactionIndex = message.ownReactions?.indexWhere(
                       (reaction) => reaction.type == reactionIcon.type) ??
                   -1;

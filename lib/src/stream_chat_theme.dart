@@ -142,7 +142,7 @@ class StreamChatThemeData {
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
-    List<ReactionIcon> reactionAssets,
+    List<ReactionIcon> reactionIcons,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
@@ -211,7 +211,7 @@ class StreamChatThemeData {
                   this.otherMessageTheme.avatarTheme,
             ) ??
             this.otherMessageTheme,
-        reactionIcons: reactionAssets ?? this.reactionIcons,
+        reactionIcons: reactionIcons ?? this.reactionIcons,
       );
 
   /// Get the default Stream Chat theme
