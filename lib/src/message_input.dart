@@ -618,28 +618,24 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildGiphyButton() {
     return Center(
-      child: IconButton(
-        onPressed: () {
+      child: InkWell(
+        child: Icon(StreamIcons.lightning),
+        onTap: () {
           setState(() {
             _giphyEnabled = true;
           });
         },
-        icon: Icon(
-          StreamIcons.lightning,
-        ),
-        iconSize: 14.0,
       ),
     );
   }
 
   Widget _buildAttachmentButton() {
     return Center(
-      child: IconButton(
-        onPressed: () {
+      child: InkWell(
+        child: Icon(StreamIcons.attach),
+        onTap: () {
           showAttachmentModal();
         },
-        icon: Icon(StreamIcons.attach),
-        iconSize: 14.0,
       ),
     );
   }
