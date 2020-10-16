@@ -855,20 +855,24 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
-    return IconTheme(
-      data:
-          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: IconButton(
-            key: Key('sendButtonIdle'),
-            onPressed: () {
-              sendMessage();
-            },
-            icon: Icon(
-              StreamIcons.send_message,
-              color: Colors.grey,
+    return SizedBox(
+      height: 24.0,
+      width: 24.0,
+      child: IconTheme(
+        data:
+            StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: IconButton(
+              key: Key('sendButtonIdle'),
+              onPressed: () {
+                sendMessage();
+              },
+              icon: Icon(
+                StreamIcons.send_message,
+                color: Colors.grey,
+              ),
             ),
           ),
         ),
@@ -877,20 +881,24 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildSendButton(BuildContext context) {
-    return IconTheme(
-      data:
-          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            key: Key('sendButton'),
-            onPressed: () {
-              sendMessage();
-            },
-            icon: Icon(
-              StreamIcons.send_message,
-              color: StreamChatTheme.of(context).accentColor,
+    return SizedBox(
+      height: 24.0,
+      width: 24.0,
+      child: IconTheme(
+        data:
+            StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              key: Key('sendButton'),
+              onPressed: () {
+                sendMessage();
+              },
+              icon: Icon(
+                StreamIcons.send_message,
+                color: StreamChatTheme.of(context).accentColor,
+              ),
             ),
           ),
         ),
