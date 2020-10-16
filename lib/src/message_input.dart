@@ -288,6 +288,7 @@ class MessageInputState extends State<MessageInput> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
+              contentPadding: EdgeInsets.all(4)
             ),
             textCapitalization: TextCapitalization.sentences,
           ),
