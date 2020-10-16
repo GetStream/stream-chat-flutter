@@ -23,6 +23,7 @@ export 'src/sending_indicator.dart';
 export 'src/stream_channel.dart';
 export 'src/stream_chat.dart';
 export 'src/stream_chat_theme.dart';
+export 'src/stream_icons.dart';
 export 'src/system_message.dart';
 export 'src/thread_header.dart';
 export 'src/typing_indicator.dart';

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../stream_chat_flutter.dart';
 
@@ -23,7 +22,7 @@ class ReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reactionAssets = StreamChatTheme.of(context).reactionAssets;
+    final reactionAssets = StreamChatTheme.of(context).reactionIcons;
     return Material(
       color: messageTheme.ownReactionsBackgroundColor,
       clipBehavior: Clip.hardEdge,
@@ -34,15 +33,14 @@ class ReactionPicker extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
-        children: reactionAssets.map((reactionAsset) {
+        children: reactionAssets.map((reactionIcon) {
           final ownReactionIndex = message.ownReactions?.indexWhere(
-                  (reaction) => reaction.type == reactionAsset.type) ??
+                  (reaction) => reaction.type == reactionIcon.type) ??
               -1;
           return IconButton(
             iconSize: 24,
-            icon: SvgPicture.asset(
-              reactionAsset.svgAsset,
-              package: reactionAsset.package,
+            icon: Icon(
+              reactionIcon.iconData,
               color: ownReactionIndex != -1
                   ? StreamChatTheme.of(context).accentColor
                   : Theme.of(context).iconTheme.color,
@@ -56,7 +54,7 @@ class ReactionPicker extends StatelessWidget {
               } else {
                 sendReaction(
                   context,
-                  reactionAsset.type,
+                  reactionIcon.type,
                 );
               }
             },

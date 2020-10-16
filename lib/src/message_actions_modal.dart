@@ -1,10 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
+import 'package:stream_chat_flutter/src/stream_icons.dart';
 
 import 'message_input.dart';
 import 'message_widget.dart';
@@ -129,7 +129,7 @@ class MessageActionsModal extends StatelessWidget {
             Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
       ),
       leading: Icon(
-        Icons.delete_outline,
+        StreamIcons.delete,
         color: Colors.red,
       ),
       onTap: () {
@@ -148,12 +148,9 @@ class MessageActionsModal extends StatelessWidget {
         'Edit message',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: SvgPicture.asset(
-        'assets/icon_edit.svg',
-        alignment: Alignment.center,
-        package: 'stream_chat_flutter',
+      leading: Icon(
+        StreamIcons.edit,
         color: StreamChatTheme.of(context).primaryIconTheme.color,
-        width: 24,
       ),
       onTap: () async {
         Navigator.pop(context);
@@ -255,11 +252,11 @@ class MessageActionsModal extends StatelessWidget {
   Widget _buildReplyButton(BuildContext context) {
     return ListTile(
       title: Text(
-        'Start a thread',
+        'Thread reply',
         style: Theme.of(context).textTheme.headline6,
       ),
       leading: Icon(
-        Icons.reply,
+        StreamIcons.Thread_Reply,
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () {
