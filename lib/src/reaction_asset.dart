@@ -1,11 +1,11 @@
-class ReactionAsset {
-  final String type;
-  final String svgAsset;
-  final String package;
+import 'package:flutter/material.dart';
 
-  ReactionAsset({
+class ReactionIcon {
+  final String type;
+  final IconData iconData;
+
+  ReactionIcon({
     this.type,
-    this.svgAsset,
-    this.package,
+    this.iconData,
   });
 }

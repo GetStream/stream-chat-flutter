@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:line_awesome_icons/line_awesome_icons.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_icons.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 import 'channel_info.dart';
@@ -75,7 +74,7 @@ class ChannelBottomSheet extends StatelessWidget {
                 builder: (context, snapshot) {
                   return ListTile(
                     leading: Icon(
-                      LineAwesomeIcons.volume_off,
+                      StreamIcons.mute,
                       size: 22,
                       color: StreamChatTheme.of(context).primaryIconTheme.color,
                     ),
@@ -95,10 +94,10 @@ class ChannelBottomSheet extends StatelessWidget {
             Divider(),
             if (channel.isGroup && !channel.isDistinct)
               ListTile(
-                leading: SvgPicture.asset(
-                  'assets/icon_user_minus.svg',
-                  package: 'stream_chat_flutter',
-                  width: 22,
+                leading: Icon(
+                  StreamIcons.user_minus,
+                  size: 22,
+                  color: Colors.black,
                 ),
                 title: Text('Leave Group'),
                 onTap: () async {

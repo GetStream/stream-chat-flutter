@@ -16,7 +16,7 @@ class ChannelInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (channel.memberCount > 2) {
+    if (channel.memberCount != null && channel.memberCount > 2) {
       return Text(
         '${channel.memberCount} Members, ${channel.state.watcherCount} Online',
         style: StreamChatTheme.of(context)

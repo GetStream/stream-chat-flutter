@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ReactionBubble extends StatelessWidget {
@@ -22,7 +21,7 @@ class ReactionBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reactionAssets = StreamChatTheme.of(context).reactionAssets;
+    final reactionAssets = StreamChatTheme.of(context).reactionIcons;
     return Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
@@ -55,10 +54,9 @@ class ReactionBubble extends StatelessWidget {
                     );
                   }
 
-                  return SvgPicture.asset(
-                    reactionAsset.svgAsset,
-                    package: reactionAsset.package,
-                    height: 16,
+                  return Icon(
+                    reactionAsset.iconData,
+                    size: 16,
                     color: StreamChatTheme.of(context).accentColor,
                   );
                 }).toList(),
