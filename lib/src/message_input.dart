@@ -447,9 +447,15 @@ class MessageInputState extends State<MessageInput> {
                               leading: UserAvatar(
                                 user: m.user,
                               ),
-                              title: Text('${m.user.name}', style: TextStyle(fontWeight: FontWeight.bold),),
+                              title: Text(
+                                '${m.user.name}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               subtitle: Text('${m.userId}'),
-                              trailing: Icon(Icons.alternate_email, color: StreamChatTheme.of(context).accentColor,),
+                              trailing: Icon(
+                                Icons.alternate_email,
+                                color: StreamChatTheme.of(context).accentColor,
+                              ),
                               onTap: () {
                                 _mentionedUsers.add(m.user);
 
@@ -846,7 +852,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildIdleSendButton(BuildContext context) {
     return IconTheme(
       data:
-      StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
