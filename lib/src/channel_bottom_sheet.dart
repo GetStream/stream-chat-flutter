@@ -154,7 +154,7 @@ class ChannelBottomSheet extends StatelessWidget {
       height: 83,
       child: ListView(
         padding: EdgeInsets.only(
-          left: (MediaQuery.of(context).size.width / 2) - 48,
+          left: (MediaQuery.of(context).size.width / 2) - 80,
         ),
         scrollDirection: Axis.horizontal,
         children: snapshot.data.map((m) {

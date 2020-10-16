@@ -22,6 +22,7 @@ class MessageReactionsModal extends StatelessWidget {
   final bool showReply;
   final bool reverse;
   final ShapeBorder messageShape;
+  final void Function(User) onUserAvatarTap;
 
   const MessageReactionsModal({
     Key key,
@@ -35,6 +36,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.editMessageInputBuilder,
     this.messageShape,
     this.reverse,
+    this.onUserAvatarTap,
   }) : super(key: key);
 
   @override
@@ -87,77 +89,117 @@ class MessageReactionsModal extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 8,
+              height: 16,
             ),
             if (message.latestReactions.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                ),
-                child: Card(
-                  clipBehavior: Clip.hardEdge,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(16.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.8,
-                      mainAxisSpacing: 22,
-                    ),
-                    itemCount: message.latestReactions.length,
-                    itemBuilder: (context, i) {
-                      final reaction = message.latestReactions[i];
-                      final isCurrentUser =
-                          reaction.user.id == StreamChat.of(context).user.id;
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Stack(
-                            children: [
-                              UserAvatar(
-                                user: reaction.user,
-                                constraints: BoxConstraints.tightFor(
-                                  height: 64,
-                                  width: 64,
-                                ),
-                                borderRadius: BorderRadius.circular(32),
-                              ),
-                              Positioned(
-                                child: ReactionBubble(
-                                  reactions: [reaction],
-                                  borderColor: isCurrentUser
-                                      ? messageTheme.ownReactionsBorderColor
-                                      : messageTheme.otherReactionsBorderColor,
-                                  backgroundColor: isCurrentUser
-                                      ? messageTheme.ownReactionsBackgroundColor
-                                      : messageTheme
-                                          .otherReactionsBackgroundColor,
-                                  flipTail: !isCurrentUser,
-                                ),
-                                bottom: 0,
-                                left: isCurrentUser ? 0 : null,
-                                right: isCurrentUser ? 0 : null,
-                              ),
-                            ],
-                          ),
-                          Text(
-                            reaction.user.name,
-                            style: Theme.of(context).textTheme.subtitle2,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              )
+              Container(
+                constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                child: _buildReactionCard(context),
+              ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Padding _buildReactionCard(BuildContext context) {
+    final currentUser = StreamChat.of(context).user;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8.0,
+      ),
+      child: Card(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Message Reactions',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                  right: 16,
+                  bottom: 16,
+                ),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.75,
+                    mainAxisSpacing: 22,
+                  ),
+                  itemCount: message.latestReactions.length,
+                  itemBuilder: (context, i) {
+                    final reaction = message.latestReactions[i];
+
+                    return _buildReaction(
+                      reaction,
+                      currentUser,
+                      context,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Column _buildReaction(
+    Reaction reaction,
+    User currentUser,
+    BuildContext context,
+  ) {
+    final isCurrentUser = reaction.user.id == currentUser.id;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Stack(
+          children: [
+            UserAvatar(
+              onTap: onUserAvatarTap,
+              user: reaction.user,
+              constraints: BoxConstraints.tightFor(
+                height: 64,
+                width: 64,
+              ),
+              borderRadius: BorderRadius.circular(32),
+            ),
+            Positioned(
+              child: ReactionBubble(
+                reactions: [reaction],
+                borderColor: isCurrentUser
+                    ? messageTheme.ownReactionsBorderColor
+                    : messageTheme.otherReactionsBorderColor,
+                backgroundColor: isCurrentUser
+                    ? messageTheme.ownReactionsBackgroundColor
+                    : messageTheme.otherReactionsBackgroundColor,
+                flipTail: !isCurrentUser,
+              ),
+              bottom: 0,
+              left: isCurrentUser ? 0 : null,
+              right: isCurrentUser ? 0 : null,
+            ),
+          ],
+        ),
+        Text(
+          reaction.user.name,
+          style: Theme.of(context).textTheme.subtitle2,
+          textAlign: TextAlign.center,
         ),
       ],
     );

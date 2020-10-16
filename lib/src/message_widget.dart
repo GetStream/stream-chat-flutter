@@ -485,6 +485,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           return StreamChannel(
             channel: channel,
             child: MessageReactionsModal(
+              onUserAvatarTap: widget.onUserAvatarTap,
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
               reverse: widget.reverse,
