@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
@@ -19,6 +20,7 @@ class MessageActionsModal extends StatelessWidget {
   final MessageTheme messageTheme;
   final bool showReactions;
   final bool showDeleteMessage;
+  final bool showCopyMessage;
   final bool showEditMessage;
   final bool showReply;
   final bool reverse;
@@ -32,6 +34,7 @@ class MessageActionsModal extends StatelessWidget {
     this.showDeleteMessage,
     this.showEditMessage,
     this.onThreadTap,
+    this.showCopyMessage = true,
     this.showReply,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -103,13 +106,14 @@ class MessageActionsModal extends StatelessWidget {
                   children: ListTile.divideTiles(
                     context: context,
                     tiles: [
-                      if (showEditMessage) _buildEditMessage(context),
                       if (showReply &&
                           (message.status == MessageSendingStatus.SENT ||
                               message.status == null) &&
                           message.parentId == null)
                         _buildReplyButton(context),
+                      if (showEditMessage) _buildEditMessage(context),
                       if (showDeleteMessage) _buildDeleteButton(context),
+                      if (showDeleteMessage) _buildCopyButton(context),
                     ],
                   ).toList(),
                 ),
@@ -138,6 +142,23 @@ class MessageActionsModal extends StatelessWidget {
               message,
               StreamChannel.of(context).channel.cid,
             );
+      },
+    );
+  }
+
+  Widget _buildCopyButton(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Copy message',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: Icon(
+        StreamIcons.copy,
+        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      ),
+      onTap: () async {
+        await Clipboard.setData(ClipboardData(text: message.text));
+        Navigator.pop(context);
       },
     );
   }
