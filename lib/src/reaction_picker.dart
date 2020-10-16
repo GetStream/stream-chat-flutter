@@ -13,13 +13,11 @@ class ReactionPicker extends StatelessWidget {
   const ReactionPicker({
     Key key,
     @required this.message,
-    @required this.channel,
     @required this.messageTheme,
   }) : super(key: key);
 
   final Message message;
   final MessageTheme messageTheme;
-  final Channel channel;
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +81,13 @@ class ReactionPicker extends StatelessWidget {
 
   /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
-    channel.sendReaction(message, reactionType);
+    StreamChannel.of(context).channel.sendReaction(message, reactionType);
     Navigator.of(context).pop();
   }
 
   /// Remove a reaction from the message
   void removeReaction(BuildContext context, Reaction reaction) {
-    channel.deleteReaction(message, reaction);
+    StreamChannel.of(context).channel.deleteReaction(message, reaction);
     Navigator.of(context).pop();
   }
 }

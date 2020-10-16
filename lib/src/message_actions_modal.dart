@@ -69,7 +69,6 @@ class MessageActionsModal extends StatelessWidget {
                     message.status == null))
               Center(
                 child: ReactionPicker(
-                  channel: channel,
                   message: message,
                   messageTheme: messageTheme,
                 ),

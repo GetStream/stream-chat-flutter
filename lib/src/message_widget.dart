@@ -519,8 +519,9 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   List<Widget> _parseAttachments(BuildContext context) {
     final images = widget.message.attachments
-        .where((element) => element.type == 'image')
-        .toList();
+            ?.where((element) => element.type == 'image')
+            ?.toList() ??
+        [];
 
     if (images.length > 1) {
       return [

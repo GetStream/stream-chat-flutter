@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
-import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 
@@ -28,20 +27,19 @@ class MessageReactionsModal extends StatelessWidget {
     Key key,
     @required this.message,
     @required this.messageTheme,
-    this.showReactions,
+    this.showReactions = true,
     this.showDeleteMessage,
     this.showEditMessage,
     this.onThreadTap,
     this.showReply,
     this.editMessageInputBuilder,
     this.messageShape,
-    this.reverse,
+    this.reverse = false,
     this.onUserAvatarTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final channel = StreamChannel.of(context).channel;
     return Stack(
       children: [
         Positioned.fill(
@@ -70,7 +68,6 @@ class MessageReactionsModal extends StatelessWidget {
                     message.status == null))
               Center(
                 child: ReactionPicker(
-                  channel: channel,
                   message: message,
                   messageTheme: messageTheme,
                 ),
@@ -91,7 +88,7 @@ class MessageReactionsModal extends StatelessWidget {
             SizedBox(
               height: 16,
             ),
-            if (message.latestReactions.isNotEmpty)
+            if (message.latestReactions?.isNotEmpty == true)
               Container(
                 constraints: BoxConstraints.loose(Size.fromHeight(400)),
                 child: _buildReactionCard(context),

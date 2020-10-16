@@ -70,7 +70,7 @@ class UserAvatar extends StatelessWidget {
                   : StreamChatTheme.of(context).defaultUserImage(context, user),
             ),
           ),
-          if (showOnlineStatus && user.online)
+          if (showOnlineStatus && user.online == true)
             Positioned(
               top: 0,
               right: 0,
