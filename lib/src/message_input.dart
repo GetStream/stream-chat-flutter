@@ -206,13 +206,14 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            if (!widget.disableAttachments) _buildAttachmentButton(),
-            _buildGiphyButton(),
-          ],
-        ),
+        if (_giphyEnabled)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (!widget.disableAttachments) _buildAttachmentButton(),
+              _buildGiphyButton(),
+            ],
+          ),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
@@ -293,7 +294,25 @@ class MessageInputState extends State<MessageInput> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
-              contentPadding: EdgeInsets.all(4)
+              contentPadding: EdgeInsets.all(4),
+              prefix: Chip(
+                backgroundColor: StreamChatTheme.of(context).accentColor,
+                label: Row(
+                  children: [
+                    Icon(StreamIcons.lightning, color: Colors.white,),
+                    SizedBox(width: 2,),
+                    Text('GIPHY', style: TextStyle(color: Colors.white),),
+                  ],
+                )
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.cancel_outlined),
+                onPressed: () {
+                  setState(() {
+                    _giphyEnabled = false;
+                  });
+                },
+              )
             ),
             textCapitalization: TextCapitalization.sentences,
           ),
@@ -872,16 +891,15 @@ class MessageInputState extends State<MessageInput> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: InkWell(
-            onTap: () {
-              sendMessage();
-            },
-            child: Icon(
-              StreamIcons.send_message,
-              color: Colors.grey,
-            ),
-          )
-        ),
+            child: InkWell(
+          onTap: () {
+            sendMessage();
+          },
+          child: Icon(
+            StreamIcons.send_message,
+            color: Colors.grey,
+          ),
+        )),
       ),
     );
   }
@@ -898,7 +916,7 @@ class MessageInputState extends State<MessageInput> {
               sendMessage();
             },
             child: Transform.rotate(
-              angle: - pi / 2,
+              angle: -pi / 2,
               child: Icon(
                 StreamIcons.send_message,
                 color: StreamChatTheme.of(context).accentColor,
