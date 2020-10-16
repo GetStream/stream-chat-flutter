@@ -857,7 +857,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildIdleSendButton(BuildContext context) {
     return SizedBox(
       height: 24.0,
-      width: 24.0,
+      width: 16.0,
       child: IconTheme(
         data:
             StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
@@ -883,7 +883,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildSendButton(BuildContext context) {
     return SizedBox(
       height: 24.0,
-      width: 24.0,
+      width: 16.0,
       child: IconTheme(
         data:
             StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
