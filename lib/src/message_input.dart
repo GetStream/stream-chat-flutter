@@ -165,6 +165,7 @@ class MessageInputState extends State<MessageInput> {
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
+  bool _giphyEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
 
   /// The editing controller passed to the input TextField
@@ -205,6 +206,7 @@ class MessageInputState extends State<MessageInput> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         if (!widget.disableAttachments) _buildAttachmentButton(),
+        _buildGiphyButton(),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
@@ -614,6 +616,31 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
+  Widget _buildGiphyButton() {
+    return Center(
+      child: Material(
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32),
+        ),
+        color: Colors.transparent,
+        child: IconButton(
+          onPressed: () {
+            setState(() {
+              _giphyEnabled = true;
+            });
+          },
+          icon: Transform.rotate(
+            child: Icon(
+              StreamIcons.lightning,
+            ),
+            angle: 0.4,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildAttachmentButton() {
     return Center(
       child: Material(
@@ -856,22 +883,15 @@ class MessageInputState extends State<MessageInput> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: Material(
-            clipBehavior: Clip.hardEdge,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(32),
-            ),
-            color: Colors.grey,
-            child: IconButton(
-              key: Key('sendButton'),
-              onPressed: () {
-                sendMessage();
-              },
-              icon: Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-                size: 16.0,
-              ),
+          child: IconButton(
+            key: Key('sendButtonIdle'),
+            onPressed: () {
+              sendMessage();
+            },
+            icon: Icon(
+              StreamIcons.send_message,
+              color: Colors.grey,
+              size: 16.0,
             ),
           ),
         ),
@@ -886,22 +906,15 @@ class MessageInputState extends State<MessageInput> {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Material(
-            clipBehavior: Clip.hardEdge,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(32),
-            ),
-            color: StreamChatTheme.of(context).accentColor,
-            child: IconButton(
-              key: Key('sendButton'),
-              onPressed: () {
-                sendMessage();
-              },
-              icon: Icon(
-                Icons.arrow_upward,
-                color: Colors.white,
-                size: 16.0,
-              ),
+          child: IconButton(
+            key: Key('sendButton'),
+            onPressed: () {
+              sendMessage();
+            },
+            icon: Icon(
+              StreamIcons.send_message,
+              color: StreamChatTheme.of(context).accentColor,
+              size: 16.0,
             ),
           ),
         ),
