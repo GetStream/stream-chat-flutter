@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -619,7 +620,10 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildGiphyButton() {
     return Center(
       child: InkWell(
-        child: Icon(StreamIcons.lightning),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(StreamIcons.lightning),
+        ),
         onTap: () {
           setState(() {
             _giphyEnabled = true;
@@ -632,7 +636,10 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildAttachmentButton() {
     return Center(
       child: InkWell(
-        child: Icon(StreamIcons.attach),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(StreamIcons.attach),
+        ),
         onTap: () {
           showAttachmentModal();
         },
@@ -859,17 +866,15 @@ class MessageInputState extends State<MessageInput> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: IconButton(
-            iconSize: 14.0,
-            key: Key('sendButtonIdle'),
-            onPressed: () {
+          child: InkWell(
+            onTap: () {
               sendMessage();
             },
-            icon: Icon(
+            child: Icon(
               StreamIcons.send_message,
               color: Colors.grey,
             ),
-          ),
+          )
         ),
       ),
     );
@@ -882,15 +887,16 @@ class MessageInputState extends State<MessageInput> {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: IconButton(
-            iconSize: 14.0,
-            key: Key('sendButton'),
-            onPressed: () {
+          child: InkWell(
+            onTap: () {
               sendMessage();
             },
-            icon: Icon(
-              StreamIcons.send_message,
-              color: StreamChatTheme.of(context).accentColor,
+            child: Transform.rotate(
+              angle: - pi / 2,
+              child: Icon(
+                StreamIcons.send_message,
+                color: StreamChatTheme.of(context).accentColor,
+              ),
             ),
           ),
         ),
