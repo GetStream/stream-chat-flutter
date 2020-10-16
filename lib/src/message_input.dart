@@ -206,8 +206,13 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (!widget.disableAttachments) _buildAttachmentButton(),
-        _buildGiphyButton(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            if (!widget.disableAttachments) _buildAttachmentButton(),
+            _buildGiphyButton(),
+          ],
+        ),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
@@ -622,7 +627,7 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 5.0, right: 10.0),
+          padding: const EdgeInsets.all(8.0),
           child: Icon(StreamIcons.lightning),
         ),
         onTap: () {
@@ -638,7 +643,7 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, left: 10.0, right: 5.0),
+          padding: const EdgeInsets.all(8.0),
           child: Icon(StreamIcons.attach),
         ),
         onTap: () {
