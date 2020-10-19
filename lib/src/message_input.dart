@@ -207,7 +207,7 @@ class MessageInputState extends State<MessageInput> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               if (!widget.disableAttachments) _buildAttachmentButton(),
-              if (widget.editMessage == null) _buildGiphyButton(),
+              if (widget.editMessage == null) _buildCommandButton(),
             ],
           ),
         if (widget.actionsLocation == ActionsLocation.left)
@@ -519,6 +519,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _setCommand(Command c) {
+    textEditingController.clear();
     setState(() {
       chosenCommand = c;
       _commandEnabled = true;
@@ -645,7 +646,7 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Widget _buildGiphyButton() {
+  Widget _buildCommandButton() {
     return Center(
       child: InkWell(
         child: Padding(
@@ -654,9 +655,10 @@ class MessageInputState extends State<MessageInput> {
           child: Icon(StreamIcons.lightning),
         ),
         onTap: () {
-          setState(() {
-            _commandEnabled = true;
-          });
+          if(_commandsOverlay == null) {
+            _commandsOverlay = _buildCommandsOverlayEntry();
+            Overlay.of(context).insert(_commandsOverlay);
+          }
         },
       ),
     );
