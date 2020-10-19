@@ -461,32 +461,32 @@ class StreamIcons {
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData grey600 = IconData(
+  static const IconData grid = IconData(
     0xe95b,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData grid = IconData(
+  static const IconData group = IconData(
     0xe95c,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData heart_outline_add = IconData(
+  static const IconData heart_1 = IconData(
     0xe95d,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData heart_outline_delete = IconData(
+  static const IconData heart_outline_add = IconData(
     0xe95e,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData heart_pill = IconData(
+  static const IconData heart_outline_delete = IconData(
     0xe95f,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData heart_1 = IconData(
+  static const IconData heart_pill = IconData(
     0xe960,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
@@ -521,127 +521,127 @@ class StreamIcons {
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData hourglass_full_1 = IconData(
+  static const IconData hourglass_full = IconData(
     0xe967,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData hourglass_full = IconData(
+  static const IconData hourglass = IconData(
     0xe968,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData hourglass = IconData(
+  static const IconData insurance_outline = IconData(
     0xe969,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData insurance_outline = IconData(
+  static const IconData insurance = IconData(
     0xe96a,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData insurance = IconData(
+  static const IconData left_right = IconData(
     0xe96b,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData left_right = IconData(
+  static const IconData left = IconData(
     0xe96c,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData left = IconData(
+  static const IconData light = IconData(
     0xe96d,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData light = IconData(
+  static const IconData lightning = IconData(
     0xe96e,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData lightning = IconData(
+  static const IconData link = IconData(
     0xe96f,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData link = IconData(
+  static const IconData location_map = IconData(
     0xe970,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData location_map = IconData(
+  static const IconData location = IconData(
     0xe971,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData location = IconData(
+  static const IconData LOL_reaction = IconData(
     0xe972,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData LOL_reaction = IconData(
+  static const IconData love_reaction = IconData(
     0xe973,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData love_reaction = IconData(
+  static const IconData love = IconData(
     0xe974,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData love = IconData(
+  static const IconData lungs = IconData(
     0xe975,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData lungs = IconData(
+  static const IconData mail_open = IconData(
     0xe976,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData mail_open = IconData(
+  static const IconData mail = IconData(
     0xe977,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData mail = IconData(
+  static const IconData male = IconData(
     0xe978,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData male = IconData(
+  static const IconData medical_bed = IconData(
     0xe979,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData medical_bed = IconData(
+  static const IconData medical_blank = IconData(
     0xe97a,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData medical_blank = IconData(
+  static const IconData medical_card_add = IconData(
     0xe97b,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData medical_card_add = IconData(
+  static const IconData medical_card = IconData(
     0xe97c,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData medical_card = IconData(
+  static const IconData medical_cross = IconData(
     0xe97d,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData medical_cross = IconData(
+  static const IconData medical_load = IconData(
     0xe97e,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData medical_load = IconData(
+  static const IconData menu_point_1 = IconData(
     0xe97f,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
@@ -651,22 +651,22 @@ class StreamIcons {
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData menu_point_1 = IconData(
+  static const IconData menu_point = IconData(
     0xe981,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData menu_point = IconData(
+  static const IconData menu = IconData(
     0xe982,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData menu = IconData(
+  static const IconData message = IconData(
     0xe983,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData message = IconData(
+  static const IconData mic_1 = IconData(
     0xe984,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
@@ -886,12 +886,12 @@ class StreamIcons {
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData save_check = IconData(
+  static const IconData save_1 = IconData(
     0xe9b0,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData save_1 = IconData(
+  static const IconData save_check = IconData(
     0xe9b1,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
@@ -1061,17 +1061,17 @@ class StreamIcons {
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData Thread_Reply = IconData(
+  static const IconData thumbs_down_reaction = IconData(
     0xe9d3,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData thumbs_up_reaction_1 = IconData(
+  static const IconData thumbs_up_reaction = IconData(
     0xe9d4,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData thumbs_up_reaction = IconData(
+  static const IconData time_1 = IconData(
     0xe9d5,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
@@ -1081,108 +1081,103 @@ class StreamIcons {
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData time_1 = IconData(
+  static const IconData time = IconData(
     0xe9d7,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData time = IconData(
+  static const IconData tooth = IconData(
     0xe9d8,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData tooth = IconData(
+  static const IconData tube_full = IconData(
     0xe9d9,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData tube_full = IconData(
+  static const IconData tv_check = IconData(
     0xe9da,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData tv_check = IconData(
+  static const IconData tv_rating = IconData(
     0xe9db,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData tv_rating = IconData(
+  static const IconData unfold_less_h = IconData(
     0xe9dc,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData unfold_less_h = IconData(
+  static const IconData unfold_less = IconData(
     0xe9dd,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData unfold_less = IconData(
+  static const IconData unfold_more_h = IconData(
     0xe9de,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData unfold_more_h = IconData(
+  static const IconData unfold_more = IconData(
     0xe9df,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData unfold_more = IconData(
+  static const IconData unread = IconData(
     0xe9e0,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData unread = IconData(
+  static const IconData up_down = IconData(
     0xe9e1,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData up_down = IconData(
+  static const IconData up = IconData(
     0xe9e2,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData up = IconData(
+  static const IconData upload = IconData(
     0xe9e3,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData upload = IconData(
+  static const IconData user_add = IconData(
     0xe9e4,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData user_add = IconData(
+  static const IconData user_delete = IconData(
     0xe9e5,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData user_delete = IconData(
+  static const IconData user_minus = IconData(
     0xe9e6,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData user_minus = IconData(
+  static const IconData user = IconData(
     0xe9e7,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData user = IconData(
+  static const IconData voice = IconData(
     0xe9e8,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData voice = IconData(
+  static const IconData world = IconData(
     0xe9e9,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );
-  static const IconData world = IconData(
-    0xe9ea,
-    fontFamily: _fontFamily,
-    fontPackage: _fontPackage,
-  );
   static const IconData wut_reaction = IconData(
-    0xe9eb,
+    0xe9ea,
     fontFamily: _fontFamily,
     fontPackage: _fontPackage,
   );

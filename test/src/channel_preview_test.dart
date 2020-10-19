@@ -3,13 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class MockClient extends Mock implements Client {}
-
-class MockClientState extends Mock implements ClientState {}
-
-class MockChannel extends Mock implements Channel {}
-
-class MockChannelState extends Mock implements ChannelClientState {}
+import 'mocks.dart';
 
 void main() {
   testWidgets(

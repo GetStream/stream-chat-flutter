@@ -142,7 +142,7 @@ class StreamChatThemeData {
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
-    List<ReactionIcon> reactionAssets,
+    List<ReactionIcon> reactionIcons,
   }) =>
       StreamChatThemeData(
         primaryColor: primaryColor ?? this.primaryColor,
@@ -211,7 +211,7 @@ class StreamChatThemeData {
                   this.otherMessageTheme.avatarTheme,
             ) ??
             this.otherMessageTheme,
-        reactionIcons: reactionAssets ?? this.reactionIcons,
+        reactionIcons: reactionIcons ?? this.reactionIcons,
       );
 
   /// Get the default Stream Chat theme
@@ -365,7 +365,7 @@ class StreamChatThemeData {
         ),
         ReactionIcon(
           type: 'thumbs_down',
-          iconData: StreamIcons.thumbs_up_reaction_1,
+          iconData: StreamIcons.thumbs_down_reaction,
         ),
         ReactionIcon(
           type: 'lol',
