@@ -183,17 +183,11 @@ class MessageInputState extends State<MessageInput> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              //_buildBorder(context),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAttachments(),
-                  _buildTextField(context),
-                ],
-              ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAttachments(),
+              _buildTextField(context),
             ],
           ),
         ),
