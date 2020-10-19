@@ -291,17 +291,20 @@ class MessageInputState extends State<MessageInput> {
               ),
               contentPadding: EdgeInsets.all(4),
               prefixIcon: _giphyEnabled
-                  ? Chip(
-                      backgroundColor: StreamChatTheme.of(context).accentColor,
-                      label: Text(
-                        'GIPHY',
-                        style: TextStyle(color: Colors.white),
+                  ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: Chip(
+                        backgroundColor: StreamChatTheme.of(context).accentColor,
+                        label: Text(
+                          'GIPHY',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        avatar: Icon(
+                          StreamIcons.lightning,
+                          color: Colors.white,
+                        ),
                       ),
-                      avatar: Icon(
-                        StreamIcons.lightning,
-                        color: Colors.white,
-                      ),
-                    )
+                  )
                   : null,
               suffixIcon: _giphyEnabled
                   ? IconButton(
@@ -932,9 +935,13 @@ class MessageInputState extends State<MessageInput> {
 
   /// Sends the current message
   void sendMessage() async {
-    final text = textEditingController.text.trim();
+    var text = textEditingController.text.trim();
     if (text.isEmpty && _attachments.isEmpty) {
       return;
+    }
+
+    if(_giphyEnabled) {
+      text = '/giphy' + text;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
