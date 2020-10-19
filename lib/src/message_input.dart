@@ -658,6 +658,9 @@ class MessageInputState extends State<MessageInput> {
           if(_commandsOverlay == null) {
             _commandsOverlay = _buildCommandsOverlayEntry();
             Overlay.of(context).insert(_commandsOverlay);
+          } else {
+            _commandsOverlay?.remove();
+            _commandsOverlay = null;
           }
         },
       ),
