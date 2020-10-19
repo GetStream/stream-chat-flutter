@@ -290,7 +290,7 @@ class MessageInputState extends State<MessageInput> {
                 borderRadius: BorderRadius.circular(32),
               ),
               contentPadding: EdgeInsets.all(4),
-              prefix: _giphyEnabled
+              prefixIcon: _giphyEnabled
                   ? Chip(
                       backgroundColor: StreamChatTheme.of(context).accentColor,
                       label: Text(
