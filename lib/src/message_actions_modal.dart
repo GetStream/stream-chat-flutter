@@ -193,37 +193,16 @@ class MessageActionsModal extends StatelessWidget {
                       'Edit message',
                       style: Theme.of(context).textTheme.headline6,
                     ),
-                    Container(
-                      height: 30,
-                      padding: const EdgeInsets.all(2.0),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: RawMaterialButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          elevation: 0,
-                          highlightElevation: 0,
-                          focusElevation: 0,
-                          disabledElevation: 0,
-                          hoverElevation: 0,
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          fillColor:
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white.withOpacity(.1)
-                                  : Colors.black.withOpacity(.1),
-                          padding: EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.close,
-                            size: 15,
-                            color: StreamChatTheme.of(context)
-                                .primaryIconTheme
-                                .color,
-                          ),
-                        ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.cancel_outlined,
+                        size: 15,
+                        color:
+                            StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
                     ),
                   ],
                 ),

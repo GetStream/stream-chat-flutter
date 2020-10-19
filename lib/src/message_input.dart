@@ -205,7 +205,7 @@ class MessageInputState extends State<MessageInput> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               if (!widget.disableAttachments) _buildAttachmentButton(),
-              _buildGiphyButton(),
+              if (widget.editMessage != null) _buildGiphyButton(),
             ],
           ),
         if (widget.actionsLocation == ActionsLocation.left)
