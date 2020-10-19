@@ -292,7 +292,7 @@ class MessageInputState extends State<MessageInput> {
               contentPadding: EdgeInsets.all(4),
               prefixIcon: _giphyEnabled
                   ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: Chip(
                         backgroundColor: StreamChatTheme.of(context).accentColor,
                         label: Text(
