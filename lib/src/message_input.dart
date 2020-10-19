@@ -521,6 +521,7 @@ class MessageInputState extends State<MessageInput> {
   void _setCommand(Command c) {
     setState(() {
       chosenCommand = c;
+      _commandEnabled = true;
     });
     _commandsOverlay?.remove();
     _commandsOverlay = null;
@@ -940,7 +941,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if(_commandEnabled) {
-      text = '/${chosenCommand.args} ' + text;
+      text = '/${chosenCommand.name} ' + text;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
