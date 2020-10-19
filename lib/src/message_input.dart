@@ -166,8 +166,10 @@ class MessageInputState extends State<MessageInput> {
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
-  bool _giphyEnabled = false;
+  bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
+
+  Command chosenCommand;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -200,7 +202,7 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (!_giphyEnabled)
+        if (!_commandEnabled)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -285,18 +287,18 @@ class MessageInputState extends State<MessageInput> {
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: 'Write a message',
-              prefixText: _giphyEnabled ? null : '   ',
+              prefixText: _commandEnabled ? null : '   ',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
-              contentPadding: EdgeInsets.all(4),
-              prefixIcon: _giphyEnabled
+              contentPadding: EdgeInsets.all(8),
+              prefixIcon: _commandEnabled
                   ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Chip(
                         backgroundColor: StreamChatTheme.of(context).accentColor,
                         label: Text(
-                          'GIPHY',
+                          chosenCommand?.name ?? "",
                           style: TextStyle(color: Colors.white),
                         ),
                         avatar: Icon(
@@ -306,12 +308,12 @@ class MessageInputState extends State<MessageInput> {
                       ),
                   )
                   : null,
-              suffixIcon: _giphyEnabled
+              suffixIcon: _commandEnabled
                   ? IconButton(
                       icon: Icon(Icons.cancel_outlined),
                       onPressed: () {
                         setState(() {
-                          _giphyEnabled = false;
+                          _commandEnabled = false;
                         });
                       },
                     )
@@ -517,12 +519,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _setCommand(Command c) {
-    textEditingController.value = TextEditingValue(
-      text: '/${c.name} ',
-      selection: TextSelection.collapsed(
-        offset: c.name.length + 2,
-      ),
-    );
+    setState(() {
+      chosenCommand = c;
+    });
     _commandsOverlay?.remove();
     _commandsOverlay = null;
   }
@@ -655,7 +654,7 @@ class MessageInputState extends State<MessageInput> {
         ),
         onTap: () {
           setState(() {
-            _giphyEnabled = true;
+            _commandEnabled = true;
           });
         },
       ),
@@ -940,8 +939,8 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
-    if(_giphyEnabled) {
-      text = '/giphy ' + text;
+    if(_commandEnabled) {
+      text = '/${chosenCommand.args} ' + text;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
@@ -952,7 +951,7 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _messageIsPresent = false;
       _typingStarted = false;
-      _giphyEnabled = false;
+      _commandEnabled = false;
     });
 
     _commandsOverlay?.remove();
