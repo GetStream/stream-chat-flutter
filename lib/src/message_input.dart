@@ -941,7 +941,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if(_giphyEnabled) {
-      text = '/giphy' + text;
+      text = '/giphy ' + text;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
@@ -952,6 +952,7 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _messageIsPresent = false;
       _typingStarted = false;
+      _giphyEnabled = false;
     });
 
     _commandsOverlay?.remove();
