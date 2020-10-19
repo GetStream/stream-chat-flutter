@@ -113,7 +113,7 @@ class MessageActionsModal extends StatelessWidget {
                         _buildReplyButton(context),
                       if (showEditMessage) _buildEditMessage(context),
                       if (showDeleteMessage) _buildDeleteButton(context),
-                      if (showDeleteMessage) _buildCopyButton(context),
+                      if (showCopyMessage) _buildCopyButton(context),
                     ],
                   ).toList(),
                 ),
