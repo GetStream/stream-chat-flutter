@@ -288,6 +288,7 @@ class MessageInputState extends State<MessageInput> {
             },
             style: Theme.of(context).textTheme.bodyText2,
             autofocus: false,
+            textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: 'Write a message',
               prefixText: _giphyEnabled ? null : '   ',
@@ -295,16 +296,18 @@ class MessageInputState extends State<MessageInput> {
                 borderRadius: BorderRadius.circular(32),
               ),
               contentPadding: EdgeInsets.all(4),
-              prefix: _giphyEnabled ? Chip(
-                backgroundColor: StreamChatTheme.of(context).accentColor,
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(StreamIcons.lightning, color: Colors.white,),
-                    SizedBox(width: 2,),
-                    Text('GIPHY', style: TextStyle(color: Colors.white),),
-                  ],
-                )
+              prefix: _giphyEnabled ? Center(
+                child: Chip(
+                  backgroundColor: StreamChatTheme.of(context).accentColor,
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(StreamIcons.lightning, color: Colors.white,),
+                      SizedBox(width: 2,),
+                      Text('GIPHY', style: TextStyle(color: Colors.white),),
+                    ],
+                  )
+                ),
               ) : null,
               suffixIcon: _giphyEnabled ? IconButton(
                 icon: Icon(Icons.cancel_outlined),
@@ -647,7 +650,7 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 4.0, top: 8.0, bottom: 8.0),
+          padding: const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
           child: Icon(StreamIcons.lightning),
         ),
         onTap: () {
@@ -663,7 +666,7 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
+          padding: const EdgeInsets.only(left: 8.0, right: 4.0, top: 8.0, bottom: 8.0),
           child: Icon(StreamIcons.attach),
         ),
         onTap: () {
