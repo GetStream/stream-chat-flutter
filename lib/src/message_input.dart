@@ -169,7 +169,8 @@ class MessageInputState extends State<MessageInput> {
   bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
 
-  Command chosenCommand;
+  Command _chosenCommand;
+  bool _actionsShrunk = false;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -202,14 +203,8 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (!_commandEnabled)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              if (!widget.disableAttachments) _buildAttachmentButton(),
-              if (widget.editMessage == null) _buildCommandButton(),
-            ],
-          ),
+        if(!_commandEnabled)
+          _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
@@ -228,6 +223,31 @@ class MessageInputState extends State<MessageInput> {
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
       secondChild: _buildIdleSendButton(context),
+      duration: Duration(milliseconds: 300),
+      alignment: Alignment.center,
+    );
+  }
+
+  Widget _buildExpandActionsButton() {
+    return AnimatedCrossFade(
+      crossFadeState: _actionsShrunk
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      firstChild: IconButton(
+        onPressed: () {
+          setState(() {
+            _actionsShrunk = false;
+          });
+        },
+        icon: Icon(StreamIcons.arrow_right, color: StreamChatTheme.of(context).accentColor,),
+      ),
+      secondChild: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          if (!widget.disableAttachments) _buildAttachmentButton(),
+          if (widget.editMessage == null) _buildCommandButton(),
+        ],
+      ),
       duration: Duration(milliseconds: 300),
       alignment: Alignment.center,
     );
@@ -254,6 +274,7 @@ class MessageInputState extends State<MessageInput> {
 
               setState(() {
                 _messageIsPresent = s.trim().isNotEmpty;
+                _actionsShrunk = true;
               });
 
               _commandsOverlay?.remove();
@@ -298,7 +319,7 @@ class MessageInputState extends State<MessageInput> {
                     child: Chip(
                         backgroundColor: StreamChatTheme.of(context).accentColor,
                         label: Text(
-                          chosenCommand?.name ?? "",
+                          _chosenCommand?.name ?? "",
                           style: TextStyle(color: Colors.white),
                         ),
                         avatar: Icon(
@@ -521,7 +542,7 @@ class MessageInputState extends State<MessageInput> {
   void _setCommand(Command c) {
     textEditingController.clear();
     setState(() {
-      chosenCommand = c;
+      _chosenCommand = c;
       _commandEnabled = true;
     });
     _commandsOverlay?.remove();
@@ -946,7 +967,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if(_commandEnabled) {
-      text = '/${chosenCommand.name} ' + text;
+      text = '/${_chosenCommand.name} ' + text;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
