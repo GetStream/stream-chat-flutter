@@ -239,7 +239,7 @@ class MessageInputState extends State<MessageInput> {
             _actionsShrunk = false;
           });
         },
-        icon: Icon(StreamIcons.arrow_right, color: StreamChatTheme.of(context).accentColor,),
+        icon: Icon(StreamIcons.circle_left, color: StreamChatTheme.of(context).accentColor,),
       ),
       secondChild: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -274,7 +274,7 @@ class MessageInputState extends State<MessageInput> {
 
               setState(() {
                 _messageIsPresent = s.trim().isNotEmpty;
-                _actionsShrunk = true;
+                _actionsShrunk = s.trim().isNotEmpty;
               });
 
               _commandsOverlay?.remove();
