@@ -40,6 +40,7 @@ class ReactionBubble extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(14)),
             ),
             child: Wrap(
+              spacing: 8,
               children: [
                 ...reactions.map((reaction) {
                   final reactionIcon = reactionIcons.firstWhere(

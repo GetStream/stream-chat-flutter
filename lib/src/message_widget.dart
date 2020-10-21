@@ -498,8 +498,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         });
   }
 
-  ContinuousRectangleBorder _getDefaultShape(BuildContext context) {
-    return ContinuousRectangleBorder(
+  ShapeBorder _getDefaultShape(BuildContext context) {
+    return RoundedRectangleBorder(
       side: widget.attachmentBorderSide ??
           widget.borderSide ??
           BorderSide(
@@ -718,7 +718,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       onLongPress: () => onLongPress(context),
       child: Material(
         shape: widget.shape ??
-            ContinuousRectangleBorder(
+            RoundedRectangleBorder(
               side: widget.borderSide ??
                   BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark

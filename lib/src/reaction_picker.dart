@@ -45,7 +45,7 @@ class ReactionPicker extends StatelessWidget {
                   reactionIcon.iconData,
                   color: ownReactionIndex != -1
                       ? StreamChatTheme.of(context).accentColor
-                      : Theme.of(context).iconTheme.color,
+                      : Theme.of(context).iconTheme.color.withOpacity(.5),
                 ),
                 onPressed: () {
                   if (ownReactionIndex != -1) {
