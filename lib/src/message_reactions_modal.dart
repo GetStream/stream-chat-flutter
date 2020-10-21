@@ -70,7 +70,10 @@ class MessageReactionsModal extends StatelessWidget {
               child: MessageWidget(
                 key: Key('MessageWidget'),
                 reverse: reverse,
-                message: message,
+                message: message.text.length > 200
+                    ? message.copyWith(
+                        text: '${message.text.substring(0, 200)}...')
+                    : message,
                 messageTheme: messageTheme,
                 showReactions: false,
                 showUsername: false,
