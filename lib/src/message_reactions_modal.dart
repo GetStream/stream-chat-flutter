@@ -130,14 +130,13 @@ class MessageReactionsModal extends StatelessWidget {
                     spacing: 16,
                     runSpacing: 22,
                     alignment: WrapAlignment.start,
-                    children:
-                        message.latestReactions
-                            .map((e) => _buildReaction(
-                                  e,
-                                  currentUser,
-                                  context,
-                                ))
-                            .toList(),
+                    children: message.latestReactions
+                        .map((e) => _buildReaction(
+                              e,
+                              currentUser,
+                              context,
+                            ))
+                        .toList(),
                   ),
                 ),
               ),
