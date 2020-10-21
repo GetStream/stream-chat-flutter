@@ -119,30 +119,26 @@ class MessageReactionsModal extends StatelessWidget {
               ),
             ),
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  right: 16,
-                  bottom: 16,
-                ),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
-                    mainAxisSpacing: 22,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 18,
+                    right: 18,
+                    bottom: 26,
                   ),
-                  itemCount: message.latestReactions.length,
-                  itemBuilder: (context, i) {
-                    final reaction = message.latestReactions[i];
-
-                    return _buildReaction(
-                      reaction,
-                      currentUser,
-                      context,
-                    );
-                  },
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 22,
+                    alignment: WrapAlignment.start,
+                    children:
+                        [...message.latestReactions, ...message.latestReactions]
+                            .map((e) => _buildReaction(
+                                  e,
+                                  currentUser,
+                                  context,
+                                ))
+                            .toList(),
+                  ),
                 ),
               ),
             ),
@@ -152,51 +148,57 @@ class MessageReactionsModal extends StatelessWidget {
     );
   }
 
-  Column _buildReaction(
+  Widget _buildReaction(
     Reaction reaction,
     User currentUser,
     BuildContext context,
   ) {
     final isCurrentUser = reaction.user.id == currentUser.id;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Stack(
-          children: [
-            UserAvatar(
-              onTap: onUserAvatarTap,
-              user: reaction.user,
-              constraints: BoxConstraints.tightFor(
-                height: 64,
-                width: 64,
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(Size(
+        64,
+        98,
+      )),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Stack(
+            children: [
+              UserAvatar(
+                onTap: onUserAvatarTap,
+                user: reaction.user,
+                constraints: BoxConstraints.tightFor(
+                  height: 64,
+                  width: 64,
+                ),
+                borderRadius: BorderRadius.circular(32),
               ),
-              borderRadius: BorderRadius.circular(32),
-            ),
-            Positioned(
-              child: ReactionBubble(
-                reactions: [reaction],
-                borderColor: isCurrentUser
-                    ? messageTheme.ownReactionsBorderColor
-                    : messageTheme.otherReactionsBorderColor,
-                backgroundColor: isCurrentUser
-                    ? messageTheme.ownReactionsBackgroundColor
-                    : messageTheme.otherReactionsBackgroundColor,
-                flipTail: !isCurrentUser,
+              Positioned(
+                child: ReactionBubble(
+                  reactions: [reaction],
+                  borderColor: isCurrentUser
+                      ? messageTheme.ownReactionsBorderColor
+                      : messageTheme.otherReactionsBorderColor,
+                  backgroundColor: isCurrentUser
+                      ? messageTheme.ownReactionsBackgroundColor
+                      : messageTheme.otherReactionsBackgroundColor,
+                  flipTail: !isCurrentUser,
+                ),
+                bottom: 0,
+                left: isCurrentUser ? 0 : null,
+                right: isCurrentUser ? 0 : null,
               ),
-              bottom: 0,
-              left: isCurrentUser ? 0 : null,
-              right: isCurrentUser ? 0 : null,
-            ),
-          ],
-        ),
-        Text(
-          reaction.user.name,
-          style: Theme.of(context).textTheme.subtitle2,
-          textAlign: TextAlign.center,
-        ),
-      ],
+            ],
+          ),
+          Text(
+            reaction.user.name,
+            style: Theme.of(context).textTheme.subtitle2,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
