@@ -12,17 +12,23 @@ class UnreadIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: CircleAvatar(
-        backgroundColor:
-            StreamChatTheme.of(context).channelPreviewTheme.unreadCounterColor,
-        radius: 8,
-        child: Text(
-          '${channel.state.unreadCount}',
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.white,
+    return Material(
+      borderRadius: BorderRadius.circular(8),
+      color: StreamChatTheme.of(context).channelPreviewTheme.unreadCounterColor,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: 5.0,
+          right: 5.0,
+          top: 2,
+          bottom: 1,
+        ),
+        child: Center(
+          child: Text(
+            '${channel.state.unreadCount}',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
