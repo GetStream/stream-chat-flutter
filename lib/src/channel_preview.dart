@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
-import 'typing_indicator.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -71,10 +70,9 @@ class ChannelPreview extends StatelessWidget {
                           StreamChatTheme.of(context).channelPreviewTheme.title,
                     ),
                   ),
-                  if (channel.state.unreadCount > 0)
-                    UnreadIndicator(
-                      channel: channel,
-                    ),
+                  UnreadIndicator(
+                    channel: channel,
+                  ),
                 ],
               ),
               subtitle: Row(
