@@ -400,7 +400,7 @@ class MessageInputState extends State<MessageInput> {
         right: 0,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Material(
+          child: Card(
             color: StreamChatTheme.of(context).primaryColor,
             child: Container(
               constraints: BoxConstraints.loose(Size.fromHeight(400)),
@@ -450,7 +450,7 @@ class MessageInputState extends State<MessageInput> {
                       trailing: CircleAvatar(
                         backgroundColor: StreamChatTheme.of(context).accentColor,
                         child: Icon(StreamIcons.lightning, color: Colors.white,),
-                        maxRadius: 40.0,
+                        maxRadius: 25.0,
                       ),
                       //subtitle: Text(c.description),
                       onTap: () {
