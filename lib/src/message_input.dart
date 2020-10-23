@@ -415,30 +415,44 @@ class MessageInputState extends State<MessageInput> {
             child: ListView(
               padding: const EdgeInsets.all(0),
               shrinkWrap: true,
-              children: commands
-                  .map(
-                    (c) => ListTile(
-                      title: Text.rich(
-                        TextSpan(
-                          text: '${c.name}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: ' ${c.args}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ],
-                        ),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Icon(StreamIcons.lightning, color: StreamChatTheme.of(context).accentColor),
                       ),
-                      subtitle: Text(c.description),
-                      onTap: () {
-                        _setCommand(c);
-                      },
+                      Text('Instant Commands')
+                    ],
+                  ),
+                ),
+                ...commands
+                    .map(
+                      (c) => ListTile(
+                    title: Text.rich(
+                      TextSpan(
+                        text: '${c.name}',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        children: [
+                          TextSpan(
+                            text: ' ${c.args}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                  .toList(),
+                    subtitle: Text(c.description),
+                    onTap: () {
+                      _setCommand(c);
+                    },
+                  ),
+                )
+                    .toList(),
+              ],
             ),
           ),
         ),
@@ -544,6 +558,7 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _chosenCommand = c;
       _commandEnabled = true;
+      _messageIsPresent = false;
     });
     _commandsOverlay?.remove();
     _commandsOverlay = null;
