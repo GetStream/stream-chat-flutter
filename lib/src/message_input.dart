@@ -417,7 +417,7 @@ class MessageInputState extends State<MessageInput> {
               shrinkWrap: true,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.only(left: 8.0, top: 8.0),
                   child: Row(
                     children: [
                       Padding(
@@ -433,11 +433,11 @@ class MessageInputState extends State<MessageInput> {
                       (c) => ListTile(
                     title: Text.rich(
                       TextSpan(
-                        text: '${c.name}',
+                        text: '${c.name.capitalize()}',
                         style: TextStyle(fontWeight: FontWeight.bold),
                         children: [
                           TextSpan(
-                            text: ' ${c.args}',
+                            text: ' /${c.name} ${c.args}',
                             style: TextStyle(
                               fontWeight: FontWeight.w300,
                             ),
@@ -445,7 +445,11 @@ class MessageInputState extends State<MessageInput> {
                         ],
                       ),
                     ),
-                    subtitle: Text(c.description),
+                    trailing: CircleAvatar(
+                      backgroundColor: StreamChatTheme.of(context).accentColor,
+                      child: Icon(StreamIcons.lightning, color: Colors.white,),
+                    ),
+                    //subtitle: Text(c.description),
                     onTap: () {
                       _setCommand(c);
                     },
@@ -1138,4 +1142,10 @@ class _SendingAttachment {
     this.attachment,
     this.uploaded = false,
   });
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
+  }
 }
