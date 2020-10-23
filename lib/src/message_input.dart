@@ -398,65 +398,69 @@ class MessageInputState extends State<MessageInput> {
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
-        child: Material(
-          color: StreamChatTheme.of(context).primaryColor,
-          child: Container(
-            constraints: BoxConstraints.loose(Size.fromHeight(400)),
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  spreadRadius: -8,
-                  blurRadius: 5.0,
-                  offset: Offset(0, -4),
-                ),
-              ],
-              color: StreamChatTheme.of(context).primaryColor,
-            ),
-            child: ListView(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(StreamIcons.lightning, color: StreamChatTheme.of(context).accentColor),
-                      ),
-                      Text('Instant Commands')
-                    ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Material(
+            color: StreamChatTheme.of(context).primaryColor,
+            child: Container(
+              constraints: BoxConstraints.loose(Size.fromHeight(400)),
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    spreadRadius: -8,
+                    blurRadius: 5.0,
+                    offset: Offset(0, -4),
                   ),
-                ),
-                ...commands
-                    .map(
-                      (c) => ListTile(
-                    title: Text.rich(
-                      TextSpan(
-                        text: '${c.name.capitalize()}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        children: [
-                          TextSpan(
-                            text: ' /${c.name} ${c.args}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w300,
+                ],
+                color: StreamChatTheme.of(context).primaryColor,
+              ),
+              child: ListView(
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Icon(StreamIcons.lightning, color: StreamChatTheme.of(context).accentColor),
+                        ),
+                        Text('Instant Commands')
+                      ],
+                    ),
+                  ),
+                  ...commands
+                      .map(
+                        (c) => ListTile(
+                      title: Text.rich(
+                        TextSpan(
+                          text: '${c.name.capitalize()}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          children: [
+                            TextSpan(
+                              text: ' /${c.name} ${c.args}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w300,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      trailing: CircleAvatar(
+                        backgroundColor: StreamChatTheme.of(context).accentColor,
+                        child: Icon(StreamIcons.lightning, color: Colors.white,),
+                        maxRadius: 40.0,
+                      ),
+                      //subtitle: Text(c.description),
+                      onTap: () {
+                        _setCommand(c);
+                      },
                     ),
-                    trailing: CircleAvatar(
-                      backgroundColor: StreamChatTheme.of(context).accentColor,
-                      child: Icon(StreamIcons.lightning, color: Colors.white,),
-                    ),
-                    //subtitle: Text(c.description),
-                    onTap: () {
-                      _setCommand(c);
-                    },
-                  ),
-                )
-                    .toList(),
-              ],
+                  )
+                      .toList(),
+                ],
+              ),
             ),
           ),
         ),
