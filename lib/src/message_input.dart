@@ -401,7 +401,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Card(
-            elevation: 4.0,
+            elevation: 2.0,
             color: StreamChatTheme.of(context).primaryColor,
             clipBehavior: Clip.antiAlias,
             child: Container(
