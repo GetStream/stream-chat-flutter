@@ -12,17 +12,26 @@ class UnreadIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: CircleAvatar(
-        backgroundColor:
-            StreamChatTheme.of(context).channelPreviewTheme.unreadCounterColor,
-        radius: 6,
-        child: Text(
-          '${channel.state.unreadCount}',
-          style: TextStyle(fontSize: 8),
-        ),
-      ),
-    );
+    return StreamBuilder<int>(
+        stream: channel.state.unreadCountStream,
+        initialData: channel.state.unreadCount,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data == 0) {
+            return SizedBox();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: CircleAvatar(
+              backgroundColor: StreamChatTheme.of(context)
+                  .channelPreviewTheme
+                  .unreadCounterColor,
+              radius: 6,
+              child: Text(
+                '${snapshot.data}',
+                style: TextStyle(fontSize: 8),
+              ),
+            ),
+          );
+        });
   }
 }

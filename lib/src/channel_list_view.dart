@@ -304,10 +304,8 @@ class _ChannelListViewState extends State<ChannelListView>
       return StreamChannel(
         key: ValueKey<String>('CHANNEL-${channel.id}'),
         channel: channel,
-        child: StreamBuilder<DateTime>(
-          initialData: channel.updatedAt,
-          stream: channel.updatedAtStream,
-          builder: (context, snapshot) {
+        child: Builder(
+          builder: (context) {
             Widget child;
             if (widget.channelPreviewBuilder != null) {
               child = Stack(
