@@ -401,18 +401,19 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Card(
+            elevation: 4.0,
             color: StreamChatTheme.of(context).primaryColor,
             clipBehavior: Clip.antiAlias,
             child: Container(
               constraints: BoxConstraints.loose(Size.fromHeight(400)),
               decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    spreadRadius: -8,
-                    blurRadius: 5.0,
-                    offset: Offset(0, -4),
-                  ),
-                ],
+                // boxShadow: [
+                //   BoxShadow(
+                //     spreadRadius: -8,
+                //     blurRadius: 5.0,
+                //     offset: Offset(0, -4),
+                //   ),
+                // ],
                 color: StreamChatTheme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(8.0)
               ),
@@ -451,7 +452,7 @@ class MessageInputState extends State<MessageInput> {
                       ),
                       trailing: CircleAvatar(
                         backgroundColor: StreamChatTheme.of(context).accentColor,
-                        child: Icon(StreamIcons.lightning, color: Colors.white, size: 10.0,),
+                        child: Icon(StreamIcons.lightning, color: Colors.white, size: 12.5,),
                         maxRadius: 12.5,
                       ),
                       //subtitle: Text(c.description),
