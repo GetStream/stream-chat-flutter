@@ -453,7 +453,7 @@ class MessageInputState extends State<MessageInput> {
                       trailing: CircleAvatar(
                         backgroundColor: StreamChatTheme.of(context).accentColor,
                         child: Icon(StreamIcons.lightning, color: Colors.white, size: 12.5,),
-                        maxRadius: 12.5,
+                        maxRadius: 15,
                       ),
                       //subtitle: Text(c.description),
                       onTap: () {
