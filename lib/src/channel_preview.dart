@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
-import 'typing_indicator.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -103,17 +102,24 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildSubtitle(BuildContext context) {
-    final opacity = channel.state.unreadCount > 0 ? 1.0 : 0.5;
-    return TypingIndicator(
-      channel: channel,
-      alternativeWidget: _buildLastMessage(context, opacity),
-      style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-            color: StreamChatTheme.of(context)
-                .channelPreviewTheme
-                .subtitle
-                .color
-                .withOpacity(opacity),
-          ),
+    return StreamBuilder(
+      initialData: channel.state.unreadCount,
+      stream: channel.state.unreadCountStream,
+      builder: (context, snapshot) {
+        final opacity = (snapshot.data ?? 0) > 0 ? 1.0 : 0.5;
+        return TypingIndicator(
+          channel: channel,
+          alternativeWidget: _buildLastMessage(context, opacity),
+          style:
+              StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                    color: StreamChatTheme.of(context)
+                        .channelPreviewTheme
+                        .subtitle
+                        .color
+                        .withOpacity(opacity),
+                  ),
+        );
+      },
     );
   }
 

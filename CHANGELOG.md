@@ -1,3 +1,8 @@
+## 0.2.11
+
+- Update llc dependency
+- Update widget to use `channel.state.unreadCountStream`
+
 ## 0.2.10
 
 - Update llc dependency
