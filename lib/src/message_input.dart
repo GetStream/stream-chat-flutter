@@ -189,7 +189,6 @@ class MessageInputState extends State<MessageInput> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAttachments(),
               _buildTextField(context),
             ],
           ),
@@ -258,89 +257,94 @@ class MessageInputState extends State<MessageInput> {
       child: Center(
         child: LimitedBox(
           maxHeight: widget.maxHeight,
-          child: TextField(
-            key: Key('messageInputText'),
-            enabled: _inputEnabled,
-            minLines: null,
-            maxLines: null,
-            onSubmitted: (_) {
-              sendMessage();
-            },
-            keyboardType: widget.keyboardType,
-            controller: textEditingController,
-            focusNode: _focusNode,
-            onChanged: (s) {
-              StreamChannel.of(context).channel.keyStroke();
+          child: Column(
+            children: [
+              _buildAttachments(),
+              TextField(
+                key: Key('messageInputText'),
+                enabled: _inputEnabled,
+                minLines: null,
+                maxLines: null,
+                onSubmitted: (_) {
+                  sendMessage();
+                },
+                keyboardType: widget.keyboardType,
+                controller: textEditingController,
+                focusNode: _focusNode,
+                onChanged: (s) {
+                  StreamChannel.of(context).channel.keyStroke();
 
-              setState(() {
-                _messageIsPresent = s.trim().isNotEmpty;
-                _actionsShrunk = s.trim().isNotEmpty;
-              });
+                  setState(() {
+                    _messageIsPresent = s.trim().isNotEmpty;
+                    _actionsShrunk = s.trim().isNotEmpty;
+                  });
 
-              _commandsOverlay?.remove();
-              _commandsOverlay = null;
-              _mentionsOverlay?.remove();
-              _mentionsOverlay = null;
+                  _commandsOverlay?.remove();
+                  _commandsOverlay = null;
+                  _mentionsOverlay?.remove();
+                  _mentionsOverlay = null;
 
-              if (s.startsWith('/')) {
-                _commandsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_commandsOverlay);
-              }
+                  if (s.startsWith('/')) {
+                    _commandsOverlay = _buildCommandsOverlayEntry();
+                    Overlay.of(context).insert(_commandsOverlay);
+                  }
 
-              if (textEditingController.selection.isCollapsed &&
-                  (s[textEditingController.selection.start - 1] == '@' ||
-                      textEditingController.text
-                          .substring(0, textEditingController.selection.start)
-                          .split(' ')
-                          .last
-                          .contains('@'))) {
-                _mentionsOverlay = _buildMentionsOverlayEntry();
-                Overlay.of(context).insert(_mentionsOverlay);
-              }
-            },
-            onTap: () {
-              setState(() {
-                _typingStarted = true;
-              });
-            },
-            style: Theme.of(context).textTheme.bodyText2,
-            autofocus: false,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              hintText: 'Write a message',
-              prefixText: _commandEnabled ? null : '   ',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
+                  if (textEditingController.selection.isCollapsed &&
+                      (s[textEditingController.selection.start - 1] == '@' ||
+                          textEditingController.text
+                              .substring(0, textEditingController.selection.start)
+                              .split(' ')
+                              .last
+                              .contains('@'))) {
+                    _mentionsOverlay = _buildMentionsOverlayEntry();
+                    Overlay.of(context).insert(_mentionsOverlay);
+                  }
+                },
+                onTap: () {
+                  setState(() {
+                    _typingStarted = true;
+                  });
+                },
+                style: Theme.of(context).textTheme.bodyText2,
+                autofocus: false,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  hintText: 'Write a message',
+                  prefixText: _commandEnabled ? null : '   ',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  contentPadding: EdgeInsets.all(8),
+                  prefixIcon: _commandEnabled
+                      ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Chip(
+                            backgroundColor: StreamChatTheme.of(context).accentColor,
+                            label: Text(
+                              _chosenCommand?.name ?? "",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            avatar: Icon(
+                              StreamIcons.lightning,
+                              color: Colors.white,
+                            ),
+                          ),
+                      )
+                      : null,
+                  suffixIcon: _commandEnabled
+                      ? IconButton(
+                          icon: Icon(Icons.cancel_outlined),
+                          onPressed: () {
+                            setState(() {
+                              _commandEnabled = false;
+                            });
+                          },
+                        )
+                      : null,
+                ),
+                textCapitalization: TextCapitalization.sentences,
               ),
-              contentPadding: EdgeInsets.all(8),
-              prefixIcon: _commandEnabled
-                  ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Chip(
-                        backgroundColor: StreamChatTheme.of(context).accentColor,
-                        label: Text(
-                          _chosenCommand?.name ?? "",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        avatar: Icon(
-                          StreamIcons.lightning,
-                          color: Colors.white,
-                        ),
-                      ),
-                  )
-                  : null,
-              suffixIcon: _commandEnabled
-                  ? IconButton(
-                      icon: Icon(Icons.cancel_outlined),
-                      onPressed: () {
-                        setState(() {
-                          _commandEnabled = false;
-                        });
-                      },
-                    )
-                  : null,
-            ),
-            textCapitalization: TextCapitalization.sentences,
+            ],
           ),
         ),
       ),
