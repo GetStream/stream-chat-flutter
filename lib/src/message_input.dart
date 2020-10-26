@@ -592,8 +592,8 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachments() {
-    return Wrap(
-      direction: Axis.horizontal,
+    return ListView(
+      scrollDirection: Axis.horizontal,
       children: _attachments
           .map(
             (attachment) => Padding(
