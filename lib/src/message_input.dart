@@ -255,7 +255,7 @@ class MessageInputState extends State<MessageInput> {
           maxHeight: widget.maxHeight,
           child: Container(
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
+                borderRadius: BorderRadius.circular(32.0),
                 border: Border.all(
                   color: Colors.grey,
                 )),
@@ -623,32 +623,32 @@ class MessageInputState extends State<MessageInput> {
               scrollDirection: Axis.horizontal,
               children: _attachments
                   .map(
-                    (attachment) => AspectRatio(
-                      aspectRatio: 1.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
+                    (attachment) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Stack(
+                          children: <Widget>[
+                            AspectRatio(
+                              aspectRatio: 1.0,
+                              child: Container(
                                 height: 50,
                                 width: 50,
                                 child: _buildAttachment(attachment),
                               ),
-                              _buildRemoveButton(attachment),
-                              attachment.uploaded
-                                  ? SizedBox()
-                                  : Positioned.fill(
-                                      child: Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: CircularProgressIndicator(),
-                                        ),
+                            ),
+                            _buildRemoveButton(attachment),
+                            attachment.uploaded
+                                ? SizedBox()
+                                : Positioned.fill(
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: CircularProgressIndicator(),
                                       ),
                                     ),
-                            ],
-                          ),
+                                  ),
+                          ],
                         ),
                       ),
                     ),
