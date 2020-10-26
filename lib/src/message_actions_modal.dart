@@ -192,7 +192,7 @@ class MessageActionsModal extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         StreamIcons.form_edit,
-                        size: 18,
+                        size: 22,
                         color:
                         StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
@@ -200,12 +200,12 @@ class MessageActionsModal extends StatelessWidget {
                     ),
                     Text(
                       'Edit message',
-                      style: Theme.of(context).textTheme.headline6,
+                      style: Theme.of(context).textTheme.headline6.copyWith(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: Icon(
                         Icons.cancel_outlined,
-                        size: 18,
+                        size: 2,
                         color:
                             StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
