@@ -612,8 +612,8 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachments() {
-    return Container(
-      height: 76.0,
+    return LimitedBox(
+      maxHeight: 76.0,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: _attachments
