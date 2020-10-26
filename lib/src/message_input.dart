@@ -612,38 +612,41 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachments() {
-    return Wrap(
-      direction: Axis.horizontal,
-      children: _attachments
-          .map(
-            (attachment) => Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Stack(
-                  children: <Widget>[
-                    Container(
-                      height: 50,
-                      width: 50,
-                      child: _buildAttachment(attachment),
-                    ),
-                    _buildRemoveButton(attachment),
-                    attachment.uploaded
-                        ? SizedBox()
-                        : Positioned.fill(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
+    return Container(
+      height: 76.0,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: _attachments
+            .map(
+              (attachment) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        height: 50,
+                        width: 50,
+                        child: _buildAttachment(attachment),
+                      ),
+                      _buildRemoveButton(attachment),
+                      attachment.uploaded
+                          ? SizedBox()
+                          : Positioned.fill(
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(),
+                                ),
                               ),
                             ),
-                          ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          )
-          .toList(),
+            )
+            .toList(),
+      ),
     );
   }
 
