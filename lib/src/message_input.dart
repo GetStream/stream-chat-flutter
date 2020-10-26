@@ -254,8 +254,14 @@ class MessageInputState extends State<MessageInput> {
           maxHeight: widget.maxHeight,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all()
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(
+                color: _typingStarted
+                    ? Colors.transparent
+                    : Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(.2)
+                    : Colors.black.withOpacity(.2)),
+              )
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -312,9 +318,11 @@ class MessageInputState extends State<MessageInput> {
                   decoration: InputDecoration(
                     hintText: 'Write a message',
                     prefixText: _commandEnabled ? null : '   ',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
                     contentPadding: EdgeInsets.all(8),
                     prefixIcon: _commandEnabled
                         ? Padding(
