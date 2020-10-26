@@ -191,7 +191,7 @@ class MessageActionsModal extends StatelessWidget {
                   children: <Widget>[
                     IconButton(
                       icon: Icon(
-                        StreamIcons.form_edit,
+                        StreamIcons.edit,
                         size: 22,
                         color:
                         StreamChatTheme.of(context).primaryIconTheme.color,

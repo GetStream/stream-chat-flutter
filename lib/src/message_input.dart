@@ -309,7 +309,7 @@ class MessageInputState extends State<MessageInput> {
             decoration: InputDecoration(
               hintText: 'Write a message',
               prefixText: _commandEnabled ? null : '   ',
-              border: OutlineInputBorder(
+              border: widget.editMessage == null ? null : OutlineInputBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
               contentPadding: EdgeInsets.all(8),
