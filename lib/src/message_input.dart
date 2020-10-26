@@ -502,6 +502,7 @@ class MessageInputState extends State<MessageInput> {
         right: 0,
         child: Card(
           margin: EdgeInsets.all(8.0),
+          elevation: 2.0,
           color: StreamChatTheme.of(context).primaryColor,
           clipBehavior: Clip.antiAlias,
           child: Container(
