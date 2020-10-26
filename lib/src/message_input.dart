@@ -255,6 +255,7 @@ class MessageInputState extends State<MessageInput> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
+              border: Border.all()
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
