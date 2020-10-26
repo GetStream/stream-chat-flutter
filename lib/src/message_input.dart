@@ -186,12 +186,7 @@ class MessageInputState extends State<MessageInput> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTextField(context),
-            ],
-          ),
+          child: _buildTextField(context),
         ),
       ),
     );
@@ -200,7 +195,7 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         if(!_commandEnabled)
           _buildExpandActionsButton(),
