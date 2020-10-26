@@ -205,7 +205,7 @@ class MessageActionsModal extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.cancel_outlined,
-                        size: 2,
+                        size: 22,
                         color:
                             StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
