@@ -189,6 +189,15 @@ class MessageActionsModal extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
+                    IconButton(
+                      icon: Icon(
+                        StreamIcons.form_edit,
+                        size: 18,
+                        color:
+                        StreamChatTheme.of(context).primaryIconTheme.color,
+                      ),
+                      onPressed: () {},
+                    ),
                     Text(
                       'Edit message',
                       style: Theme.of(context).textTheme.headline6,
@@ -196,7 +205,7 @@ class MessageActionsModal extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.cancel_outlined,
-                        size: 15,
+                        size: 18,
                         color:
                             StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
