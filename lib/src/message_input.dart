@@ -254,11 +254,13 @@ class MessageInputState extends State<MessageInput> {
         child: LimitedBox(
           maxHeight: widget.maxHeight,
           child: Container(
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32.0),
-                border: Border.all(
-                  color: Colors.grey,
-                )),
+              borderRadius: BorderRadius.circular(32.0),
+              border: Border.all(
+                color: Colors.grey,
+              ),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
