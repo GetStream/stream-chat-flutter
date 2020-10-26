@@ -500,8 +500,10 @@ class MessageInputState extends State<MessageInput> {
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
-        child: Material(
+        child: Card(
+          margin: EdgeInsets.all(8.0),
           color: StreamChatTheme.of(context).primaryColor,
+          clipBehavior: Clip.antiAlias,
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
             decoration: BoxDecoration(
