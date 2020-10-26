@@ -197,8 +197,7 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        if(!_commandEnabled)
-          _buildExpandActionsButton(),
+        if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
@@ -224,16 +223,18 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildExpandActionsButton() {
     return AnimatedCrossFade(
-      crossFadeState: _actionsShrunk
-          ? CrossFadeState.showFirst
-          : CrossFadeState.showSecond,
+      crossFadeState:
+          _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       firstChild: IconButton(
         onPressed: () {
           setState(() {
             _actionsShrunk = false;
           });
         },
-        icon: Icon(StreamIcons.circle_left, color: StreamChatTheme.of(context).accentColor,),
+        icon: Icon(
+          StreamIcons.circle_left,
+          color: StreamChatTheme.of(context).accentColor,
+        ),
       ),
       secondChild: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -254,11 +255,10 @@ class MessageInputState extends State<MessageInput> {
           maxHeight: widget.maxHeight,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              border: Border.all(
-                color: Colors.grey,
-              )
-            ),
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: Colors.grey,
+                )),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -295,7 +295,8 @@ class MessageInputState extends State<MessageInput> {
                     if (textEditingController.selection.isCollapsed &&
                         (s[textEditingController.selection.start - 1] == '@' ||
                             textEditingController.text
-                                .substring(0, textEditingController.selection.start)
+                                .substring(
+                                    0, textEditingController.selection.start)
                                 .split(' ')
                                 .last
                                 .contains('@'))) {
@@ -315,26 +316,23 @@ class MessageInputState extends State<MessageInput> {
                     hintText: 'Write a message',
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.transparent)
-                    ),
+                        borderSide: BorderSide(color: Colors.transparent)),
                     focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)
-                    ),
+                        borderSide: BorderSide(color: Colors.transparent)),
                     enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)
-                    ),
+                        borderSide: BorderSide(color: Colors.transparent)),
                     errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)
-                    ),
+                        borderSide: BorderSide(color: Colors.transparent)),
                     disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)
-                    ),
+                        borderSide: BorderSide(color: Colors.transparent)),
                     contentPadding: EdgeInsets.all(8),
                     prefixIcon: _commandEnabled
                         ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Chip(
-                              backgroundColor: StreamChatTheme.of(context).accentColor,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Chip(
+                              backgroundColor:
+                                  StreamChatTheme.of(context).accentColor,
                               label: Text(
                                 _chosenCommand?.name ?? "",
                                 style: TextStyle(color: Colors.white),
@@ -344,7 +342,7 @@ class MessageInputState extends State<MessageInput> {
                                 color: Colors.white,
                               ),
                             ),
-                        )
+                          )
                         : null,
                     suffixIcon: _commandEnabled
                         ? IconButton(
@@ -427,16 +425,15 @@ class MessageInputState extends State<MessageInput> {
             child: Container(
               constraints: BoxConstraints.loose(Size.fromHeight(400)),
               decoration: BoxDecoration(
-                // boxShadow: [
-                //   BoxShadow(
-                //     spreadRadius: -8,
-                //     blurRadius: 5.0,
-                //     offset: Offset(0, -4),
-                //   ),
-                // ],
-                color: StreamChatTheme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(8.0)
-              ),
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     spreadRadius: -8,
+                  //     blurRadius: 5.0,
+                  //     offset: Offset(0, -4),
+                  //   ),
+                  // ],
+                  color: StreamChatTheme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8.0)),
               child: ListView(
                 padding: const EdgeInsets.all(0),
                 shrinkWrap: true,
@@ -447,7 +444,8 @@ class MessageInputState extends State<MessageInput> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Icon(StreamIcons.lightning, color: StreamChatTheme.of(context).accentColor),
+                          child: Icon(StreamIcons.lightning,
+                              color: StreamChatTheme.of(context).accentColor),
                         ),
                         Text('Instant Commands')
                       ],
@@ -456,31 +454,36 @@ class MessageInputState extends State<MessageInput> {
                   ...commands
                       .map(
                         (c) => ListTile(
-                      title: Text.rich(
-                        TextSpan(
-                          text: '${c.name.capitalize()}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                          children: [
+                          title: Text.rich(
                             TextSpan(
-                              text: ' /${c.name} ${c.args}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w300,
-                              ),
+                              text: '${c.name.capitalize()}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text: ' /${c.name} ${c.args}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
+                          trailing: CircleAvatar(
+                            backgroundColor:
+                                StreamChatTheme.of(context).accentColor,
+                            child: Icon(
+                              StreamIcons.lightning,
+                              color: Colors.white,
+                              size: 12.5,
+                            ),
+                            maxRadius: 15,
+                          ),
+                          //subtitle: Text(c.description),
+                          onTap: () {
+                            _setCommand(c);
+                          },
                         ),
-                      ),
-                      trailing: CircleAvatar(
-                        backgroundColor: StreamChatTheme.of(context).accentColor,
-                        child: Icon(StreamIcons.lightning, color: Colors.white, size: 12.5,),
-                        maxRadius: 15,
-                      ),
-                      //subtitle: Text(c.description),
-                      onTap: () {
-                        _setCommand(c);
-                      },
-                    ),
-                  )
+                      )
                       .toList(),
                 ],
               ),
@@ -612,42 +615,44 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachments() {
-    return LimitedBox(
-      maxHeight: 80.0,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: _attachments
-            .map(
-              (attachment) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Stack(
-                    children: <Widget>[
-                      Container(
-                        height: 50,
-                        width: 50,
-                        child: _buildAttachment(attachment),
-                      ),
-                      _buildRemoveButton(attachment),
-                      attachment.uploaded
-                          ? SizedBox()
-                          : Positioned.fill(
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
+    return _attachments.isEmpty
+        ? Container()
+        : LimitedBox(
+            maxHeight: 80.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: _attachments
+                  .map(
+                    (attachment) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Stack(
+                          children: <Widget>[
+                            Container(
+                              height: 50,
+                              width: 50,
+                              child: _buildAttachment(attachment),
                             ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    );
+                            _buildRemoveButton(attachment),
+                            attachment.uploaded
+                                ? SizedBox()
+                                : Positioned.fill(
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          );
   }
 
   Positioned _buildRemoveButton(_SendingAttachment attachment) {
@@ -728,7 +733,7 @@ class MessageInputState extends State<MessageInput> {
           child: Icon(StreamIcons.lightning),
         ),
         onTap: () {
-          if(_commandsOverlay == null) {
+          if (_commandsOverlay == null) {
             _commandsOverlay = _buildCommandsOverlayEntry();
             Overlay.of(context).insert(_commandsOverlay);
           } else {
@@ -1018,7 +1023,7 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
-    if(_commandEnabled) {
+    if (_commandEnabled) {
       text = '/${_chosenCommand.name} ' + text;
     }
 
