@@ -258,6 +258,7 @@ class MessageInputState extends State<MessageInput> {
         child: LimitedBox(
           maxHeight: widget.maxHeight,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildAttachments(),
               TextField(
