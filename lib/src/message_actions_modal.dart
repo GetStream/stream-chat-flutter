@@ -43,75 +43,71 @@ class MessageActionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: 10,
-                sigmaY: 10,
-              ),
-              child: Container(
-                color: Colors.transparent,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(top: 160),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 10,
+                  sigmaY: 10,
+                ),
+                child: Container(
+                  color: Colors.transparent,
+                ),
               ),
             ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (showReactions &&
-                  (message.status == MessageSendingStatus.SENT ||
-                      message.status == null))
-                Center(
-                  child: ReactionPicker(
-                    message: message,
-                    messageTheme: messageTheme,
-                  ),
-                ),
-              IgnorePointer(
-                child: MessageWidget(
-                  key: Key('MessageWidget'),
-                  reverse: reverse,
-                  message: message.copyWith(
-                    text: message.text.length > 200
-                        ? '${message.text.substring(0, 200)}...'
-                        : message.text,
-                    attachments: message.attachments.length > 1
-                        ? [message.attachments[0]]
-                        : message.attachments,
-                  ),
-                  messageTheme: messageTheme,
-                  showReactions: false,
-                  showUsername: false,
-                  showReplyIndicator: false,
-                  showTimestamp: false,
-                  showSendingIndicator: DisplayWidget.gone,
-                  shape: messageShape,
-                ),
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 48.0,
-                  ),
-                  child: Material(
-                    clipBehavior: Clip.hardEdge,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (showReactions &&
+                      (message.status == MessageSendingStatus.SENT ||
+                          message.status == null))
+                    Center(
+                      child: ReactionPicker(
+                        message: message,
+                        messageTheme: messageTheme,
+                      ),
                     ),
-                    child: SingleChildScrollView(
+                  IgnorePointer(
+                    child: MessageWidget(
+                      key: Key('MessageWidget'),
+                      reverse: reverse,
+                      message: message.copyWith(
+                        text: message.text.length > 200
+                            ? '${message.text.substring(0, 200)}...'
+                            : message.text,
+                      ),
+                      messageTheme: messageTheme,
+                      showReactions: false,
+                      showUsername: false,
+                      showReplyIndicator: false,
+                      showTimestamp: false,
+                      showSendingIndicator: DisplayWidget.gone,
+                      shape: messageShape,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 48.0,
+                    ),
+                    child: Material(
+                      clipBehavior: Clip.hardEdge,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: ListTile.divideTiles(
@@ -129,13 +125,13 @@ class MessageActionsModal extends StatelessWidget {
                         ).toList(),
                       ),
                     ),
-                  ),
-                ),
-              )
-            ],
-          ),
+                  )
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

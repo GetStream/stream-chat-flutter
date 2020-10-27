@@ -392,6 +392,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         reactionsMap[element.type] = element;
       }
     });
+    final reactionsList = reactionsMap.values.toList()
+      ..sort((a, b) => a.user.id == ownId ? 1 : -1);
 
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
@@ -406,7 +408,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                 flipTail: widget.reverse,
                 backgroundColor: widget.messageTheme.reactionsBackgroundColor,
                 borderColor: widget.messageTheme.reactionsBorderColor,
-                reactions: reactionsMap.values.toList(),
+                reactions: reactionsList,
               ),
             )
           : SizedBox(),
