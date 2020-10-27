@@ -290,8 +290,24 @@ class MessageInputState extends State<MessageInput> {
                     _mentionsOverlay = null;
 
                     if (s.startsWith('/')) {
-                      _commandsOverlay = _buildCommandsOverlayEntry();
-                      Overlay.of(context).insert(_commandsOverlay);
+                      var matchedCommandsList = StreamChannel.of(context)
+                          .channel
+                          .config
+                          .commands.where((element) => element.name == s.substring(1)).toList();
+
+                      if(matchedCommandsList.length == 1) {
+                        _chosenCommand = matchedCommandsList[0];
+                        textEditingController.clear();
+                        _typingStarted = false;
+                        setState(() {
+                          _commandEnabled = true;
+                        });
+                        _commandsOverlay.remove();
+                        _commandsOverlay = null;
+                      } else {
+                        _commandsOverlay = _buildCommandsOverlayEntry();
+                        Overlay.of(context).insert(_commandsOverlay);
+                      }
                     }
 
                     if (textEditingController.selection.isCollapsed &&
@@ -440,19 +456,21 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.all(0),
                 shrinkWrap: true,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Icon(StreamIcons.lightning,
-                              color: StreamChatTheme.of(context).accentColor),
-                        ),
-                        Text('Instant Commands')
-                      ],
+                  if (commands.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Icon(StreamIcons.lightning,
+                                color: StreamChatTheme.of(context).accentColor),
+                          ),
+                          Text('Instant Commands')
+                        ],
+                      ),
                     ),
-                  ),
                   ...commands
                       .map(
                         (c) => ListTile(
