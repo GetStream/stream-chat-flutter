@@ -298,7 +298,7 @@ class MessageInputState extends State<MessageInput> {
                       if(matchedCommandsList.length == 1) {
                         _chosenCommand = matchedCommandsList[0];
                         textEditingController.clear();
-                        _typingStarted = false;
+                        _messageIsPresent = false;
                         setState(() {
                           _commandEnabled = true;
                         });
