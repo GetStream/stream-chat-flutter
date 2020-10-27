@@ -171,6 +171,7 @@ class MessageInputState extends State<MessageInput> {
 
   Command _chosenCommand;
   bool _actionsShrunk = false;
+  bool _sendAsDm = false;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -184,9 +185,19 @@ class MessageInputState extends State<MessageInput> {
             _focusNode.unfocus();
           }
         },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _buildTextField(context),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _buildTextField(context),
+            ),
+            if(widget.parentMessage != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildDmCheckbox(),
+              ),
+          ],
         ),
       ),
     );
@@ -204,6 +215,18 @@ class MessageInputState extends State<MessageInput> {
         _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
+      ],
+    );
+  }
+
+  Widget _buildDmCheckbox() {
+    return Row(
+      children: [
+        Checkbox(value: _sendAsDm, onChanged: (val) => setState(() {_sendAsDm = val;})),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text('Send also as direct message'),
+        ),
       ],
     );
   }
