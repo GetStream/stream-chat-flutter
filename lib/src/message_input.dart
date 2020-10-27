@@ -1083,7 +1083,6 @@ class MessageInputState extends State<MessageInput> {
       _messageIsPresent = false;
       _typingStarted = false;
       _commandEnabled = false;
-      _sendAsDm = false;
     });
 
     _commandsOverlay?.remove();
