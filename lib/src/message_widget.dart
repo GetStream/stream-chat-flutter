@@ -241,7 +241,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         Flexible(
                           child: PortalEntry(
                             portal: Container(
-                              transform: Matrix4.translationValues(-16, 0, 0),
+                              transform: Matrix4.translationValues(-16, 2, 0),
                               child: _buildReactionIndicator(context),
                               constraints: BoxConstraints(maxWidth: 22 * 6.0),
                             ),
