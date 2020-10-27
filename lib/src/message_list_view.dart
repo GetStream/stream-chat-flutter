@@ -273,7 +273,7 @@ class _MessageListViewState extends State<MessageListView> {
                     );
                   }
 
-                  return VisibleNotifierWidget(child: messageWidget);
+                  return VisibleNotifierWidget(child: messageWidget, data: i,);
                 },
                 childCount: _messages.length + 2,
                 findChildIndexCallback: (key) {
@@ -297,12 +297,13 @@ class _MessageListViewState extends State<MessageListView> {
                   }
                   return _buildScrollToBottom(streamChannel);
                 }),
+          if(positionData != null)
           Positioned(
             top: 20.0,
             child: WidgetsVisibilityListener(
                listener: (context, event) {
                  setState(() {
-                   positionData = event.positionDataList.isNotEmpty ? event.positionDataList[0] : null;
+                   positionData = event.positionDataList.isNotEmpty ? event.positionDataList[0].data : null;
                  });
                },
                child: DateDivider(
