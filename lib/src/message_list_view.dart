@@ -160,6 +160,7 @@ class _MessageListViewState extends State<MessageListView> {
     return WidgetsVisibilityProvider(
       condition: (c) => null,
       child: Stack(
+        alignment: Alignment.center,
         children: [
           NotificationListener<ScrollNotification>(
             onNotification: (_) {
@@ -301,13 +302,13 @@ class _MessageListViewState extends State<MessageListView> {
             child: WidgetsVisibilityListener(
                listener: (context, event) {
                  setState(() {
-                   positionData = event.positionDataList.first.startPosition;
+                   positionData = event.positionDataList.isNotEmpty ? event.positionDataList[0] : null;
                  });
                },
-               child: Chip(
-                 label: Text(positionData.toString()),
+               child: DateDivider(
+                   dateTime: _messages[positionData].createdAt.toLocal(),
+                 ),
                ),
-             ),
           ),
         ],
       ),
