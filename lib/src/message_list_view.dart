@@ -304,13 +304,14 @@ class _MessageListViewState extends State<MessageListView> {
           Positioned(
             top: 20.0,
             child: WidgetsVisibilityConsumer(
+              listener: (context, event,) {},
               builder: (context, event) {
                 if(event.positionDataList == null || event.positionDataList.isEmpty) {
                   return Container();
                 }
 
                 return DateDivider(
-                  dateTime: _messages[event.positionDataList[0].data].createdAt.toLocal(),
+                  dateTime: _messages[event.positionDataList.last.data].createdAt.toLocal(),
                 );
               },
             ),
