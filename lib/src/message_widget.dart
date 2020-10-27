@@ -387,7 +387,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   ) {
     final ownId = StreamChat.of(context).user.id;
     final reactionsMap = <String, Reaction>{};
-    widget.message.latestReactions.forEach((element) {
+    widget.message.latestReactions?.forEach((element) {
       if (!reactionsMap.containsKey(element.type) || element.user.id == ownId) {
         reactionsMap[element.type] = element;
       }

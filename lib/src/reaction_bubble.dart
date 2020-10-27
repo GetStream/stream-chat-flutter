@@ -26,6 +26,7 @@ class ReactionBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reactionIcons = StreamChatTheme.of(context).reactionIcons;
+    final offset = reactions.length > 1 ? 16.0 : 2.0;
     return Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
@@ -33,7 +34,7 @@ class ReactionBubble extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Transform.translate(
-            offset: Offset(reverse ? 2 : -2, 0),
+            offset: Offset(reverse ? offset : -offset, 0),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(

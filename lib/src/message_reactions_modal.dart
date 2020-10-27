@@ -68,7 +68,7 @@ class MessageReactionsModal extends StatelessWidget {
                     messageTheme: messageTheme,
                   ),
                 ),
-              AbsorbPointer(
+              IgnorePointer(
                 child: MessageWidget(
                   key: Key('MessageWidget'),
                   reverse: reverse,

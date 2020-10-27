@@ -62,71 +62,78 @@ class MessageActionsModal extends StatelessWidget {
             ),
           ),
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (showReactions &&
-                (message.status == MessageSendingStatus.SENT ||
-                    message.status == null))
-              Center(
-                child: ReactionPicker(
-                  message: message,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (showReactions &&
+                  (message.status == MessageSendingStatus.SENT ||
+                      message.status == null))
+                Center(
+                  child: ReactionPicker(
+                    message: message,
+                    messageTheme: messageTheme,
+                  ),
+                ),
+              IgnorePointer(
+                child: MessageWidget(
+                  key: Key('MessageWidget'),
+                  reverse: reverse,
+                  message: message.copyWith(
+                    text: message.text.length > 200
+                        ? '${message.text.substring(0, 200)}...'
+                        : message.text,
+                    attachments: message.attachments.length > 1
+                        ? [message.attachments[0]]
+                        : message.attachments,
+                  ),
                   messageTheme: messageTheme,
+                  showReactions: false,
+                  showUsername: false,
+                  showReplyIndicator: false,
+                  showTimestamp: false,
+                  showSendingIndicator: DisplayWidget.gone,
+                  shape: messageShape,
                 ),
               ),
-            AbsorbPointer(
-              child: MessageWidget(
-                key: Key('MessageWidget'),
-                reverse: reverse,
-                message: message.copyWith(
-                  text: message.text.length > 200
-                      ? '${message.text.substring(0, 200)}...'
-                      : message.text,
-                  attachments: message.attachments.length > 1
-                      ? [message.attachments[0]]
-                      : message.attachments,
-                ),
-                messageTheme: messageTheme,
-                showReactions: false,
-                showUsername: false,
-                showReplyIndicator: false,
-                showTimestamp: false,
-                showSendingIndicator: DisplayWidget.gone,
-                shape: messageShape,
+              SizedBox(
+                height: 8,
               ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 48.0,
-              ),
-              child: Material(
-                clipBehavior: Clip.hardEdge,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 48.0,
+                  ),
+                  child: Material(
+                    clipBehavior: Clip.hardEdge,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: ListTile.divideTiles(
+                          context: context,
+                          tiles: [
+                            if (showReply &&
+                                (message.status == MessageSendingStatus.SENT ||
+                                    message.status == null) &&
+                                message.parentId == null)
+                              _buildReplyButton(context),
+                            if (showEditMessage) _buildEditMessage(context),
+                            if (showDeleteMessage) _buildDeleteButton(context),
+                            if (showCopyMessage) _buildCopyButton(context),
+                          ],
+                        ).toList(),
+                      ),
+                    ),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: ListTile.divideTiles(
-                    context: context,
-                    tiles: [
-                      if (showReply &&
-                          (message.status == MessageSendingStatus.SENT ||
-                              message.status == null) &&
-                          message.parentId == null)
-                        _buildReplyButton(context),
-                      if (showEditMessage) _buildEditMessage(context),
-                      if (showDeleteMessage) _buildDeleteButton(context),
-                      if (showCopyMessage) _buildCopyButton(context),
-                    ],
-                  ).toList(),
-                ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ],
     );
