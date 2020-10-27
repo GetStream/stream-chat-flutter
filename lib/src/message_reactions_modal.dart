@@ -53,49 +53,54 @@ class MessageReactionsModal extends StatelessWidget {
             ),
           ),
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (showReactions &&
-                (message.status == MessageSendingStatus.SENT ||
-                    message.status == null))
-              Center(
-                child: ReactionPicker(
-                  message: message,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (showReactions &&
+                  (message.status == MessageSendingStatus.SENT ||
+                      message.status == null))
+                Center(
+                  child: ReactionPicker(
+                    message: message,
+                    messageTheme: messageTheme,
+                  ),
+                ),
+              AbsorbPointer(
+                child: MessageWidget(
+                  key: Key('MessageWidget'),
+                  reverse: reverse,
+                  message: message.copyWith(
+                    text: message.text.length > 200
+                        ? '${message.text.substring(0, 200)}...'
+                        : message.text,
+                    attachments: message.attachments.length > 1
+                        ? [message.attachments[0]]
+                        : message.attachments,
+                  ),
                   messageTheme: messageTheme,
+                  showReactions: false,
+                  showUsername: false,
+                  showReplyIndicator: false,
+                  showTimestamp: false,
+                  showSendingIndicator: DisplayWidget.gone,
+                  shape: messageShape,
                 ),
               ),
-            AbsorbPointer(
-              child: MessageWidget(
-                key: Key('MessageWidget'),
-                reverse: reverse,
-                message: message.copyWith(
-                  text: message.text.length > 200
-                      ? '${message.text.substring(0, 200)}...'
-                      : message.text,
-                  attachments: message.attachments.length > 1
-                      ? [message.attachments[0]]
-                      : message.attachments,
+              SizedBox(
+                height: 16,
+              ),
+              if (message.latestReactions?.isNotEmpty == true)
+                Flexible(
+                  child: Container(
+                    constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                    child: _buildReactionCard(context),
+                  ),
                 ),
-                messageTheme: messageTheme,
-                showReactions: false,
-                showUsername: false,
-                showReplyIndicator: false,
-                showTimestamp: false,
-                showSendingIndicator: DisplayWidget.gone,
-                shape: messageShape,
-              ),
-            ),
-            SizedBox(
-              height: 16,
-            ),
-            if (message.latestReactions?.isNotEmpty == true)
-              Container(
-                constraints: BoxConstraints.loose(Size.fromHeight(400)),
-                child: _buildReactionCard(context),
-              ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -181,16 +186,14 @@ class MessageReactionsModal extends StatelessWidget {
               Positioned(
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Container(
-                    child: ReactionBubble(
-                      reactions: [reaction],
-                      borderColor: messageTheme.reactionsBorderColor,
-                      backgroundColor: messageTheme.reactionsBackgroundColor,
-                      flipTail: !isCurrentUser,
-                    ),
+                  child: ReactionBubble(
+                    reactions: [reaction],
+                    borderColor: messageTheme.reactionsBorderColor,
+                    backgroundColor: messageTheme.reactionsBackgroundColor,
+                    highlightOwnReactions: false,
                   ),
                 ),
-                bottom: 0,
+                bottom: 4,
                 left: isCurrentUser ? 0 : null,
                 right: isCurrentUser ? 0 : null,
               ),

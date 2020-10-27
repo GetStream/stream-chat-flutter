@@ -13,6 +13,7 @@ class ReactionBubble extends StatelessWidget {
     @required this.backgroundColor,
     this.reverse = false,
     this.flipTail = false,
+    this.highlightOwnReactions = true,
   }) : super(key: key);
 
   final List<Reaction> reactions;
@@ -20,6 +21,7 @@ class ReactionBubble extends StatelessWidget {
   final Color backgroundColor;
   final bool reverse;
   final bool flipTail;
+  final bool highlightOwnReactions;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +33,9 @@ class ReactionBubble extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Transform.translate(
-            offset: Offset(reverse ? 5 : -5, 0),
+            offset: Offset(reverse ? 2 : -2, 0),
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: borderColor,
@@ -73,8 +75,8 @@ class ReactionBubble extends StatelessWidget {
           ),
           Positioned(
             bottom: 0,
-            left: reverse ? null : 16,
-            right: !reverse ? null : 16,
+            left: reverse ? null : 11,
+            right: !reverse ? null : 11,
             child: _buildReactionsTail(context),
           ),
         ],
@@ -99,7 +101,8 @@ class ReactionBubble extends StatelessWidget {
       child: Icon(
         reactionIcon?.iconData ?? Icons.help_outline_rounded,
         size: 16,
-        color: reaction.user.id == StreamChat.of(context).user.id
+        color: (!highlightOwnReactions ||
+                reaction.user.id == StreamChat.of(context).user.id)
             ? StreamChatTheme.of(context).accentColor
             : Colors.black.withOpacity(.5),
       ),
@@ -107,13 +110,10 @@ class ReactionBubble extends StatelessWidget {
   }
 
   Widget _buildReactionsTail(BuildContext context) {
-    final tail = Transform.translate(
-      offset: Offset(-5, 0),
-      child: CustomPaint(
-        painter: ReactionBubblePainter(
-          backgroundColor,
-          borderColor,
-        ),
+    final tail = CustomPaint(
+      painter: ReactionBubblePainter(
+        backgroundColor,
+        borderColor,
       ),
     );
 

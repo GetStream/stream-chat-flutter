@@ -240,7 +240,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                           ),
                         Flexible(
                           child: PortalEntry(
-                            portal: ConstrainedBox(
+                            portal: Container(
+                              transform: Matrix4.translationValues(-16, 0, 0),
                               child: _buildReactionIndicator(context),
                               constraints: BoxConstraints(maxWidth: 22 * 6.0),
                             ),
@@ -399,16 +400,13 @@ class _MessageWidgetState extends State<MessageWidget> {
               !widget.message.isDeleted)
           ? GestureDetector(
               onTap: () => _showMessageReactionsModalBottomSheet(context),
-              child: Transform.translate(
-                offset: Offset(-16, 0),
-                child: ReactionBubble(
-                  key: ValueKey('${widget.message.id}.reactions'),
-                  reverse: widget.reverse,
-                  flipTail: widget.reverse,
-                  backgroundColor: widget.messageTheme.reactionsBackgroundColor,
-                  borderColor: widget.messageTheme.reactionsBorderColor,
-                  reactions: reactionsMap.values.toList(),
-                ),
+              child: ReactionBubble(
+                key: ValueKey('${widget.message.id}.reactions'),
+                reverse: widget.reverse,
+                flipTail: widget.reverse,
+                backgroundColor: widget.messageTheme.reactionsBackgroundColor,
+                borderColor: widget.messageTheme.reactionsBorderColor,
+                reactions: reactionsMap.values.toList(),
               ),
             )
           : SizedBox(),
