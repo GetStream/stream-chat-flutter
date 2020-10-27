@@ -1029,7 +1029,7 @@ class MessageInputState extends State<MessageInput> {
             child: Transform.rotate(
               angle: widget.editMessage == null ? -pi / 2 : 0,
               child: Icon(
-                widget.editMessage == null ? StreamIcons.send_message : StreamIcons.check,
+                widget.editMessage == null ? StreamIcons.send_message : StreamIcons.check_send,
                 color: StreamChatTheme.of(context).accentColor,
               ),
             ),
