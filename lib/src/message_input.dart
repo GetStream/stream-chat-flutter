@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -165,7 +166,12 @@ class MessageInputState extends State<MessageInput> {
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _typingStarted = false;
+  bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay;
+
+  Command _chosenCommand;
+  bool _actionsShrunk = false;
+  bool _sendAsDm = false;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -179,21 +185,19 @@ class MessageInputState extends State<MessageInput> {
             _focusNode.unfocus();
           }
         },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              _buildBorder(context),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAttachments(),
-                  _buildTextField(context),
-                ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _buildTextField(context),
+            ),
+            if(widget.parentMessage != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: _buildDmCheckbox(),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -202,15 +206,27 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (!widget.disableAttachments) _buildAttachmentButton(),
+        if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
         _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
+      ],
+    );
+  }
+
+  Widget _buildDmCheckbox() {
+    return Row(
+      children: [
+        Checkbox(value: _sendAsDm, onChanged: (val) => setState(() {_sendAsDm = val;})),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text('Send also as direct message'),
+        ),
       ],
     );
   }
@@ -222,7 +238,34 @@ class MessageInputState extends State<MessageInput> {
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
-      secondChild: SizedBox(),
+      secondChild: _buildIdleSendButton(context),
+      duration: Duration(milliseconds: 300),
+      alignment: Alignment.center,
+    );
+  }
+
+  Widget _buildExpandActionsButton() {
+    return AnimatedCrossFade(
+      crossFadeState:
+          _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      firstChild: IconButton(
+        onPressed: () {
+          setState(() {
+            _actionsShrunk = false;
+          });
+        },
+        icon: Icon(
+          StreamIcons.circle_left,
+          color: StreamChatTheme.of(context).accentColor,
+        ),
+      ),
+      secondChild: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          if (!widget.disableAttachments) _buildAttachmentButton(),
+          if (widget.editMessage == null) _buildCommandButton(),
+        ],
+      ),
       duration: Duration(milliseconds: 300),
       alignment: Alignment.center,
     );
@@ -230,60 +273,134 @@ class MessageInputState extends State<MessageInput> {
 
   Expanded _buildTextInput(BuildContext context) {
     return Expanded(
-      child: LimitedBox(
-        maxHeight: widget.maxHeight,
-        child: TextField(
-          key: Key('messageInputText'),
-          enabled: _inputEnabled,
-          minLines: null,
-          maxLines: null,
-          onSubmitted: (_) {
-            sendMessage();
-          },
-          keyboardType: widget.keyboardType,
-          controller: textEditingController,
-          focusNode: _focusNode,
-          onChanged: (s) {
-            StreamChannel.of(context).channel.keyStroke();
+      child: Center(
+        child: LimitedBox(
+          maxHeight: widget.maxHeight,
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32.0),
+              border: Border.all(
+                color: Colors.grey,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildAttachments(),
+                TextField(
+                  key: Key('messageInputText'),
+                  enabled: _inputEnabled,
+                  minLines: null,
+                  maxLines: null,
+                  onSubmitted: (_) {
+                    sendMessage();
+                  },
+                  keyboardType: widget.keyboardType,
+                  controller: textEditingController,
+                  focusNode: _focusNode,
+                  onChanged: (s) {
+                    StreamChannel.of(context).channel.keyStroke();
 
-            setState(() {
-              _messageIsPresent = s.trim().isNotEmpty;
-            });
+                    setState(() {
+                      _messageIsPresent = s.trim().isNotEmpty;
+                      _actionsShrunk = s.trim().isNotEmpty;
+                    });
 
-            _commandsOverlay?.remove();
-            _commandsOverlay = null;
-            _mentionsOverlay?.remove();
-            _mentionsOverlay = null;
+                    _commandsOverlay?.remove();
+                    _commandsOverlay = null;
+                    _mentionsOverlay?.remove();
+                    _mentionsOverlay = null;
 
-            if (s.startsWith('/')) {
-              _commandsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_commandsOverlay);
-            }
+                    if (s.startsWith('/')) {
+                      var matchedCommandsList = StreamChannel.of(context)
+                          .channel
+                          .config
+                          .commands.where((element) => element.name == s.substring(1)).toList();
 
-            if (textEditingController.selection.isCollapsed &&
-                (s[textEditingController.selection.start - 1] == '@' ||
-                    textEditingController.text
-                        .substring(0, textEditingController.selection.start)
-                        .split(' ')
-                        .last
-                        .contains('@'))) {
-              _mentionsOverlay = _buildMentionsOverlayEntry();
-              Overlay.of(context).insert(_mentionsOverlay);
-            }
-          },
-          onTap: () {
-            setState(() {
-              _typingStarted = true;
-            });
-          },
-          style: Theme.of(context).textTheme.bodyText2,
-          autofocus: false,
-          decoration: InputDecoration(
-            hintText: 'Write a message',
-            prefixText: '   ',
-            border: InputBorder.none,
+                      if(matchedCommandsList.length == 1) {
+                        _chosenCommand = matchedCommandsList[0];
+                        textEditingController.clear();
+                        _messageIsPresent = false;
+                        setState(() {
+                          _commandEnabled = true;
+                        });
+                        _commandsOverlay.remove();
+                        _commandsOverlay = null;
+                      } else {
+                        _commandsOverlay = _buildCommandsOverlayEntry();
+                        Overlay.of(context).insert(_commandsOverlay);
+                      }
+                    }
+
+                    if (textEditingController.selection.isCollapsed &&
+                        (s[textEditingController.selection.start - 1] == '@' ||
+                            textEditingController.text
+                                .substring(
+                                    0, textEditingController.selection.start)
+                                .split(' ')
+                                .last
+                                .contains('@'))) {
+                      _mentionsOverlay = _buildMentionsOverlayEntry();
+                      Overlay.of(context).insert(_mentionsOverlay);
+                    }
+                  },
+                  onTap: () {
+                    setState(() {
+                      _typingStarted = true;
+                    });
+                  },
+                  style: Theme.of(context).textTheme.bodyText2,
+                  autofocus: false,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: 'Write a message',
+                    prefixText: _commandEnabled ? null : '   ',
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent)),
+                    errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent)),
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent)),
+                    contentPadding: EdgeInsets.all(8),
+                    prefixIcon: _commandEnabled
+                        ? Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Chip(
+                              backgroundColor:
+                                  StreamChatTheme.of(context).accentColor,
+                              label: Text(
+                                _chosenCommand?.name ?? "",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              avatar: Icon(
+                                StreamIcons.lightning,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                        : null,
+                    suffixIcon: _commandEnabled
+                        ? IconButton(
+                            icon: Icon(Icons.cancel_outlined),
+                            onPressed: () {
+                              setState(() {
+                                _commandEnabled = false;
+                              });
+                            },
+                          )
+                        : null,
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+              ],
+            ),
           ),
-          textCapitalization: TextCapitalization.sentences,
         ),
       ),
     );
@@ -340,47 +457,79 @@ class MessageInputState extends State<MessageInput> {
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
-        child: Material(
-          color: StreamChatTheme.of(context).primaryColor,
-          child: Container(
-            constraints: BoxConstraints.loose(Size.fromHeight(400)),
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  spreadRadius: -8,
-                  blurRadius: 5.0,
-                  offset: Offset(0, -4),
-                ),
-              ],
-              color: StreamChatTheme.of(context).primaryColor,
-            ),
-            child: ListView(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              children: commands
-                  .map(
-                    (c) => ListTile(
-                      title: Text.rich(
-                        TextSpan(
-                          text: '${c.name}',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                          children: [
-                            TextSpan(
-                              text: ' ${c.args}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ],
-                        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Card(
+            elevation: 2.0,
+            color: StreamChatTheme.of(context).primaryColor,
+            clipBehavior: Clip.antiAlias,
+            child: Container(
+              constraints: BoxConstraints.loose(Size.fromHeight(400)),
+              decoration: BoxDecoration(
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     spreadRadius: -8,
+                  //     blurRadius: 5.0,
+                  //     offset: Offset(0, -4),
+                  //   ),
+                  // ],
+                  color: StreamChatTheme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8.0)),
+              child: ListView(
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                children: [
+                  if (commands.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Icon(StreamIcons.lightning,
+                                color: StreamChatTheme.of(context).accentColor),
+                          ),
+                          Text('Instant Commands')
+                        ],
                       ),
-                      subtitle: Text(c.description),
-                      onTap: () {
-                        _setCommand(c);
-                      },
                     ),
-                  )
-                  .toList(),
+                  ...commands
+                      .map(
+                        (c) => ListTile(
+                          title: Text.rich(
+                            TextSpan(
+                              text: '${c.name.capitalize()}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text: ' /${c.name} ${c.args}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          trailing: CircleAvatar(
+                            backgroundColor:
+                                StreamChatTheme.of(context).accentColor,
+                            child: Icon(
+                              StreamIcons.lightning,
+                              color: Colors.white,
+                              size: 12.5,
+                            ),
+                            maxRadius: 15,
+                          ),
+                          //subtitle: Text(c.description),
+                          onTap: () {
+                            _setCommand(c);
+                          },
+                        ),
+                      )
+                      .toList(),
+                ],
+              ),
             ),
           ),
         ),
@@ -417,8 +566,11 @@ class MessageInputState extends State<MessageInput> {
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
-        child: Material(
+        child: Card(
+          margin: EdgeInsets.all(8.0),
+          elevation: 2.0,
           color: StreamChatTheme.of(context).primaryColor,
+          clipBehavior: Clip.antiAlias,
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
             decoration: BoxDecoration(
@@ -443,7 +595,15 @@ class MessageInputState extends State<MessageInput> {
                               leading: UserAvatar(
                                 user: m.user,
                               ),
-                              title: Text('${m.user.name}'),
+                              title: Text(
+                                '${m.user.name}',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text('${m.userId}'),
+                              trailing: Icon(
+                                Icons.alternate_email,
+                                color: StreamChatTheme.of(context).accentColor,
+                              ),
                               onTap: () {
                                 _mentionedUsers.add(m.user);
 
@@ -474,12 +634,12 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _setCommand(Command c) {
-    textEditingController.value = TextEditingValue(
-      text: '/${c.name} ',
-      selection: TextSelection.collapsed(
-        offset: c.name.length + 2,
-      ),
-    );
+    textEditingController.clear();
+    setState(() {
+      _chosenCommand = c;
+      _commandEnabled = true;
+      _messageIsPresent = false;
+    });
     _commandsOverlay?.remove();
     _commandsOverlay = null;
   }
@@ -498,39 +658,47 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachments() {
-    return Wrap(
-      direction: Axis.horizontal,
-      children: _attachments
-          .map(
-            (attachment) => Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Stack(
-                  children: <Widget>[
-                    Container(
-                      height: 50,
-                      width: 50,
-                      child: _buildAttachment(attachment),
-                    ),
-                    _buildRemoveButton(attachment),
-                    attachment.uploaded
-                        ? SizedBox()
-                        : Positioned.fill(
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
+    return _attachments.isEmpty
+        ? Container()
+        : LimitedBox(
+            maxHeight: 76.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: _attachments
+                  .map(
+                    (attachment) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Stack(
+                          children: <Widget>[
+                            AspectRatio(
+                              aspectRatio: 1.0,
+                              child: Container(
+                                height: 50,
+                                width: 50,
+                                child: _buildAttachment(attachment),
                               ),
                             ),
-                          ),
-                  ],
-                ),
-              ),
+                            _buildRemoveButton(attachment),
+                            attachment.uploaded
+                                ? SizedBox()
+                                : Positioned.fill(
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
-          )
-          .toList(),
-    );
+          );
   }
 
   Positioned _buildRemoveButton(_SendingAttachment attachment) {
@@ -602,20 +770,39 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  Material _buildAttachmentButton() {
-    return Material(
-      clipBehavior: Clip.hardEdge,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(32),
+  Widget _buildCommandButton() {
+    return Center(
+      child: InkWell(
+        child: Padding(
+          padding: const EdgeInsets.only(
+              left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
+          child: Icon(StreamIcons.lightning),
+        ),
+        onTap: () {
+          if (_commandsOverlay == null) {
+            _commandsOverlay = _buildCommandsOverlayEntry();
+            Overlay.of(context).insert(_commandsOverlay);
+          } else {
+            _commandsOverlay?.remove();
+            _commandsOverlay = null;
+          }
+        },
       ),
-      color: Colors.transparent,
-      child: IconButton(
-        onPressed: () {
+    );
+  }
+
+  Widget _buildAttachmentButton() {
+    var padding = widget.editMessage == null ? 4.0 : 8.0;
+    return Center(
+      child: InkWell(
+        child: Padding(
+          padding: EdgeInsets.only(
+              left: 8.0, right: padding, top: 8.0, bottom: 8.0),
+          child: Icon(StreamIcons.attach),
+        ),
+        onTap: () {
           showAttachmentModal();
         },
-        icon: Icon(
-          Icons.add_circle_outline,
-        ),
       ),
     );
   }
@@ -832,24 +1019,44 @@ class MessageInputState extends State<MessageInput> {
     return res.file;
   }
 
+  Widget _buildIdleSendButton(BuildContext context) {
+    return IconTheme(
+      data:
+          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+            child: InkWell(
+          onTap: () {
+            sendMessage();
+          },
+          child: Icon(
+            StreamIcons.send_message,
+            color: Colors.grey,
+          ),
+        )),
+      ),
+    );
+  }
+
   Widget _buildSendButton(BuildContext context) {
     return IconTheme(
       data:
           StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Material(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-        color: Colors.transparent,
-        child: IconButton(
-          key: Key('sendButton'),
-          onPressed: () {
-            sendMessage();
-          },
-          icon: Icon(
-            Icons.send,
-            color: StreamChatTheme.of(context).accentColor,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: () {
+              sendMessage();
+            },
+            child: Transform.rotate(
+              angle: widget.editMessage == null ? -pi / 2 : 0,
+              child: Icon(
+                widget.editMessage == null ? StreamIcons.send_message : StreamIcons.check_send,
+                color: StreamChatTheme.of(context).accentColor,
+              ),
+            ),
           ),
         ),
       ),
@@ -858,9 +1065,13 @@ class MessageInputState extends State<MessageInput> {
 
   /// Sends the current message
   void sendMessage() async {
-    final text = textEditingController.text.trim();
+    var text = textEditingController.text.trim();
     if (text.isEmpty && _attachments.isEmpty) {
       return;
+    }
+
+    if (_commandEnabled) {
+      text = '/${_chosenCommand.name} ' + text;
     }
 
     final attachments = List<_SendingAttachment>.from(_attachments);
@@ -871,6 +1082,7 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _messageIsPresent = false;
       _typingStarted = false;
+      _commandEnabled = false;
     });
 
     _commandsOverlay?.remove();
@@ -896,6 +1108,7 @@ class MessageInputState extends State<MessageInput> {
         attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
+        showInChannel: widget.parentMessage != null ? _sendAsDm : null,
       );
     }
 
@@ -1015,4 +1228,10 @@ class _SendingAttachment {
     this.attachment,
     this.uploaded = false,
   });
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
+  }
 }
