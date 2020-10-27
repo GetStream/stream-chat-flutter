@@ -150,7 +150,6 @@ class _MessageListViewState extends State<MessageListView> {
   List<Message> _newMessageList = [];
   Function _onThreadTap;
   bool _showScrollToBottom = false;
-  var positionData;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +163,8 @@ class _MessageListViewState extends State<MessageListView> {
         children: [
           NotificationListener<ScrollNotification>(
             onNotification: (_) {
-              if (_scrollController.offset < 150 && _newMessageList.isNotEmpty) {
+              if (_scrollController.offset < 150 &&
+                  _newMessageList.isNotEmpty) {
                 setState(() {
                   _messages.insertAll(0, _newMessageList);
                   _newMessageList.clear();
@@ -193,7 +193,8 @@ class _MessageListViewState extends State<MessageListView> {
                           children: <Widget>[
                             buildParentMessage(widget.parentMessage),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 32),
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 child: Text(
@@ -273,7 +274,10 @@ class _MessageListViewState extends State<MessageListView> {
                     );
                   }
 
-                  return VisibleNotifierWidget(child: messageWidget, data: i,);
+                  return VisibleNotifierWidget(
+                    child: messageWidget,
+                    data: i,
+                  );
                 },
                 childCount: _messages.length + 2,
                 findChildIndexCallback: (key) {
@@ -297,19 +301,19 @@ class _MessageListViewState extends State<MessageListView> {
                   }
                   return _buildScrollToBottom(streamChannel);
                 }),
-          if(positionData != null)
           Positioned(
             top: 20.0,
-            child: WidgetsVisibilityListener(
-               listener: (context, event) {
-                 setState(() {
-                   positionData = event.positionDataList.isNotEmpty ? event.positionDataList[0].data : null;
-                 });
-               },
-               child: DateDivider(
-                   dateTime: _messages[positionData].createdAt.toLocal(),
-                 ),
-               ),
+            child: WidgetsVisibilityConsumer(
+              builder: (context, event) {
+                if(event.positionDataList == null || event.positionDataList.isEmpty) {
+                  return Container();
+                }
+
+                return DateDivider(
+                  dateTime: _messages[event.positionDataList[0].data].createdAt.toLocal(),
+                );
+              },
+            ),
           ),
         ],
       ),
