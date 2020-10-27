@@ -543,7 +543,7 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
-      showUserAvatar: isMyMessage
+      showUserAvatar: !isMyMessage
           ? DisplayWidget.gone
           : (isNextUser ? DisplayWidget.hide : DisplayWidget.show),
       messageTheme: isMyMessage

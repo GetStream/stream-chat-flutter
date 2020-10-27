@@ -302,12 +302,8 @@ class StreamChatThemeData {
           fontSize: 12,
         ),
         messageBackgroundColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
-        ownReactionsBackgroundColor:
-            isDark ? Color(0xff191919) : Color(0xffEAEAEA),
-        ownReactionsBorderColor: isDark ? Colors.black : Colors.white,
-        otherReactionsBackgroundColor: isDark ? Colors.black : Colors.white,
-        otherReactionsBorderColor:
-            isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        reactionsBackgroundColor: isDark ? Colors.black : Colors.white,
+        reactionsBorderColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -320,12 +316,9 @@ class StreamChatThemeData {
         ),
       ),
       otherMessageTheme: MessageTheme(
-        ownReactionsBackgroundColor:
+        reactionsBackgroundColor:
             isDark ? Color(0xff191919) : Color(0xffEAEAEA),
-        ownReactionsBorderColor: isDark ? Colors.black : Colors.white,
-        otherReactionsBackgroundColor: isDark ? Colors.black : Colors.white,
-        otherReactionsBorderColor:
-            isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        reactionsBorderColor: isDark ? Colors.black : Colors.white,
         messageText: TextStyle(
           fontSize: 15,
           color: isDark ? Colors.white : Colors.black,
@@ -457,10 +450,8 @@ class MessageTheme {
   final TextStyle createdAt;
   final TextStyle replies;
   final Color messageBackgroundColor;
-  final Color ownReactionsBackgroundColor;
-  final Color ownReactionsBorderColor;
-  final Color otherReactionsBackgroundColor;
-  final Color otherReactionsBorderColor;
+  final Color reactionsBackgroundColor;
+  final Color reactionsBorderColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
@@ -469,10 +460,8 @@ class MessageTheme {
     this.messageAuthor,
     this.messageLinks,
     this.messageBackgroundColor,
-    this.ownReactionsBackgroundColor,
-    this.ownReactionsBorderColor,
-    this.otherReactionsBackgroundColor,
-    this.otherReactionsBorderColor,
+    this.reactionsBackgroundColor,
+    this.reactionsBorderColor,
     this.avatarTheme,
     this.createdAt,
   });
@@ -485,10 +474,8 @@ class MessageTheme {
     TextStyle replies,
     Color messageBackgroundColor,
     AvatarTheme avatarTheme,
-    Color ownReactionsBackgroundColor,
-    Color ownReactionsBorderColor,
-    Color otherReactionsBackgroundColor,
-    Color otherReactionsBorderColor,
+    Color reactionsBackgroundColor,
+    Color reactionsBorderColor,
   }) =>
       MessageTheme(
         messageText: messageText ?? this.messageText,
@@ -499,14 +486,9 @@ class MessageTheme {
             messageBackgroundColor ?? this.messageBackgroundColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         replies: replies ?? this.replies,
-        ownReactionsBackgroundColor:
-            ownReactionsBackgroundColor ?? this.ownReactionsBackgroundColor,
-        ownReactionsBorderColor:
-            ownReactionsBorderColor ?? this.ownReactionsBorderColor,
-        otherReactionsBackgroundColor:
-            otherReactionsBackgroundColor ?? this.otherReactionsBackgroundColor,
-        otherReactionsBorderColor:
-            otherReactionsBorderColor ?? this.otherReactionsBorderColor,
+        reactionsBackgroundColor:
+            reactionsBackgroundColor ?? this.reactionsBackgroundColor,
+        reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
       );
 }
 

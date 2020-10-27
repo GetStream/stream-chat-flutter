@@ -26,7 +26,7 @@ class ReactionPicker extends StatelessWidget {
       fit: StackFit.passthrough,
       children: [
         Material(
-          color: messageTheme.ownReactionsBackgroundColor,
+          color: messageTheme.reactionsBackgroundColor,
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -69,9 +69,8 @@ class ReactionPicker extends StatelessWidget {
           bottom: 0,
           child: CustomPaint(
             painter: ReactionBubblePainter(
-              messageTheme.ownReactionsBackgroundColor,
-              messageTheme.ownReactionsBorderColor,
-              2,
+              messageTheme.reactionsBackgroundColor,
+              messageTheme.reactionsBorderColor,
             ),
           ),
         ),

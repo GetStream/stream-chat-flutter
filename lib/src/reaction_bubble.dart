@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ReactionBubble extends StatelessWidget {
@@ -25,60 +27,92 @@ class ReactionBubble extends StatelessWidget {
     return Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
-      child: Column(
-        crossAxisAlignment:
-            flipTail ? CrossAxisAlignment.start : CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: borderColor,
+          Transform.translate(
+            offset: Offset(reverse ? 5 : -5, 0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: borderColor,
+                ),
+                color: backgroundColor,
+                borderRadius: BorderRadius.all(Radius.circular(14)),
               ),
-              color: backgroundColor,
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-            ),
-            child: Wrap(
-              spacing: 8,
-              children: [
-                ...reactions.map((reaction) {
-                  final reactionIcon = reactionIcons.firstWhere(
-                    (r) => r.type == reaction.type,
-                    orElse: () => null,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Flex(
+                    direction: Axis.horizontal,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (constraints.maxWidth < double.infinity)
+                        ...reactions
+                            .take((constraints.maxWidth) ~/ 22)
+                            .map((reaction) {
+                          return _buildReaction(
+                            reactionIcons,
+                            reaction,
+                            context,
+                          );
+                        }).toList(),
+                      if (constraints.maxWidth == double.infinity)
+                        ...reactions.map((reaction) {
+                          return _buildReaction(
+                            reactionIcons,
+                            reaction,
+                            context,
+                          );
+                        }).toList(),
+                    ],
                   );
-                  if (reactionIcon == null) {
-                    return Text(
-                      '?',
-                      style: TextStyle(
-                        color: StreamChatTheme.of(context).accentColor,
-                      ),
-                    );
-                  }
-
-                  return Icon(
-                    reactionIcon.iconData,
-                    size: 16,
-                    color: StreamChatTheme.of(context).accentColor,
-                  );
-                }).toList(),
-              ],
+                },
+              ),
             ),
           ),
-          _buildReactionsTail(context),
+          Positioned(
+            bottom: 0,
+            left: reverse ? null : 16,
+            right: !reverse ? null : 16,
+            child: _buildReactionsTail(context),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildReaction(
+    List<ReactionIcon> reactionIcons,
+    Reaction reaction,
+    BuildContext context,
+  ) {
+    final reactionIcon = reactionIcons.firstWhere(
+      (r) => r.type == reaction.type,
+      orElse: () => null,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 4.0,
+      ),
+      child: Icon(
+        reactionIcon?.iconData ?? Icons.help_outline_rounded,
+        size: 16,
+        color: reaction.user.id == StreamChat.of(context).user.id
+            ? StreamChatTheme.of(context).accentColor
+            : Colors.black.withOpacity(.5),
       ),
     );
   }
 
   Widget _buildReactionsTail(BuildContext context) {
     final tail = Transform.translate(
-      offset: Offset(reactions.length > 1 ? -9 : -9, 0),
+      offset: Offset(-5, 0),
       child: CustomPaint(
         painter: ReactionBubblePainter(
           backgroundColor,
           borderColor,
-          reactions.length,
         ),
       ),
     );
@@ -98,12 +132,10 @@ class ReactionBubble extends StatelessWidget {
 class ReactionBubblePainter extends CustomPainter {
   final Color color;
   final Color borderColor;
-  final int reactionsCount;
 
   ReactionBubblePainter(
     this.color,
     this.borderColor,
-    this.reactionsCount,
   );
 
   @override
@@ -126,7 +158,7 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path();
     path.addOval(
       Rect.fromCircle(
-        center: Offset(6, 2),
+        center: Offset(4, 3),
         radius: 2,
       ),
     );
@@ -140,7 +172,7 @@ class ReactionBubblePainter extends CustomPainter {
 
     final path = Path();
     path.addOval(Rect.fromCircle(
-      center: Offset(6, 2),
+      center: Offset(4, 3),
       radius: 2,
     ));
     canvas.drawPath(path, paint);
@@ -152,13 +184,13 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
-    final dy = reactionsCount > 1 ? -2.0 : -3.0;
-    final startAngle = reactionsCount > 1 ? 1.08 : 1.16;
-    final sweepAngle = reactionsCount > 1 ? 0.95 : 1.1;
+    final dy = -2.2;
+    final startAngle = 1.1;
+    final sweepAngle = 1.2;
     final path = Path();
     path.addArc(
       Rect.fromCircle(
-        center: Offset(0, dy),
+        center: Offset(1, dy),
         radius: 4,
       ),
       -pi * startAngle,
@@ -172,13 +204,13 @@ class ReactionBubblePainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 1;
 
-    final dy = reactionsCount > 1 ? -2.0 : -3.0;
-    final startAngle = reactionsCount > 1 ? 1 : 1.16;
-    final sweepAngle = reactionsCount > 1 ? 1.2 : 1;
+    final dy = -2.2;
+    final startAngle = 1;
+    final sweepAngle = 1.3;
     final path = Path();
     path.addArc(
       Rect.fromCircle(
-        center: Offset(0, dy),
+        center: Offset(1, dy),
         radius: 4,
       ),
       -pi * startAngle,

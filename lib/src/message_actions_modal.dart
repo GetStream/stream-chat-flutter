@@ -79,10 +79,14 @@ class MessageActionsModal extends StatelessWidget {
               child: MessageWidget(
                 key: Key('MessageWidget'),
                 reverse: reverse,
-                message: message.text.length > 200
-                    ? message.copyWith(
-                        text: '${message.text.substring(0, 200)}...')
-                    : message,
+                message: message.copyWith(
+                  text: message.text.length > 200
+                      ? '${message.text.substring(0, 200)}...'
+                      : message.text,
+                  attachments: message.attachments.length > 1
+                      ? [message.attachments[0]]
+                      : message.attachments,
+                ),
                 messageTheme: messageTheme,
                 showReactions: false,
                 showUsername: false,
