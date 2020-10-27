@@ -194,7 +194,7 @@ class MessageInputState extends State<MessageInput> {
             ),
             if(widget.parentMessage != null)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
               ),
           ],
@@ -206,7 +206,7 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
@@ -792,11 +792,12 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachmentButton() {
+    var padding = widget.editMessage == null ? 4.0 : 8.0;
     return Center(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.only(
-              left: 8.0, right: 4.0, top: 8.0, bottom: 8.0),
+          padding: EdgeInsets.only(
+              left: 8.0, right: padding, top: 8.0, bottom: 8.0),
           child: Icon(StreamIcons.attach),
         ),
         onTap: () {
@@ -1082,6 +1083,7 @@ class MessageInputState extends State<MessageInput> {
       _messageIsPresent = false;
       _typingStarted = false;
       _commandEnabled = false;
+      _sendAsDm = false;
     });
 
     _commandsOverlay?.remove();
@@ -1107,6 +1109,7 @@ class MessageInputState extends State<MessageInput> {
         attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
+        showInChannel: widget.parentMessage != null ? _sendAsDm : null,
       );
     }
 
