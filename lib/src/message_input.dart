@@ -573,6 +573,9 @@ class MessageInputState extends State<MessageInput> {
           margin: EdgeInsets.all(8.0),
           elevation: 2.0,
           color: StreamChatTheme.of(context).primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
           clipBehavior: Clip.antiAlias,
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
@@ -602,7 +605,7 @@ class MessageInputState extends State<MessageInput> {
                                 '${m.user.name}',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              subtitle: Text('${m.userId}'),
+                              subtitle: Text('@${m.userId}'),
                               trailing: Icon(
                                 Icons.alternate_email,
                                 color: StreamChatTheme.of(context).accentColor,
