@@ -43,88 +43,102 @@ class MessageActionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              Navigator.pop(context);
-            },
+    final ownId = StreamChat.of(context).user.id;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Stack(
+        children: [
+          Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(
-                sigmaX: 10,
-                sigmaY: 10,
+                sigmaX: 10.8731,
+                sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.transparent,
+                color: Colors.black.withOpacity(0.2),
               ),
             ),
           ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (showReactions &&
-                (message.status == MessageSendingStatus.SENT ||
-                    message.status == null))
-              Center(
-                child: ReactionPicker(
-                  message: message,
-                  messageTheme: messageTheme,
-                ),
-              ),
-            AbsorbPointer(
-              child: MessageWidget(
-                key: Key('MessageWidget'),
-                reverse: reverse,
-                message: message.text.length > 200
-                    ? message.copyWith(
-                        text: '${message.text.substring(0, 200)}...')
-                    : message,
-                messageTheme: messageTheme,
-                showReactions: false,
-                showUsername: false,
-                showReplyIndicator: false,
-                showTimestamp: false,
-                showSendingIndicator: DisplayWidget.gone,
-                shape: messageShape,
-              ),
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 48.0,
-              ),
-              child: Material(
-                clipBehavior: Clip.hardEdge,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: ListTile.divideTiles(
-                    context: context,
-                    tiles: [
-                      if (showReply &&
-                          (message.status == MessageSendingStatus.SENT ||
-                              message.status == null) &&
-                          message.parentId == null)
-                        _buildReplyButton(context),
-                      if (showEditMessage) _buildEditMessage(context),
-                      if (showDeleteMessage) _buildDeleteButton(context),
-                      if (showCopyMessage) _buildCopyButton(context),
-                    ],
-                  ).toList(),
+                  children: <Widget>[
+                    if (showReactions &&
+                        (message.status == MessageSendingStatus.SENT ||
+                            message.status == null))
+                      Center(
+                        child: ReactionPicker(
+                          message: message,
+                          messageTheme: messageTheme,
+                        ),
+                      ),
+                    IgnorePointer(
+                      child: MessageWidget(
+                        key: Key('MessageWidget'),
+                        reverse: reverse,
+                        message: message.copyWith(
+                          text: message.text.length > 200
+                              ? '${message.text.substring(0, 200)}...'
+                              : message.text,
+                        ),
+                        messageTheme: messageTheme,
+                        showReactions: false,
+                        showUsername: false,
+                        showReplyIndicator: false,
+                        showUserAvatar: message.user.id == ownId
+                            ? DisplayWidget.gone
+                            : DisplayWidget.show,
+                        showTimestamp: false,
+                        showSendingIndicator: DisplayWidget.gone,
+                        shape: messageShape,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48.0,
+                      ),
+                      child: Material(
+                        clipBehavior: Clip.hardEdge,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: ListTile.divideTiles(
+                            context: context,
+                            tiles: [
+                              if (showReply &&
+                                  (message.status ==
+                                          MessageSendingStatus.SENT ||
+                                      message.status == null) &&
+                                  message.parentId == null)
+                                _buildReplyButton(context),
+                              if (showEditMessage) _buildEditMessage(context),
+                              if (showDeleteMessage)
+                                _buildDeleteButton(context),
+                              if (showCopyMessage) _buildCopyButton(context),
+                            ],
+                          ).toList(),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
               ),
-            )
-          ],
-        ),
-      ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

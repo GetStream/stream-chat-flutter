@@ -129,14 +129,9 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
           constraints: themeData?.ownMessageTheme?.avatarTheme?.constraints,
           borderRadius: themeData?.ownMessageTheme?.avatarTheme?.borderRadius,
         ),
-        otherReactionsBorderColor:
-            themeData?.ownMessageTheme?.otherReactionsBorderColor,
-        otherReactionsBackgroundColor:
-            themeData?.ownMessageTheme?.otherReactionsBackgroundColor,
-        ownReactionsBackgroundColor:
-            themeData?.ownMessageTheme?.ownReactionsBackgroundColor,
-        ownReactionsBorderColor:
-            themeData?.ownMessageTheme?.ownReactionsBorderColor,
+        reactionsBorderColor: themeData?.ownMessageTheme?.reactionsBorderColor,
+        reactionsBackgroundColor:
+            themeData?.ownMessageTheme?.reactionsBackgroundColor,
       ),
       otherMessageTheme: defaultTheme.otherMessageTheme.copyWith(
         replies: themeData?.otherMessageTheme?.replies,
@@ -150,14 +145,10 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
           constraints: themeData?.otherMessageTheme?.avatarTheme?.constraints,
           borderRadius: themeData?.otherMessageTheme?.avatarTheme?.borderRadius,
         ),
-        otherReactionsBorderColor:
-            themeData?.otherMessageTheme?.otherReactionsBorderColor,
-        otherReactionsBackgroundColor:
-            themeData?.otherMessageTheme?.otherReactionsBackgroundColor,
-        ownReactionsBackgroundColor:
-            themeData?.otherMessageTheme?.ownReactionsBackgroundColor,
-        ownReactionsBorderColor:
-            themeData?.otherMessageTheme?.ownReactionsBorderColor,
+        reactionsBorderColor:
+            themeData?.otherMessageTheme?.reactionsBorderColor,
+        reactionsBackgroundColor:
+            themeData?.otherMessageTheme?.reactionsBackgroundColor,
       ),
       accentColor: themeData?.accentColor,
       secondaryColor: themeData?.secondaryColor,

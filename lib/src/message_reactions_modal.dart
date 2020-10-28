@@ -34,66 +34,75 @@ class MessageReactionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              Navigator.pop(context);
-            },
+    final ownId = StreamChat.of(context).user.id;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Stack(
+        children: [
+          Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(
-                sigmaX: 10,
-                sigmaY: 10,
+                sigmaX: 10.8731,
+                sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.transparent,
+                color: Colors.black.withOpacity(0.2),
               ),
             ),
           ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (showReactions &&
-                (message.status == MessageSendingStatus.SENT ||
-                    message.status == null))
-              Center(
-                child: ReactionPicker(
-                  message: message,
-                  messageTheme: messageTheme,
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (showReactions &&
+                        (message.status == MessageSendingStatus.SENT ||
+                            message.status == null))
+                      Center(
+                        child: ReactionPicker(
+                          message: message,
+                          messageTheme: messageTheme,
+                        ),
+                      ),
+                    IgnorePointer(
+                      child: MessageWidget(
+                        key: Key('MessageWidget'),
+                        reverse: reverse,
+                        message: message.copyWith(
+                          text: message.text.length > 200
+                              ? '${message.text.substring(0, 200)}...'
+                              : message.text,
+                        ),
+                        messageTheme: messageTheme,
+                        showReactions: false,
+                        showUsername: false,
+                        showUserAvatar: message.user.id == ownId
+                            ? DisplayWidget.gone
+                            : DisplayWidget.show,
+                        showReplyIndicator: false,
+                        showTimestamp: false,
+                        showSendingIndicator: DisplayWidget.gone,
+                        shape: messageShape,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    if (message.latestReactions?.isNotEmpty == true)
+                      _buildReactionCard(context),
+                  ],
                 ),
               ),
-            AbsorbPointer(
-              child: MessageWidget(
-                key: Key('MessageWidget'),
-                reverse: reverse,
-                message: message.text.length > 200
-                    ? message.copyWith(
-                        text: '${message.text.substring(0, 200)}...')
-                    : message,
-                messageTheme: messageTheme,
-                showReactions: false,
-                showUsername: false,
-                showReplyIndicator: false,
-                showTimestamp: false,
-                showSendingIndicator: DisplayWidget.gone,
-                shape: messageShape,
-              ),
             ),
-            SizedBox(
-              height: 16,
-            ),
-            if (message.latestReactions?.isNotEmpty == true)
-              Container(
-                constraints: BoxConstraints.loose(Size.fromHeight(400)),
-                child: _buildReactionCard(context),
-              ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -119,30 +128,25 @@ class MessageReactionsModal extends StatelessWidget {
               ),
             ),
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  right: 16,
-                  bottom: 16,
-                ),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
-                    mainAxisSpacing: 22,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 18,
+                    right: 18,
+                    bottom: 26,
                   ),
-                  itemCount: message.latestReactions.length,
-                  itemBuilder: (context, i) {
-                    final reaction = message.latestReactions[i];
-
-                    return _buildReaction(
-                      reaction,
-                      currentUser,
-                      context,
-                    );
-                  },
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 22,
+                    alignment: WrapAlignment.start,
+                    children: message.latestReactions
+                        .map((e) => _buildReaction(
+                              e,
+                              currentUser,
+                              context,
+                            ))
+                        .toList(),
+                  ),
                 ),
               ),
             ),
@@ -152,51 +156,56 @@ class MessageReactionsModal extends StatelessWidget {
     );
   }
 
-  Column _buildReaction(
+  Widget _buildReaction(
     Reaction reaction,
     User currentUser,
     BuildContext context,
   ) {
     final isCurrentUser = reaction.user.id == currentUser.id;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Stack(
-          children: [
-            UserAvatar(
-              onTap: onUserAvatarTap,
-              user: reaction.user,
-              constraints: BoxConstraints.tightFor(
-                height: 64,
-                width: 64,
+    return ConstrainedBox(
+      constraints: BoxConstraints.loose(Size(
+        64,
+        98,
+      )),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Stack(
+            children: [
+              UserAvatar(
+                onTap: onUserAvatarTap,
+                user: reaction.user,
+                constraints: BoxConstraints.tightFor(
+                  height: 64,
+                  width: 64,
+                ),
+                borderRadius: BorderRadius.circular(32),
               ),
-              borderRadius: BorderRadius.circular(32),
-            ),
-            Positioned(
-              child: ReactionBubble(
-                reactions: [reaction],
-                borderColor: isCurrentUser
-                    ? messageTheme.ownReactionsBorderColor
-                    : messageTheme.otherReactionsBorderColor,
-                backgroundColor: isCurrentUser
-                    ? messageTheme.ownReactionsBackgroundColor
-                    : messageTheme.otherReactionsBackgroundColor,
-                flipTail: !isCurrentUser,
+              Positioned(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ReactionBubble(
+                    reactions: [reaction],
+                    borderColor: messageTheme.reactionsBorderColor,
+                    backgroundColor: messageTheme.reactionsBackgroundColor,
+                    highlightOwnReactions: false,
+                  ),
+                ),
+                bottom: 4,
+                left: isCurrentUser ? 0 : null,
+                right: isCurrentUser ? 0 : null,
               ),
-              bottom: 0,
-              left: isCurrentUser ? 0 : null,
-              right: isCurrentUser ? 0 : null,
-            ),
-          ],
-        ),
-        Text(
-          reaction.user.name,
-          style: Theme.of(context).textTheme.subtitle2,
-          textAlign: TextAlign.center,
-        ),
-      ],
+            ],
+          ),
+          Text(
+            reaction.user.name,
+            style: Theme.of(context).textTheme.subtitle2,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
