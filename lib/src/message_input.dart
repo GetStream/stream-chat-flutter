@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:http_parser/http_parser.dart';
@@ -16,7 +16,7 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
 
-typedef FileUploader = Future<String> Function(File, Channel);
+typedef FileUploader = Future<String> Function(PlatformFile, Channel);
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   _SendingAttachment,
@@ -578,8 +578,8 @@ class MessageInputState extends State<MessageInput> {
       case 'image':
       case 'giphy':
         return attachment.file != null
-            ? Image.file(
-                attachment.file,
+            ? Image.memory(
+                attachment.file.bytes,
                 fit: BoxFit.cover,
               )
             : Image.network(
@@ -711,7 +711,7 @@ class MessageInputState extends State<MessageInput> {
       _inputEnabled = false;
     });
 
-    File file;
+    PlatformFile file;
     String attachmentType;
 
     if (fileType == DefaultAttachmentTypes.image) {
@@ -729,7 +729,11 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.video) {
         pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
       }
-      file = File(pickedFile.path);
+      final bytes = await pickedFile.readAsBytes();
+      file = PlatformFile(
+        path: pickedFile.path,
+        bytes: bytes,
+      );
     } else {
       FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
@@ -739,9 +743,13 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.file) {
         type = FileType.any;
       }
-      final res = await FilePicker.platform.pickFiles(type: type);
+      final res = await FilePicker.platform.pickFiles(
+        type: type,
+        withData: true,
+      );
       if (res?.files?.isNotEmpty == true) {
-        file = File(res.files.first.path);
+        file = res.files.single;
+        print('file.bytes?.length: ${file.bytes?.length}');
       }
     }
 
@@ -754,11 +762,10 @@ class MessageInputState extends State<MessageInput> {
     }
 
     final channel = StreamChannel.of(context).channel;
-
     final attachment = _SendingAttachment(
       file: file,
       attachment: Attachment(
-        localUri: file.uri,
+        localUri: file.path != null ? Uri.parse(file.path) : null,
         type: attachmentType,
       ),
     );
@@ -785,7 +792,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadAttachment(
-    File file,
+    PlatformFile file,
     DefaultAttachmentTypes type,
     Channel channel,
   ) async {
@@ -806,9 +813,9 @@ class MessageInputState extends State<MessageInput> {
     return url;
   }
 
-  Future<String> _uploadImage(File file, Channel channel) async {
-    final filename = file.path.split('/').last;
-    final bytes = await file.readAsBytes();
+  Future<String> _uploadImage(PlatformFile file, Channel channel) async {
+    final filename = file.name;
+    final bytes = file.bytes;
     final res = await channel.sendImage(
       MultipartFile.fromBytes(
         bytes,
@@ -819,9 +826,9 @@ class MessageInputState extends State<MessageInput> {
     return res.file;
   }
 
-  Future<String> _uploadFile(File file, Channel channel) async {
-    final filename = file.path.split('/').last;
-    final bytes = await file.readAsBytes();
+  Future<String> _uploadFile(PlatformFile file, Channel channel) async {
+    final filename = file.name;
+    final bytes = file.bytes;
     final res = await channel.sendFile(
       MultipartFile.fromBytes(
         bytes,
@@ -1006,7 +1013,7 @@ class MessageInputState extends State<MessageInput> {
 }
 
 class _SendingAttachment {
-  File file;
+  PlatformFile file;
   Attachment attachment;
   bool uploaded;
 
