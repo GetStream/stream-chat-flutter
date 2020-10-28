@@ -223,10 +223,14 @@ class MessageInputState extends State<MessageInput> {
     return Row(
       children: [
         Checkbox(
-            value: _sendAsDm,
-            onChanged: (val) => setState(() {
-                  _sendAsDm = val;
-                })),
+          value: _sendAsDm,
+          onChanged: (val) => setState(
+            () {
+              _sendAsDm = val;
+            },
+          ),
+          activeColor: Color(0xFF006CFF),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text('Send also as direct message'),
