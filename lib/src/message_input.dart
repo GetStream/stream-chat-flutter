@@ -192,7 +192,7 @@ class MessageInputState extends State<MessageInput> {
               padding: const EdgeInsets.all(8.0),
               child: _buildTextField(context),
             ),
-            if(widget.parentMessage != null)
+            if (widget.parentMessage != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
@@ -222,7 +222,11 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildDmCheckbox() {
     return Row(
       children: [
-        Checkbox(value: _sendAsDm, onChanged: (val) => setState(() {_sendAsDm = val;})),
+        Checkbox(
+            value: _sendAsDm,
+            onChanged: (val) => setState(() {
+                  _sendAsDm = val;
+                })),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text('Send also as direct message'),
@@ -316,9 +320,11 @@ class MessageInputState extends State<MessageInput> {
                       var matchedCommandsList = StreamChannel.of(context)
                           .channel
                           .config
-                          .commands.where((element) => element.name == s.substring(1)).toList();
+                          .commands
+                          .where((element) => element.name == s.substring(1))
+                          .toList();
 
-                      if(matchedCommandsList.length == 1) {
+                      if (matchedCommandsList.length == 1) {
                         _chosenCommand = matchedCommandsList[0];
                         textEditingController.clear();
                         _messageIsPresent = false;
@@ -796,8 +802,8 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: EdgeInsets.only(
-              left: 8.0, right: padding, top: 8.0, bottom: 8.0),
+          padding:
+              EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
           child: Icon(StreamIcons.attach),
         ),
         onTap: () {
@@ -1053,7 +1059,9 @@ class MessageInputState extends State<MessageInput> {
             child: Transform.rotate(
               angle: widget.editMessage == null ? -pi / 2 : 0,
               child: Icon(
-                widget.editMessage == null ? StreamIcons.send_message : StreamIcons.check_send,
+                widget.editMessage == null
+                    ? StreamIcons.send_message
+                    : StreamIcons.check_send,
                 color: StreamChatTheme.of(context).accentColor,
               ),
             ),
