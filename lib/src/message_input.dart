@@ -354,7 +354,7 @@ class MessageInputState extends State<MessageInput> {
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    hintText: 'Write a message',
+                    hintText: (_commandEnabled && _chosenCommand.name == 'giphy') ? 'Search GIFs' :'Write a message',
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
@@ -461,6 +461,9 @@ class MessageInputState extends State<MessageInput> {
           padding: const EdgeInsets.all(8.0),
           child: Card(
             elevation: 2.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
             color: StreamChatTheme.of(context).primaryColor,
             clipBehavior: Clip.antiAlias,
             child: Container(
@@ -519,7 +522,7 @@ class MessageInputState extends State<MessageInput> {
                               color: Colors.white,
                               size: 12.5,
                             ),
-                            maxRadius: 15,
+                            maxRadius: 12,
                           ),
                           //subtitle: Text(c.description),
                           onTap: () {
@@ -776,7 +779,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.only(
               left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-          child: Icon(StreamIcons.lightning),
+          child: Icon(StreamIcons.lightning, color: Color(0xFF000000).withAlpha(128),),
         ),
         onTap: () {
           if (_commandsOverlay == null) {
@@ -798,7 +801,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: EdgeInsets.only(
               left: 8.0, right: padding, top: 8.0, bottom: 8.0),
-          child: Icon(StreamIcons.attach),
+          child: Icon(StreamIcons.attach, color: Color(0xFF000000).withAlpha(128),),
         ),
         onTap: () {
           showAttachmentModal();
