@@ -157,7 +157,9 @@ class _MessageListViewState extends State<MessageListView> {
 
     /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
     return WidgetsVisibilityProvider(
-      condition: (c) => null,
+      condition: (positionData) =>
+          positionData.endPosition >= 20 &&
+          positionData.startPosition <= positionData.viewportSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -257,14 +259,24 @@ class _MessageListViewState extends State<MessageListView> {
                   if (nextMessage != null &&
                       !Jiffy(message.createdAt.toLocal())
                           .isSame(nextMessage.createdAt.toLocal(), Units.DAY)) {
-                    return VisibleNotifierWidget(
-                      data: i,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          messageWidget,
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        messageWidget,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          child: VisibleNotifierWidget(
+                            condition: (
+                              ScrollNotification previousNotification,
+                              PositionData previousPositionData,
+                              ScrollNotification currentNotification,
+                              PositionData currentPositionData,
+                            ) {
+                              print(
+                                  'currentPositionData.endPosition: ${currentPositionData.endPosition}');
+                              return true;
+                            },
+                            data: i,
                             child: widget.dateDividerBuilder != null
                                 ? widget.dateDividerBuilder(
                                     nextMessage.createdAt.toLocal())
@@ -272,8 +284,8 @@ class _MessageListViewState extends State<MessageListView> {
                                     dateTime: nextMessage.createdAt.toLocal(),
                                   ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     );
                   }
 
@@ -307,14 +319,20 @@ class _MessageListViewState extends State<MessageListView> {
           Positioned(
             top: 20.0,
             child: WidgetsVisibilityConsumer(
-              listener: (context, event,) {},
+              listener: (
+                context,
+                event,
+              ) {},
               builder: (context, event) {
-                if(event.positionDataList == null || event.positionDataList.isEmpty) {
+                if (event.positionDataList == null ||
+                    event.positionDataList.isEmpty) {
                   return Container();
                 }
 
                 return DateDivider(
-                  dateTime: _messages[event.positionDataList.last.data].createdAt.toLocal(),
+                  dateTime: _messages[event.positionDataList.last.data]
+                      .createdAt
+                      .toLocal(),
                 );
               },
             ),
