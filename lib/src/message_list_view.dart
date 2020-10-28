@@ -257,20 +257,23 @@ class _MessageListViewState extends State<MessageListView> {
                   if (nextMessage != null &&
                       !Jiffy(message.createdAt.toLocal())
                           .isSame(nextMessage.createdAt.toLocal(), Units.DAY)) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        messageWidget,
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          child: widget.dateDividerBuilder != null
-                              ? widget.dateDividerBuilder(
-                                  nextMessage.createdAt.toLocal())
-                              : DateDivider(
-                                  dateTime: nextMessage.createdAt.toLocal(),
-                                ),
-                        ),
-                      ],
+                    return VisibleNotifierWidget(
+                      data: i,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          messageWidget,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: widget.dateDividerBuilder != null
+                                ? widget.dateDividerBuilder(
+                                    nextMessage.createdAt.toLocal())
+                                : DateDivider(
+                                    dateTime: nextMessage.createdAt.toLocal(),
+                                  ),
+                          ),
+                        ],
+                      ),
                     );
                   }
 
