@@ -26,7 +26,7 @@ class ReactionPicker extends StatelessWidget {
       fit: StackFit.passthrough,
       children: [
         Material(
-          color: messageTheme.ownReactionsBackgroundColor,
+          color: messageTheme.reactionsBackgroundColor,
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -45,7 +45,7 @@ class ReactionPicker extends StatelessWidget {
                   reactionIcon.iconData,
                   color: ownReactionIndex != -1
                       ? StreamChatTheme.of(context).accentColor
-                      : Theme.of(context).iconTheme.color,
+                      : Theme.of(context).iconTheme.color.withOpacity(.5),
                 ),
                 onPressed: () {
                   if (ownReactionIndex != -1) {
@@ -69,9 +69,8 @@ class ReactionPicker extends StatelessWidget {
           bottom: 0,
           child: CustomPaint(
             painter: ReactionBubblePainter(
-              messageTheme.ownReactionsBackgroundColor,
-              messageTheme.ownReactionsBorderColor,
-              2,
+              messageTheme.reactionsBackgroundColor,
+              messageTheme.reactionsBorderColor,
             ),
           ),
         ),

@@ -31,6 +31,7 @@ dependencies:
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
+  widgets_visibility_provider: ^2.0.2
 
 flutter:
   fonts:
