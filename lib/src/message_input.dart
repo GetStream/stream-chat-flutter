@@ -607,7 +607,7 @@ class MessageInputState extends State<MessageInput> {
                               ),
                               subtitle: Text('@${m.userId}'),
                               trailing: Icon(
-                                Icons.alternate_email,
+                                StreamIcons.at_mention,
                                 color: StreamChatTheme.of(context).accentColor,
                               ),
                               onTap: () {
@@ -1037,7 +1037,7 @@ class MessageInputState extends State<MessageInput> {
             sendMessage();
           },
           child: Icon(
-            StreamIcons.send_message,
+            _getIdleSendIcon(),
             color: Colors.grey,
           ),
         )),
@@ -1059,7 +1059,7 @@ class MessageInputState extends State<MessageInput> {
             child: Transform.rotate(
               angle: widget.editMessage == null ? -pi / 2 : 0,
               child: Icon(
-                widget.editMessage == null ? StreamIcons.send_message : StreamIcons.check_send,
+                _getSendIcon(),
                 color: StreamChatTheme.of(context).accentColor,
               ),
             ),
@@ -1067,6 +1067,24 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+  }
+
+  IconData _getIdleSendIcon() {
+    if (_commandEnabled) {
+      return StreamIcons.search;
+    } else {
+      return StreamIcons.send_message;
+    }
+  }
+
+  IconData _getSendIcon() {
+    if(widget.editMessage != null) {
+      return StreamIcons.check_send;
+    } else if (_commandEnabled) {
+      return StreamIcons.search;
+    } else {
+      return StreamIcons.send_message;
+    }
   }
 
   /// Sends the current message
