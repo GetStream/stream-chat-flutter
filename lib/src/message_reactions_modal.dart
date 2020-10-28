@@ -34,27 +34,28 @@ class MessageReactionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ownId = StreamChat.of(context).user.id;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
         Navigator.pop(context);
       },
-      child: Center(
-        child: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 10,
-                    sigmaY: 10,
-                  ),
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 10.8731,
+                sigmaY: 10.8731,
               ),
-              Padding(
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+              ),
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -81,6 +82,9 @@ class MessageReactionsModal extends StatelessWidget {
                         messageTheme: messageTheme,
                         showReactions: false,
                         showUsername: false,
+                        showUserAvatar: message.user.id == ownId
+                            ? DisplayWidget.gone
+                            : DisplayWidget.show,
                         showReplyIndicator: false,
                         showTimestamp: false,
                         showSendingIndicator: DisplayWidget.gone,
@@ -95,9 +99,9 @@ class MessageReactionsModal extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -220,8 +220,8 @@ class StreamChatThemeData {
     return StreamChatThemeData(
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
-      primaryIconTheme:
-          IconThemeData(color: isDark ? Colors.white : Colors.black),
+      primaryIconTheme: IconThemeData(
+          color: isDark ? Colors.white : Colors.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),
       backgroundColor: isDark ? Colors.black : Colors.white,
       defaultUserImage: (context, user) => Center(
@@ -287,7 +287,7 @@ class StreamChatThemeData {
       ),
       ownMessageTheme: MessageTheme(
         messageText: TextStyle(
-          fontSize: 15,
+          fontSize: 14.5,
           color: isDark ? Colors.white : Colors.black,
         ),
         createdAt: TextStyle(
@@ -320,7 +320,7 @@ class StreamChatThemeData {
             isDark ? Color(0xff191919) : Color(0xffEAEAEA),
         reactionsBorderColor: isDark ? Colors.black : Colors.white,
         messageText: TextStyle(
-          fontSize: 15,
+          fontSize: 14.5,
           color: isDark ? Colors.white : Colors.black,
         ),
         createdAt: TextStyle(
