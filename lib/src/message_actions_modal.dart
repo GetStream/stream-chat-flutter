@@ -218,13 +218,16 @@ class MessageActionsModal extends StatelessWidget {
                         StreamIcons.edit,
                         size: 22,
                         color:
-                        StreamChatTheme.of(context).primaryIconTheme.color,
+                            StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
                       onPressed: () {},
                     ),
                     Text(
                       'Edit message',
-                      style: Theme.of(context).textTheme.headline6.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .copyWith(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: Icon(
