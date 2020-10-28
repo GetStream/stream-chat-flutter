@@ -192,7 +192,7 @@ class MessageInputState extends State<MessageInput> {
               padding: const EdgeInsets.all(8.0),
               child: _buildTextField(context),
             ),
-            if(widget.parentMessage != null)
+            if (widget.parentMessage != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
@@ -222,7 +222,11 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildDmCheckbox() {
     return Row(
       children: [
-        Checkbox(value: _sendAsDm, onChanged: (val) => setState(() {_sendAsDm = val;})),
+        Checkbox(
+            value: _sendAsDm,
+            onChanged: (val) => setState(() {
+                  _sendAsDm = val;
+                })),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text('Send also as direct message'),
@@ -316,9 +320,11 @@ class MessageInputState extends State<MessageInput> {
                       var matchedCommandsList = StreamChannel.of(context)
                           .channel
                           .config
-                          .commands.where((element) => element.name == s.substring(1)).toList();
+                          .commands
+                          .where((element) => element.name == s.substring(1))
+                          .toList();
 
-                      if(matchedCommandsList.length == 1) {
+                      if (matchedCommandsList.length == 1) {
                         _chosenCommand = matchedCommandsList[0];
                         textEditingController.clear();
                         _messageIsPresent = false;
@@ -354,7 +360,10 @@ class MessageInputState extends State<MessageInput> {
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    hintText: (_commandEnabled && _chosenCommand.name == 'giphy') ? 'Search GIFs' :'Write a message',
+                    hintText:
+                        (_commandEnabled && _chosenCommand.name == 'giphy')
+                            ? 'Search GIFs'
+                            : 'Write a message',
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
@@ -782,7 +791,10 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.only(
               left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-          child: Icon(StreamIcons.lightning, color: Color(0xFF000000).withAlpha(128),),
+          child: Icon(
+            StreamIcons.lightning,
+            color: Color(0xFF000000).withAlpha(128),
+          ),
         ),
         onTap: () {
           if (_commandsOverlay == null) {
@@ -802,9 +814,12 @@ class MessageInputState extends State<MessageInput> {
     return Center(
       child: InkWell(
         child: Padding(
-          padding: EdgeInsets.only(
-              left: 8.0, right: padding, top: 8.0, bottom: 8.0),
-          child: Icon(StreamIcons.attach, color: Color(0xFF000000).withAlpha(128),),
+          padding:
+              EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
+          child: Icon(
+            StreamIcons.attach,
+            color: Color(0xFF000000).withAlpha(128),
+          ),
         ),
         onTap: () {
           showAttachmentModal();
@@ -1056,13 +1071,7 @@ class MessageInputState extends State<MessageInput> {
             onTap: () {
               sendMessage();
             },
-            child: Transform.rotate(
-              angle: widget.editMessage == null ? -pi / 2 : 0,
-              child: Icon(
-                _getSendIcon(),
-                color: StreamChatTheme.of(context).accentColor,
-              ),
-            ),
+            child: _getSendIcon(),
           ),
         ),
       ),
@@ -1077,13 +1086,24 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  IconData _getSendIcon() {
-    if(widget.editMessage != null) {
-      return StreamIcons.check_send;
+  Widget _getSendIcon() {
+    if (widget.editMessage != null) {
+      return Icon(
+        StreamIcons.check_send,
+        color: StreamChatTheme.of(context).accentColor,
+      );
     } else if (_commandEnabled) {
-      return StreamIcons.search;
+      return Icon(
+        StreamIcons.search,
+        color: StreamChatTheme.of(context).accentColor,
+      );
     } else {
-      return StreamIcons.send_message;
+      return Transform.rotate(
+          angle: -pi / 2,
+          child: Icon(
+            StreamIcons.send_message,
+            color: StreamChatTheme.of(context).accentColor,
+          ));
     }
   }
 
