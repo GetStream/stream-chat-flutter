@@ -10,13 +10,21 @@ void main() {
   testWidgets(
     'it should show one thumbs from the picker',
     (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
       final themeData = ThemeData();
+
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
       final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: StreamChatTheme(
-            data: streamTheme,
+          home: StreamChat(
+            client: client,
+            streamChatThemeData: streamTheme,
             child: MessageReactionsModal(
               message: Message(
                 id: 'test',

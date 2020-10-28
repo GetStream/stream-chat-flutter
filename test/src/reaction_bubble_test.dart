@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'mocks.dart';
 
 void main() {
   testWidgets(
@@ -29,17 +32,25 @@ void main() {
   testWidgets(
     'it should show a thumb up',
     (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
       final themeData = ThemeData();
+
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: StreamChatTheme(
-            data: StreamChatThemeData.getDefaultTheme(themeData),
+          home: StreamChat(
+            client: client,
+            streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
             child: Container(
               child: ReactionBubble(
                 reactions: [
                   Reaction(
                     type: 'thumbs_up',
+                    user: User(id: 'test'),
                   ),
                 ],
                 borderColor: Colors.black,
@@ -56,20 +67,29 @@ void main() {
   testWidgets(
     'it should show two reactions',
     (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
       final themeData = ThemeData();
+
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
-          home: StreamChatTheme(
-            data: StreamChatThemeData.getDefaultTheme(themeData),
+          home: StreamChat(
+            client: client,
+            streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
             child: Container(
               child: ReactionBubble(
                 reactions: [
                   Reaction(
                     type: 'thumbs_up',
+                    user: User(id: 'test'),
                   ),
                   Reaction(
                     type: 'love',
+                    user: User(id: 'test'),
                   ),
                 ],
                 borderColor: Colors.black,

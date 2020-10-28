@@ -178,7 +178,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    client.state.totalUnreadCountStream.listen((count) {
+    client.state?.totalUnreadCountStream?.listen((count) {
       if (count > 0) {
         FlutterAppBadger.updateBadgeCount(count);
       } else {
