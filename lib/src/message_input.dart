@@ -282,26 +282,25 @@ class MessageInputState extends State<MessageInput> {
   Expanded _buildTextInput(BuildContext context) {
     return Expanded(
       child: Center(
-        child: LimitedBox(
-          maxHeight: widget.maxHeight,
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32.0),
-              border: Border.all(
-                color: Colors.grey,
-              ),
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32.0),
+            border: Border.all(
+              color: Colors.grey,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildAttachments(),
-                TextField(
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildAttachments(),
+              LimitedBox(
+                maxHeight: widget.maxHeight,
+                child: TextField(
                   key: Key('messageInputText'),
                   enabled: _inputEnabled,
                   minLines: null,
                   maxLines: null,
-                  expands: true,
                   onSubmitted: (_) {
                     sendMessage();
                   },
@@ -412,8 +411,8 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   textCapitalization: TextCapitalization.sentences,
                 ),
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),
@@ -514,11 +513,13 @@ class MessageInputState extends State<MessageInput> {
                   ...commands
                       .map(
                         (c) => ListTile(
-                          leading: c.name == 'giphy' ? CircleAvatar(
-                            backgroundColor: Colors.black,
-                            child: Image.asset('images/giphy_icon.png'),
-                            maxRadius: 12.0,
-                          ) : null,
+                          leading: c.name == 'giphy'
+                              ? CircleAvatar(
+                                  backgroundColor: Colors.black,
+                                  child: Image.asset('images/giphy_icon.png'),
+                                  maxRadius: 12.0,
+                                )
+                              : null,
                           title: Text.rich(
                             TextSpan(
                               text: '${c.name.capitalize()}',
