@@ -32,11 +32,10 @@ dependencies:
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
   widgets_visibility_provider: ^2.0.2
-  flutter_svg: ^0.19.1
 
 flutter:
   assets:
-    - images/giphy_icon.svg
+    - images/giphy_icon.png
   fonts:
    - family: stream-icons
      fonts:

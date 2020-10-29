@@ -6,7 +6,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -517,8 +516,8 @@ class MessageInputState extends State<MessageInput> {
                           leading: c.name == 'giphy'
                               ? CircleAvatar(
                                   backgroundColor: Colors.black,
-                                  child: SvgPicture.asset(
-                                    'images/giphy_icon.svg',
+                                  child: Image.asset(
+                                    'images/giphy_icon.png',
                                     package: 'stream_chat_flutter',
                                     width: 16.0,
                                     height: 16.0,
