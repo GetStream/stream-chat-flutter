@@ -25,6 +25,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool showReply;
   final bool reverse;
   final ShapeBorder messageShape;
+  final DisplayWidget showUserAvatar;
 
   const MessageActionsModal({
     Key key,
@@ -36,6 +37,7 @@ class MessageActionsModal extends StatelessWidget {
     this.onThreadTap,
     this.showCopyMessage = true,
     this.showReply = true,
+    this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
     this.reverse = false,
@@ -43,7 +45,6 @@ class MessageActionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ownId = StreamChat.of(context).user.id;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -92,10 +93,9 @@ class MessageActionsModal extends StatelessWidget {
                         showReactions: false,
                         showUsername: false,
                         showReplyIndicator: false,
-                        showUserAvatar: message.user.id == ownId
-                            ? DisplayWidget.gone
-                            : DisplayWidget.show,
+                        showUserAvatar: showUserAvatar,
                         showTimestamp: false,
+                        translateUserAvatar: false,
                         showSendingIndicator: DisplayWidget.gone,
                         shape: messageShape,
                       ),

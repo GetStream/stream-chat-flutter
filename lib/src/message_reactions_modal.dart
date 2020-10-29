@@ -17,6 +17,7 @@ class MessageReactionsModal extends StatelessWidget {
   final MessageTheme messageTheme;
   final bool reverse;
   final bool showReactions;
+  final DisplayWidget showUserAvatar;
   final ShapeBorder messageShape;
   final void Function(User) onUserAvatarTap;
 
@@ -29,12 +30,12 @@ class MessageReactionsModal extends StatelessWidget {
     this.editMessageInputBuilder,
     this.messageShape,
     this.reverse = false,
+    this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ownId = StreamChat.of(context).user.id;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -82,11 +83,10 @@ class MessageReactionsModal extends StatelessWidget {
                         messageTheme: messageTheme,
                         showReactions: false,
                         showUsername: false,
-                        showUserAvatar: message.user.id == ownId
-                            ? DisplayWidget.gone
-                            : DisplayWidget.show,
+                        showUserAvatar: showUserAvatar,
                         showReplyIndicator: false,
                         showTimestamp: false,
+                        translateUserAvatar: false,
                         showSendingIndicator: DisplayWidget.gone,
                         shape: messageShape,
                       ),

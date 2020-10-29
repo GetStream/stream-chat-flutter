@@ -115,11 +115,15 @@ class MessageWidget extends StatefulWidget {
   final bool showEditMessage;
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
+  /// Center user avatar with bottom of the message
+  final bool translateUserAvatar;
+
   MessageWidget({
     Key key,
     @required this.message,
     @required this.messageTheme,
     this.reverse = false,
+    this.translateUserAvatar = true,
     this.shape,
     this.attachmentShape,
     this.borderSide,
@@ -423,6 +427,10 @@ class _MessageWidgetState extends State<MessageWidget> {
           return StreamChannel(
             channel: channel,
             child: MessageActionsModal(
+              showUserAvatar:
+                  widget.message.user.id == channel.client.state.user.id
+                      ? DisplayWidget.gone
+                      : DisplayWidget.show,
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
               reverse: widget.reverse,
@@ -447,6 +455,10 @@ class _MessageWidgetState extends State<MessageWidget> {
           return StreamChannel(
             channel: channel,
             child: MessageReactionsModal(
+              showUserAvatar:
+                  widget.message.user.id == channel.client.state.user.id
+                      ? DisplayWidget.gone
+                      : DisplayWidget.show,
               onUserAvatarTap: widget.onUserAvatarTap,
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
@@ -614,7 +626,11 @@ class _MessageWidgetState extends State<MessageWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: Transform.translate(
             offset: Offset(
-                0, widget.messageTheme.avatarTheme.constraints.maxHeight / 2),
+              0,
+              widget.translateUserAvatar
+                  ? widget.messageTheme.avatarTheme.constraints.maxHeight / 2
+                  : 0,
+            ),
             child: UserAvatar(
               user: widget.message.user,
               onTap: widget.onUserAvatarTap,
