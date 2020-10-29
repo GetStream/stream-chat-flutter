@@ -239,20 +239,24 @@ class _MessageWidgetState extends State<MessageWidget> {
                                 8,
                           ),
                         Flexible(
-                          child: Padding(
-                            padding: widget.showReactions
-                                ? EdgeInsets.only(
-                                    top: widget.message.reactionCounts
-                                                ?.isNotEmpty ==
-                                            true
-                                        ? 12
-                                        : 0,
-                                  )
-                                : EdgeInsets.zero,
-                            child: PortalEntry(
-                              portalAnchor: Alignment(-0.81, 0),
-                              childAnchor: Alignment.topRight,
-                              portal: _buildReactionIndicator(context),
+                          child: PortalEntry(
+                            portal: Container(
+                              transform: Matrix4.translationValues(-16, 2, 0),
+                              child: _buildReactionIndicator(context),
+                              constraints: BoxConstraints(maxWidth: 22 * 6.0),
+                            ),
+                            portalAnchor: Alignment(-1.0, -1.0),
+                            childAnchor: Alignment(1, -1.0),
+                            child: Padding(
+                              padding: widget.showReactions
+                                  ? EdgeInsets.only(
+                                      top: widget.message.reactionCounts
+                                                  ?.isNotEmpty ==
+                                              true
+                                          ? 18
+                                          : 0,
+                                    )
+                                  : EdgeInsets.zero,
                               child: (widget.message.isDeleted &&
                                       widget.message.status !=
                                           MessageSendingStatus.FAILED_DELETE)
@@ -378,75 +382,33 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Widget _buildReactionIndicator(BuildContext context) {
-    final otherReactions = widget.message.latestReactions
-            ?.where(
-                (element) => element.user.id != StreamChat.of(context).user.id)
-            ?.toList() ??
-        [];
+  Widget _buildReactionIndicator(
+    BuildContext context,
+  ) {
+    final ownId = StreamChat.of(context).user.id;
+    final reactionsMap = <String, Reaction>{};
+    widget.message.latestReactions?.forEach((element) {
+      if (!reactionsMap.containsKey(element.type) || element.user.id == ownId) {
+        reactionsMap[element.type] = element;
+      }
+    });
+    final reactionsList = reactionsMap.values.toList()
+      ..sort((a, b) => a.user.id == ownId ? 1 : -1);
 
-    var rowChildren = [
-      if (widget.message.ownReactions?.isNotEmpty == true) ...[
-        Transform.translate(
-          offset: Offset(
-            widget.reverse ? -6 : 0,
-            0,
-          ),
-          child: ReactionBubble(
-            key: ValueKey('${widget.message.id}.own'),
-            reverse: widget.reverse,
-            backgroundColor: widget.messageTheme.ownReactionsBackgroundColor,
-            borderColor: widget.messageTheme.ownReactionsBorderColor,
-            reactions: widget.message.ownReactions,
-          ),
-        ),
-        if (otherReactions.isEmpty)
-          Container(
-            width: 18,
-          ),
-      ],
-      if (otherReactions?.isNotEmpty == true) ...[
-        if (widget.message.ownReactions?.isEmpty == true)
-          Container(
-            width: 18,
-          ),
-        Transform.translate(
-          offset: Offset(
-            widget.reverse ? 0 : -6,
-            0,
-          ),
-          child: ReactionBubble(
-            key: ValueKey('${widget.message.id}.other'),
-            reactions: otherReactions,
-            reverse: widget.reverse,
-            flipTail: true,
-            backgroundColor: widget.messageTheme.otherReactionsBackgroundColor,
-            borderColor: widget.messageTheme.otherReactionsBorderColor,
-          ),
-        ),
-      ]
-    ];
-
-    if (widget.reverse) {
-      rowChildren = rowChildren.reversed.toList();
-    }
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
       child: (widget.showReactions &&
-              (widget.message.reactionCounts?.isNotEmpty == true ||
-                  otherReactions.isNotEmpty) &&
+              (widget.message.reactionCounts?.isNotEmpty == true) &&
               !widget.message.isDeleted)
-          ? Container(
-              child: GestureDetector(
-                onTap: () => _showMessageReactionsModalBottomSheet(context),
-                child: FractionallySizedBox(
-                  widthFactor: 0.5,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: rowChildren,
-                  ),
-                ),
+          ? GestureDetector(
+              onTap: () => _showMessageReactionsModalBottomSheet(context),
+              child: ReactionBubble(
+                key: ValueKey('${widget.message.id}.reactions'),
+                reverse: widget.reverse,
+                flipTail: widget.reverse,
+                backgroundColor: widget.messageTheme.reactionsBackgroundColor,
+                borderColor: widget.messageTheme.reactionsBorderColor,
+                reactions: reactionsList,
               ),
             )
           : SizedBox(),
@@ -498,8 +460,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         });
   }
 
-  ContinuousRectangleBorder _getDefaultShape(BuildContext context) {
-    return ContinuousRectangleBorder(
+  ShapeBorder _getDefaultShape(BuildContext context) {
+    return RoundedRectangleBorder(
       side: widget.attachmentBorderSide ??
           widget.borderSide ??
           BorderSide(
@@ -718,7 +680,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       onLongPress: () => onLongPress(context),
       child: Material(
         shape: widget.shape ??
-            ContinuousRectangleBorder(
+            RoundedRectangleBorder(
               side: widget.borderSide ??
                   BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark
