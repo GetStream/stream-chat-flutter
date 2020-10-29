@@ -74,7 +74,8 @@ class MessageActionsModal extends StatelessWidget {
                     if (showReactions &&
                         (message.status == MessageSendingStatus.SENT ||
                             message.status == null))
-                      Center(
+                      Align(
+                        alignment: Alignment(-0.3, 0.0),
                         child: ReactionPicker(
                           message: message,
                           messageTheme: messageTheme,
