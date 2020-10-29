@@ -96,6 +96,7 @@ class MessageActionsModal extends StatelessWidget {
                         showUserAvatar: showUserAvatar,
                         showTimestamp: false,
                         translateUserAvatar: false,
+                        showReactionPickerIndicator: true,
                         showSendingIndicator: DisplayWidget.gone,
                         shape: messageShape,
                       ),

@@ -106,6 +106,9 @@ class MessageWidget extends StatefulWidget {
   /// The function called when tapping on a link
   final void Function(String) onLinkTap;
 
+  /// Used in [MessageReactionsModal] and [MessageActionsModal]
+  final bool showReactionPickerIndicator;
+
   final List<Read> readList;
 
   /// If true show the users username next to the timestamp of the message
@@ -131,6 +134,7 @@ class MessageWidget extends StatefulWidget {
     this.borderRadiusGeometry,
     this.attachmentBorderRadiusGeometry,
     this.onMentionTap,
+    this.showReactionPickerIndicator = false,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = DisplayWidget.show,
     this.showReplyIndicator = true,
@@ -251,39 +255,62 @@ class _MessageWidgetState extends State<MessageWidget> {
                             ),
                             portalAnchor: Alignment(-1.0, -1.0),
                             childAnchor: Alignment(1, -1.0),
-                            child: Padding(
-                              padding: widget.showReactions
-                                  ? EdgeInsets.only(
-                                      top: widget.message.reactionCounts
-                                                  ?.isNotEmpty ==
-                                              true
-                                          ? 18
-                                          : 0,
-                                    )
-                                  : EdgeInsets.zero,
-                              child: (widget.message.isDeleted &&
-                                      widget.message.status !=
-                                          MessageSendingStatus.FAILED_DELETE)
-                                  ? Transform(
-                                      alignment: Alignment.center,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Padding(
+                                  padding: widget.showReactions
+                                      ? EdgeInsets.only(
+                                          top: widget.message.reactionCounts
+                                                      ?.isNotEmpty ==
+                                                  true
+                                              ? 18
+                                              : 0,
+                                        )
+                                      : EdgeInsets.zero,
+                                  child: (widget.message.isDeleted &&
+                                          widget.message.status !=
+                                              MessageSendingStatus
+                                                  .FAILED_DELETE)
+                                      ? Transform(
+                                          alignment: Alignment.center,
+                                          transform: Matrix4.rotationY(
+                                              widget.reverse ? pi : 0),
+                                          child: DeletedMessage(
+                                            messageTheme: widget.messageTheme,
+                                          ),
+                                        )
+                                      : Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            ..._parseAttachments(context),
+                                            if (widget.message.text
+                                                .trim()
+                                                .isNotEmpty)
+                                              _buildTextBubble(context),
+                                          ],
+                                        ),
+                                ),
+                                if (widget.showReactionPickerIndicator)
+                                  Positioned(
+                                    right: 0,
+                                    top: -6,
+                                    child: Transform(
                                       transform: Matrix4.rotationY(
                                           widget.reverse ? pi : 0),
-                                      child: DeletedMessage(
-                                        messageTheme: widget.messageTheme,
+                                      child: CustomPaint(
+                                        painter: ReactionBubblePainter(
+                                          widget.messageTheme
+                                              .reactionsBackgroundColor,
+                                          widget.messageTheme
+                                              .reactionsBorderColor,
+                                        ),
                                       ),
-                                    )
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        ..._parseAttachments(context),
-                                        if (widget.message.text
-                                            .trim()
-                                            .isNotEmpty)
-                                          _buildTextBubble(context),
-                                      ],
                                     ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),

@@ -89,6 +89,7 @@ class MessageReactionsModal extends StatelessWidget {
                         translateUserAvatar: false,
                         showSendingIndicator: DisplayWidget.gone,
                         shape: messageShape,
+                        showReactionPickerIndicator: true,
                       ),
                     ),
                     SizedBox(
