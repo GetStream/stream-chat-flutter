@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         run: |
           cd example/ios
           bundle install
-      - uses: subosito/flutter-action@v1.3.2
+      - uses: subosito/flutter-action@v1.4.0
         with:
           channel: 'stable'
       - name: Install firebase-tools
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: '12.x'
-      - uses: subosito/flutter-action@v1.3.2
+      - uses: subosito/flutter-action@v1.4.0
         with:
           channel: 'stable'
       - run: |
