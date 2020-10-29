@@ -229,7 +229,7 @@ class MessageInputState extends State<MessageInput> {
               _sendAsDm = val;
             },
           ),
-          activeColor: Color(0xFF006CFF),
+          activeColor: StreamChatTheme.of(context).accentColor,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
