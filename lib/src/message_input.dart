@@ -664,22 +664,24 @@ class MessageInputState extends State<MessageInput> {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text('Photo from camera'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.image, true);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.videocam),
-                title: Text('Video from camera'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.video, true);
-                  Navigator.pop(context);
-                },
-              ),
+              if (!kIsWeb)
+                ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text('Photo from camera'),
+                  onTap: () {
+                    pickFile(DefaultAttachmentTypes.image, true);
+                    Navigator.pop(context);
+                  },
+                ),
+              if (!kIsWeb)
+                ListTile(
+                  leading: Icon(Icons.videocam),
+                  title: Text('Video from camera'),
+                  onTap: () {
+                    pickFile(DefaultAttachmentTypes.video, true);
+                    Navigator.pop(context);
+                  },
+                ),
               ListTile(
                 leading: Icon(Icons.insert_drive_file),
                 title: Text('Upload a file'),
@@ -943,34 +945,36 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
-      if (visible) {
-        if (_commandsOverlay != null) {
-          if (textEditingController.text.startsWith('/')) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _commandsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_commandsOverlay);
-            });
+    if (!kIsWeb) {
+      _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
+        if (visible) {
+          if (_commandsOverlay != null) {
+            if (textEditingController.text.startsWith('/')) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _commandsOverlay = _buildCommandsOverlayEntry();
+                Overlay.of(context).insert(_commandsOverlay);
+              });
+            }
           }
-        }
 
-        if (_mentionsOverlay != null) {
-          if (textEditingController.text.contains('@')) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _mentionsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_mentionsOverlay);
-            });
+          if (_mentionsOverlay != null) {
+            if (textEditingController.text.contains('@')) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _mentionsOverlay = _buildCommandsOverlayEntry();
+                Overlay.of(context).insert(_mentionsOverlay);
+              });
+            }
+          }
+        } else {
+          if (_commandsOverlay != null) {
+            _commandsOverlay.remove();
+          }
+          if (_mentionsOverlay != null) {
+            _mentionsOverlay.remove();
           }
         }
-      } else {
-        if (_commandsOverlay != null) {
-          _commandsOverlay.remove();
-        }
-        if (_mentionsOverlay != null) {
-          _mentionsOverlay.remove();
-        }
-      }
-    });
+      });
+    }
 
     textEditingController =
         widget.textEditingController ?? TextEditingController();
@@ -997,7 +1001,7 @@ class MessageInputState extends State<MessageInput> {
   void dispose() {
     _commandsOverlay?.remove();
     _mentionsOverlay?.remove();
-    _keyboardListener.cancel();
+    _keyboardListener?.cancel();
     super.dispose();
   }
 
