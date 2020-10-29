@@ -301,6 +301,7 @@ class MessageInputState extends State<MessageInput> {
                   enabled: _inputEnabled,
                   minLines: null,
                   maxLines: null,
+                  expands: true,
                   onSubmitted: (_) {
                     sendMessage();
                   },
@@ -513,6 +514,11 @@ class MessageInputState extends State<MessageInput> {
                   ...commands
                       .map(
                         (c) => ListTile(
+                          leading: c.name == 'giphy' ? CircleAvatar(
+                            backgroundColor: Colors.black,
+                            child: Image.asset('images/giphy_icon.png'),
+                            maxRadius: 12.0,
+                          ) : null,
                           title: Text.rich(
                             TextSpan(
                               text: '${c.name.capitalize()}',

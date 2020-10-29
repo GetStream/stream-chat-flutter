@@ -32,6 +32,8 @@ dependencies:
   clipboard: ^0.1.2+8
 
 flutter:
+  assets:
+    - images/giphy_icon.png
   fonts:
    - family: stream-icons
      fonts:
