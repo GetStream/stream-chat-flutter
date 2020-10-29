@@ -34,6 +34,8 @@ dependencies:
   widgets_visibility_provider: ^2.0.2
 
 flutter:
+  assets:
+    - images/giphy_icon.png
   fonts:
    - family: stream-icons
      fonts:
