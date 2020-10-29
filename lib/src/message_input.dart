@@ -516,7 +516,12 @@ class MessageInputState extends State<MessageInput> {
                           leading: c.name == 'giphy'
                               ? CircleAvatar(
                                   backgroundColor: Colors.black,
-                                  child: Image.asset('images/giphy_icon.png'),
+                                  child: Image.asset(
+                                    'images/giphy_icon.png',
+                                    package: 'stream_chat_flutter',
+                                    width: 16.0,
+                                    height: 16.0,
+                                  ),
                                   maxRadius: 12.0,
                                 )
                               : null,
