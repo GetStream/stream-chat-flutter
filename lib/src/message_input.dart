@@ -814,7 +814,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadImage(PlatformFile file, Channel channel) async {
-    final filename = file.name;
+    final filename = file.name ?? file.path?.split('/')?.last;
     final bytes = file.bytes;
     final res = await channel.sendImage(
       MultipartFile.fromBytes(
@@ -827,7 +827,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadFile(PlatformFile file, Channel channel) async {
-    final filename = file.name;
+    final filename = file.name ?? file.path?.split('/')?.last;
     final bytes = file.bytes;
     final res = await channel.sendFile(
       MultipartFile.fromBytes(
