@@ -514,7 +514,7 @@ class MessageInputState extends State<MessageInput> {
                   ...commands
                       .map(
                         (c) => ListTile(
-                          leading: c.name == 'giphy' ? CircleAvatar(
+                          leading: c.name == '/giphy' ? CircleAvatar(
                             backgroundColor: Colors.black,
                             child: Image.asset('images/giphy_icon.png'),
                             maxRadius: 12.0,
