@@ -58,7 +58,7 @@ class MessageActionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.1),
               ),
             ),
           ),

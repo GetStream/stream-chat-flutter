@@ -78,6 +78,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return AppBar(
+      brightness: Theme.of(context).brightness,
       elevation: 1,
       leading: showBackButton
           ? StreamBackButton(onPressed: onBackPressed)
