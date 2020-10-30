@@ -40,12 +40,9 @@ class MessageReactionsModal extends StatelessWidget {
     var user = StreamChat.of(context).user;
 
     var roughMaxSize = 2 * size.width / 3;
-    var roughSentenceSize = message.text.length * messageTheme.messageText.fontSize * 1.2;
+    var roughSentenceSize =
+        message.text.length * messageTheme.messageText.fontSize * 1.2;
     var divFactor = roughSentenceSize / roughMaxSize;
-
-    print(roughMaxSize);
-    print(roughSentenceSize);
-    print(divFactor);
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -77,7 +74,11 @@ class MessageReactionsModal extends StatelessWidget {
                         (message.status == MessageSendingStatus.SENT ||
                             message.status == null))
                       Align(
-                        alignment: Alignment(user.id == message.user.id ? (divFactor > 1.0 ? 0.0 : (1.0 - divFactor)) : (divFactor > 1.0 ? 0.0 : -(1.0 - divFactor)), 0.0),
+                        alignment: Alignment(
+                            user.id == message.user.id
+                                ? (divFactor > 1.0 ? 0.0 : (1.0 - divFactor))
+                                : (divFactor > 1.0 ? 0.0 : -(1.0 - divFactor)),
+                            0.0),
                         child: ReactionPicker(
                           message: message,
                           messageTheme: messageTheme,
@@ -154,10 +155,10 @@ class MessageReactionsModal extends StatelessWidget {
                     alignment: WrapAlignment.start,
                     children: message.latestReactions
                         .map((e) => _buildReaction(
-                      e,
-                      currentUser,
-                      context,
-                    ))
+                              e,
+                              currentUser,
+                              context,
+                            ))
                         .toList(),
                   ),
                 ),
@@ -170,10 +171,10 @@ class MessageReactionsModal extends StatelessWidget {
   }
 
   Widget _buildReaction(
-      Reaction reaction,
-      User currentUser,
-      BuildContext context,
-      ) {
+    Reaction reaction,
+    User currentUser,
+    BuildContext context,
+  ) {
     final isCurrentUser = reaction.user.id == currentUser.id;
     return ConstrainedBox(
       constraints: BoxConstraints.loose(Size(

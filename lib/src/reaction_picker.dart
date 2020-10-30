@@ -28,37 +28,37 @@ class ReactionPicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: reactionIcons.map((reactionIcon) {
-              final ownReactionIndex = message.ownReactions?.indexWhere(
-                      (reaction) => reaction.type == reactionIcon.type) ??
-                  -1;
-              return IconButton(
-                iconSize: 24,
-                icon: Icon(
-                  reactionIcon.iconData,
-                  color: ownReactionIndex != -1
-                      ? StreamChatTheme.of(context).accentColor
-                      : Theme.of(context).iconTheme.color.withOpacity(.5),
-                ),
-                onPressed: () {
-                  if (ownReactionIndex != -1) {
-                    removeReaction(
-                      context,
-                      message.ownReactions[ownReactionIndex],
-                    );
-                  } else {
-                    sendReaction(
-                      context,
-                      reactionIcon.type,
-                    );
-                  }
-                },
-              );
-            }).toList(),
-          ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: reactionIcons.map((reactionIcon) {
+          final ownReactionIndex = message.ownReactions?.indexWhere(
+                  (reaction) => reaction.type == reactionIcon.type) ??
+              -1;
+          return IconButton(
+            iconSize: 24,
+            icon: Icon(
+              reactionIcon.iconData,
+              color: ownReactionIndex != -1
+                  ? StreamChatTheme.of(context).accentColor
+                  : Theme.of(context).iconTheme.color.withOpacity(.5),
+            ),
+            onPressed: () {
+              if (ownReactionIndex != -1) {
+                removeReaction(
+                  context,
+                  message.ownReactions[ownReactionIndex],
+                );
+              } else {
+                sendReaction(
+                  context,
+                  reactionIcon.type,
+                );
+              }
+            },
+          );
+        }).toList(),
+      ),
     );
   }
 
