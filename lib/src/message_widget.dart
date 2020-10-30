@@ -175,7 +175,7 @@ class MessageWidget extends StatefulWidget {
           'giphy': (context, message, attachment) {
             return GiphyAttachment(
               attachment: attachment,
-              messageTheme: messageTheme,
+              messageTheme: messageTheme.copyWith(messageBackgroundColor: Colors.white),
               message: message,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,
