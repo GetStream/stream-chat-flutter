@@ -66,12 +66,16 @@ class MessageReactionsModal extends StatelessWidget {
                         (message.status == MessageSendingStatus.SENT ||
                             message.status == null))
                       Align(
-                        alignment: Alignment(-0.3, 0.0),
-                        child: ReactionPicker(
-                          message: message,
-                          messageTheme: messageTheme,
-                        ),
-                      ),
+                          alignment: Alignment(-0.3, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ReactionPicker(
+                                message: message,
+                                messageTheme: messageTheme,
+                              ),
+                            ],
+                          )),
                     IgnorePointer(
                       child: MessageWidget(
                         key: Key('MessageWidget'),
