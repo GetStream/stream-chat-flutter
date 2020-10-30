@@ -20,6 +20,7 @@ class ReactionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var user = StreamChat.of(context).user;
     final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     return Material(
       color: messageTheme.reactionsBackgroundColor,
@@ -29,7 +30,7 @@ class ReactionPicker extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: user.id == message.user.id ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: reactionIcons.map((reactionIcon) {
           final ownReactionIndex = message.ownReactions?.indexWhere(
