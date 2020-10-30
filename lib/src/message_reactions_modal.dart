@@ -17,6 +17,7 @@ class MessageReactionsModal extends StatelessWidget {
   final MessageTheme messageTheme;
   final bool reverse;
   final bool showReactions;
+  final DisplayWidget showUserAvatar;
   final ShapeBorder messageShape;
   final void Function(User) onUserAvatarTap;
 
@@ -29,12 +30,21 @@ class MessageReactionsModal extends StatelessWidget {
     this.editMessageInputBuilder,
     this.messageShape,
     this.reverse = false,
+    this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ownId = StreamChat.of(context).user.id;
+    var size = MediaQuery.of(context).size;
+    var user = StreamChat.of(context).user;
+
+    var roughMaxSize = 2 * size.width / 3;
+    var roughSentenceSize =
+        message.text.length * messageTheme.messageText.fontSize * 1.2;
+    var divFactor =
+        roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize);
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -49,7 +59,7 @@ class MessageReactionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.1),
               ),
             ),
           ),
@@ -64,7 +74,12 @@ class MessageReactionsModal extends StatelessWidget {
                     if (showReactions &&
                         (message.status == MessageSendingStatus.SENT ||
                             message.status == null))
-                      Center(
+                      Align(
+                        alignment: Alignment(
+                            user.id == message.user.id
+                                ? (divFactor > 1.0 ? 0.0 : (1.0 - divFactor))
+                                : (divFactor > 1.0 ? 0.0 : -(1.0 - divFactor)),
+                            0.0),
                         child: ReactionPicker(
                           message: message,
                           messageTheme: messageTheme,
@@ -82,13 +97,13 @@ class MessageReactionsModal extends StatelessWidget {
                         messageTheme: messageTheme,
                         showReactions: false,
                         showUsername: false,
-                        showUserAvatar: message.user.id == ownId
-                            ? DisplayWidget.gone
-                            : DisplayWidget.show,
+                        showUserAvatar: showUserAvatar,
                         showReplyIndicator: false,
                         showTimestamp: false,
+                        translateUserAvatar: false,
                         showSendingIndicator: DisplayWidget.gone,
                         shape: messageShape,
+                        showReactionPickerIndicator: true,
                       ),
                     ),
                     SizedBox(
