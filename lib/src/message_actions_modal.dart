@@ -45,6 +45,15 @@ class MessageActionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    var user = StreamChat.of(context).user;
+
+    var roughMaxSize = 2 * size.width / 3;
+    var roughSentenceSize =
+        message.text.length * messageTheme.messageText.fontSize * 1.2;
+    var divFactor =
+        roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize);
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -75,7 +84,11 @@ class MessageActionsModal extends StatelessWidget {
                         (message.status == MessageSendingStatus.SENT ||
                             message.status == null))
                       Align(
-                        alignment: Alignment(-0.3, 0.0),
+                        alignment: Alignment(
+                            user.id == message.user.id
+                                ? (divFactor > 1.0 ? 0.0 : (1.0 - divFactor))
+                                : (divFactor > 1.0 ? 0.0 : -(1.0 - divFactor)),
+                            0.0),
                         child: ReactionPicker(
                           message: message,
                           messageTheme: messageTheme,

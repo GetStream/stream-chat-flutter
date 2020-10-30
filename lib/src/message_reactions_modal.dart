@@ -42,7 +42,8 @@ class MessageReactionsModal extends StatelessWidget {
     var roughMaxSize = 2 * size.width / 3;
     var roughSentenceSize =
         message.text.length * messageTheme.messageText.fontSize * 1.2;
-    var divFactor = roughSentenceSize / roughMaxSize;
+    var divFactor =
+        roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize);
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
