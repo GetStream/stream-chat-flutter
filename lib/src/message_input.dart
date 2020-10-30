@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:http_parser/http_parser.dart';
@@ -17,7 +17,7 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
 
-typedef FileUploader = Future<String> Function(File, Channel);
+typedef FileUploader = Future<String> Function(PlatformFile, Channel);
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   _SendingAttachment,
@@ -223,10 +223,14 @@ class MessageInputState extends State<MessageInput> {
     return Row(
       children: [
         Checkbox(
-            value: _sendAsDm,
-            onChanged: (val) => setState(() {
-                  _sendAsDm = val;
-                })),
+          value: _sendAsDm,
+          onChanged: (val) => setState(
+            () {
+              _sendAsDm = val;
+            },
+          ),
+          activeColor: StreamChatTheme.of(context).accentColor,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text('Send also as direct message'),
@@ -278,21 +282,21 @@ class MessageInputState extends State<MessageInput> {
   Expanded _buildTextInput(BuildContext context) {
     return Expanded(
       child: Center(
-        child: LimitedBox(
-          maxHeight: widget.maxHeight,
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32.0),
-              border: Border.all(
-                color: Colors.grey,
-              ),
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32.0),
+            border: Border.all(
+              color: Colors.grey,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildAttachments(),
-                TextField(
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildAttachments(),
+              LimitedBox(
+                maxHeight: widget.maxHeight,
+                child: TextField(
                   key: Key('messageInputText'),
                   enabled: _inputEnabled,
                   minLines: null,
@@ -360,7 +364,10 @@ class MessageInputState extends State<MessageInput> {
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    hintText: 'Write a message',
+                    hintText:
+                        (_commandEnabled && _chosenCommand.name == 'giphy')
+                            ? 'Search GIFs'
+                            : 'Write a message',
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
@@ -404,8 +411,8 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   textCapitalization: TextCapitalization.sentences,
                 ),
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),
@@ -467,6 +474,9 @@ class MessageInputState extends State<MessageInput> {
           padding: const EdgeInsets.all(8.0),
           child: Card(
             elevation: 2.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
             color: StreamChatTheme.of(context).primaryColor,
             clipBehavior: Clip.antiAlias,
             child: Container(
@@ -503,6 +513,18 @@ class MessageInputState extends State<MessageInput> {
                   ...commands
                       .map(
                         (c) => ListTile(
+                          leading: c.name == 'giphy'
+                              ? CircleAvatar(
+                                  backgroundColor: Colors.black,
+                                  child: Image.asset(
+                                    'images/giphy_icon.png',
+                                    package: 'stream_chat_flutter',
+                                    width: 16.0,
+                                    height: 16.0,
+                                  ),
+                                  maxRadius: 12.0,
+                                )
+                              : null,
                           title: Text.rich(
                             TextSpan(
                               text: '${c.name.capitalize()}',
@@ -525,7 +547,7 @@ class MessageInputState extends State<MessageInput> {
                               color: Colors.white,
                               size: 12.5,
                             ),
-                            maxRadius: 15,
+                            maxRadius: 12,
                           ),
                           //subtitle: Text(c.description),
                           onTap: () {
@@ -576,6 +598,9 @@ class MessageInputState extends State<MessageInput> {
           margin: EdgeInsets.all(8.0),
           elevation: 2.0,
           color: StreamChatTheme.of(context).primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
           clipBehavior: Clip.antiAlias,
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
@@ -605,9 +630,9 @@ class MessageInputState extends State<MessageInput> {
                                 '${m.user.name}',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              subtitle: Text('${m.userId}'),
+                              subtitle: Text('@${m.userId}'),
                               trailing: Icon(
-                                Icons.alternate_email,
+                                StreamIcons.at_mention,
                                 color: StreamChatTheme.of(context).accentColor,
                               ),
                               onTap: () {
@@ -752,8 +777,8 @@ class MessageInputState extends State<MessageInput> {
       case 'image':
       case 'giphy':
         return attachment.file != null
-            ? Image.file(
-                attachment.file,
+            ? Image.memory(
+                attachment.file.bytes,
                 fit: BoxFit.cover,
               )
             : Image.network(
@@ -782,7 +807,10 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.only(
               left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-          child: Icon(StreamIcons.lightning),
+          child: Icon(
+            StreamIcons.lightning,
+            color: Color(0xFF000000).withAlpha(128),
+          ),
         ),
         onTap: () {
           if (_commandsOverlay == null) {
@@ -804,7 +832,10 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding:
               EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
-          child: Icon(StreamIcons.attach),
+          child: Icon(
+            StreamIcons.attach,
+            color: Color(0xFF000000).withAlpha(128),
+          ),
         ),
         onTap: () {
           showAttachmentModal();
@@ -857,22 +888,24 @@ class MessageInputState extends State<MessageInput> {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text('Photo from camera'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.image, true);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.videocam),
-                title: Text('Video from camera'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.video, true);
-                  Navigator.pop(context);
-                },
-              ),
+              if (!kIsWeb)
+                ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text('Photo from camera'),
+                  onTap: () {
+                    pickFile(DefaultAttachmentTypes.image, true);
+                    Navigator.pop(context);
+                  },
+                ),
+              if (!kIsWeb)
+                ListTile(
+                  leading: Icon(Icons.videocam),
+                  title: Text('Video from camera'),
+                  onTap: () {
+                    pickFile(DefaultAttachmentTypes.video, true);
+                    Navigator.pop(context);
+                  },
+                ),
               ListTile(
                 leading: Icon(Icons.insert_drive_file),
                 title: Text('Upload a file'),
@@ -904,7 +937,7 @@ class MessageInputState extends State<MessageInput> {
       _inputEnabled = false;
     });
 
-    File file;
+    PlatformFile file;
     String attachmentType;
 
     if (fileType == DefaultAttachmentTypes.image) {
@@ -922,7 +955,11 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.video) {
         pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
       }
-      file = File(pickedFile.path);
+      final bytes = await pickedFile.readAsBytes();
+      file = PlatformFile(
+        path: pickedFile.path,
+        bytes: bytes,
+      );
     } else {
       FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
@@ -932,9 +969,13 @@ class MessageInputState extends State<MessageInput> {
       } else if (fileType == DefaultAttachmentTypes.file) {
         type = FileType.any;
       }
-      final res = await FilePicker.platform.pickFiles(type: type);
+      final res = await FilePicker.platform.pickFiles(
+        type: type,
+        withData: true,
+      );
       if (res?.files?.isNotEmpty == true) {
-        file = File(res.files.first.path);
+        file = res.files.single;
+        print('file.bytes?.length: ${file.bytes?.length}');
       }
     }
 
@@ -947,11 +988,10 @@ class MessageInputState extends State<MessageInput> {
     }
 
     final channel = StreamChannel.of(context).channel;
-
     final attachment = _SendingAttachment(
       file: file,
       attachment: Attachment(
-        localUri: file.uri,
+        localUri: file.path != null ? Uri.parse(file.path) : null,
         type: attachmentType,
       ),
     );
@@ -978,7 +1018,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadAttachment(
-    File file,
+    PlatformFile file,
     DefaultAttachmentTypes type,
     Channel channel,
   ) async {
@@ -999,9 +1039,9 @@ class MessageInputState extends State<MessageInput> {
     return url;
   }
 
-  Future<String> _uploadImage(File file, Channel channel) async {
-    final filename = file.path.split('/').last;
-    final bytes = await file.readAsBytes();
+  Future<String> _uploadImage(PlatformFile file, Channel channel) async {
+    final filename = file.name ?? file.path?.split('/')?.last;
+    final bytes = file.bytes;
     final res = await channel.sendImage(
       MultipartFile.fromBytes(
         bytes,
@@ -1012,9 +1052,9 @@ class MessageInputState extends State<MessageInput> {
     return res.file;
   }
 
-  Future<String> _uploadFile(File file, Channel channel) async {
-    final filename = file.path.split('/').last;
-    final bytes = await file.readAsBytes();
+  Future<String> _uploadFile(PlatformFile file, Channel channel) async {
+    final filename = file.name ?? file.path?.split('/')?.last;
+    final bytes = file.bytes;
     final res = await channel.sendFile(
       MultipartFile.fromBytes(
         bytes,
@@ -1037,7 +1077,7 @@ class MessageInputState extends State<MessageInput> {
             sendMessage();
           },
           child: Icon(
-            StreamIcons.send_message,
+            _getIdleSendIcon(),
             color: Colors.grey,
           ),
         )),
@@ -1056,19 +1096,40 @@ class MessageInputState extends State<MessageInput> {
             onTap: () {
               sendMessage();
             },
-            child: Transform.rotate(
-              angle: widget.editMessage == null ? -pi / 2 : 0,
-              child: Icon(
-                widget.editMessage == null
-                    ? StreamIcons.send_message
-                    : StreamIcons.check_send,
-                color: StreamChatTheme.of(context).accentColor,
-              ),
-            ),
+            child: _getSendIcon(),
           ),
         ),
       ),
     );
+  }
+
+  IconData _getIdleSendIcon() {
+    if (_commandEnabled) {
+      return StreamIcons.search;
+    } else {
+      return StreamIcons.send_message;
+    }
+  }
+
+  Widget _getSendIcon() {
+    if (widget.editMessage != null) {
+      return Icon(
+        StreamIcons.check_send,
+        color: StreamChatTheme.of(context).accentColor,
+      );
+    } else if (_commandEnabled) {
+      return Icon(
+        StreamIcons.search,
+        color: StreamChatTheme.of(context).accentColor,
+      );
+    } else {
+      return Transform.rotate(
+          angle: -pi / 2,
+          child: Icon(
+            StreamIcons.send_message,
+            color: StreamChatTheme.of(context).accentColor,
+          ));
+    }
   }
 
   /// Sends the current message
@@ -1157,34 +1218,36 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
-      if (visible) {
-        if (_commandsOverlay != null) {
-          if (textEditingController.text.startsWith('/')) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _commandsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_commandsOverlay);
-            });
+    if (!kIsWeb) {
+      _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
+        if (visible) {
+          if (_commandsOverlay != null) {
+            if (textEditingController.text.startsWith('/')) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _commandsOverlay = _buildCommandsOverlayEntry();
+                Overlay.of(context).insert(_commandsOverlay);
+              });
+            }
           }
-        }
 
-        if (_mentionsOverlay != null) {
-          if (textEditingController.text.contains('@')) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _mentionsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_mentionsOverlay);
-            });
+          if (_mentionsOverlay != null) {
+            if (textEditingController.text.contains('@')) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _mentionsOverlay = _buildCommandsOverlayEntry();
+                Overlay.of(context).insert(_mentionsOverlay);
+              });
+            }
+          }
+        } else {
+          if (_commandsOverlay != null) {
+            _commandsOverlay.remove();
+          }
+          if (_mentionsOverlay != null) {
+            _mentionsOverlay.remove();
           }
         }
-      } else {
-        if (_commandsOverlay != null) {
-          _commandsOverlay.remove();
-        }
-        if (_mentionsOverlay != null) {
-          _mentionsOverlay.remove();
-        }
-      }
-    });
+      });
+    }
 
     textEditingController =
         widget.textEditingController ?? TextEditingController();
@@ -1211,7 +1274,7 @@ class MessageInputState extends State<MessageInput> {
   void dispose() {
     _commandsOverlay?.remove();
     _mentionsOverlay?.remove();
-    _keyboardListener.cancel();
+    _keyboardListener?.cancel();
     super.dispose();
   }
 
@@ -1227,7 +1290,7 @@ class MessageInputState extends State<MessageInput> {
 }
 
 class _SendingAttachment {
-  File file;
+  PlatformFile file;
   Attachment attachment;
   bool uploaded;
 
