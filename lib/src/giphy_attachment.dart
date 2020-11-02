@@ -31,66 +31,63 @@ class GiphyAttachment extends StatelessWidget {
       );
     }
 
-    return Container(
-      color: Colors.white,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Stack(
-            children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) {
-                    return FullScreenImage(
-                      url: attachment.imageUrl ??
-                          attachment.assetUrl ??
-                          attachment.thumbUrl,
-                    );
-                  }));
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Stack(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) {
+                  return FullScreenImage(
+                    url: attachment.imageUrl ??
+                        attachment.assetUrl ??
+                        attachment.thumbUrl,
+                  );
+                }));
+              },
+              child: CachedNetworkImage(
+                height: size?.height,
+                width: size?.width,
+                placeholder: (_, __) {
+                  return Container(
+                    width: size?.width,
+                    height: size?.height,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 },
-                child: CachedNetworkImage(
-                  height: size?.height,
-                  width: size?.width,
-                  placeholder: (_, __) {
-                    return Container(
-                      width: size?.width,
-                      height: size?.height,
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  },
-                  imageUrl: attachment.thumbUrl ??
-                      attachment.imageUrl ??
-                      attachment.assetUrl,
-                  errorWidget: (context, url, error) => AttachmentError(
-                    attachment: attachment,
-                    size: size,
-                  ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ],
-          ),
-          if (attachment.title != null)
-            Container(
-              alignment: Alignment.bottomCenter,
-              child: Material(
-                color: Colors.white,
-                child: AttachmentTitle(
-                  messageTheme: messageTheme,
+                imageUrl: attachment.thumbUrl ??
+                    attachment.imageUrl ??
+                    attachment.assetUrl,
+                errorWidget: (context, url, error) => AttachmentError(
                   attachment: attachment,
+                  size: size,
                 ),
+                fit: BoxFit.cover,
               ),
             ),
-          if (attachment.actions != null)
-            AttachmentActions(
-              attachment: attachment,
-              message: message,
+          ],
+        ),
+        if (attachment.title != null)
+          Container(
+            alignment: Alignment.bottomCenter,
+            child: Material(
+              color: Colors.white,
+              child: AttachmentTitle(
+                messageTheme: messageTheme,
+                attachment: attachment,
+              ),
             ),
-        ],
-      ),
+          ),
+        if (attachment.actions != null)
+          AttachmentActions(
+            attachment: attachment,
+            message: message,
+          ),
+      ],
     );
   }
 }
