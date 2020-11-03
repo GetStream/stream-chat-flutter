@@ -276,7 +276,7 @@ class _MessageListViewState extends State<MessageListView> {
                                   'currentPositionData.endPosition: ${currentPositionData.endPosition}');
                               return true;
                             },
-                            data: i,
+                            data: nextMessage,
                             child: widget.dateDividerBuilder != null
                                 ? widget.dateDividerBuilder(
                                     nextMessage.createdAt.toLocal())
