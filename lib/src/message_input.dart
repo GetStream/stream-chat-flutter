@@ -326,57 +326,11 @@ class MessageInputState extends State<MessageInput> {
                     _emojiOverlay?.remove();
                     _emojiOverlay = null;
 
-                    if (s.startsWith('/')) {
-                      var matchedCommandsList = StreamChannel.of(context)
-                          .channel
-                          .config
-                          .commands
-                          .where((element) => element.name == s.substring(1))
-                          .toList();
+                    _checkCommands(s, context);
 
-                      if (matchedCommandsList.length == 1) {
-                        _chosenCommand = matchedCommandsList[0];
-                        textEditingController.clear();
-                        _messageIsPresent = false;
-                        setState(() {
-                          _commandEnabled = true;
-                        });
-                        _commandsOverlay.remove();
-                        _commandsOverlay = null;
-                      } else {
-                        _commandsOverlay = _buildCommandsOverlayEntry();
-                        Overlay.of(context).insert(_commandsOverlay);
-                      }
-                    }
+                    _checkMentions(s, context);
 
-                    if (textEditingController.selection.isCollapsed &&
-                        (s[textEditingController.selection.start - 1] == '@' ||
-                            textEditingController.text
-                                .substring(
-                                    0, textEditingController.selection.start)
-                                .split(' ')
-                                .last
-                                .contains('@'))) {
-                      _mentionsOverlay = _buildMentionsOverlayEntry();
-                      Overlay.of(context).insert(_mentionsOverlay);
-                    }
-
-                    if (textEditingController.selection.isCollapsed &&
-                        (s[textEditingController.selection.start - 1] == ':' ||
-                            textEditingController.text
-                                .substring(
-                                  0,
-                                  textEditingController.selection.start,
-                                )
-                                .split(' ')
-                                .last
-                                .contains(':'))) {
-                      _emojiOverlay = _buildEmojiOverlay();
-
-                      if (_emojiOverlay != null) {
-                        Overlay.of(context).insert(_emojiOverlay);
-                      }
-                    }
+                    _checkEmoji(s, context);
                   },
                   onTap: () {
                     setState(() {
@@ -440,6 +394,74 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+  }
+
+  void _checkEmoji(String s, BuildContext context) {
+    if (textEditingController.selection.isCollapsed &&
+        (s[textEditingController.selection.start - 1] == ':' ||
+            textEditingController.text
+                .substring(
+                  0,
+                  textEditingController.selection.start,
+                )
+                .split(' ')
+                .last
+                .contains(':'))) {
+      final emojiParser = EmojiParser();
+      final textToSelection = textEditingController.text
+          .substring(0, textEditingController.value.selection.start);
+      final splits = textToSelection.split(':');
+      final query = splits[1]?.toLowerCase();
+      final emoji = emojiParser.get(query);
+
+      if (textToSelection.endsWith(':') && emoji.name != '') {
+        _chooseEmoji(splits, emoji);
+      } else {
+        _emojiOverlay = _buildEmojiOverlay();
+
+        if (_emojiOverlay != null) {
+          Overlay.of(context).insert(_emojiOverlay);
+        }
+      }
+    }
+  }
+
+  void _checkMentions(String s, BuildContext context) {
+    if (textEditingController.selection.isCollapsed &&
+        (s[textEditingController.selection.start - 1] == '@' ||
+            textEditingController.text
+                .substring(0, textEditingController.selection.start)
+                .split(' ')
+                .last
+                .contains('@'))) {
+      _mentionsOverlay = _buildMentionsOverlayEntry();
+      Overlay.of(context).insert(_mentionsOverlay);
+    }
+  }
+
+  void _checkCommands(String s, BuildContext context) {
+    if (s.startsWith('/')) {
+      var matchedCommandsList = StreamChannel.of(context)
+          .channel
+          .config
+          .commands
+          .where((element) => element.name == s.substring(1))
+          .toList();
+
+      if (matchedCommandsList.length == 1) {
+        _chosenCommand = matchedCommandsList[0];
+        textEditingController.clear();
+        _messageIsPresent = false;
+        setState(() {
+          _commandEnabled = true;
+        });
+        _commandsOverlay.remove();
+        _commandsOverlay = null;
+      } else {
+        _commandsOverlay = _buildCommandsOverlayEntry();
+        Overlay.of(context).insert(_commandsOverlay);
+      }
+    }
   }
 
   OverlayEntry _buildCommandsOverlayEntry() {
@@ -721,20 +743,7 @@ class MessageInputState extends State<MessageInput> {
                         ),
                       ),
                       onTap: () {
-                        splits[splits.length - 1] = emoji.code;
-                        final rejoin = splits.join('');
-
-                        textEditingController.value = TextEditingValue(
-                          text: rejoin +
-                              textEditingController.text.substring(
-                                  textEditingController.selection.start),
-                          selection: TextSelection.collapsed(
-                            offset: rejoin.length,
-                          ),
-                        );
-
-                        _emojiOverlay?.remove();
-                        _emojiOverlay = null;
+                        _chooseEmoji(splits, emoji);
                       },
                     ))
               ],
@@ -743,6 +752,23 @@ class MessageInputState extends State<MessageInput> {
         ),
       );
     });
+  }
+
+  void _chooseEmoji(List<String> splits, Emoji emoji) {
+    splits[1] = emoji.code;
+    final rejoin = splits.join('');
+
+    textEditingController.value = TextEditingValue(
+      text: rejoin +
+          textEditingController.text
+              .substring(textEditingController.selection.start),
+      selection: TextSelection.collapsed(
+        offset: rejoin.length,
+      ),
+    );
+
+    _emojiOverlay?.remove();
+    _emojiOverlay = null;
   }
 
   void _setCommand(Command c) {
