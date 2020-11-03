@@ -185,29 +185,54 @@ class _MessageListViewState extends State<MessageListView> {
                   if (i == _messages.length + 1) {
                     if (widget.parentMessage != null) {
                       if (widget.parentMessageBuilder != null) {
-                        return widget.parentMessageBuilder(
-                          context,
-                          widget.parentMessage,
+                        return VisibleNotifierWidget(
+                          child: widget.parentMessageBuilder(
+                            context,
+                            widget.parentMessage,
+                          ),
+                          condition: (
+                            ScrollNotification previousNotification,
+                            PositionData previousPositionData,
+                            ScrollNotification currentNotification,
+                            PositionData currentPositionData,
+                          ) {
+                            return true;
+                          },
+                          data: i,
+                          listener: (a, b, c) {},
                         );
                       } else {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            buildParentMessage(widget.parentMessage),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 32),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                  'Start of thread',
-                                  textAlign: TextAlign.center,
+                        return VisibleNotifierWidget(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              buildParentMessage(widget.parentMessage),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 32),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    'Start of thread',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  color: Theme.of(context)
+                                      .accentColor
+                                      .withAlpha(50),
                                 ),
-                                color:
-                                    Theme.of(context).accentColor.withAlpha(50),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          condition: (
+                            ScrollNotification previousNotification,
+                            PositionData previousPositionData,
+                            ScrollNotification currentNotification,
+                            PositionData currentPositionData,
+                          ) {
+                            return true;
+                          },
+                          data: i,
+                          listener: (a, b, c) {},
                         );
                       }
                     } else {
@@ -220,6 +245,8 @@ class _MessageListViewState extends State<MessageListView> {
                   }
                   final message = _messages[i];
                   final nextMessage = i > 0 ? _messages[i - 1] : null;
+                  final lastMessage =
+                      i < _messages.length - 1 ? _messages[i + 1] : null;
 
                   Widget messageWidget;
 
@@ -256,13 +283,12 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                   }
 
-                  if (nextMessage != null &&
-                      !Jiffy(message.createdAt.toLocal())
-                          .isSame(nextMessage.createdAt.toLocal(), Units.DAY)) {
+                  if (lastMessage != null &&
+                      !Jiffy(message?.createdAt.toLocal()).isSame(
+                          lastMessage?.createdAt.toLocal(), Units.DAY)) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        messageWidget,
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           child: VisibleNotifierWidget(
@@ -272,25 +298,34 @@ class _MessageListViewState extends State<MessageListView> {
                               ScrollNotification currentNotification,
                               PositionData currentPositionData,
                             ) {
-                              print(
-                                  'currentPositionData.endPosition: ${currentPositionData.endPosition}');
                               return true;
                             },
+                            listener: (a, b, c) {},
                             data: i,
                             child: widget.dateDividerBuilder != null
                                 ? widget.dateDividerBuilder(
-                                    nextMessage.createdAt.toLocal())
+                                    message.createdAt.toLocal())
                                 : DateDivider(
-                                    dateTime: nextMessage.createdAt.toLocal(),
+                                    dateTime: message.createdAt.toLocal(),
                                   ),
                           ),
                         ),
+                        messageWidget,
                       ],
                     );
                   }
 
                   return VisibleNotifierWidget(
                     child: messageWidget,
+                    condition: (
+                      ScrollNotification previousNotification,
+                      PositionData previousPositionData,
+                      ScrollNotification currentNotification,
+                      PositionData currentPositionData,
+                    ) {
+                      return true;
+                    },
+                    listener: (a, b, c) {},
                     data: i,
                   );
                 },
