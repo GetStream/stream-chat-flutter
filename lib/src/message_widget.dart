@@ -276,7 +276,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                         ..._parseAttachments(context),
                                         if (widget.message.text
                                             .trim()
-                                            .isNotEmpty)
+                                            .isNotEmpty && widget.message.type != 'giphy')
                                           _buildTextBubble(context),
                                       ],
                                     ),
