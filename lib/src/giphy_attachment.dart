@@ -102,7 +102,7 @@ class GiphyAttachment extends StatelessWidget {
                         Icon(
                           StreamIcons.lightning,
                           color: StreamChatTheme.of(context).accentColor,
-                          size: 15.0,
+                          size: 16.0,
                         ),
                         Text(
                           'GIPHY',
@@ -142,10 +142,12 @@ class GiphyAttachment extends StatelessWidget {
                       shape: CircleBorder(),
                     ),
                     Expanded(
-                      child: Text(
-                        '"${attachment.title}"',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
+                      child: Center(
+                        child: Text(
+                          '"${attachment.title}"',
+                          style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ),
                     ),
@@ -191,6 +193,7 @@ class GiphyAttachment extends StatelessWidget {
                       'Cancel',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: Colors.black.withOpacity(0.5)
                       ),
                     ),
                   ],
