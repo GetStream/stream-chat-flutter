@@ -266,26 +266,36 @@ class GiphyAttachment extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          CachedNetworkImage(
-            height: size?.height,
-            width: size?.width,
-            placeholder: (_, __) {
-              return Container(
-                width: size?.width,
-                height: size?.height,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            },
-            imageUrl: attachment.thumbUrl ??
-                attachment.imageUrl ??
-                attachment.assetUrl,
-            errorWidget: (context, url, error) => AttachmentError(
-              attachment: attachment,
-              size: size,
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(8.0),
+                bottomRight: Radius.circular(0.0),
+                topLeft: Radius.circular(8.0),
+                bottomLeft: Radius.circular(8.0),
+              ),
             ),
-            fit: BoxFit.cover,
+            child: CachedNetworkImage(
+              height: size?.height,
+              width: size?.width,
+              placeholder: (_, __) {
+                return Container(
+                  width: size?.width,
+                  height: size?.height,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              imageUrl: attachment.thumbUrl ??
+                  attachment.imageUrl ??
+                  attachment.assetUrl,
+              errorWidget: (context, url, error) => AttachmentError(
+                attachment: attachment,
+                size: size,
+              ),
+              fit: BoxFit.cover,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
