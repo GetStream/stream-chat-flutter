@@ -131,7 +131,7 @@ class GiphyAttachment extends StatelessWidget {
                       child: IconButton(
                         icon: Icon(
                           StreamIcons.left,
-                          size: 18.0,
+                          size: 24.0,
                         ),
                         onPressed: () {
                           streamChannel.channel.sendAction(message, {
@@ -155,7 +155,7 @@ class GiphyAttachment extends StatelessWidget {
                       child: IconButton(
                         icon: Icon(
                           StreamIcons.right,
-                          size: 18.0,
+                          size: 24.0,
                         ),
                         onPressed: () {
                           streamChannel.channel.sendAction(message, {
