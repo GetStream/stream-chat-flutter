@@ -235,7 +235,7 @@ class GiphyAttachment extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -245,11 +245,14 @@ class GiphyAttachment extends StatelessWidget {
                   size: 16.0,
                 ),
                 SizedBox(
-                  width: 4.0,
+                  width: 8.0,
                 ),
                 Text(
                   'Only visible to you',
-                  style: TextStyle(color: Colors.black.withOpacity(0.5)),
+                  style: TextStyle(
+                    color: Colors.black.withOpacity(0.5),
+                    fontSize: 12.0,
+                  ),
                 ),
               ],
             ),
