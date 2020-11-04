@@ -275,6 +275,7 @@ class GiphyAttachment extends StatelessWidget {
                 bottomLeft: Radius.circular(8.0),
               ),
             ),
+            clipBehavior: Clip.antiAlias,
             child: CachedNetworkImage(
               height: size?.height,
               width: size?.width,
