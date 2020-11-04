@@ -308,15 +308,8 @@ class GiphyAttachment extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
-                  Jiffy(message.createdAt.toLocal()).format('  HH:mm'),
-                  style: TextStyle(
-                    fontSize: 12.0,
-                    color: Colors.black.withOpacity(0.5),
-                  ),
-                )
               ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
             ),
           )
         ],
