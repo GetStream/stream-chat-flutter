@@ -269,10 +269,10 @@ class GiphyAttachment extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
-                topRight: Radius.circular(8.0),
+                topRight: Radius.circular(16.0),
                 bottomRight: Radius.circular(0.0),
-                topLeft: Radius.circular(8.0),
-                bottomLeft: Radius.circular(8.0),
+                topLeft: Radius.circular(16.0),
+                bottomLeft: Radius.circular(16.0),
               ),
             ),
             clipBehavior: Clip.antiAlias,
