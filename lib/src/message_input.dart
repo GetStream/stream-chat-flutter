@@ -235,31 +235,42 @@ class MessageInputState extends State<MessageInput> {
             child: Container(
               height: 16,
               width: 16,
-              child: Material(
+              foregroundDecoration: BoxDecoration(
+                border: _sendAsDm
+                    ? null
+                    : Border.all(
+                        color: Colors.black.withOpacity(.5),
+                        width: 2,
+                      ),
                 borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
-                    ? StreamChatTheme.of(context).accentColor
-                    : Colors.white,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _sendAsDm = !_sendAsDm;
-                    });
-                  },
-                  child: AnimatedCrossFade(
-                    duration: Duration(milliseconds: 300),
-                    reverseDuration: Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    firstChild: Icon(
-                      Icons.check,
-                      size: 16.0,
-                      color: Colors.white,
-                    ),
-                    secondChild: SizedBox(
-                      height: 16,
-                      width: 16,
+              ),
+              child: Center(
+                child: Material(
+                  borderRadius: BorderRadius.circular(3),
+                  color: _sendAsDm
+                      ? StreamChatTheme.of(context).accentColor
+                      : Colors.white,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _sendAsDm = !_sendAsDm;
+                      });
+                    },
+                    child: AnimatedCrossFade(
+                      duration: Duration(milliseconds: 300),
+                      reverseDuration: Duration(milliseconds: 300),
+                      crossFadeState: _sendAsDm
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
+                      firstChild: Icon(
+                        StreamIcons.check,
+                        size: 16.0,
+                        color: Colors.white,
+                      ),
+                      secondChild: SizedBox(
+                        height: 16,
+                        width: 16,
+                      ),
                     ),
                   ),
                 ),
