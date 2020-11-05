@@ -55,76 +55,80 @@ class GiphyAttachment extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return FullScreenImage(
-                        url: attachment.imageUrl ??
-                            attachment.assetUrl ??
-                            attachment.thumbUrl,
-                      );
-                    }));
-                  },
-                  child: CachedNetworkImage(
-                    height: size?.height,
-                    width: size?.width,
-                    placeholder: (_, __) {
-                      return Container(
-                        width: size?.width,
+              Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) {
+                          return FullScreenImage(
+                            url: attachment.imageUrl ??
+                                attachment.assetUrl ??
+                                attachment.thumbUrl,
+                          );
+                        }));
+                      },
+                      child: CachedNetworkImage(
                         height: size?.height,
-                        child: Center(
-                          child: CircularProgressIndicator(),
+                        width: size?.width,
+                        placeholder: (_, __) {
+                          return Container(
+                            width: size?.width,
+                            height: size?.height,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        },
+                        imageUrl: attachment.thumbUrl ??
+                            attachment.imageUrl ??
+                            attachment.assetUrl,
+                        errorWidget: (context, url, error) => AttachmentError(
+                          attachment: attachment,
+                          size: size,
                         ),
-                      );
-                    },
-                    imageUrl: attachment.thumbUrl ??
-                        attachment.imageUrl ??
-                        attachment.assetUrl,
-                    errorWidget: (context, url, error) => AttachmentError(
-                      attachment: attachment,
-                      size: size,
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(16.0),
-                      )),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 8.0,
-                      right: 8.0,
-                      top: 8.0,
-                      bottom: 4.0,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          StreamIcons.lightning,
-                          color: StreamChatTheme.of(context).accentColor,
-                          size: 16.0,
-                        ),
-                        Text(
-                          'GIPHY',
-                          style: TextStyle(
-                            color: StreamChatTheme.of(context).accentColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11.0,
-                          ),
-                        ),
-                      ],
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(16.0),
+                          )),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 8.0,
+                          right: 8.0,
+                          top: 8.0,
+                          bottom: 4.0,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              StreamIcons.lightning,
+                              color: StreamChatTheme.of(context).accentColor,
+                              size: 16.0,
+                            ),
+                            Text(
+                              'GIPHY',
+                              style: TextStyle(
+                                color: StreamChatTheme.of(context).accentColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               if (attachment.title != null)
                 Container(
