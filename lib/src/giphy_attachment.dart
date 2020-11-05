@@ -97,7 +97,7 @@ class GiphyAttachment extends StatelessWidget {
                     top: 0,
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Colors.transparent,
+                          color: Colors.white,
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(16.0),
                           )),
