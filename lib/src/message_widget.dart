@@ -216,8 +216,9 @@ class _MessageWidgetState extends State<MessageWidget> {
         ? widget.messageTheme.avatarTheme.constraints.maxWidth + 16.0
         : 6.0;
 
-    bool isGiphy =
-        widget.message.attachments.any((element) => element.type == 'giphy');
+    final isGiphy =
+        widget.message.attachments?.any((element) => element.type == 'giphy') ==
+            true;
 
     return Portal(
       child: Padding(
