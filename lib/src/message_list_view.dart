@@ -107,8 +107,8 @@ class MessageListView extends StatefulWidget {
     this.onThreadTap,
     this.dateDividerBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
-    this.initialScrollIndex,
-    this.initialAlignment,
+    this.initialScrollIndex = 0,
+    this.initialAlignment = 0,
     this.scrollController,
     this.itemPositionListener,
   }) : super(key: key);
@@ -608,8 +608,6 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   void initState() {
-    super.initState();
-
     _scrollController = widget.scrollController ?? ItemScrollController();
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
@@ -644,6 +642,7 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     _getOnThreadTap();
+    super.initState();
   }
 
   void _getOnThreadTap() {
