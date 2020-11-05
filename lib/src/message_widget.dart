@@ -183,7 +183,9 @@ class MessageWidget extends StatefulWidget {
           'giphy': (context, message, attachment) {
             return GiphyAttachment(
               attachment: attachment,
-              messageTheme: messageTheme,
+              messageTheme: messageTheme.copyWith(
+                messageBackgroundColor: Colors.white,
+              ),
               message: message,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,
@@ -213,6 +215,11 @@ class _MessageWidgetState extends State<MessageWidget> {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
         ? widget.messageTheme.avatarTheme.constraints.maxWidth + 16.0
         : 6.0;
+
+    final isGiphy =
+        widget.message.attachments?.any((element) => element.type == 'giphy') ==
+            true;
+
     return Portal(
       child: Padding(
         padding: widget.padding ?? EdgeInsets.all(8),
@@ -287,8 +294,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           children: <Widget>[
                                             ..._parseAttachments(context),
                                             if (widget.message.text
-                                                .trim()
-                                                .isNotEmpty)
+                                                    .trim()
+                                                    .isNotEmpty &&
+                                                !isGiphy)
                                               _buildTextBubble(context),
                                           ],
                                         ),
@@ -551,12 +559,14 @@ class _MessageWidgetState extends State<MessageWidget> {
             widget.message,
             attachment,
           );
-          return wrapAttachmentWidget(context, attachmentWidget);
+          return wrapAttachmentWidget(context, attachmentWidget,
+              attachment: attachment);
         })?.toList() ??
         [];
   }
 
-  Padding wrapAttachmentWidget(BuildContext context, Widget attachmentWidget) {
+  Padding wrapAttachmentWidget(BuildContext context, Widget attachmentWidget,
+      {Attachment attachment}) {
     return Padding(
       padding: EdgeInsets.only(
         bottom: 4,
@@ -565,7 +575,9 @@ class _MessageWidgetState extends State<MessageWidget> {
         onTap: () => retryMessage(context),
         onLongPress: () => onLongPress(context),
         child: Material(
-          color: _getBackgroundColor(),
+          color: attachment?.type == 'giphy'
+              ? Colors.white
+              : _getBackgroundColor(),
           clipBehavior: Clip.hardEdge,
           shape: widget.attachmentShape ??
               widget.shape ??
