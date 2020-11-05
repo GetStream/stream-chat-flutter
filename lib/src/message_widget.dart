@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
@@ -751,9 +751,8 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildTextBubble(BuildContext context) {
-    final emojiParser = EmojiParser();
     final isOnlyEmoji =
-        widget.message.text.characters.every((c) => emojiParser.hasEmoji(c));
+        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
     Widget child = Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),

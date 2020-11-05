@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
+import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji/flutter_emoji.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:http_parser/http_parser.dart';
@@ -171,7 +170,7 @@ class MessageInputState extends State<MessageInput> {
   bool _typingStarted = false;
   bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay, _emojiOverlay;
-  Fuzzy _emojiFuse;
+  Fuzzy<String> _emojiFuse;
 
   Command _chosenCommand;
   bool _actionsShrunk = false;
@@ -326,7 +325,7 @@ class MessageInputState extends State<MessageInput> {
                     _emojiOverlay?.remove();
                     _emojiOverlay = null;
 
-                    _checkCommands(s, context);
+                    _checkCommands(s.trimLeft(), context);
 
                     _checkMentions(s, context);
 
@@ -398,7 +397,7 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkEmoji(String s, BuildContext context) {
     if (textEditingController.selection.isCollapsed &&
-        (s[textEditingController.selection.start - 1] == ':' ||
+        (s.isNotEmpty && s[textEditingController.selection.start - 1] == ':' ||
             textEditingController.text
                 .substring(
                   0,
@@ -407,14 +406,13 @@ class MessageInputState extends State<MessageInput> {
                 .split(' ')
                 .last
                 .contains(':'))) {
-      final emojiParser = EmojiParser();
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
       final splits = textToSelection.split(':');
       final query = splits[1]?.toLowerCase();
-      final emoji = emojiParser.get(query);
+      final emoji = Emoji.byName(query);
 
-      if (textToSelection.endsWith(':') && emoji.name != '') {
+      if (textToSelection.endsWith(':') && emoji != null) {
         _chooseEmoji(splits, emoji);
       } else {
         _emojiOverlay = _buildEmojiOverlay();
@@ -428,7 +426,7 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkMentions(String s, BuildContext context) {
     if (textEditingController.selection.isCollapsed &&
-        (s[textEditingController.selection.start - 1] == '@' ||
+        (s.isNotEmpty && s[textEditingController.selection.start - 1] == '@' ||
             textEditingController.text
                 .substring(0, textEditingController.selection.start)
                 .split(' ')
@@ -465,7 +463,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   OverlayEntry _buildCommandsOverlayEntry() {
-    final text = textEditingController.text;
+    final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
         .channel
         .config
@@ -678,9 +676,11 @@ class MessageInputState extends State<MessageInput> {
       return null;
     }
 
-    final parser = EmojiParser();
-    final emojis =
-        _emojiFuse.search(query).map((e) => parser.get(e.item)).toList();
+    final emojis = _emojiFuse
+        .search(query)
+        .map((e) => Emoji.byName(e.item))
+        .where((e) => e != null)
+        .toList();
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -736,7 +736,7 @@ class MessageInputState extends State<MessageInput> {
                 ),
                 ...emojis.map((emoji) => ListTile(
                       title: Text(
-                        "${emoji.code} ${emoji.name.replaceAll('_', ' ')}",
+                        "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14.5,
@@ -755,7 +755,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _chooseEmoji(List<String> splits, Emoji emoji) {
-    splits[1] = emoji.code;
+    splits[1] = emoji.char;
     final rejoin = splits.join('');
 
     textEditingController.value = TextEditingValue(
@@ -1324,9 +1324,8 @@ class MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
-    Map<String, dynamic> emojiMap = jsonDecode(EmojiParser.JSON_EMOJI);
 
-    _emojiFuse = Fuzzy<String>(emojiMap.keys.toList(),
+    _emojiFuse = Fuzzy<String>(Emoji.all().map((e) => e.name).toList(),
         options: FuzzyOptions(
           matchAllTokens: true,
           tokenize: true,
@@ -1336,7 +1335,7 @@ class MessageInputState extends State<MessageInput> {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
         if (visible) {
           if (_commandsOverlay != null) {
-            if (textEditingController.text.startsWith('/')) {
+            if (textEditingController.text.trimLeft().startsWith('/')) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _commandsOverlay = _buildCommandsOverlayEntry();
                 Overlay.of(context).insert(_commandsOverlay);
@@ -1354,7 +1353,7 @@ class MessageInputState extends State<MessageInput> {
           }
 
           if (_emojiOverlay != null) {
-            if (textEditingController.text.contains('@')) {
+            if (textEditingController.text.contains(':')) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _emojiOverlay = _buildEmojiOverlay();
                 Overlay.of(context).insert(_emojiOverlay);
