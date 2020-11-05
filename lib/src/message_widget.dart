@@ -293,8 +293,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           children: <Widget>[
                                             ..._parseAttachments(context),
                                             if (widget.message.text
-                                                .trim()
-                                                .isNotEmpty)
+                                                    .trim()
+                                                    .isNotEmpty &&
+                                                !isGiphy)
                                               _buildTextBubble(context),
                                           ],
                                         ),
@@ -314,19 +315,6 @@ class _MessageWidgetState extends State<MessageWidget> {
                                               .reactionsBorderColor,
                                         ),
                                       ),
-                                    )
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        ..._parseAttachments(context),
-                                        if (widget.message.text
-                                                .trim()
-                                                .isNotEmpty &&
-                                            !isGiphy)
-                                          _buildTextBubble(context),
-                                      ],
                                     ),
                                   ),
                               ],

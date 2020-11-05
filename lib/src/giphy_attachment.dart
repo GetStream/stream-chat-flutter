@@ -313,7 +313,7 @@ class GiphyAttachment extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.only(top: 8.0),
             child: Row(
               children: [
                 Row(
