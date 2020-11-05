@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -173,6 +175,8 @@ class MessageInputState extends State<MessageInput> {
   bool _actionsShrunk = false;
   bool _sendAsDm = false;
   bool _openFilePickerSection = false;
+  int _filePickerIndex = 0;
+  Album _selectedAlbum;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -198,8 +202,7 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
               ),
-            if(_openFilePickerSection)
-              _buildFilePickerSection(),
+            if (_openFilePickerSection) _buildFilePickerSection(),
           ],
         ),
       ),
@@ -538,7 +541,144 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildFilePickerSection() {
     return Container(
       height: 200.0,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IconButton(
+                icon: Icon(
+                  StreamIcons.picture,
+                  color: _filePickerIndex == 0
+                      ? StreamChatTheme.of(context).accentColor
+                      : Colors.black.withOpacity(0.5),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _filePickerIndex = 0;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(
+                  StreamIcons.folder,
+                  color: _filePickerIndex == 1
+                      ? StreamChatTheme.of(context).accentColor
+                      : Colors.black.withOpacity(0.5),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _filePickerIndex = 1;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(
+                  StreamIcons.camera,
+                  color: _filePickerIndex == 2
+                      ? StreamChatTheme.of(context).accentColor
+                      : Colors.black.withOpacity(0.5),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _filePickerIndex = 2;
+                  });
+                },
+              ),
+            ],
+          ),
+          Expanded(
+            child: _buildPickerSection(),
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildPickerSection() {
+    switch (_filePickerIndex) {
+      case 0:
+        if (_selectedAlbum != null) {
+          return FutureBuilder<MediaPage>(
+              future: _selectedAlbum.listMedia(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return GridView.builder(
+                  itemCount: snapshot.data.total,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3),
+                  itemBuilder: (context, position) {
+                    return FutureBuilder<File>(
+                        future: snapshot.data.items[position].getFile(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          return InkWell(
+                            onTap: () {
+
+                            },
+                            child: AspectRatio(
+                              child: Image.file(snapshot.data),
+                              aspectRatio: 1.0,
+                            ),
+                          );
+                        });
+                  },
+                );
+              });
+        }
+
+        return FutureBuilder<List<Album>>(
+            future: PhotoGallery.listAlbums(mediumType: MediumType.image),
+            builder: (context, albumData) {
+              if (!albumData.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return GridView.builder(
+                itemCount: albumData.data.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3),
+                itemBuilder: (context, position) {
+                  return FutureBuilder<List<int>>(
+                      future: albumData.data[position].getThumbnail(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        return InkWell(
+                          child: AspectRatio(
+                            child: Image.memory(snapshot.data),
+                            aspectRatio: 1.0,
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _selectedAlbum = albumData.data[position];
+                            });
+                          },
+                        );
+                      });
+                },
+              );
+            });
+        break;
+      case 1:
+        break;
+      case 2:
+        break;
+    }
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
@@ -814,7 +954,7 @@ class MessageInputState extends State<MessageInput> {
           ),
         ),
         onTap: () {
-          if(_openFilePickerSection) {
+          if (_openFilePickerSection) {
             setState(() {
               _openFilePickerSection = false;
             });
@@ -832,7 +972,7 @@ class MessageInputState extends State<MessageInput> {
       _focusNode.unfocus();
     }
 
-    if(!kIsWeb) {
+    if (!kIsWeb) {
       setState(() {
         _openFilePickerSection = true;
       });

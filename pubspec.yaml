@@ -32,6 +32,7 @@ dependencies:
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
   widgets_visibility_provider: ^2.0.2
+  photo_gallery: ^0.3.0
 
 flutter:
   assets:
