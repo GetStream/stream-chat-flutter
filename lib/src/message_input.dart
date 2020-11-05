@@ -172,6 +172,7 @@ class MessageInputState extends State<MessageInput> {
   Command _chosenCommand;
   bool _actionsShrunk = false;
   bool _sendAsDm = false;
+  bool _openFilePickerSection = false;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -197,6 +198,8 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
               ),
+            if(_openFilePickerSection)
+              _buildFilePickerSection(),
           ],
         ),
       ),
@@ -420,40 +423,6 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Positioned _buildBorder(BuildContext context) {
-    return Positioned.fill(
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          gradient: _getGradient(context),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: StreamChatTheme.of(context)
-                .channelTheme
-                .inputBackground
-                .withAlpha(255),
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: StreamChatTheme.of(context).channelTheme.inputBackground,
-              borderRadius: BorderRadius.circular(10.0),
-              border: Border.all(
-                  color: _typingStarted
-                      ? Colors.transparent
-                      : Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(.2)
-                          : Colors.black.withOpacity(.2)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   OverlayEntry _buildCommandsOverlayEntry() {
     final text = textEditingController.text;
     final commands = StreamChannel.of(context)
@@ -564,6 +533,12 @@ class MessageInputState extends State<MessageInput> {
         ),
       );
     });
+  }
+
+  Widget _buildFilePickerSection() {
+    return Container(
+      height: 200.0,
+    );
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
@@ -839,7 +814,13 @@ class MessageInputState extends State<MessageInput> {
           ),
         ),
         onTap: () {
-          showAttachmentModal();
+          if(_openFilePickerSection) {
+            setState(() {
+              _openFilePickerSection = false;
+            });
+          } else {
+            showAttachmentModal();
+          }
         },
       ),
     );
@@ -851,73 +832,79 @@ class MessageInputState extends State<MessageInput> {
       _focusNode.unfocus();
     }
 
-    showModalBottomSheet(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+    if(!kIsWeb) {
+      setState(() {
+        _openFilePickerSection = true;
+      });
+    } else {
+      showModalBottomSheet(
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(32),
+              topRight: Radius.circular(32),
+            ),
           ),
-        ),
-        context: context,
-        isScrollControlled: true,
-        builder: (_) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                title: Text(
-                  'Add a file',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+          context: context,
+          isScrollControlled: true,
+          builder: (_) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  title: Text(
+                    'Add a file',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              ListTile(
-                leading: Icon(Icons.image),
-                title: Text('Upload a photo'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.image, false);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.video_library),
-                title: Text('Upload a video'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.video, false);
-                  Navigator.pop(context);
-                },
-              ),
-              if (!kIsWeb)
                 ListTile(
-                  leading: Icon(Icons.camera_alt),
-                  title: Text('Photo from camera'),
+                  leading: Icon(Icons.image),
+                  title: Text('Upload a photo'),
                   onTap: () {
-                    pickFile(DefaultAttachmentTypes.image, true);
+                    pickFile(DefaultAttachmentTypes.image, false);
                     Navigator.pop(context);
                   },
                 ),
-              if (!kIsWeb)
                 ListTile(
-                  leading: Icon(Icons.videocam),
-                  title: Text('Video from camera'),
+                  leading: Icon(Icons.video_library),
+                  title: Text('Upload a video'),
                   onTap: () {
-                    pickFile(DefaultAttachmentTypes.video, true);
+                    pickFile(DefaultAttachmentTypes.video, false);
                     Navigator.pop(context);
                   },
                 ),
-              ListTile(
-                leading: Icon(Icons.insert_drive_file),
-                title: Text('Upload a file'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.file, false);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        });
+                if (!kIsWeb)
+                  ListTile(
+                    leading: Icon(Icons.camera_alt),
+                    title: Text('Photo from camera'),
+                    onTap: () {
+                      pickFile(DefaultAttachmentTypes.image, true);
+                      Navigator.pop(context);
+                    },
+                  ),
+                if (!kIsWeb)
+                  ListTile(
+                    leading: Icon(Icons.videocam),
+                    title: Text('Video from camera'),
+                    onTap: () {
+                      pickFile(DefaultAttachmentTypes.video, true);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ListTile(
+                  leading: Icon(Icons.insert_drive_file),
+                  title: Text('Upload a file'),
+                  onTap: () {
+                    pickFile(DefaultAttachmentTypes.file, false);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          });
+    }
   }
 
   /// Add an attachment to the sending message
