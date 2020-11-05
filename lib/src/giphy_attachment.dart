@@ -1,12 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/attachment_actions.dart';
 
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
-import 'attachment_title.dart';
 import 'full_screen_image.dart';
 
 class GiphyAttachment extends StatelessWidget {
@@ -58,76 +55,76 @@ class GiphyAttachment extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Stack(
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return FullScreenImage(
-                          url: attachment.imageUrl ??
-                              attachment.assetUrl ??
-                              attachment.thumbUrl,
-                        );
-                      }));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CachedNetworkImage(
-                        height: size?.height,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) {
+                      return FullScreenImage(
+                        url: attachment.imageUrl ??
+                            attachment.assetUrl ??
+                            attachment.thumbUrl,
+                      );
+                    }));
+                  },
+                  child: CachedNetworkImage(
+                    height: size?.height,
+                    width: size?.width,
+                    placeholder: (_, __) {
+                      return Container(
                         width: size?.width,
-                        placeholder: (_, __) {
-                          return Container(
-                            width: size?.width,
-                            height: size?.height,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                        imageUrl: attachment.thumbUrl ??
-                            attachment.imageUrl ??
-                            attachment.assetUrl,
-                        errorWidget: (context, url, error) => AttachmentError(
-                          attachment: attachment,
-                          size: size,
+                        height: size?.height,
+                        child: Center(
+                          child: CircularProgressIndicator(),
                         ),
-                        fit: BoxFit.cover,
-                      ),
+                      );
+                    },
+                    imageUrl: attachment.thumbUrl ??
+                        attachment.imageUrl ??
+                        attachment.assetUrl,
+                    errorWidget: (context, url, error) => AttachmentError(
+                      attachment: attachment,
+                      size: size,
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(16.0),
+                      )),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8.0,
+                      right: 8.0,
+                      top: 8.0,
+                      bottom: 4.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          StreamIcons.lightning,
+                          color: StreamChatTheme.of(context).accentColor,
+                          size: 16.0,
+                        ),
+                        Text(
+                          'GIPHY',
+                          style: TextStyle(
+                            color: StreamChatTheme.of(context).accentColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(16.0),
-                          )),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 4.0, right: 4.0, top: 6.0, bottom: 2.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              StreamIcons.lightning,
-                              color: StreamChatTheme.of(context).accentColor,
-                              size: 16.0,
-                            ),
-                            Text(
-                              'GIPHY',
-                              style: TextStyle(
-                                color: StreamChatTheme.of(context).accentColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
               if (attachment.title != null)
                 Container(
@@ -143,6 +140,7 @@ class GiphyAttachment extends StatelessWidget {
                               StreamIcons.left,
                               size: 24.0,
                             ),
+                            splashRadius: 24,
                             onPressed: () {
                               streamChannel.channel.sendAction(message, {
                                 'image_action': 'shuffle',
@@ -167,6 +165,7 @@ class GiphyAttachment extends StatelessWidget {
                               StreamIcons.right,
                               size: 24.0,
                             ),
+                            splashRadius: 24,
                             onPressed: () {
                               streamChannel.channel.sendAction(message, {
                                 'image_action': 'shuffle',
@@ -188,24 +187,23 @@ class GiphyAttachment extends StatelessWidget {
                 height: 0.5,
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  FlatButton(
-                    onPressed: () {
-                      streamChannel.channel.sendAction(message, {
-                        'image_action': 'cancel',
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        Text(
-                          'Cancel',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black.withOpacity(0.5)),
-                        ),
-                      ],
+                  Expanded(
+                    child: FlatButton(
+                      height: 50,
+                      onPressed: () {
+                        streamChannel.channel.sendAction(message, {
+                          'image_action': 'cancel',
+                        });
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black.withOpacity(0.5)),
+                      ),
                     ),
                   ),
                   Container(
@@ -213,21 +211,20 @@ class GiphyAttachment extends StatelessWidget {
                     color: Colors.black.withOpacity(0.2),
                     height: 50.0,
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      streamChannel.channel.sendAction(message, {
-                        'image_action': 'send',
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        Text(
-                          'Send',
-                          style: TextStyle(
-                              color: StreamChatTheme.of(context).accentColor,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                  Expanded(
+                    child: FlatButton(
+                      height: 50,
+                      onPressed: () {
+                        streamChannel.channel.sendAction(message, {
+                          'image_action': 'send',
+                        });
+                      },
+                      child: Text(
+                        'Send',
+                        style: TextStyle(
+                            color: StreamChatTheme.of(context).accentColor,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ],
@@ -282,26 +279,37 @@ class GiphyAttachment extends StatelessWidget {
               ),
             ),
             clipBehavior: Clip.antiAlias,
-            child: CachedNetworkImage(
-              height: size?.height,
-              width: size?.width,
-              placeholder: (_, __) {
-                return Container(
-                  width: size?.width,
-                  height: size?.height,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) {
+                  return FullScreenImage(
+                    url: attachment.imageUrl ??
+                        attachment.assetUrl ??
+                        attachment.thumbUrl,
+                  );
+                }));
               },
-              imageUrl: attachment.thumbUrl ??
-                  attachment.imageUrl ??
-                  attachment.assetUrl,
-              errorWidget: (context, url, error) => AttachmentError(
-                attachment: attachment,
-                size: size,
+              child: CachedNetworkImage(
+                height: size?.height,
+                width: size?.width,
+                placeholder: (_, __) {
+                  return Container(
+                    width: size?.width,
+                    height: size?.height,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+                imageUrl: attachment.thumbUrl ??
+                    attachment.imageUrl ??
+                    attachment.assetUrl,
+                errorWidget: (context, url, error) => AttachmentError(
+                  attachment: attachment,
+                  size: size,
+                ),
+                fit: BoxFit.cover,
               ),
-              fit: BoxFit.cover,
             ),
           ),
           Padding(

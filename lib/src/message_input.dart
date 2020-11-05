@@ -335,7 +335,7 @@ class MessageInputState extends State<MessageInput> {
                         setState(() {
                           _commandEnabled = true;
                         });
-                        _commandsOverlay.remove();
+                        _commandsOverlay?.remove();
                         _commandsOverlay = null;
                       } else {
                         _commandsOverlay = _buildCommandsOverlayEntry();
@@ -344,6 +344,7 @@ class MessageInputState extends State<MessageInput> {
                     }
 
                     if (textEditingController.selection.isCollapsed &&
+                        s.isNotEmpty &&
                         (s[textEditingController.selection.start - 1] == '@' ||
                             textEditingController.text
                                 .substring(
