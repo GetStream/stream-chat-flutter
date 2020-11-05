@@ -483,13 +483,6 @@ class MessageInputState extends State<MessageInput> {
             child: Container(
               constraints: BoxConstraints.loose(Size.fromHeight(400)),
               decoration: BoxDecoration(
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     spreadRadius: -8,
-                  //     blurRadius: 5.0,
-                  //     offset: Offset(0, -4),
-                  //   ),
-                  // ],
                   color: StreamChatTheme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(8.0)),
               child: ListView(
@@ -606,13 +599,6 @@ class MessageInputState extends State<MessageInput> {
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
             decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  spreadRadius: -8,
-                  blurRadius: 5.0,
-                  offset: Offset(0, -4),
-                ),
-              ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
             child: FutureBuilder<List<Member>>(
@@ -625,6 +611,12 @@ class MessageInputState extends State<MessageInput> {
                     children: snapshot.data
                         .map((m) => ListTile(
                               leading: UserAvatar(
+                                constraints: BoxConstraints.tight(
+                                  Size(
+                                    40,
+                                    40,
+                                  ),
+                                ),
                                 user: m.user,
                               ),
                               title: Text(
