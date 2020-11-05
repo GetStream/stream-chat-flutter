@@ -682,6 +682,10 @@ class MessageInputState extends State<MessageInput> {
         .where((e) => e != null)
         .toList();
 
+    if (emojis.isEmpty) {
+      return null;
+    }
+
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
 
