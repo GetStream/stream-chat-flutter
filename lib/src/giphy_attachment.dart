@@ -97,7 +97,7 @@ class GiphyAttachment extends StatelessWidget {
                     top: 0,
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(16.0),
                           )),
@@ -133,53 +133,50 @@ class GiphyAttachment extends StatelessWidget {
               if (attachment.title != null)
                 Container(
                   alignment: Alignment.bottomCenter,
-                  child: Material(
-                    color: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Card(
-                          child: IconButton(
-                            icon: Icon(
-                              StreamIcons.left,
-                              size: 24.0,
-                            ),
-                            splashRadius: 24,
-                            onPressed: () {
-                              streamChannel.channel.sendAction(message, {
-                                'image_action': 'shuffle',
-                              });
-                            },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Card(
+                        child: IconButton(
+                          icon: Icon(
+                            StreamIcons.left,
+                            size: 24.0,
                           ),
-                          shape: CircleBorder(),
+                          splashRadius: 24,
+                          onPressed: () {
+                            streamChannel.channel.sendAction(message, {
+                              'image_action': 'shuffle',
+                            });
+                          },
                         ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              '"${attachment.title}"',
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                              ),
+                        shape: CircleBorder(),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            '"${attachment.title}"',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
                             ),
                           ),
                         ),
-                        Card(
-                          child: IconButton(
-                            icon: Icon(
-                              StreamIcons.right,
-                              size: 24.0,
-                            ),
-                            splashRadius: 24,
-                            onPressed: () {
-                              streamChannel.channel.sendAction(message, {
-                                'image_action': 'shuffle',
-                              });
-                            },
+                      ),
+                      Card(
+                        child: IconButton(
+                          icon: Icon(
+                            StreamIcons.right,
+                            size: 24.0,
                           ),
-                          shape: CircleBorder(),
+                          splashRadius: 24,
+                          onPressed: () {
+                            streamChannel.channel.sendAction(message, {
+                              'image_action': 'shuffle',
+                            });
+                          },
                         ),
-                      ],
-                    ),
+                        shape: CircleBorder(),
+                      ),
+                    ],
                   ),
                 ),
               SizedBox(
@@ -317,7 +314,10 @@ class GiphyAttachment extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(
+              top: 8.0,
+              bottom: 8,
+            ),
             child: Row(
               children: [
                 Row(
