@@ -176,7 +176,6 @@ class MessageInputState extends State<MessageInput> {
   bool _sendAsDm = false;
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
-  Album _selectedAlbum;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -598,59 +597,23 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildPickerSection() {
     switch (_filePickerIndex) {
       case 0:
-        if (_selectedAlbum != null) {
-          return FutureBuilder<MediaPage>(
-              future: _selectedAlbum.listMedia(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                return GridView.builder(
-                  itemCount: snapshot.data.total,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3),
-                  itemBuilder: (context, position) {
-                    return FutureBuilder<File>(
-                        future: snapshot.data.items[position].getFile(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          return InkWell(
-                            onTap: () {
-
-                            },
-                            child: AspectRatio(
-                              child: Image.file(snapshot.data),
-                              aspectRatio: 1.0,
-                            ),
-                          );
-                        });
-                  },
-                );
-              });
-        }
-
-        return FutureBuilder<List<Album>>(
-            future: PhotoGallery.listAlbums(mediumType: MediumType.image),
-            builder: (context, albumData) {
-              if (!albumData.hasData) {
+        return FutureBuilder<List<Medium>>(
+            future: _getAllMedia(MediumType.image),
+            builder: (context, mediaData) {
+              if (!mediaData.hasData) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
               }
+
               return GridView.builder(
-                itemCount: albumData.data.length,
+                itemCount: mediaData.data.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3),
                 itemBuilder: (context, position) {
-                  return FutureBuilder<List<int>>(
-                      future: albumData.data[position].getThumbnail(),
+                  return FutureBuilder<List<dynamic>>(
+                      future: PhotoGallery.getThumbnail(
+                          mediumId: mediaData.data[position].id),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return Center(
@@ -658,16 +621,22 @@ class MessageInputState extends State<MessageInput> {
                           );
                         }
 
-                        return InkWell(
-                          child: AspectRatio(
-                            child: Image.memory(snapshot.data),
-                            aspectRatio: 1.0,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 1.0, vertical: 1.0),
+                          child: InkWell(
+                            child: AspectRatio(
+                              child: Image.memory(
+                                snapshot.data,
+                                fit: mediaData.data[position].height >
+                                        mediaData.data[position].width
+                                    ? BoxFit.fitWidth
+                                    : BoxFit.fitHeight,
+                              ),
+                              aspectRatio: 1.0,
+                            ),
+                            onTap: () {},
                           ),
-                          onTap: () {
-                            setState(() {
-                              _selectedAlbum = albumData.data[position];
-                            });
-                          },
                         );
                       });
                 },
@@ -675,10 +644,69 @@ class MessageInputState extends State<MessageInput> {
             });
         break;
       case 1:
+        return FutureBuilder<List<Medium>>(
+            future: _getAllMedia(MediumType.video),
+            builder: (context, mediaData) {
+              if (!mediaData.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              return GridView.builder(
+                itemCount: mediaData.data.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3),
+                itemBuilder: (context, position) {
+                  return FutureBuilder<List<dynamic>>(
+                      future: PhotoGallery.getThumbnail(
+                          mediumId: mediaData.data[position].id),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 1.0, vertical: 1.0),
+                          child: InkWell(
+                            child: AspectRatio(
+                              child: Image.memory(
+                                snapshot.data,
+                                fit: mediaData.data[position].height >
+                                    mediaData.data[position].width
+                                    ? BoxFit.fitWidth
+                                    : BoxFit.fitHeight,
+                              ),
+                              aspectRatio: 1.0,
+                            ),
+                            onTap: () {},
+                          ),
+                        );
+                      });
+                },
+              );
+            });
         break;
       case 2:
         break;
     }
+  }
+
+  Future<List<Medium>> _getAllMedia(MediumType type) async {
+    var allAlbums = await PhotoGallery.listAlbums(mediumType: type);
+    List<Medium> resultList = [];
+
+    for (var album in allAlbums) {
+      var data = await album.listMedia();
+      resultList.addAll(data.items);
+    }
+
+    resultList.sort((a, b) => a.modifiedDate.compareTo(b.modifiedDate));
+
+    return resultList;
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
