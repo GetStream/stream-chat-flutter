@@ -231,46 +231,44 @@ class MessageInputState extends State<MessageInput> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Center(
-            child: Container(
-              height: 16,
-              width: 16,
-              foregroundDecoration: BoxDecoration(
-                border: _sendAsDm
-                    ? null
-                    : Border.all(
-                        color: Colors.black.withOpacity(.5),
-                        width: 2,
-                      ),
+          Container(
+            height: 16,
+            width: 16,
+            foregroundDecoration: BoxDecoration(
+              border: _sendAsDm
+                  ? null
+                  : Border.all(
+                      color: Colors.black.withOpacity(.5),
+                      width: 2,
+                    ),
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Center(
+              child: Material(
                 borderRadius: BorderRadius.circular(3),
-              ),
-              child: Center(
-                child: Material(
-                  borderRadius: BorderRadius.circular(3),
-                  color: _sendAsDm
-                      ? StreamChatTheme.of(context).accentColor
-                      : Colors.white,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _sendAsDm = !_sendAsDm;
-                      });
-                    },
-                    child: AnimatedCrossFade(
-                      duration: Duration(milliseconds: 300),
-                      reverseDuration: Duration(milliseconds: 300),
-                      crossFadeState: _sendAsDm
-                          ? CrossFadeState.showFirst
-                          : CrossFadeState.showSecond,
-                      firstChild: Icon(
-                        StreamIcons.check,
-                        size: 16.0,
-                        color: Colors.white,
-                      ),
-                      secondChild: SizedBox(
-                        height: 16,
-                        width: 16,
-                      ),
+                color: _sendAsDm
+                    ? StreamChatTheme.of(context).accentColor
+                    : Colors.white,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _sendAsDm = !_sendAsDm;
+                    });
+                  },
+                  child: AnimatedCrossFade(
+                    duration: Duration(milliseconds: 300),
+                    reverseDuration: Duration(milliseconds: 300),
+                    crossFadeState: _sendAsDm
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Icon(
+                      StreamIcons.check,
+                      size: 16.0,
+                      color: Colors.white,
+                    ),
+                    secondChild: SizedBox(
+                      height: 16,
+                      width: 16,
                     ),
                   ),
                 ),
@@ -278,32 +276,11 @@ class MessageInputState extends State<MessageInput> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text('Send also as direct message'),
           ),
         ],
       ),
-    );
-    return Row(
-      children: [
-        ClipRRect(
-          clipBehavior: Clip.hardEdge,
-          borderRadius: BorderRadius.circular(1),
-          child: Checkbox(
-            value: _sendAsDm,
-            onChanged: (val) => setState(
-              () {
-                _sendAsDm = val;
-              },
-            ),
-            activeColor: StreamChatTheme.of(context).accentColor,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('Send also as direct message'),
-        ),
-      ],
     );
   }
 
