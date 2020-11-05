@@ -714,44 +714,49 @@ class MessageInputState extends State<MessageInput> {
               ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
-            child: ListView(
-              padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(
-                          StreamIcons.smile,
-                          color: StreamChatTheme.of(context).accentColor,
-                        ),
+            child: ListView.builder(
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                itemCount: emojis.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Icon(
+                              StreamIcons.smile,
+                              color: StreamChatTheme.of(context).accentColor,
+                            ),
+                          ),
+                          Text(
+                            'Emoji matching "$query"',
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(.5),
+                            ),
+                          )
+                        ],
                       ),
-                      Text(
-                        'Emoji matching "$query"',
-                        style: TextStyle(
-                          color: Colors.black.withOpacity(.5),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                ...emojis.map((emoji) => ListTile(
-                      title: Text(
-                        "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.5,
-                        ),
+                    );
+                  }
+
+                  final emoji = emojis[i - 1];
+                  return ListTile(
+                    title: Text(
+                      "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.5,
                       ),
-                      onTap: () {
-                        _chooseEmoji(splits, emoji);
-                      },
-                    ))
-              ],
-            ),
+                    ),
+                    onTap: () {
+                      _chooseEmoji(splits, emoji);
+                    },
+                  );
+                }),
           ),
         ),
       );
