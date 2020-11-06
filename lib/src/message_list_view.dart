@@ -306,7 +306,7 @@ class _MessageListViewState extends State<MessageListView> {
                   valueListenable: _itemPositionListener.itemPositions,
                   builder: (context, values, _) {
                     final items = _itemPositionListener.itemPositions?.value;
-                    if (items.isEmpty) {
+                    if (items.isEmpty || messages.isEmpty) {
                       return SizedBox();
                     }
 
