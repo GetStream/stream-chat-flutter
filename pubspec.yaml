@@ -26,7 +26,8 @@ dependencies:
   file_picker: ^2.0.8+1
   image_picker: ^0.6.7+2
   flutter_keyboard_visibility: ^3.2.1
-  stream_chat: ^0.2.10+1
+  stream_chat:
+    path: ../stream_chat_dart
   emojis: ^0.9.3
   mime: ^0.9.6+3
   visibility_detector: ^0.1.5

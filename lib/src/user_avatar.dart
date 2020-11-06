@@ -55,9 +55,7 @@ class UserAvatar extends StatelessWidget {
                       errorWidget: (_, __, ___) {
                         return Center(
                           child: Text(
-                            user.extraData?.containsKey('name') ?? false
-                                ? user.extraData['name'][0]
-                                : '',
+                            user.name[0],
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

@@ -218,6 +218,7 @@ class StreamChatThemeData {
     final accentColor = Color(0xff006cff);
     final isDark = theme.brightness == Brightness.dark;
     return StreamChatThemeData(
+      secondaryColor: Color(0xffEAEAEA),
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
       primaryIconTheme: IconThemeData(
