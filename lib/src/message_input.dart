@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
@@ -176,6 +175,7 @@ class MessageInputState extends State<MessageInput> {
   bool _sendAsDm = false;
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
+  double _filePickerSize = 250.0;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -539,7 +539,8 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildFilePickerSection() {
     return Container(
-      height: 200.0,
+      color: Color(0xFFF2F2F2),
+      height: _filePickerSize,
       child: Column(
         children: [
           Row(
@@ -566,9 +567,7 @@ class MessageInputState extends State<MessageInput> {
                       : Colors.black.withOpacity(0.5),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _filePickerIndex = 1;
-                  });
+                  pickFile(DefaultAttachmentTypes.file, false);
                 },
               ),
               IconButton(
@@ -579,15 +578,54 @@ class MessageInputState extends State<MessageInput> {
                       : Colors.black.withOpacity(0.5),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _filePickerIndex = 2;
-                  });
+                  pickFile(DefaultAttachmentTypes.image, true);
                 },
               ),
             ],
           ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8.0),
+                topRight: Radius.circular(8.0),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onVerticalDragUpdate: (update) {
+                    setState(() {
+                      _filePickerSize -= update.delta.dy;
+                      if (_filePickerSize < 100) {
+                        _filePickerSize = 100.0;
+                      }
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: 40.0,
+                      height: 4.0,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF2F2F2),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Expanded(
-            child: _buildPickerSection(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: _buildPickerSection(),
+            ),
           ),
         ],
       ),
@@ -598,7 +636,7 @@ class MessageInputState extends State<MessageInput> {
     switch (_filePickerIndex) {
       case 0:
         return FutureBuilder<List<Medium>>(
-            future: _getAllMedia(MediumType.image),
+            future: _getAllMedia(),
             builder: (context, mediaData) {
               if (!mediaData.hasData) {
                 return Center(
@@ -635,7 +673,9 @@ class MessageInputState extends State<MessageInput> {
                               ),
                               aspectRatio: 1.0,
                             ),
-                            onTap: () {},
+                            onTap: () {
+                              _addAttachment(mediaData.data[position]);
+                            },
                           ),
                         );
                       });
@@ -644,65 +684,81 @@ class MessageInputState extends State<MessageInput> {
             });
         break;
       case 1:
-        return FutureBuilder<List<Medium>>(
-            future: _getAllMedia(MediumType.video),
-            builder: (context, mediaData) {
-              if (!mediaData.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              return GridView.builder(
-                itemCount: mediaData.data.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3),
-                itemBuilder: (context, position) {
-                  return FutureBuilder<List<dynamic>>(
-                      future: PhotoGallery.getThumbnail(
-                          mediumId: mediaData.data[position].id),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 1.0, vertical: 1.0),
-                          child: InkWell(
-                            child: AspectRatio(
-                              child: Image.memory(
-                                snapshot.data,
-                                fit: mediaData.data[position].height >
-                                    mediaData.data[position].width
-                                    ? BoxFit.fitWidth
-                                    : BoxFit.fitHeight,
-                              ),
-                              aspectRatio: 1.0,
-                            ),
-                            onTap: () {},
-                          ),
-                        );
-                      });
-                },
-              );
-            });
         break;
       case 2:
         break;
     }
   }
 
-  Future<List<Medium>> _getAllMedia(MediumType type) async {
-    var allAlbums = await PhotoGallery.listAlbums(mediumType: type);
+  void _addAttachment(Medium medium) async {
+    var mediaFile = await PhotoGallery.getFile(mediumId: medium.id);
+
+    var file = PlatformFile(
+      path: mediaFile.path,
+      bytes: mediaFile.readAsBytesSync(),
+    );
+
+    setState(() {
+      _inputEnabled = true;
+    });
+
+    if (file == null) {
+      return;
+    }
+
+    final channel = StreamChannel.of(context).channel;
+    final attachment = _SendingAttachment(
+      file: file,
+      attachment: Attachment(
+        localUri: file.path != null ? Uri.parse(file.path) : null,
+        type: medium.mediumType == MediumType.image ? 'image' : 'video',
+      ),
+    );
+
+    setState(() {
+      _attachments.add(attachment);
+    });
+
+    final url = await _uploadAttachment(
+        file,
+        medium.mediumType == MediumType.image
+            ? DefaultAttachmentTypes.image
+            : DefaultAttachmentTypes.video,
+        channel);
+
+    var fileType = medium.mediumType == MediumType.image
+        ? DefaultAttachmentTypes.image
+        : DefaultAttachmentTypes.video;
+
+    if (fileType == DefaultAttachmentTypes.image) {
+      attachment.attachment = attachment.attachment.copyWith(
+        imageUrl: url,
+      );
+    } else {
+      attachment.attachment = attachment.attachment.copyWith(
+        assetUrl: url,
+      );
+    }
+
+    setState(() {
+      attachment.uploaded = true;
+    });
+  }
+
+  Future<List<Medium>> _getAllMedia() async {
+    var allAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.image);
+    //var allVideoAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.video);
     List<Medium> resultList = [];
 
     for (var album in allAlbums) {
       var data = await album.listMedia();
       resultList.addAll(data.items);
     }
+
+    // for (var album in allVideoAlbums) {
+    //   var data = await album.listMedia();
+    //   resultList.addAll(data.items);
+    // }
 
     resultList.sort((a, b) => a.modifiedDate.compareTo(b.modifiedDate));
 
@@ -817,19 +873,6 @@ class MessageInputState extends State<MessageInput> {
     });
     _commandsOverlay?.remove();
     _commandsOverlay = null;
-  }
-
-  Gradient _getGradient(BuildContext context) {
-    if (_typingStarted) {
-      if (widget.editMessage == null) {
-        return StreamChatTheme.of(context).channelTheme.inputGradient;
-      }
-      return LinearGradient(
-        colors: [Colors.lightGreen, Colors.green],
-      );
-    } else {
-      return null;
-    }
   }
 
   Widget _buildAttachments() {
@@ -985,6 +1028,7 @@ class MessageInputState extends State<MessageInput> {
           if (_openFilePickerSection) {
             setState(() {
               _openFilePickerSection = false;
+              _filePickerSize = 250.0;
             });
           } else {
             showAttachmentModal();
@@ -1410,6 +1454,12 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage != null || widget.initialMessage != null) {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
     }
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _openFilePickerSection = false;
+      }
+    });
   }
 
   void _parseExistingMessage(Message message) {
