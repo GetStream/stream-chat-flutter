@@ -15,6 +15,7 @@ dependencies:
   photo_view: ^0.10.1
   rxdart: ^0.24.1
   jiffy: ^3.0.1
+  flutter_svg: ^0.19.1
   flutter_portal: ^0.3.0
   cached_network_image: ^2.2.0+1
   flutter_markdown: ^0.5.0
@@ -35,7 +36,8 @@ dependencies:
 
 flutter:
   assets:
-    - images/giphy_icon.png
+    - images/
+    - svgs/
   fonts:
    - family: stream-icons
      fonts:
