@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -223,22 +224,66 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildDmCheckbox() {
-    return Row(
-      children: [
-        Checkbox(
-          value: _sendAsDm,
-          onChanged: (val) => setState(
-            () {
-              _sendAsDm = val;
-            },
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.only(
+        left: 12,
+        bottom: 12,
+        top: 8,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            height: 16,
+            width: 16,
+            foregroundDecoration: BoxDecoration(
+              border: _sendAsDm
+                  ? null
+                  : Border.all(
+                      color: Colors.black.withOpacity(.5),
+                      width: 2,
+                    ),
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Center(
+              child: Material(
+                borderRadius: BorderRadius.circular(3),
+                color: _sendAsDm
+                    ? StreamChatTheme.of(context).accentColor
+                    : Colors.white,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _sendAsDm = !_sendAsDm;
+                    });
+                  },
+                  child: AnimatedCrossFade(
+                    duration: Duration(milliseconds: 300),
+                    reverseDuration: Duration(milliseconds: 300),
+                    crossFadeState: _sendAsDm
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Icon(
+                      StreamIcons.check,
+                      size: 16.0,
+                      color: Colors.white,
+                    ),
+                    secondChild: SizedBox(
+                      height: 16,
+                      width: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          activeColor: StreamChatTheme.of(context).accentColor,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('Send also as direct message'),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text('Send also as direct message'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -506,25 +551,19 @@ class MessageInputState extends State<MessageInput> {
                             child: Icon(StreamIcons.lightning,
                                 color: StreamChatTheme.of(context).accentColor),
                           ),
-                          Text('Instant Commands')
+                          Text(
+                            'Instant Commands',
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(.5),
+                            ),
+                          )
                         ],
                       ),
                     ),
                   ...commands
                       .map(
                         (c) => ListTile(
-                          leading: c.name == 'giphy'
-                              ? CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  child: Image.asset(
-                                    'images/giphy_icon.png',
-                                    package: 'stream_chat_flutter',
-                                    width: 16.0,
-                                    height: 16.0,
-                                  ),
-                                  maxRadius: 12.0,
-                                )
-                              : null,
+                          leading: c.name == 'giphy' ? _buildGiphyIcon() : null,
                           title: Text.rich(
                             TextSpan(
                               text: '${c.name.capitalize()}',
@@ -563,6 +602,31 @@ class MessageInputState extends State<MessageInput> {
         ),
       );
     });
+  }
+
+  CircleAvatar _buildGiphyIcon() {
+    if (kIsWeb) {
+      return CircleAvatar(
+        backgroundColor: Colors.black,
+        child: Image.asset(
+          'images/giphy_icon.png',
+          package: 'stream_chat_flutter',
+          width: 24.0,
+          height: 24.0,
+        ),
+        radius: 12,
+      );
+    } else {
+      return CircleAvatar(
+        child: SvgPicture.asset(
+          'svgs/giphy_icon.svg',
+          package: 'stream_chat_flutter',
+          width: 24.0,
+          height: 24.0,
+        ),
+        radius: 12,
+      );
+    }
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
@@ -605,13 +669,6 @@ class MessageInputState extends State<MessageInput> {
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
             decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  spreadRadius: -8,
-                  blurRadius: 5.0,
-                  offset: Offset(0, -4),
-                ),
-              ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
             child: FutureBuilder<List<Member>>(
@@ -624,6 +681,12 @@ class MessageInputState extends State<MessageInput> {
                     children: snapshot.data
                         .map((m) => ListTile(
                               leading: UserAvatar(
+                                constraints: BoxConstraints.tight(
+                                  Size(
+                                    40,
+                                    40,
+                                  ),
+                                ),
                                 user: m.user,
                               ),
                               title: Text(
