@@ -729,10 +729,12 @@ class MessageInputState extends State<MessageInput> {
                               color: StreamChatTheme.of(context).accentColor,
                             ),
                           ),
-                          Text(
-                            'Emoji matching "$query"',
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(.5),
+                          Flexible(
+                            child: Text(
+                              'Emoji matching "$query"',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(.5),
+                              ),
                             ),
                           )
                         ],
