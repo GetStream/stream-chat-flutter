@@ -768,8 +768,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _chooseEmoji(List<String> splits, Emoji emoji) {
-    splits[1] = emoji.char;
-    final rejoin = splits.join('');
+    final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char;
 
     textEditingController.value = TextEditingValue(
       text: rejoin +
