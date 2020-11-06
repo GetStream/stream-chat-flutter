@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:fuzzy/fuzzy.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -15,6 +14,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:substring_highlight/substring_highlight.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -170,7 +170,7 @@ class MessageInputState extends State<MessageInput> {
   bool _typingStarted = false;
   bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay, _emojiOverlay;
-  Fuzzy<String> _emojiFuse;
+  Iterable<String> _emojiNames;
 
   Command _chosenCommand;
   bool _actionsShrunk = false;
@@ -403,8 +403,6 @@ class MessageInputState extends State<MessageInput> {
                   0,
                   textEditingController.selection.start,
                 )
-                .split(' ')
-                .last
                 .contains(':'))) {
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
@@ -676,11 +674,8 @@ class MessageInputState extends State<MessageInput> {
       return null;
     }
 
-    final emojis = _emojiFuse
-        .search(query)
-        .map((e) => Emoji.byName(e.item))
-        .where((e) => e != null)
-        .toList();
+    final emojis =
+        _emojiNames.where((e) => e.contains(query)).map((e) => Emoji.byName(e));
 
     if (emojis.isEmpty) {
       return null;
@@ -743,14 +738,19 @@ class MessageInputState extends State<MessageInput> {
                     );
                   }
 
-                  final emoji = emojis[i - 1];
+                  final emoji = emojis.elementAt(i - 1);
                   return ListTile(
-                    title: Text(
-                      "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.5,
-                      ),
+                    title: SubstringHighlight(
+                      text: "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
+                      term: query,
+                      textStyleHighlight:
+                          Theme.of(context).textTheme.headline6.copyWith(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                      textStyle: Theme.of(context).textTheme.headline6.copyWith(
+                            fontSize: 14.5,
+                          ),
                     ),
                     onTap: () {
                       _chooseEmoji(splits, emoji);
@@ -1334,11 +1334,7 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    _emojiFuse = Fuzzy<String>(Emoji.all().map((e) => e.name).toList(),
-        options: FuzzyOptions(
-          matchAllTokens: true,
-          tokenize: true,
-        ));
+    _emojiNames = Emoji.all().map((e) => e.name);
 
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {

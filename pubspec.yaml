@@ -27,9 +27,9 @@ dependencies:
   stream_chat: ^0.2.10+1
   emojis: ^0.9.3
   mime: ^0.9.6+3
-  fuzzy: ^0.2.3
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4
+  substring_highlight: ^0.1.2
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
