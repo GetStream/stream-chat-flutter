@@ -674,8 +674,10 @@ class MessageInputState extends State<MessageInput> {
       return null;
     }
 
-    final emojis =
-        _emojiNames.where((e) => e.contains(query)).map((e) => Emoji.byName(e));
+    final emojis = _emojiNames
+        .where((e) => e.contains(query))
+        .map((e) => Emoji.byName(e))
+        .where((e) => e != null);
 
     if (emojis.isEmpty) {
       return null;
