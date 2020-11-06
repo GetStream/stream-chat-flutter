@@ -407,11 +407,11 @@ class MessageInputState extends State<MessageInput> {
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
       final splits = textToSelection.split(':');
-      final query = splits[1]?.toLowerCase();
+      final query = splits[splits.length - 2]?.toLowerCase();
       final emoji = Emoji.byName(query);
 
       if (textToSelection.endsWith(':') && emoji != null) {
-        _chooseEmoji(splits, emoji);
+        _chooseEmoji(splits.sublist(0, splits.length - 1), emoji);
       } else {
         _emojiOverlay = _buildEmojiOverlay();
 
