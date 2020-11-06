@@ -1,7 +1,7 @@
 name: example
 description: A new Flutter project.
 
-version: 1.0.41+43
+version: 1.0.42+44
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -19,7 +19,13 @@ dev_dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  flutter_launcher_icons: ^0.8.0
   test: any
 
 flutter:
   uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
