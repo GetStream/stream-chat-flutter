@@ -177,6 +177,8 @@ class MessageInputState extends State<MessageInput> {
   int _filePickerIndex = 0;
   double _filePickerSize = 250.0;
 
+  Tuple2<List<Medium>, List<dynamic>> _mediaData = Tuple2([], []);
+
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
 
@@ -637,65 +639,55 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildPickerSection() {
     switch (_filePickerIndex) {
       case 0:
-        return FutureBuilder(
-            future: _getAllMedia(),
-            builder: (context, mediaData) {
-              if (!mediaData.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              return GridView.builder(
-                itemCount: mediaData.data.item2.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3),
-                itemBuilder: (context, position) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 1.0, vertical: 1.0),
-                    child: InkWell(
-                      child: Stack(
-                        children: [
-                          AspectRatio(
-                            aspectRatio: 1.0,
-                            child: Image.memory(
-                              mediaData.data.item2[position],
-                              fit: mediaData.data.item1[position].height >
-                                      mediaData.data.item1[position].width
-                                  ? BoxFit.fitWidth
-                                  : BoxFit.fitHeight,
-                            ),
-                          ),
-                          if (_attachments.any((element) =>
-                              element.id == mediaData.data.item1[position].id))
-                            Container(
-                              color: Colors.black.withOpacity(0.5),
-                              child: Center(
-                                child: Icon(
-                                  StreamIcons.check_send,
-                                  color: Colors.white,
-                                  size: 24.0,
-                                ),
-                              ),
-                            ),
-                        ],
+        return GridView.builder(
+          itemCount: _mediaData.item2.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3),
+          itemBuilder: (context, position) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 1.0, vertical: 1.0),
+              child: InkWell(
+                child: Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1.0,
+                      child: Image.memory(
+                        _mediaData.item2[position],
+                        fit: _mediaData.item1[position].height >
+                            _mediaData.item1[position].width
+                            ? BoxFit.fitWidth
+                            : BoxFit.fitHeight,
                       ),
-                      onTap: () {
-                        if (!_attachments.any((element) =>
-                            element.id == mediaData.data.item1[position].id)) {
-                          _addAttachment(mediaData.data.item1[position]);
-                        } else {
-                          _attachments.removeWhere((element) =>
-                              element.id == mediaData.data.item1[position].id);
-                          setState(() {});
-                        }
-                      },
                     ),
-                  );
+                    if (_attachments.any((element) =>
+                    element.id == _mediaData.item1[position].id))
+                      Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: Center(
+                          child: Icon(
+                            StreamIcons.check_send,
+                            color: Colors.white,
+                            size: 24.0,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                onTap: () {
+                  if (!_attachments.any((element) =>
+                  element.id == _mediaData.item1[position].id)) {
+                    _addAttachment(_mediaData.item1[position]);
+                  } else {
+                    _attachments.removeWhere((element) =>
+                    element.id == _mediaData.item1[position].id);
+                    setState(() {});
+                  }
                 },
-              );
-            });
+              ),
+            );
+          },
+        );
         break;
       case 1:
         break;
@@ -760,7 +752,7 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
-  Future<Tuple2<List<Medium>, List<dynamic>>> _getAllMedia() async {
+  void _getAllMedia() async {
     var allAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.image);
     //var allVideoAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.video);
     List<Medium> resultList = [];
@@ -782,7 +774,9 @@ class MessageInputState extends State<MessageInput> {
       resultThumbnailList.add(await PhotoGallery.getThumbnail(mediumId: e.id));
     }
 
-    return Tuple2<List<Medium>, List<dynamic>>(resultList, resultThumbnailList);
+    setState(() {
+      _mediaData = Tuple2<List<Medium>, List<dynamic>>(resultList, resultThumbnailList);
+    });
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
@@ -1051,6 +1045,7 @@ class MessageInputState extends State<MessageInput> {
               _filePickerSize = 250.0;
             });
           } else {
+            _getAllMedia();
             showAttachmentModal();
           }
         },
