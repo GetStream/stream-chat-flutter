@@ -600,6 +600,8 @@ class MessageInputState extends State<MessageInput> {
                       _filePickerSize -= update.delta.dy;
                       if (_filePickerSize < 100) {
                         _filePickerSize = 100.0;
+                      } else if (_filePickerSize > 500) {
+                        _filePickerSize = 500;
                       }
                     });
                   },
