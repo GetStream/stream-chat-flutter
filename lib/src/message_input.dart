@@ -737,10 +737,13 @@ class MessageInputState extends State<MessageInput> {
                       Container(
                         color: Colors.black.withOpacity(0.5),
                         child: Center(
-                          child: Icon(
-                            StreamIcons.check_send,
-                            color: Colors.white,
-                            size: 24.0,
+                          child: CircleAvatar(
+                            maxRadius: 12.0,
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              StreamIcons.check,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                       ),
@@ -826,7 +829,7 @@ class MessageInputState extends State<MessageInput> {
 
   void _getAllMedia() async {
     var allAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.image);
-    //var allVideoAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.video);
+    var allVideoAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.video);
     List<Medium> resultList = [];
     List<List<dynamic>> resultThumbnailList = [];
 
@@ -835,12 +838,13 @@ class MessageInputState extends State<MessageInput> {
       resultList.addAll(data.items);
     }
 
-    // for (var album in allVideoAlbums) {
-    //   var data = await album.listMedia();
-    //   resultList.addAll(data.items);
-    // }
+    for (var album in allVideoAlbums) {
+      var data = await album.listMedia();
+      resultList.addAll(data.items);
+    }
 
     resultList.sort((a, b) => a.modifiedDate.compareTo(b.modifiedDate));
+    resultList = resultList.toSet().toList();
 
     for (var e in resultList) {
       resultThumbnailList.add(await PhotoGallery.getThumbnail(mediumId: e.id));
