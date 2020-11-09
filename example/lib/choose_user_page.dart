@@ -1,71 +1,11 @@
-import 'dart:io';
-
 import 'package:example/advanced_options_page.dart';
 import 'package:example/main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_apns/flutter_apns.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    hide Message;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-void showLocalNotification(Message message, ChannelModel channel) async {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  final initializationSettingsAndroid =
-      AndroidInitializationSettings('launch_background');
-  final initializationSettingsIOS = IOSInitializationSettings();
-  final initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
-  );
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  await flutterLocalNotificationsPlugin.show(
-    message.id.hashCode,
-    '${message.user.name} @ ${channel.name}',
-    message.text,
-    NotificationDetails(
-      android: AndroidNotificationDetails(
-        'message channel',
-        'Message channel',
-        'Channel used for showing messages',
-        priority: Priority.high,
-        importance: Importance.high,
-      ),
-      iOS: IOSNotificationDetails(),
-    ),
-  );
-}
-
-Future backgroundHandler(Map<String, dynamic> notification) async {
-  final messageId = notification['data']['message_id'];
-
-  final notificationData =
-      await NotificationService.getAndStoreMessage(messageId);
-
-  showLocalNotification(
-    notificationData.message,
-    notificationData.channel,
-  );
-}
-
-void _initNotifications(Client client) {
-  final connector = createPushConnector();
-  connector.configure(
-    onBackgroundMessage: backgroundHandler,
-  );
-
-  connector.requestNotificationPermissions();
-  connector.token.addListener(() {
-    if (connector.token.value != null) {
-      client.addDevice(
-        connector.token.value,
-        Platform.isAndroid ? 'firebase' : 'apn',
-      );
-    }
-  });
-}
+import 'notifications_service.dart';
 
 class ChooseUserPage extends StatelessWidget {
   @override
@@ -142,82 +82,93 @@ class ChooseUserPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView(
-              children: [
-                ...users.entries.map((entry) {
-                  final token = entry.key;
-                  final user = entry.value;
-                  return ListTile(
-                    onTap: () async {
-                      final client = StreamChat.of(context).client;
+            child: ListView.separated(
+              separatorBuilder: (context, i) {
+                return Container(
+                  width: double.infinity,
+                  color: Colors.black12,
+                  height: 1,
+                );
+              },
+              itemCount: users.length + 1,
+              itemBuilder: (context, i) {
+                return [
+                  ...users.entries.map((entry) {
+                    final token = entry.key;
+                    final user = entry.value;
+                    return ListTile(
+                      onTap: () async {
+                        final client = StreamChat.of(context).client;
 
-                      await client.setUser(
-                        User(id: user.id, extraData: {
-                          'name': user.name,
-                        }),
-                        token,
-                      );
+                        await client.setUser(
+                          User(id: user.id, extraData: {
+                            'name': user.name,
+                          }),
+                          token,
+                        );
 
-                      if (!kIsWeb) {
-                        _initNotifications(client);
-                      }
+                        if (!kIsWeb) {
+                          initNotifications(client);
+                        }
 
-                      await Navigator.pushReplacement(
+                        await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return StreamChat(
+                                client: client,
+                                child: ChannelListPage(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      leading: UserAvatar(
+                        user: user,
+                        constraints: BoxConstraints.tight(
+                          Size.fromRadius(20),
+                        ),
+                      ),
+                      title: Text(
+                        user.name,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text('Stream test account'),
+                      trailing: Icon(
+                        StreamIcons.arrow_right,
+                        color: StreamChatTheme.of(context).accentColor,
+                      ),
+                    );
+                  }),
+                  ListTile(
+                    onTap: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) {
-                            return StreamChat(
-                              client: client,
-                              child: ChannelListPage(),
-                            );
-                          },
+                          builder: (context) => AdvancedOptionsPage(),
                         ),
                       );
                     },
-                    leading: UserAvatar(
-                      user: user,
-                      constraints: BoxConstraints.tight(
-                        Size.fromRadius(20),
+                    leading: CircleAvatar(
+                      child: Icon(
+                        StreamIcons.settings,
+                        color: Colors.black,
                       ),
+                      backgroundColor:
+                          StreamChatTheme.of(context).secondaryColor,
                     ),
                     title: Text(
-                      user.name,
+                      'Advanced Options',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('Stream test account'),
+                    subtitle: Text('Custom settings'),
                     trailing: Icon(
                       StreamIcons.arrow_right,
                       color: StreamChatTheme.of(context).accentColor,
                     ),
-                  );
-                }),
-                ListTile(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdvancedOptionsPage(),
-                      ),
-                    );
-                  },
-                  leading: CircleAvatar(
-                    child: Icon(
-                      StreamIcons.settings,
-                      color: Colors.black,
-                    ),
-                    backgroundColor: StreamChatTheme.of(context).secondaryColor,
                   ),
-                  title: Text(
-                    'Advanced Options',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text('Custom settings'),
-                  trailing: Icon(
-                    StreamIcons.arrow_right,
-                    color: StreamChatTheme.of(context).accentColor,
-                  ),
-                ),
-              ],
+                ][i];
+              },
             ),
           ),
         ],

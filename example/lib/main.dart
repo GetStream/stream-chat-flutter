@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'notifications_service.dart';
+
 void main() async {
   final client = Client(
     's2dxdhpxd94g',
