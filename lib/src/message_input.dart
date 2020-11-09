@@ -1169,11 +1169,12 @@ class MessageInputState extends State<MessageInput> {
             _attachments.remove(attachment);
           });
         },
-        fillColor: Colors.white.withOpacity(.5),
+        fillColor: Colors.black.withOpacity(.5),
         child: Center(
           child: Icon(
-            Icons.close,
+            StreamIcons.close,
             size: 15,
+            color: Colors.white,
           ),
         ),
       ),
