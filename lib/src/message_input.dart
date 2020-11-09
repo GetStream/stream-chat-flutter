@@ -20,9 +20,9 @@ import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(PlatformFile, Channel);
 typedef AttachmentThumbnailBuilder = Widget Function(
-  BuildContext,
-  _SendingAttachment,
-);
+    BuildContext,
+    _SendingAttachment,
+    );
 
 enum ActionsLocation {
   left,
@@ -230,7 +230,7 @@ class MessageInputState extends State<MessageInput> {
         Checkbox(
           value: _sendAsDm,
           onChanged: (val) => setState(
-            () {
+                () {
               _sendAsDm = val;
             },
           ),
@@ -247,7 +247,7 @@ class MessageInputState extends State<MessageInput> {
   AnimatedCrossFade _animateSendButton(BuildContext context) {
     return AnimatedCrossFade(
       crossFadeState: ((_messageIsPresent || _attachments.isNotEmpty) &&
-              _attachments.every((a) => a.uploaded == true))
+          _attachments.every((a) => a.uploaded == true))
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
@@ -260,7 +260,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildExpandActionsButton() {
     return AnimatedCrossFade(
       crossFadeState:
-          _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       firstChild: IconButton(
         onPressed: () {
           setState(() {
@@ -353,7 +353,7 @@ class MessageInputState extends State<MessageInput> {
                         (s[textEditingController.selection.start - 1] == '@' ||
                             textEditingController.text
                                 .substring(
-                                    0, textEditingController.selection.start)
+                                0, textEditingController.selection.start)
                                 .split(' ')
                                 .last
                                 .contains('@'))) {
@@ -371,9 +371,9 @@ class MessageInputState extends State<MessageInput> {
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                     hintText:
-                        (_commandEnabled && _chosenCommand.name == 'giphy')
-                            ? 'Search GIFs'
-                            : 'Write a message',
+                    (_commandEnabled && _chosenCommand.name == 'giphy')
+                        ? 'Search GIFs'
+                        : 'Write a message',
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
@@ -388,31 +388,31 @@ class MessageInputState extends State<MessageInput> {
                     contentPadding: EdgeInsets.all(8),
                     prefixIcon: _commandEnabled
                         ? Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Chip(
-                              backgroundColor:
-                                  StreamChatTheme.of(context).accentColor,
-                              label: Text(
-                                _chosenCommand?.name ?? "",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              avatar: Icon(
-                                StreamIcons.lightning,
-                                color: Colors.white,
-                              ),
-                            ),
-                          )
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Chip(
+                        backgroundColor:
+                        StreamChatTheme.of(context).accentColor,
+                        label: Text(
+                          _chosenCommand?.name ?? "",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        avatar: Icon(
+                          StreamIcons.lightning,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
                         : null,
                     suffixIcon: _commandEnabled
                         ? IconButton(
-                            icon: Icon(Icons.cancel_outlined),
-                            onPressed: () {
-                              setState(() {
-                                _commandEnabled = false;
-                              });
-                            },
-                          )
+                      icon: Icon(Icons.cancel_outlined),
+                      onPressed: () {
+                        setState(() {
+                          _commandEnabled = false;
+                        });
+                      },
+                    )
                         : null,
                   ),
                   textCapitalization: TextCapitalization.sentences,
@@ -454,13 +454,13 @@ class MessageInputState extends State<MessageInput> {
             child: Container(
               constraints: BoxConstraints.loose(Size.fromHeight(400)),
               decoration: BoxDecoration(
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     spreadRadius: -8,
-                  //     blurRadius: 5.0,
-                  //     offset: Offset(0, -4),
-                  //   ),
-                  // ],
+                // boxShadow: [
+                //   BoxShadow(
+                //     spreadRadius: -8,
+                //     blurRadius: 5.0,
+                //     offset: Offset(0, -4),
+                //   ),
+                // ],
                   color: StreamChatTheme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(8.0)),
               child: ListView(
@@ -474,7 +474,7 @@ class MessageInputState extends State<MessageInput> {
                         children: [
                           Padding(
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Icon(StreamIcons.lightning,
                                 color: StreamChatTheme.of(context).accentColor),
                           ),
@@ -485,48 +485,48 @@ class MessageInputState extends State<MessageInput> {
                   ...commands
                       .map(
                         (c) => ListTile(
-                          leading: c.name == 'giphy'
-                              ? CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  child: Image.asset(
-                                    'images/giphy_icon.png',
-                                    package: 'stream_chat_flutter',
-                                    width: 16.0,
-                                    height: 16.0,
-                                  ),
-                                  maxRadius: 12.0,
-                                )
-                              : null,
-                          title: Text.rich(
-                            TextSpan(
-                              text: '${c.name.capitalize()}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              children: [
-                                TextSpan(
-                                  text: ' /${c.name} ${c.args}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          trailing: CircleAvatar(
-                            backgroundColor:
-                                StreamChatTheme.of(context).accentColor,
-                            child: Icon(
-                              StreamIcons.lightning,
-                              color: Colors.white,
-                              size: 12.5,
-                            ),
-                            maxRadius: 12,
-                          ),
-                          //subtitle: Text(c.description),
-                          onTap: () {
-                            _setCommand(c);
-                          },
+                      leading: c.name == 'giphy'
+                          ? CircleAvatar(
+                        backgroundColor: Colors.black,
+                        child: Image.asset(
+                          'images/giphy_icon.png',
+                          package: 'stream_chat_flutter',
+                          width: 16.0,
+                          height: 16.0,
                         ),
+                        maxRadius: 12.0,
                       )
+                          : null,
+                      title: Text.rich(
+                        TextSpan(
+                          text: '${c.name.capitalize()}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          children: [
+                            TextSpan(
+                              text: ' /${c.name} ${c.args}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      trailing: CircleAvatar(
+                        backgroundColor:
+                        StreamChatTheme.of(context).accentColor,
+                        child: Icon(
+                          StreamIcons.lightning,
+                          color: Colors.white,
+                          size: 12.5,
+                        ),
+                        maxRadius: 12,
+                      ),
+                      //subtitle: Text(c.description),
+                      onTap: () {
+                        _setCommand(c);
+                      },
+                    ),
+                  )
                       .toList(),
                 ],
               ),
@@ -637,7 +637,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildPickerSection() {
     switch (_filePickerIndex) {
       case 0:
-        return FutureBuilder<List<Medium>>(
+        return FutureBuilder(
             future: _getAllMedia(),
             builder: (context, mediaData) {
               if (!mediaData.hasData) {
@@ -647,40 +647,46 @@ class MessageInputState extends State<MessageInput> {
               }
 
               return GridView.builder(
-                itemCount: mediaData.data.length,
+                itemCount: mediaData.data.item2.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3),
                 itemBuilder: (context, position) {
-                  return FutureBuilder<List<dynamic>>(
-                      future: PhotoGallery.getThumbnail(
-                          mediumId: mediaData.data[position].id),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 1.0, vertical: 1.0),
-                          child: InkWell(
-                            child: AspectRatio(
-                              child: Image.memory(
-                                snapshot.data,
-                                fit: mediaData.data[position].height >
-                                        mediaData.data[position].width
-                                    ? BoxFit.fitWidth
-                                    : BoxFit.fitHeight,
-                              ),
-                              aspectRatio: 1.0,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 1.0, vertical: 1.0),
+                    child: InkWell(
+                      child: Stack(
+                        children: [
+                          AspectRatio(
+                            aspectRatio: 1.0,
+                            child: Image.memory(
+                              mediaData.data.item2[position],
+                              fit: mediaData.data.item1[position].height >
+                                  mediaData.data.item1[position].width
+                                  ? BoxFit.fitWidth
+                                  : BoxFit.fitHeight,
                             ),
-                            onTap: () {
-                              _addAttachment(mediaData.data[position]);
-                            },
                           ),
-                        );
-                      });
+                          if (_attachments.any((element) =>
+                          element.id ==
+                              mediaData.data.item1[position].id))
+                            Container(
+                              color: Colors.black.withOpacity(0.5),
+                              child: Center(
+                                child: Icon(
+                                  StreamIcons.check_send,
+                                  color: Colors.white,
+                                  size: 24.0,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      onTap: () {
+                        _addAttachment(mediaData.data.item1[position]);
+                      },
+                    ),
+                  );
                 },
               );
             });
@@ -715,6 +721,7 @@ class MessageInputState extends State<MessageInput> {
         localUri: file.path != null ? Uri.parse(file.path) : null,
         type: medium.mediumType == MediumType.image ? 'image' : 'video',
       ),
+      id: medium.id,
     );
 
     setState(() {
@@ -747,10 +754,11 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
-  Future<List<Medium>> _getAllMedia() async {
+  Future<Tuple2<List<Medium>, List<dynamic>>> _getAllMedia() async {
     var allAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.image);
     //var allVideoAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.video);
     List<Medium> resultList = [];
+    List<List<dynamic>> resultThumbnailList = [];
 
     for (var album in allAlbums) {
       var data = await album.listMedia();
@@ -764,7 +772,11 @@ class MessageInputState extends State<MessageInput> {
 
     resultList.sort((a, b) => a.modifiedDate.compareTo(b.modifiedDate));
 
-    return resultList;
+    for (var e in resultList) {
+      resultThumbnailList.add(await PhotoGallery.getThumbnail(mediumId: e.id));
+    }
+
+    return Tuple2<List<Medium>, List<dynamic>>(resultList, resultThumbnailList);
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
@@ -784,8 +796,8 @@ class MessageInputState extends State<MessageInput> {
     }
 
     final members = StreamChannel.of(context).channel.state.members?.where((m) {
-          return m.user.name.toLowerCase().contains(query);
-        })?.toList() ??
+      return m.user.name.toLowerCase().contains(query);
+    })?.toList() ??
         [];
 
     RenderBox renderBox = context.findRenderObject();
@@ -825,38 +837,38 @@ class MessageInputState extends State<MessageInput> {
                     shrinkWrap: true,
                     children: snapshot.data
                         .map((m) => ListTile(
-                              leading: UserAvatar(
-                                user: m.user,
-                              ),
-                              title: Text(
-                                '${m.user.name}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text('@${m.userId}'),
-                              trailing: Icon(
-                                StreamIcons.at_mention,
-                                color: StreamChatTheme.of(context).accentColor,
-                              ),
-                              onTap: () {
-                                _mentionedUsers.add(m.user);
+                      leading: UserAvatar(
+                        user: m.user,
+                      ),
+                      title: Text(
+                        '${m.user.name}',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text('@${m.userId}'),
+                      trailing: Icon(
+                        StreamIcons.at_mention,
+                        color: StreamChatTheme.of(context).accentColor,
+                      ),
+                      onTap: () {
+                        _mentionedUsers.add(m.user);
 
-                                splits[splits.length - 1] = m.user.name;
-                                final rejoin = splits.join('@');
+                        splits[splits.length - 1] = m.user.name;
+                        final rejoin = splits.join('@');
 
-                                textEditingController.value = TextEditingValue(
-                                  text: rejoin +
-                                      textEditingController.text.substring(
-                                          textEditingController
-                                              .selection.start),
-                                  selection: TextSelection.collapsed(
-                                    offset: rejoin.length,
-                                  ),
-                                );
+                        textEditingController.value = TextEditingValue(
+                          text: rejoin +
+                              textEditingController.text.substring(
+                                  textEditingController
+                                      .selection.start),
+                          selection: TextSelection.collapsed(
+                            offset: rejoin.length,
+                          ),
+                        );
 
-                                _mentionsOverlay?.remove();
-                                _mentionsOverlay = null;
-                              },
-                            ))
+                        _mentionsOverlay?.remove();
+                        _mentionsOverlay = null;
+                      },
+                    ))
                         .toList(),
                   );
                 }),
@@ -881,44 +893,44 @@ class MessageInputState extends State<MessageInput> {
     return _attachments.isEmpty
         ? Container()
         : LimitedBox(
-            maxHeight: 76.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: _attachments
-                  .map(
-                    (attachment) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: <Widget>[
-                            AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Container(
-                                height: 50,
-                                width: 50,
-                                child: _buildAttachment(attachment),
-                              ),
-                            ),
-                            _buildRemoveButton(attachment),
-                            attachment.uploaded
-                                ? SizedBox()
-                                : Positioned.fill(
-                                    child: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                  ),
-                          ],
-                        ),
+      maxHeight: 76.0,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: _attachments
+            .map(
+              (attachment) => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Stack(
+                children: <Widget>[
+                  AspectRatio(
+                    aspectRatio: 1.0,
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      child: _buildAttachment(attachment),
+                    ),
+                  ),
+                  _buildRemoveButton(attachment),
+                  attachment.uploaded
+                      ? SizedBox()
+                      : Positioned.fill(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(),
                       ),
                     ),
-                  )
-                  .toList(),
+                  ),
+                ],
+              ),
             ),
-          );
+          ),
+        )
+            .toList(),
+      ),
+    );
   }
 
   Positioned _buildRemoveButton(_SendingAttachment attachment) {
@@ -954,7 +966,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildAttachment(_SendingAttachment attachment) {
     if (widget.attachmentThumbnailBuilders
-            ?.containsKey(attachment.attachment.type) ==
+        ?.containsKey(attachment.attachment.type) ==
         true) {
       return widget.attachmentThumbnailBuilders[attachment.attachment.type](
         context,
@@ -967,14 +979,14 @@ class MessageInputState extends State<MessageInput> {
       case 'giphy':
         return attachment.file != null
             ? Image.memory(
-                attachment.file.bytes,
-                fit: BoxFit.cover,
-              )
+          attachment.file.bytes,
+          fit: BoxFit.cover,
+        )
             : Image.network(
-                attachment.attachment.imageUrl ??
-                    attachment.attachment.thumbUrl,
-                fit: BoxFit.cover,
-              );
+          attachment.attachment.imageUrl ??
+              attachment.attachment.thumbUrl,
+          fit: BoxFit.cover,
+        );
         break;
       case 'video':
         return Container(
@@ -1020,7 +1032,7 @@ class MessageInputState extends State<MessageInput> {
       child: InkWell(
         child: Padding(
           padding:
-              EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
+          EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
           child: Icon(
             StreamIcons.attach,
             color: Color(0xFF000000).withAlpha(128),
@@ -1220,10 +1232,10 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadAttachment(
-    PlatformFile file,
-    DefaultAttachmentTypes type,
-    Channel channel,
-  ) async {
+      PlatformFile file,
+      DefaultAttachmentTypes type,
+      Channel channel,
+      ) async {
     String url;
     if (type == DefaultAttachmentTypes.image) {
       if (widget.doImageUploadRequest != null) {
@@ -1270,19 +1282,19 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildIdleSendButton(BuildContext context) {
     return IconTheme(
       data:
-          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+      StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
             child: InkWell(
-          onTap: () {
-            sendMessage();
-          },
-          child: Icon(
-            _getIdleSendIcon(),
-            color: Colors.grey,
-          ),
-        )),
+              onTap: () {
+                sendMessage();
+              },
+              child: Icon(
+                _getIdleSendIcon(),
+                color: Colors.grey,
+              ),
+            )),
       ),
     );
   }
@@ -1290,7 +1302,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildSendButton(BuildContext context) {
     return IconTheme(
       data:
-          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+      StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -1370,7 +1382,7 @@ class MessageInputState extends State<MessageInput> {
         text: text,
         attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
-            _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
+        _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
     } else {
       message = (widget.initialMessage ?? Message()).copyWith(
@@ -1378,7 +1390,7 @@ class MessageInputState extends State<MessageInput> {
         text: text,
         attachments: _getAttachments(attachments).toList(),
         mentionedUsers:
-            _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
+        _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
         showInChannel: widget.parentMessage != null ? _sendAsDm : null,
       );
     }
@@ -1392,9 +1404,9 @@ class MessageInputState extends State<MessageInput> {
       sendingFuture = channel.sendMessage(message);
     } else {
       sendingFuture = StreamChat.of(context).client.updateMessage(
-            message,
-            channel.cid,
-          );
+        message,
+        channel.cid,
+      );
     }
 
     return sendingFuture.then((resp) {
@@ -1501,11 +1513,13 @@ class _SendingAttachment {
   PlatformFile file;
   Attachment attachment;
   bool uploaded;
+  String id;
 
   _SendingAttachment({
     this.file,
     this.attachment,
     this.uploaded = false,
+    this.id,
   });
 }
 
@@ -1513,4 +1527,45 @@ extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1)}";
   }
+}
+
+/// Represents a 2-tuple, or pair.
+class Tuple2<T1, T2> {
+  /// Returns the first item of the tuple
+  final T1 item1;
+
+  /// Returns the second item of the tuple
+  final T2 item2;
+
+  /// Creates a new tuple value with the specified items.
+  const Tuple2(this.item1, this.item2);
+
+  /// Create a new tuple value with the specified list [items].
+  factory Tuple2.fromList(List items) {
+    if (items.length != 2) {
+      throw ArgumentError('items must have length 2');
+    }
+
+    return Tuple2<T1, T2>(items[0] as T1, items[1] as T2);
+  }
+
+  /// Returns a tuple with the first item set to the specified value.
+  Tuple2<T1, T2> withItem1(T1 v) => Tuple2<T1, T2>(v, item2);
+
+  /// Returns a tuple with the second item set to the specified value.
+  Tuple2<T1, T2> withItem2(T2 v) => Tuple2<T1, T2>(item1, v);
+
+  /// Creates a [List] containing the items of this [Tuple2].
+  ///
+  /// The elements are in item order. The list is variable-length
+  /// if [growable] is true.
+  List toList({bool growable = false}) =>
+      List.from([item1, item2], growable: growable);
+
+  @override
+  String toString() => '[$item1, $item2]';
+
+  @override
+  bool operator ==(Object other) =>
+      other is Tuple2 && other.item1 == item1 && other.item2 == item2;
 }
