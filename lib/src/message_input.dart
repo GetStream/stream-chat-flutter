@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -14,6 +16,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:substring_highlight/substring_highlight.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -168,7 +171,8 @@ class MessageInputState extends State<MessageInput> {
   bool _messageIsPresent = false;
   bool _typingStarted = false;
   bool _commandEnabled = false;
-  OverlayEntry _commandsOverlay, _mentionsOverlay;
+  OverlayEntry _commandsOverlay, _mentionsOverlay, _emojiOverlay;
+  Iterable<String> _emojiNames;
 
   Command _chosenCommand;
   bool _actionsShrunk = false;
@@ -227,22 +231,66 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildDmCheckbox() {
-    return Row(
-      children: [
-        Checkbox(
-          value: _sendAsDm,
-          onChanged: (val) => setState(
-            () {
-              _sendAsDm = val;
-            },
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.only(
+        left: 12,
+        bottom: 12,
+        top: 8,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            height: 16,
+            width: 16,
+            foregroundDecoration: BoxDecoration(
+              border: _sendAsDm
+                  ? null
+                  : Border.all(
+                      color: Colors.black.withOpacity(.5),
+                      width: 2,
+                    ),
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Center(
+              child: Material(
+                borderRadius: BorderRadius.circular(3),
+                color: _sendAsDm
+                    ? StreamChatTheme.of(context).accentColor
+                    : Colors.white,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _sendAsDm = !_sendAsDm;
+                    });
+                  },
+                  child: AnimatedCrossFade(
+                    duration: Duration(milliseconds: 300),
+                    reverseDuration: Duration(milliseconds: 300),
+                    crossFadeState: _sendAsDm
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: Icon(
+                      StreamIcons.check,
+                      size: 16.0,
+                      color: Colors.white,
+                    ),
+                    secondChild: SizedBox(
+                      height: 16,
+                      width: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          activeColor: StreamChatTheme.of(context).accentColor,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('Send also as direct message'),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text('Send also as direct message'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -326,42 +374,14 @@ class MessageInputState extends State<MessageInput> {
                     _commandsOverlay = null;
                     _mentionsOverlay?.remove();
                     _mentionsOverlay = null;
+                    _emojiOverlay?.remove();
+                    _emojiOverlay = null;
 
-                    if (s.startsWith('/')) {
-                      var matchedCommandsList = StreamChannel.of(context)
-                          .channel
-                          .config
-                          .commands
-                          .where((element) => element.name == s.substring(1))
-                          .toList();
+                    _checkCommands(s.trimLeft(), context);
 
-                      if (matchedCommandsList.length == 1) {
-                        _chosenCommand = matchedCommandsList[0];
-                        textEditingController.clear();
-                        _messageIsPresent = false;
-                        setState(() {
-                          _commandEnabled = true;
-                        });
-                        _commandsOverlay?.remove();
-                        _commandsOverlay = null;
-                      } else {
-                        _commandsOverlay = _buildCommandsOverlayEntry();
-                        Overlay.of(context).insert(_commandsOverlay);
-                      }
-                    }
+                    _checkMentions(s, context);
 
-                    if (textEditingController.selection.isCollapsed &&
-                        s.isNotEmpty &&
-                        (s[textEditingController.selection.start - 1] == '@' ||
-                            textEditingController.text
-                                .substring(
-                                    0, textEditingController.selection.start)
-                                .split(' ')
-                                .last
-                                .contains('@'))) {
-                      _mentionsOverlay = _buildMentionsOverlayEntry();
-                      Overlay.of(context).insert(_mentionsOverlay);
-                    }
+                    _checkEmoji(s, context);
                   },
                   onTap: () {
                     setState(() {
@@ -427,8 +447,73 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
+  void _checkEmoji(String s, BuildContext context) {
+    if (textEditingController.selection.isCollapsed &&
+        (s.isNotEmpty && s[textEditingController.selection.start - 1] == ':' ||
+            textEditingController.text
+                .substring(
+                  0,
+                  textEditingController.selection.start,
+                )
+                .contains(':'))) {
+      final textToSelection = textEditingController.text
+          .substring(0, textEditingController.value.selection.start);
+      final splits = textToSelection.split(':');
+      final query = splits[splits.length - 2]?.toLowerCase();
+      final emoji = Emoji.byName(query);
+
+      if (textToSelection.endsWith(':') && emoji != null) {
+        _chooseEmoji(splits.sublist(0, splits.length - 1), emoji);
+      } else {
+        _emojiOverlay = _buildEmojiOverlay();
+
+        if (_emojiOverlay != null) {
+          Overlay.of(context).insert(_emojiOverlay);
+        }
+      }
+    }
+  }
+
+  void _checkMentions(String s, BuildContext context) {
+    if (textEditingController.selection.isCollapsed &&
+        (s.isNotEmpty && s[textEditingController.selection.start - 1] == '@' ||
+            textEditingController.text
+                .substring(0, textEditingController.selection.start)
+                .split(' ')
+                .last
+                .contains('@'))) {
+      _mentionsOverlay = _buildMentionsOverlayEntry();
+      Overlay.of(context).insert(_mentionsOverlay);
+    }
+  }
+
+  void _checkCommands(String s, BuildContext context) {
+    if (s.startsWith('/')) {
+      var matchedCommandsList = StreamChannel.of(context)
+          .channel
+          .config
+          .commands
+          .where((element) => element.name == s.substring(1))
+          .toList();
+
+      if (matchedCommandsList.length == 1) {
+        _chosenCommand = matchedCommandsList[0];
+        textEditingController.clear();
+        _messageIsPresent = false;
+        setState(() {
+          _commandEnabled = true;
+        });
+        _commandsOverlay.remove();
+        _commandsOverlay = null;
+      } else {
+        _commandsOverlay = _buildCommandsOverlayEntry();
+        Overlay.of(context).insert(_commandsOverlay);
+      }
+    }
+  }
+
   OverlayEntry _buildCommandsOverlayEntry() {
-    final text = textEditingController.text;
+    final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
         .channel
         .config
@@ -456,13 +541,6 @@ class MessageInputState extends State<MessageInput> {
             child: Container(
               constraints: BoxConstraints.loose(Size.fromHeight(400)),
               decoration: BoxDecoration(
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     spreadRadius: -8,
-                  //     blurRadius: 5.0,
-                  //     offset: Offset(0, -4),
-                  //   ),
-                  // ],
                   color: StreamChatTheme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(8.0)),
               child: ListView(
@@ -480,25 +558,19 @@ class MessageInputState extends State<MessageInput> {
                             child: Icon(StreamIcons.lightning,
                                 color: StreamChatTheme.of(context).accentColor),
                           ),
-                          Text('Instant Commands')
+                          Text(
+                            'Instant Commands',
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(.5),
+                            ),
+                          )
                         ],
                       ),
                     ),
                   ...commands
                       .map(
                         (c) => ListTile(
-                          leading: c.name == 'giphy'
-                              ? CircleAvatar(
-                                  backgroundColor: Colors.black,
-                                  child: Image.asset(
-                                    'images/giphy_icon.png',
-                                    package: 'stream_chat_flutter',
-                                    width: 16.0,
-                                    height: 16.0,
-                                  ),
-                                  maxRadius: 12.0,
-                                )
-                              : null,
+                          leading: c.name == 'giphy' ? _buildGiphyIcon() : null,
                           title: Text.rich(
                             TextSpan(
                               text: '${c.name.capitalize()}',
@@ -641,12 +713,12 @@ class MessageInputState extends State<MessageInput> {
       case 0:
         return GridView.builder(
           itemCount: _mediaData.item2.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3),
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           itemBuilder: (context, position) {
             return Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 1.0, vertical: 1.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0),
               child: InkWell(
                 child: Stack(
                   children: [
@@ -655,13 +727,13 @@ class MessageInputState extends State<MessageInput> {
                       child: Image.memory(
                         _mediaData.item2[position],
                         fit: _mediaData.item1[position].height >
-                            _mediaData.item1[position].width
+                                _mediaData.item1[position].width
                             ? BoxFit.fitWidth
                             : BoxFit.fitHeight,
                       ),
                     ),
                     if (_attachments.any((element) =>
-                    element.id == _mediaData.item1[position].id))
+                        element.id == _mediaData.item1[position].id))
                       Container(
                         color: Colors.black.withOpacity(0.5),
                         child: Center(
@@ -676,11 +748,11 @@ class MessageInputState extends State<MessageInput> {
                 ),
                 onTap: () {
                   if (!_attachments.any((element) =>
-                  element.id == _mediaData.item1[position].id)) {
+                      element.id == _mediaData.item1[position].id)) {
                     _addAttachment(_mediaData.item1[position]);
                   } else {
                     _attachments.removeWhere((element) =>
-                    element.id == _mediaData.item1[position].id);
+                        element.id == _mediaData.item1[position].id);
                     setState(() {});
                   }
                 },
@@ -775,8 +847,34 @@ class MessageInputState extends State<MessageInput> {
     }
 
     setState(() {
-      _mediaData = Tuple2<List<Medium>, List<dynamic>>(resultList, resultThumbnailList);
+      _mediaData =
+          Tuple2<List<Medium>, List<dynamic>>(resultList, resultThumbnailList);
     });
+  }
+
+  CircleAvatar _buildGiphyIcon() {
+    if (kIsWeb) {
+      return CircleAvatar(
+        backgroundColor: Colors.black,
+        child: Image.asset(
+          'images/giphy_icon.png',
+          package: 'stream_chat_flutter',
+          width: 24.0,
+          height: 24.0,
+        ),
+        radius: 12,
+      );
+    } else {
+      return CircleAvatar(
+        child: SvgPicture.asset(
+          'svgs/giphy_icon.svg',
+          package: 'stream_chat_flutter',
+          width: 24.0,
+          height: 24.0,
+        ),
+        radius: 12,
+      );
+    }
   }
 
   OverlayEntry _buildMentionsOverlayEntry() {
@@ -819,13 +917,6 @@ class MessageInputState extends State<MessageInput> {
           child: Container(
             constraints: BoxConstraints.loose(Size.fromHeight(400)),
             decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  spreadRadius: -8,
-                  blurRadius: 5.0,
-                  offset: Offset(0, -4),
-                ),
-              ],
               color: StreamChatTheme.of(context).primaryColor,
             ),
             child: FutureBuilder<List<Member>>(
@@ -838,6 +929,12 @@ class MessageInputState extends State<MessageInput> {
                     children: snapshot.data
                         .map((m) => ListTile(
                               leading: UserAvatar(
+                                constraints: BoxConstraints.tight(
+                                  Size(
+                                    40,
+                                    40,
+                                  ),
+                                ),
                                 user: m.user,
                               ),
                               title: Text(
@@ -876,6 +973,125 @@ class MessageInputState extends State<MessageInput> {
         ),
       );
     });
+  }
+
+  OverlayEntry _buildEmojiOverlay() {
+    final splits = textEditingController.text
+        .substring(0, textEditingController.value.selection.start)
+        .split(':');
+    final query = splits.last.toLowerCase();
+
+    if (query.isEmpty) {
+      return null;
+    }
+
+    final emojis = _emojiNames
+        .where((e) => e.contains(query))
+        .map((e) => Emoji.byName(e))
+        .where((e) => e != null);
+
+    if (emojis.isEmpty) {
+      return null;
+    }
+
+    RenderBox renderBox = context.findRenderObject();
+    final size = renderBox.size;
+
+    return OverlayEntry(builder: (context) {
+      return Positioned(
+        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+        left: 0,
+        right: 0,
+        child: Card(
+          margin: EdgeInsets.all(8.0),
+          elevation: 2.0,
+          color: StreamChatTheme.of(context).primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            constraints: BoxConstraints.loose(Size.fromHeight(200)),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  spreadRadius: -8,
+                  blurRadius: 5.0,
+                  offset: Offset(0, -4),
+                ),
+              ],
+              color: StreamChatTheme.of(context).primaryColor,
+            ),
+            child: ListView.builder(
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                itemCount: emojis.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Icon(
+                              StreamIcons.smile,
+                              color: StreamChatTheme.of(context).accentColor,
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              'Emoji matching "$query"',
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(.5),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  }
+
+                  final emoji = emojis.elementAt(i - 1);
+                  return ListTile(
+                    title: SubstringHighlight(
+                      text: "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
+                      term: query,
+                      textStyleHighlight:
+                          Theme.of(context).textTheme.headline6.copyWith(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                      textStyle: Theme.of(context).textTheme.headline6.copyWith(
+                            fontSize: 14.5,
+                          ),
+                    ),
+                    onTap: () {
+                      _chooseEmoji(splits, emoji);
+                    },
+                  );
+                }),
+          ),
+        ),
+      );
+    });
+  }
+
+  void _chooseEmoji(List<String> splits, Emoji emoji) {
+    final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char;
+
+    textEditingController.value = TextEditingValue(
+      text: rejoin +
+          textEditingController.text
+              .substring(textEditingController.selection.start),
+      selection: TextSelection.collapsed(
+        offset: rejoin.length,
+      ),
+    );
+
+    _emojiOverlay?.remove();
+    _emojiOverlay = null;
   }
 
   void _setCommand(Command c) {
@@ -1433,11 +1649,13 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
+    _emojiNames = Emoji.all().map((e) => e.name);
+
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
         if (visible) {
           if (_commandsOverlay != null) {
-            if (textEditingController.text.startsWith('/')) {
+            if (textEditingController.text.trimLeft().startsWith('/')) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _commandsOverlay = _buildCommandsOverlayEntry();
                 Overlay.of(context).insert(_commandsOverlay);
@@ -1453,12 +1671,24 @@ class MessageInputState extends State<MessageInput> {
               });
             }
           }
+
+          if (_emojiOverlay != null) {
+            if (textEditingController.text.contains(':')) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _emojiOverlay = _buildEmojiOverlay();
+                Overlay.of(context).insert(_emojiOverlay);
+              });
+            }
+          }
         } else {
           if (_commandsOverlay != null) {
             _commandsOverlay.remove();
           }
           if (_mentionsOverlay != null) {
             _mentionsOverlay.remove();
+          }
+          if (_emojiOverlay != null) {
+            _emojiOverlay.remove();
           }
         }
       });
@@ -1494,6 +1724,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   void dispose() {
     _commandsOverlay?.remove();
+    _emojiOverlay?.remove();
     _mentionsOverlay?.remove();
     _keyboardListener?.cancel();
     super.dispose();

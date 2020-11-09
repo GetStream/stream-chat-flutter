@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -729,37 +730,68 @@ class _MessageWidgetState extends State<MessageWidget> {
     return SizedBox();
   }
 
+  Widget _wrapTextInBubble({
+    BuildContext context,
+    Widget child,
+  }) {
+    return Material(
+      shape: widget.shape ??
+          RoundedRectangleBorder(
+            side: widget.borderSide ??
+                BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withAlpha(24)
+                      : Colors.black.withAlpha(24),
+                ),
+            borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
+          ),
+      color: _getBackgroundColor(),
+      child: child,
+    );
+  }
+
   Widget _buildTextBubble(BuildContext context) {
+    final isOnlyEmoji =
+        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
+
+    Widget child = Transform(
+      transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+      alignment: Alignment.center,
+      child: Padding(
+        padding: widget.textPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            getFailedMessageWidget(context),
+            widget.textBuilder != null
+                ? widget.textBuilder(context, widget.message)
+                : MessageText(
+                    onLinkTap: widget.onLinkTap,
+                    message: widget.message,
+                    onMentionTap: widget.onMentionTap,
+                    messageTheme: isOnlyEmoji
+                        ? widget.messageTheme.copyWith(
+                            messageText:
+                                widget.messageTheme.messageText.copyWith(
+                            fontSize: 40,
+                          ))
+                        : widget.messageTheme,
+                  ),
+          ],
+        ),
+      ),
+    );
+
+    if (!isOnlyEmoji) {
+      child = _wrapTextInBubble(
+        context: context,
+        child: child,
+      );
+    }
     return GestureDetector(
       onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
-      child: Material(
-        shape: widget.shape ??
-            RoundedRectangleBorder(
-              side: widget.borderSide ??
-                  BorderSide(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withAlpha(24)
-                        : Colors.black.withAlpha(24),
-                  ),
-              borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-            ),
-        color: _getBackgroundColor(),
-        child: Transform(
-          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-          alignment: Alignment.center,
-          child: Padding(
-            padding: widget.textPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                getFailedMessageWidget(context),
-                _buildText(context),
-              ],
-            ),
-          ),
-        ),
-      ),
+      child: child,
     );
   }
 
@@ -792,16 +824,5 @@ class _MessageWidgetState extends State<MessageWidget> {
           );
       return;
     }
-  }
-
-  Widget _buildText(BuildContext context) {
-    return widget.textBuilder != null
-        ? widget.textBuilder(context, widget.message)
-        : MessageText(
-            onLinkTap: widget.onLinkTap,
-            message: widget.message,
-            onMentionTap: widget.onMentionTap,
-            messageTheme: widget.messageTheme,
-          );
   }
 }

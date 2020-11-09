@@ -14,7 +14,9 @@ dependencies:
   flutter_app_badger: ^1.1.2
   photo_view: ^0.10.1
   rxdart: ^0.24.1
+  scrollable_positioned_list: ^0.1.8
   jiffy: ^3.0.1
+  flutter_svg: ^0.19.1
   flutter_portal: ^0.3.0
   cached_network_image: ^2.2.0+1
   flutter_markdown: ^0.5.0
@@ -25,18 +27,20 @@ dependencies:
   image_picker: ^0.6.7+2
   flutter_keyboard_visibility: ^3.2.1
   stream_chat: ^0.2.10+1
+  emojis: ^0.9.3
   mime: ^0.9.6+3
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4
+  substring_highlight: ^0.1.2
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
-  widgets_visibility_provider: ^2.0.2
   photo_gallery: ^0.3.0
 
 flutter:
   assets:
-    - images/giphy_icon.png
+    - images/
+    - svgs/
   fonts:
    - family: stream-icons
      fonts:

@@ -98,7 +98,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
+
+      ///TODO change to system once dark theme is implemented
       builder: (context, widget) {
         return StreamChat(
           child: widget,

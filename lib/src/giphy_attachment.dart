@@ -41,195 +41,211 @@ class GiphyAttachment extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Card(
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(16.0),
-              bottomRight: Radius.circular(0.0),
-              topLeft: Radius.circular(16.0),
-              bottomLeft: Radius.circular(16.0),
+        DecoratedBox(
+          decoration: BoxDecoration(),
+          child: Card(
+            elevation: 2,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(16.0),
+                bottomRight: Radius.circular(0.0),
+                topLeft: Radius.circular(16.0),
+                bottomLeft: Radius.circular(16.0),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return FullScreenImage(
-                        url: attachment.imageUrl ??
-                            attachment.assetUrl ??
-                            attachment.thumbUrl,
-                      );
-                    }));
-                  },
-                  child: CachedNetworkImage(
-                    height: size?.height,
-                    width: size?.width,
-                    placeholder: (_, __) {
-                      return Container(
-                        width: size?.width,
-                        height: size?.height,
-                        child: Center(
-                          child: CircularProgressIndicator(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) {
+                            return FullScreenImage(
+                              url: attachment.imageUrl ??
+                                  attachment.assetUrl ??
+                                  attachment.thumbUrl,
+                            );
+                          }));
+                        },
+                        child: CachedNetworkImage(
+                          height: size?.height,
+                          width: size?.width,
+                          placeholder: (_, __) {
+                            return Container(
+                              width: size?.width,
+                              height: size?.height,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          imageUrl: attachment.thumbUrl ??
+                              attachment.imageUrl ??
+                              attachment.assetUrl,
+                          errorWidget: (context, url, error) => AttachmentError(
+                            attachment: attachment,
+                            size: size,
+                          ),
+                          fit: BoxFit.cover,
                         ),
-                      );
-                    },
-                    imageUrl: attachment.thumbUrl ??
-                        attachment.imageUrl ??
-                        attachment.assetUrl,
-                    errorWidget: (context, url, error) => AttachmentError(
-                      attachment: attachment,
-                      size: size,
+                      ),
                     ),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(16.0),
-                      )),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 8.0,
-                      right: 8.0,
-                      top: 8.0,
-                      bottom: 4.0,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          StreamIcons.lightning,
-                          color: StreamChatTheme.of(context).accentColor,
-                          size: 16.0,
-                        ),
-                        Text(
-                          'GIPHY',
-                          style: TextStyle(
-                            color: StreamChatTheme.of(context).accentColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11.0,
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(16.0),
+                            )),
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 8.0,
+                            right: 8.0,
+                            top: 8.0,
+                            bottom: 4.0,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                StreamIcons.lightning,
+                                color: StreamChatTheme.of(context).accentColor,
+                                size: 16.0,
+                              ),
+                              Text(
+                                'GIPHY',
+                                style: TextStyle(
+                                  color:
+                                      StreamChatTheme.of(context).accentColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11.0,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-              if (attachment.title != null)
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  child: Material(
-                    color: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Card(
-                          child: IconButton(
-                            icon: Icon(
-                              StreamIcons.left,
-                              size: 24.0,
+                if (attachment.title != null)
+                  Container(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Card(
+                            elevation: 2,
+                            child: IconButton(
+                              padding: const EdgeInsets.all(0),
+                              constraints: BoxConstraints.tight(Size(32, 32)),
+                              icon: Icon(
+                                StreamIcons.left,
+                                size: 24.0,
+                              ),
+                              splashRadius: 16,
+                              onPressed: () {
+                                streamChannel.channel.sendAction(message, {
+                                  'image_action': 'shuffle',
+                                });
+                              },
                             ),
-                            splashRadius: 24,
-                            onPressed: () {
-                              streamChannel.channel.sendAction(message, {
-                                'image_action': 'shuffle',
-                              });
-                            },
+                            shape: CircleBorder(),
                           ),
-                          shape: CircleBorder(),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              '"${attachment.title}"',
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                '"${attachment.title}"',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Card(
-                          child: IconButton(
-                            icon: Icon(
-                              StreamIcons.right,
-                              size: 24.0,
+                          Card(
+                            elevation: 2,
+                            child: IconButton(
+                              padding: const EdgeInsets.all(0),
+                              constraints: BoxConstraints.tight(Size(32, 32)),
+                              icon: Icon(
+                                StreamIcons.right,
+                                size: 24.0,
+                              ),
+                              splashRadius: 16,
+                              onPressed: () {
+                                streamChannel.channel.sendAction(message, {
+                                  'image_action': 'shuffle',
+                                });
+                              },
                             ),
-                            splashRadius: 24,
-                            onPressed: () {
-                              streamChannel.channel.sendAction(message, {
-                                'image_action': 'shuffle',
-                              });
-                            },
+                            shape: CircleBorder(),
                           ),
-                          shape: CircleBorder(),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
+                SizedBox(
+                  height: 4.0,
                 ),
-              SizedBox(
-                height: 4.0,
-              ),
-              Container(
-                color: Colors.black.withOpacity(0.2),
-                width: double.infinity,
-                height: 0.5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: FlatButton(
-                      height: 50,
-                      onPressed: () {
-                        streamChannel.channel.sendAction(message, {
-                          'image_action': 'cancel',
-                        });
-                      },
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black.withOpacity(0.5)),
+                Container(
+                  color: Colors.black.withOpacity(0.2),
+                  width: double.infinity,
+                  height: 0.5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: FlatButton(
+                        height: 50,
+                        onPressed: () {
+                          streamChannel.channel.sendAction(message, {
+                            'image_action': 'cancel',
+                          });
+                        },
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black.withOpacity(0.5)),
+                        ),
                       ),
                     ),
-                  ),
-                  Container(
-                    width: 0.5,
-                    color: Colors.black.withOpacity(0.2),
-                    height: 50.0,
-                  ),
-                  Expanded(
-                    child: FlatButton(
-                      height: 50,
-                      onPressed: () {
-                        streamChannel.channel.sendAction(message, {
-                          'image_action': 'send',
-                        });
-                      },
-                      child: Text(
-                        'Send',
-                        style: TextStyle(
-                            color: StreamChatTheme.of(context).accentColor,
-                            fontWeight: FontWeight.bold),
+                    Container(
+                      width: 0.5,
+                      color: Colors.black.withOpacity(0.2),
+                      height: 50.0,
+                    ),
+                    Expanded(
+                      child: FlatButton(
+                        height: 50,
+                        onPressed: () {
+                          streamChannel.channel.sendAction(message, {
+                            'image_action': 'send',
+                          });
+                        },
+                        child: Text(
+                          'Send',
+                          style: TextStyle(
+                              color: StreamChatTheme.of(context).accentColor,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         SizedBox(
@@ -313,7 +329,10 @@ class GiphyAttachment extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(
+              top: 8.0,
+              bottom: 8,
+            ),
             child: Row(
               children: [
                 Row(

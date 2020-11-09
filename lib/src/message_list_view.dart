@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:widgets_visibility_provider/widgets_visibility_provider.dart';
 
 import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
@@ -106,7 +107,10 @@ class MessageListView extends StatefulWidget {
     this.onThreadTap,
     this.dateDividerBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.initialScrollIndex = 0,
+    this.initialAlignment = 0,
+    this.scrollController,
+    this.itemPositionListener,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -131,95 +135,101 @@ class MessageListView extends StatefulWidget {
   /// Builder used to render date dividers
   final Widget Function(DateTime) dateDividerBuilder;
 
+  /// Index of an item to initially align within the viewport.
+  final int initialScrollIndex;
+
+  /// Determines where the leading edge of the item at [initialScrollIndex]
+  /// should be placed.
+  final double initialAlignment;
+
+  /// Controller for jumping or scrolling to an item.
+  final ItemScrollController scrollController;
+
+  /// Provides a listenable iterable of [itemPositions] of items that are on
+  /// screen and their locations.
+  final ItemPositionsListener itemPositionListener;
+
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
-
-  /// The [ScrollViewKeyboardDismissBehavior] used by the ListView
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
 }
 
 class _MessageListViewState extends State<MessageListView> {
-  static const _newMessageLoadingOffset = 100;
-  final ScrollController _scrollController = ScrollController();
-  bool _bottomWasVisible = true;
+  ItemScrollController _scrollController;
+  bool _bottomWasVisible = false;
   bool _topWasVisible = false;
-  List<Message> _messages = [];
-  List<Message> _newMessageList = [];
   Function _onThreadTap;
   bool _showScrollToBottom = false;
+  ItemPositionsListener _itemPositionListener;
 
   @override
   Widget build(BuildContext context) {
     final streamChannel = StreamChannel.of(context);
 
-    /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
-    return WidgetsVisibilityProvider(
-      condition: (positionData) =>
-          positionData.endPosition >= 20 &&
-          positionData.startPosition <= positionData.viewportSize,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: (_) {
-              if (_scrollController.offset < 150 &&
-                  _newMessageList.isNotEmpty) {
-                setState(() {
-                  _messages.insertAll(0, _newMessageList);
-                  _newMessageList.clear();
-                });
-              }
-              return true;
-            },
-            child: ListView.custom(
-              key: Key('messageListView'),
-              physics: widget.scrollPhysics,
-              keyboardDismissBehavior: widget.keyboardDismissBehavior,
-              controller: _scrollController,
-              reverse: true,
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  if (i == _messages.length + 1) {
-                    if (widget.parentMessage != null) {
-                      if (widget.parentMessageBuilder != null) {
-                        return widget.parentMessageBuilder(
-                          context,
-                          widget.parentMessage,
-                        );
-                      } else {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            buildParentMessage(widget.parentMessage),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 32),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                  'Start of thread',
-                                  textAlign: TextAlign.center,
-                                ),
-                                color:
-                                    Theme.of(context).accentColor.withAlpha(50),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
+    final messagesStream = widget.parentMessage != null
+        ? streamChannel.channel.state.threadsStream
+            .where((threads) => threads.containsKey(widget.parentMessage.id))
+            .map((threads) => threads[widget.parentMessage.id])
+        : streamChannel.channel.state.messagesStream;
+
+    return StreamBuilder<List<Message>>(
+        stream: messagesStream,
+        initialData: widget.parentMessage != null
+            ? streamChannel.channel.state.threads[widget.parentMessage.id]
+            : streamChannel.channel.state.messages,
+        builder: (context, snapshot) {
+          final messages = snapshot.data?.reversed?.toList() ?? [];
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              ScrollablePositionedList.builder(
+                itemPositionsListener: _itemPositionListener,
+                addAutomaticKeepAlives: true,
+                key: Key('messageListView'),
+                initialScrollIndex: widget.initialScrollIndex,
+                initialAlignment: widget.initialAlignment,
+                physics: widget.scrollPhysics,
+                itemScrollController: _scrollController,
+                reverse: true,
+                itemCount: messages.length +
+                    1 +
+                    (widget.parentMessage != null ? 1 : 0),
+                itemBuilder: (context, i) {
+                  if (i == messages.length + 1) {
+                    if (widget.parentMessageBuilder != null) {
+                      return widget.parentMessageBuilder(
+                        context,
+                        widget.parentMessage,
+                      );
                     } else {
-                      return SizedBox();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          buildParentMessage(widget.parentMessage),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                'Start of thread',
+                                textAlign: TextAlign.center,
+                              ),
+                              color:
+                                  Theme.of(context).accentColor.withAlpha(50),
+                            ),
+                          ),
+                        ],
+                      );
                     }
                   }
 
-                  if (i == _messages.length) {
+                  if (i == messages.length) {
                     return _buildLoadingIndicator(streamChannel);
                   }
-                  final message = _messages[i];
-                  final nextMessage = i > 0 ? _messages[i - 1] : null;
+                  final message = messages[i];
+                  final nextMessage = i > 0 ? messages[i - 1] : null;
 
                   Widget messageWidget;
 
@@ -227,14 +237,14 @@ class _MessageListViewState extends State<MessageListView> {
                     messageWidget = _buildBottomMessage(
                       context,
                       message,
-                      _messages,
+                      messages,
                       streamChannel,
                     );
-                  } else if (i == _messages.length - 1) {
+                  } else if (i == messages.length - 1) {
                     messageWidget = _buildTopMessage(
                       context,
                       message,
-                      _messages,
+                      messages,
                       streamChannel,
                     );
                   } else {
@@ -246,13 +256,13 @@ class _MessageListViewState extends State<MessageListView> {
                             MessageDetails(
                               context,
                               message,
-                              _messages,
+                              messages,
                               i,
                             ),
-                            _messages),
+                            messages),
                       );
                     } else {
-                      messageWidget = buildMessage(message, _messages, i);
+                      messageWidget = buildMessage(message, messages, i);
                     }
                   }
 
@@ -265,84 +275,74 @@ class _MessageListViewState extends State<MessageListView> {
                         messageWidget,
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          child: VisibleNotifierWidget(
-                            condition: (
-                              ScrollNotification previousNotification,
-                              PositionData previousPositionData,
-                              ScrollNotification currentNotification,
-                              PositionData currentPositionData,
-                            ) {
-                              print(
-                                  'currentPositionData.endPosition: ${currentPositionData.endPosition}');
-                              return true;
-                            },
-                            data: i,
-                            child: widget.dateDividerBuilder != null
-                                ? widget.dateDividerBuilder(
-                                    nextMessage.createdAt.toLocal())
-                                : DateDivider(
-                                    dateTime: nextMessage.createdAt.toLocal(),
-                                  ),
-                          ),
+                          child: widget.dateDividerBuilder != null
+                              ? widget.dateDividerBuilder(
+                                  nextMessage.createdAt.toLocal())
+                              : DateDivider(
+                                  dateTime: nextMessage.createdAt.toLocal(),
+                                ),
                         ),
                       ],
                     );
                   }
 
-                  return VisibleNotifierWidget(
-                    child: messageWidget,
-                    data: i,
-                  );
-                },
-                childCount: _messages.length + 2,
-                findChildIndexCallback: (key) {
-                  final ValueKey<String> valueKey = key;
-                  final index = _messages
-                      .indexWhere((m) => 'MESSAGE-${m.id}' == valueKey.value);
-                  return index != -1 ? index : null;
+                  return messageWidget;
                 },
               ),
-            ),
-          ),
-          if (widget.showScrollToBottom)
-            StreamBuilder<Event>(
-                stream: streamChannel.channel.on(
-                  EventType.messageNew,
-                ),
-                builder: (context, _) {
-                  if (!_showScrollToBottom ||
-                      streamChannel.channel.state.unreadCount == 0) {
-                    return SizedBox();
-                  }
-                  return _buildScrollToBottom(streamChannel);
-                }),
-          Positioned(
-            top: 20.0,
-            child: WidgetsVisibilityConsumer(
-              listener: (
-                context,
-                event,
-              ) {},
-              builder: (context, event) {
-                if (event.positionDataList == null ||
-                    event.positionDataList.isEmpty) {
-                  return Container();
-                }
+              if (widget.showScrollToBottom)
+                StreamBuilder<int>(
+                    stream: streamChannel.channel.state.unreadCountStream,
+                    builder: (context, snapshot) {
+                      if (!_showScrollToBottom ||
+                          !snapshot.hasData ||
+                          snapshot.data == 0) {
+                        return SizedBox();
+                      }
+                      return _buildScrollToBottom(snapshot.data);
+                    }),
+              Positioned(
+                top: 20.0,
+                child: ValueListenableBuilder<Iterable<ItemPosition>>(
+                  valueListenable: _itemPositionListener.itemPositions,
+                  builder: (context, values, _) {
+                    final items = _itemPositionListener.itemPositions?.value;
+                    if (items.isEmpty || messages.isEmpty) {
+                      return SizedBox();
+                    }
 
-                return DateDivider(
-                  dateTime: _messages[event.positionDataList.last.data]
-                      .createdAt
-                      .toLocal(),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+                    var index = _getTopElement(values).index;
+
+                    if (index > messages.length) {
+                      return SizedBox();
+                    }
+
+                    if (index == messages.length) {
+                      index = max(index - 1, 0);
+                    }
+
+                    return widget.dateDividerBuilder != null
+                        ? widget.dateDividerBuilder(
+                            messages[index].createdAt.toLocal(),
+                          )
+                        : DateDivider(
+                            dateTime: messages[index].createdAt.toLocal(),
+                          );
+                  },
+                ),
+              ),
+            ],
+          );
+        });
   }
 
-  Widget _buildScrollToBottom(StreamChannelState streamChannel) {
+  ItemPosition _getTopElement(Iterable<ItemPosition> values) {
+    return values
+        .where((ItemPosition position) => position.itemLeadingEdge < 0.9)
+        .reduce((ItemPosition max, ItemPosition position) =>
+            position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
+  }
+
+  Widget _buildScrollToBottom(int unreadCount) {
     return Positioned(
       bottom: 8,
       right: 8,
@@ -358,13 +358,11 @@ class _MessageListViewState extends State<MessageListView> {
               color: Colors.black,
             ),
             onPressed: () {
-              Future.delayed(Duration(milliseconds: 500), () {
-                setState(() {
-                  _showScrollToBottom = false;
-                });
+              setState(() {
+                _showScrollToBottom = false;
               });
-              _scrollController.animateTo(
-                0,
+              _scrollController.scrollTo(
+                index: 0,
                 duration: Duration(seconds: 1),
                 curve: Curves.easeInOut,
               );
@@ -377,7 +375,7 @@ class _MessageListViewState extends State<MessageListView> {
             top: -10,
             child: CircleAvatar(
               radius: 20,
-              child: Text(streamChannel.channel.state.unreadCount.toString()),
+              child: Text(unreadCount.toString()),
             ),
           ),
         ],
@@ -387,7 +385,9 @@ class _MessageListViewState extends State<MessageListView> {
 
   Container _buildLoadingIndicator(StreamChannelState streamChannel) {
     return Container(
+      key: Key('LOADING-INDICATOR'),
       height: 50,
+      width: double.infinity,
       child: StreamBuilder<bool>(
           stream: streamChannel.queryMessage,
           initialData: false,
@@ -401,7 +401,7 @@ class _MessageListViewState extends State<MessageListView> {
               );
             }
             if (!snapshot.data) {
-              return Container();
+              return SizedBox();
             }
             return Center(
               child: Padding(
@@ -428,14 +428,14 @@ class _MessageListViewState extends State<MessageListView> {
           MessageDetails(
             context,
             message,
-            _messages,
-            _messages.length - 1,
+            messages,
+            messages.length - 1,
           ),
-          _messages,
+          messages,
         ),
       );
     } else {
-      messageWidget = buildMessage(message, messages, _messages.length - 1);
+      messageWidget = buildMessage(message, messages, messages.length - 1);
     }
 
     return VisibilityDetector(
@@ -470,10 +470,10 @@ class _MessageListViewState extends State<MessageListView> {
           MessageDetails(
             context,
             message,
-            _messages,
+            messages,
             0,
           ),
-          _messages,
+          messages,
         ),
       );
     } else {
@@ -492,9 +492,11 @@ class _MessageListViewState extends State<MessageListView> {
           }
         }
         _bottomWasVisible = isVisible;
-        setState(() {
-          _showScrollToBottom = !isVisible;
-        });
+        if (mounted) {
+          setState(() {
+            _showScrollToBottom = !isVisible;
+          });
+        }
       },
       child: messageWidget,
     );
@@ -541,6 +543,7 @@ class _MessageListViewState extends State<MessageListView> {
   ) {
     if (message.type == 'system' && message.text?.isNotEmpty == true) {
       return SystemMessage(
+        key: ValueKey<String>('MESSAGE-${message.id}'),
         message: message,
       );
     }
@@ -563,6 +566,7 @@ class _MessageListViewState extends State<MessageListView> {
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
 
     return MessageWidget(
+      key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
@@ -600,64 +604,45 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
-  StreamSubscription _streamListener;
+  StreamSubscription _messageNewListener;
 
   @override
   void initState() {
-    super.initState();
+    _scrollController = widget.scrollController ?? ItemScrollController();
+    _itemPositionListener =
+        widget.itemPositionListener ?? ItemPositionsListener.create();
 
     final streamChannel = StreamChannel.of(context);
 
-    Stream<List<Message>> stream;
-
-    if (widget.parentMessage == null) {
-      stream = streamChannel.channel.state.messagesStream;
-    } else {
-      streamChannel.getReplies(widget.parentMessage.id);
-      stream = streamChannel.channel.state.threadsStream
-          .where((threads) => threads.containsKey(widget.parentMessage.id))
-          .map((threads) => threads[widget.parentMessage.id]);
-    }
-
-    _streamListener = stream
-        .map((messages) =>
-            messages
-                ?.where((m) =>
-                    !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
-                ?.toList() ??
-            [])
-        .listen((newMessages) {
-      newMessages = newMessages.reversed.toList();
-      if (_messages.isEmpty ||
-          newMessages.isEmpty ||
-          newMessages.first.id != _messages.first.id) {
-        if (!_scrollController.hasClients ||
-            _scrollController.offset < _newMessageLoadingOffset) {
-          if (streamChannel.channel.state.unreadCount > 0) {
-            streamChannel.channel.markRead();
-          }
-          setState(() {
-            _messages = newMessages;
-          });
-        } else if (newMessages.first.user.id ==
-            streamChannel.channel.client.state.user.id) {
-          _scrollController.jumpTo(0);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              _messages = newMessages;
-            });
-          });
-        } else {
-          _newMessageList = newMessages;
-        }
-      } else {
-        setState(() {
-          _messages = newMessages;
+    _messageNewListener =
+        streamChannel.channel.on(EventType.messageNew).listen((event) {
+      final firstElementInViewport =
+          _itemPositionListener.itemPositions.value.first;
+      if (event.message.user.id == streamChannel.channel.client.state.user.id) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollController.jumpTo(
+            index: 0,
+          );
         });
+      } else {
+        if (firstElementInViewport.index != 0) {
+          _scrollController.jumpTo(
+            index: firstElementInViewport.index + 1,
+            alignment: firstElementInViewport.itemLeadingEdge,
+          );
+        }
+      }
+      if (firstElementInViewport.index == 0) {
+        streamChannel.channel.markRead();
       }
     });
 
+    if (widget.parentMessage != null) {
+      streamChannel.getReplies(widget.parentMessage.id);
+    }
+
     _getOnThreadTap();
+    super.initState();
   }
 
   void _getOnThreadTap() {
@@ -696,7 +681,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   void dispose() {
-    _streamListener.cancel();
+    _messageNewListener?.cancel();
     super.dispose();
   }
 }
