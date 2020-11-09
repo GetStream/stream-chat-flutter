@@ -613,98 +613,100 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildFilePickerSection() {
     return Container(
-      color: Color(0xFFF2F2F2),
       height: _filePickerSize,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              IconButton(
-                icon: Icon(
-                  StreamIcons.picture,
-                  color: _filePickerIndex == 0
-                      ? StreamChatTheme.of(context).accentColor
-                      : Colors.black.withOpacity(0.5),
+      child: Material(
+        color: Color(0xFFF2F2F2),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.picture,
+                    color: _filePickerIndex == 0
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _filePickerIndex = 0;
+                    });
+                  },
                 ),
-                onPressed: () {
-                  setState(() {
-                    _filePickerIndex = 0;
-                  });
-                },
-              ),
-              IconButton(
-                icon: Icon(
-                  StreamIcons.folder,
-                  color: _filePickerIndex == 1
-                      ? StreamChatTheme.of(context).accentColor
-                      : Colors.black.withOpacity(0.5),
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.folder,
+                    color: _filePickerIndex == 1
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    pickFile(DefaultAttachmentTypes.file, false);
+                  },
                 ),
-                onPressed: () {
-                  pickFile(DefaultAttachmentTypes.file, false);
-                },
-              ),
-              IconButton(
-                icon: Icon(
-                  StreamIcons.camera,
-                  color: _filePickerIndex == 2
-                      ? StreamChatTheme.of(context).accentColor
-                      : Colors.black.withOpacity(0.5),
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.camera,
+                    color: _filePickerIndex == 2
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    pickFile(DefaultAttachmentTypes.image, true);
+                  },
                 ),
-                onPressed: () {
-                  pickFile(DefaultAttachmentTypes.image, true);
-                },
-              ),
-            ],
-          ),
-          GestureDetector(
-            onVerticalDragUpdate: (update) {
-              setState(() {
-                _filePickerSize -= update.delta.dy;
-                if (_filePickerSize < 100) {
-                  _filePickerSize = 100.0;
-                } else if (_filePickerSize >
-                    MediaQuery.of(context).size.height / 1.7) {
-                  _filePickerSize = MediaQuery.of(context).size.height / 1.7;
-                }
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16.0),
-                  topRight: Radius.circular(16.0),
-                ),
-              ),
+              ],
+            ),
+            GestureDetector(
+              onVerticalDragUpdate: (update) {
+                setState(() {
+                  _filePickerSize -= update.delta.dy;
+                  if (_filePickerSize < 100) {
+                    _filePickerSize = 100.0;
+                  } else if (_filePickerSize >
+                      MediaQuery.of(context).size.height / 1.7) {
+                    _filePickerSize = MediaQuery.of(context).size.height / 1.7;
+                  }
+                });
+              },
               child: Container(
-                width: double.infinity,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: 40.0,
-                      height: 4.0,
-                      decoration: BoxDecoration(
-                        color: Color(0xFFF2F2F2),
-                        borderRadius: BorderRadius.circular(4.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                  ),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: 40.0,
+                        height: 4.0,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF2F2F2),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: _buildPickerSection(),
               ),
-              child: _buildPickerSection(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
