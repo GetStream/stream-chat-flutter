@@ -186,7 +186,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
               .listen((event) async {
             var channel = client.state.channels[event.cid];
 
-            if (channel != null) {
+            if (channel == null) {
               channel = client.channel(
                 event.channelType,
                 id: event.channelId,
