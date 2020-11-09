@@ -657,28 +657,28 @@ class MessageInputState extends State<MessageInput> {
               ),
             ],
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16.0),
-                topRight: Radius.circular(16.0),
+          GestureDetector(
+            onVerticalDragUpdate: (update) {
+              setState(() {
+                _filePickerSize -= update.delta.dy;
+                if (_filePickerSize < 100) {
+                  _filePickerSize = 100.0;
+                } else if (_filePickerSize > 500) {
+                  _filePickerSize = 500;
+                }
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16.0),
+                  topRight: Radius.circular(16.0),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onVerticalDragUpdate: (update) {
-                    setState(() {
-                      _filePickerSize -= update.delta.dy;
-                      if (_filePickerSize < 100) {
-                        _filePickerSize = 100.0;
-                      } else if (_filePickerSize > 500) {
-                        _filePickerSize = 500;
-                      }
-                    });
-                  },
+              child: Container(
+                width: double.infinity,
+                child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
@@ -691,7 +691,7 @@ class MessageInputState extends State<MessageInput> {
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
           Expanded(
