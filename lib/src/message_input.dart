@@ -377,7 +377,7 @@ class MessageInputState extends State<MessageInput> {
                     _emojiOverlay?.remove();
                     _emojiOverlay = null;
 
-                    _checkCommands(s.trimLeft(), context);
+                    _checkCommands(s, context);
 
                     _checkMentions(s, context);
 
@@ -1668,42 +1668,9 @@ class MessageInputState extends State<MessageInput> {
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
         if (visible) {
-          if (_commandsOverlay != null) {
-            if (textEditingController.text.trimLeft().startsWith('/')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _commandsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_commandsOverlay);
-              });
-            }
-          }
-
-          if (_mentionsOverlay != null) {
-            if (textEditingController.text.contains('@')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _mentionsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_mentionsOverlay);
-              });
-            }
-          }
-
-          if (_emojiOverlay != null) {
-            if (textEditingController.text.contains(':')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _emojiOverlay = _buildEmojiOverlay();
-                Overlay.of(context).insert(_emojiOverlay);
-              });
-            }
-          }
-        } else {
-          if (_commandsOverlay != null) {
-            _commandsOverlay.remove();
-          }
-          if (_mentionsOverlay != null) {
-            _mentionsOverlay.remove();
-          }
-          if (_emojiOverlay != null) {
-            _emojiOverlay.remove();
-          }
+          _checkCommands(textEditingController.text, context);
+          _checkMentions(textEditingController.text, context);
+          _checkEmoji(textEditingController.text, context);
         }
       });
     }
