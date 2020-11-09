@@ -207,7 +207,7 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
               ),
-            if (_openFilePickerSection) _buildFilePickerSection(),
+            _buildFilePickerSection(),
           ],
         ),
       ),
@@ -612,8 +612,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildFilePickerSection() {
-    return Container(
-      height: _filePickerSize,
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      height: _openFilePickerSection ? _filePickerSize : 0,
       child: Material(
         color: Color(0xFFF2F2F2),
         child: Column(
