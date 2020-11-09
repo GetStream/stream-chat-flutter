@@ -663,8 +663,9 @@ class MessageInputState extends State<MessageInput> {
                 _filePickerSize -= update.delta.dy;
                 if (_filePickerSize < 100) {
                   _filePickerSize = 100.0;
-                } else if (_filePickerSize > 500) {
-                  _filePickerSize = 500;
+                } else if (_filePickerSize >
+                    MediaQuery.of(context).size.height / 1.7) {
+                  _filePickerSize = MediaQuery.of(context).size.height / 1.7;
                 }
               });
             },
@@ -732,21 +733,28 @@ class MessageInputState extends State<MessageInput> {
                             : BoxFit.fitHeight,
                       ),
                     ),
-                    if (_attachments.any((element) =>
-                        element.id == _mediaData.item1[position].id))
-                      Container(
-                        color: Colors.black.withOpacity(0.5),
-                        child: Center(
-                          child: CircleAvatar(
-                            maxRadius: 12.0,
-                            backgroundColor: Colors.white,
-                            child: Icon(
-                              StreamIcons.check,
-                              color: Colors.black,
+                    IgnorePointer(
+                      child: AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        opacity: _attachments.any((element) =>
+                                element.id == _mediaData.item1[position].id)
+                            ? 1.0
+                            : 0.0,
+                        child: Container(
+                          color: Colors.black.withOpacity(0.5),
+                          child: Center(
+                            child: CircleAvatar(
+                              maxRadius: 12.0,
+                              backgroundColor: Colors.white,
+                              child: Icon(
+                                StreamIcons.check,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
                       ),
+                    ),
                   ],
                 ),
                 onTap: () {
@@ -829,7 +837,8 @@ class MessageInputState extends State<MessageInput> {
 
   void _getAllMedia() async {
     var allAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.image);
-    var allVideoAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.video);
+    var allVideoAlbums =
+        await PhotoGallery.listAlbums(mediumType: MediumType.video);
     List<Medium> resultList = [];
     List<List<dynamic>> resultThumbnailList = [];
 
