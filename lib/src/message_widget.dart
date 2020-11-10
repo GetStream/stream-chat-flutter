@@ -352,8 +352,9 @@ class _MessageWidgetState extends State<MessageWidget> {
     var host = Uri.parse(urlAttachment.ogScrapeUrl).host;
     var splitList = host.split('.');
     var hostName = splitList.length == 3 ? splitList[1] : splitList[0];
-    var hostDisplayName =
-        _getWebsiteName(hostName.toLowerCase()) ?? hostName.capitalize();
+    var hostDisplayName = urlAttachment.authorName?.capitalize() ??
+        _getWebsiteName(hostName.toLowerCase()) ??
+        hostName.capitalize();
 
     return Stack(
       children: [
