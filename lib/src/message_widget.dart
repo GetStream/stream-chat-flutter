@@ -359,6 +359,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     return Stack(
       children: [
         Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (urlAttachment.imageUrl != null)
               SizedBox(
@@ -370,7 +371,11 @@ class _MessageWidgetState extends State<MessageWidget> {
                 child: Stack(
                   clipBehavior: Clip.antiAlias,
                   children: [
-                    CachedNetworkImage(imageUrl: urlAttachment.imageUrl),
+                    Center(
+                      child: CachedNetworkImage(
+                        imageUrl: urlAttachment.imageUrl,
+                      ),
+                    ),
                     Positioned(
                       left: 0.0,
                       bottom: 0.0,
