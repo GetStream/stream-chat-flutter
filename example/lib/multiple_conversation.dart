@@ -56,9 +56,9 @@ class ChannelListPage extends StatelessWidget {
       body: ChannelsBloc(
         child: ChannelListView(
           filter: {
-            'members': {
-              '\$in': [StreamChat.of(context).user.id],
-            }
+            // 'members': {
+            //   '\$in': [StreamChat.of(context).user.id],
+            // }
           },
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
