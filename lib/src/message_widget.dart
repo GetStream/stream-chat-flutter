@@ -356,42 +356,44 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     return Column(
       children: [
+        if (urlAttachment.imageUrl != null)
         SizedBox(
           height: 16.0,
         ),
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Stack(
-            clipBehavior: Clip.antiAlias,
-            children: [
-              CachedNetworkImage(imageUrl: urlAttachment.imageUrl),
-              Positioned(
-                left: 0.0,
-                bottom: 0.0,
-                child: Container(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-                    child: Text(
-                      hostDisplayName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF006CFF),
+        if (urlAttachment.imageUrl != null)
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Stack(
+              clipBehavior: Clip.antiAlias,
+              children: [
+                CachedNetworkImage(imageUrl: urlAttachment.imageUrl),
+                Positioned(
+                  left: 0.0,
+                  bottom: 0.0,
+                  child: Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 8.0, left: 8.0, right: 8.0),
+                      child: Text(
+                        hostDisplayName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF006CFF),
+                        ),
                       ),
                     ),
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.only(topRight: Radius.circular(16.0)),
-                    color: Color(0xFFE9F2FF),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.only(topRight: Radius.circular(16.0)),
+                      color: Color(0xFFE9F2FF),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0)),
           ),
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0)),
-        ),
         Padding(
           padding: widget.textPadding,
           child: Column(
