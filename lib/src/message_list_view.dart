@@ -289,7 +289,9 @@ class _MessageListViewState extends State<MessageListView> {
                   return messageWidget;
                 },
               ),
-              if (widget.showScrollToBottom)
+              if (streamChannel.channel.state.members.contains((Member e) =>
+                      e.userId == streamChannel.channel.client.state.user.id) &&
+                  widget.showScrollToBottom)
                 StreamBuilder<int>(
                     stream: streamChannel.channel.state.unreadCountStream,
                     builder: (context, snapshot) {
@@ -374,8 +376,16 @@ class _MessageListViewState extends State<MessageListView> {
             left: 10,
             top: -10,
             child: CircleAvatar(
-              radius: 20,
-              child: Text(unreadCount.toString()),
+              child: Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: Text(
+                  unreadCount.toString(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -555,13 +565,14 @@ class _MessageListViewState extends State<MessageListView> {
 
     final channel = StreamChannel.of(context).channel;
     final readList = channel.state?.read
-        ?.where((element) => element.user.id != userId)
-        ?.where((read) =>
-            (read.lastRead.isAfter(message.createdAt) ||
-                read.lastRead.isAtSameMomentAs(message.createdAt)) &&
-            (index == 0 ||
-                read.lastRead.isBefore(messages[index - 1].createdAt)))
-        ?.toList();
+            ?.where((element) => element.user.id != userId)
+            ?.where((read) =>
+                (read.lastRead.isAfter(message.createdAt) ||
+                    read.lastRead.isAtSameMomentAs(message.createdAt)) &&
+                (index == 0 ||
+                    read.lastRead.isBefore(messages[index - 1].createdAt)))
+            ?.toList() ??
+        [];
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
 

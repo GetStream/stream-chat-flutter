@@ -70,9 +70,11 @@ class ChannelPreview extends StatelessWidget {
                           StreamChatTheme.of(context).channelPreviewTheme.title,
                     ),
                   ),
-                  UnreadIndicator(
-                    channel: channel,
-                  ),
+                  if (channel.state.members.contains(
+                      (Member e) => e.userId == channel.client.state.user.id))
+                    UnreadIndicator(
+                      channel: channel,
+                    ),
                 ],
               ),
               subtitle: Row(
@@ -92,7 +94,7 @@ class ChannelPreview extends StatelessWidget {
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
                                     .length ==
-                                channel.memberCount - 1,
+                                (channel.memberCount ?? 0) - 1,
                           ),
                         );
                       }
