@@ -38,7 +38,9 @@ class UserAvatar extends StatelessWidget {
           decoration: BoxDecoration(
             color: StreamChatTheme.of(context).accentColor,
           ),
-          child: user.extraData?.containsKey('image') ?? false
+          child: (user.extraData?.containsKey('image') == true &&
+                  user.extraData['image'] != null &&
+                  user.extraData['image'] != '')
               ? CachedNetworkImage(
                   imageUrl: user.extraData['image'],
                   errorWidget: (_, __, ___) {
