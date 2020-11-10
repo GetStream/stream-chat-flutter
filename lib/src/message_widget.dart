@@ -16,6 +16,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'image_group.dart';
 import 'message_text.dart';
+import 'utils.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
@@ -354,69 +355,89 @@ class _MessageWidgetState extends State<MessageWidget> {
     var hostDisplayName =
         _getWebsiteName(hostName.toLowerCase()) ?? hostName.capitalize();
 
-    return Column(
+    return Stack(
       children: [
-        if (urlAttachment.imageUrl != null)
-        SizedBox(
-          height: 16.0,
-        ),
-        if (urlAttachment.imageUrl != null)
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Stack(
-              clipBehavior: Clip.antiAlias,
-              children: [
-                CachedNetworkImage(imageUrl: urlAttachment.imageUrl),
-                Positioned(
-                  left: 0.0,
-                  bottom: 0.0,
-                  child: Container(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 8.0, left: 8.0, right: 8.0),
-                      child: Text(
-                        hostDisplayName,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF006CFF),
+        Column(
+          children: [
+            if (urlAttachment.imageUrl != null)
+              SizedBox(
+                height: 16.0,
+              ),
+            if (urlAttachment.imageUrl != null)
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Stack(
+                  clipBehavior: Clip.antiAlias,
+                  children: [
+                    CachedNetworkImage(imageUrl: urlAttachment.imageUrl),
+                    Positioned(
+                      left: 0.0,
+                      bottom: 0.0,
+                      child: Container(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 8.0,
+                            left: 8.0,
+                            right: 8.0,
+                          ),
+                          child: Text(
+                            hostDisplayName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF006CFF),
+                            ),
+                          ),
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(16.0),
+                          ),
+                          color: Color(0xFFE9F2FF),
                         ),
                       ),
                     ),
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.only(topRight: Radius.circular(16.0)),
-                      color: Color(0xFFE9F2FF),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(8.0)),
+              ),
+            Padding(
+              padding: widget.textPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (urlAttachment.title != null)
+                    Text(
+                      urlAttachment.title,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12.0,
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  if (urlAttachment.text != null)
+                    Text(
+                      urlAttachment.text,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                ],
+              ),
             ),
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0)),
-          ),
-        Padding(
-          padding: widget.textPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (urlAttachment.title != null)
-                Text(
-                  urlAttachment.title,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12.0,
-                  ),
-                ),
-              if (urlAttachment.text != null)
-                Text(
-                  urlAttachment.text,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 12.0,
-                  ),
-                ),
-            ],
+          ],
+        ),
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => launchURL(
+                context,
+                urlAttachment.ogScrapeUrl,
+              ),
+            ),
           ),
         ),
       ],
