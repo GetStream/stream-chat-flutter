@@ -70,11 +70,20 @@ class ChannelPreview extends StatelessWidget {
                           StreamChatTheme.of(context).channelPreviewTheme.title,
                     ),
                   ),
-                  if (channel.state.members.contains(
-                      (Member e) => e.userId == channel.client.state.user.id))
-                    UnreadIndicator(
-                      channel: channel,
-                    ),
+                  StreamBuilder<List<Member>>(
+                      stream: channel.state.membersStream,
+                      initialData: channel.state.members,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData ||
+                            snapshot.data.isEmpty ||
+                            !snapshot.data.any((Member e) =>
+                                e.user.id == channel.client.state.user.id)) {
+                          return SizedBox();
+                        }
+                        return UnreadIndicator(
+                          channel: channel,
+                        );
+                      }),
                 ],
               ),
               subtitle: Row(
