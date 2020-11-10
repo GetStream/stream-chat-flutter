@@ -98,6 +98,24 @@ class ChooseUserPage extends StatelessWidget {
                     final user = entry.value;
                     return ListTile(
                       onTap: () async {
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (context) => Center(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.white,
+                              ),
+                              height: 100,
+                              width: 100,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          ),
+                        );
+
                         final client = StreamChat.of(context).client;
 
                         await client.setUser(
@@ -111,6 +129,7 @@ class ChooseUserPage extends StatelessWidget {
                           initNotifications(client);
                         }
 
+                        Navigator.pop(context);
                         await Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
