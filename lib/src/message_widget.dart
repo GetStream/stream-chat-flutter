@@ -862,6 +862,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: widget.textPadding,
