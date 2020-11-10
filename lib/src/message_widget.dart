@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -343,6 +344,83 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
+  Widget _buildUrlAttachment() {
+    var urlAttachment = widget.message.attachments
+        .firstWhere((element) => element.ogScrapeUrl != null);
+
+    var host = Uri.parse(urlAttachment.ogScrapeUrl).host;
+    var splitList = host.split('.');
+    var hostName = splitList.length == 3 ? splitList[1] : splitList[0];
+    var hostDisplayName =
+        _getWebsiteName(hostName.toLowerCase()) ?? hostName.capitalize();
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 16.0,
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Stack(
+            clipBehavior: Clip.antiAlias,
+            children: [
+              CachedNetworkImage(imageUrl: urlAttachment.imageUrl),
+              Positioned(
+                left: 0.0,
+                bottom: 0.0,
+                child: Container(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+                    child: Text(
+                      hostDisplayName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF006CFF),
+                      ),
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.only(topRight: Radius.circular(16.0)),
+                    color: Color(0xFFE9F2FF),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0)),
+        ),
+        Padding(
+          padding: widget.textPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (urlAttachment.title != null)
+                Text(
+                  urlAttachment.title,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12.0,
+                  ),
+                ),
+              if (urlAttachment.text != null)
+                Text(
+                  urlAttachment.text,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12.0,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Padding _buildBottomRow(double leftPadding) {
     return Padding(
       padding: EdgeInsets.only(
@@ -525,7 +603,8 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   List<Widget> _parseAttachments(BuildContext context) {
     final images = widget.message.attachments
-            ?.where((element) => element.type == 'image')
+            ?.where((element) =>
+                element.type == 'image' && element.ogScrapeUrl == null)
             ?.toList() ??
         [];
 
@@ -548,7 +627,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       ];
     }
 
-    return widget.message.attachments?.map((attachment) {
+    return widget.message.attachments
+            ?.where((element) => element.ogScrapeUrl == null)
+            ?.map((attachment) {
           final attachmentBuilder = widget.attachmentBuilders[attachment.type];
 
           if (attachmentBuilder == null) {
@@ -757,28 +838,35 @@ class _MessageWidgetState extends State<MessageWidget> {
     Widget child = Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
-      child: Padding(
-        padding: widget.textPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            getFailedMessageWidget(context),
-            widget.textBuilder != null
-                ? widget.textBuilder(context, widget.message)
-                : MessageText(
-                    onLinkTap: widget.onLinkTap,
-                    message: widget.message,
-                    onMentionTap: widget.onMentionTap,
-                    messageTheme: isOnlyEmoji
-                        ? widget.messageTheme.copyWith(
-                            messageText:
-                                widget.messageTheme.messageText.copyWith(
-                            fontSize: 40,
-                          ))
-                        : widget.messageTheme,
-                  ),
-          ],
-        ),
+      child: Column(
+        children: [
+          Padding(
+            padding: widget.textPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                getFailedMessageWidget(context),
+                widget.textBuilder != null
+                    ? widget.textBuilder(context, widget.message)
+                    : MessageText(
+                        onLinkTap: widget.onLinkTap,
+                        message: widget.message,
+                        onMentionTap: widget.onMentionTap,
+                        messageTheme: isOnlyEmoji
+                            ? widget.messageTheme.copyWith(
+                                messageText:
+                                    widget.messageTheme.messageText.copyWith(
+                                fontSize: 40,
+                              ))
+                            : widget.messageTheme,
+                      ),
+              ],
+            ),
+          ),
+          if (widget.message.attachments
+              .any((element) => element.ogScrapeUrl != null))
+            _buildUrlAttachment(),
+        ],
       ),
     );
 
@@ -796,11 +884,18 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Color _getBackgroundColor() {
-    return (widget.message.status == MessageSendingStatus.FAILED ||
-            widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
-            widget.message.status == MessageSendingStatus.FAILED_DELETE)
-        ? Color(0xffd0021B).withOpacity(.1)
-        : widget.messageTheme.messageBackgroundColor;
+    if ((widget.message.status == MessageSendingStatus.FAILED ||
+        widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
+        widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
+      return Color(0xffd0021B).withOpacity(.1);
+    }
+
+    if (widget.message.attachments
+        .any((element) => element.ogScrapeUrl != null)) {
+      return Color(0xFFE9F2FF);
+    }
+
+    return widget.messageTheme.messageBackgroundColor;
   }
 
   void retryMessage(BuildContext context) {
@@ -823,6 +918,47 @@ class _MessageWidgetState extends State<MessageWidget> {
             channel.cid,
           );
       return;
+    }
+  }
+
+  String _getWebsiteName(String hostName) {
+    switch (hostName) {
+      case 'reddit':
+        return 'Reddit';
+      case 'youtube':
+        return 'Youtube';
+      case 'wikipedia':
+        return 'Wikipedia';
+      case 'twitter':
+        return 'Twitter';
+      case 'facebook':
+        return 'Facebook';
+      case 'amazon':
+        return 'Amazon';
+      case 'yelp':
+        return 'Yelp';
+      case 'imdb':
+        return 'IMDB';
+      case 'pinterest':
+        return 'Pinterest';
+      case 'tripadvisor':
+        return 'TripAdvisor';
+      case 'instagram':
+        return 'Instagram';
+      case 'walmart':
+        return 'Walmart';
+      case 'craigslist':
+        return 'Craigslist';
+      case 'ebay':
+        return 'eBay';
+      case 'linkedin':
+        return 'LinkedIn';
+      case 'google':
+        return 'Google';
+      case 'apple':
+        return 'Apple';
+      default:
+        return null;
     }
   }
 }
