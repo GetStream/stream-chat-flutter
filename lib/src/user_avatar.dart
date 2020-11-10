@@ -18,6 +18,9 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasImage = user.extraData?.containsKey('image') == true &&
+        user.extraData['image'] != null &&
+        user.extraData['image'] != '';
     return GestureDetector(
       onTap: () {
         if (onTap != null) {
@@ -38,9 +41,7 @@ class UserAvatar extends StatelessWidget {
           decoration: BoxDecoration(
             color: StreamChatTheme.of(context).accentColor,
           ),
-          child: (user.extraData?.containsKey('image') == true &&
-                  user.extraData['image'] != null &&
-                  user.extraData['image'] != '')
+          child: hasImage
               ? CachedNetworkImage(
                   imageUrl: user.extraData['image'],
                   errorWidget: (_, __, ___) {
