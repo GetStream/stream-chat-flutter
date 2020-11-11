@@ -74,6 +74,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     decoration: InputDecoration(
                       labelStyle: TextStyle(
                         fontSize: 14,
+                        fontWeight: FontWeight.bold,
                         color: Colors.black.withOpacity(.5),
                       ),
                       border: UnderlineInputBorder(
@@ -99,6 +100,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: Colors.black.withOpacity(.5),
                         ),
@@ -125,6 +127,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: Colors.black.withOpacity(.5),
                         ),
@@ -146,6 +149,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       decoration: InputDecoration(
                         labelStyle: TextStyle(
                           fontSize: 14,
+                          fontWeight: FontWeight.bold,
                           color: Colors.black.withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
