@@ -14,11 +14,11 @@ import 'package:media_gallery/media_gallery.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -182,8 +182,6 @@ class MessageInputState extends State<MessageInput> {
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
   double _filePickerSize = 250.0;
-
-  Iterable<Media> _media = [];
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -699,15 +697,16 @@ class MessageInputState extends State<MessageInput> {
                 ),
               ),
             ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.0),
+            if (_openFilePickerSection)
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: _buildPickerSection(),
                 ),
-                child: _buildPickerSection(),
               ),
-            ),
           ],
         ),
       ),
@@ -717,68 +716,15 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildPickerSection() {
     switch (_filePickerIndex) {
       case 0:
-        return GridView.builder(
-          itemCount: _media.length,
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-          itemBuilder: (context, position) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0),
-              child: InkWell(
-                child: Stack(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 1.0,
-                      child: FadeInImage(
-                        placeholder: MemoryImage(kTransparentImage),
-                        image: MediaThumbnailProvider(
-                          media: _media.elementAt(position),
-                        ),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: AnimatedOpacity(
-                          duration: Duration(milliseconds: 300),
-                          opacity: _attachments.any((element) =>
-                                  element.id == _media.elementAt(position).id)
-                              ? 1.0
-                              : 0.0,
-                          child: Container(
-                            color: Colors.black.withOpacity(0.5),
-                            alignment: Alignment.topRight,
-                            padding: const EdgeInsets.only(
-                              top: 8,
-                              right: 8,
-                            ),
-                            child: CircleAvatar(
-                              maxRadius: 12.0,
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                StreamIcons.check,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                onTap: () {
-                  if (!_attachments.any((element) =>
-                      element.id == _media.elementAt(position).id)) {
-                    _addAttachment(_media.elementAt(position));
-                  } else {
-                    _attachments.removeWhere((element) =>
-                        element.id == _media.elementAt(position).id);
-                    setState(() {});
-                  }
-                },
-              ),
-            );
+        return MediaListView(
+          selectedIds: _attachments.map((e) => e.id).toList(),
+          onSelect: (media) {
+            if (!_attachments.any((element) => element.id == media.id)) {
+              _addAttachment(media);
+            } else {
+              _attachments.removeWhere((element) => element.id == media.id);
+              setState(() {});
+            }
           },
         );
         break;
@@ -842,32 +788,6 @@ class MessageInputState extends State<MessageInput> {
 
     setState(() {
       attachment.uploaded = true;
-    });
-  }
-
-  void _getAllMedia() async {
-    final List<MediaCollection> collections =
-        await MediaGallery.listMediaCollections(mediaTypes: [
-      MediaType.image,
-      MediaType.video,
-    ]);
-
-    if (collections.isEmpty) {
-      return;
-    }
-
-    final page = await collections
-        .firstWhere(
-          (element) => element.name == 'All',
-          orElse: () => collections.first,
-        )
-        .getMedias(
-          take: 50,
-        );
-
-    print('page.items.length: ${page.items.length}');
-    setState(() {
-      _media = page.items;
     });
   }
 
@@ -1275,6 +1195,13 @@ class MessageInputState extends State<MessageInput> {
           ),
         ),
         onTap: () async {
+          _emojiOverlay?.remove();
+          _emojiOverlay = null;
+          _commandsOverlay?.remove();
+          _commandsOverlay = null;
+          _mentionsOverlay?.remove();
+          _mentionsOverlay = null;
+
           if (_openFilePickerSection) {
             setState(() {
               _openFilePickerSection = false;
@@ -1282,14 +1209,12 @@ class MessageInputState extends State<MessageInput> {
             });
           } else {
             final status = await Permission.storage.request();
-            print('status: ${status}');
             if (status.isDenied || status.isPermanentlyDenied) {
               final res = await openAppSettings();
               if (!res) {
                 return;
               }
             }
-            _getAllMedia();
             showAttachmentModal();
           }
         },
