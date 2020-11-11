@@ -1191,7 +1191,9 @@ class MessageInputState extends State<MessageInput> {
               EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
           child: Icon(
             StreamIcons.attach,
-            color: Color(0xFF000000).withAlpha(128),
+            color: _openFilePickerSection
+                ? StreamChatTheme.of(context).accentColor
+                : Color(0xFF000000).withAlpha(128),
           ),
         ),
         onTap: () async {
