@@ -8,15 +8,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:http_parser/http_parser.dart' as httpParser;
 import 'package:image_picker/image_picker.dart';
+import 'package:media_gallery/media_gallery.dart';
 import 'package:mime/mime.dart';
-import 'package:photo_gallery/photo_gallery.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -181,7 +183,7 @@ class MessageInputState extends State<MessageInput> {
   int _filePickerIndex = 0;
   double _filePickerSize = 250.0;
 
-  Tuple2<List<Medium>, List<dynamic>> _mediaData = Tuple2([], []);
+  Iterable<Media> _media = [];
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -716,7 +718,7 @@ class MessageInputState extends State<MessageInput> {
     switch (_filePickerIndex) {
       case 0:
         return GridView.builder(
-          itemCount: _mediaData.item2.length,
+          itemCount: _media.length,
           gridDelegate:
               SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
           itemBuilder: (context, position) {
@@ -728,24 +730,29 @@ class MessageInputState extends State<MessageInput> {
                   children: [
                     AspectRatio(
                       aspectRatio: 1.0,
-                      child: Image.memory(
-                        _mediaData.item2[position],
-                        fit: _mediaData.item1[position].height >
-                                _mediaData.item1[position].width
-                            ? BoxFit.fitWidth
-                            : BoxFit.fitHeight,
+                      child: FadeInImage(
+                        placeholder: MemoryImage(kTransparentImage),
+                        image: MediaThumbnailProvider(
+                          media: _media.elementAt(position),
+                        ),
+                        fit: BoxFit.fill,
                       ),
                     ),
-                    IgnorePointer(
-                      child: AnimatedOpacity(
-                        duration: Duration(milliseconds: 300),
-                        opacity: _attachments.any((element) =>
-                                element.id == _mediaData.item1[position].id)
-                            ? 1.0
-                            : 0.0,
-                        child: Container(
-                          color: Colors.black.withOpacity(0.5),
-                          child: Center(
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: AnimatedOpacity(
+                          duration: Duration(milliseconds: 300),
+                          opacity: _attachments.any((element) =>
+                                  element.id == _media.elementAt(position).id)
+                              ? 1.0
+                              : 0.0,
+                          child: Container(
+                            color: Colors.black.withOpacity(0.5),
+                            alignment: Alignment.topRight,
+                            padding: const EdgeInsets.only(
+                              top: 8,
+                              right: 8,
+                            ),
                             child: CircleAvatar(
                               maxRadius: 12.0,
                               backgroundColor: Colors.white,
@@ -762,11 +769,11 @@ class MessageInputState extends State<MessageInput> {
                 ),
                 onTap: () {
                   if (!_attachments.any((element) =>
-                      element.id == _mediaData.item1[position].id)) {
-                    _addAttachment(_mediaData.item1[position]);
+                      element.id == _media.elementAt(position).id)) {
+                    _addAttachment(_media.elementAt(position));
                   } else {
                     _attachments.removeWhere((element) =>
-                        element.id == _mediaData.item1[position].id);
+                        element.id == _media.elementAt(position).id);
                     setState(() {});
                   }
                 },
@@ -782,10 +789,10 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  void _addAttachment(Medium medium) async {
-    var mediaFile = await PhotoGallery.getFile(mediumId: medium.id);
+  void _addAttachment(Media medium) async {
+    final mediaFile = await medium.getFile();
 
-    var file = PlatformFile(
+    final file = PlatformFile(
       path: mediaFile.path,
       bytes: mediaFile.readAsBytesSync(),
     );
@@ -803,7 +810,7 @@ class MessageInputState extends State<MessageInput> {
       file: file,
       attachment: Attachment(
         localUri: file.path != null ? Uri.parse(file.path) : null,
-        type: medium.mediumType == MediumType.image ? 'image' : 'video',
+        type: medium.mediaType == MediaType.image ? 'image' : 'video',
       ),
       id: medium.id,
     );
@@ -814,12 +821,12 @@ class MessageInputState extends State<MessageInput> {
 
     final url = await _uploadAttachment(
         file,
-        medium.mediumType == MediumType.image
+        medium.mediaType == MediaType.image
             ? DefaultAttachmentTypes.image
             : DefaultAttachmentTypes.video,
         channel);
 
-    var fileType = medium.mediumType == MediumType.image
+    final fileType = medium.mediaType == MediaType.image
         ? DefaultAttachmentTypes.image
         : DefaultAttachmentTypes.video;
 
@@ -839,32 +846,28 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _getAllMedia() async {
-    var allAlbums = await PhotoGallery.listAlbums(mediumType: MediumType.image);
-    var allVideoAlbums =
-        await PhotoGallery.listAlbums(mediumType: MediumType.video);
-    List<Medium> resultList = [];
-    List<List<dynamic>> resultThumbnailList = [];
+    final List<MediaCollection> collections =
+        await MediaGallery.listMediaCollections(mediaTypes: [
+      MediaType.image,
+      MediaType.video,
+    ]);
 
-    for (var album in allAlbums) {
-      var data = await album.listMedia();
-      resultList.addAll(data.items);
+    if (collections.isEmpty) {
+      return;
     }
 
-    for (var album in allVideoAlbums) {
-      var data = await album.listMedia();
-      resultList.addAll(data.items);
-    }
+    final page = await collections
+        .firstWhere(
+          (element) => element.name == 'All',
+          orElse: () => collections.first,
+        )
+        .getMedias(
+          take: 50,
+        );
 
-    resultList.sort((a, b) => a.modifiedDate.compareTo(b.modifiedDate));
-    resultList = resultList.toSet().toList();
-
-    for (var e in resultList) {
-      resultThumbnailList.add(await PhotoGallery.getThumbnail(mediumId: e.id));
-    }
-
+    print('page.items.length: ${page.items.length}');
     setState(() {
-      _mediaData =
-          Tuple2<List<Medium>, List<dynamic>>(resultList, resultThumbnailList);
+      _media = page.items;
     });
   }
 
@@ -1271,13 +1274,21 @@ class MessageInputState extends State<MessageInput> {
             color: Color(0xFF000000).withAlpha(128),
           ),
         ),
-        onTap: () {
+        onTap: () async {
           if (_openFilePickerSection) {
             setState(() {
               _openFilePickerSection = false;
               _filePickerSize = 250.0;
             });
           } else {
+            final status = await Permission.storage.request();
+            print('status: ${status}');
+            if (status.isDenied || status.isPermanentlyDenied) {
+              final res = await openAppSettings();
+              if (!res) {
+                return;
+              }
+            }
             _getAllMedia();
             showAttachmentModal();
           }
@@ -1494,7 +1505,7 @@ class MessageInputState extends State<MessageInput> {
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: MediaType.parse(lookupMimeType(filename)),
+        contentType: httpParser.MediaType.parse(lookupMimeType(filename)),
       ),
     );
     return res.file;
@@ -1507,7 +1518,7 @@ class MessageInputState extends State<MessageInput> {
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: MediaType.parse(lookupMimeType(filename)),
+        contentType: httpParser.MediaType.parse(lookupMimeType(filename)),
       ),
     );
     return res.file;
