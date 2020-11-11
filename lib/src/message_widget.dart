@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -11,10 +12,12 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'image_group.dart';
 import 'message_text.dart';
+import 'utils.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
@@ -343,6 +346,24 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
+  Widget _buildUrlAttachment() {
+    var urlAttachment = widget.message.attachments
+        .firstWhere((element) => element.ogScrapeUrl != null);
+
+    var host = Uri.parse(urlAttachment.ogScrapeUrl).host;
+    var splitList = host.split('.');
+    var hostName = splitList.length == 3 ? splitList[1] : splitList[0];
+    var hostDisplayName = urlAttachment.authorName?.capitalize() ??
+        _getWebsiteName(hostName.toLowerCase()) ??
+        hostName.capitalize();
+
+    return UrlAttachment(
+      urlAttachment: urlAttachment,
+      hostDisplayName: hostDisplayName,
+      textPadding: widget.textPadding,
+    );
+  }
+
   Padding _buildBottomRow(double leftPadding) {
     return Padding(
       padding: EdgeInsets.only(
@@ -525,7 +546,8 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   List<Widget> _parseAttachments(BuildContext context) {
     final images = widget.message.attachments
-            ?.where((element) => element.type == 'image')
+            ?.where((element) =>
+                element.type == 'image' && element.ogScrapeUrl == null)
             ?.toList() ??
         [];
 
@@ -548,7 +570,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       ];
     }
 
-    return widget.message.attachments?.map((attachment) {
+    return widget.message.attachments
+            ?.where((element) => element.ogScrapeUrl == null)
+            ?.map((attachment) {
           final attachmentBuilder = widget.attachmentBuilders[attachment.type];
 
           if (attachmentBuilder == null) {
@@ -757,28 +781,36 @@ class _MessageWidgetState extends State<MessageWidget> {
     Widget child = Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
-      child: Padding(
-        padding: widget.textPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            getFailedMessageWidget(context),
-            widget.textBuilder != null
-                ? widget.textBuilder(context, widget.message)
-                : MessageText(
-                    onLinkTap: widget.onLinkTap,
-                    message: widget.message,
-                    onMentionTap: widget.onMentionTap,
-                    messageTheme: isOnlyEmoji
-                        ? widget.messageTheme.copyWith(
-                            messageText:
-                                widget.messageTheme.messageText.copyWith(
-                            fontSize: 40,
-                          ))
-                        : widget.messageTheme,
-                  ),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: widget.textPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                getFailedMessageWidget(context),
+                widget.textBuilder != null
+                    ? widget.textBuilder(context, widget.message)
+                    : MessageText(
+                        onLinkTap: widget.onLinkTap,
+                        message: widget.message,
+                        onMentionTap: widget.onMentionTap,
+                        messageTheme: isOnlyEmoji
+                            ? widget.messageTheme.copyWith(
+                                messageText:
+                                    widget.messageTheme.messageText.copyWith(
+                                fontSize: 40,
+                              ))
+                            : widget.messageTheme,
+                      ),
+              ],
+            ),
+          ),
+          if (widget.message.attachments
+              .any((element) => element.ogScrapeUrl != null))
+            _buildUrlAttachment(),
+        ],
       ),
     );
 
@@ -796,11 +828,18 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Color _getBackgroundColor() {
-    return (widget.message.status == MessageSendingStatus.FAILED ||
-            widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
-            widget.message.status == MessageSendingStatus.FAILED_DELETE)
-        ? Color(0xffd0021B).withOpacity(.1)
-        : widget.messageTheme.messageBackgroundColor;
+    if ((widget.message.status == MessageSendingStatus.FAILED ||
+        widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
+        widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
+      return Color(0xffd0021B).withOpacity(.1);
+    }
+
+    if (widget.message.attachments
+        .any((element) => element.ogScrapeUrl != null)) {
+      return Color(0xFFE9F2FF);
+    }
+
+    return widget.messageTheme.messageBackgroundColor;
   }
 
   void retryMessage(BuildContext context) {
@@ -823,6 +862,47 @@ class _MessageWidgetState extends State<MessageWidget> {
             channel.cid,
           );
       return;
+    }
+  }
+
+  String _getWebsiteName(String hostName) {
+    switch (hostName) {
+      case 'reddit':
+        return 'Reddit';
+      case 'youtube':
+        return 'Youtube';
+      case 'wikipedia':
+        return 'Wikipedia';
+      case 'twitter':
+        return 'Twitter';
+      case 'facebook':
+        return 'Facebook';
+      case 'amazon':
+        return 'Amazon';
+      case 'yelp':
+        return 'Yelp';
+      case 'imdb':
+        return 'IMDB';
+      case 'pinterest':
+        return 'Pinterest';
+      case 'tripadvisor':
+        return 'TripAdvisor';
+      case 'instagram':
+        return 'Instagram';
+      case 'walmart':
+        return 'Walmart';
+      case 'craigslist':
+        return 'Craigslist';
+      case 'ebay':
+        return 'eBay';
+      case 'linkedin':
+        return 'LinkedIn';
+      case 'google':
+        return 'Google';
+      case 'apple':
+        return 'Apple';
+      default:
+        return null;
     }
   }
 }
