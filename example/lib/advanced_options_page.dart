@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -52,9 +53,11 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
       body: Builder(
         builder: (context) {
           return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              0,
             ),
             child: Form(
               key: _formKey,
@@ -266,7 +269,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         },
                       ),
                     ),
-                  )
+                  ),
+                  StreamVersion(),
                 ],
               ),
             ),

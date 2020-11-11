@@ -1,12 +1,11 @@
 import 'package:example/advanced_options_page.dart';
 import 'package:example/main.dart';
+import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:yaml/yaml.dart';
 
 import 'notifications_service.dart';
 
@@ -216,32 +215,7 @@ class ChooseUserPage extends StatelessWidget {
               },
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            alignment: Alignment.bottomCenter,
-            child: FutureBuilder<String>(
-              future: rootBundle.loadString('pubspec.lock'),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return SizedBox();
-                }
-
-                final pubspec = snapshot.data;
-                final yaml = loadYaml(pubspec);
-                final streamChatDep =
-                    yaml['packages']['stream_chat_flutter']['version'];
-
-                print('streamChatDep: ${streamChatDep}');
-                return Text(
-                  'Stream SDK v ${streamChatDep}',
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    color: Colors.black.withOpacity(.13),
-                  ),
-                );
-              },
-            ),
-          ),
+          StreamVersion(),
         ],
       ),
     );
