@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
+import 'channel_unread_indicator.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -80,7 +80,7 @@ class ChannelPreview extends StatelessWidget {
                                 e.user.id == channel.client.state.user.id)) {
                           return SizedBox();
                         }
-                        return UnreadIndicator(
+                        return ChannelUnreadIndicator(
                           channel: channel,
                         );
                       }),

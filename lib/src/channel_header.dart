@@ -81,7 +81,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
       brightness: Theme.of(context).brightness,
       elevation: 1,
       leading: showBackButton
-          ? StreamBackButton(onPressed: onBackPressed)
+          ? StreamBackButton(
+              onPressed: onBackPressed,
+              showUnreads: true,
+            )
           : SizedBox(),
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,

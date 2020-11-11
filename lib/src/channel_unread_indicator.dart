@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class UnreadIndicator extends StatelessWidget {
-  const UnreadIndicator({
+class ChannelUnreadIndicator extends StatelessWidget {
+  const ChannelUnreadIndicator({
     Key key,
+    @required this.channel,
   }) : super(key: key);
+
+  final Channel channel;
 
   @override
   Widget build(BuildContext context) {
-    final client = StreamChat.of(context).client;
     return StreamBuilder<int>(
-      stream: client.state.totalUnreadCountStream,
-      initialData: client.state.totalUnreadCount,
+      stream: channel.state.unreadCountStream,
+      initialData: channel.state.unreadCount,
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == 0) {
           return SizedBox();
