@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -17,7 +16,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'image_group.dart';
 import 'message_text.dart';
-import 'utils.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
