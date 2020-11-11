@@ -2,10 +2,16 @@ import 'package:example/advanced_options_page.dart';
 import 'package:example/main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'notifications_service.dart';
+
+const kStreamApiKey = 'STREAM_API_KEY';
+const kStreamUserId = 'STREAM_USER_ID';
+const kStreamToken = 'STREAM_TOKEN';
+const kDefaultStreamApiKey = 's2dxdhpxd94g';
 
 class ChooseUserPage extends StatelessWidget {
   @override
@@ -116,6 +122,7 @@ class ChooseUserPage extends StatelessWidget {
                           ),
                         );
 
+                        final secureStorage = FlutterSecureStorage();
                         final client = StreamChat.of(context).client;
 
                         await client.setUser(
@@ -124,6 +131,21 @@ class ChooseUserPage extends StatelessWidget {
                           }),
                           token,
                         );
+
+                        await Future.wait([
+                          secureStorage.write(
+                            key: kStreamApiKey,
+                            value: kDefaultStreamApiKey,
+                          ),
+                          secureStorage.write(
+                            key: kStreamUserId,
+                            value: user.id,
+                          ),
+                          secureStorage.write(
+                            key: kStreamToken,
+                            value: token,
+                          ),
+                        ]);
 
                         if (!kIsWeb) {
                           initNotifications(client);

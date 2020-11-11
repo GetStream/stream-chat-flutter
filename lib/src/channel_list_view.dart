@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -482,6 +483,8 @@ class _ChannelListViewState extends State<ChannelListView>
     }
   }
 
+  StreamSubscription _subscription;
+
   @override
   void initState() {
     super.initState();
@@ -506,7 +509,7 @@ class _ChannelListViewState extends State<ChannelListView>
 
     final client = StreamChat.of(context).client;
 
-    client
+    _subscription = client
         .on(
       EventType.connectionRecovered,
       EventType.notificationAddedToChannel,
@@ -544,6 +547,7 @@ class _ChannelListViewState extends State<ChannelListView>
 
   @override
   void dispose() {
+    _subscription.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
