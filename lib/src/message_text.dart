@@ -24,7 +24,11 @@ class MessageText extends StatelessWidget {
     final text = _replaceMentions(message.text);
     return MarkdownBody(
       data: text,
-      onTapLink: (text, link, title) {
+      onTapLink: (
+        String link,
+        String href,
+        String title,
+      ) {
         if (link.startsWith('@')) {
           final mentionedUser = message.mentionedUsers.firstWhere(
             (u) => '@${u.name.replaceAll(' ', '')}' == link,
