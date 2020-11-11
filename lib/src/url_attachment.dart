@@ -27,6 +27,7 @@ class UrlAttachment extends StatelessWidget {
               ),
             if (urlAttachment.imageUrl != null)
               Container(
+                clipBehavior: Clip.antiAliasWithSaveLayer,
                 margin: EdgeInsets.symmetric(horizontal: 8.0),
                 child: Stack(
                   children: [
@@ -63,8 +64,9 @@ class UrlAttachment extends StatelessWidget {
                     ),
                   ],
                 ),
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(8.0)),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
             Padding(
               padding: textPadding,
