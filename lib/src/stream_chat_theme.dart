@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channel_header.dart';
@@ -5,6 +6,7 @@ import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/utils.dart';
 
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
 class StreamChatTheme extends InheritedWidget {
@@ -226,9 +228,9 @@ class StreamChatThemeData {
       defaultChannelImage: (context, channel) => SizedBox(),
       backgroundColor: isDark ? Colors.black : Colors.white,
       defaultUserImage: (context, user) => Center(
-        child: Text(
-          user.name?.substring(0, 1) ?? '',
-          style: TextStyle(color: Colors.white),
+        child: CachedNetworkImage(
+          imageUrl: getRandomPicUrl(user),
+          fit: BoxFit.cover,
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(

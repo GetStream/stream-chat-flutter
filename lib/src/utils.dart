@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> launchURL(BuildContext context, String url) async {
@@ -42,3 +43,7 @@ Future<bool> showConfirmationDialog(
     },
   );
 }
+
+/// Get random png with initials
+String getRandomPicUrl(User user) =>
+    'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
