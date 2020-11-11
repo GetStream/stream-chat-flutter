@@ -53,6 +53,10 @@ class ChooseUserPage extends StatelessWidget {
         },
       ),
     };
+
+    users.updateAll(
+        (_, value) => value..extraData['image'] = getRandomPicUrl(value));
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,9 +130,7 @@ class ChooseUserPage extends StatelessWidget {
                         final client = StreamChat.of(context).client;
 
                         await client.setUser(
-                          User(id: user.id, extraData: {
-                            'name': user.name,
-                          }),
+                          user,
                           token,
                         );
 
