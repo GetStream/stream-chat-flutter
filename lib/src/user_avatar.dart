@@ -27,6 +27,7 @@ class UserAvatar extends StatelessWidget {
     final hasImage = user.extraData?.containsKey('image') == true &&
         user.extraData['image'] != null &&
         user.extraData['image'] != '';
+    final streamChatTheme = StreamChatTheme.of(context);
     return GestureDetector(
       onTap: onTap != null
           ? () {
@@ -39,38 +40,22 @@ class UserAvatar extends StatelessWidget {
         children: <Widget>[
           ClipRRect(
             borderRadius: borderRadius ??
-                StreamChatTheme.of(context)
-                    .ownMessageTheme
-                    .avatarTheme
-                    .borderRadius,
+                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
             child: Container(
               constraints: constraints ??
-                  StreamChatTheme.of(context)
-                      .ownMessageTheme
-                      .avatarTheme
-                      .constraints,
+                  streamChatTheme.ownMessageTheme.avatarTheme.constraints,
               decoration: BoxDecoration(
-                color: StreamChatTheme.of(context).accentColor,
+                color: streamChatTheme.accentColor,
               ),
               child: hasImage
                   ? CachedNetworkImage(
                       imageUrl: user.extraData['image'],
                       errorWidget: (_, __, ___) {
-                        return Center(
-                          child: Text(
-                            user.extraData?.containsKey('name') ?? false
-                                ? user.extraData['name'][0]
-                                : '',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
+                        return streamChatTheme.defaultUserImage(context, user);
                       },
                       fit: BoxFit.cover,
                     )
-                  : StreamChatTheme.of(context).defaultUserImage(context, user),
+                  : streamChatTheme.defaultUserImage(context, user),
             ),
           ),
           if (showOnlineStatus && user.online == true)

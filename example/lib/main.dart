@@ -1,88 +1,35 @@
 import 'dart:io';
 
+import 'package:example/choose_user_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_apns/apns.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    hide Message;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-void showLocalNotification(Message message, ChannelModel channel) async {
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  final initializationSettingsAndroid =
-      AndroidInitializationSettings('launch_background');
-  final initializationSettingsIOS = IOSInitializationSettings();
-  final initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
-  );
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  await flutterLocalNotificationsPlugin.show(
-    message.id.hashCode,
-    '${message.user.name} @ ${channel.name}',
-    message.text,
-    NotificationDetails(
-      android: AndroidNotificationDetails(
-        'message channel',
-        'Message channel',
-        'Channel used for showing messages',
-        priority: Priority.high,
-        importance: Importance.high,
-      ),
-      iOS: IOSNotificationDetails(),
-    ),
-  );
-}
-
-Future backgroundHandler(Map<String, dynamic> notification) async {
-  final messageId = notification['data']['message_id'];
-
-  final notificationData =
-      await NotificationService.getAndStoreMessage(messageId);
-
-  showLocalNotification(
-    notificationData.message,
-    notificationData.channel,
-  );
-}
-
-void _initNotifications(Client client) {
-  final connector = createPushConnector();
-  connector.configure(
-    onBackgroundMessage: backgroundHandler,
-  );
-
-  connector.requestNotificationPermissions();
-  connector.token.addListener(() {
-    if (connector.token.value != null) {
-      client.addDevice(
-        connector.token.value,
-        Platform.isAndroid ? 'firebase' : 'apn',
-      );
-    }
-  });
-}
+import 'notifications_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final secureStorage = FlutterSecureStorage();
+
+  final apiKey = await secureStorage.read(key: kStreamApiKey);
+  final userId = await secureStorage.read(key: kStreamUserId);
+
   final client = Client(
-    's2dxdhpxd94g',
+    apiKey ?? kDefaultStreamApiKey,
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
     persistenceEnabled: true,
   );
 
-  await client.setUser(
-    User(id: 'super-band-9', extraData: {
-      'name': 'Jonathan Doe',
-    }),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
-  );
-
-  if (!kIsWeb) {
-    _initNotifications(client);
+  if (userId != null) {
+    final token = await secureStorage.read(key: kStreamToken);
+    await client.setUser(
+      User(id: userId),
+      token,
+    );
   }
 
   runApp(MyApp(client));
@@ -98,16 +45,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      //TODO change to system once dark theme is implemented
       themeMode: ThemeMode.light,
-
-      ///TODO change to system once dark theme is implemented
       builder: (context, widget) {
         return StreamChat(
           child: widget,
           client: client,
         );
       },
-      home: ChannelListPage(),
+      home: client.state.user == null ? ChooseUserPage() : ChannelListPage(),
     );
   }
 }
@@ -115,7 +61,89 @@ class MyApp extends StatelessWidget {
 class ChannelListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final user = StreamChat.of(context).user;
     return Scaffold(
+      drawer: Drawer(
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).viewPadding.top + 8,
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  bottom: 20.0,
+                  left: 8,
+                ),
+                child: Row(
+                  children: [
+                    UserAvatar(
+                      user: user,
+                      showOnlineStatus: false,
+                      constraints: BoxConstraints.tight(Size.fromRadius(20)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Text(
+                        user.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: Icon(StreamIcons.edit),
+                title: Text(
+                  'New direct message',
+                  style: TextStyle(
+                    fontSize: 14.5,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(StreamIcons.group),
+                title: Text(
+                  'New group',
+                  style: TextStyle(
+                    fontSize: 14.5,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  child: ListTile(
+                    onTap: () async {
+                      await StreamChat.of(context).client.disconnect();
+
+                      final secureStorage = FlutterSecureStorage();
+                      await secureStorage.deleteAll();
+                      Navigator.pop(context);
+                      await Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChooseUserPage(),
+                        ),
+                      );
+                    },
+                    leading: Icon(StreamIcons.user),
+                    title: Text(
+                      'Sign out',
+                      style: TextStyle(
+                        fontSize: 14.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
@@ -129,7 +157,7 @@ class ChannelListPage extends StatelessWidget {
           swipeToAction: true,
           filter: {
             'members': {
-              '\$in': [StreamChat.of(context).user.id],
+              '\$in': [user.id],
             }
           },
           options: {
