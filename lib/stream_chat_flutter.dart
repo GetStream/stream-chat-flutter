@@ -28,4 +28,5 @@ export 'src/system_message.dart';
 export 'src/thread_header.dart';
 export 'src/typing_indicator.dart';
 export 'src/user_avatar.dart';
+export 'src/utils.dart';
 export 'src/video_attachment.dart';

@@ -19,6 +19,7 @@ void main() {
       when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
       when(channel.lastMessageAt).thenReturn(lastMessageAt);
       when(channel.state).thenReturn(channelState);
+      when(channel.client).thenReturn(client);
       when(channel.isMuted).thenReturn(false);
       when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(channel.extraDataStream).thenAnswer((i) => Stream.value({
@@ -28,7 +29,19 @@ void main() {
         'name': 'test name',
       });
       when(channelState.unreadCount).thenReturn(1);
-      when(channelState.members).thenReturn([]);
+      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
+      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+            Member(
+              userId: 'user-id',
+              user: User(id: 'user-id'),
+            )
+          ]));
+      when(channelState.members).thenReturn([
+        Member(
+          userId: 'user-id',
+          user: User(id: 'user-id'),
+        ),
+      ]);
       when(channelState.lastMessage).thenReturn(Message(
         text: 'hello',
         user: User(id: 'other-user'),

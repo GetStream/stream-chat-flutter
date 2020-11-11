@@ -1,3 +1,12 @@
+## 0.2.12
+
+- Upgrade dependencies
+- Check if user.extraData['image'] is not null before using it
+
+## 0.2.11+1
+
+- Fix error with channel query while handling background notifications
+
 ## 0.2.11
 
 - Update llc dependency

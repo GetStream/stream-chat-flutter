@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
+import 'channel_unread_indicator.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -70,9 +70,20 @@ class ChannelPreview extends StatelessWidget {
                           StreamChatTheme.of(context).channelPreviewTheme.title,
                     ),
                   ),
-                  UnreadIndicator(
-                    channel: channel,
-                  ),
+                  StreamBuilder<List<Member>>(
+                      stream: channel.state.membersStream,
+                      initialData: channel.state.members,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData ||
+                            snapshot.data.isEmpty ||
+                            !snapshot.data.any((Member e) =>
+                                e.user.id == channel.client.state.user.id)) {
+                          return SizedBox();
+                        }
+                        return ChannelUnreadIndicator(
+                          channel: channel,
+                        );
+                      }),
                 ],
               ),
               subtitle: Row(
@@ -92,7 +103,7 @@ class ChannelPreview extends StatelessWidget {
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
                                     .length ==
-                                channel.memberCount - 1,
+                                (channel.memberCount ?? 0) - 1,
                           ),
                         );
                       }

@@ -18,6 +18,7 @@ class SendingIndicator extends StatelessWidget {
       return Icon(
         Icons.done_all,
         size: 8,
+        color: StreamChatTheme.of(context).accentColor,
       );
     }
     if (message.status == MessageSendingStatus.SENT || message.status == null) {
