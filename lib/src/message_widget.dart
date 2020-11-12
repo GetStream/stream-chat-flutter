@@ -493,7 +493,10 @@ class _MessageWidgetState extends State<MessageWidget> {
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
-              showEditMessage: widget.showEditMessage,
+              showEditMessage: widget.showEditMessage &&
+                  widget.message.attachments
+                          ?.any((element) => element.type == 'giphy') !=
+                      true,
               showReactions: widget.showReactions,
               showReply:
                   widget.showReplyIndicator && widget.onThreadTap != null,
