@@ -46,9 +46,16 @@ class GroupImage extends StatelessWidget {
                       .take(2)
                       .map((url) => Flexible(
                             fit: FlexFit.tight,
-                            child: CachedNetworkImage(
-                              imageUrl: url,
+                            child: FittedBox(
                               fit: BoxFit.cover,
+                              clipBehavior: Clip.antiAlias,
+                              child: Transform.scale(
+                                scale: 1.2,
+                                child: CachedNetworkImage(
+                                  imageUrl: url,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                           ))
                       .toList(),
@@ -64,9 +71,16 @@ class GroupImage extends StatelessWidget {
                         .skip(2)
                         .map((url) => Flexible(
                               fit: FlexFit.tight,
-                              child: CachedNetworkImage(
-                                imageUrl: url,
+                              child: FittedBox(
                                 fit: BoxFit.cover,
+                                clipBehavior: Clip.antiAlias,
+                                child: Transform.scale(
+                                  scale: 1.2,
+                                  child: CachedNetworkImage(
+                                    imageUrl: url,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ))
                         .toList(),
