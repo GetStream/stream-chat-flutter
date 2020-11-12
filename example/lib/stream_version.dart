@@ -24,7 +24,6 @@ class StreamVersion extends StatelessWidget {
           final streamChatDep =
               yaml['packages']['stream_chat_flutter']['version'];
 
-          print('streamChatDep: ${streamChatDep}');
           return Text(
             'Stream SDK v ${streamChatDep}',
             style: TextStyle(

@@ -178,9 +178,10 @@ class ChooseUserPage extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text('Stream test account'),
-                      trailing: Icon(
-                        StreamIcons.arrow_right,
-                        color: StreamChatTheme.of(context).accentColor,
+                      trailing: SvgPicture.asset(
+                        'assets/icon_arrow_right.svg',
+                        height: 24,
+                        width: 24,
                       ),
                     );
                   }),
@@ -206,9 +207,11 @@ class ChooseUserPage extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text('Custom settings'),
-                    trailing: Icon(
-                      StreamIcons.arrow_right,
-                      color: StreamChatTheme.of(context).accentColor,
+                    trailing: SvgPicture.asset(
+                      'assets/icon_arrow_right.svg',
+                      height: 24,
+                      width: 24,
+                      clipBehavior: Clip.none,
                     ),
                   ),
                 ][i];

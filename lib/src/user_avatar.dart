@@ -49,6 +49,7 @@ class UserAvatar extends StatelessWidget {
               ),
               child: hasImage
                   ? CachedNetworkImage(
+                      filterQuality: FilterQuality.high,
                       imageUrl: user.extraData['image'],
                       errorWidget: (_, __, ___) {
                         return streamChatTheme.defaultUserImage(context, user);
