@@ -171,7 +171,7 @@ class MessageInputState extends State<MessageInput> {
   final _imagePicker = ImagePicker();
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
-  bool _typingStarted = false;
+  bool _animateContainer = true;
   bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay, _emojiOverlay;
   Iterable<String> _emojiNames;
@@ -382,11 +382,6 @@ class MessageInputState extends State<MessageInput> {
                     _checkMentions(s, context);
 
                     _checkEmoji(s, context);
-                  },
-                  onTap: () {
-                    setState(() {
-                      _typingStarted = true;
-                    });
                   },
                   style: Theme.of(context).textTheme.bodyText2,
                   autofocus: false,
@@ -613,7 +608,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildFilePickerSection() {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
+      duration: _animateContainer ? Duration(milliseconds: 300) : Duration.zero,
       height: _openFilePickerSection ? _filePickerSize : 0,
       child: Material(
         color: Color(0xFFF2F2F2),
@@ -662,13 +657,11 @@ class MessageInputState extends State<MessageInput> {
             GestureDetector(
               onVerticalDragUpdate: (update) {
                 setState(() {
-                  _filePickerSize -= update.delta.dy;
-                  if (_filePickerSize < 100) {
-                    _filePickerSize = 100.0;
-                  } else if (_filePickerSize >
-                      MediaQuery.of(context).size.height / 1.7) {
-                    _filePickerSize = MediaQuery.of(context).size.height / 1.7;
-                  }
+                  _animateContainer = false;
+                  _filePickerSize = (_filePickerSize - update.delta.dy).clamp(
+                    100,
+                    MediaQuery.of(context).size.height / 1.7,
+                  );
                 });
               },
               child: Container(
@@ -1206,6 +1199,7 @@ class MessageInputState extends State<MessageInput> {
 
           if (_openFilePickerSection) {
             setState(() {
+              _animateContainer = true;
               _openFilePickerSection = false;
               _filePickerSize = 250.0;
             });
@@ -1536,7 +1530,6 @@ class MessageInputState extends State<MessageInput> {
 
     setState(() {
       _messageIsPresent = false;
-      _typingStarted = false;
       _commandEnabled = false;
     });
 
@@ -1632,7 +1625,6 @@ class MessageInputState extends State<MessageInput> {
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
 
-    _typingStarted = true;
     _messageIsPresent = true;
 
     message.attachments?.forEach((attachment) {

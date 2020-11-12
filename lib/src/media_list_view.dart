@@ -99,21 +99,7 @@ class _MediaListViewState extends State<MediaListView> {
   @override
   void initState() {
     super.initState();
-
-    _scrollController.addListener(() {
-      if (_scrollController.offset >
-          _scrollController.position.maxScrollExtent - 100) {
-        _getMedia();
-      }
-    });
-
     _getMedia();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   void _getMedia() async {
@@ -154,8 +140,5 @@ class _MediaListViewState extends State<MediaListView> {
     setState(() {
       _media.addAll(allItems);
     });
-
-    print(
-        '_media.where((element) => element.mediaType == MediaType.video).length: ${_media.where((element) => element.mediaType == MediaType.video).length}');
   }
 }
