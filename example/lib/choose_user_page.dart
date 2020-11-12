@@ -135,20 +135,18 @@ class ChooseUserPage extends StatelessWidget {
                           token,
                         );
 
-                        await Future.wait([
-                          secureStorage.write(
-                            key: kStreamApiKey,
-                            value: kDefaultStreamApiKey,
-                          ),
-                          secureStorage.write(
-                            key: kStreamUserId,
-                            value: user.id,
-                          ),
-                          secureStorage.write(
-                            key: kStreamToken,
-                            value: token,
-                          ),
-                        ]);
+                        secureStorage.write(
+                          key: kStreamApiKey,
+                          value: kDefaultStreamApiKey,
+                        );
+                        secureStorage.write(
+                          key: kStreamUserId,
+                          value: user.id,
+                        );
+                        secureStorage.write(
+                          key: kStreamToken,
+                          value: token,
+                        );
 
                         if (!kIsWeb) {
                           initNotifications(client);
