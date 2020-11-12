@@ -110,34 +110,12 @@ class ImageGroup extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) {
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              iconTheme: IconThemeData(
-                color: Colors.white,
-              ),
+        builder: (context) =>
+            FullScreenImage(urls: images.map((e) => e.imageUrl).toList(),
+              startIndex: index,
+              userName: message.user.name,
+              sentAt: message.createdAt,
             ),
-            backgroundColor: Colors.black,
-            body: SizedBox.expand(
-              child: CarouselSlider(
-                items: images
-                    .map((image) => FullScreenImage(
-                          url: image.imageUrl ??
-                              image.thumbUrl ??
-                              image.assetUrl,
-                        ))
-                    .toList(),
-                options: CarouselOptions(
-                  initialPage: index ?? 0,
-                  enableInfiniteScroll: false,
-                  viewportFraction: 0.95,
-                  height: MediaQuery.of(context).size.height,
-                ),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

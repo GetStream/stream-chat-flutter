@@ -44,9 +44,11 @@ class ImageAttachment extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) {
                           return FullScreenImage(
-                            url: attachment.imageUrl ??
+                            urls: [attachment.imageUrl ??
                                 attachment.assetUrl ??
-                                attachment.thumbUrl,
+                                attachment.thumbUrl],
+                            userName: message.user.name,
+                            sentAt: message.createdAt,
                           );
                         },
                       ),
