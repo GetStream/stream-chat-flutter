@@ -135,20 +135,18 @@ class ChooseUserPage extends StatelessWidget {
                           token,
                         );
 
-                        await Future.wait([
-                          secureStorage.write(
-                            key: kStreamApiKey,
-                            value: kDefaultStreamApiKey,
-                          ),
-                          secureStorage.write(
-                            key: kStreamUserId,
-                            value: user.id,
-                          ),
-                          secureStorage.write(
-                            key: kStreamToken,
-                            value: token,
-                          ),
-                        ]);
+                        secureStorage.write(
+                          key: kStreamApiKey,
+                          value: kDefaultStreamApiKey,
+                        );
+                        secureStorage.write(
+                          key: kStreamUserId,
+                          value: user.id,
+                        );
+                        secureStorage.write(
+                          key: kStreamToken,
+                          value: token,
+                        );
 
                         if (!kIsWeb) {
                           initNotifications(client);
@@ -178,9 +176,10 @@ class ChooseUserPage extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text('Stream test account'),
-                      trailing: Icon(
-                        StreamIcons.arrow_right,
-                        color: StreamChatTheme.of(context).accentColor,
+                      trailing: SvgPicture.asset(
+                        'assets/icon_arrow_right.svg',
+                        height: 24,
+                        width: 24,
                       ),
                     );
                   }),
@@ -206,9 +205,11 @@ class ChooseUserPage extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text('Custom settings'),
-                    trailing: Icon(
-                      StreamIcons.arrow_right,
-                      color: StreamChatTheme.of(context).accentColor,
+                    trailing: SvgPicture.asset(
+                      'assets/icon_arrow_right.svg',
+                      height: 24,
+                      width: 24,
+                      clipBehavior: Clip.none,
                     ),
                   ),
                 ][i];

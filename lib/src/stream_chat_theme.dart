@@ -229,6 +229,7 @@ class StreamChatThemeData {
       backgroundColor: isDark ? Colors.black : Colors.white,
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
+          filterQuality: FilterQuality.high,
           imageUrl: getRandomPicUrl(user),
           fit: BoxFit.cover,
         ),
