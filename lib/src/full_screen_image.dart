@@ -35,7 +35,7 @@ class _FullScreenImageState extends State<FullScreenImage>
 
   AnimationController _controller;
   PageController _pageController;
-  
+
   int _currentPage;
 
   @override
@@ -53,56 +53,66 @@ class _FullScreenImageState extends State<FullScreenImage>
       body: Stack(
         children: [
           AnimatedBuilder(
-            animation: _controller,
-            builder: (context, snapshot) {
-              return PageView.builder(
-                controller: _pageController,
-                onPageChanged: (val) {
-                  setState(() {
-                    _currentPage = val;
-                  });
-                },
-                itemBuilder: (context, position) {
-                  return PhotoView(
-                    imageProvider: CachedNetworkImageProvider(widget.urls[position]),
-                    maxScale: PhotoViewComputedScale.covered,
-                    minScale: PhotoViewComputedScale.contained,
-                    heroAttributes: PhotoViewHeroAttributes(
-                      tag: widget.urls,
-                    ),
-                    backgroundDecoration: BoxDecoration(
-                      color: ColorTween(
-                          begin: StreamChatTheme.of(context)
-                              .channelTheme
-                              .channelHeaderTheme
-                              .color,
-                          end: Colors.black).lerp(_controller.value),
-                    ),
-                    onTapUp: (a, b, c) {
-                      setState(() {
-                        _optionsShown = !_optionsShown;
-                      });
-                      if(_controller.isCompleted) {
-                        _controller.reverse();
-                      } else {
-                        _controller.forward();
-                      }
-                    },
-                  );
-                },
-                itemCount: widget.urls.length,
-              );
-            }
-          ),
+              animation: _controller,
+              builder: (context, snapshot) {
+                return PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (val) {
+                    setState(() {
+                      _currentPage = val;
+                    });
+                  },
+                  itemBuilder: (context, position) {
+                    return PhotoView(
+                      imageProvider:
+                          CachedNetworkImageProvider(widget.urls[position]),
+                      maxScale: PhotoViewComputedScale.covered,
+                      minScale: PhotoViewComputedScale.contained,
+                      heroAttributes: PhotoViewHeroAttributes(
+                        tag: widget.urls,
+                      ),
+                      backgroundDecoration: BoxDecoration(
+                        color: ColorTween(
+                                begin: StreamChatTheme.of(context)
+                                    .channelTheme
+                                    .channelHeaderTheme
+                                    .color,
+                                end: Colors.black)
+                            .lerp(_controller.value),
+                      ),
+                      onTapUp: (a, b, c) {
+                        setState(() {
+                          _optionsShown = !_optionsShown;
+                        });
+                        if (_controller.isCompleted) {
+                          _controller.reverse();
+                        } else {
+                          _controller.forward();
+                        }
+                      },
+                    );
+                  },
+                  itemCount: widget.urls.length,
+                );
+              }),
           AnimatedOpacity(
             opacity: _optionsShown ? 1.0 : 0.0,
             duration: Duration(milliseconds: 300),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ImageHeader(userName: widget.userName, sentAt: 'Sent at${Jiffy(widget.sentAt.toLocal())
-                    .format('  HH:mm')}',),
-                ImageFooter(currentPage: _currentPage, totalPages: widget.urls.length,),
+                ImageHeader(
+                  userName: widget.userName,
+                  sentAt:
+                      'Sent at${Jiffy(widget.sentAt.toLocal()).format('  HH:mm')}',
+                  onBackPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ImageFooter(
+                  currentPage: _currentPage,
+                  totalPages: widget.urls.length,
+                ),
               ],
             ),
           ),

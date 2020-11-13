@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter/src/stream_icons.dart';
 
 import './channel_name.dart';
 import 'channel_image.dart';
+import 'image_actions_modal.dart';
 import 'stream_channel.dart';
 
 class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -63,7 +64,9 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
             color: Colors.black,
             size: 24.0,
           ),
-          onPressed: () {},
+          onPressed: () {
+            _showMessageActionModalBottomSheet(context);
+          },
         ),
       ],
       centerTitle: true,
@@ -98,4 +101,15 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   final Size preferredSize;
+
+  void _showMessageActionModalBottomSheet(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return ImageActionsModal(
+            userName: userName,
+            sentAt: sentAt,
+          );
+        });
+  }
 }
