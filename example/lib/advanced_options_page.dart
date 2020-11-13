@@ -104,7 +104,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor: Color(0xffF5F5F5),
                       filled: true,
                       labelText:
-                          'Chat API Key ${_apiKeyError != null ? ': $_apiKeyError' : ''}',
+                          'Chat API Key ${_apiKeyError != null ? ':$_apiKeyError' : ''}',
                     ),
                     textInputAction: TextInputAction.next,
                   ),
@@ -149,7 +149,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fillColor: Color(0xffF5F5F5),
                         filled: true,
                         labelText:
-                            'User ID ${_userIdError != null ? ': $_userIdError' : ''}',
+                            'User ID ${_userIdError != null ? ':$_userIdError' : ''}',
                       ),
                     ),
                   ),
@@ -194,7 +194,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fillColor: Color(0xffF5F5F5),
                         filled: true,
                         labelText:
-                            'User Token ${_userTokenError != null ? ': $_userTokenError' : ''}',
+                            'User Token ${_userTokenError != null ? ':$_userTokenError' : ''}',
                       ),
                     ),
                   ),
@@ -265,7 +265,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                               ),
                             );
 
-                            print('CREATE CLIENT');
                             final client = Client(
                               apiKey,
                               logLevel: Level.INFO,
