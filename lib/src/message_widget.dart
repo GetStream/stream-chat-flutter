@@ -585,14 +585,22 @@ class _MessageWidgetState extends State<MessageWidget> {
             widget.message,
             attachment,
           );
-          return wrapAttachmentWidget(context, attachmentWidget,
-              attachment: attachment);
+          return wrapAttachmentWidget(
+            context,
+            attachmentWidget,
+            attachment: attachment,
+          );
         })?.toList() ??
         [];
   }
 
-  Padding wrapAttachmentWidget(BuildContext context, Widget attachmentWidget,
-      {Attachment attachment}) {
+  Padding wrapAttachmentWidget(
+    BuildContext context,
+    Widget attachmentWidget, {
+    Attachment attachment,
+  }) {
+    final attachmentShape =
+        widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
     return Padding(
       padding: EdgeInsets.only(
         bottom: 4,
@@ -605,13 +613,12 @@ class _MessageWidgetState extends State<MessageWidget> {
               ? Colors.white
               : _getBackgroundColor(),
           clipBehavior: Clip.hardEdge,
-          shape: widget.attachmentShape ??
-              widget.shape ??
-              _getDefaultShape(context),
+          shape: attachmentShape,
           child: Padding(
             padding: widget.attachmentPadding,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
+            child: Material(
+              clipBehavior: Clip.hardEdge,
+              shape: attachmentShape,
               child: Transform(
                 transform: Matrix4.rotationY(widget.reverse ? pi : 0),
                 alignment: Alignment.center,

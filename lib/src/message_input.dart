@@ -218,7 +218,7 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
@@ -388,10 +388,7 @@ class MessageInputState extends State<MessageInput> {
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    hintText:
-                        (_commandEnabled && _chosenCommand.name == 'giphy')
-                            ? 'Search GIFs'
-                            : 'Write a message',
+                    hintText: _getHint(),
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
@@ -441,6 +438,16 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+  }
+
+  String _getHint() {
+    if (_commandEnabled && _chosenCommand.name == 'giphy') {
+      return 'Search GIFs';
+    }
+    if (_attachments.isNotEmpty) {
+      return 'Add a command or send';
+    }
+    return 'Write a message';
   }
 
   void _checkEmoji(String s, BuildContext context) {
@@ -551,8 +558,10 @@ class MessageInputState extends State<MessageInput> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Icon(StreamIcons.lightning,
-                                color: StreamChatTheme.of(context).accentColor),
+                            child: Icon(
+                              StreamIcons.lightning,
+                              color: StreamChatTheme.of(context).accentColor,
+                            ),
                           ),
                           Text(
                             'Instant Commands',
@@ -1247,26 +1256,24 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton() {
-    return Center(
-      child: InkWell(
-        child: Padding(
-          padding: const EdgeInsets.only(
-              left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-          child: Icon(
-            StreamIcons.lightning,
-            color: Color(0xFF000000).withAlpha(128),
-          ),
+    return InkWell(
+      child: Padding(
+        padding:
+            const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
+        child: Icon(
+          StreamIcons.lightning,
+          color: Color(0xFF000000).withAlpha(128),
         ),
-        onTap: () {
-          if (_commandsOverlay == null) {
-            _commandsOverlay = _buildCommandsOverlayEntry();
-            Overlay.of(context).insert(_commandsOverlay);
-          } else {
-            _commandsOverlay?.remove();
-            _commandsOverlay = null;
-          }
-        },
       ),
+      onTap: () {
+        if (_commandsOverlay == null) {
+          _commandsOverlay = _buildCommandsOverlayEntry();
+          Overlay.of(context).insert(_commandsOverlay);
+        } else {
+          _commandsOverlay?.remove();
+          _commandsOverlay = null;
+        }
+      },
     );
   }
 
