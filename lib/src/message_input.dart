@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:emojis/emoji.dart';
@@ -659,7 +660,7 @@ class MessageInputState extends State<MessageInput> {
                 setState(() {
                   _animateContainer = false;
                   _filePickerSize = (_filePickerSize - update.delta.dy).clamp(
-                    100,
+                    240.0,
                     MediaQuery.of(context).size.height / 1.7,
                   );
                 });
@@ -709,17 +710,80 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildPickerSection() {
     switch (_filePickerIndex) {
       case 0:
-        return MediaListView(
-          selectedIds: _attachments.map((e) => e.id).toList(),
-          onSelect: (media) {
-            if (!_attachments.any((element) => element.id == media.id)) {
-              _addAttachment(media);
-            } else {
-              _attachments.removeWhere((element) => element.id == media.id);
-              setState(() {});
-            }
-          },
-        );
+        return FutureBuilder<PermissionStatus>(
+            future: Platform.isAndroid
+                ? Permission.storage.status
+                : Permission.photos.status,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (snapshot.data.isGranted) {
+                return MediaListView(
+                  selectedIds: _attachments.map((e) => e.id).toList(),
+                  onSelect: (media) {
+                    if (!_attachments
+                        .any((element) => element.id == media.id)) {
+                      _addAttachment(media);
+                    } else {
+                      _attachments
+                          .removeWhere((element) => element.id == media.id);
+                      setState(() {});
+                    }
+                  },
+                );
+              }
+
+              return InkWell(
+                onTap: () async {
+                  var status = await (Platform.isAndroid
+                      ? Permission.storage.status
+                      : Permission.photos.status);
+                  print('status: ${status}');
+                  if (status.isPermanentlyDenied || status.isDenied) {
+                    if (await openAppSettings()) {
+                      setState(() {});
+                    }
+                  } else {
+                    status = await (Platform.isAndroid
+                            ? Permission.storage
+                            : Permission.photos)
+                        .request();
+                    if (status.isGranted) {
+                      setState(() {});
+                    }
+                  }
+                },
+                child: Container(
+                  color: Color(0xFFF2F2F2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SvgPicture.asset(
+                        'svgs/icon_picture_empty_state.svg',
+                        package: 'stream_chat_flutter',
+                        height: 140,
+                        color: StreamChatTheme.of(context).accentColor,
+                      ),
+                      Center(
+                        child: Text(
+                          'Allow access to your gallery',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: StreamChatTheme.of(context).accentColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            });
         break;
       case 1:
         break;
@@ -1235,12 +1299,14 @@ class MessageInputState extends State<MessageInput> {
               _filePickerSize = 250.0;
             });
           } else {
-            final status = await Permission.storage.request();
-            if (status.isDenied || status.isPermanentlyDenied) {
-              final res = await openAppSettings();
-              if (!res) {
-                return;
-              }
+            final status = await (Platform.isAndroid
+                ? Permission.storage.status
+                : Permission.photos.status);
+            if (status.isUndetermined) {
+              await (Platform.isAndroid
+                      ? Permission.storage
+                      : Permission.photos)
+                  .request();
             }
             showAttachmentModal();
           }
