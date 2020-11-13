@@ -730,10 +730,16 @@ class MessageInputState extends State<MessageInput> {
 
   void _addAttachment(Media medium) async {
     final mediaFile = await medium.getFile();
+    final thumbBytes = await medium.getThumbnail();
 
     final file = PlatformFile(
       path: mediaFile.path,
       bytes: mediaFile.readAsBytesSync(),
+    );
+
+    final thumbFile = PlatformFile(
+      bytes: thumbBytes,
+      name: '${file.name ?? file.path?.split('/')?.last}_thumbnail.jpeg',
     );
 
     setState(() {
@@ -747,6 +753,7 @@ class MessageInputState extends State<MessageInput> {
     final channel = StreamChannel.of(context).channel;
     final attachment = _SendingAttachment(
       file: file,
+      thumbFile: thumbFile,
       attachment: Attachment(
         localUri: file.path != null ? Uri.parse(file.path) : null,
         type: medium.mediaType == MediaType.image ? 'image' : 'video',
@@ -757,6 +764,11 @@ class MessageInputState extends State<MessageInput> {
     setState(() {
       _attachments.add(attachment);
     });
+
+    final thumbUrl = await _uploadImage(
+      thumbFile,
+      channel,
+    );
 
     final url = await _uploadAttachment(
         file,
@@ -772,10 +784,12 @@ class MessageInputState extends State<MessageInput> {
     if (fileType == DefaultAttachmentTypes.image) {
       attachment.attachment = attachment.attachment.copyWith(
         imageUrl: url,
+        thumbUrl: thumbUrl,
       );
     } else {
       attachment.attachment = attachment.attachment.copyWith(
         assetUrl: url,
+        thumbUrl: thumbUrl,
       );
     }
 
@@ -1041,7 +1055,7 @@ class MessageInputState extends State<MessageInput> {
     return _attachments.isEmpty
         ? Container()
         : LimitedBox(
-            maxHeight: 76.0,
+            maxHeight: 104.0,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: _attachments
@@ -1055,8 +1069,8 @@ class MessageInputState extends State<MessageInput> {
                             AspectRatio(
                               aspectRatio: 1.0,
                               child: Container(
-                                height: 50,
-                                width: 50,
+                                height: 104,
+                                width: 104,
                                 child: _buildAttachment(attachment),
                               ),
                             ),
@@ -1138,9 +1152,26 @@ class MessageInputState extends State<MessageInput> {
               );
         break;
       case 'video':
-        return Container(
-          child: Icon(Icons.videocam),
-          color: Colors.black26,
+        return Stack(
+          children: [
+            Container(
+              child: attachment.thumbFile != null
+                  ? Image.memory(
+                      attachment.thumbFile.bytes,
+                      fit: BoxFit.cover,
+                    )
+                  : Icon(Icons.videocam),
+              color: Colors.black26,
+            ),
+            Positioned(
+              left: 8,
+              bottom: 10,
+              child: SvgPicture.asset(
+                'svgs/video_call_icon.svg',
+                package: 'stream_chat_flutter',
+              ),
+            ),
+          ],
         );
         break;
       default:
@@ -1426,7 +1457,9 @@ class MessageInputState extends State<MessageInput> {
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: httpParser.MediaType.parse(lookupMimeType(filename)),
+        contentType: filename != null
+            ? httpParser.MediaType.parse(lookupMimeType(filename))
+            : null,
       ),
     );
     return res.file;
@@ -1657,12 +1690,14 @@ class MessageInputState extends State<MessageInput> {
 
 class _SendingAttachment {
   PlatformFile file;
+  PlatformFile thumbFile;
   Attachment attachment;
   bool uploaded;
   String id;
 
   _SendingAttachment({
     this.file,
+    this.thumbFile,
     this.attachment,
     this.uploaded = false,
     this.id,

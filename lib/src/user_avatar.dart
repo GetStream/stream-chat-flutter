@@ -38,25 +38,23 @@ class UserAvatar extends StatelessWidget {
           : null,
       child: Stack(
         children: <Widget>[
-          ClipRRect(
-            borderRadius: borderRadius ??
-                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
-            child: Container(
-              constraints: constraints ??
-                  streamChatTheme.ownMessageTheme.avatarTheme.constraints,
-              decoration: BoxDecoration(
-                color: streamChatTheme.accentColor,
-              ),
-              child: hasImage
-                  ? CachedNetworkImage(
-                      imageUrl: user.extraData['image'],
-                      errorWidget: (_, __, ___) {
-                        return streamChatTheme.defaultUserImage(context, user);
-                      },
-                      fit: BoxFit.cover,
-                    )
-                  : streamChatTheme.defaultUserImage(context, user),
+          Container(
+            constraints: constraints ??
+                streamChatTheme.ownMessageTheme.avatarTheme.constraints,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: borderRadius ??
+                  streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
+              color: streamChatTheme.accentColor,
             ),
+            child: hasImage
+                ? CachedNetworkImage(
+                    imageUrl: user.extraData['image'],
+                    errorWidget: (_, __, ___) {
+                      return streamChatTheme.defaultUserImage(context, user);
+                    },
+                  )
+                : streamChatTheme.defaultUserImage(context, user),
           ),
           if (showOnlineStatus && user.online == true)
             Positioned(
