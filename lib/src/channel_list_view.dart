@@ -63,12 +63,16 @@ class ChannelListView extends StatefulWidget {
     this.channelPreviewBuilder,
     this.separatorBuilder,
     this.errorBuilder,
+    this.emptyBuilder,
     this.onImageTap,
     this.pullToRefresh = true,
   }) : super(key: key);
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
+
+  /// The builder used when the channel list is empty.
+  final  WidgetBuilder emptyBuilder;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -231,7 +235,11 @@ class _ChannelListViewState extends State<ChannelListView>
 
           final channels = snapshot.data;
 
-          if (channels.isEmpty) {
+          if (channels.isEmpty && widget.emptyBuilder != null) {
+              return widget.emptyBuilder(context);
+          } 
+
+          if (channels.isEmpty && widget.emptyBuilder == null) {
             return LayoutBuilder(
               builder: (context, viewportConstraints) {
                 return SingleChildScrollView(
