@@ -445,7 +445,7 @@ class MessageInputState extends State<MessageInput> {
       return 'Search GIFs';
     }
     if (_attachments.isNotEmpty) {
-      return 'Add a command or send';
+      return 'Add a comment or send';
     }
     return 'Write a message';
   }

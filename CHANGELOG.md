@@ -1,3 +1,10 @@
+## 0.2.13
+
+- Update llc dependency
+- Send parent_id in typing events
+- Expose addition input styling options
+- Expose builder for empty channel state
+
 ## 0.2.12
 
 - Upgrade dependencies
