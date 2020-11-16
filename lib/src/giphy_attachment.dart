@@ -283,80 +283,74 @@ class GiphyAttachment extends StatelessWidget {
 
   Widget _buildSentAttachment(context) {
     return Container(
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(16.0),
-                bottomRight: Radius.circular(0.0),
-                topLeft: Radius.circular(16.0),
-                bottomLeft: Radius.circular(16.0),
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  return FullScreenImage(
-                    url: attachment.imageUrl ??
-                        attachment.assetUrl ??
-                        attachment.thumbUrl,
-                  );
-                }));
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) {
+            return FullScreenImage(
+              url: attachment.imageUrl ??
+                  attachment.assetUrl ??
+                  attachment.thumbUrl,
+            );
+          }));
+        },
+        child: Stack(
+          children: [
+            CachedNetworkImage(
+              height: size?.height,
+              width: size?.width,
+              placeholder: (_, __) {
+                return Container(
+                  width: size?.width,
+                  height: size?.height,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               },
-              child: CachedNetworkImage(
-                height: size?.height,
-                width: size?.width,
-                placeholder: (_, __) {
-                  return Container(
-                    width: size?.width,
-                    height: size?.height,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                },
-                imageUrl: attachment.thumbUrl ??
-                    attachment.imageUrl ??
-                    attachment.assetUrl,
-                errorWidget: (context, url, error) => AttachmentError(
-                  attachment: attachment,
-                  size: size,
+              imageUrl: attachment.thumbUrl ??
+                  attachment.imageUrl ??
+                  attachment.assetUrl,
+              errorWidget: (context, url, error) => AttachmentError(
+                attachment: attachment,
+                size: size,
+              ),
+              fit: BoxFit.cover,
+            ),
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: Material(
+                color: Colors.black.withOpacity(.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                fit: BoxFit.cover,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        StreamIcons.lightning,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      Text(
+                        'GIPHY',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 8.0,
-              bottom: 8,
-            ),
-            child: Row(
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      StreamIcons.lightning,
-                      color: StreamChatTheme.of(context).accentColor,
-                      size: 15.0,
-                    ),
-                    Text(
-                      'GIPHY',
-                      style: TextStyle(
-                        color: StreamChatTheme.of(context).accentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              mainAxisAlignment: MainAxisAlignment.start,
-            ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
