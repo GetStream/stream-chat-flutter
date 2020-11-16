@@ -630,6 +630,7 @@ class MessageInputState extends State<MessageInput> {
                 IconButton(
                   icon: Icon(
                     StreamIcons.picture,
+                    size: 24,
                     color: _filePickerIndex == 0
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -643,6 +644,7 @@ class MessageInputState extends State<MessageInput> {
                 IconButton(
                   icon: Icon(
                     StreamIcons.folder,
+                    size: 24,
                     color: _filePickerIndex == 1
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -654,12 +656,25 @@ class MessageInputState extends State<MessageInput> {
                 IconButton(
                   icon: Icon(
                     StreamIcons.camera,
+                    size: 24,
                     color: _filePickerIndex == 2
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
                   ),
                   onPressed: () {
                     pickFile(DefaultAttachmentTypes.image, true);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.record,
+                    size: 24,
+                    color: _filePickerIndex == 2
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    pickFile(DefaultAttachmentTypes.video, true);
                   },
                 ),
               ],
@@ -793,10 +808,6 @@ class MessageInputState extends State<MessageInput> {
                 ),
               );
             });
-        break;
-      case 1:
-        break;
-      case 2:
         break;
     }
   }
