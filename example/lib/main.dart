@@ -64,83 +64,85 @@ class ChannelListPage extends StatelessWidget {
     final user = StreamChat.of(context).user;
     return Scaffold(
       drawer: Drawer(
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).viewPadding.top + 8,
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  bottom: 20.0,
-                  left: 8,
-                ),
-                child: Row(
-                  children: [
-                    UserAvatar(
-                      user: user,
-                      showOnlineStatus: false,
-                      constraints: BoxConstraints.tight(Size.fromRadius(20)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).viewPadding.top + 8,
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 20.0,
+                    left: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      UserAvatar(
+                        user: user,
+                        showOnlineStatus: false,
+                        constraints: BoxConstraints.tight(Size.fromRadius(20)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Text(
+                          user.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(StreamIcons.edit),
+                  title: Text(
+                    'New direct message',
+                    style: TextStyle(
+                      fontSize: 14.5,
                     ),
-                  ],
-                ),
-              ),
-              ListTile(
-                leading: Icon(StreamIcons.edit),
-                title: Text(
-                  'New direct message',
-                  style: TextStyle(
-                    fontSize: 14.5,
                   ),
                 ),
-              ),
-              ListTile(
-                leading: Icon(StreamIcons.group),
-                title: Text(
-                  'New group',
-                  style: TextStyle(
-                    fontSize: 14.5,
+                ListTile(
+                  leading: Icon(StreamIcons.group),
+                  title: Text(
+                    'New group',
+                    style: TextStyle(
+                      fontSize: 14.5,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.bottomCenter,
-                  child: ListTile(
-                    onTap: () async {
-                      await StreamChat.of(context).client.disconnect();
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.bottomCenter,
+                    child: ListTile(
+                      onTap: () async {
+                        await StreamChat.of(context).client.disconnect();
 
-                      final secureStorage = FlutterSecureStorage();
-                      await secureStorage.deleteAll();
-                      Navigator.pop(context);
-                      await Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChooseUserPage(),
+                        final secureStorage = FlutterSecureStorage();
+                        await secureStorage.deleteAll();
+                        Navigator.pop(context);
+                        await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChooseUserPage(),
+                          ),
+                        );
+                      },
+                      leading: Icon(StreamIcons.user),
+                      title: Text(
+                        'Sign out',
+                        style: TextStyle(
+                          fontSize: 14.5,
                         ),
-                      );
-                    },
-                    leading: Icon(StreamIcons.user),
-                    title: Text(
-                      'Sign out',
-                      style: TextStyle(
-                        fontSize: 14.5,
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

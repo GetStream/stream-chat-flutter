@@ -35,6 +35,9 @@ dependencies:
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
+  media_gallery: ^0.1.5
+  permission_handler: ^5.0.1+1
+  transparent_image: ^1.0.0
 
 flutter:
   assets:
