@@ -1170,8 +1170,8 @@ class MessageInputState extends State<MessageInput> {
 
   Positioned _buildRemoveButton(_SendingAttachment attachment) {
     return Positioned(
-      height: 16,
-      width: 16,
+      height: 24,
+      width: 24,
       top: 4,
       right: 4,
       child: RawMaterialButton(
@@ -1192,7 +1192,7 @@ class MessageInputState extends State<MessageInput> {
         child: Center(
           child: Icon(
             StreamIcons.close,
-            size: 15,
+            size: 24,
             color: Colors.white,
           ),
         ),

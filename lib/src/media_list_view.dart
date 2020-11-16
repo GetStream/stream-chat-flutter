@@ -63,10 +63,11 @@ class _MediaListViewState extends State<MediaListView> {
                           right: 8,
                         ),
                         child: CircleAvatar(
-                          maxRadius: 12.0,
+                          radius: 12,
                           backgroundColor: Colors.white,
                           child: Icon(
                             StreamIcons.check,
+                            size: 24,
                             color: Colors.black,
                           ),
                         ),
