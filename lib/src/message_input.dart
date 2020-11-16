@@ -341,7 +341,7 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32.0),
+            borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: Colors.grey,
             ),
