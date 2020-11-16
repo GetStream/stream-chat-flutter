@@ -93,6 +93,7 @@ class MessageInput extends StatefulWidget {
     this.actions,
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
+    this.inputTextStyle,
   }) : super(key: key);
 
   /// Message to edit
@@ -137,6 +138,10 @@ class MessageInput extends StatefulWidget {
 
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
+
+  /// Text style used in message text field. If null, [MessageInput] uses
+  /// `Theme.of(context).textTheme.bodyText2`.
+  final TextStyle inputTextStyle;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -276,10 +281,12 @@ class MessageInputState extends State<MessageInput> {
               _typingStarted = true;
             });
           },
-          style: Theme.of(context).textTheme.bodyText2,
+          style: widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
           autofocus: false,
           decoration: InputDecoration(
             hintText: 'Write a message',
+            hintStyle: widget.inputTextStyle ??
+                Theme.of(context).textTheme.bodyText2,
             prefixText: '   ',
             border: InputBorder.none,
           ),
