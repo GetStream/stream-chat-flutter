@@ -605,10 +605,10 @@ class MessageInputState extends State<MessageInput> {
   Material _buildAttachmentButton() {
     return Material(
       clipBehavior: Clip.hardEdge,
+      type: MaterialType.transparency,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(32),
       ),
-      color: Colors.transparent,
       child: IconButton(
         onPressed: () {
           showAttachmentModal();
