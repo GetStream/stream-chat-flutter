@@ -77,25 +77,25 @@ enum DefaultAttachmentTypes {
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
-  MessageInput({
-    Key key,
-    this.onMessageSent,
-    this.preMessageSending,
-    this.parentMessage,
-    this.editMessage,
-    this.maxHeight = 150,
-    this.keyboardType = TextInputType.multiline,
-    this.disableAttachments = false,
-    this.doImageUploadRequest,
-    this.doFileUploadRequest,
-    this.initialMessage,
-    this.textEditingController,
-    this.actions,
-    this.actionsLocation = ActionsLocation.left,
-    this.attachmentThumbnailBuilders,
-    this.inputTextStyle,
-    this.attachmentIconColor
-  }) : super(key: key);
+  MessageInput(
+      {Key key,
+      this.onMessageSent,
+      this.preMessageSending,
+      this.parentMessage,
+      this.editMessage,
+      this.maxHeight = 150,
+      this.keyboardType = TextInputType.multiline,
+      this.disableAttachments = false,
+      this.doImageUploadRequest,
+      this.doFileUploadRequest,
+      this.initialMessage,
+      this.textEditingController,
+      this.actions,
+      this.actionsLocation = ActionsLocation.left,
+      this.attachmentThumbnailBuilders,
+      this.inputTextStyle,
+      this.attachmentIconColor})
+      : super(key: key);
 
   /// Message to edit
   final Message editMessage;
@@ -253,7 +253,9 @@ class MessageInputState extends State<MessageInput> {
           controller: textEditingController,
           focusNode: _focusNode,
           onChanged: (s) {
-            StreamChannel.of(context).channel.keyStroke();
+            StreamChannel.of(context).channel.keyStroke(
+                  widget.parentMessage?.id,
+                );
 
             setState(() {
               _messageIsPresent = s.trim().isNotEmpty;
@@ -289,8 +291,8 @@ class MessageInputState extends State<MessageInput> {
           autofocus: false,
           decoration: InputDecoration(
             hintText: 'Write a message',
-            hintStyle: widget.inputTextStyle ??
-                Theme.of(context).textTheme.bodyText2,
+            hintStyle:
+                widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
             prefixText: '   ',
             border: InputBorder.none,
           ),
