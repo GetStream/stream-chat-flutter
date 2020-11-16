@@ -94,6 +94,7 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.inputTextStyle,
+    this.attachmentIconColor
   }) : super(key: key);
 
   /// Message to edit
@@ -142,6 +143,9 @@ class MessageInput extends StatefulWidget {
   /// Text style used in message text field. If null, [MessageInput] uses
   /// `Theme.of(context).textTheme.bodyText2`.
   final TextStyle inputTextStyle;
+
+  /// Color used for attachment icon.
+  final Color attachmentIconColor;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -622,6 +626,7 @@ class MessageInputState extends State<MessageInput> {
         },
         icon: Icon(
           Icons.add_circle_outline,
+          color: widget.attachmentIconColor,
         ),
       ),
     );
