@@ -72,7 +72,7 @@ class ChannelListView extends StatefulWidget {
   final Widget Function(Error error) errorBuilder;
 
   /// The builder used when the channel list is empty.
-  final  WidgetBuilder emptyBuilder;
+  final WidgetBuilder emptyBuilder;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -236,8 +236,8 @@ class _ChannelListViewState extends State<ChannelListView>
           final channels = snapshot.data;
 
           if (channels.isEmpty && widget.emptyBuilder != null) {
-              return widget.emptyBuilder(context);
-          } 
+            return widget.emptyBuilder(context);
+          }
 
           if (channels.isEmpty && widget.emptyBuilder == null) {
             return LayoutBuilder(
