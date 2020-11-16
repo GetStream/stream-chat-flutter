@@ -816,7 +816,8 @@ class _MessageWidgetState extends State<MessageWidget> {
             ),
           ),
           if (widget.message.attachments
-              .any((element) => element.ogScrapeUrl != null))
+                  ?.any((element) => element.ogScrapeUrl != null) ==
+              true)
             _buildUrlAttachment(),
         ],
       ),
@@ -843,7 +844,8 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
 
     if (widget.message.attachments
-        .any((element) => element.ogScrapeUrl != null)) {
+            ?.any((element) => element.ogScrapeUrl != null) ==
+        true) {
       return Color(0xFFE9F2FF);
     }
 
