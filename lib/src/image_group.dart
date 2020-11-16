@@ -111,7 +111,7 @@ class ImageGroup extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            FullScreenImage(urls: images.map((e) => e.imageUrl).toList(),
+            FullScreenImage(urls: images.map((e) => e.imageUrl ?? e.thumbUrl ?? e.assetUrl).toList(),
               startIndex: index,
               userName: message.user.name,
               sentAt: message.createdAt,

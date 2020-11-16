@@ -112,6 +112,7 @@ class _FullScreenImageState extends State<FullScreenImage>
                 ImageFooter(
                   currentPage: _currentPage,
                   totalPages: widget.urls.length,
+                  urls: widget.urls,
                 ),
               ],
             ),

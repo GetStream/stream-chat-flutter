@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
@@ -24,6 +25,8 @@ class ImageFooter extends StatelessWidget {
   final int currentPage;
   final int totalPages;
 
+  final List<String> urls;
+
   /// Creates a channel header
   ImageFooter({
     Key key,
@@ -32,6 +35,7 @@ class ImageFooter extends StatelessWidget {
     this.onImageTap,
     this.currentPage = 0,
     this.totalPages = 0,
+    this.urls,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -39,7 +43,8 @@ class ImageFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        color: StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
+        color:
+            StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
         padding: EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -77,7 +82,9 @@ class ImageFooter extends StatelessWidget {
                 StreamIcons.grid,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: () {
+                _buildPhotosModal(context);
+              },
             ),
           ],
         ),
@@ -125,6 +132,73 @@ class ImageFooter extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPhotosModal(context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(8.0),
+                  topLeft: Radius.circular(8.0),
+                )
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Photos',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      icon: Icon(StreamIcons.close, color: Colors.black,),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              color: Colors.white,
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, position) {
+                  return Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: AspectRatio(child: CachedNetworkImage(imageUrl: urls[position]), aspectRatio: 1.0,),
+                  );
+                },
+                itemCount: urls.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
