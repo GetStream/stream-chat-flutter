@@ -63,6 +63,13 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Stream Chat',
+          style: TextStyle(color: Colors.black),
+        ),
+      ),
       drawer: Drawer(
         child: SafeArea(
           child: Padding(
@@ -97,6 +104,12 @@ class ChannelListPage extends StatelessWidget {
                   ),
                 ),
                 ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => NewChatScreen()),
+                    );
+                  },
                   leading: Icon(StreamIcons.edit),
                   title: Text(
                     'New direct message',
@@ -432,5 +445,26 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
         ];
       });
     }).whenComplete(() => loading = false);
+  }
+}
+
+class NewChatScreen extends StatefulWidget {
+  @override
+  _NewChatScreenState createState() => _NewChatScreenState();
+}
+
+class _NewChatScreenState extends State<NewChatScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          'New Chat',
+          style: TextStyle(color: Colors.black),
+        ),
+      ),
+      body: Container(),
+    );
   }
 }
