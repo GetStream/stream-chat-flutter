@@ -1,10 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
 
 import 'stream_chat.dart';
+import 'user_item.dart';
 
+/// Callback called when tapping on a user
 typedef UserTapCallback = void Function(User, Widget);
+
+/// Builder used to create a custom [UserItem] from a [User]
+typedef UserItemBuilder = Widget Function(BuildContext, User);
 
 ///
 /// It shows the list of current users.
@@ -50,6 +57,7 @@ class UserListView extends StatefulWidget {
     this.onUserTap,
     this.onUserLongPress,
     this.userWidget,
+    this.userItemBuilder,
     this.separatorBuilder,
     this.onImageTap,
     this.swipeToAction = false,
@@ -99,8 +107,8 @@ class UserListView extends StatefulWidget {
   /// Widget used when opening a channel
   final Widget userWidget;
 
-  // /// Builder used to create a custom channel preview
-  // final ChannelPreviewBuilder channelPreviewBuilder;
+  /// Builder used to create a custom user preview
+  final UserItemBuilder userItemBuilder;
 
   /// Builder used to create a custom item separator
   final Function(BuildContext, int) separatorBuilder;
@@ -122,6 +130,21 @@ class _UserListViewState extends State<UserListView>
   @override
   void initState() {
     super.initState();
+    final channelsBloc = UsersBloc.of(context);
+    channelsBloc.queryUsers(
+      filter: widget.filter,
+      sort: widget.sort,
+      pagination: widget.pagination,
+      options: widget.options,
+    );
+
+    _scrollController.addListener(() {
+      channelsBloc.queryUsersLoading.first.then((loading) {
+        if (!loading) {
+          _listenUserPagination(channelsBloc);
+        }
+      });
+    });
   }
 
   @override
@@ -263,8 +286,8 @@ class _UserListViewState extends State<UserListView>
             childCount: (users.length * 2) + 1,
             findChildIndexCallback: (key) {
               final ValueKey<String> valueKey = key;
-              final index = users.indexWhere(
-                  (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
+              final index = users
+                  .indexWhere((user) => 'USER-${user.id}' == valueKey.value);
               return index != -1 ? (index * 2) : null;
             },
           ),
@@ -306,125 +329,12 @@ class _UserListViewState extends State<UserListView>
         };
       }
 
-      return Container(
+      return UserItem(
         key: ValueKey<String>('USER-${user.id}'),
-        child: Builder(
-          builder: (context) {
-            Widget child;
-            child = ListTile(
-              title: Text(user.name),
-            );
-            // if (widget.channelPreviewBuilder != null) {
-            //   child = Stack(
-            //     children: [
-            //       widget.channelPreviewBuilder(
-            //         context,
-            //         channel,
-            //       ),
-            //       Positioned.fill(
-            //         child: Material(
-            //           color: Colors.transparent,
-            //           child: InkWell(
-            //             onTap: () {
-            //               onTap(channel, widget.channelWidget);
-            //             },
-            //           ),
-            //         ),
-            //       ),
-            //     ],
-            //   );
-            // } else {
-            //   final backgroundColor =
-            //       Theme.of(context).brightness == Brightness.light
-            //           ? Color(0xffEBEBEB)
-            //           : Color(0xff141414);
-            //   child = Slidable(
-            //     enabled: widget.swipeToAction,
-            //     actionPane: SlidableBehindActionPane(),
-            //     actionExtentRatio: 0.12,
-            //     closeOnScroll: true,
-            //     secondaryActions: <Widget>[
-            //       IconSlideAction(
-            //         color: backgroundColor,
-            //         icon: Icons.more_horiz,
-            //         onTap: () {
-            //           showModalBottomSheet(
-            //             clipBehavior: Clip.hardEdge,
-            //             shape: RoundedRectangleBorder(
-            //               borderRadius: BorderRadius.only(
-            //                 topLeft: Radius.circular(32),
-            //                 topRight: Radius.circular(32),
-            //               ),
-            //             ),
-            //             context: context,
-            //             builder: (context) {
-            //               return ChannelBottomSheet(channel: channel);
-            //             },
-            //           );
-            //         },
-            //       ),
-            //       IconSlideAction(
-            //         color: backgroundColor,
-            //         icon: StreamIcons.mute,
-            //         onTap: () async {
-            //           if (!channel.isMuted) {
-            //             await channel.mute();
-            //           } else {
-            //             await channel.unmute();
-            //           }
-            //         },
-            //       ),
-            //       if (channel.isGroup && !channel.isDistinct)
-            //         IconSlideAction(
-            //           color: backgroundColor,
-            //           icon: StreamIcons.user_minus,
-            //           onTap: () async {
-            //             final confirm = await showConfirmationDialog(
-            //               context,
-            //               'Do you want to leave the group?',
-            //             );
-            //             if (confirm == true) {
-            //               await channel
-            //                   .removeMembers([StreamChat.of(context).user.id]);
-            //             }
-            //           },
-            //         ),
-            //       if (!channel.isGroup && !channel.isDistinct)
-            //         IconSlideAction(
-            //           color: backgroundColor,
-            //           icon: Icons.delete_outline,
-            //           onTap: () async {
-            //             final confirm = await showConfirmationDialog(
-            //               context,
-            //               'Do you want to delete the chat?',
-            //             );
-            //             if (confirm == true) {
-            //               await channel
-            //                   .removeMembers([StreamChat.of(context).user.id]);
-            //             }
-            //           },
-            //         ),
-            //     ],
-            //     child: Container(
-            //       color: StreamChatTheme.of(context).backgroundColor,
-            //       child: ChannelPreview(
-            //         onLongPress: widget.onChannelLongPress,
-            //         channel: channel,
-            //         onImageTap: widget.onImageTap != null
-            //             ? () {
-            //                 widget.onImageTap(channel);
-            //               }
-            //             : null,
-            //         onTap: (channel) {
-            //           onTap(channel, widget.userWidget);
-            //         },
-            //       ),
-            //     ),
-            //   );
-            // }
-            return child;
-          },
-        ),
+        user: user,
+        onTap: (user) => onTap(user, widget.userWidget),
+        onLongPress: widget.onUserLongPress,
+        onImageTap: widget.onImageTap,
       );
     } else {
       return _buildQueryProgressIndicator(context, usersProvider);
@@ -464,5 +374,38 @@ class _UserListViewState extends State<UserListView>
           ? Colors.white.withOpacity(0.1)
           : Colors.black.withOpacity(0.1),
     );
+  }
+
+  void _listenUserPagination(UsersBlocState usersProvider) {
+    if (_scrollController.position.maxScrollExtent ==
+            _scrollController.offset &&
+        _scrollController.offset != 0) {
+      usersProvider.queryUsers(
+        filter: widget.filter,
+        sort: widget.sort,
+        pagination: widget.pagination.copyWith(
+          offset: usersProvider.users?.length ?? 0,
+        ),
+        options: widget.options,
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(UserListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
+        jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
+        widget.pagination?.toJson()?.toString() !=
+            oldWidget.pagination?.toJson()?.toString() ||
+        widget.options?.toString() != oldWidget.options?.toString()) {
+      final channelsBloc = UsersBloc.of(context);
+      channelsBloc.queryUsers(
+        filter: widget.filter,
+        sort: widget.sort,
+        pagination: widget.pagination,
+        options: widget.options,
+      );
+    }
   }
 }

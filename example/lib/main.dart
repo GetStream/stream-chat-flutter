@@ -464,7 +464,19 @@ class _NewChatScreenState extends State<NewChatScreen> {
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body: Container(),
+      body: UsersBloc(
+        child: UserListView(
+          pagination: PaginationParams(
+            limit: 25,
+          ),
+          sort: [
+            SortOption(
+              'name',
+              direction: SortOption.ASC,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

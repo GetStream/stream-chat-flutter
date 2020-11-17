@@ -91,12 +91,6 @@ class UsersBlocState extends State<UsersBloc>
   }
 
   @override
-  void initState() {
-    super.initState();
-    final client = StreamChat.of(context).client;
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
