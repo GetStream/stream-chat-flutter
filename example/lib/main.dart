@@ -268,12 +268,7 @@ class CreateChannelPage extends StatefulWidget {
 }
 
 class _CreateChannelPageState extends State<CreateChannelPage> {
-  final ScrollController _scrollController = ScrollController();
-  Client client;
-  List<User> users = [];
   List<User> selectedUsers = [];
-  int offset = 0;
-  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -292,31 +287,29 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
     );
   }
 
-  ListView _buildListView() {
-    return ListView.builder(
-      controller: _scrollController,
-      itemBuilder: _itemBuilder,
-      itemCount: users.length,
-    );
-  }
-
-  Widget _itemBuilder(context, i) {
-    final user = users[i];
-    return ListTile(
-      onLongPress: () {
-        _selectUser(user);
-      },
-      selected: selectedUsers.contains(user),
-      onTap: () {
-        if (selectedUsers.isNotEmpty) {
-          return _selectUser(user);
-        }
-        _createChannel(context, [user]);
-      },
-      leading: UserAvatar(
-        user: user,
+  Widget _buildListView() {
+    return UsersBloc(
+      child: UserListView(
+        pagination: PaginationParams(
+          limit: 25,
+        ),
+        sort: [
+          SortOption(
+            'name',
+            direction: SortOption.ASC,
+          ),
+        ],
+        onUserLongPress: (user) {
+          _selectUser(user);
+        },
+        selectedUsers: selectedUsers,
+        onUserTap: (user, _) {
+          if (selectedUsers.isNotEmpty) {
+            return _selectUser(user);
+          }
+          _createChannel(context, [user]);
+        },
       ),
-      title: Text(user.name),
     );
   }
 
@@ -373,6 +366,7 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
     List<User> users, [
     String name,
   ]) async {
+    final client = StreamChat.of(context).client;
     final channel = client.channel('messaging', extraData: {
       'members': [
         client.state.user.id,
@@ -404,47 +398,6 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
         selectedUsers.remove(user);
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    client = StreamChat.of(context).client;
-
-    _scrollController.addListener(() async {
-      if (!loading &&
-          _scrollController.offset >=
-              _scrollController.position.maxScrollExtent - 100) {
-        offset += 25;
-        await _queryUsers();
-      }
-    });
-
-    _queryUsers();
-  }
-
-  Future<void> _queryUsers() {
-    loading = true;
-    return client.queryUsers(
-      pagination: PaginationParams(
-        limit: 25,
-        offset: offset,
-      ),
-      sort: [
-        SortOption(
-          'name',
-          direction: SortOption.ASC,
-        ),
-      ],
-    ).then((value) {
-      setState(() {
-        users = [
-          ...users,
-          ...value.users,
-        ];
-      });
-    }).whenComplete(() => loading = false);
   }
 }
 
