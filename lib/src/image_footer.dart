@@ -4,14 +4,16 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
+import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/user_avatar.dart';
 
 import './channel_name.dart';
 import 'channel_image.dart';
 import 'stream_channel.dart';
 
-class ImageFooter extends StatelessWidget {
+class ImageFooter extends StatefulWidget {
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
@@ -40,6 +42,22 @@ class ImageFooter extends StatelessWidget {
         super(key: key);
 
   @override
+  _ImageFooterState createState() => _ImageFooterState();
+
+  @override
+  final Size preferredSize;
+}
+
+class _ImageFooterState extends State<ImageFooter> {
+  Future<QueryUsersResponse> _userQuery;
+
+  @override
+  void initState() {
+    super.initState();
+    _userQuery = _queryUsers(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
@@ -55,10 +73,12 @@ class ImageFooter extends StatelessWidget {
                 size: 24.0,
                 color: Colors.black,
               ),
-              onPressed: onBackPressed,
+              onPressed: () {
+                _buildShareModal(context);
+              },
             ),
             InkWell(
-              onTap: onTitleTap,
+              onTap: widget.onTitleTap,
               child: Container(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -66,7 +86,7 @@ class ImageFooter extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text(
-                      '${currentPage + 1} of $totalPages',
+                      '${widget.currentPage + 1} of ${widget.totalPages}',
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w700,
@@ -96,7 +116,7 @@ class ImageFooter extends StatelessWidget {
       elevation: 1,
       leading: IconButton(
         icon: Icon(StreamIcons.share),
-        onPressed: onBackPressed,
+        onPressed: widget.onBackPressed,
       ),
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
@@ -108,10 +128,10 @@ class ImageFooter extends StatelessWidget {
       ],
       centerTitle: true,
       title: InkWell(
-        onTap: onTitleTap,
+        onTap: widget.onTitleTap,
         child: Container(
-          height: preferredSize.height,
-          width: preferredSize.width,
+          height: widget.preferredSize.height,
+          width: widget.preferredSize.width,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -147,12 +167,11 @@ class ImageFooter extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(8.0),
-                  topLeft: Radius.circular(8.0),
-                )
-              ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(8.0),
+                    topLeft: Radius.circular(8.0),
+                  )),
               child: Stack(
                 children: [
                   Center(
@@ -171,7 +190,10 @@ class ImageFooter extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: IconButton(
-                      icon: Icon(StreamIcons.close, color: Colors.black,),
+                      icon: Icon(
+                        StreamIcons.close,
+                        color: Colors.black,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -188,10 +210,16 @@ class ImageFooter extends StatelessWidget {
                 itemBuilder: (context, position) {
                   return Padding(
                     padding: const EdgeInsets.all(1.0),
-                    child: AspectRatio(child: CachedNetworkImage(imageUrl: urls[position]), aspectRatio: 1.0,),
+                    child: AspectRatio(
+                      child: CachedNetworkImage(
+                        imageUrl: widget.urls[position],
+                        fit: BoxFit.cover,
+                      ),
+                      aspectRatio: 1.0,
+                    ),
                   );
                 },
-                itemCount: urls.length,
+                itemCount: widget.urls.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3),
               ),
@@ -202,6 +230,148 @@ class ImageFooter extends StatelessWidget {
     );
   }
 
-  @override
-  final Size preferredSize;
+  Widget _buildShareModal(context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: 8.0,
+              ),
+              padding: EdgeInsets.symmetric(
+                vertical: 4.0,
+              ),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(16.0),
+                    topLeft: Radius.circular(16.0),
+                  )),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: IconButton(
+                      icon: Icon(
+                        StreamIcons.search,
+                        color: Colors.black,
+                      ),
+                      iconSize: 24.0,
+                      onPressed: () {},
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Select a Chat to Share',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: IconButton(
+                      icon: Icon(
+                        StreamIcons.share,
+                        color: Colors.black,
+                      ),
+                      iconSize: 24.0,
+                      onPressed: () {},
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                color: Colors.white,
+                margin: EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                ),
+                child: FutureBuilder<QueryUsersResponse>(
+                    future: _userQuery,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        itemBuilder: (context, position) {
+                          var user = snapshot.data.users[position];
+
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Stack(
+                                  children: [
+                                    UserAvatar(
+                                      onTap: (user) {},
+                                      user: user,
+                                      constraints: BoxConstraints.tightFor(
+                                        height: 64,
+                                        width: 64,
+                                      ),
+                                      borderRadius: BorderRadius.circular(32),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    user.name,
+                                    style: Theme.of(context).textTheme.subtitle2,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        itemCount: snapshot.data.users.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          childAspectRatio: 0.75,
+                        ),
+                      );
+                    }),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<QueryUsersResponse> _queryUsers(context) {
+    return StreamChat.of(context).client.queryUsers(
+      pagination: PaginationParams(
+        limit: 25,
+      ),
+      sort: [
+        SortOption(
+          'name',
+          direction: SortOption.ASC,
+        ),
+      ],
+    );
+  }
 }
