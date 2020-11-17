@@ -21,7 +21,7 @@ void main() async {
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
-    persistenceEnabled: true,
+    persistenceEnabled: false,
   );
 
   if (userId != null) {
