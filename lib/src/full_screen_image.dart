@@ -50,6 +50,7 @@ class _FullScreenImageState extends State<FullScreenImage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           AnimatedBuilder(

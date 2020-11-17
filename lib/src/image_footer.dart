@@ -50,6 +50,8 @@ class ImageFooter extends StatefulWidget {
 
 class _ImageFooterState extends State<ImageFooter> {
   Future<QueryUsersResponse> _userQuery;
+  bool _userSearchMode = false;
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -107,49 +109,6 @@ class _ImageFooterState extends State<ImageFooter> {
               },
             ),
           ],
-        ),
-      ),
-    );
-
-    return AppBar(
-      brightness: Theme.of(context).brightness,
-      elevation: 1,
-      leading: IconButton(
-        icon: Icon(StreamIcons.share),
-        onPressed: widget.onBackPressed,
-      ),
-      backgroundColor:
-          StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(StreamIcons.grid),
-          onPressed: () {},
-        ),
-      ],
-      centerTitle: true,
-      title: InkWell(
-        onTap: widget.onTitleTap,
-        child: Container(
-          height: widget.preferredSize.height,
-          width: widget.preferredSize.width,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                'Demo name',
-                style: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .title,
-              ),
-              Text(
-                '1 of 1',
-                style: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -231,134 +190,272 @@ class _ImageFooterState extends State<ImageFooter> {
   }
 
   Widget _buildShareModal(context) {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(
-                horizontal: 8.0,
+        return StatefulBuilder(builder: (context, modalSetState) {
+          return Align(
+            alignment:
+                _userSearchMode ? Alignment.topCenter : Alignment.bottomCenter,
+            child: Material(
+              color: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              padding: EdgeInsets.symmetric(
-                vertical: 4.0,
-              ),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(16.0),
-                    topLeft: Radius.circular(16.0),
-                  )),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                    child: IconButton(
-                      icon: Icon(
-                        StreamIcons.search,
-                        color: Colors.black,
+                  ListView(
+                    children: [
+                      if (!_userSearchMode)
+                        GestureDetector(
+                          child: Container(
+                            height: MediaQuery.of(context).size.height / 2,
+                            color: Colors.transparent,
+                          ),
+                          onTapUp: (val) {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 4.0,
+                        ),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(16.0),
+                              topLeft: Radius.circular(16.0),
+                            )),
+                        child: _buildTextInputSection(modalSetState),
                       ),
-                      iconSize: 24.0,
-                      onPressed: () {},
-                    ),
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            bottomRight:
+                                Radius.circular(_userSearchMode ? 16.0 : 0.0),
+                            bottomLeft:
+                                Radius.circular(_userSearchMode ? 16.0 : 0.0),
+                          ),
+                        ),
+                        child: FutureBuilder<QueryUsersResponse>(
+                            future: _userQuery,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              var filteredData = snapshot.data.users.toList();
+
+                              if (_userSearchMode &&
+                                  _searchController.text.length > 0) {
+                                filteredData = snapshot.data.users
+                                    .where((element) => element.name
+                                        .toLowerCase()
+                                        .contains(_searchController.text
+                                            .toLowerCase()))
+                                    .toList();
+                              }
+
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, position) {
+                                  var user = filteredData[position];
+
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            UserAvatar(
+                                              onTap: (user) {},
+                                              user: user,
+                                              constraints:
+                                                  BoxConstraints.tightFor(
+                                                height: 64,
+                                                width: 64,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(32),
+                                            ),
+                                          ],
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            user.name,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .subtitle2,
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                itemCount: filteredData.length,
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  childAspectRatio: 0.75,
+                                ),
+                              );
+                            }),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Select a Chat to Share',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
+                  if (!_userSearchMode)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        color: Colors.white,
+                        height: 48.0,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ),
+                        child: SizedBox.expand(
+                          child: Center(
+                            child: Text(
+                              'Save to Photos',
+                              style: TextStyle(
+                                color: StreamChatTheme.of(context).accentColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                    child: IconButton(
-                      icon: Icon(
-                        StreamIcons.share,
-                        color: Colors.black,
-                      ),
-                      iconSize: 24.0,
-                      onPressed: () {},
-                    ),
-                  ),
                 ],
               ),
             ),
-            Expanded(
-              child: Container(
-                color: Colors.white,
-                margin: EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                ),
-                child: FutureBuilder<QueryUsersResponse>(
-                    future: _userQuery,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        itemBuilder: (context, position) {
-                          var user = snapshot.data.users[position];
-
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Stack(
-                                  children: [
-                                    UserAvatar(
-                                      onTap: (user) {},
-                                      user: user,
-                                      constraints: BoxConstraints.tightFor(
-                                        height: 64,
-                                        width: 64,
-                                      ),
-                                      borderRadius: BorderRadius.circular(32),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    user.name,
-                                    style: Theme.of(context).textTheme.subtitle2,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        itemCount: snapshot.data.users.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          childAspectRatio: 0.75,
-                        ),
-                      );
-                    }),
-              ),
-            ),
-          ],
-        );
+          );
+        });
       },
     );
+  }
+
+  Widget _buildTextInputSection(modalSetState) {
+    if (_userSearchMode) {
+      return Column(
+        children: [
+          SizedBox(
+            height: 16.0,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: 16.0,
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (val) {
+                    modalSetState(() {});
+                  },
+                  cursorColor: Colors.black,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    prefixIcon: Icon(
+                      StreamIcons.search,
+                      color: Colors.black,
+                    ),
+                    hintText: 'Search',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(32.0),
+                      borderSide:
+                          BorderSide(color: Colors.black.withOpacity(0.08)),
+                      gapPadding: 0.0,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(32.0),
+                      borderSide:
+                          BorderSide(color: Colors.black.withOpacity(0.08)),
+                      gapPadding: 0.0,
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              IconButton(
+                icon: Icon(StreamIcons.close_circle),
+                onPressed: () {
+                  modalSetState(() {
+                    _userSearchMode = false;
+                  });
+                  setState(() {});
+                },
+              )
+            ],
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: IconButton(
+              icon: Icon(
+                StreamIcons.search,
+                color: Colors.black,
+              ),
+              iconSize: 24.0,
+              onPressed: () {
+                modalSetState(() {
+                  _userSearchMode = true;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Select a Chat to Share',
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: IconButton(
+              icon: Icon(
+                StreamIcons.share,
+                color: Colors.black,
+              ),
+              iconSize: 24.0,
+              onPressed: () {},
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   Future<QueryUsersResponse> _queryUsers(context) {
