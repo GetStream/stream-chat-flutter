@@ -17,13 +17,14 @@ import 'stream_chat_theme.dart';
 /// Modify it to change the widget appearance.
 class UserItem extends StatelessWidget {
   /// Instantiate a new UserItem
-  const UserItem(
-      {Key key,
-      @required this.user,
-      this.onTap,
-      this.onLongPress,
-      this.onImageTap})
-      : super(key: key);
+  const UserItem({
+    Key key,
+    @required this.user,
+    this.onTap,
+    this.onLongPress,
+    this.onImageTap,
+    this.selected = false,
+  }) : super(key: key);
 
   /// Function called when tapping this widget
   final void Function(User) onTap;
@@ -36,6 +37,9 @@ class UserItem extends StatelessWidget {
 
   /// The function called when the image is tapped
   final void Function(User) onImageTap;
+
+  /// If true the [UserItem] will show a trailing checkmark
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +62,15 @@ class UserItem extends StatelessWidget {
               onImageTap(user);
             }
           }),
+      trailing: selected
+          ? CircleAvatar(
+              child: Icon(
+                StreamIcons.check,
+                size: 20,
+              ),
+              radius: 10,
+            )
+          : null,
       title: Text(user.name),
       subtitle: _buildLastActive(context),
     );

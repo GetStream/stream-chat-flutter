@@ -60,6 +60,7 @@ class UserListView extends StatefulWidget {
     this.userItemBuilder,
     this.separatorBuilder,
     this.onImageTap,
+    this.selectedUsers,
     this.swipeToAction = false,
     this.pullToRefresh = true,
   }) : super(key: key);
@@ -118,6 +119,9 @@ class UserListView extends StatefulWidget {
 
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
+
+  /// Sets a blue trailing checkMark in [UserItem] for all the [selectedUsers]
+  final List<User> selectedUsers;
 
   @override
   _UserListViewState createState() => _UserListViewState();
@@ -309,6 +313,7 @@ class _UserListViewState extends State<UserListView>
     final usersProvider = UsersBloc.of(context);
     if (i < users.length) {
       final user = users[i];
+      final selected = widget.selectedUsers?.contains(user) ?? false;
 
       UserTapCallback onTap;
       if (widget.onUserTap != null) {
@@ -335,6 +340,7 @@ class _UserListViewState extends State<UserListView>
         onTap: (user) => onTap(user, widget.userWidget),
         onLongPress: widget.onUserLongPress,
         onImageTap: widget.onImageTap,
+        selected: selected,
       );
     } else {
       return _buildQueryProgressIndicator(context, usersProvider);
