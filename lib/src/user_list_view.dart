@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'stream_chat.dart';
 import 'user_item.dart';
@@ -10,8 +11,8 @@ import 'user_item.dart';
 /// Callback called when tapping on a user
 typedef UserTapCallback = void Function(User, Widget);
 
-/// Builder used to create a custom [UserItem] from a [User]
-typedef UserItemBuilder = Widget Function(BuildContext, User);
+/// Builder used to create a custom [ListUserItem] from a [User]
+typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
 ///
 /// It shows the list of current users.
@@ -63,6 +64,7 @@ class UserListView extends StatefulWidget {
     this.selectedUsers,
     this.swipeToAction = false,
     this.pullToRefresh = true,
+    this.groupAlphabetically = false,
   }) : super(key: key);
 
   /// The builder that will be used in case of error
@@ -120,8 +122,13 @@ class UserListView extends StatefulWidget {
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
-  /// Sets a blue trailing checkMark in [UserItem] for all the [selectedUsers]
+  /// Sets a blue trailing checkMark in [ListUserItem] for all the [selectedUsers]
   final List<User> selectedUsers;
+
+  /// Set it to true to group users by their first character
+  ///
+  /// defaults to false
+  final bool groupAlphabetically;
 
   @override
   _UserListViewState createState() => _UserListViewState();
@@ -172,11 +179,30 @@ class _UserListViewState extends State<UserListView>
     );
   }
 
-  StreamBuilder<List<User>> _buildListView(
+  StreamBuilder<List<ListItem>> _buildListView(
     UsersBlocState usersBlocState,
   ) {
     return StreamBuilder(
-      stream: usersBlocState.usersStream,
+      stream: usersBlocState.usersStream.map(
+        (users) {
+          if (widget.groupAlphabetically) {
+            final temp = users
+              ..sort((curr, next) => curr.name.compareTo(next.name));
+            final groupedUsers = <String, List<User>>{};
+            for (var e in temp) {
+              final alphabet = e.name[0];
+              groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
+            }
+            final items = <ListItem>[];
+            for (var key in groupedUsers.keys) {
+              items.add(ListHeaderItem(key));
+              items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
+            }
+            return items;
+          }
+          return users.map((e) => ListUserItem(e)).toList();
+        },
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           if (snapshot.error is Error) {
@@ -256,13 +282,13 @@ class _UserListViewState extends State<UserListView>
           );
         }
 
-        final users = snapshot.data;
+        final items = snapshot.data;
 
-        if (users.isEmpty && widget.emptyBuilder != null) {
+        if (items.isEmpty && widget.emptyBuilder != null) {
           return widget.emptyBuilder(context);
         }
 
-        if (users.isEmpty && widget.emptyBuilder == null) {
+        if (items.isEmpty && widget.emptyBuilder == null) {
           return LayoutBuilder(
             builder: (context, viewportConstraints) {
               return SingleChildScrollView(
@@ -285,13 +311,13 @@ class _UserListViewState extends State<UserListView>
           controller: _scrollController,
           childrenDelegate: SliverChildBuilderDelegate(
             (context, i) {
-              return _itemBuilder(context, i, users);
+              return _itemBuilder(context, i, items);
             },
-            childCount: (users.length * 2) + 1,
+            childCount: (items.length * 2) + 1,
             findChildIndexCallback: (key) {
               final ValueKey<String> valueKey = key;
-              final index = users
-                  .indexWhere((user) => 'USER-${user.id}' == valueKey.value);
+              final index =
+                  items.indexWhere((item) => item.key == valueKey.value);
               return index != -1 ? (index * 2) : null;
             },
           ),
@@ -300,7 +326,7 @@ class _UserListViewState extends State<UserListView>
     );
   }
 
-  Widget _itemBuilder(context, int i, List<User> users) {
+  Widget _itemBuilder(BuildContext context, int i, List<ListItem> items) {
     if (i % 2 != 0) {
       if (widget.separatorBuilder != null) {
         return widget.separatorBuilder(context, i);
@@ -311,36 +337,57 @@ class _UserListViewState extends State<UserListView>
     i = i ~/ 2;
 
     final usersProvider = UsersBloc.of(context);
-    if (i < users.length) {
-      final user = users[i];
-      final selected = widget.selectedUsers?.contains(user) ?? false;
+    if (i < items.length) {
+      final item = items[i];
+      return item.when(
+        headerItem: (header) {
+          return Container(
+            key: ValueKey<String>('HEADER-$header'),
+            color: Colors.grey.shade100,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                header,
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          );
+        },
+        userItem: (user) {
+          final selected = widget.selectedUsers?.contains(user) ?? false;
 
-      UserTapCallback onTap;
-      if (widget.onUserTap != null) {
-        onTap = widget.onUserTap;
-      } else {
-        onTap = (client, _) {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) {
-          //       return StreamChannel(
-          //         child: widget.userWidget,
-          //         channel: client,
-          //       );
-          //     },
-          //   ),
-          // );
-        };
-      }
+          UserTapCallback onTap;
+          if (widget.onUserTap != null) {
+            onTap = widget.onUserTap;
+          } else {
+            onTap = (client, _) {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) {
+              //       return StreamChannel(
+              //         child: widget.userWidget,
+              //         channel: client,
+              //       );
+              //     },
+              //   ),
+              // );
+            };
+          }
 
-      return UserItem(
-        key: ValueKey<String>('USER-${user.id}'),
-        user: user,
-        onTap: (user) => onTap(user, widget.userWidget),
-        onLongPress: widget.onUserLongPress,
-        onImageTap: widget.onImageTap,
-        selected: selected,
+          return Container(
+            key: ValueKey<String>('USER-${user.id}'),
+            child: widget.userItemBuilder != null
+                ? widget.userItemBuilder(context, user, selected)
+                : UserItem(
+                    user: user,
+                    onTap: (user) => onTap(user, widget.userWidget),
+                    onLongPress: widget.onUserLongPress,
+                    onImageTap: widget.onImageTap,
+                    selected: selected,
+                  ),
+          );
+        },
       );
     } else {
       return _buildQueryProgressIndicator(context, usersProvider);
@@ -414,4 +461,41 @@ class _UserListViewState extends State<UserListView>
       );
     }
   }
+}
+
+abstract class ListItem {
+  String get key {
+    if (this is ListHeaderItem) {
+      final header = (this as ListHeaderItem).heading;
+      return 'HEADER-$header';
+    }
+    if (this is ListUserItem) {
+      final user = (this as ListUserItem).user;
+      return 'USER-${user.id}';
+    }
+  }
+
+  Widget when({
+    @required Widget Function(String heading) headerItem,
+    @required Widget Function(User user) userItem,
+  }) {
+    if (this is ListHeaderItem) {
+      return headerItem((this as ListHeaderItem).heading);
+    }
+    if (this is ListUserItem) {
+      return userItem((this as ListUserItem).user);
+    }
+  }
+}
+
+class ListHeaderItem extends ListItem {
+  final String heading;
+
+  ListHeaderItem(this.heading);
+}
+
+class ListUserItem extends ListItem {
+  final User user;
+
+  ListUserItem(this.user);
 }
