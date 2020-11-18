@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
+import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_icons.dart';
@@ -52,6 +55,9 @@ class _ImageFooterState extends State<ImageFooter> {
   Future<QueryUsersResponse> _userQuery;
   bool _userSearchMode = false;
   TextEditingController _searchController = TextEditingController();
+  TextEditingController _messageController = TextEditingController();
+
+  List<User> selectedUsers = [];
 
   @override
   void initState() {
@@ -193,161 +199,182 @@ class _ImageFooterState extends State<ImageFooter> {
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(builder: (context, modalSetState) {
-          return Align(
-            alignment:
-                _userSearchMode ? Alignment.topCenter : Alignment.bottomCenter,
-            child: Material(
-              color: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Stack(
-                children: [
-                  ListView(
-                    children: [
-                      if (!_userSearchMode)
-                        GestureDetector(
-                          child: Container(
-                            height: MediaQuery.of(context).size.height / 2,
-                            color: Colors.transparent,
+        print('KEY ${MediaQuery.of(context).viewInsets.bottom}');
+        print(MediaQuery.of(context).viewInsets.bottom == 0.0);
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: StatefulBuilder(builder: (modalContext, modalSetState) {
+            return Align(
+              alignment:
+                  _userSearchMode ? Alignment.topCenter : Alignment.bottomCenter,
+              child: Material(
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                child: Stack(
+                  children: [
+                    ListView(
+                      children: [
+                        if (!_userSearchMode && MediaQuery.of(context).viewInsets.bottom == 0.0)
+                          GestureDetector(
+                            child: Container(
+                              height: MediaQuery.of(modalContext).size.height / 2,
+                              color: Colors.transparent,
+                            ),
+                            onTapUp: (val) {
+                              Navigator.pop(modalContext);
+                            },
                           ),
-                          onTapUp: (val) {
-                            Navigator.pop(context);
-                          },
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 4.0,
+                          ),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(16.0),
+                                topLeft: Radius.circular(16.0),
+                              )),
+                          child: _buildTextInputSection(modalSetState),
                         ),
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          vertical: 4.0,
-                        ),
-                        decoration: BoxDecoration(
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                          ),
+                          decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(16.0),
-                              topLeft: Radius.circular(16.0),
-                            )),
-                        child: _buildTextInputSection(modalSetState),
-                      ),
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            bottomRight:
-                                Radius.circular(_userSearchMode ? 16.0 : 0.0),
-                            bottomLeft:
-                                Radius.circular(_userSearchMode ? 16.0 : 0.0),
+                              bottomRight:
+                                  Radius.circular(_userSearchMode ? 16.0 : 0.0),
+                              bottomLeft:
+                                  Radius.circular(_userSearchMode ? 16.0 : 0.0),
+                            ),
                           ),
-                        ),
-                        child: FutureBuilder<QueryUsersResponse>(
-                            future: _userQuery,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              }
-
-                              var filteredData = snapshot.data.users.toList();
-
-                              if (_userSearchMode &&
-                                  _searchController.text.length > 0) {
-                                filteredData = snapshot.data.users
-                                    .where((element) => element.name
-                                        .toLowerCase()
-                                        .contains(_searchController.text
-                                            .toLowerCase()))
-                                    .toList();
-                              }
-
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemBuilder: (context, position) {
-                                  var user = filteredData[position];
-
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            UserAvatar(
-                                              onTap: (user) {},
-                                              user: user,
-                                              constraints:
-                                                  BoxConstraints.tightFor(
-                                                height: 64,
-                                                width: 64,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(32),
-                                            ),
-                                          ],
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            user.name,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .subtitle2,
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                          child: FutureBuilder<QueryUsersResponse>(
+                              future: _userQuery,
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
                                   );
-                                },
-                                itemCount: filteredData.length,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
-                                  childAspectRatio: 0.75,
-                                ),
-                              );
-                            }),
-                      ),
-                    ],
-                  ),
-                  if (!_userSearchMode)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        color: Colors.white,
-                        height: 48.0,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 8.0,
+                                }
+
+                                var filteredData = snapshot.data.users.toList();
+
+                                if (_userSearchMode &&
+                                    _searchController.text.length > 0) {
+                                  filteredData = snapshot.data.users
+                                      .where((element) => element.name
+                                          .toLowerCase()
+                                          .contains(_searchController.text
+                                              .toLowerCase()))
+                                      .toList();
+                                }
+
+                                return GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, position) {
+                                    var user = filteredData[position];
+                                    var isUserSelected =
+                                        selectedUsers.contains(user);
+
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Stack(
+                                            children: [
+                                              CircleAvatar(
+                                                maxRadius: 32.0,
+                                                child: UserAvatar(
+                                                  onTap: (user) {
+                                                    if (isUserSelected) {
+                                                      selectedUsers.remove(user);
+                                                    } else {
+                                                      selectedUsers.add(user);
+                                                    }
+                                                    modalSetState(() {});
+                                                  },
+                                                  user: user,
+                                                  constraints:
+                                                      BoxConstraints.tightFor(
+                                                    height:
+                                                        isUserSelected ? 56 : 64,
+                                                    width:
+                                                        isUserSelected ? 56 : 64,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(32),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              user.name,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle2,
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  itemCount: filteredData.length,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    childAspectRatio: 0.75,
+                                  ),
+                                );
+                              }),
                         ),
-                        child: SizedBox.expand(
-                          child: Center(
-                            child: Text(
-                              'Save to Photos',
-                              style: TextStyle(
-                                color: StreamChatTheme.of(context).accentColor,
-                                fontWeight: FontWeight.bold,
+                      ],
+                    ),
+                    if (!_userSearchMode && selectedUsers.isEmpty)
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          color: Colors.white,
+                          height: 48.0,
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                          ),
+                          child: SizedBox.expand(
+                            child: Center(
+                              child: Text(
+                                'Save to Photos',
+                                style: TextStyle(
+                                  color: StreamChatTheme.of(modalContext).accentColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                    if (!_userSearchMode && selectedUsers.isNotEmpty)
+                      _buildShareTextInputSection(modalSetState),
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          }),
+        );
       },
     );
   }
@@ -456,6 +483,95 @@ class _ImageFooterState extends State<ImageFooter> {
         ],
       );
     }
+  }
+
+  Widget _buildShareTextInputSection(modalSetState) {
+    return Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          color: Colors.white,
+          height: 56.0,
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: TextField(
+                    controller: _messageController,
+                    onChanged: (val) {
+                      modalSetState(() {});
+                    },
+                    onTap: () {
+                      modalSetState(() {});
+                      setState(() {});
+                    },
+                    decoration: InputDecoration(
+                      isDense: true,
+                      prefixText: '     ',
+                      hintText: 'Add a comment',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32.0),
+                        borderSide: BorderSide(
+                          color: Colors.black.withOpacity(0.16),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(32.0),
+                          borderSide: BorderSide(
+                            color: Colors.black.withOpacity(0.16),
+                          )
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedCrossFade(
+                crossFadeState: _messageController.text.isNotEmpty
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                firstChild: IconTheme(
+                  data:
+                  StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InkWell(
+                        onTap: () {
+                          // sendMessage();
+                        },
+                        child: Transform.rotate(
+                            angle: -pi / 2,
+                            child: Icon(
+                              StreamIcons.send_message,
+                              color: StreamChatTheme.of(context).accentColor,
+                            ),),
+                      ),
+                    ),
+                  ),
+                ),
+                secondChild: IconTheme(
+                  data:
+                  StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                        child: InkWell(
+                          onTap: () {},
+                          child: Icon(
+                            StreamIcons.send_message,
+                            color: Colors.grey,
+                          ),
+                        )),
+                  ),
+                ),
+                duration: Duration(milliseconds: 300),
+                alignment: Alignment.center,
+              ),
+            ],
+          ),
+        ),
+      );
   }
 
   Future<QueryUsersResponse> _queryUsers(context) {
