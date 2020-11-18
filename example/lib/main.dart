@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'chips_input_text_field.dart';
 
+import 'chips_input_text_field.dart';
 import 'notifications_service.dart';
 
 void main() async {
@@ -422,9 +422,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   bool _isSearchActive = false;
 
+  Channel channel;
+
   @override
   void initState() {
     super.initState();
+    channel = StreamChat.of(context).client.channel('messaging');
     _controller = TextEditingController()
       ..addListener(() {
         setState(() {
@@ -452,74 +455,88 @@ class _NewChatScreenState extends State<NewChatScreen> {
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body: UsersBloc(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ChipsInputTextField<User>(
-              key: _chipInputTextFieldStateKey,
-              controller: _controller,
-              focusNode: FocusNode(),
-              chipBuilder: (context, user) {
-                return InputChip(
-                  key: ObjectKey(user),
-                  label: Text(
-                    user.name,
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  avatar: UserAvatar(
-                    user: user,
-                  ),
-                  onDeleted: () => _chipInputTextFieldState.removeItem(user),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                );
-              },
-              onChipAdded: (user) {
-                setState(() => _selectedUsers.add(user));
-              },
-              onChipRemoved: (user) {
-                setState(() => _selectedUsers.remove(user));
-              },
-            ),
-            Container(
-              width: double.maxFinite,
-              color: Colors.white54,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 8,
-                ),
-                child: Text(
-                  _isSearchActive
-                      ? "Matches for \"$_userNameQuery\""
-                      : 'On the platform',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: UserListView(
-                filterByUserName: _userNameQuery,
-                selectedUsers: _selectedUsers,
-                groupAlphabetically: _isSearchActive ? false : true,
-                onUserTap: (user, _) {
-                  if (!_selectedUsers.contains(user)) {
-                    _controller.clear();
-                    _chipInputTextFieldState
-                      ..addItem(user)
-                      ..pauseItemAddition();
-                  }
+      body: StreamChannel(
+        showLoading: false,
+        channel: channel,
+        child: UsersBloc(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ChipsInputTextField<User>(
+                key: _chipInputTextFieldStateKey,
+                controller: _controller,
+                focusNode: FocusNode(),
+                chipBuilder: (context, user) {
+                  return InputChip(
+                    key: ObjectKey(user),
+                    label: Text(
+                      user.name,
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    avatar: UserAvatar(
+                      user: user,
+                    ),
+                    onDeleted: () => _chipInputTextFieldState.removeItem(user),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  );
                 },
-                pagination: PaginationParams(
-                  limit: 25,
+                onChipAdded: (user) {
+                  setState(() => _selectedUsers.add(user));
+                },
+                onChipRemoved: (user) {
+                  setState(() => _selectedUsers.remove(user));
+                },
+              ),
+              Container(
+                width: double.maxFinite,
+                color: Colors.white54,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 8,
+                  ),
+                  child: Text(
+                    _isSearchActive
+                        ? "Matches for \"$_userNameQuery\""
+                        : 'On the platform',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            MessageInput(
-            ),
-          ],
+              Expanded(
+                child: UserListView(
+                  filterByUserName: _userNameQuery,
+                  selectedUsers: _selectedUsers,
+                  groupAlphabetically: _isSearchActive ? false : true,
+                  onUserTap: (user, _) {
+                    if (!_selectedUsers.contains(user)) {
+                      _controller.clear();
+                      _chipInputTextFieldState
+                        ..addItem(user)
+                        ..pauseItemAddition();
+                    }
+                  },
+                  pagination: PaginationParams(
+                    limit: 25,
+                  ),
+                ),
+              ),
+              MessageInput(
+                preMessageSending: (message) async {
+                  channel.extraData = {
+                    'members': [
+                      ..._selectedUsers.map((e) => e.id),
+                      channel.client.state.user.id,
+                    ],
+                  };
+                  await channel.watch();
+                  return message;
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

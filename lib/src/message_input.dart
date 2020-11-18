@@ -364,7 +364,10 @@ class MessageInputState extends State<MessageInput> {
                   controller: textEditingController,
                   focusNode: _focusNode,
                   onChanged: (s) {
-                    StreamChannel.of(context).channel.keyStroke();
+                    StreamChannel.of(context)
+                        .channel
+                        .keyStroke()
+                        .catchError((e) {});
 
                     setState(() {
                       _messageIsPresent = s.trim().isNotEmpty;
@@ -479,7 +482,9 @@ class MessageInputState extends State<MessageInput> {
 
   void _checkMentions(String s, BuildContext context) {
     if (textEditingController.selection.isCollapsed &&
-        (s.isNotEmpty && s[textEditingController.selection.start - 1] == '@' ||
+        (s.isNotEmpty &&
+                textEditingController.selection.start > 0 &&
+                s[textEditingController.selection.start - 1] == '@' ||
             textEditingController.text
                 .substring(0, textEditingController.selection.start)
                 .split(' ')
@@ -1569,14 +1574,9 @@ class MessageInputState extends State<MessageInput> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-            child: InkWell(
-          onTap: () {
-            sendMessage();
-          },
-          child: Icon(
-            _getIdleSendIcon(),
-            color: Colors.grey,
-          ),
+            child: Icon(
+          _getIdleSendIcon(),
+          color: Colors.grey,
         )),
       ),
     );
