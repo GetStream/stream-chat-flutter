@@ -130,7 +130,7 @@ class UserListView extends StatefulWidget {
   final bool pullToRefresh;
 
   /// Sets a blue trailing checkMark in [ListUserItem] for all the [selectedUsers]
-  final List<User> selectedUsers;
+  final Set<User> selectedUsers;
 
   /// Set it to true to group users by their first character
   ///
