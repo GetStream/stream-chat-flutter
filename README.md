@@ -55,6 +55,11 @@ We also use [video_player](https://pub.dev/packages/video_player) to reproduce v
 To pick images from the camera, we use the [image_picker](https://pub.dev/packages/image_picker) plugin.
 Follow [these instructions](https://pub.dev/packages/image_picker#ios) to check the requirements.
 
+### Troubleshooting
+
+It may happen that you have some problems building the app.
+If it seems related to the [flutter file picker plugin](https://github.com/miguelpruivo/flutter_file_picker) make sure to check [this page](https://github.com/miguelpruivo/flutter_file_picker/wiki/Troubleshooting) 
+
 ## Docs
 
 ### Business logic components
