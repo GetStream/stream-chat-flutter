@@ -70,6 +70,7 @@ class ChannelListView extends StatefulWidget {
     this.errorBuilder,
     this.emptyBuilder,
     this.onImageTap,
+    this.onStartChatPressed,
     this.swipeToAction = false,
     this.pullToRefresh = true,
   }) : super(key: key);
@@ -129,6 +130,9 @@ class ChannelListView extends StatefulWidget {
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
+  /// Callback used in the default empty list widget
+  final VoidCallback onStartChatPressed;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -185,13 +189,69 @@ class _ChannelListViewState extends State<ChannelListView>
                 builder: (context, viewportConstraints) {
                   return SingleChildScrollView(
                     physics: AlwaysScrollableScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: viewportConstraints.maxHeight,
-                      ),
-                      child: Center(
-                        child: Text('You have no channels currently'),
-                      ),
+                    child: Stack(
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  StreamIcons.message,
+                                  size: 136,
+                                  color: Color(0xffDBDBDB),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Let’s start chatting!',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 52,
+                                ),
+                                child: Text(
+                                  'How about sending your first message to a friend?',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xff7A7A7A),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (widget.onStartChatPressed != null)
+                          Positioned(
+                            right: 0,
+                            left: 0,
+                            bottom: 32,
+                            child: Center(
+                              child: FlatButton(
+                                onPressed: widget.onStartChatPressed,
+                                child: Text(
+                                  'Start a chat',
+                                  style: TextStyle(
+                                    color:
+                                        StreamChatTheme.of(context).accentColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   );
                 },
@@ -542,11 +602,13 @@ class _ChannelListViewState extends State<ChannelListView>
               ),
             );
           }
-          return snapshot.data
-              ? _buildLoadingItem()
-              : Container(
-                  height: 70,
-                );
+          return Container(
+            height: 100,
+            padding: EdgeInsets.all(32),
+            child: Center(
+              child: snapshot.data ? CircularProgressIndicator() : Container(),
+            ),
+          );
         });
   }
 

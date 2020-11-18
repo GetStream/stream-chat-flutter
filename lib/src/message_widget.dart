@@ -619,6 +619,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             child: Material(
               clipBehavior: Clip.hardEdge,
               shape: attachmentShape,
+              type: MaterialType.transparency,
               child: Transform(
                 transform: Matrix4.rotationY(widget.reverse ? pi : 0),
                 alignment: Alignment.center,
