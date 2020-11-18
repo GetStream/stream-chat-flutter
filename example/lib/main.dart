@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'chips_input_text_field.dart';
 
 import 'notifications_service.dart';
 
@@ -268,7 +269,7 @@ class CreateChannelPage extends StatefulWidget {
 }
 
 class _CreateChannelPageState extends State<CreateChannelPage> {
-  List<User> selectedUsers = [];
+  final selectedUsers = <User>{};
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +283,7 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
         ),
       ),
       floatingActionButton:
-          selectedUsers.isNotEmpty ? _buildFAB(context) : SizedBox(),
+          selectedUsers.isNotEmpty ? _buildFAB(context) : null,
       body: _buildListView(),
     );
   }
@@ -325,7 +326,7 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
           }
         }
 
-        _createChannel(context, selectedUsers, name);
+        _createChannel(context, selectedUsers.toList(), name);
       },
     );
   }
@@ -407,10 +408,44 @@ class NewChatScreen extends StatefulWidget {
 }
 
 class _NewChatScreenState extends State<NewChatScreen> {
+  final _chipInputTextFieldStateKey =
+      GlobalKey<ChipInputTextFieldState<User>>();
+
+  TextEditingController _controller;
+
+  ChipInputTextFieldState get _chipInputTextFieldState =>
+      _chipInputTextFieldStateKey.currentState;
+
+  String _userNameQuery = '';
+
+  final _selectedUsers = <User>{};
+
+  bool _isSearchActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController()
+      ..addListener(() {
+        setState(() {
+          _userNameQuery = _controller.text;
+          _isSearchActive = _userNameQuery.isNotEmpty;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller?.clear();
+    _controller?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: Colors.white,
         title: Text(
           'New Chat',
@@ -418,14 +453,71 @@ class _NewChatScreenState extends State<NewChatScreen> {
         ),
       ),
       body: UsersBloc(
-        child: UserListView(
-          pagination: PaginationParams(
-            limit: 25,
-          ),
-          sort: [
-            SortOption(
-              'name',
-              direction: SortOption.ASC,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ChipsInputTextField<User>(
+              key: _chipInputTextFieldStateKey,
+              controller: _controller,
+              focusNode: FocusNode(),
+              chipBuilder: (context, user) {
+                return InputChip(
+                  key: ObjectKey(user),
+                  label: Text(
+                    user.name,
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  avatar: UserAvatar(
+                    user: user,
+                  ),
+                  onDeleted: () => _chipInputTextFieldState.removeItem(user),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                );
+              },
+              onChipAdded: (user) {
+                setState(() => _selectedUsers.add(user));
+              },
+              onChipRemoved: (user) {
+                setState(() => _selectedUsers.remove(user));
+              },
+            ),
+            Container(
+              width: double.maxFinite,
+              color: Colors.white54,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 8,
+                ),
+                child: Text(
+                  _isSearchActive
+                      ? "Matches for \"$_userNameQuery\""
+                      : 'On the platform',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: UserListView(
+                filterByUserName: _userNameQuery,
+                selectedUsers: _selectedUsers,
+                groupAlphabetically: _isSearchActive ? false : true,
+                onUserTap: (user, _) {
+                  if (!_selectedUsers.contains(user)) {
+                    _controller.clear();
+                    _chipInputTextFieldState
+                      ..addItem(user)
+                      ..pauseItemAddition();
+                  }
+                },
+                pagination: PaginationParams(
+                  limit: 25,
+                ),
+              ),
+            ),
+            MessageInput(
             ),
           ],
         ),
