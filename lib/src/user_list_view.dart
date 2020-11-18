@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -65,7 +66,13 @@ class UserListView extends StatefulWidget {
     this.swipeToAction = false,
     this.pullToRefresh = true,
     this.groupAlphabetically = false,
-  }) : super(key: key);
+    this.filterByUserName = '',
+    this.filterByUserNameStream,
+  })  : assert(
+          filterByUserName == null || filterByUserNameStream == null,
+          'Cannot provide both filterByUserName and filterByUserNameStream.',
+        ),
+        super(key: key);
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
@@ -130,6 +137,12 @@ class UserListView extends StatefulWidget {
   /// defaults to false
   final bool groupAlphabetically;
 
+  ///
+  final String filterByUserName;
+
+  ///
+  final Stream<String> filterByUserNameStream;
+
   @override
   _UserListViewState createState() => _UserListViewState();
 }
@@ -179,30 +192,49 @@ class _UserListViewState extends State<UserListView>
     );
   }
 
+  List<ListItem> _getFilteredItems(List<User> users, String query) {
+    if (widget.groupAlphabetically) {
+      var temp = users..sort((curr, next) => curr.name.compareTo(next.name));
+      temp = temp
+          .where((it) => it.name.toLowerCase().contains(query.toLowerCase()));
+      final groupedUsers = <String, List<User>>{};
+      for (var e in temp) {
+        final alphabet = e.name[0];
+        groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
+      }
+      final items = <ListItem>[];
+      for (var key in groupedUsers.keys) {
+        items.add(ListHeaderItem(key));
+        items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
+      }
+      return items;
+    }
+    return users
+        .where((it) => it.name.toLowerCase().contains(query.toLowerCase()))
+        .map((e) => ListUserItem(e))
+        .toList();
+  }
+
+  Stream<List<ListItem>> _buildUserStream(
+    UsersBlocState usersBlocState,
+  ) {
+    if (widget.filterByUserNameStream == null) {
+      return usersBlocState.usersStream.map(
+        (users) => _getFilteredItems(users, widget.filterByUserName),
+      );
+    }
+    return Rx.combineLatest2(
+      usersBlocState.usersStream,
+      widget.filterByUserNameStream,
+      _getFilteredItems,
+    );
+  }
+
   StreamBuilder<List<ListItem>> _buildListView(
     UsersBlocState usersBlocState,
   ) {
     return StreamBuilder(
-      stream: usersBlocState.usersStream.map(
-        (users) {
-          if (widget.groupAlphabetically) {
-            final temp = users
-              ..sort((curr, next) => curr.name.compareTo(next.name));
-            final groupedUsers = <String, List<User>>{};
-            for (var e in temp) {
-              final alphabet = e.name[0];
-              groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
-            }
-            final items = <ListItem>[];
-            for (var key in groupedUsers.keys) {
-              items.add(ListHeaderItem(key));
-              items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
-            }
-            return items;
-          }
-          return users.map((e) => ListUserItem(e)).toList();
-        },
-      ),
+      stream: _buildUserStream(usersBlocState),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           if (snapshot.error is Error) {
