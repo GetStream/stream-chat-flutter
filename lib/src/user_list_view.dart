@@ -196,7 +196,8 @@ class _UserListViewState extends State<UserListView>
     if (widget.groupAlphabetically) {
       var temp = users..sort((curr, next) => curr.name.compareTo(next.name));
       temp = temp
-          .where((it) => it.name.toLowerCase().contains(query.toLowerCase()));
+          .where((it) => it.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
       final groupedUsers = <String, List<User>>{};
       for (var e in temp) {
         final alphabet = e.name[0];
