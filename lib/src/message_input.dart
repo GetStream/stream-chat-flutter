@@ -19,6 +19,7 @@ import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter/src/video_thumbnail.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
 import '../stream_chat_flutter.dart';
@@ -40,6 +41,8 @@ enum DefaultAttachmentTypes {
   video,
   file,
 }
+
+const _kMinMediaPickerSize = 360.0;
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -182,7 +185,7 @@ class MessageInputState extends State<MessageInput> {
   bool _sendAsDm = false;
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
-  double _filePickerSize = 250.0;
+  double _filePickerSize = _kMinMediaPickerSize;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -654,9 +657,11 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(
-                    StreamIcons.camera,
-                    size: 24,
+                  icon: SvgPicture.asset(
+                    'svgs/icon_camera.svg',
+                    package: 'stream_chat_flutter',
+                    height: 24,
+                    width: 24,
                     color: _filePickerIndex == 2
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -684,7 +689,7 @@ class MessageInputState extends State<MessageInput> {
                 setState(() {
                   _animateContainer = false;
                   _filePickerSize = (_filePickerSize - update.delta.dy).clamp(
-                    240.0,
+                    _kMinMediaPickerSize,
                     MediaQuery.of(context).size.height / 1.7,
                   );
                 });
@@ -753,9 +758,10 @@ class MessageInputState extends State<MessageInput> {
                         .any((element) => element.id == media.id)) {
                       _addAttachment(media);
                     } else {
-                      _attachments
-                          .removeWhere((element) => element.id == media.id);
-                      setState(() {});
+                      setState(() {
+                        _attachments
+                            .removeWhere((element) => element.id == media.id);
+                      });
                     }
                   },
                 );
@@ -813,35 +819,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _addAttachment(Media medium) async {
-    final mediaFile = await medium.getFile();
-    final thumbBytes = await medium.getThumbnail();
-
-    final file = PlatformFile(
-      path: mediaFile.path,
-      bytes: mediaFile.readAsBytesSync(),
-    );
-
-    final thumbFile = PlatformFile(
-      bytes: thumbBytes,
-      name: '${file.name ?? file.path?.split('/')?.last}_thumbnail.jpeg',
-    );
-
-    setState(() {
-      _inputEnabled = true;
-    });
-
-    if (file == null) {
-      return;
-    }
-
-    final channel = StreamChannel.of(context).channel;
     final attachment = _SendingAttachment(
-      file: file,
-      thumbFile: thumbFile,
-      attachment: Attachment(
-        localUri: file.path != null ? Uri.parse(file.path) : null,
-        type: medium.mediaType == MediaType.image ? 'image' : 'video',
-      ),
       id: medium.id,
     );
 
@@ -849,10 +827,22 @@ class MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    final thumbUrl = await _uploadImage(
-      thumbFile,
-      channel,
+    final mediaFile = await medium.getFile();
+
+    final file = PlatformFile(
+      path: mediaFile.path,
+      bytes: mediaFile.readAsBytesSync(),
     );
+
+    final channel = StreamChannel.of(context).channel;
+    setState(() {
+      attachment
+        ..file = file
+        ..attachment = Attachment(
+          localUri: file.path != null ? Uri.parse(file.path) : null,
+          type: medium.mediaType == MediaType.image ? 'image' : 'video',
+        );
+    });
 
     final url = await _uploadAttachment(
         file,
@@ -868,12 +858,10 @@ class MessageInputState extends State<MessageInput> {
     if (fileType == DefaultAttachmentTypes.image) {
       attachment.attachment = attachment.attachment.copyWith(
         imageUrl: url,
-        thumbUrl: thumbUrl,
       );
     } else {
       attachment.attachment = attachment.attachment.copyWith(
         assetUrl: url,
-        thumbUrl: thumbUrl,
       );
     }
 
@@ -1221,6 +1209,10 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
+    if (attachment.attachment == null) {
+      return SizedBox();
+    }
+
     switch (attachment.attachment.type) {
       case 'image':
       case 'giphy':
@@ -1230,22 +1222,20 @@ class MessageInputState extends State<MessageInput> {
                 fit: BoxFit.cover,
               )
             : Image.network(
-                attachment.attachment.imageUrl ??
-                    attachment.attachment.thumbUrl,
+                attachment.attachment.imageUrl,
                 fit: BoxFit.cover,
               );
         break;
       case 'video':
         return Stack(
           children: [
-            Container(
-              child: attachment.thumbFile != null
-                  ? Image.memory(
-                      attachment.thumbFile.bytes,
-                      fit: BoxFit.cover,
-                    )
-                  : Icon(Icons.videocam),
-              color: Colors.black26,
+            Positioned.fill(
+              child: Container(
+                child: VideoThumbnail(
+                    file: File(
+                  attachment.file.path,
+                )),
+              ),
             ),
             Positioned(
               left: 8,
@@ -1314,7 +1304,7 @@ class MessageInputState extends State<MessageInput> {
             setState(() {
               _animateContainer = true;
               _openFilePickerSection = false;
-              _filePickerSize = 250.0;
+              _filePickerSize = _kMinMediaPickerSize;
             });
           } else {
             final status = await (Platform.isAndroid
@@ -1449,6 +1439,9 @@ class MessageInputState extends State<MessageInput> {
         pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
       } else if (fileType == DefaultAttachmentTypes.video) {
         pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
+      }
+      if (pickedFile == null) {
+        return;
       }
       final bytes = await pickedFile.readAsBytes();
       file = PlatformFile(
@@ -1774,14 +1767,12 @@ class MessageInputState extends State<MessageInput> {
 
 class _SendingAttachment {
   PlatformFile file;
-  PlatformFile thumbFile;
   Attachment attachment;
   bool uploaded;
   String id;
 
   _SendingAttachment({
     this.file,
-    this.thumbFile,
     this.attachment,
     this.uploaded = false,
     this.id,
