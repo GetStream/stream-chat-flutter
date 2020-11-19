@@ -599,14 +599,182 @@ class NewGroupChatScreen extends StatefulWidget {
 }
 
 class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
+  TextEditingController _controller;
+
+  String _userNameQuery = '';
+
+  final _selectedUsers = <User>{};
+
+  bool _isSearchActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController()
+      ..addListener(() {
+        setState(() {
+          _userNameQuery = _controller.text;
+          _isSearchActive = _userNameQuery.isNotEmpty;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller?.clear();
+    _controller?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 2,
         backgroundColor: Colors.white,
         title: Text(
           'Add Group Members',
           style: TextStyle(color: Colors.black),
+        ),
+        actions: [
+          if (_selectedUsers.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                StreamIcons.arrow_right,
+                color: Colors.blue.shade700,
+              ),
+              onPressed: () {},
+            )
+        ],
+      ),
+      body: UsersBloc(
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              margin: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 8,
+              ),
+              child: TextField(
+                onTap: () {},
+                controller: _controller,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(StreamIcons.search),
+                  hintText: 'Search',
+                  contentPadding: const EdgeInsets.all(8),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+              ),
+            ),
+            if (_selectedUsers.isNotEmpty)
+              Container(
+                height: 120,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _selectedUsers.length,
+                  padding: const EdgeInsets.all(8),
+                  separatorBuilder: (_, __) => SizedBox(width: 16),
+                  itemBuilder: (_, index) {
+                    final user = _selectedUsers.elementAt(index);
+                    return Column(
+                      children: [
+                        Stack(
+                          children: [
+                            UserAvatar(
+                              user: user,
+                              showOnlineStatus: true,
+                              borderRadius: BorderRadius.circular(40),
+                              constraints: BoxConstraints.tightFor(
+                                height: 80,
+                                width: 80,
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: InkWell(
+                                onTap: () {
+                                  if (_selectedUsers.contains(user)) {
+                                    setState(() => _selectedUsers.remove(user));
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    border:
+                                        Border.all(color: Colors.grey.shade100),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Icon(
+                                      Icons.clear_rounded,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          user.name.split(' ')[0],
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            Container(
+              width: double.maxFinite,
+              color: Colors.grey.shade50,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 8,
+                ),
+                child: Text(
+                  _isSearchActive
+                      ? 'Matches for \"$_userNameQuery\"'
+                      : 'On the platform',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: UserListView(
+                filterByUserName: _userNameQuery,
+                selectedUsers: _selectedUsers,
+                groupAlphabetically: _isSearchActive ? false : true,
+                onUserTap: (user, _) {
+                  if (!_selectedUsers.contains(user)) {
+                    setState(() {
+                      _selectedUsers.add(user);
+                    });
+                  }
+                },
+                pagination: PaginationParams(
+                  limit: 25,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
