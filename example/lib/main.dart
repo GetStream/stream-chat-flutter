@@ -534,6 +534,19 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   await channel.watch();
                   return message;
                 },
+                onMessageSent: (_) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return StreamChannel(
+                          child: ChannelPage(),
+                          channel: channel,
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
             ],
           ),
