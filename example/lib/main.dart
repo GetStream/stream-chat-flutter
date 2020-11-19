@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
 import 'notifications_service.dart';
+import 'neumorphic_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -487,9 +488,34 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   setState(() => _selectedUsers.remove(user));
                 },
               ),
+              if (!_isSearchActive)
+                Container(
+                  color: Colors.white54,
+                  child: InkWell(
+                    onTap: () {},
+                    child: Row(
+                      children: [
+                        NeumorphicButton(
+                          child: Icon(
+                            StreamIcons.group,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Create a Group',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               Container(
                 width: double.maxFinite,
-                color: Colors.white54,
+                color: Colors.grey.shade50,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 8,

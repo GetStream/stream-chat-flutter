@@ -64,7 +64,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 4,
+      elevation: 2,
       color: Colors.white,
       child: Container(
         child: Padding(
