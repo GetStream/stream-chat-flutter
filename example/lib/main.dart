@@ -643,7 +643,16 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 StreamIcons.arrow_right,
                 color: Colors.blue.shade700,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => GroupChatDetailsScreen(
+                      selectedUsers: _selectedUsers.toList(growable: false),
+                    ),
+                  ),
+                );
+              },
             )
         ],
       ),
@@ -776,6 +785,169 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class GroupChatDetailsScreen extends StatefulWidget {
+  final List<User> selectedUsers;
+
+  const GroupChatDetailsScreen({
+    Key key,
+    @required this.selectedUsers,
+  }) : super(key: key);
+
+  @override
+  _GroupChatDetailsScreenState createState() => _GroupChatDetailsScreenState();
+}
+
+class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
+  final _selectedUsers = <User>[];
+
+  TextEditingController _groupNameController;
+
+  Channel _channel;
+
+  bool _isGroupNameEmpty = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _channel = StreamChat.of(context).client.channel('messaging');
+    _selectedUsers.addAll(widget.selectedUsers);
+    _groupNameController = TextEditingController()
+      ..addListener(() {
+        final name = _groupNameController.text;
+        setState(() {
+          _isGroupNameEmpty = name.isEmpty;
+        });
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 2,
+        backgroundColor: Colors.white,
+        title: Text(
+          'Name of Group Chat',
+          style: TextStyle(color: Colors.black),
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  'NAME',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    controller: _groupNameController,
+                    style: TextStyle(fontSize: 18),
+                    decoration: InputDecoration(
+                        isDense: true,
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        hintText: 'Choose a group chat name',
+                        hintStyle: TextStyle(fontSize: 18)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          NeumorphicButton(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: IconButton(
+              padding: const EdgeInsets.all(0),
+              icon: Icon(StreamIcons.check),
+              color: Colors.blue.shade700,
+              onPressed: _isGroupNameEmpty
+                  ? null
+                  : () async {
+                      final groupName = _groupNameController.text;
+                      final client = _channel.client;
+                      _channel.extraData = {
+                        'members': [
+                          client.state.user.id,
+                          ..._selectedUsers.map((e) => e.id),
+                        ],
+                        'name': groupName,
+                      };
+                      await _channel.watch();
+                      Navigator.of(context)
+                        ..pop()
+                        ..pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return StreamChannel(
+                                child: ChannelPage(),
+                                channel: _channel,
+                              );
+                            },
+                          ),
+                        );
+                    },
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.maxFinite,
+            color: Colors.grey.shade50,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 8,
+              ),
+              child: Text(
+                '5 Members',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.separated(
+              itemCount: _selectedUsers.length,
+              separatorBuilder: (_, __) => Container(
+                height: 1,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.1),
+              ),
+              itemBuilder: (_, index) {
+                final user = _selectedUsers[index];
+                return UserItem(
+                  key: ObjectKey(user),
+                  user: user,
+                  selected: true,
+                  showLastSeen: false,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
