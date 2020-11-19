@@ -934,12 +934,10 @@ class MessageInputState extends State<MessageInput> {
         if (visible) {
           _onChange();
         } else {
-          if (_commandsOverlay != null) {
-            _commandsOverlay.remove();
-          }
-          if (_mentionsOverlay != null) {
-            _mentionsOverlay.remove();
-          }
+          _commandsOverlay?.remove();
+          _commandsOverlay = null;
+          _mentionsOverlay?.remove();
+          _mentionsOverlay = null;
         }
       });
     }
