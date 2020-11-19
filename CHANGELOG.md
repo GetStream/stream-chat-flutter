@@ -1,3 +1,7 @@
+## 0.2.13+1
+
+- Use TextEditingController.addListener instea of TextField.onChanged
+
 ## 0.2.13
 
 - Update llc dependency
