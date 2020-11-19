@@ -77,25 +77,25 @@ enum DefaultAttachmentTypes {
 /// Modify it to change the widget appearance.
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
-  MessageInput(
-      {Key key,
-      this.onMessageSent,
-      this.preMessageSending,
-      this.parentMessage,
-      this.editMessage,
-      this.maxHeight = 150,
-      this.keyboardType = TextInputType.multiline,
-      this.disableAttachments = false,
-      this.doImageUploadRequest,
-      this.doFileUploadRequest,
-      this.initialMessage,
-      this.textEditingController,
-      this.actions,
-      this.actionsLocation = ActionsLocation.left,
-      this.attachmentThumbnailBuilders,
-      this.inputTextStyle,
-      this.attachmentIconColor})
-      : super(key: key);
+  MessageInput({
+    Key key,
+    this.onMessageSent,
+    this.preMessageSending,
+    this.parentMessage,
+    this.editMessage,
+    this.maxHeight = 150,
+    this.keyboardType = TextInputType.multiline,
+    this.disableAttachments = false,
+    this.doImageUploadRequest,
+    this.doFileUploadRequest,
+    this.initialMessage,
+    this.textEditingController,
+    this.actions,
+    this.actionsLocation = ActionsLocation.left,
+    this.attachmentThumbnailBuilders,
+    this.inputTextStyle,
+    this.attachmentIconColor,
+  }) : super(key: key);
 
   /// Message to edit
   final Message editMessage;
@@ -252,36 +252,6 @@ class MessageInputState extends State<MessageInput> {
           keyboardType: widget.keyboardType,
           controller: textEditingController,
           focusNode: _focusNode,
-          onChanged: (s) {
-            StreamChannel.of(context).channel.keyStroke(
-                  widget.parentMessage?.id,
-                );
-
-            setState(() {
-              _messageIsPresent = s.trim().isNotEmpty;
-            });
-
-            _commandsOverlay?.remove();
-            _commandsOverlay = null;
-            _mentionsOverlay?.remove();
-            _mentionsOverlay = null;
-
-            if (s.startsWith('/')) {
-              _commandsOverlay = _buildCommandsOverlayEntry();
-              Overlay.of(context).insert(_commandsOverlay);
-            }
-
-            if (textEditingController.selection.isCollapsed &&
-                (s[textEditingController.selection.start - 1] == '@' ||
-                    textEditingController.text
-                        .substring(0, textEditingController.selection.start)
-                        .split(' ')
-                        .last
-                        .contains('@'))) {
-              _mentionsOverlay = _buildMentionsOverlayEntry();
-              Overlay.of(context).insert(_mentionsOverlay);
-            }
-          },
           onTap: () {
             setState(() {
               _typingStarted = true;
@@ -403,7 +373,7 @@ class MessageInputState extends State<MessageInput> {
 
   OverlayEntry _buildMentionsOverlayEntry() {
     final splits = textEditingController.text
-        .substring(0, textEditingController.value.selection.start)
+        .substring(0, textEditingController.value.selection.baseOffset)
         .split('@');
     final query = splits.last.toLowerCase();
 
@@ -467,7 +437,7 @@ class MessageInputState extends State<MessageInput> {
                                   text: rejoin +
                                       textEditingController.text.substring(
                                           textEditingController
-                                              .selection.start),
+                                              .selection.baseOffset),
                                   selection: TextSelection.collapsed(
                                     offset: rejoin.length,
                                   ),
@@ -962,23 +932,7 @@ class MessageInputState extends State<MessageInput> {
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
         if (visible) {
-          if (_commandsOverlay != null) {
-            if (textEditingController.text.startsWith('/')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _commandsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_commandsOverlay);
-              });
-            }
-          }
-
-          if (_mentionsOverlay != null) {
-            if (textEditingController.text.contains('@')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _mentionsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_mentionsOverlay);
-              });
-            }
-          }
+          _onChange();
         } else {
           if (_commandsOverlay != null) {
             _commandsOverlay.remove();
@@ -992,8 +946,44 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController =
         widget.textEditingController ?? TextEditingController();
+
+    textEditingController.addListener(_onChange);
+
     if (widget.editMessage != null || widget.initialMessage != null) {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
+    }
+  }
+
+  void _onChange() {
+    final s = textEditingController.text;
+    StreamChannel.of(context).channel.keyStroke(
+          widget.parentMessage?.id,
+        );
+
+    setState(() {
+      _messageIsPresent = s.trim().isNotEmpty;
+    });
+
+    _commandsOverlay?.remove();
+    _commandsOverlay = null;
+    _mentionsOverlay?.remove();
+    _mentionsOverlay = null;
+
+    if (s.trim().startsWith('/')) {
+      _commandsOverlay = _buildCommandsOverlayEntry();
+      Overlay.of(context).insert(_commandsOverlay);
+    }
+
+    if (_messageIsPresent &&
+        textEditingController.selection.isCollapsed &&
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
+            .substring(0, textEditingController.selection.baseOffset)
+            .split(' ')
+            .last
+            .contains('@')) {
+      _mentionsOverlay = _buildMentionsOverlayEntry();
+      Overlay.of(context).insert(_mentionsOverlay);
     }
   }
 
