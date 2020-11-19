@@ -671,7 +671,6 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 horizontal: 8,
               ),
               child: TextField(
-                onTap: () {},
                 controller: _controller,
                 decoration: InputDecoration(
                   prefixIcon: Icon(StreamIcons.search),
@@ -811,6 +810,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   bool _isGroupNameEmpty = true;
 
+  int get _totalUsers => _selectedUsers.length;
+
   @override
   void initState() {
     super.initState();
@@ -920,7 +921,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 horizontal: 8,
               ),
               child: Text(
-                '5 Members',
+                '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                 ),
