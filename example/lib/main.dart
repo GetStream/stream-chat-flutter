@@ -284,22 +284,24 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   Channel channel;
 
+  void _userNameListener() {
+    setState(() {
+      _userNameQuery = _controller.text;
+      _isSearchActive = _userNameQuery.isNotEmpty;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     channel = StreamChat.of(context).client.channel('messaging');
-    _controller = TextEditingController()
-      ..addListener(() {
-        setState(() {
-          _userNameQuery = _controller.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
-        });
-      });
+    _controller = TextEditingController()..addListener(_userNameListener);
   }
 
   @override
   void dispose() {
     _controller?.clear();
+    _controller?.removeListener(_userNameListener);
     _controller?.dispose();
     super.dispose();
   }
@@ -489,21 +491,23 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   bool _isSearchActive = false;
 
+  void _userNameListener() {
+    setState(() {
+      _userNameQuery = _controller.text;
+      _isSearchActive = _userNameQuery.isNotEmpty;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController()
-      ..addListener(() {
-        setState(() {
-          _userNameQuery = _controller.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
-        });
-      });
+    _controller = TextEditingController()..addListener(_userNameListener);
   }
 
   @override
   void dispose() {
     _controller?.clear();
+    _controller?.removeListener(_userNameListener);
     _controller?.dispose();
     super.dispose();
   }
@@ -723,18 +727,28 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   int get _totalUsers => _selectedUsers.length;
 
+  void _groupNameListener() {
+    final name = _groupNameController.text;
+    setState(() {
+      _isGroupNameEmpty = name.isEmpty;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _channel = StreamChat.of(context).client.channel('messaging');
     _selectedUsers.addAll(widget.selectedUsers);
     _groupNameController = TextEditingController()
-      ..addListener(() {
-        final name = _groupNameController.text;
-        setState(() {
-          _isGroupNameEmpty = name.isEmpty;
-        });
-      });
+      ..addListener(_groupNameListener);
+  }
+
+  @override
+  void dispose() {
+    _groupNameController?.clear();
+    _groupNameController?.removeListener(_groupNameListener);
+    _groupNameController?.dispose();
+    super.dispose();
   }
 
   @override
