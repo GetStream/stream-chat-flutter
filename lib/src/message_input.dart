@@ -364,25 +364,7 @@ class MessageInputState extends State<MessageInput> {
                   controller: textEditingController,
                   focusNode: _focusNode,
                   onChanged: (s) {
-                    StreamChannel.of(context).channel.keyStroke();
-
-                    setState(() {
-                      _messageIsPresent = s.trim().isNotEmpty;
-                      _actionsShrunk = s.trim().isNotEmpty;
-                    });
-
-                    _commandsOverlay?.remove();
-                    _commandsOverlay = null;
-                    _mentionsOverlay?.remove();
-                    _mentionsOverlay = null;
-                    _emojiOverlay?.remove();
-                    _emojiOverlay = null;
-
-                    _checkCommands(s, context);
-
-                    _checkMentions(s, context);
-
-                    _checkEmoji(s, context);
+                    _onChanged(context, s);
                   },
                   style: Theme.of(context).textTheme.bodyText2,
                   autofocus: false,
@@ -440,6 +422,28 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
+  void _onChanged(BuildContext context, String s) {
+    StreamChannel.of(context).channel.keyStroke();
+
+    setState(() {
+      _messageIsPresent = s.trim().isNotEmpty;
+      _actionsShrunk = s.trim().isNotEmpty;
+    });
+
+    _commandsOverlay?.remove();
+    _commandsOverlay = null;
+    _mentionsOverlay?.remove();
+    _mentionsOverlay = null;
+    _emojiOverlay?.remove();
+    _emojiOverlay = null;
+
+    _checkCommands(s.trim(), context);
+
+    _checkMentions(s, context);
+
+    _checkEmoji(s, context);
+  }
+
   String _getHint() {
     if (_commandEnabled && _chosenCommand.name == 'giphy') {
       return 'Search GIFs';
@@ -451,14 +455,14 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _checkEmoji(String s, BuildContext context) {
-    if (textEditingController.selection.isCollapsed &&
-        (s.isNotEmpty && s[textEditingController.selection.start - 1] == ':' ||
-            textEditingController.text
-                .substring(
-                  0,
-                  textEditingController.selection.start,
-                )
-                .contains(':'))) {
+    if (s.isNotEmpty &&
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
+            .substring(
+              0,
+              textEditingController.selection.baseOffset,
+            )
+            .contains(':')) {
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
       final splits = textToSelection.split(':');
@@ -478,13 +482,13 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _checkMentions(String s, BuildContext context) {
-    if (textEditingController.selection.isCollapsed &&
-        (s.isNotEmpty && s[textEditingController.selection.start - 1] == '@' ||
-            textEditingController.text
-                .substring(0, textEditingController.selection.start)
-                .split(' ')
-                .last
-                .contains('@'))) {
+    if (s.isNotEmpty &&
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
+            .substring(0, textEditingController.selection.baseOffset)
+            .split(' ')
+            .last
+            .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
       Overlay.of(context).insert(_mentionsOverlay);
     }
@@ -1718,11 +1722,7 @@ class MessageInputState extends State<MessageInput> {
 
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
-        if (visible) {
-          _checkCommands(textEditingController.text, context);
-          _checkMentions(textEditingController.text, context);
-          _checkEmoji(textEditingController.text, context);
-        }
+        _onChanged(context, textEditingController.text);
       });
     }
 
@@ -1731,6 +1731,10 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage != null || widget.initialMessage != null) {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
     }
+
+    textEditingController.addListener(() {
+      _onChanged(context, textEditingController.text);
+    });
 
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
