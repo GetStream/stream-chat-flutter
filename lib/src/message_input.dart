@@ -366,9 +366,6 @@ class MessageInputState extends State<MessageInput> {
                   keyboardType: widget.keyboardType,
                   controller: textEditingController,
                   focusNode: _focusNode,
-                  onChanged: (s) {
-                    _onChanged(context, s);
-                  },
                   style: Theme.of(context).textTheme.bodyText2,
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
