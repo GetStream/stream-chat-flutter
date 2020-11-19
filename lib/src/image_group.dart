@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/full_screen_image.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ImageGroup extends StatelessWidget {
   const ImageGroup({
@@ -107,14 +108,20 @@ class ImageGroup extends StatelessWidget {
     BuildContext context, [
     int index,
   ]) {
+    final channel = StreamChannel.of(context).channel;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            FullScreenImage(urls: images.map((e) => e.imageUrl ?? e.thumbUrl ?? e.assetUrl).toList(),
-              startIndex: index,
-              userName: message.user.name,
-              sentAt: message.createdAt,
+            StreamChannel(
+              channel: channel,
+              child: FullScreenImage(urls: images.map((e) => e.imageUrl ?? e.thumbUrl ?? e.assetUrl).toList(),
+                startIndex: index,
+                userName: message.user.name,
+                sentAt: message.createdAt,
+                message: message,
+              ),
             ),
       ),
     );

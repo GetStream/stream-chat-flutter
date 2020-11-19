@@ -11,6 +11,7 @@ import '../stream_chat_flutter.dart';
 class FullScreenImage extends StatefulWidget {
   /// The url of the image
   final List<String> urls;
+  final Message message;
 
   final int startIndex;
   final String userName;
@@ -20,6 +21,7 @@ class FullScreenImage extends StatefulWidget {
   const FullScreenImage({
     Key key,
     @required this.urls,
+    this.message,
     this.startIndex = 0,
     this.userName = '',
     this.sentAt,
@@ -109,11 +111,13 @@ class _FullScreenImageState extends State<FullScreenImage>
                   onBackPressed: () {
                     Navigator.of(context).pop();
                   },
+                  message: widget.message,
                 ),
                 ImageFooter(
                   currentPage: _currentPage,
                   totalPages: widget.urls.length,
                   urls: widget.urls,
+                  message: widget.message,
                 ),
               ],
             ),

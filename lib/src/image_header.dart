@@ -25,12 +25,15 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Callback to call when the image is tapped.
   final VoidCallback onImageTap;
 
+  final Message message;
+
   final String userName;
   final String sentAt;
 
   /// Creates a channel header
   ImageHeader({
     Key key,
+    this.message,
     this.showBackButton = true,
     this.onBackPressed,
     this.onTitleTap,
@@ -103,12 +106,18 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   final Size preferredSize;
 
   void _showMessageActionModalBottomSheet(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+
     showDialog(
         context: context,
         builder: (context) {
-          return ImageActionsModal(
-            userName: userName,
-            sentAt: sentAt,
+          return StreamChannel(
+            channel: channel,
+            child: ImageActionsModal(
+              userName: userName,
+              sentAt: sentAt,
+              message: message,
+            ),
           );
         });
   }

@@ -64,14 +64,20 @@ class GiphyAttachment extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                         onTap: () {
+                          final channel = StreamChannel.of(context).channel;
+
                           Navigator.push(context,
                               MaterialPageRoute(builder: (_) {
-                            return FullScreenImage(
-                              urls: [attachment.imageUrl ??
-                                  attachment.assetUrl ??
-                                  attachment.thumbUrl],
-                              userName: message.user.name,
-                              sentAt: message.createdAt,
+                            return StreamChannel(
+                              channel: channel,
+                              child: FullScreenImage(
+                                urls: [attachment.imageUrl ??
+                                    attachment.assetUrl ??
+                                    attachment.thumbUrl],
+                                userName: message.user.name,
+                                sentAt: message.createdAt,
+                                message: message,
+                              ),
                             );
                           }));
                         },
@@ -299,13 +305,19 @@ class GiphyAttachment extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: GestureDetector(
               onTap: () {
+                final channel = StreamChannel.of(context).channel;
+
                 Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  return FullScreenImage(
-                    urls: [attachment.imageUrl ??
-                        attachment.assetUrl ??
-                        attachment.thumbUrl],
-                    userName: message.user.name,
-                    sentAt: message.createdAt,
+                  return StreamChannel(
+                    channel: channel,
+                    child: FullScreenImage(
+                      urls: [attachment.imageUrl ??
+                          attachment.assetUrl ??
+                          attachment.thumbUrl],
+                      userName: message.user.name,
+                      sentAt: message.createdAt,
+                      message: message,
+                    ),
                   );
                 }));
               },

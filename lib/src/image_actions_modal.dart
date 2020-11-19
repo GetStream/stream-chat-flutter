@@ -6,10 +6,11 @@ import '../stream_chat_flutter.dart';
 import 'stream_icons.dart';
 
 class ImageActionsModal extends StatelessWidget {
+  final Message message;
   final String userName;
   final String sentAt;
 
-  ImageActionsModal({this.userName, this.sentAt});
+  ImageActionsModal({this.message, this.userName, this.sentAt});
 
   @override
   Widget build(BuildContext context) {
@@ -21,20 +22,18 @@ class ImageActionsModal extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
+              child: Container(
+            decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.transparent,
-                  ],
-                  stops: [0.0, 0.4],
-                )
-              ),
-            )
-          ),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.8),
+                Colors.transparent,
+              ],
+              stops: [0.0, 0.4],
+            )),
+          )),
           _buildPage(context),
         ],
       ),
@@ -70,8 +69,10 @@ class ImageActionsModal extends StatelessWidget {
                   ),
                   Text(
                     sentAt,
-                    style:
-                        StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(color: Colors.white.withOpacity(0.5)),
+                    style: StreamChatTheme.of(context)
+                        .channelPreviewTheme
+                        .subtitle
+                        .copyWith(color: Colors.white.withOpacity(0.5)),
                   ),
                 ],
               ),
@@ -104,11 +105,26 @@ class ImageActionsModal extends StatelessWidget {
                     children: ListTile.divideTiles(
                       context: context,
                       tiles: [
-                        _buildButton(context, 'Reply', StreamIcons.curve_line_down_left, () {}),
-                        _buildButton(context, 'Show in Chat', StreamIcons.eye, () {}),
-                        _buildButton(context, 'Save Image', StreamIcons.save_1, () {}),
+                        _buildButton(context, 'Reply',
+                            StreamIcons.curve_line_down_left, () {}),
+                        _buildButton(context, 'Show in Chat', StreamIcons.eye,
+                            () {
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        }),
+                        _buildButton(
+                            context, 'Save Image', StreamIcons.save_1, () {}),
                         _buildButton(context, 'Copy', StreamIcons.copy, () {}),
-                        _buildButton(context, 'Delete', StreamIcons.delete, () {}, color: Colors.red),
+                        if (StreamChat.of(context).user.id == message.user.id)
+                          _buildButton(context, 'Delete', StreamIcons.delete,
+                              () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            StreamChat.of(context).client.deleteMessage(
+                                  message,
+                                  StreamChannel.of(context).channel.cid,
+                                );
+                          }, color: Colors.red),
                       ],
                     ).toList(),
                   ),
@@ -121,7 +137,9 @@ class ImageActionsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(context, String title, IconData iconData, VoidCallback onTap, {Color color}) {
+  Widget _buildButton(
+      context, String title, IconData iconData, VoidCallback onTap,
+      {Color color}) {
     var titleStyle = TextStyle(
       fontSize: 14.5,
       color: Colors.black,
