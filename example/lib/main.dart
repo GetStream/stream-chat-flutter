@@ -121,6 +121,12 @@ class ChannelListPage extends StatelessWidget {
                   ),
                 ),
                 ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
+                    );
+                  },
                   leading: Icon(StreamIcons.group),
                   title: Text(
                     'New group',
@@ -492,7 +498,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
                 Container(
                   color: Colors.white54,
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
+                      );
+                    },
                     child: Row(
                       children: [
                         NeumorphicButton(
@@ -576,6 +587,26 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class NewGroupChatScreen extends StatefulWidget {
+  @override
+  _NewGroupChatScreenState createState() => _NewGroupChatScreenState();
+}
+
+class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Add Group Members',
+          style: TextStyle(color: Colors.black),
         ),
       ),
     );
