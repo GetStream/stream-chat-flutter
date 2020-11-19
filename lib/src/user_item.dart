@@ -24,6 +24,7 @@ class UserItem extends StatelessWidget {
     this.onLongPress,
     this.onImageTap,
     this.selected = false,
+    this.showLastSeen = true,
   }) : super(key: key);
 
   /// Function called when tapping this widget
@@ -40,6 +41,9 @@ class UserItem extends StatelessWidget {
 
   /// If true the [UserItem] will show a trailing checkmark
   final bool selected;
+
+  /// If true the [UserItem] will show the last seen
+  final bool showLastSeen;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +76,7 @@ class UserItem extends StatelessWidget {
             )
           : null,
       title: Text(user.name),
-      subtitle: _buildLastActive(context),
+      subtitle: showLastSeen ? _buildLastActive(context) : null,
     );
   }
 
