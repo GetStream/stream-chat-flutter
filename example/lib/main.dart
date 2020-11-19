@@ -558,6 +558,35 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   pagination: PaginationParams(
                     limit: 25,
                   ),
+                  emptyBuilder: (_) {
+                    return LayoutBuilder(
+                      builder: (context, viewportConstraints) {
+                        return SingleChildScrollView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: viewportConstraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Icon(
+                                      StreamIcons.search,
+                                      size: 96,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text('No user matches these keywords...'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
               MessageInput(
@@ -780,6 +809,35 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 pagination: PaginationParams(
                   limit: 25,
                 ),
+                emptyBuilder: (_) {
+                  return LayoutBuilder(
+                    builder: (context, viewportConstraints) {
+                      return SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Icon(
+                                    StreamIcons.search,
+                                    size: 96,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text('No user matches these keywords...'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
