@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2  
     - name: Flutter action
-      uses: subosito/flutter-action@v1.3.2
+      uses: subosito/flutter-action@v1.4.0
       with:
         channel: 'stable'
     - name: Get dependencies
