@@ -282,6 +282,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                                 }),
                                 userToken,
                               );
+
+                              if (!kIsWeb) {
+                                initNotifications(client);
+                              }
                             } catch (e) {
                               var errorText = 'Error connecting, retry';
                               if (e is Map) {

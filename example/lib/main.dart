@@ -30,6 +30,9 @@ void main() async {
       User(id: userId),
       token,
     );
+    if (!kIsWeb) {
+      initNotifications(client);
+    }
   }
 
   runApp(MyApp(client));
