@@ -388,33 +388,13 @@ class _UserListViewState extends State<UserListView>
         },
         userItem: (user) {
           final selected = widget.selectedUsers?.contains(user) ?? false;
-
-          UserTapCallback onTap;
-          if (widget.onUserTap != null) {
-            onTap = widget.onUserTap;
-          } else {
-            onTap = (client, _) {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) {
-              //       return StreamChannel(
-              //         child: widget.userWidget,
-              //         channel: client,
-              //       );
-              //     },
-              //   ),
-              // );
-            };
-          }
-
           return Container(
             key: ValueKey<String>('USER-${user.id}'),
             child: widget.userItemBuilder != null
                 ? widget.userItemBuilder(context, user, selected)
                 : UserItem(
                     user: user,
-                    onTap: (user) => onTap(user, widget.userWidget),
+                    onTap: (user) => widget.onUserTap(user, widget.userWidget),
                     onLongPress: widget.onUserLongPress,
                     onImageTap: widget.onImageTap,
                     selected: selected,
