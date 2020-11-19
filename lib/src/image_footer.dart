@@ -641,7 +641,7 @@ class _ImageFooterState extends State<ImageFooter> {
       await sendingFuture;
     }
 
-    Navigator.pop(context);
+    _selectedUsers.clear();
     Navigator.pop(context);
   }
 }
