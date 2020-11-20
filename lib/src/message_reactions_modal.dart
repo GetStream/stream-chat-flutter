@@ -86,27 +86,35 @@ class MessageReactionsModal extends StatelessWidget {
                           messageTheme: messageTheme,
                         ),
                       ),
-                    IgnorePointer(
-                      child: MessageWidget(
-                        key: Key('MessageWidget'),
-                        reverse: reverse,
-                        message: message.copyWith(
-                          text: message.text.length > 200
-                              ? '${message.text.substring(0, 200)}...'
-                              : message.text,
-                        ),
-                        messageTheme: messageTheme,
-                        showReactions: false,
-                        showUsername: false,
-                        showUserAvatar: showUserAvatar,
-                        showReplyIndicator: false,
-                        showTimestamp: false,
-                        translateUserAvatar: false,
-                        showSendingIndicator: DisplayWidget.gone,
-                        shape: messageShape,
-                        showReactionPickerIndicator: true,
-                      ),
-                    ),
+                    TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 300),
+                        builder: (context, val, snapshot) {
+                          return Transform.scale(
+                            scale: val,
+                            child: IgnorePointer(
+                              child: MessageWidget(
+                                key: Key('MessageWidget'),
+                                reverse: reverse,
+                                message: message.copyWith(
+                                  text: message.text.length > 200
+                                      ? '${message.text.substring(0, 200)}...'
+                                      : message.text,
+                                ),
+                                messageTheme: messageTheme,
+                                showReactions: false,
+                                showUsername: false,
+                                showUserAvatar: showUserAvatar,
+                                showReplyIndicator: false,
+                                showTimestamp: false,
+                                translateUserAvatar: false,
+                                showSendingIndicator: DisplayWidget.gone,
+                                shape: messageShape,
+                                showReactionPickerIndicator: true,
+                              ),
+                            ),
+                          );
+                        }),
                     SizedBox(
                       height: 16,
                     ),
@@ -178,50 +186,60 @@ class MessageReactionsModal extends StatelessWidget {
     BuildContext context,
   ) {
     final isCurrentUser = reaction.user.id == currentUser.id;
-    return ConstrainedBox(
-      constraints: BoxConstraints.loose(Size(
-        64,
-        98,
-      )),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Stack(
-            children: [
-              UserAvatar(
-                onTap: onUserAvatarTap,
-                user: reaction.user,
-                constraints: BoxConstraints.tightFor(
-                  height: 64,
-                  width: 64,
-                ),
-                borderRadius: BorderRadius.circular(32),
-              ),
-              Positioned(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: ReactionBubble(
-                    reactions: [reaction],
-                    borderColor: messageTheme.reactionsBorderColor,
-                    backgroundColor: messageTheme.reactionsBackgroundColor,
-                    highlightOwnReactions: false,
+    return TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        builder: (context, val, snapshot) {
+          return Transform.scale(
+            scale: val,
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(Size(
+                64,
+                98,
+              )),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Stack(
+                    children: [
+                      UserAvatar(
+                        onTap: onUserAvatarTap,
+                        user: reaction.user,
+                        constraints: BoxConstraints.tightFor(
+                          height: 64,
+                          width: 64,
+                        ),
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      Positioned(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: ReactionBubble(
+                            reactions: [reaction],
+                            borderColor: messageTheme.reactionsBorderColor,
+                            backgroundColor:
+                                messageTheme.reactionsBackgroundColor,
+                            highlightOwnReactions: false,
+                          ),
+                        ),
+                        bottom: 4,
+                        left: isCurrentUser ? 0 : null,
+                        right: isCurrentUser ? 0 : null,
+                      ),
+                    ],
                   ),
-                ),
-                bottom: 4,
-                left: isCurrentUser ? 0 : null,
-                right: isCurrentUser ? 0 : null,
+                  Text(
+                    reaction.user.name,
+                    style: Theme.of(context).textTheme.subtitle2,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-            ],
-          ),
-          Text(
-            reaction.user.name,
-            style: Theme.of(context).textTheme.subtitle2,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+            ),
+          );
+        });
   }
 }
