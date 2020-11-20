@@ -41,6 +41,7 @@ class _MediaListViewState extends State<MediaListView> {
                 AspectRatio(
                   aspectRatio: 1.0,
                   child: FadeInImage(
+                    fadeInDuration: Duration(milliseconds: 300),
                     placeholder: MemoryImage(kTransparentImage),
                     image: MediaThumbnailProvider(
                       media: media,
