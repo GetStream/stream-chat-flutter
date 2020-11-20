@@ -69,13 +69,14 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: IntrinsicHeight(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Text(
                     'TO:',
                     style: TextStyle(
+                      fontSize: 12,
                       color: Colors.black.withOpacity(0.5),
                     ),
                   ),
@@ -109,6 +110,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                             hintText: widget.hint,
                             hintStyle: TextStyle(
                               color: Colors.black.withOpacity(0.5),
+                              fontSize: 14,
                             ),
                           ),
                         ),
@@ -122,6 +124,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                     icon: Icon(
                       _chips.isEmpty ? StreamIcons.user : StreamIcons.user_add,
                       color: Colors.black.withOpacity(0.5),
+                      size: 24,
                     ),
                     onPressed: !_pauseItemAddition ? null : resumeItemAddition,
                     alignment: Alignment.topRight,

@@ -80,7 +80,10 @@ class UserItem extends StatelessWidget {
               radius: 10,
             )
           : null,
-      title: Text(user.name,style: TextStyle(fontWeight: FontWeight.bold),),
+      title: Text(
+        user.name,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       subtitle: showLastOnline ? _buildLastActive(context) : null,
     );
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:example/choose_user_page.dart';
@@ -8,9 +9,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
-import 'notifications_service.dart';
 import 'neumorphic_button.dart';
-import 'dart:async';
+import 'notifications_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -179,7 +179,6 @@ class ChannelListPage extends StatelessWidget {
           options: {
             'presence': true,
           },
-          sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
             limit: 20,
           ),
@@ -323,7 +322,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
         leading: const StreamBackButton(),
         title: Text(
           'New Chat',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
         ),
         centerTitle: true,
       ),
@@ -577,7 +579,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
         leading: const StreamBackButton(),
         title: Text(
           'Add Group Members',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -622,10 +627,12 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   prefixIcon: Icon(
                     StreamIcons.search,
                     color: Colors.black,
+                    size: 24,
                   ),
                   hintText: 'Search',
                   hintStyle: TextStyle(
                     color: Colors.black.withOpacity(0.5),
+                    fontSize: 14,
                   ),
                   contentPadding: const EdgeInsets.all(0),
                   border: OutlineInputBorder(
@@ -650,6 +657,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                         Stack(
                           children: [
                             UserAvatar(
+                              onlineIndicatorAlignment: Alignment(0.9, 0.9),
                               user: user,
                               showOnlineStatus: true,
                               borderRadius: BorderRadius.circular(32),
@@ -659,9 +667,9 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                               ),
                             ),
                             Positioned(
-                              top: 0,
-                              right: 0,
-                              child: InkWell(
+                              top: -4,
+                              right: -4,
+                              child: GestureDetector(
                                 onTap: () {
                                   if (_selectedUsers.contains(user)) {
                                     setState(() => _selectedUsers.remove(user));
@@ -671,14 +679,15 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     shape: BoxShape.circle,
-                                    border:
-                                        Border.all(color: Colors.grey.shade100),
+                                    border: Border.all(
+                                      color: Colors.grey.shade100,
+                                    ),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(2.0),
+                                    padding: const EdgeInsets.all(0.0),
                                     child: Icon(
-                                      Icons.clear_rounded,
-                                      size: 14,
+                                      StreamIcons.close,
+                                      size: 24,
                                     ),
                                   ),
                                 ),
@@ -848,7 +857,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         leading: const StreamBackButton(),
         title: Text(
           'Name of Group Chat',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
         ),
         centerTitle: true,
         bottom: PreferredSize(
@@ -860,6 +872,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 Text(
                   'NAME',
                   style: TextStyle(
+                    fontSize: 12,
                     color: Colors.black.withOpacity(0.5),
                   ),
                 ),
@@ -876,6 +889,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       disabledBorder: InputBorder.none,
                       contentPadding: const EdgeInsets.all(0),
                       hintText: 'Choose a group chat name',
+                      hintStyle: TextStyle(
+                          fontSize: 14, color: Colors.black.withOpacity(.5)),
                     ),
                   ),
                 ),

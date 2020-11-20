@@ -423,7 +423,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _onChanged(BuildContext context, String s) {
-    StreamChannel.of(context).channel.keyStroke();
+    StreamChannel.of(context).channel.keyStroke().catchError((e) {});
 
     setState(() {
       _messageIsPresent = s.trim().isNotEmpty;
@@ -1712,7 +1712,9 @@ class MessageInputState extends State<MessageInput> {
 
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
-        _onChanged(context, textEditingController.text);
+        if (_focusNode.hasFocus) {
+          _onChanged(context, textEditingController.text);
+        }
       });
     }
 
