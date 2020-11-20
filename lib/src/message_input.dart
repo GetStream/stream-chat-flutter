@@ -104,6 +104,7 @@ class MessageInput extends StatefulWidget {
     this.actions,
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
+    this.focusNode,
   }) : super(key: key);
 
   /// Message to edit
@@ -149,6 +150,9 @@ class MessageInput extends StatefulWidget {
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
 
+  /// The focus node associated to the TextField
+  final FocusNode focusNode;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -169,10 +173,10 @@ class MessageInput extends StatefulWidget {
 
 class MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
-  final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
+  FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _animateContainer = true;
@@ -1707,6 +1711,8 @@ class MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
+
+    _focusNode = widget.focusNode ?? FocusNode();
 
     _emojiNames = Emoji.all().map((e) => e.name);
 

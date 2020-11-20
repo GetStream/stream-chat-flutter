@@ -4,9 +4,9 @@ import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class UrlAttachment extends StatelessWidget {
-  Attachment urlAttachment;
-  String hostDisplayName;
-  EdgeInsets textPadding;
+  final Attachment urlAttachment;
+  final String hostDisplayName;
+  final EdgeInsets textPadding;
 
   UrlAttachment({
     @required this.urlAttachment,

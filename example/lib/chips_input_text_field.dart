@@ -22,7 +22,7 @@ class ChipsInputTextField<T> extends StatefulWidget {
     this.focusNode,
     this.onChipAdded,
     this.onChipRemoved,
-    this.hint = 'Type a name or group',
+    this.hint = 'Type a name',
   }) : super(key: key);
 
   @override
@@ -61,83 +61,96 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 1,
-      color: Colors.white,
-      child: Container(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    'TO:',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black.withOpacity(0.5),
+    return GestureDetector(
+      onTap: _pauseItemAddition
+          ? () {
+              setState(() {
+                _pauseItemAddition = false;
+                widget.focusNode?.requestFocus();
+              });
+            }
+          : null,
+      child: Material(
+        elevation: 1,
+        color: Colors.white,
+        child: Container(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Text(
+                      'TO:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black.withOpacity(0.5),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Wrap(
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                        children: _chips.map((item) {
-                          return widget.chipBuilder(context, item);
-                        }).toList(),
-                      ),
-                      if (!_pauseItemAddition)
-                        TextField(
-                          controller: widget.controller,
-                          onChanged: widget.onInputChanged,
-                          focusNode: widget.focusNode,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            contentPadding: const EdgeInsets.only(top: 4.0),
-                            hintText: widget.hint,
-                            hintStyle: TextStyle(
-                              color: Colors.black.withOpacity(0.5),
-                              fontSize: 14,
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 4.0,
+                          children: _chips.map((item) {
+                            return widget.chipBuilder(context, item);
+                          }).toList(),
+                        ),
+                        if (!_pauseItemAddition)
+                          TextField(
+                            controller: widget.controller,
+                            onChanged: widget.onInputChanged,
+                            focusNode: widget.focusNode,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              contentPadding: const EdgeInsets.only(top: 4.0),
+                              hintText: widget.hint,
+                              hintStyle: TextStyle(
+                                color: Colors.black.withOpacity(0.5),
+                                fontSize: 14,
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 12),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: IconButton(
-                    icon: Icon(
-                      _chips.isEmpty ? StreamIcons.user : StreamIcons.user_add,
-                      color: Colors.black.withOpacity(0.5),
-                      size: 24,
-                    ),
-                    onPressed: !_pauseItemAddition ? null : resumeItemAddition,
-                    alignment: Alignment.topRight,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.all(0),
-                    splashRadius: 24,
-                    constraints: BoxConstraints.tightFor(
-                      height: 24,
-                      width: 24,
+                      ],
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(width: 12),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: IconButton(
+                      icon: Icon(
+                        _chips.isEmpty
+                            ? StreamIcons.user
+                            : StreamIcons.user_add,
+                        color: Colors.black.withOpacity(0.5),
+                        size: 24,
+                      ),
+                      onPressed:
+                          !_pauseItemAddition ? null : resumeItemAddition,
+                      alignment: Alignment.topRight,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.all(0),
+                      splashRadius: 24,
+                      constraints: BoxConstraints.tightFor(
+                        height: 24,
+                        width: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

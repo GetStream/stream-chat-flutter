@@ -111,6 +111,7 @@ class ChannelListPage extends StatelessWidget {
                 ),
                 ListTile(
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => NewChatScreen()),
@@ -126,6 +127,7 @@ class ChannelListPage extends StatelessWidget {
                 ),
                 ListTile(
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
@@ -177,7 +179,10 @@ class ChannelListPage extends StatelessWidget {
           filter: {
             'members': {
               '\$in': [user.id],
-            }
+            },
+            'draft': {
+              r'$ne': true,
+            },
           },
           options: {
             'presence': true,
@@ -283,11 +288,16 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   final _selectedUsers = <User>{};
 
+  final _searchFocusNode = FocusNode();
+  final _messageInputFocusNode = FocusNode();
+
   bool _isSearchActive = false;
 
   Channel channel;
 
   Timer _debounce;
+
+  bool _showUserList = true;
 
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
@@ -305,10 +315,50 @@ class _NewChatScreenState extends State<NewChatScreen> {
     super.initState();
     channel = StreamChat.of(context).client.channel('messaging');
     _controller = TextEditingController()..addListener(_userNameListener);
+
+    _searchFocusNode.addListener(() async {
+      if (_searchFocusNode.hasFocus && !_showUserList) {
+        if (channel.extraData['draft'] == true) {
+          await channel.stopWatching();
+          channel.dispose();
+          channel.client.state.channels.remove(channel.cid);
+        }
+        setState(() {
+          _showUserList = true;
+        });
+      }
+    });
+
+    _messageInputFocusNode.addListener(() async {
+      if (_messageInputFocusNode.hasFocus && _selectedUsers.isNotEmpty) {
+        final chatState = StreamChat.of(context);
+
+        channel = chatState.client.channel(
+          'messaging',
+          extraData: {
+            'members': [
+              ..._selectedUsers.map((e) => e.id),
+              chatState.user.id,
+            ],
+            'draft': true,
+          },
+        );
+
+        if (!chatState.client.state.channels.containsKey(channel.cid)) {
+          await channel.watch();
+        }
+
+        setState(() {
+          _showUserList = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _searchFocusNode.dispose();
+    _messageInputFocusNode.dispose();
     _controller?.clear();
     _controller?.removeListener(_userNameListener);
     _controller?.dispose();
@@ -335,81 +385,81 @@ class _NewChatScreenState extends State<NewChatScreen> {
       body: StreamChannel(
         showLoading: false,
         channel: channel,
-        child: UsersBloc(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ChipsInputTextField<User>(
-                key: _chipInputTextFieldStateKey,
-                controller: _controller,
-                focusNode: FocusNode(),
-                chipBuilder: (context, user) {
-                  return Stack(
-                    alignment: AlignmentDirectional.centerStart,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.only(left: 24),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
-                          child: Text(
-                            user.name,
-                            style: TextStyle(color: Colors.black),
-                          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ChipsInputTextField<User>(
+              key: _chipInputTextFieldStateKey,
+              controller: _controller,
+              focusNode: _searchFocusNode,
+              chipBuilder: (context, user) {
+                return Stack(
+                  alignment: AlignmentDirectional.centerStart,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.only(left: 24),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+                        child: Text(
+                          user.name,
+                          style: TextStyle(color: Colors.black),
                         ),
                       ),
-                      UserAvatar(
-                        user: user,
-                        constraints: BoxConstraints.tightFor(
-                          height: 24,
-                          width: 24,
+                    ),
+                    UserAvatar(
+                      user: user,
+                      constraints: BoxConstraints.tightFor(
+                        height: 24,
+                        width: 24,
+                      ),
+                    ),
+                  ],
+                );
+              },
+              onChipAdded: (user) {
+                setState(() => _selectedUsers.add(user));
+              },
+              onChipRemoved: (user) {
+                setState(() => _selectedUsers.remove(user));
+              },
+            ),
+            if (!_isSearchActive && !_selectedUsers.isNotEmpty)
+              Container(
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        NeumorphicButton(
+                          child: Icon(
+                            StreamIcons.group,
+                            color: Color(0xFF006CFF),
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-                onChipAdded: (user) {
-                  setState(() => _selectedUsers.add(user));
-                },
-                onChipRemoved: (user) {
-                  setState(() => _selectedUsers.remove(user));
-                },
-              ),
-              if (!_isSearchActive && !_selectedUsers.isNotEmpty)
-                Container(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Row(
-                        children: [
-                          NeumorphicButton(
-                            child: Icon(
-                              StreamIcons.group,
-                              color: Color(0xFF006CFF),
-                            ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Create a Group',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Create a Group',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              ),
+            if (_showUserList)
               Container(
                 width: double.maxFinite,
                 decoration: BoxDecoration(
@@ -438,94 +488,105 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   ),
                 ),
               ),
-              Expanded(
-                child: UserListView(
-                  selectedUsers: _selectedUsers,
-                  groupAlphabetically: _isSearchActive ? false : true,
-                  onUserTap: (user, _) {
-                    _controller.clear();
-                    if (!_selectedUsers.contains(user)) {
-                      _chipInputTextFieldState
-                        ..addItem(user)
-                        ..pauseItemAddition();
-                    } else {
-                      _chipInputTextFieldState.removeItem(user);
-                    }
-                  },
-                  pagination: PaginationParams(
-                    limit: 25,
-                  ),
-                  filter: {
-                    if (_userNameQuery.isNotEmpty)
-                      'name': {
-                        r'$autocomplete': _userNameQuery,
-                      }
-                  },
-                  sort: [
-                    SortOption(
-                      'name',
-                      direction: 1,
-                    ),
-                  ],
-                  emptyBuilder: (_) {
-                    return LayoutBuilder(
-                      builder: (context, viewportConstraints) {
-                        return SingleChildScrollView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: viewportConstraints.maxHeight,
-                            ),
-                            child: Center(
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(24),
-                                    child: Icon(
-                                      StreamIcons.search,
-                                      size: 96,
-                                      color: Colors.grey,
+            Expanded(
+              child: _showUserList
+                  ? UsersBloc(
+                      child: UserListView(
+                        selectedUsers: _selectedUsers,
+                        groupAlphabetically: _isSearchActive ? false : true,
+                        onUserTap: (user, _) {
+                          _controller.clear();
+                          if (!_selectedUsers.contains(user)) {
+                            _chipInputTextFieldState
+                              ..addItem(user)
+                              ..pauseItemAddition();
+                          } else {
+                            _chipInputTextFieldState.removeItem(user);
+                          }
+                        },
+                        pagination: PaginationParams(
+                          limit: 25,
+                        ),
+                        filter: {
+                          if (_userNameQuery.isNotEmpty)
+                            'name': {
+                              r'$autocomplete': _userNameQuery,
+                            },
+                          'id': {
+                            r'$ne': StreamChat.of(context).user.id,
+                          },
+                        },
+                        sort: [
+                          SortOption(
+                            'name',
+                            direction: 1,
+                          ),
+                        ],
+                        emptyBuilder: (_) {
+                          return LayoutBuilder(
+                            builder: (context, viewportConstraints) {
+                              return SingleChildScrollView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: viewportConstraints.maxHeight,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: Icon(
+                                            StreamIcons.search,
+                                            size: 96,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        Text(
+                                            'No user matches these keywords...'),
+                                      ],
                                     ),
                                   ),
-                                  Text('No user matches these keywords...'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              MessageInput(
-                preMessageSending: (message) async {
-                  channel.extraData = {
-                    'members': [
-                      ..._selectedUsers.map((e) => e.id),
-                      channel.client.state.user.id,
-                    ],
-                  };
-                  await channel.watch();
-                  return message;
-                },
-                onMessageSent: (_) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return StreamChannel(
-                          child: ChannelPage(),
-                          channel: channel,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    )
+                  : MessageListView(),
+            ),
+            MessageInput(
+              focusNode: _messageInputFocusNode,
+              onMessageSent: (m) {
+                if (!m.isEphemeral) {
+                  _updateChannelAndNavigate(context);
+                } else {
+                  channel.on('message.new').first.then((_) {
+                    _updateChannelAndNavigate(context);
+                  });
+                }
+              },
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  void _updateChannelAndNavigate(BuildContext context) {
+    channel.update({
+      'draft': false,
+    });
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return StreamChannel(
+            child: ChannelPage(),
+            channel: channel,
+          );
+        },
       ),
     );
   }
@@ -761,7 +822,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   if (_userNameQuery.isNotEmpty)
                     'name': {
                       r'$autocomplete': _userNameQuery,
-                    }
+                    },
+                  'id': {
+                    r'$ne': StreamChat.of(context).user.id,
+                  }
                 },
                 sort: [
                   SortOption(
@@ -832,9 +896,11 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   void _groupNameListener() {
     final name = _groupNameController.text;
-    setState(() {
-      _isGroupNameEmpty = name.isEmpty;
-    });
+    if (mounted) {
+      setState(() {
+        _isGroupNameEmpty = name.isEmpty;
+      });
+    }
   }
 
   @override
