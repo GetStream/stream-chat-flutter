@@ -10,6 +10,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'chips_input_text_field.dart';
 import 'notifications_service.dart';
 import 'neumorphic_button.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -284,10 +285,16 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   Channel channel;
 
+  Timer _debounce;
+
   void _userNameListener() {
-    setState(() {
-      _userNameQuery = _controller.text;
-      _isSearchActive = _userNameQuery.isNotEmpty;
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted)
+        setState(() {
+          _userNameQuery = _controller.text;
+          _isSearchActive = _userNameQuery.isNotEmpty;
+        });
     });
   }
 
@@ -533,10 +540,16 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   bool _isSearchActive = false;
 
+  Timer _debounce;
+
   void _userNameListener() {
-    setState(() {
-      _userNameQuery = _controller.text;
-      _isSearchActive = _userNameQuery.isNotEmpty;
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted)
+        setState(() {
+          _userNameQuery = _controller.text;
+          _isSearchActive = _userNameQuery.isNotEmpty;
+        });
     });
   }
 
