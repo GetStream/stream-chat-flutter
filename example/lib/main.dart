@@ -736,6 +736,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     setState(() {
                       _selectedUsers.add(user);
                     });
+                  } else {
+                    setState(() {
+                      _selectedUsers.remove(user);
+                    });
                   }
                 },
                 pagination: PaginationParams(
@@ -939,7 +943,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           ),
           Expanded(
             child: ListView.separated(
-              itemCount: _selectedUsers.length,
+              itemCount: _selectedUsers.length + 1,
               separatorBuilder: (_, __) => Container(
                 height: 1,
                 color: Theme.of(context).brightness == Brightness.dark
@@ -947,12 +951,48 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     : Colors.black.withOpacity(0.1),
               ),
               itemBuilder: (_, index) {
+                if (index == _selectedUsers.length) {
+                  return Container(
+                    height: 1,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.black.withOpacity(0.1),
+                  );
+                }
                 final user = _selectedUsers[index];
-                return UserItem(
+                return ListTile(
                   key: ObjectKey(user),
-                  user: user,
-                  selected: true,
-                  showLastOnline: false,
+                  leading: UserAvatar(
+                    user: user,
+                    constraints: BoxConstraints.tightFor(
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                  title: Text(
+                    user.name,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.clear_rounded,
+                      color: Colors.black,
+                    ),
+                    padding: const EdgeInsets.all(0),
+                    splashRadius: 24,
+                    onPressed: () {
+                      setState(() {
+                        _selectedUsers.remove(user);
+                      });
+                      if (_selectedUsers.isEmpty) {
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
                 );
               },
             ),
