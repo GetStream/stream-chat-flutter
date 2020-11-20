@@ -44,6 +44,7 @@ class _MediaListViewState extends State<MediaListView> {
                     placeholder: MemoryImage(kTransparentImage),
                     image: MediaThumbnailProvider(
                       media: media,
+                      highQuality: true,
                     ),
                     fit: BoxFit.cover,
                   ),
