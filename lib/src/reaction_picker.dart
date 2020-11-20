@@ -119,17 +119,24 @@ class _ReactionPickerState extends State<ReactionPicker> {
     }
   }
 
+  void pop() async {
+    for (var a in animations) {
+      a.stop();
+    }
+    Navigator.of(context).pop();
+  }
+
   /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
     StreamChannel.of(context)
         .channel
         .sendReaction(widget.message, reactionType);
-    Navigator.of(context).pop();
+    pop();
   }
 
   /// Remove a reaction from the message
   void removeReaction(BuildContext context, Reaction reaction) {
     StreamChannel.of(context).channel.deleteReaction(widget.message, reaction);
-    Navigator.of(context).pop();
+    pop();
   }
 }
