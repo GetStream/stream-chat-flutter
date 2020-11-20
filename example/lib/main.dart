@@ -939,7 +939,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   key: ObjectKey(user),
                   user: user,
                   selected: true,
-                  showLastSeen: false,
+                  showLastOnline: false,
                 );
               },
             ),

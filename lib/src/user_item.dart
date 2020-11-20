@@ -24,7 +24,7 @@ class UserItem extends StatelessWidget {
     this.onLongPress,
     this.onImageTap,
     this.selected = false,
-    this.showLastSeen = true,
+    this.showLastOnline = true,
   }) : super(key: key);
 
   /// Function called when tapping this widget
@@ -43,7 +43,7 @@ class UserItem extends StatelessWidget {
   final bool selected;
 
   /// If true the [UserItem] will show the last seen
-  final bool showLastSeen;
+  final bool showLastOnline;
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +81,11 @@ class UserItem extends StatelessWidget {
             )
           : null,
       title: Text(user.name,style: TextStyle(fontWeight: FontWeight.bold),),
-      subtitle: showLastSeen ? _buildLastActive(context) : null,
+      subtitle: showLastOnline ? _buildLastActive(context) : null,
     );
   }
 
   Widget _buildLastActive(context) {
-    return Text('Last seen ${Jiffy(user.lastActive).fromNow()}');
+    return Text('Last online ${Jiffy(user.lastActive).fromNow()}');
   }
 }
