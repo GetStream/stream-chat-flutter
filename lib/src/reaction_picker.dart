@@ -127,7 +127,7 @@ class _ReactionPickerState extends State<ReactionPicker>
   void pop() async {
     for (var a in animations) {
       a.stop();
-      a.dispose();
+      //a.dispose();
     }
     Navigator.of(context).pop();
   }
