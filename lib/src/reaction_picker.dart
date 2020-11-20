@@ -25,7 +25,8 @@ class ReactionPicker extends StatefulWidget {
   _ReactionPickerState createState() => _ReactionPickerState();
 }
 
-class _ReactionPickerState extends State<ReactionPicker> {
+class _ReactionPickerState extends State<ReactionPicker>
+    with TickerProviderStateMixin {
   List<EzAnimation> animations = [];
 
   @override
@@ -35,10 +36,14 @@ class _ReactionPickerState extends State<ReactionPicker> {
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {
         animations.add(
-          EzAnimation.sequence([
-            SequenceItem(0.0, 1.4),
-            SequenceItem(1.4, 1.0),
-          ], Duration(milliseconds: 500)),
+          EzAnimation.sequence(
+            [
+              SequenceItem(0.0, 1.4),
+              SequenceItem(1.4, 1.0),
+            ],
+            Duration(milliseconds: 500),
+            vsync: this,
+          ),
         );
       });
 
