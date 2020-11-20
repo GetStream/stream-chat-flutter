@@ -373,7 +373,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   setState(() => _selectedUsers.remove(user));
                 },
               ),
-              if (!_isSearchActive)
+              if (!_isSearchActive && !_selectedUsers.isNotEmpty)
                 Container(
                   child: InkWell(
                     onTap: () {
