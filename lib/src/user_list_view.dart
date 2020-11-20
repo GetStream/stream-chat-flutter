@@ -179,14 +179,19 @@ class _UserListViewState extends State<UserListView>
     );
   }
 
+  bool get isListAlreadySorted =>
+      widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
+
   Stream<List<ListItem>> _buildUserStream(
     UsersBlocState usersBlocState,
   ) {
     return usersBlocState.usersStream.map(
       (users) {
         if (widget.groupAlphabetically) {
-          var temp = users
-            ..sort((curr, next) => curr.name.compareTo(next.name));
+          var temp = users;
+          if (!isListAlreadySorted) {
+            temp = users..sort((curr, next) => curr.name.compareTo(next.name));
+          }
           final groupedUsers = <String, List<User>>{};
           for (var e in temp) {
             final alphabet = e.name[0];
