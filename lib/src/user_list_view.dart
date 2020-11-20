@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -66,13 +65,7 @@ class UserListView extends StatefulWidget {
     this.swipeToAction = false,
     this.pullToRefresh = true,
     this.groupAlphabetically = false,
-    this.filterByUserName = '',
-    this.filterByUserNameStream,
-  })  : assert(
-          filterByUserName == null || filterByUserNameStream == null,
-          'Cannot provide both filterByUserName and filterByUserNameStream.',
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
@@ -137,12 +130,6 @@ class UserListView extends StatefulWidget {
   /// defaults to false
   final bool groupAlphabetically;
 
-  ///
-  final String filterByUserName;
-
-  ///
-  final Stream<String> filterByUserNameStream;
-
   @override
   _UserListViewState createState() => _UserListViewState();
 }
@@ -154,8 +141,8 @@ class _UserListViewState extends State<UserListView>
   @override
   void initState() {
     super.initState();
-    final channelsBloc = UsersBloc.of(context);
-    channelsBloc.queryUsers(
+    final usersBloc = UsersBloc.of(context);
+    usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
       pagination: widget.pagination,
@@ -163,9 +150,9 @@ class _UserListViewState extends State<UserListView>
     );
 
     _scrollController.addListener(() {
-      channelsBloc.queryUsersLoading.first.then((loading) {
+      usersBloc.queryUsersLoading.first.then((loading) {
         if (!loading) {
-          _listenUserPagination(channelsBloc);
+          _listenUserPagination(usersBloc);
         }
       });
     });
@@ -192,42 +179,28 @@ class _UserListViewState extends State<UserListView>
     );
   }
 
-  List<ListItem> _getFilteredItems(List<User> users, String query) {
-    if (widget.groupAlphabetically) {
-      var temp = users..sort((curr, next) => curr.name.compareTo(next.name));
-      temp = temp
-          .where((it) => it.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-      final groupedUsers = <String, List<User>>{};
-      for (var e in temp) {
-        final alphabet = e.name[0];
-        groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
-      }
-      final items = <ListItem>[];
-      for (var key in groupedUsers.keys) {
-        items.add(ListHeaderItem(key));
-        items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
-      }
-      return items;
-    }
-    return users
-        .where((it) => it.name.toLowerCase().contains(query.toLowerCase()))
-        .map((e) => ListUserItem(e))
-        .toList();
-  }
-
   Stream<List<ListItem>> _buildUserStream(
     UsersBlocState usersBlocState,
   ) {
-    if (widget.filterByUserNameStream == null) {
-      return usersBlocState.usersStream.map(
-        (users) => _getFilteredItems(users, widget.filterByUserName),
-      );
-    }
-    return Rx.combineLatest2(
-      usersBlocState.usersStream,
-      widget.filterByUserNameStream,
-      _getFilteredItems,
+    return usersBlocState.usersStream.map(
+      (users) {
+        if (widget.groupAlphabetically) {
+          var temp = users
+            ..sort((curr, next) => curr.name.compareTo(next.name));
+          final groupedUsers = <String, List<User>>{};
+          for (var e in temp) {
+            final alphabet = e.name[0];
+            groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
+          }
+          final items = <ListItem>[];
+          for (var key in groupedUsers.keys) {
+            items.add(ListHeaderItem(key));
+            items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
+          }
+          return items;
+        }
+        return users.map((e) => ListUserItem(e)).toList();
+      },
     );
   }
 
@@ -378,14 +351,13 @@ class _UserListViewState extends State<UserListView>
             key: ValueKey<String>('HEADER-$header'),
             color: Colors.black.withOpacity(0.05),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal:8.0,vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
               child: Text(
                 header,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color:Colors.black.withOpacity(0.3)
-                ),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black.withOpacity(0.3)),
               ),
             ),
           );
@@ -469,8 +441,8 @@ class _UserListViewState extends State<UserListView>
         widget.pagination?.toJson()?.toString() !=
             oldWidget.pagination?.toJson()?.toString() ||
         widget.options?.toString() != oldWidget.options?.toString()) {
-      final channelsBloc = UsersBloc.of(context);
-      channelsBloc.queryUsers(
+      final usersBloc = UsersBloc.of(context);
+      usersBloc.queryUsers(
         filter: widget.filter,
         sort: widget.sort,
         pagination: widget.pagination,

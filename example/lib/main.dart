@@ -309,6 +309,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -367,7 +368,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
               if (!_isSearchActive)
                 Container(
-                  color: Colors.white54,
                   child: InkWell(
                     onTap: () {
                       Navigator.push(
@@ -375,23 +375,26 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
                       );
                     },
-                    child: Row(
-                      children: [
-                        NeumorphicButton(
-                          child: Icon(
-                            StreamIcons.group,
-                            color: Colors.blue.shade700,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          NeumorphicButton(
+                            child: Icon(
+                              StreamIcons.group,
+                              color: Color(0xFF006CFF),
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Create a Group',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 18,
+                          SizedBox(width: 8),
+                          Text(
+                            'Create a Group',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -425,20 +428,33 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
               Expanded(
                 child: UserListView(
-                  filterByUserName: _userNameQuery,
                   selectedUsers: _selectedUsers,
                   groupAlphabetically: _isSearchActive ? false : true,
                   onUserTap: (user, _) {
+                    _controller.clear();
                     if (!_selectedUsers.contains(user)) {
-                      _controller.clear();
                       _chipInputTextFieldState
                         ..addItem(user)
                         ..pauseItemAddition();
+                    } else {
+                      _chipInputTextFieldState.removeItem(user);
                     }
                   },
                   pagination: PaginationParams(
                     limit: 25,
                   ),
+                  filter: {
+                    if (_userNameQuery.isNotEmpty)
+                      'name': {
+                        r'$autocomplete': _userNameQuery,
+                      }
+                  },
+                  sort: [
+                    SortOption(
+                      'name',
+                      direction: 1,
+                    ),
+                  ],
                   emptyBuilder: (_) {
                     return LayoutBuilder(
                       builder: (context, viewportConstraints) {
@@ -541,6 +557,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: AppBar(
         elevation: 1,
         backgroundColor: Colors.white,
@@ -555,7 +572,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             IconButton(
               icon: Icon(
                 StreamIcons.arrow_right,
-                color: Colors.blue.shade700,
+                color: Color(0xFF006CFF),
               ),
               onPressed: () {
                 Navigator.push(
@@ -576,6 +593,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             Container(
               height: 36,
               decoration: BoxDecoration(
+                color: Colors.white,
                 border: Border.all(
                   color: Colors.grey.shade300,
                 ),
@@ -593,8 +611,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     color: Colors.black,
                   ),
                   hintText: 'Search',
+                  hintStyle: TextStyle(
+                    color: Colors.black.withOpacity(0.5),
+                  ),
                   contentPadding: const EdgeInsets.all(0),
-                  // isDense: true,
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(24),
@@ -696,7 +716,6 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             ),
             Expanded(
               child: UserListView(
-                filterByUserName: _userNameQuery,
                 selectedUsers: _selectedUsers,
                 groupAlphabetically: _isSearchActive ? false : true,
                 onUserTap: (user, _) {
@@ -709,6 +728,18 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 pagination: PaginationParams(
                   limit: 25,
                 ),
+                filter: {
+                  if (_userNameQuery.isNotEmpty)
+                    'name': {
+                      r'$autocomplete': _userNameQuery,
+                    }
+                },
+                sort: [
+                  SortOption(
+                    'name',
+                    direction: 1,
+                  ),
+                ],
                 emptyBuilder: (_) {
                   return LayoutBuilder(
                     builder: (context, viewportConstraints) {
@@ -797,6 +828,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: AppBar(
         elevation: 1,
         backgroundColor: Colors.white,
@@ -840,12 +872,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         ),
         actions: [
           NeumorphicButton(
-            padding: const EdgeInsets.all(8),
-            margin: const EdgeInsets.symmetric(vertical: 8),
             child: IconButton(
               padding: const EdgeInsets.all(0),
               icon: Icon(StreamIcons.check),
-              color: Colors.blue.shade700,
+              color: Color(0xFF006CFF),
               onPressed: _isGroupNameEmpty
                   ? null
                   : () async {

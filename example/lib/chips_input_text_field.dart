@@ -34,10 +34,8 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
   bool _pauseItemAddition = false;
 
   void addItem(T item) {
-    if (!_pauseItemAddition) {
-      setState(() => _chips.add(item));
-      if (widget.onChipAdded != null) widget.onChipAdded(item);
-    }
+    setState(() => _chips.add(item));
+    if (widget.onChipAdded != null) widget.onChipAdded(item);
   }
 
   void removeItem(T item) {
@@ -108,6 +106,9 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                           disabledBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.only(top: 4.0),
                           hintText: widget.hint,
+                          hintStyle: TextStyle(
+                            color: Colors.black.withOpacity(0.5),
+                          ),
                         ),
                       ),
                     ]
