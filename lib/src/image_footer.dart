@@ -434,22 +434,25 @@ class _ImageFooterState extends State<ImageFooter> {
                   autofocus: true,
                   decoration: InputDecoration(
                     isDense: true,
-                    prefixIcon: Icon(
-                      StreamIcons.search,
-                      color: Colors.black,
+                    prefixIconConstraints: BoxConstraints.tight(Size(38.0, 38.0)),
+                    prefixIcon: Transform.scale(
+                      scale: 1.2,
+                      alignment: Alignment.center,
+                      child: Icon(
+                        StreamIcons.search,
+                        color: Colors.black,
+                      ),
                     ),
                     hintText: 'Search',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32.0),
                       borderSide:
                           BorderSide(color: Colors.black.withOpacity(0.08)),
-                      gapPadding: 0.0,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32.0),
                       borderSide:
                           BorderSide(color: Colors.black.withOpacity(0.08)),
-                      gapPadding: 0.0,
                     ),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -459,7 +462,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 width: 8.0,
               ),
               IconButton(
-                icon: Icon(StreamIcons.close_circle),
+                icon: Icon(StreamIcons.close_circle, color: Colors.black.withOpacity(0.5),),
                 onPressed: () {
                   modalSetState(() {
                     _userSearchMode = false;
@@ -677,5 +680,31 @@ class _ImageFooterState extends State<ImageFooter> {
 
     _selectedUsers.clear();
     Navigator.pop(context);
+  }
+}
+
+/// Used for clipping textfield prefix icon
+class IconClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var leftX = size.width / 5;
+    var rightX = 4 * size.width / 5;
+    var topY = size.height / 5;
+    var bottomY = 4 * size.height / 5;
+
+    final path = Path();
+    path.moveTo(leftX, topY);
+    path.lineTo(leftX, bottomY);
+    path.lineTo(rightX, bottomY);
+    path.lineTo(rightX, topY);
+    path.lineTo(leftX, topY);
+    path.lineTo(0.0, 0.0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper oldClipper) {
+    return false;
   }
 }

@@ -150,7 +150,6 @@ class ImageActionsModal extends StatelessWidget {
     var titleStyle = TextStyle(
       fontSize: 14.5,
       color: Colors.black,
-      fontWeight: FontWeight.w500,
     );
 
     return ListTile(
@@ -165,6 +164,7 @@ class ImageActionsModal extends StatelessWidget {
         size: 24.0,
       ),
       onTap: onTap,
+      tileColor: Colors.white,
     );
   }
 }
