@@ -376,12 +376,16 @@ class _UserListViewState extends State<UserListView>
         headerItem: (header) {
           return Container(
             key: ValueKey<String>('HEADER-$header'),
-            color: Colors.grey.shade100,
+            color: Colors.black.withOpacity(0.05),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal:8.0,vertical: 6),
               child: Text(
                 header,
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color:Colors.black.withOpacity(0.3)
+                ),
               ),
             ),
           );

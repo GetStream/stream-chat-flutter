@@ -64,24 +64,20 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 4,
+      elevation: 1,
       color: Colors.white,
       child: Container(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 16.0,
-            horizontal: 16.0,
-          ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text(
                   'TO:',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    color: Colors.black.withOpacity(0.5),
                   ),
                 ),
               ),
@@ -92,46 +88,48 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Wrap(
-                      spacing: 4.0,
+                      spacing: 8.0,
                       runSpacing: 4.0,
                       children: _chips.map((item) {
                         return widget.chipBuilder(context, item);
                       }).toList(),
                     ),
                     if (!_pauseItemAddition) ...[
-                      if (_chips.isNotEmpty) SizedBox(height: 4),
                       TextField(
                         controller: widget.controller,
                         onChanged: widget.onInputChanged,
                         focusNode: widget.focusNode,
-                        style: TextStyle(fontSize: 18),
                         decoration: InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 8,
-                            ),
-                            hintText: widget.hint,
-                            hintStyle: TextStyle(fontSize: 18)),
+                          isDense: true,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.only(top: 4.0),
+                          hintText: widget.hint,
+                        ),
                       ),
                     ]
                   ],
                 ),
               ),
-              SizedBox(width: 12),
               IconButton(
                 icon: Icon(
                   _chips.isEmpty ? StreamIcons.user : StreamIcons.user_add,
+                  color: Colors.black.withOpacity(0.5),
                 ),
                 onPressed: () {
                   resumeItemAddition();
                 },
+                alignment: Alignment.topRight,
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.all(0),
+                splashRadius: 24,
+                constraints: BoxConstraints.tightFor(
+                  height: 24,
+                  width: 24,
+                ),
               ),
             ],
           ),

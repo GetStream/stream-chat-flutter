@@ -59,13 +59,18 @@ class UserItem extends StatelessWidget {
         }
       },
       leading: UserAvatar(
-          user: user,
-          showOnlineStatus: true,
-          onTap: (user) {
-            if (onImageTap != null) {
-              onImageTap(user);
-            }
-          }),
+        user: user,
+        showOnlineStatus: true,
+        onTap: (user) {
+          if (onImageTap != null) {
+            onImageTap(user);
+          }
+        },
+        constraints: BoxConstraints.tightFor(
+          height: 40,
+          width: 40,
+        ),
+      ),
       trailing: selected
           ? CircleAvatar(
               child: Icon(
@@ -75,7 +80,7 @@ class UserItem extends StatelessWidget {
               radius: 10,
             )
           : null,
-      title: Text(user.name),
+      title: Text(user.name,style: TextStyle(fontWeight: FontWeight.bold),),
       subtitle: showLastSeen ? _buildLastActive(context) : null,
     );
   }

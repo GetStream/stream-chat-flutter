@@ -312,10 +312,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
+        leading: const StreamBackButton(),
         title: Text(
           'New Chat',
           style: TextStyle(color: Colors.black),
         ),
+        centerTitle: true,
       ),
       body: StreamChannel(
         showLoading: false,
@@ -329,17 +331,31 @@ class _NewChatScreenState extends State<NewChatScreen> {
                 controller: _controller,
                 focusNode: FocusNode(),
                 chipBuilder: (context, user) {
-                  return InputChip(
-                    key: ObjectKey(user),
-                    label: Text(
-                      user.name,
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    avatar: UserAvatar(
-                      user: user,
-                    ),
-                    onDeleted: () => _chipInputTextFieldState.removeItem(user),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  return Stack(
+                    alignment: AlignmentDirectional.centerStart,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.only(left: 24),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+                          child: Text(
+                            user.name,
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+                      ),
+                      UserAvatar(
+                        user: user,
+                        constraints: BoxConstraints.tightFor(
+                          height: 24,
+                          width: 24,
+                        ),
+                      ),
+                    ],
                   );
                 },
                 onChipAdded: (user) {
@@ -381,7 +397,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
                 ),
               Container(
                 width: double.maxFinite,
-                color: Colors.grey.shade50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withOpacity(0.02),
+                      Colors.white.withOpacity(0.05),
+                    ],
+                    stops: [0, 1],
+                  ),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 8,
@@ -392,7 +418,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ? "Matches for \"$_userNameQuery\""
                         : 'On the platform',
                     style: TextStyle(
-                      fontWeight: FontWeight.w500,
+                      color: Colors.black.withOpacity(0.5),
                     ),
                   ),
                 ),
@@ -516,12 +542,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 2,
+        elevation: 1,
         backgroundColor: Colors.white,
+        leading: const StreamBackButton(),
         title: Text(
           'Add Group Members',
           style: TextStyle(color: Colors.black),
         ),
+        centerTitle: true,
         actions: [
           if (_selectedUsers.isNotEmpty)
             IconButton(
@@ -546,6 +574,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
         child: Column(
           children: [
             Container(
+              height: 36,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.grey.shade300,
@@ -559,9 +588,13 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               child: TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(StreamIcons.search),
+                  prefixIcon: Icon(
+                    StreamIcons.search,
+                    color: Colors.black,
+                  ),
                   hintText: 'Search',
-                  contentPadding: const EdgeInsets.all(8),
+                  contentPadding: const EdgeInsets.all(0),
+                  // isDense: true,
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(24),
@@ -571,7 +604,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
             ),
             if (_selectedUsers.isNotEmpty)
               Container(
-                height: 120,
+                height: 104,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _selectedUsers.length,
@@ -586,10 +619,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                             UserAvatar(
                               user: user,
                               showOnlineStatus: true,
-                              borderRadius: BorderRadius.circular(40),
+                              borderRadius: BorderRadius.circular(32),
                               constraints: BoxConstraints.tightFor(
-                                height: 80,
-                                width: 80,
+                                height: 64,
+                                width: 64,
                               ),
                             ),
                             Positioned(
@@ -609,10 +642,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                         Border.all(color: Colors.grey.shade100),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(4.0),
+                                    padding: const EdgeInsets.all(2.0),
                                     child: Icon(
                                       Icons.clear_rounded,
-                                      size: 16,
+                                      size: 14,
                                     ),
                                   ),
                                 ),
@@ -624,8 +657,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                         Text(
                           user.name.split(' ')[0],
                           style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -635,7 +668,17 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               ),
             Container(
               width: double.maxFinite,
-              color: Colors.grey.shade50,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.black.withOpacity(0.02),
+                    Colors.white.withOpacity(0.05),
+                  ],
+                  stops: [0, 1],
+                ),
+              ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 8,
@@ -646,7 +689,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                       ? 'Matches for \"$_userNameQuery\"'
                       : 'On the platform',
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    color: Colors.black.withOpacity(0.5),
                   ),
                 ),
               ),
@@ -755,42 +798,40 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 2,
+        elevation: 1,
         backgroundColor: Colors.white,
+        leading: const StreamBackButton(),
         title: Text(
           'Name of Group Chat',
           style: TextStyle(color: Colors.black),
         ),
+        centerTitle: true,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
             child: Row(
               children: [
                 Text(
                   'NAME',
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
+                    color: Colors.black.withOpacity(0.5),
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: TextField(
                     controller: _groupNameController,
-                    style: TextStyle(fontSize: 18),
                     decoration: InputDecoration(
-                        isDense: true,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                        ),
-                        hintText: 'Choose a group chat name',
-                        hintStyle: TextStyle(fontSize: 18)),
+                      isDense: true,
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.all(0),
+                      hintText: 'Choose a group chat name',
+                    ),
                   ),
                 ),
               ],
