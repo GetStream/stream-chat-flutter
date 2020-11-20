@@ -86,7 +86,7 @@ class _ImageFooterState extends State<ImageFooter> {
           children: [
             IconButton(
               icon: Icon(
-                StreamIcons.share,
+                StreamIcons.share_1,
                 size: 24.0,
                 color: Colors.black,
               ),

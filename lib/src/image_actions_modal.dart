@@ -122,7 +122,6 @@ class ImageActionsModal extends StatelessWidget {
                               urls[currentIndex].split('?')[0]);
                           Navigator.pop(context);
                         }),
-                        _buildButton(context, 'Copy', StreamIcons.copy, () {}),
                         if (StreamChat.of(context).user.id == message.user.id)
                           _buildButton(context, 'Delete', StreamIcons.delete,
                               () {

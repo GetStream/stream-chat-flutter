@@ -107,7 +107,7 @@ class _FullScreenImageState extends State<FullScreenImage>
                 ImageHeader(
                   userName: widget.userName,
                   sentAt:
-                      'Sent at${Jiffy(widget.sentAt.toLocal()).format('  HH:mm')}',
+                      'Sent ${getDay(widget.message.createdAt)} at ${Jiffy(widget.sentAt.toLocal()).format('HH:mm')}',
                   onBackPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -127,5 +127,17 @@ class _FullScreenImageState extends State<FullScreenImage>
         ],
       ),
     );
+  }
+
+  String getDay(DateTime dateTime) {
+    var now = DateTime.now();
+
+    if(DateTime(dateTime.year, dateTime.month, dateTime.day) == DateTime(now.year, now.month, now.day)) {
+      return 'today';
+    } else if(DateTime(now.year, now.month, now.day).difference(dateTime).inHours < 24) {
+      return 'yesterday';
+    } else {
+      return 'on ${Jiffy(dateTime).format("MMM do")}';
+    }
   }
 }
