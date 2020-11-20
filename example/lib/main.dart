@@ -434,6 +434,6 @@ class _CreateChannelPageState extends State<CreateChannelPage> {
           ...value.users,
         ];
       });
-    }).whenComplete(() => loading = false );
+    }).whenComplete(() => loading = false);
   }
 }
