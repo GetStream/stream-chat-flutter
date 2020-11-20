@@ -289,7 +289,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted)
         setState(() {
           _userNameQuery = _controller.text;
@@ -544,7 +544,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted)
         setState(() {
           _userNameQuery = _controller.text;
