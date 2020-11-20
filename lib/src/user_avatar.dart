@@ -13,9 +13,11 @@ class UserAvatar extends StatelessWidget {
     this.onTap,
     this.showOnlineStatus = true,
     this.borderRadius,
+    this.onlineIndicatorAlignment = Alignment.topRight,
   }) : super(key: key);
 
   final User user;
+  final Alignment onlineIndicatorAlignment;
   final BoxConstraints constraints;
   final BorderRadius borderRadius;
   final BoxConstraints onlineIndicatorConstraints;
@@ -60,11 +62,11 @@ class UserAvatar extends StatelessWidget {
             ),
           ),
           if (showOnlineStatus && user.online == true)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Material(
-                child: Center(
+            Positioned.fill(
+              child: Align(
+                alignment: onlineIndicatorAlignment,
+                child: Material(
+                  type: MaterialType.circle,
                   child: Container(
                     padding: const EdgeInsets.all(2.0),
                     constraints: onlineIndicatorConstraints ??
@@ -77,9 +79,8 @@ class UserAvatar extends StatelessWidget {
                       color: Color(0xff20E070),
                     ),
                   ),
+                  color: Colors.white,
                 ),
-                shape: CircleBorder(),
-                color: Colors.white,
               ),
             ),
         ],
