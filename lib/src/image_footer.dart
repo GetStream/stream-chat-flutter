@@ -1,7 +1,12 @@
+import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
@@ -61,6 +66,7 @@ class _ImageFooterState extends State<ImageFooter> {
   TextEditingController _messageController = TextEditingController();
 
   List<User> _selectedUsers = [];
+  bool _loading = false;
 
   @override
   void initState() {
@@ -311,7 +317,8 @@ class _ImageFooterState extends State<ImageFooter> {
                                                         _selectedUsers
                                                             .remove(user);
                                                       } else {
-                                                        _selectedUsers.add(user);
+                                                        _selectedUsers
+                                                            .add(user);
                                                       }
                                                       modalSetState(() {});
                                                     },
@@ -368,14 +375,23 @@ class _ImageFooterState extends State<ImageFooter> {
                             margin: EdgeInsets.symmetric(
                               horizontal: 8.0,
                             ),
-                            child: SizedBox.expand(
-                              child: Center(
-                                child: Text(
-                                  'Save to Photos',
-                                  style: TextStyle(
-                                    color: StreamChatTheme.of(modalContext)
-                                        .accentColor,
-                                    fontWeight: FontWeight.bold,
+                            child: Material(
+                              child: InkWell(
+                                onTap: () async {
+                                  await GallerySaver.saveImage(
+                                      widget.urls[widget.currentPage].split('?')[0]);
+                                  Navigator.pop(context);
+                                },
+                                child: SizedBox.expand(
+                                  child: Center(
+                                    child: Text(
+                                      'Save to Photos',
+                                      style: TextStyle(
+                                        color: StreamChatTheme.of(modalContext)
+                                            .accentColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -493,7 +509,14 @@ class _ImageFooterState extends State<ImageFooter> {
                 color: Colors.black,
               ),
               iconSize: 24.0,
-              onPressed: () {},
+              onPressed: () async {
+                var url = widget.urls[widget.currentPage];
+                var type = url?.split('?')?.first?.split('.')?.last ?? 'jpg';
+                var request = await HttpClient().getUrl(Uri.parse(url));
+                var response = await request.close();
+                var bytes = await consolidateHttpClientResponseBytes(response);
+                await Share.file('File', 'image.$type', bytes, 'image/$type');
+              },
             ),
           ),
         ],
@@ -507,7 +530,12 @@ class _ImageFooterState extends State<ImageFooter> {
       child: Container(
         color: Colors.white,
         height: 56.0,
-        child: Row(
+        child: _loading ? Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircularProgressIndicator(),
+          ),
+        ) : Row(
           children: [
             Expanded(
               child: Padding(
@@ -553,8 +581,14 @@ class _ImageFooterState extends State<ImageFooter> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: InkWell(
-                      onTap: () {
-                        sendMessage();
+                      onTap: () async {
+                        modalSetState(() {
+                          _loading = true;
+                        });
+                        await sendMessage();
+                        modalSetState(() {
+                          _loading = false;
+                        });
                       },
                       child: Transform.rotate(
                         angle: -pi / 2,
@@ -607,7 +641,7 @@ class _ImageFooterState extends State<ImageFooter> {
   }
 
   /// Sends the current message
-  void sendMessage() async {
+  Future sendMessage() async {
     var text = _messageController.text.trim();
 
     final attachments = widget.message.attachments;
@@ -615,8 +649,8 @@ class _ImageFooterState extends State<ImageFooter> {
     _messageController.clear();
 
     final client = StreamChat.of(context).client;
-    
-    for(var user in _selectedUsers) {
+
+    for (var user in _selectedUsers) {
       var c = client.channel('messaging', extraData: {
         'members': [
           user.id,

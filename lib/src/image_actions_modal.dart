@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_icons.dart';
@@ -9,8 +10,11 @@ class ImageActionsModal extends StatelessWidget {
   final Message message;
   final String userName;
   final String sentAt;
+  final List<String> urls;
+  final currentIndex;
 
-  ImageActionsModal({this.message, this.userName, this.sentAt});
+  ImageActionsModal(
+      {this.message, this.userName, this.sentAt, this.urls, this.currentIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +116,12 @@ class ImageActionsModal extends StatelessWidget {
                           Navigator.pop(context);
                           Navigator.pop(context);
                         }),
-                        _buildButton(
-                            context, 'Save Image', StreamIcons.save_1, () {}),
+                        _buildButton(context, 'Save Image', StreamIcons.save_1,
+                            () async {
+                          await GallerySaver.saveImage(
+                              urls[currentIndex].split('?')[0]);
+                          Navigator.pop(context);
+                        }),
                         _buildButton(context, 'Copy', StreamIcons.copy, () {}),
                         if (StreamChat.of(context).user.id == message.user.id)
                           _buildButton(context, 'Delete', StreamIcons.delete,

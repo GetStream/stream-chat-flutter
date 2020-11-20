@@ -30,10 +30,15 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final String sentAt;
 
+  final List<String> urls;
+  final currentIndex;
+
   /// Creates a channel header
   ImageHeader({
     Key key,
     this.message,
+    this.urls,
+    this.currentIndex,
     this.showBackButton = true,
     this.onBackPressed,
     this.onTitleTap,
@@ -117,6 +122,8 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
               userName: userName,
               sentAt: sentAt,
               message: message,
+              urls: urls,
+              currentIndex: currentIndex,
             ),
           );
         });

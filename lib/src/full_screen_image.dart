@@ -112,6 +112,8 @@ class _FullScreenImageState extends State<FullScreenImage>
                     Navigator.of(context).pop();
                   },
                   message: widget.message,
+                  urls: widget.urls,
+                  currentIndex: _currentPage,
                 ),
                 ImageFooter(
                   currentPage: _currentPage,

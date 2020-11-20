@@ -35,6 +35,8 @@ dependencies:
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
+  gallery_saver: ^2.0.1
+  esys_flutter_share: ^1.0.2
 
 flutter:
   assets:
