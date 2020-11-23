@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import 'main.dart';
 import 'neumorphic_button.dart';
@@ -21,8 +22,6 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   TextEditingController _groupNameController;
 
-  Channel _channel;
-
   bool _isGroupNameEmpty = true;
 
   int get _totalUsers => _selectedUsers.length;
@@ -39,7 +38,6 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _channel = StreamChat.of(context).client.channel('messaging');
     _selectedUsers.addAll(widget.selectedUsers);
     _groupNameController = TextEditingController()
       ..addListener(_groupNameListener);
@@ -47,8 +45,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
 
   @override
   void dispose() {
-    _groupNameController?.clear();
     _groupNameController?.removeListener(_groupNameListener);
+    _groupNameController?.clear();
     _groupNameController?.dispose();
     super.dispose();
   }
@@ -114,15 +112,16 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   ? null
                   : () async {
                       final groupName = _groupNameController.text;
-                      final client = _channel.client;
-                      _channel.extraData = {
+                      final client = StreamChat.of(context).client;
+                      final channel = client
+                          .channel('messaging', id: Uuid().v4(), extraData: {
                         'members': [
                           client.state.user.id,
                           ..._selectedUsers.map((e) => e.id),
                         ],
                         'name': groupName,
-                      };
-                      await _channel.watch();
+                      });
+                      await channel.watch();
                       Navigator.of(context)
                         ..pop()
                         ..pushReplacement(
@@ -130,7 +129,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                             builder: (context) {
                               return StreamChannel(
                                 child: ChannelPage(),
-                                channel: _channel,
+                                channel: channel,
                               );
                             },
                           ),
