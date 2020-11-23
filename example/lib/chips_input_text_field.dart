@@ -43,7 +43,6 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       _chips.remove(item);
       if (_chips.isEmpty) resumeItemAddition();
     });
-    if (widget.focusNode != null) widget.focusNode.requestFocus();
     if (widget.onChipRemoved != null) widget.onChipRemoved(item);
   }
 
@@ -51,14 +50,14 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
     if (!_pauseItemAddition) {
       setState(() => _pauseItemAddition = true);
     }
-    widget.focusNode.unfocus();
+    if (widget.focusNode != null) widget.focusNode.unfocus();
   }
 
   void resumeItemAddition() {
     if (_pauseItemAddition) {
       setState(() => _pauseItemAddition = false);
     }
-    widget.focusNode.requestFocus();
+    if (widget.focusNode != null) widget.focusNode.requestFocus();
   }
 
   @override
