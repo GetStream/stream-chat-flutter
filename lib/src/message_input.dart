@@ -540,86 +540,101 @@ class MessageInputState extends State<MessageInput> {
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Card(
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            color: StreamChatTheme.of(context).primaryColor,
-            clipBehavior: Clip.antiAlias,
-            child: Container(
-              constraints: BoxConstraints.loose(Size.fromHeight(400)),
-              decoration: BoxDecoration(
-                  color: StreamChatTheme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(8.0)),
-              child: ListView(
-                padding: const EdgeInsets.all(0),
-                shrinkWrap: true,
-                children: [
-                  if (commands.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0, top: 8.0),
-                      child: Row(
+        child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOutExpo,
+            builder: (context, val, wid) {
+              return Transform.scale(
+                alignment: Alignment.center,
+                scale: val,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    color: StreamChatTheme.of(context).primaryColor,
+                    clipBehavior: Clip.antiAlias,
+                    child: Container(
+                      constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                      decoration: BoxDecoration(
+                          color: StreamChatTheme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(8.0)),
+                      child: ListView(
+                        padding: const EdgeInsets.all(0),
+                        shrinkWrap: true,
                         children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Icon(
-                              StreamIcons.lightning,
-                              color: StreamChatTheme.of(context).accentColor,
+                          if (commands.isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 8.0, top: 8.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Icon(
+                                      StreamIcons.lightning,
+                                      color: StreamChatTheme.of(context)
+                                          .accentColor,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Instant Commands',
+                                    style: TextStyle(
+                                      color: Colors.black.withOpacity(.5),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Instant Commands',
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(.5),
-                            ),
-                          )
+                          ...commands
+                              .map(
+                                (c) => ListTile(
+                                  leading: c.name == 'giphy'
+                                      ? _buildGiphyIcon()
+                                      : null,
+                                  title: Text.rich(
+                                    TextSpan(
+                                      text: '${c.name.capitalize()}',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      children: [
+                                        TextSpan(
+                                          text: ' /${c.name} ${c.args}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  trailing: CircleAvatar(
+                                    backgroundColor:
+                                        StreamChatTheme.of(context).accentColor,
+                                    child: Icon(
+                                      StreamIcons.lightning,
+                                      color: Colors.white,
+                                      size: 12.5,
+                                    ),
+                                    maxRadius: 12,
+                                  ),
+                                  //subtitle: Text(c.description),
+                                  onTap: () {
+                                    _setCommand(c);
+                                  },
+                                ),
+                              )
+                              .toList(),
                         ],
                       ),
                     ),
-                  ...commands
-                      .map(
-                        (c) => ListTile(
-                          leading: c.name == 'giphy' ? _buildGiphyIcon() : null,
-                          title: Text.rich(
-                            TextSpan(
-                              text: '${c.name.capitalize()}',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              children: [
-                                TextSpan(
-                                  text: ' /${c.name} ${c.args}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          trailing: CircleAvatar(
-                            backgroundColor:
-                                StreamChatTheme.of(context).accentColor,
-                            child: Icon(
-                              StreamIcons.lightning,
-                              color: Colors.white,
-                              size: 12.5,
-                            ),
-                            maxRadius: 12,
-                          ),
-                          //subtitle: Text(c.description),
-                          onTap: () {
-                            _setCommand(c);
-                          },
-                        ),
-                      )
-                      .toList(),
-                ],
-              ),
-            ),
-          ),
-        ),
+                  ),
+                ),
+              );
+            }),
       );
     });
   }
@@ -929,71 +944,84 @@ class MessageInputState extends State<MessageInput> {
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
-        child: Card(
-          margin: EdgeInsets.all(8.0),
-          elevation: 2.0,
-          color: StreamChatTheme.of(context).primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Container(
-            constraints: BoxConstraints.loose(Size.fromHeight(400)),
-            decoration: BoxDecoration(
-              color: StreamChatTheme.of(context).primaryColor,
-            ),
-            child: FutureBuilder<List<Member>>(
-                future: queryMembers ?? Future.value(members),
-                initialData: members,
-                builder: (context, snapshot) {
-                  return ListView(
-                    padding: const EdgeInsets.all(0),
-                    shrinkWrap: true,
-                    children: snapshot.data
-                        .map((m) => ListTile(
-                              leading: UserAvatar(
-                                constraints: BoxConstraints.tight(
-                                  Size(
-                                    40,
-                                    40,
-                                  ),
-                                ),
-                                user: m.user,
-                              ),
-                              title: Text(
-                                '${m.user.name}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text('@${m.userId}'),
-                              trailing: Icon(
-                                StreamIcons.at_mention,
-                                color: StreamChatTheme.of(context).accentColor,
-                              ),
-                              onTap: () {
-                                _mentionedUsers.add(m.user);
+        child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOutExpo,
+            builder: (context, val, wid) {
+              return Transform.scale(
+                scale: val,
+                child: Card(
+                  margin: EdgeInsets.all(8.0),
+                  elevation: 2.0,
+                  color: StreamChatTheme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Container(
+                    constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                    decoration: BoxDecoration(
+                      color: StreamChatTheme.of(context).primaryColor,
+                    ),
+                    child: FutureBuilder<List<Member>>(
+                        future: queryMembers ?? Future.value(members),
+                        initialData: members,
+                        builder: (context, snapshot) {
+                          return ListView(
+                            padding: const EdgeInsets.all(0),
+                            shrinkWrap: true,
+                            children: snapshot.data
+                                .map((m) => ListTile(
+                                      leading: UserAvatar(
+                                        constraints: BoxConstraints.tight(
+                                          Size(
+                                            40,
+                                            40,
+                                          ),
+                                        ),
+                                        user: m.user,
+                                      ),
+                                      title: Text(
+                                        '${m.user.name}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      subtitle: Text('@${m.userId}'),
+                                      trailing: Icon(
+                                        StreamIcons.at_mention,
+                                        color: StreamChatTheme.of(context)
+                                            .accentColor,
+                                      ),
+                                      onTap: () {
+                                        _mentionedUsers.add(m.user);
 
-                                splits[splits.length - 1] = m.user.name;
-                                final rejoin = splits.join('@');
+                                        splits[splits.length - 1] = m.user.name;
+                                        final rejoin = splits.join('@');
 
-                                textEditingController.value = TextEditingValue(
-                                  text: rejoin +
-                                      textEditingController.text.substring(
-                                          textEditingController
-                                              .selection.start),
-                                  selection: TextSelection.collapsed(
-                                    offset: rejoin.length,
-                                  ),
-                                );
+                                        textEditingController.value =
+                                            TextEditingValue(
+                                          text: rejoin +
+                                              textEditingController.text
+                                                  .substring(
+                                                      textEditingController
+                                                          .selection.start),
+                                          selection: TextSelection.collapsed(
+                                            offset: rejoin.length,
+                                          ),
+                                        );
 
-                                _mentionsOverlay?.remove();
-                                _mentionsOverlay = null;
-                              },
-                            ))
-                        .toList(),
-                  );
-                }),
-          ),
-        ),
+                                        _mentionsOverlay?.remove();
+                                        _mentionsOverlay = null;
+                                      },
+                                    ))
+                                .toList(),
+                          );
+                        }),
+                  ),
+                ),
+              );
+            }),
       );
     });
   }

@@ -95,59 +95,82 @@ class MessageActionsModal extends StatelessWidget {
                           messageTheme: messageTheme,
                         ),
                       ),
-                    IgnorePointer(
-                      child: MessageWidget(
-                        key: Key('MessageWidget'),
-                        reverse: reverse,
-                        message: message.copyWith(
-                          text: message.text.length > 200
-                              ? '${message.text.substring(0, 200)}...'
-                              : message.text,
-                        ),
-                        messageTheme: messageTheme,
-                        showReactions: false,
-                        showUsername: false,
-                        showReplyIndicator: false,
-                        showUserAvatar: showUserAvatar,
-                        showTimestamp: false,
-                        translateUserAvatar: false,
-                        showReactionPickerIndicator: true,
-                        showSendingIndicator: DisplayWidget.gone,
-                        shape: messageShape,
-                      ),
-                    ),
+                    TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 300),
+                        builder: (context, val, snapshot) {
+                          return Transform.scale(
+                            scale: val,
+                            child: IgnorePointer(
+                              child: MessageWidget(
+                                key: Key('MessageWidget'),
+                                reverse: reverse,
+                                message: message.copyWith(
+                                  text: message.text.length > 200
+                                      ? '${message.text.substring(0, 200)}...'
+                                      : message.text,
+                                ),
+                                messageTheme: messageTheme,
+                                showReactions: false,
+                                showUsername: false,
+                                showReplyIndicator: false,
+                                showUserAvatar: showUserAvatar,
+                                showTimestamp: false,
+                                translateUserAvatar: false,
+                                showReactionPickerIndicator: true,
+                                showSendingIndicator: DisplayWidget.gone,
+                                shape: messageShape,
+                              ),
+                            ),
+                          );
+                        }),
                     SizedBox(
                       height: 8,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 48.0,
-                      ),
-                      child: Material(
-                        clipBehavior: Clip.hardEdge,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: ListTile.divideTiles(
-                            context: context,
-                            tiles: [
-                              if (showReply &&
-                                  (message.status ==
-                                          MessageSendingStatus.SENT ||
-                                      message.status == null) &&
-                                  message.parentId == null)
-                                _buildReplyButton(context),
-                              if (showEditMessage) _buildEditMessage(context),
-                              if (showDeleteMessage)
-                                _buildDeleteButton(context),
-                              if (showCopyMessage) _buildCopyButton(context),
-                            ],
-                          ).toList(),
-                        ),
-                      ),
-                    )
+                    TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        builder: (context, val, wid) {
+                          return Transform(
+                            transform: Matrix4.identity()
+                              ..scale(val)
+                              ..rotateZ(-1.0 + val),
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 48.0,
+                              ),
+                              child: Material(
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: ListTile.divideTiles(
+                                    context: context,
+                                    tiles: [
+                                      if (showReply &&
+                                          (message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              message.status == null) &&
+                                          message.parentId == null)
+                                        _buildReplyButton(context),
+                                      if (showEditMessage)
+                                        _buildEditMessage(context),
+                                      if (showDeleteMessage)
+                                        _buildDeleteButton(context),
+                                      if (showCopyMessage)
+                                        _buildCopyButton(context),
+                                    ],
+                                  ).toList(),
+                                ),
+                              ),
+                            ),
+                          );
+                        })
                   ],
                 ),
               ),

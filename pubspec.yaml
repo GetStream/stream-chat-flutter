@@ -40,6 +40,7 @@ dependencies:
     git: https://github.com/imtoori/media_gallery.git
   permission_handler: ^5.0.1+1
   transparent_image: ^1.0.0
+  ezanimation: ^0.4.1
 
 flutter:
   assets:

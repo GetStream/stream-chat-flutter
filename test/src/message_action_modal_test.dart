@@ -40,6 +40,7 @@ void main() {
       );
       await tester.pump();
 
+      await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
       expect(find.byIcon(StreamIcons.sorting_up), findsOneWidget);
       expect(find.byIcon(StreamIcons.edit), findsOneWidget);
@@ -84,6 +85,7 @@ void main() {
       );
       await tester.pump();
 
+      await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
       expect(find.byIcon(StreamIcons.sorting_up), findsNothing);
       expect(find.byIcon(StreamIcons.edit), findsNothing);
