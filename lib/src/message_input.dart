@@ -201,6 +201,11 @@ class MessageInputState extends State<MessageInput> {
         onPanUpdate: (details) {
           if (details.delta.dy > 0) {
             _focusNode.unfocus();
+            if (_openFilePickerSection) {
+              setState(() {
+                _openFilePickerSection = false;
+              });
+            }
           }
         },
         child: Column(

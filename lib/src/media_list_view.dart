@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:media_gallery/media_gallery.dart';
 import 'package:stream_chat_flutter/src/stream_icons.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class MediaListView extends StatefulWidget {
   final List<String> selectedIds;
@@ -26,8 +25,10 @@ class _MediaListViewState extends State<MediaListView> {
     return GridView.builder(
       itemCount: _media.length,
       controller: _scrollController,
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+      ),
+      cacheExtent: 1000,
       itemBuilder: (
         context,
         position,
@@ -42,7 +43,10 @@ class _MediaListViewState extends State<MediaListView> {
                   aspectRatio: 1.0,
                   child: FadeInImage(
                     fadeInDuration: Duration(milliseconds: 300),
-                    placeholder: MemoryImage(kTransparentImage),
+                    placeholder: AssetImage(
+                      'images/placeholder.png',
+                      package: 'stream_chat_flutter',
+                    ),
                     image: MediaThumbnailProvider(
                       media: media,
                       highQuality: true,
