@@ -31,7 +31,7 @@ class ChannelsBloc extends StatefulWidget {
     streamChatState = context.findAncestorStateOfType<ChannelsBlocState>();
 
     if (streamChatState == null) {
-      throw Exception('You must have a ChannelsBloc widget as anchestor');
+      throw Exception('You must have a ChannelsBloc widget as ancestor');
     }
 
     return streamChatState;

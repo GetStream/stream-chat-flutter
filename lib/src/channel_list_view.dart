@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
@@ -67,7 +68,9 @@ class ChannelListView extends StatefulWidget {
     this.channelPreviewBuilder,
     this.separatorBuilder,
     this.errorBuilder,
+    this.emptyBuilder,
     this.onImageTap,
+    this.onStartChatPressed,
     this.swipeToAction = false,
     this.pullToRefresh = true,
   }) : super(key: key);
@@ -77,6 +80,9 @@ class ChannelListView extends StatefulWidget {
 
   /// If true a default swipe to action behaviour will be added to this widget
   final bool swipeToAction;
+
+  /// The builder used when the channel list is empty.
+  final WidgetBuilder emptyBuilder;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -124,6 +130,9 @@ class ChannelListView extends StatefulWidget {
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
+  /// Callback used in the default empty list widget
+  final VoidCallback onStartChatPressed;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -159,121 +168,263 @@ class _ChannelListViewState extends State<ChannelListView>
     return StreamBuilder<List<Channel>>(
         stream: channelsBlocState.channelsStream,
         builder: (context, snapshot) {
+          var child;
           if (snapshot.hasError) {
-            if (snapshot.error is Error) {
-              print((snapshot.error as Error).stackTrace);
+            child = _buildErrorWidget(
+              snapshot,
+              context,
+              channelsBlocState,
+            );
+          } else if (!snapshot.hasData) {
+            child = _buildLoadingWidget();
+          } else {
+            final channels = snapshot.data;
+
+            if (channels.isEmpty && widget.emptyBuilder != null) {
+              child = widget.emptyBuilder(context);
             }
 
-            if (widget.errorBuilder != null) {
-              return widget.errorBuilder(snapshot.error);
-            }
-
-            var message = snapshot.error.toString();
-            if (snapshot.error is DioError) {
-              final dioError = snapshot.error as DioError;
-              if (dioError.type == DioErrorType.RESPONSE) {
-                message = dioError.message;
-              } else {
-                message = 'Check your connection and retry';
-              }
-            }
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text.rich(
-                    TextSpan(
+            if (channels.isEmpty && widget.emptyBuilder == null) {
+              child = LayoutBuilder(
+                builder: (context, viewportConstraints) {
+                  return SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Stack(
                       children: [
-                        WidgetSpan(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              right: 2.0,
-                            ),
-                            child: Icon(Icons.error_outline),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  StreamIcons.message,
+                                  size: 136,
+                                  color: Color(0xffDBDBDB),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Let’s start chatting!',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 52,
+                                ),
+                                child: Text(
+                                  'How about sending your first message to a friend?',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xff7A7A7A),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        TextSpan(text: 'Error loading channels'),
+                        if (widget.onStartChatPressed != null)
+                          Positioned(
+                            right: 0,
+                            left: 0,
+                            bottom: 32,
+                            child: Center(
+                              child: FlatButton(
+                                onPressed: widget.onStartChatPressed,
+                                child: Text(
+                                  'Start a chat',
+                                  style: TextStyle(
+                                    color:
+                                        StreamChatTheme.of(context).accentColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 16.0,
-                    ),
-                    child: Text(message),
-                  ),
-                  FlatButton(
-                    onPressed: () {
-                      channelsBlocState.queryChannels(
-                        filter: widget.filter,
-                        sortOptions: widget.sort,
-                        paginationParams: widget.pagination,
-                        options: widget.options,
-                      );
-                    },
-                    child: Text('Retry'),
-                  ),
-                ],
-              ),
-            );
+                  );
+                },
+              );
+            }
+
+            if (channels.isNotEmpty) {
+              child = ListView.custom(
+                physics: AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                childrenDelegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    return _itemBuilder(context, i, channels);
+                  },
+                  childCount: (channels.length * 2) + 1,
+                  findChildIndexCallback: (key) {
+                    final ValueKey<String> valueKey = key;
+                    final index = channels.indexWhere(
+                        (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
+                    return index != -1 ? (index * 2) : null;
+                  },
+                ),
+              );
+            }
           }
 
-          if (!snapshot.hasData) {
-            return LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-
-          final channels = snapshot.data;
-
-          if (channels.isEmpty) {
-            return LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: Center(
-                      child: Text('You have no channels currently'),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-
-          return ListView.custom(
-            physics: AlwaysScrollableScrollPhysics(),
-            controller: _scrollController,
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, i) {
-                return _itemBuilder(context, i, channels);
-              },
-              childCount: (channels.length * 2) + 1,
-              findChildIndexCallback: (key) {
-                final ValueKey<String> valueKey = key;
-                final index = channels.indexWhere(
-                    (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
-                return index != -1 ? (index * 2) : null;
-              },
-            ),
+          return AnimatedSwitcher(
+            child: child,
+            duration: Duration(milliseconds: 500),
           );
         });
+  }
+
+  Widget _buildLoadingWidget() {
+    return ListView(
+      physics: AlwaysScrollableScrollPhysics(),
+      children: List.generate(
+        25,
+        (i) {
+          if (i % 2 != 0) {
+            if (widget.separatorBuilder != null) {
+              return widget.separatorBuilder(context, i);
+            }
+            return _separatorBuilder(context, i);
+          }
+          return _buildLoadingItem();
+        },
+      ),
+    );
+  }
+
+  Shimmer _buildLoadingItem() {
+    return Shimmer.fromColors(
+      baseColor: Color(0xffE5E5E5),
+      highlightColor: Color(0xffffffff),
+      child: ListTile(
+        leading: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          constraints: BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
+          ),
+        ),
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(11),
+            ),
+            constraints: BoxConstraints.tightFor(
+              height: 16,
+              width: 82,
+            ),
+          ),
+        ),
+        subtitle: Row(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                constraints: BoxConstraints.tightFor(
+                  height: 16,
+                  width: 238,
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(left: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              constraints: BoxConstraints.tightFor(
+                height: 16,
+                width: 42,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(
+    AsyncSnapshot<List<Channel>> snapshot,
+    BuildContext context,
+    ChannelsBlocState channelsBlocState,
+  ) {
+    if (snapshot.error is Error) {
+      print((snapshot.error as Error).stackTrace);
+    }
+
+    if (widget.errorBuilder != null) {
+      return widget.errorBuilder(snapshot.error);
+    }
+
+    var message = snapshot.error.toString();
+    if (snapshot.error is DioError) {
+      final dioError = snapshot.error as DioError;
+      if (dioError.type == DioErrorType.RESPONSE) {
+        message = dioError.message;
+      } else {
+        message = 'Check your connection and retry';
+      }
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text.rich(
+            TextSpan(
+              children: [
+                WidgetSpan(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      right: 2.0,
+                    ),
+                    child: Icon(Icons.error_outline),
+                  ),
+                ),
+                TextSpan(text: 'Error loading channels'),
+              ],
+            ),
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 16.0,
+            ),
+            child: Text(message),
+          ),
+          FlatButton(
+            onPressed: () {
+              channelsBlocState.queryChannels(
+                filter: widget.filter,
+                sortOptions: widget.sort,
+                paginationParams: widget.pagination,
+                options: widget.options,
+              );
+            },
+            child: Text('Retry'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _itemBuilder(context, int i, List<Channel> channels) {
@@ -433,7 +584,9 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   Widget _buildQueryProgressIndicator(
-      context, ChannelsBlocState channelsProvider) {
+    context,
+    ChannelsBlocState channelsProvider,
+  ) {
     return StreamBuilder<bool>(
         stream: channelsProvider.queryChannelsLoading,
         initialData: false,

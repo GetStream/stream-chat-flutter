@@ -36,14 +36,15 @@ class MessageReactionsModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
-    var user = StreamChat.of(context).user;
+    final size = MediaQuery.of(context).size;
+    final user = StreamChat.of(context).user;
 
-    var roughMaxSize = 2 * size.width / 3;
-    var roughSentenceSize =
+    final roughMaxSize = 2 * size.width / 3;
+    final roughSentenceSize =
         message.text.length * messageTheme.messageText.fontSize * 1.2;
-    var divFactor =
-        roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize);
+    final divFactor = message.attachments?.isNotEmpty == true
+        ? 1
+        : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,

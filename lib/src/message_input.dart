@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:emojis/emoji.dart';
@@ -8,13 +9,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:http_parser/http_parser.dart' as httpParser;
 import 'package:image_picker/image_picker.dart';
+import 'package:media_gallery/media_gallery.dart';
 import 'package:mime/mime.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter/src/video_thumbnail.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
 import '../stream_chat_flutter.dart';
@@ -36,6 +41,8 @@ enum DefaultAttachmentTypes {
   video,
   file,
 }
+
+const _kMinMediaPickerSize = 360.0;
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -97,6 +104,7 @@ class MessageInput extends StatefulWidget {
     this.actions,
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
+    this.focusNode,
   }) : super(key: key);
 
   /// Message to edit
@@ -142,6 +150,9 @@ class MessageInput extends StatefulWidget {
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
 
+  /// The focus node associated to the TextField
+  final FocusNode focusNode;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -162,13 +173,13 @@ class MessageInput extends StatefulWidget {
 
 class MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
-  final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
+  FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
-  bool _typingStarted = false;
+  bool _animateContainer = true;
   bool _commandEnabled = false;
   OverlayEntry _commandsOverlay, _mentionsOverlay, _emojiOverlay;
   Iterable<String> _emojiNames;
@@ -176,6 +187,9 @@ class MessageInputState extends State<MessageInput> {
   Command _chosenCommand;
   bool _actionsShrunk = false;
   bool _sendAsDm = false;
+  bool _openFilePickerSection = false;
+  int _filePickerIndex = 0;
+  double _filePickerSize = _kMinMediaPickerSize;
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -201,6 +215,7 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildDmCheckbox(),
               ),
+            _buildFilePickerSection(),
           ],
         ),
       ),
@@ -210,7 +225,7 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
@@ -333,7 +348,7 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32.0),
+            borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
               color: Colors.grey,
             ),
@@ -355,40 +370,11 @@ class MessageInputState extends State<MessageInput> {
                   keyboardType: widget.keyboardType,
                   controller: textEditingController,
                   focusNode: _focusNode,
-                  onChanged: (s) {
-                    StreamChannel.of(context).channel.keyStroke();
-
-                    setState(() {
-                      _messageIsPresent = s.trim().isNotEmpty;
-                      _actionsShrunk = s.trim().isNotEmpty;
-                    });
-
-                    _commandsOverlay?.remove();
-                    _commandsOverlay = null;
-                    _mentionsOverlay?.remove();
-                    _mentionsOverlay = null;
-                    _emojiOverlay?.remove();
-                    _emojiOverlay = null;
-
-                    _checkCommands(s.trimLeft(), context);
-
-                    _checkMentions(s, context);
-
-                    _checkEmoji(s, context);
-                  },
-                  onTap: () {
-                    setState(() {
-                      _typingStarted = true;
-                    });
-                  },
                   style: Theme.of(context).textTheme.bodyText2,
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    hintText:
-                        (_commandEnabled && _chosenCommand.name == 'giphy')
-                            ? 'Search GIFs'
-                            : 'Write a message',
+                    hintText: _getHint(),
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
@@ -440,15 +426,47 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
+  void _onChanged(BuildContext context, String s) {
+    StreamChannel.of(context).channel.keyStroke().catchError((e) {});
+
+    setState(() {
+      _messageIsPresent = s.trim().isNotEmpty;
+      _actionsShrunk = s.trim().isNotEmpty;
+    });
+
+    _commandsOverlay?.remove();
+    _commandsOverlay = null;
+    _mentionsOverlay?.remove();
+    _mentionsOverlay = null;
+    _emojiOverlay?.remove();
+    _emojiOverlay = null;
+
+    _checkCommands(s.trim(), context);
+
+    _checkMentions(s, context);
+
+    _checkEmoji(s, context);
+  }
+
+  String _getHint() {
+    if (_commandEnabled && _chosenCommand.name == 'giphy') {
+      return 'Search GIFs';
+    }
+    if (_attachments.isNotEmpty) {
+      return 'Add a comment or send';
+    }
+    return 'Write a message';
+  }
+
   void _checkEmoji(String s, BuildContext context) {
-    if (textEditingController.selection.isCollapsed &&
-        (s.isNotEmpty && s[textEditingController.selection.start - 1] == ':' ||
-            textEditingController.text
-                .substring(
-                  0,
-                  textEditingController.selection.start,
-                )
-                .contains(':'))) {
+    if (s.isNotEmpty &&
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
+            .substring(
+              0,
+              textEditingController.selection.baseOffset,
+            )
+            .contains(':')) {
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
       final splits = textToSelection.split(':');
@@ -468,13 +486,13 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _checkMentions(String s, BuildContext context) {
-    if (textEditingController.selection.isCollapsed &&
-        (s.isNotEmpty && s[textEditingController.selection.start - 1] == '@' ||
-            textEditingController.text
-                .substring(0, textEditingController.selection.start)
-                .split(' ')
-                .last
-                .contains('@'))) {
+    if (s.isNotEmpty &&
+        textEditingController.selection.baseOffset > 0 &&
+        textEditingController.text
+            .substring(0, textEditingController.selection.baseOffset)
+            .split(' ')
+            .last
+            .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
       Overlay.of(context).insert(_mentionsOverlay);
     }
@@ -548,8 +566,10 @@ class MessageInputState extends State<MessageInput> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Icon(StreamIcons.lightning,
-                                color: StreamChatTheme.of(context).accentColor),
+                            child: Icon(
+                              StreamIcons.lightning,
+                              color: StreamChatTheme.of(context).accentColor,
+                            ),
                           ),
                           Text(
                             'Instant Commands',
@@ -601,6 +621,257 @@ class MessageInputState extends State<MessageInput> {
           ),
         ),
       );
+    });
+  }
+
+  Widget _buildFilePickerSection() {
+    return AnimatedContainer(
+      duration: _animateContainer ? Duration(milliseconds: 300) : Duration.zero,
+      height: _openFilePickerSection ? _filePickerSize : 0,
+      child: Material(
+        color: Color(0xFFF2F2F2),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.picture,
+                    size: 24,
+                    color: _filePickerIndex == 0
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _filePickerIndex = 0;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.folder,
+                    size: 24,
+                    color: _filePickerIndex == 1
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    pickFile(DefaultAttachmentTypes.file, false);
+                  },
+                ),
+                IconButton(
+                  icon: SvgPicture.asset(
+                    'svgs/icon_camera.svg',
+                    package: 'stream_chat_flutter',
+                    height: 24,
+                    width: 24,
+                    color: _filePickerIndex == 2
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    pickFile(DefaultAttachmentTypes.image, true);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    StreamIcons.record,
+                    size: 24,
+                    color: _filePickerIndex == 2
+                        ? StreamChatTheme.of(context).accentColor
+                        : Colors.black.withOpacity(0.5),
+                  ),
+                  onPressed: () {
+                    pickFile(DefaultAttachmentTypes.video, true);
+                  },
+                ),
+              ],
+            ),
+            GestureDetector(
+              onVerticalDragUpdate: (update) {
+                setState(() {
+                  _animateContainer = false;
+                  _filePickerSize = (_filePickerSize - update.delta.dy).clamp(
+                    _kMinMediaPickerSize,
+                    MediaQuery.of(context).size.height / 1.7,
+                  );
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0),
+                  ),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: 40.0,
+                        height: 4.0,
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF2F2F2),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (_openFilePickerSection)
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: _buildPickerSection(),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPickerSection() {
+    switch (_filePickerIndex) {
+      case 0:
+        return FutureBuilder<PermissionStatus>(
+            future: Platform.isAndroid
+                ? Permission.storage.status
+                : Permission.photos.status,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              if (snapshot.data.isGranted) {
+                return MediaListView(
+                  selectedIds: _attachments.map((e) => e.id).toList(),
+                  onSelect: (media) {
+                    if (!_attachments
+                        .any((element) => element.id == media.id)) {
+                      _addAttachment(media);
+                    } else {
+                      setState(() {
+                        _attachments
+                            .removeWhere((element) => element.id == media.id);
+                      });
+                    }
+                  },
+                );
+              }
+
+              return InkWell(
+                onTap: () async {
+                  var status = await (Platform.isAndroid
+                      ? Permission.storage.status
+                      : Permission.photos.status);
+                  print('status: ${status}');
+                  if (status.isPermanentlyDenied || status.isDenied) {
+                    if (await openAppSettings()) {
+                      setState(() {});
+                    }
+                  } else {
+                    status = await (Platform.isAndroid
+                            ? Permission.storage
+                            : Permission.photos)
+                        .request();
+                    if (status.isGranted) {
+                      setState(() {});
+                    }
+                  }
+                },
+                child: Container(
+                  color: Color(0xFFF2F2F2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SvgPicture.asset(
+                        'svgs/icon_picture_empty_state.svg',
+                        package: 'stream_chat_flutter',
+                        height: 140,
+                        color: StreamChatTheme.of(context).accentColor,
+                      ),
+                      Center(
+                        child: Text(
+                          'Allow access to your gallery',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: StreamChatTheme.of(context).accentColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            });
+        break;
+    }
+  }
+
+  void _addAttachment(Media medium) async {
+    final attachment = _SendingAttachment(
+      id: medium.id,
+    );
+
+    setState(() {
+      _attachments.add(attachment);
+    });
+
+    final mediaFile = await medium.getFile();
+
+    final file = PlatformFile(
+      path: mediaFile.path,
+      bytes: mediaFile.readAsBytesSync(),
+    );
+
+    final channel = StreamChannel.of(context).channel;
+    setState(() {
+      attachment
+        ..file = file
+        ..attachment = Attachment(
+          localUri: file.path != null ? Uri.parse(file.path) : null,
+          type: medium.mediaType == MediaType.image ? 'image' : 'video',
+        );
+    });
+
+    final url = await _uploadAttachment(
+        file,
+        medium.mediaType == MediaType.image
+            ? DefaultAttachmentTypes.image
+            : DefaultAttachmentTypes.video,
+        channel);
+
+    final fileType = medium.mediaType == MediaType.image
+        ? DefaultAttachmentTypes.image
+        : DefaultAttachmentTypes.video;
+
+    if (fileType == DefaultAttachmentTypes.image) {
+      attachment.attachment = attachment.attachment.copyWith(
+        imageUrl: url,
+      );
+    } else {
+      attachment.attachment = attachment.attachment.copyWith(
+        assetUrl: url,
+      );
+    }
+
+    setState(() {
+      attachment.uploaded = true;
     });
   }
 
@@ -857,24 +1128,11 @@ class MessageInputState extends State<MessageInput> {
     _commandsOverlay = null;
   }
 
-  Gradient _getGradient(BuildContext context) {
-    if (_typingStarted) {
-      if (widget.editMessage == null) {
-        return StreamChatTheme.of(context).channelTheme.inputGradient;
-      }
-      return LinearGradient(
-        colors: [Colors.lightGreen, Colors.green],
-      );
-    } else {
-      return null;
-    }
-  }
-
   Widget _buildAttachments() {
     return _attachments.isEmpty
         ? Container()
         : LimitedBox(
-            maxHeight: 76.0,
+            maxHeight: 104.0,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: _attachments
@@ -888,8 +1146,8 @@ class MessageInputState extends State<MessageInput> {
                             AspectRatio(
                               aspectRatio: 1.0,
                               child: Container(
-                                height: 50,
-                                width: 50,
+                                height: 104,
+                                width: 104,
                                 child: _buildAttachment(attachment),
                               ),
                             ),
@@ -916,8 +1174,8 @@ class MessageInputState extends State<MessageInput> {
 
   Positioned _buildRemoveButton(_SendingAttachment attachment) {
     return Positioned(
-      height: 16,
-      width: 16,
+      height: 24,
+      width: 24,
       top: 4,
       right: 4,
       child: RawMaterialButton(
@@ -934,11 +1192,12 @@ class MessageInputState extends State<MessageInput> {
             _attachments.remove(attachment);
           });
         },
-        fillColor: Colors.white.withOpacity(.5),
+        fillColor: Colors.black.withOpacity(.5),
         child: Center(
           child: Icon(
-            Icons.close,
-            size: 15,
+            StreamIcons.close,
+            size: 24,
+            color: Colors.white,
           ),
         ),
       ),
@@ -955,6 +1214,10 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
+    if (attachment.attachment == null) {
+      return SizedBox();
+    }
+
     switch (attachment.attachment.type) {
       case 'image':
       case 'giphy':
@@ -964,15 +1227,30 @@ class MessageInputState extends State<MessageInput> {
                 fit: BoxFit.cover,
               )
             : Image.network(
-                attachment.attachment.imageUrl ??
-                    attachment.attachment.thumbUrl,
+                attachment.attachment.imageUrl,
                 fit: BoxFit.cover,
               );
         break;
       case 'video':
-        return Container(
-          child: Icon(Icons.videocam),
-          color: Colors.black26,
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                child: VideoThumbnail(
+                    file: File(
+                  attachment.file.path,
+                )),
+              ),
+            ),
+            Positioned(
+              left: 8,
+              bottom: 10,
+              child: SvgPicture.asset(
+                'svgs/video_call_icon.svg',
+                package: 'stream_chat_flutter',
+              ),
+            ),
+          ],
         );
         break;
       default:
@@ -984,26 +1262,24 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton() {
-    return Center(
-      child: InkWell(
-        child: Padding(
-          padding: const EdgeInsets.only(
-              left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-          child: Icon(
-            StreamIcons.lightning,
-            color: Color(0xFF000000).withAlpha(128),
-          ),
+    return InkWell(
+      child: Padding(
+        padding:
+            const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
+        child: Icon(
+          StreamIcons.lightning,
+          color: Color(0xFF000000).withAlpha(128),
         ),
-        onTap: () {
-          if (_commandsOverlay == null) {
-            _commandsOverlay = _buildCommandsOverlayEntry();
-            Overlay.of(context).insert(_commandsOverlay);
-          } else {
-            _commandsOverlay?.remove();
-            _commandsOverlay = null;
-          }
-        },
       ),
+      onTap: () {
+        if (_commandsOverlay == null) {
+          _commandsOverlay = _buildCommandsOverlayEntry();
+          Overlay.of(context).insert(_commandsOverlay);
+        } else {
+          _commandsOverlay?.remove();
+          _commandsOverlay = null;
+        }
+      },
     );
   }
 
@@ -1016,11 +1292,37 @@ class MessageInputState extends State<MessageInput> {
               EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
           child: Icon(
             StreamIcons.attach,
-            color: Color(0xFF000000).withAlpha(128),
+            color: _openFilePickerSection
+                ? StreamChatTheme.of(context).accentColor
+                : Color(0xFF000000).withAlpha(128),
           ),
         ),
-        onTap: () {
-          showAttachmentModal();
+        onTap: () async {
+          _emojiOverlay?.remove();
+          _emojiOverlay = null;
+          _commandsOverlay?.remove();
+          _commandsOverlay = null;
+          _mentionsOverlay?.remove();
+          _mentionsOverlay = null;
+
+          if (_openFilePickerSection) {
+            setState(() {
+              _animateContainer = true;
+              _openFilePickerSection = false;
+              _filePickerSize = _kMinMediaPickerSize;
+            });
+          } else {
+            final status = await (Platform.isAndroid
+                ? Permission.storage.status
+                : Permission.photos.status);
+            if (status.isUndetermined) {
+              await (Platform.isAndroid
+                      ? Permission.storage
+                      : Permission.photos)
+                  .request();
+            }
+            showAttachmentModal();
+          }
         },
       ),
     );
@@ -1032,73 +1334,79 @@ class MessageInputState extends State<MessageInput> {
       _focusNode.unfocus();
     }
 
-    showModalBottomSheet(
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+    if (!kIsWeb) {
+      setState(() {
+        _openFilePickerSection = true;
+      });
+    } else {
+      showModalBottomSheet(
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(32),
+              topRight: Radius.circular(32),
+            ),
           ),
-        ),
-        context: context,
-        isScrollControlled: true,
-        builder: (_) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                title: Text(
-                  'Add a file',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+          context: context,
+          isScrollControlled: true,
+          builder: (_) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  title: Text(
+                    'Add a file',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              ListTile(
-                leading: Icon(Icons.image),
-                title: Text('Upload a photo'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.image, false);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.video_library),
-                title: Text('Upload a video'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.video, false);
-                  Navigator.pop(context);
-                },
-              ),
-              if (!kIsWeb)
                 ListTile(
-                  leading: Icon(Icons.camera_alt),
-                  title: Text('Photo from camera'),
+                  leading: Icon(Icons.image),
+                  title: Text('Upload a photo'),
                   onTap: () {
-                    pickFile(DefaultAttachmentTypes.image, true);
+                    pickFile(DefaultAttachmentTypes.image, false);
                     Navigator.pop(context);
                   },
                 ),
-              if (!kIsWeb)
                 ListTile(
-                  leading: Icon(Icons.videocam),
-                  title: Text('Video from camera'),
+                  leading: Icon(Icons.video_library),
+                  title: Text('Upload a video'),
                   onTap: () {
-                    pickFile(DefaultAttachmentTypes.video, true);
+                    pickFile(DefaultAttachmentTypes.video, false);
                     Navigator.pop(context);
                   },
                 ),
-              ListTile(
-                leading: Icon(Icons.insert_drive_file),
-                title: Text('Upload a file'),
-                onTap: () {
-                  pickFile(DefaultAttachmentTypes.file, false);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        });
+                if (!kIsWeb)
+                  ListTile(
+                    leading: Icon(Icons.camera_alt),
+                    title: Text('Photo from camera'),
+                    onTap: () {
+                      pickFile(DefaultAttachmentTypes.image, true);
+                      Navigator.pop(context);
+                    },
+                  ),
+                if (!kIsWeb)
+                  ListTile(
+                    leading: Icon(Icons.videocam),
+                    title: Text('Video from camera'),
+                    onTap: () {
+                      pickFile(DefaultAttachmentTypes.video, true);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ListTile(
+                  leading: Icon(Icons.insert_drive_file),
+                  title: Text('Upload a file'),
+                  onTap: () {
+                    pickFile(DefaultAttachmentTypes.file, false);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          });
+    }
   }
 
   /// Add an attachment to the sending message
@@ -1136,6 +1444,9 @@ class MessageInputState extends State<MessageInput> {
         pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
       } else if (fileType == DefaultAttachmentTypes.video) {
         pickedFile = await _imagePicker.getVideo(source: ImageSource.camera);
+      }
+      if (pickedFile == null) {
+        return;
       }
       final bytes = await pickedFile.readAsBytes();
       file = PlatformFile(
@@ -1228,7 +1539,9 @@ class MessageInputState extends State<MessageInput> {
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: MediaType.parse(lookupMimeType(filename)),
+        contentType: filename != null
+            ? httpParser.MediaType.parse(lookupMimeType(filename))
+            : null,
       ),
     );
     return res.file;
@@ -1241,7 +1554,7 @@ class MessageInputState extends State<MessageInput> {
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: MediaType.parse(lookupMimeType(filename)),
+        contentType: httpParser.MediaType.parse(lookupMimeType(filename)),
       ),
     );
     return res.file;
@@ -1332,7 +1645,6 @@ class MessageInputState extends State<MessageInput> {
 
     setState(() {
       _messageIsPresent = false;
-      _typingStarted = false;
       _commandEnabled = false;
     });
 
@@ -1400,47 +1712,14 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
+    _focusNode = widget.focusNode ?? FocusNode();
+
     _emojiNames = Emoji.all().map((e) => e.name);
 
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
-        if (visible) {
-          if (_commandsOverlay != null) {
-            if (textEditingController.text.trimLeft().startsWith('/')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _commandsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_commandsOverlay);
-              });
-            }
-          }
-
-          if (_mentionsOverlay != null) {
-            if (textEditingController.text.contains('@')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _mentionsOverlay = _buildCommandsOverlayEntry();
-                Overlay.of(context).insert(_mentionsOverlay);
-              });
-            }
-          }
-
-          if (_emojiOverlay != null) {
-            if (textEditingController.text.contains(':')) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _emojiOverlay = _buildEmojiOverlay();
-                Overlay.of(context).insert(_emojiOverlay);
-              });
-            }
-          }
-        } else {
-          if (_commandsOverlay != null) {
-            _commandsOverlay.remove();
-          }
-          if (_mentionsOverlay != null) {
-            _mentionsOverlay.remove();
-          }
-          if (_emojiOverlay != null) {
-            _emojiOverlay.remove();
-          }
+        if (_focusNode.hasFocus) {
+          _onChanged(context, textEditingController.text);
         }
       });
     }
@@ -1450,12 +1729,21 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage != null || widget.initialMessage != null) {
       _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
     }
+
+    textEditingController.addListener(() {
+      _onChanged(context, textEditingController.text);
+    });
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _openFilePickerSection = false;
+      }
+    });
   }
 
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
 
-    _typingStarted = true;
     _messageIsPresent = true;
 
     message.attachments?.forEach((attachment) {
@@ -1490,11 +1778,13 @@ class _SendingAttachment {
   PlatformFile file;
   Attachment attachment;
   bool uploaded;
+  String id;
 
   _SendingAttachment({
     this.file,
     this.attachment,
     this.uploaded = false,
+    this.id,
   });
 }
 
@@ -1502,4 +1792,45 @@ extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1)}";
   }
+}
+
+/// Represents a 2-tuple, or pair.
+class Tuple2<T1, T2> {
+  /// Returns the first item of the tuple
+  final T1 item1;
+
+  /// Returns the second item of the tuple
+  final T2 item2;
+
+  /// Creates a new tuple value with the specified items.
+  const Tuple2(this.item1, this.item2);
+
+  /// Create a new tuple value with the specified list [items].
+  factory Tuple2.fromList(List items) {
+    if (items.length != 2) {
+      throw ArgumentError('items must have length 2');
+    }
+
+    return Tuple2<T1, T2>(items[0] as T1, items[1] as T2);
+  }
+
+  /// Returns a tuple with the first item set to the specified value.
+  Tuple2<T1, T2> withItem1(T1 v) => Tuple2<T1, T2>(v, item2);
+
+  /// Returns a tuple with the second item set to the specified value.
+  Tuple2<T1, T2> withItem2(T2 v) => Tuple2<T1, T2>(item1, v);
+
+  /// Creates a [List] containing the items of this [Tuple2].
+  ///
+  /// The elements are in item order. The list is variable-length
+  /// if [growable] is true.
+  List toList({bool growable = false}) =>
+      List.from([item1, item2], growable: growable);
+
+  @override
+  String toString() => '[$item1, $item2]';
+
+  @override
+  bool operator ==(Object other) =>
+      other is Tuple2 && other.item1 == item1 && other.item2 == item2;
 }
