@@ -104,6 +104,7 @@ class MessageInput extends StatefulWidget {
     this.actions,
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
+    this.focusNode,
   }) : super(key: key);
 
   /// Message to edit
@@ -149,6 +150,9 @@ class MessageInput extends StatefulWidget {
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
 
+  /// The focus node associated to the TextField
+  final FocusNode focusNode;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -169,10 +173,10 @@ class MessageInput extends StatefulWidget {
 
 class MessageInputState extends State<MessageInput> {
   final List<_SendingAttachment> _attachments = [];
-  final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
+  FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _animateContainer = true;
@@ -423,7 +427,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _onChanged(BuildContext context, String s) {
-    StreamChannel.of(context).channel.keyStroke();
+    StreamChannel.of(context).channel.keyStroke().catchError((e) {});
 
     setState(() {
       _messageIsPresent = s.trim().isNotEmpty;
@@ -1708,11 +1712,15 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
+    _focusNode = widget.focusNode ?? FocusNode();
+
     _emojiNames = Emoji.all().map((e) => e.name);
 
     if (!kIsWeb) {
       _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
-        _onChanged(context, textEditingController.text);
+        if (_focusNode.hasFocus) {
+          _onChanged(context, textEditingController.text);
+        }
       });
     }
 

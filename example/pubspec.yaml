@@ -1,6 +1,6 @@
 name: example
 description: A new Flutter project.
-version: 1.0.62+64
+version: 1.0.66+68
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -15,6 +15,7 @@ dependencies:
   flutter_svg: ^0.19.1
   flutter_secure_storage: ^3.3.5
   yaml: ^2.2.1
+  uuid: ^2.2.2
 
 dev_dependencies:
   flutter_test:

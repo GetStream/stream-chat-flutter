@@ -30,3 +30,6 @@ export 'src/typing_indicator.dart';
 export 'src/user_avatar.dart';
 export 'src/utils.dart';
 export 'src/video_attachment.dart';
+export 'src/users_bloc.dart';
+export 'src/user_list_view.dart';
+export 'src/user_item.dart';

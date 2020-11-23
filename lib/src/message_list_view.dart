@@ -180,7 +180,26 @@ class _MessageListViewState extends State<MessageListView> {
             ? streamChannel.channel.state.threads[widget.parentMessage.id]
             : streamChannel.channel.state.messages,
         builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
           final messages = snapshot.data?.reversed?.toList() ?? [];
+
+          if (messages.isEmpty) {
+            return Center(
+              child: Text(
+                'No chats here yet...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black.withOpacity(.5),
+                ),
+              ),
+            );
+          }
+
           return Stack(
             alignment: Alignment.center,
             children: [

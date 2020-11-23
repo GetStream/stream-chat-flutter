@@ -12,12 +12,14 @@ class StreamChannel extends StatefulWidget {
     Key key,
     @required this.child,
     @required this.channel,
+    this.showLoading = true,
   }) : super(
           key: key,
         );
 
   final Widget child;
   final Channel channel;
+  final bool showLoading;
 
   /// Use this method to get the current [StreamChannelState] instance
   static StreamChannelState of(BuildContext context) {
@@ -155,7 +157,7 @@ class StreamChannelState extends State<StreamChannel> {
       future: widget.channel.initialized,
       initialData: widget.channel.state != null,
       builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data) {
+        if (widget.showLoading && (!snapshot.hasData || !snapshot.data)) {
           return Container(
             height: 30,
             child: Center(
