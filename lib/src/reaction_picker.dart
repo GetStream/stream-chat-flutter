@@ -127,7 +127,6 @@ class _ReactionPickerState extends State<ReactionPicker>
   void pop() async {
     for (var a in animations) {
       a.stop();
-      //a.dispose();
     }
     Navigator.of(context).pop();
   }
@@ -144,5 +143,13 @@ class _ReactionPickerState extends State<ReactionPicker>
   void removeReaction(BuildContext context, Reaction reaction) {
     StreamChannel.of(context).channel.deleteReaction(widget.message, reaction);
     pop();
+  }
+
+  @override
+  void dispose() {
+    for (var a in animations) {
+      a?.dispose();
+    }
+    super.dispose();
   }
 }
