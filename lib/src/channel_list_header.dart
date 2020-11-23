@@ -39,6 +39,9 @@ typedef _TitleBuilder = Widget Function(
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
 ///
+/// The widget by default uses the inherited [Client] to fetch information about the status.
+/// However you can also pass your own [Client] if you don't have it in the widget tree.
+///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
 class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -51,12 +54,17 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onNewChatButtonTap,
   }) : super(key: key);
 
+  /// Pass this if you don't have a [Client] in your widget tree.
   final Client client;
 
+  /// Use this to build your own title as per different [ConnectionStatus]
   final _TitleBuilder titleBuilder;
 
+  /// Callback to call when pressing the user avatar button.
+  /// By default it calls Scaffold.of(context).openDrawer()
   final Function(User) onUserAvatarTap;
 
+  /// Callback to call when pressing the new chat button.
   final VoidCallback onNewChatButtonTap;
 
   @override
