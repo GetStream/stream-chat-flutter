@@ -19,6 +19,7 @@ dependencies:
   flutter_svg: ^0.19.1
   flutter_portal: ^0.3.0
   cached_network_image: ^2.2.0+1
+  shimmer: ^1.1.2
   flutter_markdown: ^0.5.0
   url_launcher: ^5.4.11
   emojis: ^0.9.3

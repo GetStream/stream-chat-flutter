@@ -13,6 +13,8 @@ jobs:
           channel: 'stable'
       - name: Get dependencies
         run: flutter pub get
+      - name: Run formatter
+        run: flutter format -n --set-exit-if-changed .
       - name: Coverage fix
         run: |
           file=test/coverage_helper_test.dart
