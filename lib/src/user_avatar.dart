@@ -11,9 +11,13 @@ class UserAvatar extends StatelessWidget {
     this.constraints,
     this.onlineIndicatorConstraints,
     this.onTap,
+    this.onLongPress,
     this.showOnlineStatus = true,
     this.borderRadius,
     this.onlineIndicatorAlignment = Alignment.topRight,
+    this.selected = false,
+    this.selectionColor = const Color(0xFF006CFF),
+    this.selectionThickness = 4,
   }) : super(key: key);
 
   final User user;
@@ -22,7 +26,11 @@ class UserAvatar extends StatelessWidget {
   final BorderRadius borderRadius;
   final BoxConstraints onlineIndicatorConstraints;
   final void Function(User) onTap;
+  final void Function(User) onLongPress;
   final bool showOnlineStatus;
+  final bool selected;
+  final Color selectionColor;
+  final double selectionThickness;
 
   @override
   Widget build(BuildContext context) {
@@ -30,37 +38,48 @@ class UserAvatar extends StatelessWidget {
         user.extraData['image'] != null &&
         user.extraData['image'] != '';
     final streamChatTheme = StreamChatTheme.of(context);
+
+    Widget avatar = ClipRRect(
+      borderRadius: borderRadius ??
+          streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
+      child: Container(
+        constraints: constraints ??
+            streamChatTheme.ownMessageTheme.avatarTheme.constraints,
+        decoration: BoxDecoration(
+          color: streamChatTheme.accentColor,
+        ),
+        child: hasImage
+            ? CachedNetworkImage(
+                filterQuality: FilterQuality.high,
+                imageUrl: user.extraData['image'],
+                errorWidget: (_, __, ___) {
+                  return streamChatTheme.defaultUserImage(context, user);
+                },
+                fit: BoxFit.cover,
+              )
+            : streamChatTheme.defaultUserImage(context, user),
+      ),
+    );
+    if (selected) {
+      avatar = ClipRRect(
+        borderRadius: (borderRadius ??
+                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
+            BorderRadius.circular(selectionThickness),
+        child: Container(
+          color: selectionColor,
+          child: Padding(
+            padding: EdgeInsets.all(selectionThickness),
+            child: avatar,
+          ),
+        ),
+      );
+    }
     return GestureDetector(
-      onTap: onTap != null
-          ? () {
-              if (onTap != null) {
-                onTap(user);
-              }
-            }
-          : null,
+      onTap: onTap != null ? () => onTap(user) : null,
+      onLongPress: onLongPress != null ? () => onLongPress(user) : null,
       child: Stack(
         children: <Widget>[
-          ClipRRect(
-            borderRadius: borderRadius ??
-                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
-            child: Container(
-              constraints: constraints ??
-                  streamChatTheme.ownMessageTheme.avatarTheme.constraints,
-              decoration: BoxDecoration(
-                color: streamChatTheme.accentColor,
-              ),
-              child: hasImage
-                  ? CachedNetworkImage(
-                      filterQuality: FilterQuality.high,
-                      imageUrl: user.extraData['image'],
-                      errorWidget: (_, __, ___) {
-                        return streamChatTheme.defaultUserImage(context, user);
-                      },
-                      fit: BoxFit.cover,
-                    )
-                  : streamChatTheme.defaultUserImage(context, user),
-            ),
-          ),
+          avatar,
           if (showOnlineStatus && user.online == true)
             Positioned.fill(
               child: Align(

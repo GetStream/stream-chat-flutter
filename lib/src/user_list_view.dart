@@ -65,7 +65,12 @@ class UserListView extends StatefulWidget {
     this.swipeToAction = false,
     this.pullToRefresh = true,
     this.groupAlphabetically = false,
-  }) : super(key: key);
+    this.crossAxisCount = 1,
+  })  : assert(
+          crossAxisCount == 1 || groupAlphabetically == false,
+          'Cannot group alphabetically when crossAxisCount > 1',
+        ),
+        super(key: key);
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
@@ -130,6 +135,8 @@ class UserListView extends StatefulWidget {
   /// defaults to false
   final bool groupAlphabetically;
 
+  final int crossAxisCount;
+
   @override
   _UserListViewState createState() => _UserListViewState();
 }
@@ -137,6 +144,8 @@ class UserListView extends StatefulWidget {
 class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
+
+  bool get _isListView => widget.crossAxisCount == 1;
 
   @override
   void initState() {
@@ -317,19 +326,40 @@ class _UserListViewState extends State<UserListView>
           );
         }
 
-        return ListView.custom(
+        if (_isListView) {
+          return ListView.custom(
+            physics: AlwaysScrollableScrollPhysics(),
+            controller: _scrollController,
+            childrenDelegate: SliverChildBuilderDelegate(
+              (context, i) {
+                return _listItemBuilder(context, i, items);
+              },
+              childCount: (items.length * 2) + 1,
+              findChildIndexCallback: (key) {
+                final ValueKey<String> valueKey = key;
+                final index =
+                    items.indexWhere((item) => item.key == valueKey.value);
+                return index != -1 ? (index * 2) : null;
+              },
+            ),
+          );
+        }
+        return GridView.custom(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: widget.crossAxisCount,
+          ),
           physics: AlwaysScrollableScrollPhysics(),
           controller: _scrollController,
           childrenDelegate: SliverChildBuilderDelegate(
             (context, i) {
-              return _itemBuilder(context, i, items);
+              return _gridItemBuilder(context, i, items);
             },
-            childCount: (items.length * 2) + 1,
+            childCount: items.length,
             findChildIndexCallback: (key) {
               final ValueKey<String> valueKey = key;
               final index =
                   items.indexWhere((item) => item.key == valueKey.value);
-              return index != -1 ? (index * 2) : null;
+              return index != -1 ? index : null;
             },
           ),
         );
@@ -337,7 +367,7 @@ class _UserListViewState extends State<UserListView>
     );
   }
 
-  Widget _itemBuilder(BuildContext context, int i, List<ListItem> items) {
+  Widget _listItemBuilder(BuildContext context, int i, List<ListItem> items) {
     if (i % 2 != 0) {
       if (widget.separatorBuilder != null) {
         return widget.separatorBuilder(context, i);
@@ -379,6 +409,58 @@ class _UserListViewState extends State<UserListView>
                     onLongPress: widget.onUserLongPress,
                     onImageTap: widget.onImageTap,
                     selected: selected,
+                  ),
+          );
+        },
+      );
+    } else {
+      return _buildQueryProgressIndicator(context, usersProvider);
+    }
+  }
+
+  Widget _gridItemBuilder(BuildContext context, int i, List<ListItem> items) {
+    final usersProvider = UsersBloc.of(context);
+    if (i < items.length) {
+      final item = items[i];
+      return item.when(
+        headerItem: (_) => Offstage(),
+        userItem: (user) {
+          final selected = widget.selectedUsers?.contains(user) ?? false;
+          return Container(
+            key: ValueKey<String>('USER-${user.id}'),
+            child: widget.userItemBuilder != null
+                ? widget.userItemBuilder(context, user, selected)
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      UserAvatar(
+                        user: user,
+                        borderRadius: BorderRadius.circular(32),
+                        selected: selected,
+                        constraints: BoxConstraints.tightFor(
+                          height: 64,
+                          width: 64,
+                        ),
+                        onTap: (user) =>
+                            widget.onUserTap(user, widget.userWidget),
+                        onLongPress: widget.onUserLongPress,
+                      ),
+                      SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          user.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
           );
         },
