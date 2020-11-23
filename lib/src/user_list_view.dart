@@ -135,6 +135,7 @@ class UserListView extends StatefulWidget {
   /// defaults to false
   final bool groupAlphabetically;
 
+  /// The number of children in the cross axis.
   final int crossAxisCount;
 
   @override
