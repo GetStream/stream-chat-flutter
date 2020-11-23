@@ -50,27 +50,20 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
     if (!_pauseItemAddition) {
       setState(() => _pauseItemAddition = true);
     }
-    if (widget.focusNode != null) widget.focusNode.unfocus();
+    widget.focusNode?.unfocus();
   }
 
   void resumeItemAddition() {
     if (_pauseItemAddition) {
       setState(() => _pauseItemAddition = false);
     }
-    if (widget.focusNode != null) widget.focusNode.requestFocus();
+    widget.focusNode?.requestFocus();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _pauseItemAddition
-          ? () {
-              setState(() {
-                _pauseItemAddition = false;
-                widget.focusNode?.requestFocus();
-              });
-            }
-          : null,
+      onTap: _pauseItemAddition ? resumeItemAddition : null,
       child: Material(
         elevation: 1,
         color: Colors.white,
