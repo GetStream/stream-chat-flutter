@@ -51,12 +51,14 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
     if (!_pauseItemAddition) {
       setState(() => _pauseItemAddition = true);
     }
+    widget.focusNode.unfocus();
   }
 
   void resumeItemAddition() {
     if (_pauseItemAddition) {
       setState(() => _pauseItemAddition = false);
     }
+    widget.focusNode.requestFocus();
   }
 
   @override
