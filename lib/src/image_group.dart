@@ -113,16 +113,18 @@ class ImageGroup extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            StreamChannel(
-              channel: channel,
-              child: FullScreenImage(urls: images.map((e) => e.imageUrl ?? e.thumbUrl ?? e.assetUrl).toList(),
-                startIndex: index,
-                userName: message.user.name,
-                sentAt: message.createdAt,
-                message: message,
-              ),
-            ),
+        builder: (context) => StreamChannel(
+          channel: channel,
+          child: FullScreenImage(
+            urls: images
+                .map((e) => e.imageUrl ?? e.thumbUrl ?? e.assetUrl)
+                .toList(),
+            startIndex: index,
+            userName: message.user.name,
+            sentAt: message.createdAt,
+            message: message,
+          ),
+        ),
       ),
     );
   }

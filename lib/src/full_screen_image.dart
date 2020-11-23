@@ -132,9 +132,13 @@ class _FullScreenImageState extends State<FullScreenImage>
   String getDay(DateTime dateTime) {
     var now = DateTime.now();
 
-    if(DateTime(dateTime.year, dateTime.month, dateTime.day) == DateTime(now.year, now.month, now.day)) {
+    if (DateTime(dateTime.year, dateTime.month, dateTime.day) ==
+        DateTime(now.year, now.month, now.day)) {
       return 'today';
-    } else if(DateTime(now.year, now.month, now.day).difference(dateTime).inHours < 24) {
+    } else if (DateTime(now.year, now.month, now.day)
+            .difference(dateTime)
+            .inHours <
+        24) {
       return 'yesterday';
     } else {
       return 'on ${Jiffy(dateTime).format("MMM do")}';

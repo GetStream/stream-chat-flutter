@@ -378,8 +378,9 @@ class _ImageFooterState extends State<ImageFooter> {
                             child: Material(
                               child: InkWell(
                                 onTap: () async {
-                                  await GallerySaver.saveImage(
-                                      widget.urls[widget.currentPage].split('?')[0]);
+                                  await GallerySaver.saveImage(widget
+                                      .urls[widget.currentPage]
+                                      .split('?')[0]);
                                   Navigator.pop(context);
                                 },
                                 child: SizedBox.expand(
@@ -434,7 +435,8 @@ class _ImageFooterState extends State<ImageFooter> {
                   autofocus: true,
                   decoration: InputDecoration(
                     isDense: true,
-                    prefixIconConstraints: BoxConstraints.tight(Size(38.0, 38.0)),
+                    prefixIconConstraints:
+                        BoxConstraints.tight(Size(38.0, 38.0)),
                     prefixIcon: Transform.scale(
                       scale: 1.2,
                       alignment: Alignment.center,
@@ -462,7 +464,10 @@ class _ImageFooterState extends State<ImageFooter> {
                 width: 8.0,
               ),
               IconButton(
-                icon: Icon(StreamIcons.close_circle, color: Colors.black.withOpacity(0.5),),
+                icon: Icon(
+                  StreamIcons.close_circle,
+                  color: Colors.black.withOpacity(0.5),
+                ),
                 onPressed: () {
                   modalSetState(() {
                     _userSearchMode = false;
@@ -533,98 +538,100 @@ class _ImageFooterState extends State<ImageFooter> {
       child: Container(
         color: Colors.white,
         height: 56.0,
-        child: _loading ? Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircularProgressIndicator(),
-          ),
-        ) : Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: TextField(
-                  controller: _messageController,
-                  onChanged: (val) {
-                    modalSetState(() {});
-                  },
-                  onTap: () {
-                    modalSetState(() {});
-                    setState(() {});
-                  },
-                  decoration: InputDecoration(
-                    isDense: true,
-                    prefixText: '     ',
-                    hintText: 'Add a comment',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(
-                        color: Colors.black.withOpacity(0.16),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(32.0),
-                        borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.16),
-                        )),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12.0),
-                  ),
+        child: _loading
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
                 ),
-              ),
-            ),
-            AnimatedCrossFade(
-              crossFadeState: _messageController.text.isNotEmpty
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              firstChild: IconTheme(
-                data: StreamChatTheme.of(context)
-                    .channelTheme
-                    .messageInputButtonIconTheme,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InkWell(
-                      onTap: () async {
-                        modalSetState(() {
-                          _loading = true;
-                        });
-                        await sendMessage();
-                        modalSetState(() {
-                          _loading = false;
-                        });
-                      },
-                      child: Transform.rotate(
-                        angle: -pi / 2,
-                        child: Icon(
-                          StreamIcons.send_message,
-                          color: StreamChatTheme.of(context).accentColor,
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: TextField(
+                        controller: _messageController,
+                        onChanged: (val) {
+                          modalSetState(() {});
+                        },
+                        onTap: () {
+                          modalSetState(() {});
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          isDense: true,
+                          prefixText: '     ',
+                          hintText: 'Add a comment',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(32.0),
+                            borderSide: BorderSide(
+                              color: Colors.black.withOpacity(0.16),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(32.0),
+                              borderSide: BorderSide(
+                                color: Colors.black.withOpacity(0.16),
+                              )),
+                          contentPadding: EdgeInsets.symmetric(vertical: 12.0),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              secondChild: IconTheme(
-                data: StreamChatTheme.of(context)
-                    .channelTheme
-                    .messageInputButtonIconTheme,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                      child: InkWell(
-                    onTap: () {},
-                    child: Icon(
-                      StreamIcons.send_message,
-                      color: Colors.grey,
+                  AnimatedCrossFade(
+                    crossFadeState: _messageController.text.isNotEmpty
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    firstChild: IconTheme(
+                      data: StreamChatTheme.of(context)
+                          .channelTheme
+                          .messageInputButtonIconTheme,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () async {
+                              modalSetState(() {
+                                _loading = true;
+                              });
+                              await sendMessage();
+                              modalSetState(() {
+                                _loading = false;
+                              });
+                            },
+                            child: Transform.rotate(
+                              angle: -pi / 2,
+                              child: Icon(
+                                StreamIcons.send_message,
+                                color: StreamChatTheme.of(context).accentColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  )),
-                ),
+                    secondChild: IconTheme(
+                      data: StreamChatTheme.of(context)
+                          .channelTheme
+                          .messageInputButtonIconTheme,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                            child: InkWell(
+                          onTap: () {},
+                          child: Icon(
+                            StreamIcons.send_message,
+                            color: Colors.grey,
+                          ),
+                        )),
+                      ),
+                    ),
+                    duration: Duration(milliseconds: 300),
+                    alignment: Alignment.center,
+                  ),
+                ],
               ),
-              duration: Duration(milliseconds: 300),
-              alignment: Alignment.center,
-            ),
-          ],
-        ),
       ),
     );
   }

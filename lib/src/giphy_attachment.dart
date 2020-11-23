@@ -64,12 +64,14 @@ class GiphyAttachment extends StatelessWidget {
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) {
                           return FullScreenImage(
-                            urls: [attachment.imageUrl ??
-                                    attachment.assetUrl ??
-                                    attachment.thumbUrl],
-                                userName: message.user.name,
-                                sentAt: message.createdAt,
-                                message: message,
+                            urls: [
+                              attachment.imageUrl ??
+                                  attachment.assetUrl ??
+                                  attachment.thumbUrl
+                            ],
+                            userName: message.user.name,
+                            sentAt: message.createdAt,
+                            message: message,
                           );
                         }));
                       },
@@ -285,12 +287,14 @@ class GiphyAttachment extends StatelessWidget {
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) {
             return FullScreenImage(
-              urls: [attachment.imageUrl ??
-                          attachment.assetUrl ??
-                          attachment.thumbUrl],
-                      userName: message.user.name,
-                      sentAt: message.createdAt,
-                      message: message,
+              urls: [
+                attachment.imageUrl ??
+                    attachment.assetUrl ??
+                    attachment.thumbUrl
+              ],
+              userName: message.user.name,
+              sentAt: message.createdAt,
+              message: message,
             );
           }));
         },

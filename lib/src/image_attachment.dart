@@ -48,9 +48,11 @@ class ImageAttachment extends StatelessWidget {
                           return StreamChannel(
                             channel: channel,
                             child: FullScreenImage(
-                              urls: [attachment.imageUrl ??
-                                  attachment.assetUrl ??
-                                  attachment.thumbUrl],
+                              urls: [
+                                attachment.imageUrl ??
+                                    attachment.assetUrl ??
+                                    attachment.thumbUrl
+                              ],
                               userName: message.user.name,
                               sentAt: message.createdAt,
                               message: message,
