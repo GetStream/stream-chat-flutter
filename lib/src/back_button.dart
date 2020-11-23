@@ -33,7 +33,7 @@ class StreamBackButton extends StatelessWidget {
               if (onPressed != null) {
                 onPressed();
               } else {
-                Navigator.of(context).pop();
+                Navigator.maybePop(context);
               }
             },
             child: Icon(

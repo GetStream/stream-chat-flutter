@@ -69,8 +69,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 StreamIcons.arrow_right,
                 color: Color(0xFF006CFF),
               ),
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final updatedList = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => GroupChatDetailsScreen(
@@ -78,6 +78,13 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     ),
                   ),
                 );
+                if (updatedList != null) {
+                  setState(() {
+                    _selectedUsers
+                      ..clear()
+                      ..addAll(updatedList);
+                  });
+                }
               },
             )
         ],
