@@ -131,31 +131,46 @@ class _NewChatScreenState extends State<NewChatScreen> {
               controller: _controller,
               focusNode: _searchFocusNode,
               chipBuilder: (context, user) {
-                return Stack(
-                  alignment: AlignmentDirectional.centerStart,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.only(left: 24),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
-                        child: Text(
-                          user.name,
-                          style: TextStyle(color: Colors.black),
+                return GestureDetector(
+                  onTap: () {
+                    _chipInputTextFieldState.removeItem(user);
+                  },
+                  child: Stack(
+                    alignment: AlignmentDirectional.centerStart,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.only(left: 24),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
+                          child: Text(
+                            user.name,
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                       ),
-                    ),
-                    UserAvatar(
-                      user: user,
-                      constraints: BoxConstraints.tightFor(
-                        height: 24,
-                        width: 24,
+                      Opacity(
+                        opacity: .8,
+                        child: UserAvatar(
+                          showOnlineStatus: false,
+                          user: user,
+                          constraints: BoxConstraints.tightFor(
+                            height: 24,
+                            width: 24,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        child: Icon(
+                          StreamIcons.close,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
               onChipAdded: (user) {
