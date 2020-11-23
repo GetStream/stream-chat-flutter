@@ -39,6 +39,8 @@ void main() {
         ),
       );
 
+      await tester.pump(Duration(milliseconds: 1000));
+
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
       expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsOneWidget);
     },
