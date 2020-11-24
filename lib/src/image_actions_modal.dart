@@ -159,7 +159,8 @@ class ImageActionsModal extends StatelessWidget {
           dense: true,
           title: Text(
             title,
-            style: color == null ? titleStyle : titleStyle.copyWith(color: color),
+            style:
+                color == null ? titleStyle : titleStyle.copyWith(color: color),
           ),
           leading: Icon(
             iconData,
