@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ReactionBubble extends StatelessWidget {
@@ -99,14 +100,24 @@ class ReactionBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: 4.0,
       ),
-      child: Icon(
-        reactionIcon?.iconData ?? Icons.help_outline_rounded,
-        size: 16,
-        color: (!highlightOwnReactions ||
-                reaction.user.id == StreamChat.of(context).user.id)
-            ? StreamChatTheme.of(context).accentColor
-            : Colors.black.withOpacity(.5),
-      ),
+      child: reactionIcon != null
+          ? StreamSvgIcon(
+              assetName: reactionIcon.assetName,
+              width: 16,
+              height: 16,
+              color: (!highlightOwnReactions ||
+                      reaction.user.id == StreamChat.of(context).user.id)
+                  ? StreamChatTheme.of(context).accentColor
+                  : Colors.black.withOpacity(.5),
+            )
+          : Icon(
+              Icons.help_outline_rounded,
+              size: 16,
+              color: (!highlightOwnReactions ||
+                      reaction.user.id == StreamChat.of(context).user.id)
+                  ? StreamChatTheme.of(context).accentColor
+                  : Colors.black.withOpacity(.5),
+            ),
     );
   }
 

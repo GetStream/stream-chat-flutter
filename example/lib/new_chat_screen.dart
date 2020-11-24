@@ -163,8 +163,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                       ),
                       Positioned(
-                        child: Icon(
-                          StreamIcons.close,
+                        child: StreamSvgIcon.close(
                           color: Colors.white,
                         ),
                       ),
@@ -193,9 +192,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     child: Row(
                       children: [
                         StreamNeumorphicButton(
-                          child: Icon(
-                            StreamIcons.group,
-                            color: Color(0xFF006CFF),
+                          child: Center(
+                            child: StreamSvgIcon.contacts(
+                              color: Color(0xFF006CFF),
+                              size: 24,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8),
@@ -288,8 +289,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.all(24),
-                                          child: Icon(
-                                            StreamIcons.search,
+                                          child: StreamSvgIcon.search(
                                             size: 96,
                                             color: Colors.grey,
                                           ),

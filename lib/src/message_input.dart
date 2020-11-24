@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
@@ -18,6 +17,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail.dart';
 import 'package:substring_highlight/substring_highlight.dart';
@@ -284,8 +284,7 @@ class MessageInputState extends State<MessageInput> {
                     crossFadeState: _sendAsDm
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
-                    firstChild: Icon(
-                      StreamIcons.check,
+                    firstChild: StreamSvgIcon.check(
                       size: 16.0,
                       color: Colors.white,
                     ),
@@ -330,8 +329,7 @@ class MessageInputState extends State<MessageInput> {
             _actionsShrunk = false;
           });
         },
-        icon: Icon(
-          StreamIcons.circle_left,
+        icon: StreamSvgIcon.emptyCircleLeft(
           color: StreamChatTheme.of(context).accentColor,
         ),
       ),
@@ -403,8 +401,7 @@ class MessageInputState extends State<MessageInput> {
                                 _chosenCommand?.name ?? "",
                                 style: TextStyle(color: Colors.white),
                               ),
-                              avatar: Icon(
-                                StreamIcons.lightning,
+                              avatar: StreamSvgIcon.lightning(
                                 color: Colors.white,
                               ),
                             ),
@@ -579,9 +576,9 @@ class MessageInputState extends State<MessageInput> {
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Icon(
-                                      StreamIcons.lightning,
+                                      horizontal: 8.0,
+                                    ),
+                                    child: StreamSvgIcon.lightning(
                                       color: StreamChatTheme.of(context)
                                           .accentColor,
                                     ),
@@ -619,8 +616,7 @@ class MessageInputState extends State<MessageInput> {
                                   trailing: CircleAvatar(
                                     backgroundColor:
                                         StreamChatTheme.of(context).accentColor,
-                                    child: Icon(
-                                      StreamIcons.lightning,
+                                    child: StreamSvgIcon.lightning(
                                       color: Colors.white,
                                       size: 12.5,
                                     ),
@@ -656,8 +652,7 @@ class MessageInputState extends State<MessageInput> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
-                  icon: Icon(
-                    StreamIcons.picture,
+                  icon: StreamSvgIcon.pictures(
                     size: 24,
                     color: _filePickerIndex == 0
                         ? StreamChatTheme.of(context).accentColor
@@ -670,8 +665,7 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(
-                    StreamIcons.folder,
+                  icon: StreamSvgIcon.files(
                     size: 24,
                     color: _filePickerIndex == 1
                         ? StreamChatTheme.of(context).accentColor
@@ -682,11 +676,8 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: SvgPicture.asset(
-                    'svgs/icon_camera.svg',
-                    package: 'stream_chat_flutter',
-                    height: 24,
-                    width: 24,
+                  icon: StreamSvgIcon.camera(
+                    size: 24,
                     color: _filePickerIndex == 2
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -696,10 +687,9 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(
-                    StreamIcons.record,
+                  icon: StreamSvgIcon.record(
                     size: 24,
-                    color: _filePickerIndex == 2
+                    color: _filePickerIndex == 3
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
                   ),
@@ -993,8 +983,7 @@ class MessageInputState extends State<MessageInput> {
                                             fontWeight: FontWeight.bold),
                                       ),
                                       subtitle: Text('@${m.userId}'),
-                                      trailing: Icon(
-                                        StreamIcons.at_mention,
+                                      trailing: StreamSvgIcon.mentions(
                                         color: StreamChatTheme.of(context)
                                             .accentColor,
                                       ),
@@ -1091,8 +1080,7 @@ class MessageInputState extends State<MessageInput> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Icon(
-                              StreamIcons.smile,
+                            child: StreamSvgIcon.smile(
                               color: StreamChatTheme.of(context).accentColor,
                             ),
                           ),
@@ -1227,8 +1215,7 @@ class MessageInputState extends State<MessageInput> {
         },
         fillColor: Colors.black.withOpacity(.5),
         child: Center(
-          child: Icon(
-            StreamIcons.close,
+          child: StreamSvgIcon.close(
             size: 24,
             color: Colors.white,
           ),
@@ -1299,8 +1286,7 @@ class MessageInputState extends State<MessageInput> {
       child: Padding(
         padding:
             const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-        child: Icon(
-          StreamIcons.lightning,
+        child: StreamSvgIcon.lightning(
           color: Color(0xFF000000).withAlpha(128),
         ),
       ),
@@ -1323,8 +1309,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding:
               EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
-          child: Icon(
-            StreamIcons.attach,
+          child: StreamSvgIcon.attach(
             color: _openFilePickerSection
                 ? StreamChatTheme.of(context).accentColor
                 : Color(0xFF000000).withAlpha(128),
@@ -1594,69 +1579,53 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
-    return IconTheme(
-      data:
-          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-            child: InkWell(
-          onTap: () {
-            sendMessage();
-          },
-          child: Icon(
-            _getIdleSendIcon(),
-            color: Colors.grey,
-          ),
-        )),
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+          child: InkWell(
+        onTap: () {
+          sendMessage();
+        },
+        child: StreamSvgIcon(
+          assetName: _getIdleSendIcon(),
+          color: Colors.grey,
+        ),
+      )),
     );
   }
 
   Widget _buildSendButton(BuildContext context) {
-    return IconTheme(
-      data:
-          StreamChatTheme.of(context).channelTheme.messageInputButtonIconTheme,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: InkWell(
-            onTap: () {
-              sendMessage();
-            },
-            child: _getSendIcon(),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            sendMessage();
+          },
+          child: StreamSvgIcon(
+            assetName: _getSendIcon(),
+            color: StreamChatTheme.of(context).accentColor,
           ),
         ),
       ),
     );
   }
 
-  IconData _getIdleSendIcon() {
+  String _getIdleSendIcon() {
     if (_commandEnabled) {
-      return StreamIcons.search;
+      return 'Icon_search.svg';
     } else {
-      return StreamIcons.send_message;
+      return 'Icon_circle_up.svg';
     }
   }
 
-  Widget _getSendIcon() {
+  String _getSendIcon() {
     if (widget.editMessage != null) {
-      return Icon(
-        StreamIcons.check_send,
-        color: StreamChatTheme.of(context).accentColor,
-      );
+      return 'Icon_circle_right.svg';
     } else if (_commandEnabled) {
-      return Icon(
-        StreamIcons.search,
-        color: StreamChatTheme.of(context).accentColor,
-      );
+      return 'Icon_search.svg';
     } else {
-      return Transform.rotate(
-          angle: -pi / 2,
-          child: Icon(
-            StreamIcons.send_message,
-            color: StreamChatTheme.of(context).accentColor,
-          ));
+      return 'Icon_circle_right.svg';
     }
   }
 

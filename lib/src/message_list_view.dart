@@ -6,6 +6,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -374,8 +375,7 @@ class _MessageListViewState extends State<MessageListView> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.white,
-            child: Icon(
-              StreamIcons.down,
+            child: StreamSvgIcon.down(
               color: Colors.black,
             ),
             onPressed: () {

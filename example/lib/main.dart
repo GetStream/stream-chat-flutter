@@ -143,7 +143,9 @@ class ChannelListPage extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: Icon(StreamIcons.edit),
+                leading: StreamSvgIcon.penWrite(
+                  color: Colors.black.withOpacity(.5),
+                ),
                 onTap: () {
                   Navigator.of(context)
                     ..pop()
@@ -159,7 +161,9 @@ class ChannelListPage extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: Icon(StreamIcons.group),
+                leading: StreamSvgIcon.contacts(
+                  color: Colors.black.withOpacity(.5),
+                ),
                 onTap: () {
                   Navigator.of(context)
                     ..pop()
@@ -191,7 +195,9 @@ class ChannelListPage extends StatelessWidget {
                         ),
                       );
                     },
-                    leading: Icon(StreamIcons.user),
+                    leading: StreamSvgIcon.user(
+                      color: Colors.black.withOpacity(.5),
+                    ),
                     title: Text(
                       'Sign out',
                       style: TextStyle(

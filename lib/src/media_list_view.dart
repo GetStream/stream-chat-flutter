@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:media_gallery/media_gallery.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 class MediaListView extends StatefulWidget {
   final List<String> selectedIds;
@@ -71,8 +71,7 @@ class _MediaListViewState extends State<MediaListView> {
                         child: CircleAvatar(
                           radius: 12,
                           backgroundColor: Colors.white,
-                          child: Icon(
-                            StreamIcons.check,
+                          child: StreamSvgIcon.check(
                             size: 24,
                             color: Colors.black,
                           ),

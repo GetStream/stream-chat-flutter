@@ -42,10 +42,10 @@ void main() {
 
       await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
-      expect(find.byIcon(StreamIcons.sorting_up), findsOneWidget);
-      expect(find.byIcon(StreamIcons.edit), findsOneWidget);
-      expect(find.byIcon(StreamIcons.delete), findsOneWidget);
-      expect(find.byIcon(StreamIcons.copy), findsOneWidget);
+      expect(find.text('Thread reply'), findsOneWidget);
+      expect(find.text('Edit message'), findsOneWidget);
+      expect(find.text('Delete message'), findsOneWidget);
+      expect(find.text('Copy message'), findsOneWidget);
     },
   );
   testWidgets(
@@ -87,10 +87,10 @@ void main() {
 
       await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
-      expect(find.byIcon(StreamIcons.sorting_up), findsNothing);
-      expect(find.byIcon(StreamIcons.edit), findsNothing);
-      expect(find.byIcon(StreamIcons.delete), findsNothing);
-      expect(find.byIcon(StreamIcons.copy), findsNothing);
+      expect(find.text('Thread reply'), findsNothing);
+      expect(find.text('Edit message'), findsNothing);
+      expect(find.text('Delete message'), findsNothing);
+      expect(find.text('Copy message'), findsNothing);
     },
   );
 }

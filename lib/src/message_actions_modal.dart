@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import 'message_input.dart';
 import 'message_widget.dart';
@@ -188,8 +188,7 @@ class MessageActionsModal extends StatelessWidget {
         style:
             Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
       ),
-      leading: Icon(
-        StreamIcons.delete,
+      leading: StreamSvgIcon.delete(
         color: Colors.red,
       ),
       onTap: () {
@@ -208,8 +207,7 @@ class MessageActionsModal extends StatelessWidget {
         'Copy message',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: Icon(
-        StreamIcons.copy,
+      leading: StreamSvgIcon.copy(
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () async {
@@ -225,8 +223,7 @@ class MessageActionsModal extends StatelessWidget {
         'Edit message',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: Icon(
-        StreamIcons.edit,
+      leading: StreamSvgIcon.edit(
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () async {
@@ -267,8 +264,7 @@ class MessageActionsModal extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     IconButton(
-                      icon: Icon(
-                        StreamIcons.edit,
+                      icon: StreamSvgIcon.edit(
                         size: 22,
                         color:
                             StreamChatTheme.of(context).primaryIconTheme.color,
@@ -323,8 +319,7 @@ class MessageActionsModal extends StatelessWidget {
         'Thread reply',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: Icon(
-        StreamIcons.sorting_up,
+      leading: StreamSvgIcon.thread(
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () {

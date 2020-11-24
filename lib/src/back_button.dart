@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class StreamBackButton extends StatelessWidget {
   const StreamBackButton({
     Key key,
     this.onPressed,
-    this.icon = Icons.arrow_back_ios_outlined,
     this.showUnreads = false,
   }) : super(key: key);
 
   final VoidCallback onPressed;
-  final IconData icon;
   final bool showUnreads;
 
   @override
@@ -36,8 +33,7 @@ class StreamBackButton extends StatelessWidget {
                 Navigator.of(context).pop();
               }
             },
-            child: Icon(
-              icon ?? StreamIcons.left,
+            child: StreamSvgIcon.left(
               size: 24,
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white
