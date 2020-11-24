@@ -25,7 +25,8 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsNothing);
+      expect(find.byKey(Key('StreamSvgIcon-Icon_thumbs_up_reaction.svg')),
+          findsNothing);
     },
   );
 
@@ -61,7 +62,8 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsOneWidget);
+      expect(find.byKey(Key('StreamSvgIcon-Icon_thumbs_up_reaction.svg')),
+          findsOneWidget);
     },
   );
   testWidgets(
@@ -100,8 +102,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsOneWidget);
-      expect(find.byIcon(StreamIcons.love_reaction), findsOneWidget);
+      expect(find.byKey(Key('StreamSvgIcon-Icon_thumbs_up_reaction.svg')),
+          findsOneWidget);
+      expect(find.byKey(Key('StreamSvgIcon-Icon_love_reaction.svg')),
+          findsOneWidget);
     },
   );
 }

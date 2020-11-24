@@ -193,9 +193,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     child: Row(
                       children: [
                         StreamNeumorphicButton(
-                          child: StreamSvgIcon(
-                            assetName: 'Icon_contacts.svg',
-                            color: Color(0xFF006CFF),
+                          child: Center(
+                            child: StreamSvgIcon(
+                              assetName: 'Icon_contacts.svg',
+                              color: Color(0xFF006CFF),
+                              height: 24,
+                              width: 24,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8),
