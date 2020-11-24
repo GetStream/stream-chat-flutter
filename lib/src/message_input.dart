@@ -429,7 +429,7 @@ class MessageInputState extends State<MessageInput> {
                   return ListView(
                     padding: const EdgeInsets.all(0),
                     shrinkWrap: true,
-                    children: snapshot.data
+                    children: (snapshot.data ?? members)
                         .map((m) => ListTile(
                               leading: UserAvatar(
                                 user: m.user,
@@ -991,7 +991,7 @@ class MessageInputState extends State<MessageInput> {
             .contains('@')) {
       if (_debounce?.isActive == true) _debounce.cancel();
       _debounce = Timer(
-        const Duration(milliseconds: 350),
+        const Duration(milliseconds: 500),
         () {
           _mentionsOverlay = _buildMentionsOverlayEntry();
           Overlay.of(context).insert(_mentionsOverlay);
