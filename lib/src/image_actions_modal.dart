@@ -152,19 +152,22 @@ class ImageActionsModal extends StatelessWidget {
       color: Colors.black,
     );
 
-    return ListTile(
-      dense: true,
-      title: Text(
-        title,
-        style: color == null ? titleStyle : titleStyle.copyWith(color: color),
+    return Material(
+      child: InkWell(
+        onTap: onTap,
+        child: ListTile(
+          dense: true,
+          title: Text(
+            title,
+            style: color == null ? titleStyle : titleStyle.copyWith(color: color),
+          ),
+          leading: Icon(
+            iconData,
+            color: color ?? StreamChatTheme.of(context).primaryIconTheme.color,
+            size: 24.0,
+          ),
+        ),
       ),
-      leading: Icon(
-        iconData,
-        color: color ?? StreamChatTheme.of(context).primaryIconTheme.color,
-        size: 24.0,
-      ),
-      onTap: onTap,
-      tileColor: Colors.white,
     );
   }
 }
