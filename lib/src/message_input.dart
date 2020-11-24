@@ -967,6 +967,9 @@ class MessageInputState extends State<MessageInput> {
     _debounce = Timer(
       const Duration(milliseconds: 350),
       () {
+        if (!mounted) {
+          return;
+        }
         final s = textEditingController.text;
         StreamChannel.of(context).channel.keyStroke(
               widget.parentMessage?.id,
