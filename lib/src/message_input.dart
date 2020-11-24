@@ -380,11 +380,19 @@ class MessageInputState extends State<MessageInput> {
     Future<List<Member>> queryMembers;
 
     if (query.isNotEmpty) {
-      queryMembers = StreamChannel.of(context).channel.queryMembers(filter: {
-        'name': {
-          '\$autocomplete': query,
+      queryMembers = StreamChannel.of(context).channel.queryMembers(
+        filter: {
+          'name': {
+            '\$autocomplete': query,
+          },
         },
-      }).then((res) => res.members);
+        sort: [
+          SortOption(
+            'name',
+            direction: SortOption.ASC,
+          ),
+        ],
+      ).then((res) => res.members);
     }
 
     final members = StreamChannel.of(context).channel.state.members?.where((m) {
@@ -952,6 +960,7 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
+  Timer _debounce;
   void _onChange() {
     final s = textEditingController.text;
     StreamChannel.of(context).channel.keyStroke(
@@ -980,8 +989,14 @@ class MessageInputState extends State<MessageInput> {
             .split(' ')
             .last
             .contains('@')) {
-      _mentionsOverlay = _buildMentionsOverlayEntry();
-      Overlay.of(context).insert(_mentionsOverlay);
+      if (_debounce?.isActive == true) _debounce.cancel();
+      _debounce = Timer(
+        const Duration(milliseconds: 350),
+        () {
+          _mentionsOverlay = _buildMentionsOverlayEntry();
+          Overlay.of(context).insert(_mentionsOverlay);
+        },
+      );
     }
   }
 
