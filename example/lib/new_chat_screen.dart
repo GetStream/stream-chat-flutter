@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
 import 'main.dart';
-import 'neumorphic_button.dart';
 import 'new_group_chat_screen.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -193,7 +192,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
-                        NeumorphicButton(
+                        StreamNeumorphicButton(
                           child: StreamSvgIcon(
                             assetName: 'Icon_contacts.svg',
                             color: Color(0xFF006CFF),
