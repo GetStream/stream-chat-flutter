@@ -65,8 +65,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
         actions: [
           if (_selectedUsers.isNotEmpty)
             IconButton(
-              icon: Icon(
-                StreamIcons.arrow_right,
+              icon: StreamSvgIcon(
+                assetName: 'Icon_right.svg',
                 color: Color(0xFF006CFF),
               ),
               onPressed: () {
@@ -101,10 +101,11 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               child: TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(
-                    StreamIcons.search,
+                  prefixIcon: StreamSvgIcon(
+                    assetName: 'Icon_search.svg',
                     color: Colors.black,
-                    size: 24,
+                    height: 24,
+                    width: 24,
                   ),
                   hintText: 'Search',
                   hintStyle: TextStyle(
@@ -162,9 +163,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(0.0),
-                                    child: Icon(
-                                      StreamIcons.close,
-                                      size: 24,
+                                    child: StreamSvgIcon(
+                                      assetName: 'Icon_close.svg',
+                                      height: 24,
+                                      width: 24,
                                     ),
                                   ),
                                 ),
@@ -260,9 +262,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(24),
-                                  child: Icon(
-                                    StreamIcons.search,
-                                    size: 96,
+                                  child: StreamSvgIcon(
+                                    assetName: 'Icon_search.svg',
+                                    height: 96,
+                                    width: 96,
                                     color: Colors.grey,
                                   ),
                                 ),

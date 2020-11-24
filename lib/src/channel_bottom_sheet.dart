@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 import 'channel_info.dart';
@@ -73,9 +72,10 @@ class ChannelBottomSheet extends StatelessWidget {
                 initialData: channel.isMuted,
                 builder: (context, snapshot) {
                   return ListTile(
-                    leading: Icon(
-                      StreamIcons.mute,
-                      size: 22,
+                    leading: StreamSvgIcon(
+                      assetName: 'Icon_mute.svg',
+                      height: 22,
+                      width: 22,
                       color: StreamChatTheme.of(context).primaryIconTheme.color,
                     ),
                     title: Text('Mute ${channel.isGroup ? 'group' : 'user'}'),
@@ -94,9 +94,10 @@ class ChannelBottomSheet extends StatelessWidget {
             Divider(),
             if (channel.isGroup && !channel.isDistinct)
               ListTile(
-                leading: Icon(
-                  StreamIcons.user_minus,
-                  size: 22,
+                leading: StreamSvgIcon(
+                  assetName: 'Icon_User_deselect.svg',
+                  height: 22,
+                  width: 22,
                   color: Colors.black,
                 ),
                 title: Text('Leave Group'),

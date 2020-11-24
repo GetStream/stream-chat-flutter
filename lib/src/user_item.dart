@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -73,9 +74,10 @@ class UserItem extends StatelessWidget {
       ),
       trailing: selected
           ? CircleAvatar(
-              child: Icon(
-                StreamIcons.check,
-                size: 20,
+              child: StreamSvgIcon(
+                assetName: 'Icon_check.svg',
+                height: 20,
+                width: 20,
               ),
               radius: 10,
             )

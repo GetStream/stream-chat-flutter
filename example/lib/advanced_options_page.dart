@@ -44,8 +44,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
               ),
         ),
         leading: IconButton(
-          icon: Icon(
-            StreamIcons.left,
+          icon: StreamSvgIcon(
+            assetName: 'Icon_left.svg',
             color: Colors.black,
           ),
           onPressed: () {

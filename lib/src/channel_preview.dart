@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
@@ -152,9 +153,10 @@ class ChannelPreview extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          Icon(
-            StreamIcons.mute,
-            size: 16,
+          StreamSvgIcon(
+            assetName: 'Icon_mute.svg',
+            height: 16,
+            width: 16,
           ),
           Text(
             '  Channel is muted',

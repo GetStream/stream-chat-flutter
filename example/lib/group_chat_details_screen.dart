@@ -106,7 +106,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           NeumorphicButton(
             child: IconButton(
               padding: const EdgeInsets.all(0),
-              icon: Icon(StreamIcons.check),
+              icon: StreamSvgIcon(
+                assetName: 'Icon_check.svg',
+              ),
               color: Color(0xFF006CFF),
               onPressed: _isGroupNameEmpty
                   ? null

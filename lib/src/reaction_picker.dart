@@ -1,6 +1,6 @@
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 
@@ -84,9 +84,10 @@ class _ReactionPickerState extends State<ReactionPicker>
                               ..scale(animations[index].value,
                                   animations[index].value)
                               ..rotateZ(1.0 - animations[index].value),
-                            child: Icon(
-                              reactionIcon.iconData,
-                              size: animations[index].value * 24.0,
+                            child: StreamSvgIcon(
+                              assetName: reactionIcon.assetName,
+                              height: animations[index].value * 24.0,
+                              width: animations[index].value * 24.0,
                               color: ownReactionIndex != -1
                                   ? StreamChatTheme.of(context).accentColor
                                   : Theme.of(context)

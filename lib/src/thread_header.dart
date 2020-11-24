@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header_paint.png)
@@ -84,9 +84,16 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           child: showBackButton
               ? AspectRatio(
                   aspectRatio: 1,
-                  child: StreamBackButton(
+                  child: IconButton(
                     onPressed: onBackPressed,
-                    icon: Icons.close,
+                    icon: StreamSvgIcon(
+                      assetName: 'Icon_close.svg',
+                      height: 24,
+                      width: 24,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    ),
                   ),
                 )
               : SizedBox(),
