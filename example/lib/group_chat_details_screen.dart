@@ -3,7 +3,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import 'main.dart';
-import 'neumorphic_button.dart';
 
 class GroupChatDetailsScreen extends StatefulWidget {
   final List<User> selectedUsers;
@@ -103,7 +102,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           ),
         ),
         actions: [
-          NeumorphicButton(
+          StreamNeumorphicButton(
             child: IconButton(
               padding: const EdgeInsets.all(0),
               icon: Icon(StreamIcons.check),

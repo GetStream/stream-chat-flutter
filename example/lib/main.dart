@@ -69,12 +69,14 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Stream Chat',
-          style: TextStyle(color: Colors.black),
-        ),
+      appBar: ChannelListHeader(
+        onNewChatButtonTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => NewChatScreen(),
+            ),
+          );
+        },
       ),
       drawer: _buildDrawer(context, user),
       drawerEdgeDragWidth: 50,

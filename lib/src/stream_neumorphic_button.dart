@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class NeumorphicButton extends StatelessWidget {
+class StreamNeumorphicButton extends StatelessWidget {
   final Widget child;
   final Color backgroundColor;
 
-  const NeumorphicButton({
+  const StreamNeumorphicButton({
     Key key,
     @required this.child,
     this.backgroundColor = Colors.white,

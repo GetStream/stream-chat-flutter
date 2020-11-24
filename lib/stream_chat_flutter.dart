@@ -33,3 +33,5 @@ export 'src/video_attachment.dart';
 export 'src/users_bloc.dart';
 export 'src/user_list_view.dart';
 export 'src/user_item.dart';
+export 'src/stream_neumorphic_button.dart';
+export 'src/channel_list_header.dart';
