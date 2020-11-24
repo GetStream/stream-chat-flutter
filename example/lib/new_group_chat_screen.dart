@@ -161,6 +161,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.all(0.0),
                                     child: StreamSvgIcon.close(
+                                      color: Colors.black,
                                       size: 24,
                                     ),
                                   ),

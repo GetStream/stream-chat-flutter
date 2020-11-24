@@ -76,6 +76,7 @@ class UserItem extends StatelessWidget {
           ? CircleAvatar(
               child: StreamSvgIcon.check(
                 size: 20,
+                color: Colors.white,
               ),
               radius: 10,
             )
