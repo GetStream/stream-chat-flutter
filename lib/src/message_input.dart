@@ -428,26 +428,36 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
+  Timer _debounce;
   void _onChanged(BuildContext context, String s) {
-    StreamChannel.of(context).channel.keyStroke().catchError((e) {});
+    if (_debounce?.isActive == true) _debounce.cancel();
+    _debounce = Timer(
+      const Duration(milliseconds: 350),
+      () {
+        if (!mounted) {
+          return;
+        }
+        StreamChannel.of(context).channel.keyStroke().catchError((e) {});
 
-    setState(() {
-      _messageIsPresent = s.trim().isNotEmpty;
-      _actionsShrunk = s.trim().isNotEmpty;
-    });
+        setState(() {
+          _messageIsPresent = s.trim().isNotEmpty;
+          _actionsShrunk = s.trim().isNotEmpty;
+        });
 
-    _commandsOverlay?.remove();
-    _commandsOverlay = null;
-    _mentionsOverlay?.remove();
-    _mentionsOverlay = null;
-    _emojiOverlay?.remove();
-    _emojiOverlay = null;
+        _commandsOverlay?.remove();
+        _commandsOverlay = null;
+        _mentionsOverlay?.remove();
+        _mentionsOverlay = null;
+        _emojiOverlay?.remove();
+        _emojiOverlay = null;
 
-    _checkCommands(s.trim(), context);
+        _checkCommands(s.trim(), context);
 
-    _checkMentions(s, context);
+        _checkMentions(s, context);
 
-    _checkEmoji(s, context);
+        _checkEmoji(s, context);
+      },
+    );
   }
 
   String _getHint() {
