@@ -80,6 +80,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: Center(
         child: UserAvatar(
           user: user,
+          showOnlineStatus: false,
           onTap: onUserAvatarTap ?? (_) => Scaffold.of(context).openDrawer(),
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
