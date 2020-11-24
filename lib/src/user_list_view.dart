@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -144,8 +145,6 @@ class UserListView extends StatefulWidget {
 
 class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
-  final ScrollController _scrollController = ScrollController();
-
   bool get _isListView => widget.crossAxisCount == 1;
 
   @override
@@ -158,14 +157,6 @@ class _UserListViewState extends State<UserListView>
       pagination: widget.pagination,
       options: widget.options,
     );
-
-    _scrollController.addListener(() {
-      usersBloc.queryUsersLoading.first.then((loading) {
-        if (!loading) {
-          _listenUserPagination(usersBloc);
-        }
-      });
-    });
   }
 
   @override
@@ -327,32 +318,35 @@ class _UserListViewState extends State<UserListView>
           );
         }
 
-        if (_isListView) {
-          return ListView.separated(
-            physics: AlwaysScrollableScrollPhysics(),
-            controller: _scrollController,
-            itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-            separatorBuilder: (_, index) {
-              if (widget.separatorBuilder != null) {
-                return widget.separatorBuilder(context, index);
-              }
-              return _separatorBuilder(context, index);
-            },
-            itemBuilder: (context, index) {
-              return _listItemBuilder(context, index, items);
-            },
-          );
-        }
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: widget.crossAxisCount,
-          ),
-          itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-          physics: AlwaysScrollableScrollPhysics(),
-          controller: _scrollController,
-          itemBuilder: (context, index) {
-            return _gridItemBuilder(context, index, items);
-          },
+        final child = _isListView
+            ? ListView.separated(
+                physics: AlwaysScrollableScrollPhysics(),
+                // controller: _scrollController,
+                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+                separatorBuilder: (_, index) {
+                  if (widget.separatorBuilder != null) {
+                    return widget.separatorBuilder(context, index);
+                  }
+                  return _separatorBuilder(context, index);
+                },
+                itemBuilder: (context, index) {
+                  return _listItemBuilder(context, index, items);
+                },
+              )
+            : GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: widget.crossAxisCount,
+                ),
+                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+                physics: AlwaysScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return _gridItemBuilder(context, index, items);
+                },
+              );
+
+        return LazyLoadScrollView(
+          onEndOfPage: () => _listenUserPagination(usersBlocState),
+          child: child,
         );
       },
     );
@@ -488,18 +482,14 @@ class _UserListViewState extends State<UserListView>
   }
 
   void _listenUserPagination(UsersBlocState usersProvider) {
-    if (_scrollController.position.maxScrollExtent ==
-            _scrollController.offset &&
-        _scrollController.offset != 0) {
-      usersProvider.queryUsers(
-        filter: widget.filter,
-        sort: widget.sort,
-        pagination: widget.pagination.copyWith(
-          offset: usersProvider.users?.length ?? 0,
-        ),
-        options: widget.options,
-      );
-    }
+    usersProvider.queryUsers(
+      filter: widget.filter,
+      sort: widget.sort,
+      pagination: widget.pagination.copyWith(
+        offset: usersProvider.users?.length ?? 0,
+      ),
+      options: widget.options,
+    );
   }
 
   @override
