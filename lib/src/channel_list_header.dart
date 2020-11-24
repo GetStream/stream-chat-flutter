@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -107,8 +108,11 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                     color = Colors.grey;
                     break;
                 }
-                return Icon(
-                  StreamIcons.pen_write,
+                return SvgPicture.asset(
+                  'images/icon_pen-write.svg',
+                  package: 'stream_chat_flutter',
+                  width: 24.0,
+                  height: 24.0,
                   color: color,
                 );
               },
