@@ -1,3 +1,7 @@
+## 0.2.13+2
+
+- Add debounce to on change messageinput listener
+
 ## 0.2.13+1
 
 - Use TextEditingController.addListener instead of TextField.onChanged

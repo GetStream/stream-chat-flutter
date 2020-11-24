@@ -380,11 +380,19 @@ class MessageInputState extends State<MessageInput> {
     Future<List<Member>> queryMembers;
 
     if (query.isNotEmpty) {
-      queryMembers = StreamChannel.of(context).channel.queryMembers(filter: {
-        'name': {
-          '\$autocomplete': query,
+      queryMembers = StreamChannel.of(context).channel.queryMembers(
+        filter: {
+          'name': {
+            '\$autocomplete': query,
+          },
         },
-      }).then((res) => res.members);
+        sort: [
+          SortOption(
+            'name',
+            direction: SortOption.ASC,
+          ),
+        ],
+      ).then((res) => res.members);
     }
 
     final members = StreamChannel.of(context).channel.state.members?.where((m) {
@@ -421,7 +429,7 @@ class MessageInputState extends State<MessageInput> {
                   return ListView(
                     padding: const EdgeInsets.all(0),
                     shrinkWrap: true,
-                    children: snapshot.data
+                    children: (snapshot.data ?? members)
                         .map((m) => ListTile(
                               leading: UserAvatar(
                                 user: m.user,
@@ -930,7 +938,8 @@ class MessageInputState extends State<MessageInput> {
     super.initState();
 
     if (!kIsWeb) {
-      _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
+      _keyboardListener =
+          KeyboardVisibilityController().onChange.listen((visible) {
         if (visible) {
           _onChange();
         } else {
@@ -952,37 +961,47 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
+  Timer _debounce;
   void _onChange() {
-    final s = textEditingController.text;
-    StreamChannel.of(context).channel.keyStroke(
-          widget.parentMessage?.id,
-        );
+    if (_debounce?.isActive == true) _debounce.cancel();
+    _debounce = Timer(
+      const Duration(milliseconds: 350),
+      () {
+        if (!mounted) {
+          return;
+        }
+        final s = textEditingController.text;
+        StreamChannel.of(context).channel.keyStroke(
+              widget.parentMessage?.id,
+            );
 
-    setState(() {
-      _messageIsPresent = s.trim().isNotEmpty;
-    });
+        setState(() {
+          _messageIsPresent = s.trim().isNotEmpty;
+        });
 
-    _commandsOverlay?.remove();
-    _commandsOverlay = null;
-    _mentionsOverlay?.remove();
-    _mentionsOverlay = null;
+        _commandsOverlay?.remove();
+        _commandsOverlay = null;
+        _mentionsOverlay?.remove();
+        _mentionsOverlay = null;
 
-    if (s.trim().startsWith('/')) {
-      _commandsOverlay = _buildCommandsOverlayEntry();
-      Overlay.of(context).insert(_commandsOverlay);
-    }
+        if (s.trim().startsWith('/')) {
+          _commandsOverlay = _buildCommandsOverlayEntry();
+          Overlay.of(context).insert(_commandsOverlay);
+        }
 
-    if (_messageIsPresent &&
-        textEditingController.selection.isCollapsed &&
-        textEditingController.selection.baseOffset > 0 &&
-        textEditingController.text
-            .substring(0, textEditingController.selection.baseOffset)
-            .split(' ')
-            .last
-            .contains('@')) {
-      _mentionsOverlay = _buildMentionsOverlayEntry();
-      Overlay.of(context).insert(_mentionsOverlay);
-    }
+        if (_messageIsPresent &&
+            textEditingController.selection.isCollapsed &&
+            textEditingController.selection.baseOffset > 0 &&
+            textEditingController.text
+                .substring(0, textEditingController.selection.baseOffset)
+                .split(' ')
+                .last
+                .contains('@')) {
+          _mentionsOverlay = _buildMentionsOverlayEntry();
+          Overlay.of(context).insert(_mentionsOverlay);
+        }
+      },
+    );
   }
 
   void _parseExistingMessage(Message message) {
