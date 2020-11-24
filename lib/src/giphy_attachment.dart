@@ -112,11 +112,9 @@ class GiphyAttachment extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            StreamSvgIcon(
-                              assetName: 'Icon_lightning-command runner.svg',
+                            StreamSvgIcon.lightning(
                               color: StreamChatTheme.of(context).accentColor,
-                              height: 16.0,
-                              width: 16.0,
+                              size: 16.0,
                             ),
                             Text(
                               'GIPHY',
@@ -146,10 +144,8 @@ class GiphyAttachment extends StatelessWidget {
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
-                            icon: StreamSvgIcon(
-                              assetName: 'Icon_left.svg',
-                              height: 24.0,
-                              width: 24.0,
+                            icon: StreamSvgIcon.left(
+                              size: 24.0,
                             ),
                             splashRadius: 16,
                             onPressed: () {
@@ -175,10 +171,8 @@ class GiphyAttachment extends StatelessWidget {
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
-                            icon: StreamSvgIcon(
-                              assetName: 'Icon_right.svg',
-                              height: 24.0,
-                              width: 24.0,
+                            icon: StreamSvgIcon.right(
+                              size: 24.0,
                             ),
                             splashRadius: 16,
                             onPressed: () {
@@ -257,11 +251,9 @@ class GiphyAttachment extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                StreamSvgIcon(
-                  assetName: 'Icon_eye-off.svg',
+                StreamSvgIcon.eye(
                   color: Colors.black.withOpacity(0.5),
-                  height: 16.0,
-                  width: 16.0,
+                  size: 16.0,
                 ),
                 SizedBox(
                   width: 8.0,
@@ -331,11 +323,9 @@ class GiphyAttachment extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      StreamSvgIcon(
-                        assetName: 'Icon_lightning-command runner.svg',
+                      StreamSvgIcon.lightning(
                         color: Colors.white,
-                        height: 16,
-                        width: 16,
+                        size: 16,
                       ),
                       Text(
                         'GIPHY',

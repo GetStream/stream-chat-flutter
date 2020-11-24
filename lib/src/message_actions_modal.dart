@@ -188,8 +188,7 @@ class MessageActionsModal extends StatelessWidget {
         style:
             Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
       ),
-      leading: StreamSvgIcon(
-        assetName: 'Icon_delete.svg',
+      leading: StreamSvgIcon.delete(
         color: Colors.red,
       ),
       onTap: () {
@@ -208,8 +207,7 @@ class MessageActionsModal extends StatelessWidget {
         'Copy message',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: StreamSvgIcon(
-        assetName: 'Icon_copy.svg',
+      leading: StreamSvgIcon.copy(
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () async {
@@ -225,8 +223,7 @@ class MessageActionsModal extends StatelessWidget {
         'Edit message',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: StreamSvgIcon(
-        assetName: 'Icon_edit.svg',
+      leading: StreamSvgIcon.edit(
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () async {
@@ -267,10 +264,8 @@ class MessageActionsModal extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     IconButton(
-                      icon: StreamSvgIcon(
-                        assetName: 'Icon_edit.svg',
-                        height: 22,
-                        width: 22,
+                      icon: StreamSvgIcon.edit(
+                        size: 22,
                         color:
                             StreamChatTheme.of(context).primaryIconTheme.color,
                       ),
@@ -324,8 +319,7 @@ class MessageActionsModal extends StatelessWidget {
         'Thread reply',
         style: Theme.of(context).textTheme.headline6,
       ),
-      leading: StreamSvgIcon(
-        assetName: 'Icon_Thread_Reply.svg',
+      leading: StreamSvgIcon.thread(
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () {

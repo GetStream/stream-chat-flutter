@@ -153,10 +153,8 @@ class ChannelPreview extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          StreamSvgIcon(
-            assetName: 'Icon_mute.svg',
-            height: 16,
-            width: 16,
+          StreamSvgIcon.mute(
+            size: 16,
           ),
           Text(
             '  Channel is muted',

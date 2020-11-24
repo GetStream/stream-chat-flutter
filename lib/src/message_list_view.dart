@@ -375,8 +375,7 @@ class _MessageListViewState extends State<MessageListView> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.white,
-            child: StreamSvgIcon(
-              assetName: 'Icon_down.svg',
+            child: StreamSvgIcon.down(
               color: Colors.black,
             ),
             onPressed: () {

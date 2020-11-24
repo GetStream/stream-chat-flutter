@@ -143,8 +143,7 @@ class ChannelListPage extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: StreamSvgIcon(
-                  assetName: 'Icon_pen-write.svg',
+                leading: StreamSvgIcon.penWrite(
                   color: Colors.black.withOpacity(.5),
                 ),
                 onTap: () {
@@ -162,8 +161,7 @@ class ChannelListPage extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: StreamSvgIcon(
-                  assetName: 'Icon_contacts.svg',
+                leading: StreamSvgIcon.contacts(
                   color: Colors.black.withOpacity(.5),
                 ),
                 onTap: () {
@@ -197,8 +195,7 @@ class ChannelListPage extends StatelessWidget {
                         ),
                       );
                     },
-                    leading: StreamSvgIcon(
-                      assetName: 'Icon_user.svg',
+                    leading: StreamSvgIcon.user(
                       color: Colors.black.withOpacity(.5),
                     ),
                     title: Text(

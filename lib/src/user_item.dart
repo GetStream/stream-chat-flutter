@@ -74,10 +74,8 @@ class UserItem extends StatelessWidget {
       ),
       trailing: selected
           ? CircleAvatar(
-              child: StreamSvgIcon(
-                assetName: 'Icon_check.svg',
-                height: 20,
-                width: 20,
+              child: StreamSvgIcon.check(
+                size: 20,
               ),
               radius: 10,
             )

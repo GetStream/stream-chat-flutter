@@ -72,10 +72,8 @@ class ChannelBottomSheet extends StatelessWidget {
                 initialData: channel.isMuted,
                 builder: (context, snapshot) {
                   return ListTile(
-                    leading: StreamSvgIcon(
-                      assetName: 'Icon_mute.svg',
-                      height: 22,
-                      width: 22,
+                    leading: StreamSvgIcon.mute(
+                      size: 22,
                       color: StreamChatTheme.of(context).primaryIconTheme.color,
                     ),
                     title: Text('Mute ${channel.isGroup ? 'group' : 'user'}'),
@@ -94,10 +92,8 @@ class ChannelBottomSheet extends StatelessWidget {
             Divider(),
             if (channel.isGroup && !channel.isDistinct)
               ListTile(
-                leading: StreamSvgIcon(
-                  assetName: 'Icon_User_deselect.svg',
-                  height: 22,
-                  width: 22,
+                leading: StreamSvgIcon.userRemove(
+                  size: 22,
                   color: Colors.black,
                 ),
                 title: Text('Leave Group'),

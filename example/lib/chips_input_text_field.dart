@@ -130,14 +130,15 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: IconButton(
-                      icon: StreamSvgIcon(
-                        assetName: _chips.isEmpty
-                            ? 'Icon_user.svg'
-                            : 'Icon_User_add.svg',
-                        color: Colors.black.withOpacity(0.5),
-                        height: 24,
-                        width: 24,
-                      ),
+                      icon: _chips.isEmpty
+                          ? StreamSvgIcon.user(
+                              color: Colors.black.withOpacity(0.5),
+                              size: 24,
+                            )
+                          : StreamSvgIcon.userAdd(
+                              color: Colors.black.withOpacity(0.5),
+                              size: 24,
+                            ),
                       onPressed:
                           !_pauseItemAddition ? null : resumeItemAddition,
                       alignment: Alignment.topRight,

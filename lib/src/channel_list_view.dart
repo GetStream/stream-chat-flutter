@@ -201,10 +201,8 @@ class _ChannelListViewState extends State<ChannelListView>
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: StreamSvgIcon(
-                                  assetName: 'Icon_message.svg',
-                                  height: 136,
-                                  width: 136,
+                                child: StreamSvgIcon.message(
+                                  size: 136,
                                   color: Color(0xffDBDBDB),
                                 ),
                               ),
@@ -519,9 +517,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   IconSlideAction(
                     color: backgroundColor,
-                    iconWidget: StreamSvgIcon(
-                      assetName: 'Icon_mute.svg',
-                    ),
+                    iconWidget: StreamSvgIcon.mute(),
                     onTap: () async {
                       if (!channel.isMuted) {
                         await channel.mute();
@@ -533,9 +529,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   if (channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
                       color: backgroundColor,
-                      iconWidget: StreamSvgIcon(
-                        assetName: 'Icon_User_deselect.svg',
-                      ),
+                      iconWidget: StreamSvgIcon.userRemove(),
                       onTap: () async {
                         final confirm = await showConfirmationDialog(
                           context,

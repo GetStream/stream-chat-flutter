@@ -71,10 +71,8 @@ class _MediaListViewState extends State<MediaListView> {
                         child: CircleAvatar(
                           radius: 12,
                           backgroundColor: Colors.white,
-                          child: StreamSvgIcon(
-                            assetName: 'Icon_check.svg',
-                            height: 24,
-                            width: 24,
+                          child: StreamSvgIcon.check(
+                            size: 24,
                             color: Colors.black,
                           ),
                         ),

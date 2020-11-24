@@ -33,10 +33,8 @@ class StreamBackButton extends StatelessWidget {
                 Navigator.of(context).pop();
               }
             },
-            child: StreamSvgIcon(
-              assetName: 'Icon_left.svg',
-              height: 24,
-              width: 24,
+            child: StreamSvgIcon.left(
+              size: 24,
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white
                   : Colors.black,

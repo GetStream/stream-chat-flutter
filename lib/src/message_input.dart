@@ -284,10 +284,8 @@ class MessageInputState extends State<MessageInput> {
                     crossFadeState: _sendAsDm
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
-                    firstChild: StreamSvgIcon(
-                      assetName: 'Icon_check.svg',
-                      height: 16.0,
-                      width: 16.0,
+                    firstChild: StreamSvgIcon.check(
+                      size: 16.0,
                       color: Colors.white,
                     ),
                     secondChild: SizedBox(
@@ -331,8 +329,7 @@ class MessageInputState extends State<MessageInput> {
             _actionsShrunk = false;
           });
         },
-        icon: StreamSvgIcon(
-          assetName: 'Icon_empty_circle_left.svg',
+        icon: StreamSvgIcon.emptyCircleLeft(
           color: StreamChatTheme.of(context).accentColor,
         ),
       ),
@@ -404,8 +401,7 @@ class MessageInputState extends State<MessageInput> {
                                 _chosenCommand?.name ?? "",
                                 style: TextStyle(color: Colors.white),
                               ),
-                              avatar: StreamSvgIcon(
-                                assetName: 'Icon_lightning-command runner.svg',
+                              avatar: StreamSvgIcon.lightning(
                                 color: Colors.white,
                               ),
                             ),
@@ -582,9 +578,7 @@ class MessageInputState extends State<MessageInput> {
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8.0,
                                     ),
-                                    child: StreamSvgIcon(
-                                      assetName:
-                                          'Icon_lightning-command runner.svg',
+                                    child: StreamSvgIcon.lightning(
                                       color: StreamChatTheme.of(context)
                                           .accentColor,
                                     ),
@@ -622,12 +616,9 @@ class MessageInputState extends State<MessageInput> {
                                   trailing: CircleAvatar(
                                     backgroundColor:
                                         StreamChatTheme.of(context).accentColor,
-                                    child: StreamSvgIcon(
-                                      assetName:
-                                          'Icon_lightning-command runner.svg',
+                                    child: StreamSvgIcon.lightning(
                                       color: Colors.white,
-                                      height: 12.5,
-                                      width: 12.5,
+                                      size: 12.5,
                                     ),
                                     maxRadius: 12,
                                   ),
@@ -661,10 +652,8 @@ class MessageInputState extends State<MessageInput> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
-                  icon: StreamSvgIcon(
-                    assetName: 'pictures.svg',
-                    height: 24,
-                    width: 24,
+                  icon: StreamSvgIcon.pictures(
+                    size: 24,
                     color: _filePickerIndex == 0
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -676,10 +665,8 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: StreamSvgIcon(
-                    assetName: 'files.svg',
-                    height: 24,
-                    width: 24,
+                  icon: StreamSvgIcon.files(
+                    size: 24,
                     color: _filePickerIndex == 1
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -689,10 +676,8 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: StreamSvgIcon(
-                    assetName: 'Icon_camera.svg',
-                    height: 24,
-                    width: 24,
+                  icon: StreamSvgIcon.camera(
+                    size: 24,
                     color: _filePickerIndex == 2
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -702,10 +687,8 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
-                  icon: StreamSvgIcon(
-                    assetName: 'Icon_record.svg',
-                    height: 24,
-                    width: 24,
+                  icon: StreamSvgIcon.record(
+                    size: 24,
                     color: _filePickerIndex == 3
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -1000,8 +983,7 @@ class MessageInputState extends State<MessageInput> {
                                             fontWeight: FontWeight.bold),
                                       ),
                                       subtitle: Text('@${m.userId}'),
-                                      trailing: StreamSvgIcon(
-                                        assetName: 'mentions.svg',
+                                      trailing: StreamSvgIcon.mentions(
                                         color: StreamChatTheme.of(context)
                                             .accentColor,
                                       ),
@@ -1098,8 +1080,7 @@ class MessageInputState extends State<MessageInput> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: StreamSvgIcon(
-                              assetName: 'Icon_smile.svg',
+                            child: StreamSvgIcon.smile(
                               color: StreamChatTheme.of(context).accentColor,
                             ),
                           ),
@@ -1234,10 +1215,8 @@ class MessageInputState extends State<MessageInput> {
         },
         fillColor: Colors.black.withOpacity(.5),
         child: Center(
-          child: StreamSvgIcon(
-            assetName: 'Icon_close.svg',
-            height: 24,
-            width: 24,
+          child: StreamSvgIcon.close(
+            size: 24,
             color: Colors.white,
           ),
         ),
@@ -1307,8 +1286,7 @@ class MessageInputState extends State<MessageInput> {
       child: Padding(
         padding:
             const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-        child: StreamSvgIcon(
-          assetName: 'Icon_lightning-command runner.svg',
+        child: StreamSvgIcon.lightning(
           color: Color(0xFF000000).withAlpha(128),
         ),
       ),
@@ -1331,8 +1309,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding:
               EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
-          child: StreamSvgIcon(
-            assetName: 'Icon_attach.svg',
+          child: StreamSvgIcon.attach(
             color: _openFilePickerSection
                 ? StreamChatTheme.of(context).accentColor
                 : Color(0xFF000000).withAlpha(128),
