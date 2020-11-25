@@ -1,3 +1,7 @@
+## 0.2.14
+
+- Add onMessageTap callbacks
+
 ## 0.2.13+2
 
 - Add debounce to on change messageinput listener
