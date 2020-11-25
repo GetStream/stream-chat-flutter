@@ -30,6 +30,7 @@ dependencies:
   flutter_keyboard_visibility: ^3.3.0
   stream_chat: ^0.2.13+1
   mime: ^0.9.6+3
+  video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4
   substring_highlight: ^0.1.2
