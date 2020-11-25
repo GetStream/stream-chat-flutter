@@ -132,7 +132,7 @@ class ChooseUserPage extends StatelessWidget {
 
                             final secureStorage = FlutterSecureStorage();
                             final client = StreamChat.of(context).client;
-
+                            client.apiKey = kDefaultStreamApiKey;
                             await client.setUser(
                               user,
                               token,
