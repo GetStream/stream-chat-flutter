@@ -17,8 +17,34 @@ class ChannelInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
+    return StreamBuilder<List<Member>>(
+      stream: channel.state.membersStream,
+      initialData: channel.state.members,
+      builder: (context, snapshot) {
+        return ValueListenableBuilder(
+          valueListenable: client.wsConnectionStatus,
+          builder: (context, status, child) {
+            switch (status) {
+              case ConnectionStatus.connected:
+                return _buildConnectedTitleState(context, snapshot.data);
+              case ConnectionStatus.connecting:
+                return _buildConnectingTitleState(context);
+              case ConnectionStatus.disconnected:
+                return _buildDisconnectedTitleState(context, client);
+              default:
+                return Offstage();
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildConnectedTitleState(BuildContext context, List<Member> members) {
+    var alternativeWidget;
+
     if (channel.memberCount != null && channel.memberCount > 2) {
-      return Text(
+      alternativeWidget = Text(
         '${channel.memberCount} Members, ${channel.state.watcherCount} Online',
         style: StreamChatTheme.of(context)
             .channelTheme
@@ -26,52 +52,26 @@ class ChannelInfo extends StatelessWidget {
             .lastMessageAt,
       );
     } else {
-      return StreamBuilder<List<Member>>(
-        stream: channel.state.membersStream,
-        initialData: channel.state.members,
-        builder: (context, snapshot) {
-          return ValueListenableBuilder(
-            valueListenable: client.wsConnectionStatus,
-            builder: (context, status, child) {
-              switch (status) {
-                case ConnectionStatus.connected:
-                  return _buildConnectedTitleState(context, snapshot.data);
-                case ConnectionStatus.connecting:
-                  return _buildConnectingTitleState(context);
-                case ConnectionStatus.disconnected:
-                  return _buildDisconnectedTitleState(context, client);
-                default:
-                  return Offstage();
-              }
-            },
-          );
-        },
+      final otherMember = members.firstWhere(
+        (element) => element.userId != StreamChat.of(context).user.id,
+        orElse: () => null,
       );
-    }
-  }
 
-  Widget _buildConnectedTitleState(BuildContext context, List<Member> members) {
-    var alternativeWidget;
-
-    final otherMember = members.firstWhere(
-      (element) => element.userId != StreamChat.of(context).user.id,
-      orElse: () => null,
-    );
-
-    if (otherMember != null) {
-      if (otherMember.user.online) {
-        alternativeWidget = Text(
-          'Online',
-          style: StreamChatTheme.of(context)
-              .channelTheme
-              .channelHeaderTheme
-              .lastMessageAt,
-        );
-      } else {
-        alternativeWidget = Text(
-          'Last seen ${Jiffy(otherMember.user.lastActive).fromNow()}',
-          style: textStyle,
-        );
+      if (otherMember != null) {
+        if (otherMember.user.online) {
+          alternativeWidget = Text(
+            'Online',
+            style: StreamChatTheme.of(context)
+                .channelTheme
+                .channelHeaderTheme
+                .lastMessageAt,
+          );
+        } else {
+          alternativeWidget = Text(
+            'Last seen ${Jiffy(otherMember.user.lastActive).fromNow()}',
+            style: textStyle,
+          );
+        }
       }
     }
 
