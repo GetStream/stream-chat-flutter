@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'group_chat_details_screen.dart';
 import 'search_text_field.dart';
+import 'routes/routes.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
   @override
@@ -78,14 +79,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                         color: Color(0xFF006CFF),
                       ),
                       onPressed: () async {
-                        final updatedList = await Navigator.push(
+                        final updatedList = await Navigator.pushNamed(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => GroupChatDetailsScreen(
-                              selectedUsers:
-                                  _selectedUsers.toList(growable: false),
-                            ),
-                          ),
+                          Routes.NEW_GROUP_CHAT_DETAILS,
+                          arguments: _selectedUsers.toList(growable: false),
                         );
                         if (updatedList != null) {
                           setState(() {

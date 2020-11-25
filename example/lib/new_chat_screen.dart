@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'chips_input_text_field.dart';
 import 'main.dart';
 import 'new_group_chat_screen.dart';
+import 'routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
   @override
@@ -182,9 +183,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
               Container(
                 child: InkWell(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
+                      Routes.NEW_GROUP_CHAT,
                     );
                   },
                   child: Padding(
@@ -334,16 +335,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
     channel.update({
       'draft': false,
     });
-    Navigator.pushReplacement(
+    Navigator.pushNamedAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (context) {
-          return StreamChannel(
-            child: ChannelPage(),
-            channel: channel,
-          );
-        },
-      ),
+      Routes.CHANNEL_PAGE,
+      ModalRoute.withName(Routes.CHANNEL_LIST),
+      arguments: channel,
     );
   }
 }

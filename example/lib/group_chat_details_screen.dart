@@ -3,6 +3,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import 'main.dart';
+import 'routes/routes.dart';
 
 class GroupChatDetailsScreen extends StatefulWidget {
   final List<User> selectedUsers;
@@ -128,18 +129,12 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           'name': groupName,
                         });
                         await channel.watch();
-                        Navigator.of(context)
-                          ..pop()
-                          ..pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return StreamChannel(
-                                  child: ChannelPage(),
-                                  channel: channel,
-                                );
-                              },
-                            ),
-                          );
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          ModalRoute.withName(Routes.CHANNEL_LIST),
+                          arguments: channel,
+                        );
                       },
               ),
             ),

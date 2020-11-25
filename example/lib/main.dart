@@ -10,6 +10,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'notifications_service.dart';
+import 'routes/app_routes.dart';
+import 'routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,19 +49,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      //TODO change to system once dark theme is implemented
-      themeMode: ThemeMode.light,
-      builder: (context, widget) {
-        return StreamChat(
-          child: widget,
-          client: client,
-        );
-      },
-      home: client.state.user == null ? ChooseUserPage() : ChannelListPage(),
+    return StreamChat(
+      client: client,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        //TODO change to system once dark theme is implemented
+        themeMode: ThemeMode.light,
+        onGenerateRoute: AppRoutes.generateRoute,
+        initialRoute: client.state.user == null
+            ? Routes.CHOOSE_USER
+            : Routes.CHANNEL_LIST,
+      ),
     );
   }
 }
@@ -71,11 +73,7 @@ class ChannelListPage extends StatelessWidget {
     return Scaffold(
       appBar: ChannelListHeader(
         onNewChatButtonTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => NewChatScreen(),
-            ),
-          );
+          Navigator.pushNamed(context, Routes.NEW_CHAT);
         },
       ),
       drawer: _buildDrawer(context, user),
@@ -83,9 +81,7 @@ class ChannelListPage extends StatelessWidget {
       body: ChannelsBloc(
         child: ChannelListView(
           onStartChatPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return NewChatScreen();
-            }));
+            Navigator.pushNamed(context, Routes.NEW_CHAT);
           },
           swipeToAction: true,
           filter: {
@@ -147,11 +143,10 @@ class ChannelListPage extends StatelessWidget {
                   color: Colors.black.withOpacity(.5),
                 ),
                 onTap: () {
-                  Navigator.of(context)
-                    ..pop()
-                    ..push(MaterialPageRoute(builder: (context) {
-                      return NewChatScreen();
-                    }));
+                  Navigator.popAndPushNamed(
+                    context,
+                    Routes.NEW_CHAT,
+                  );
                 },
                 title: Text(
                   'New direct message',
@@ -165,11 +160,10 @@ class ChannelListPage extends StatelessWidget {
                   color: Colors.black.withOpacity(.5),
                 ),
                 onTap: () {
-                  Navigator.of(context)
-                    ..pop()
-                    ..push(MaterialPageRoute(builder: (context) {
-                      return NewGroupChatScreen();
-                    }));
+                  Navigator.popAndPushNamed(
+                    context,
+                    Routes.NEW_GROUP_CHAT,
+                  );
                 },
                 title: Text(
                   'New group',
@@ -188,11 +182,9 @@ class ChannelListPage extends StatelessWidget {
                       final secureStorage = FlutterSecureStorage();
                       await secureStorage.deleteAll();
                       Navigator.pop(context);
-                      await Navigator.pushReplacement(
+                      Navigator.pushReplacementNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => ChooseUserPage(),
-                        ),
+                        Routes.CHOOSE_USER,
                       );
                     },
                     leading: StreamSvgIcon.user(
