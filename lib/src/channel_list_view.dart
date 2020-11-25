@@ -185,26 +185,25 @@ class _ChannelListViewState extends State<ChannelListView>
             child = widget.emptyBuilder(context);
           }
 
-            if (channels.isEmpty && widget.emptyBuilder == null) {
-              child = LayoutBuilder(
-                builder: (context, viewportConstraints) {
-                  return SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: Stack(
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: viewportConstraints.maxHeight,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: StreamSvgIcon.message(
-                                  size: 136,
-                                  color: Color(0xffDBDBDB),
-                                ),
+          if (channels.isEmpty && widget.emptyBuilder == null) {
+            child = LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Stack(
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: viewportConstraints.maxHeight,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: StreamSvgIcon.message(
+                                size: 136,
+                                color: Color(0xffDBDBDB),
                               ),
                             ),
                             Padding(

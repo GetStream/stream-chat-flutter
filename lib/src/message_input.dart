@@ -14,6 +14,7 @@ import 'package:media_gallery/media_gallery.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/compress_video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -865,7 +866,18 @@ class MessageInputState extends State<MessageInput> {
 
       if (file.size > _kMaxAttachmentSize) {
         if (medium.mediaType == MediaType.video) {
-          final mediaInfo = await _compressVideo(file);
+          final mediaInfo =
+              await CompressVideoService.instance.compressVideo(file.path);
+
+          if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
+            Scaffold.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
+                ),
+              ),
+            );
+          }
           file = PlatformFile(
             name: file.name,
             size: mediaInfo.filesize,
@@ -927,33 +939,6 @@ class MessageInputState extends State<MessageInput> {
         ),
       );
     }
-  }
-
-  Future<MediaInfo> _compressVideo(PlatformFile file) async {
-    print('file.size: ${file.size}');
-    print('VideoCompress.isCompressing: ${VideoCompress.isCompressing}');
-    if (VideoCompress.isCompressing) {
-      final compressCompleter = Completer();
-      VideoCompress.compressProgress$.subscribe(
-        (event) {
-          print('event: ${event}');
-        },
-        onDone: () {
-          compressCompleter.complete();
-        },
-        onError: (e) {
-          compressCompleter.completeError(e);
-        },
-      );
-      await compressCompleter.future;
-    }
-    final mediaInfo = await VideoCompress.compressVideo(
-      file.path,
-    );
-
-    print('mediaInfo.filesize: ${mediaInfo.filesize / 1024}');
-
-    return mediaInfo;
   }
 
   CircleAvatar _buildGiphyIcon() {
@@ -1571,7 +1556,8 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size > _kMaxAttachmentSize) {
       if (attachmentType == 'video') {
-        final mediaInfo = await _compressVideo(file);
+        final mediaInfo = await CompressVideoService.instance
+            .compressVideo(file.path, _kMaxAttachmentSize);
         file = PlatformFile(
           name: mediaInfo.title,
           size: mediaInfo.filesize,
@@ -1800,22 +1786,10 @@ class MessageInputState extends State<MessageInput> {
   }
 
   StreamSubscription _keyboardListener;
-  Subscription _videoCompressSubscription;
-  Completer _videoCompressCompleter = Completer();
 
   @override
   void initState() {
     super.initState();
-
-    VideoCompress.compressProgress$.subscribe(
-      (event) {},
-      onDone: () {
-        _videoCompressCompleter.complete();
-      },
-      onError: (e) {
-        _videoCompressCompleter.completeError(e);
-      },
-    );
 
     _focusNode = widget.focusNode ?? FocusNode();
 
