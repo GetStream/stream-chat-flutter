@@ -8,7 +8,7 @@ class TypingIndicator extends StatelessWidget {
   const TypingIndicator({
     Key key,
     this.channel,
-    this.alternativeWidget = const SizedBox(),
+    this.alternativeWidget,
     this.style,
     this.alignment = Alignment.centerLeft,
   }) : super(key: key);
@@ -48,7 +48,7 @@ class TypingIndicator extends StatelessWidget {
                   key: Key('alternative'),
                   alignment: alignment,
                   child: Container(
-                    child: alternativeWidget,
+                    child: alternativeWidget ?? Offstage(),
                   ),
                 ),
         );

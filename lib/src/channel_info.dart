@@ -16,6 +16,7 @@ class ChannelInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final client = StreamChat.of(context).client;
     if (channel.memberCount != null && channel.memberCount > 2) {
       return Text(
         '${channel.memberCount} Members, ${channel.state.watcherCount} Online',
@@ -29,31 +30,107 @@ class ChannelInfo extends StatelessWidget {
         stream: channel.state.membersStream,
         initialData: channel.state.members,
         builder: (context, snapshot) {
-          final otherMember = snapshot.data.firstWhere(
-            (element) => element.userId != StreamChat.of(context).user.id,
-            orElse: () => null,
-          );
-
-          if (otherMember == null) {
-            return SizedBox();
-          }
-
-          if (otherMember.user.online) {
-            return Text(
-              'Online',
-              style: StreamChatTheme.of(context)
-                  .channelTheme
-                  .channelHeaderTheme
-                  .lastMessageAt,
-            );
-          }
-
-          return Text(
-            'Last seen ${Jiffy(otherMember.user.lastActive).fromNow()}',
-            style: textStyle,
+          return ValueListenableBuilder(
+            valueListenable: client.wsConnectionStatus,
+            builder: (context, status, child) {
+              switch (status) {
+                case ConnectionStatus.connected:
+                  return _buildConnectedTitleState(context, snapshot.data);
+                case ConnectionStatus.connecting:
+                  return _buildConnectingTitleState(context);
+                case ConnectionStatus.disconnected:
+                  return _buildDisconnectedTitleState(context, client);
+                default:
+                  return Offstage();
+              }
+            },
           );
         },
       );
     }
+  }
+
+  Widget _buildConnectedTitleState(BuildContext context, List<Member> members) {
+    var alternativeWidget;
+
+    final otherMember = members.firstWhere(
+      (element) => element.userId != StreamChat.of(context).user.id,
+      orElse: () => null,
+    );
+
+    if (otherMember != null) {
+      if (otherMember.user.online) {
+        alternativeWidget = Text(
+          'Online',
+          style: StreamChatTheme.of(context)
+              .channelTheme
+              .channelHeaderTheme
+              .lastMessageAt,
+        );
+      } else {
+        alternativeWidget = Text(
+          'Last seen ${Jiffy(otherMember.user.lastActive).fromNow()}',
+          style: textStyle,
+        );
+      }
+    }
+
+    return TypingIndicator(
+      alignment: Alignment.center,
+      alternativeWidget: alternativeWidget,
+      style: textStyle,
+    );
+  }
+
+  Widget _buildConnectingTitleState(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          height: 16,
+          width: 16,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        SizedBox(width: 10),
+        Text(
+          'Searching for Network',
+          style: textStyle,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDisconnectedTitleState(BuildContext context, Client client) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Offline...',
+          style: textStyle,
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.all(0),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity(
+              horizontal: VisualDensity.minimumDensity,
+              vertical: VisualDensity.minimumDensity,
+            ),
+          ),
+          onPressed: () async {
+            await client.disconnect();
+            return client.connect();
+          },
+          child: Text(
+            'Try Again',
+            style: textStyle.copyWith(
+              color: Color(0xFF006CFF),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

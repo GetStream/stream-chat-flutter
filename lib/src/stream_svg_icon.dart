@@ -25,6 +25,7 @@ class StreamSvgIcon extends StatelessWidget {
             height: height,
             key: key,
             color: color,
+            fit: BoxFit.scaleDown,
             alignment: Alignment.center,
           )
         : SvgPicture.asset(
@@ -34,6 +35,7 @@ class StreamSvgIcon extends StatelessWidget {
             width: width,
             height: height,
             color: color,
+            fit: BoxFit.scaleDown,
             alignment: Alignment.center,
           );
   }

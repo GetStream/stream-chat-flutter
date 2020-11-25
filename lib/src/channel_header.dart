@@ -114,6 +114,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                     .channelHeaderTheme
                     .title,
               ),
+              SizedBox(height: 2),
               ChannelInfo(
                 channel: channel,
                 textStyle:
