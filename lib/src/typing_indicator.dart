@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 
@@ -38,10 +39,21 @@ class TypingIndicator extends StatelessWidget {
               ? Align(
                   key: Key('typings'),
                   alignment: alignment,
-                  child: Text(
-                    '${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing...',
-                    maxLines: 1,
-                    style: style,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Lottie.asset(
+                        'animations/typing_dots.json',
+                        package: 'stream_chat_flutter',
+                        alignment: Alignment.center,
+                        height: 4,
+                      ),
+                      Text(
+                        '  ${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing',
+                        maxLines: 1,
+                        style: style,
+                      ),
+                    ],
                   ),
                 )
               : Align(
