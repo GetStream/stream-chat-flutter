@@ -100,9 +100,21 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               child: TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  prefixIcon: StreamSvgIcon.search(
-                    color: Colors.black,
-                    size: 24,
+                  prefixIconConstraints: BoxConstraints.tight(
+                    Size(
+                      40,
+                      24,
+                    ),
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8,
+                      right: 8,
+                    ),
+                    child: StreamSvgIcon.search(
+                      color: Colors.black,
+                      size: 24,
+                    ),
                   ),
                   hintText: 'Search',
                   hintStyle: TextStyle(
