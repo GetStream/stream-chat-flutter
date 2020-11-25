@@ -6,6 +6,7 @@ class SearchTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String hintText;
   final VoidCallback onTap;
+  final bool showCloseButton;
 
   const SearchTextField({
     Key key,
@@ -13,6 +14,7 @@ class SearchTextField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.hintText = 'Search',
+    this.showCloseButton = true,
   }) : super(key: key);
 
   @override
@@ -55,25 +57,27 @@ class SearchTextField extends StatelessWidget {
               ),
             ),
           ),
-          // Material(
-          //
-          //   child: IconButton(
-          //     icon: StreamSvgIcon.close(
-          //       color: Colors.grey,
-          //     ),
-          //     splashRadius: 24,
-          //     onPressed: () {
-          //       if (controller.text.isNotEmpty) {
-          //         Future.microtask(
-          //           () => [
-          //             controller.clear(),
-          //             onChanged(''),
-          //           ],
-          //         );
-          //       }
-          //     },
-          //   ),
-          // ),
+          if (showCloseButton)
+            Material(
+              color: Colors.transparent,
+              child: IconButton(
+                padding: const EdgeInsets.all(0),
+                icon: StreamSvgIcon.close_small(
+                  color: Colors.grey,
+                ),
+                splashRadius: 24,
+                onPressed: () {
+                  if (controller.text.isNotEmpty) {
+                    Future.microtask(
+                      () => [
+                        controller.clear(),
+                        onChanged(''),
+                      ],
+                    );
+                  }
+                },
+              ),
+            ),
         ],
       ),
     );
