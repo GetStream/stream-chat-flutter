@@ -85,7 +85,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               ? AspectRatio(
                   aspectRatio: 1,
                   child: IconButton(
-                    onPressed: onBackPressed,
+                    onPressed: onBackPressed ?? () => Navigator.pop(context),
                     icon: StreamSvgIcon.close(
                       size: 24,
                       color: Theme.of(context).brightness == Brightness.dark
