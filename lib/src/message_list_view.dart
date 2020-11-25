@@ -103,6 +103,9 @@ class MessageListView extends StatefulWidget {
     this.threadBuilder,
     this.onThreadTap,
     this.dateDividerBuilder,
+    this.onMessageTap,
+    this.onSystemMessageTap,
+    this.onParentMessageTap,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : super(key: key);
@@ -119,6 +122,15 @@ class MessageListView extends StatefulWidget {
   /// Function called when tapping on a thread
   /// By default it calls [Navigator.push] using the widget built using [threadBuilder]
   final ThreadTapCallback onThreadTap;
+
+  /// The function called when tapping on the message when the message is not failed
+  final Function(Message) onMessageTap;
+
+  /// The function called when tapping on a system message
+  final Function(Message) onSystemMessageTap;
+
+  /// The function called when tapping on the parent message when the message is not failed
+  final Function(Message) onParentMessageTap;
 
   /// Parent message in case of a thread
   final Message parentMessage;
@@ -412,6 +424,7 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
+      onMessageTap: widget.onParentMessageTap,
       borderSide: isMyMessage ? BorderSide.none : null,
       showUserAvatar: DisplayWidget.show,
       messageTheme: isMyMessage
@@ -427,6 +440,7 @@ class _MessageListViewState extends State<MessageListView> {
   ) {
     if (message.type == 'system' && message.text?.isNotEmpty == true) {
       return SystemMessage(
+        onMessageTap: widget.onSystemMessageTap,
         message: message,
       );
     }
@@ -464,6 +478,7 @@ class _MessageListViewState extends State<MessageListView> {
               (index == 0 || message.status != MessageSendingStatus.SENT)
           ? DisplayWidget.show
           : DisplayWidget.hide,
+      onMessageTap: widget.onMessageTap,
       showTimestamp: !isNextUser || readList?.isNotEmpty == true,
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
