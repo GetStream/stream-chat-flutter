@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'group_chat_details_screen.dart';
+import 'search_text_field.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
   @override
@@ -98,38 +99,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 ],
               ),
               SliverToBoxAdapter(
-                child: Container(
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Colors.grey.shade300,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 8,
-                  ),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      prefixIcon: StreamSvgIcon.search(
-                        color: Colors.black,
-                        size: 24,
-                      ),
-                      hintText: 'Search',
-                      hintStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
-                        fontSize: 14,
-                      ),
-                      contentPadding: const EdgeInsets.all(0),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                    ),
-                  ),
+                child: SearchTextField(
+                  controller: _controller,
                 ),
               ),
               if (_selectedUsers.isNotEmpty)
