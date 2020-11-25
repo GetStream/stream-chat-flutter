@@ -132,7 +132,7 @@ class ChooseUserPage extends StatelessWidget {
 
                             final secureStorage = FlutterSecureStorage();
                             final client = StreamChat.of(context).client;
-
+                            client.apiKey = kDefaultStreamApiKey;
                             await client.setUser(
                               user,
                               token,
@@ -196,8 +196,7 @@ class ChooseUserPage extends StatelessWidget {
                           );
                         },
                         leading: CircleAvatar(
-                          child: Icon(
-                            StreamIcons.settings,
+                          child: StreamSvgIcon.settings(
                             color: Colors.black,
                           ),
                           backgroundColor:

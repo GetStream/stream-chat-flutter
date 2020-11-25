@@ -40,6 +40,7 @@ class UserAvatar extends StatelessWidget {
     final streamChatTheme = StreamChatTheme.of(context);
 
     Widget avatar = ClipRRect(
+      clipBehavior: Clip.antiAlias,
       borderRadius: borderRadius ??
           streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
       child: Container(

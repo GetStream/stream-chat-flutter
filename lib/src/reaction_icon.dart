@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
-
 class ReactionIcon {
   final String type;
-  final IconData iconData;
+  final String assetName;
 
   ReactionIcon({
     this.type,
-    this.iconData,
+    this.assetName,
   });
 }

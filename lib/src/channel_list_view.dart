@@ -7,6 +7,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 import '../stream_chat_flutter.dart';
@@ -184,26 +185,26 @@ class _ChannelListViewState extends State<ChannelListView>
             child = widget.emptyBuilder(context);
           }
 
-          if (channels.isEmpty && widget.emptyBuilder == null) {
-            child = LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: Stack(
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: viewportConstraints.maxHeight,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(
-                                StreamIcons.message,
-                                size: 136,
-                                color: Color(0xffDBDBDB),
+            if (channels.isEmpty && widget.emptyBuilder == null) {
+              child = LayoutBuilder(
+                builder: (context, viewportConstraints) {
+                  return SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Stack(
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: StreamSvgIcon.message(
+                                  size: 136,
+                                  color: Color(0xffDBDBDB),
+                                ),
                               ),
                             ),
                             Padding(
@@ -518,7 +519,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: StreamIcons.mute,
+                    iconWidget: StreamSvgIcon.mute(),
                     onTap: () async {
                       if (!channel.isMuted) {
                         await channel.mute();
@@ -530,7 +531,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   if (channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
                       color: backgroundColor,
-                      icon: StreamIcons.user_minus,
+                      iconWidget: StreamSvgIcon.userRemove(),
                       onTap: () async {
                         final confirm = await showConfirmationDialog(
                           context,

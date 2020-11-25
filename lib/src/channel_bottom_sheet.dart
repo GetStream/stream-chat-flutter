@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 import 'channel_info.dart';
@@ -73,8 +72,7 @@ class ChannelBottomSheet extends StatelessWidget {
                 initialData: channel.isMuted,
                 builder: (context, snapshot) {
                   return ListTile(
-                    leading: Icon(
-                      StreamIcons.mute,
+                    leading: StreamSvgIcon.mute(
                       size: 22,
                       color: StreamChatTheme.of(context).primaryIconTheme.color,
                     ),
@@ -94,8 +92,7 @@ class ChannelBottomSheet extends StatelessWidget {
             Divider(),
             if (channel.isGroup && !channel.isDistinct)
               ListTile(
-                leading: Icon(
-                  StreamIcons.user_minus,
+                leading: StreamSvgIcon.userRemove(
                   size: 22,
                   color: Colors.black,
                 ),

@@ -65,8 +65,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
         actions: [
           if (_selectedUsers.isNotEmpty)
             IconButton(
-              icon: Icon(
-                StreamIcons.arrow_right,
+              icon: StreamSvgIcon.right(
                 color: Color(0xFF006CFF),
               ),
               onPressed: () {
@@ -101,10 +100,21 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               child: TextField(
                 controller: _controller,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(
-                    StreamIcons.search,
-                    color: Colors.black,
-                    size: 24,
+                  prefixIconConstraints: BoxConstraints.tight(
+                    Size(
+                      40,
+                      24,
+                    ),
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8,
+                      right: 8,
+                    ),
+                    child: StreamSvgIcon.search(
+                      color: Colors.black,
+                      size: 24,
+                    ),
                   ),
                   hintText: 'Search',
                   hintStyle: TextStyle(
@@ -162,8 +172,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(0.0),
-                                    child: Icon(
-                                      StreamIcons.close,
+                                    child: StreamSvgIcon.close(
+                                      color: Colors.black,
                                       size: 24,
                                     ),
                                   ),
@@ -260,8 +270,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(24),
-                                  child: Icon(
-                                    StreamIcons.search,
+                                  child: StreamSvgIcon.search(
                                     size: 96,
                                     color: Colors.grey,
                                   ),

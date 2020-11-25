@@ -426,12 +426,13 @@ class _MessageWidgetState extends State<MessageWidget> {
           top: 0,
           child: Material(
             color: Colors.white,
+            clipBehavior: Clip.antiAlias,
             shape: CircleBorder(),
             child: Padding(
               padding: const EdgeInsets.all(1.0),
               child: UserAvatar(
                 user: e.user,
-                constraints: BoxConstraints.loose(Size.fromRadius(16)),
+                constraints: BoxConstraints.loose(Size.fromRadius(8)),
                 showOnlineStatus: false,
               ),
             ),

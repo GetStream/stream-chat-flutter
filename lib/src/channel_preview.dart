@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
@@ -103,7 +104,7 @@ class ChannelPreview extends StatelessWidget {
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
                                     .length ==
-                                (channel.memberCount ?? 0) - 1,
+                                (channel.memberCount ?? 0),
                           ),
                         );
                       }
@@ -152,8 +153,7 @@ class ChannelPreview extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          Icon(
-            StreamIcons.mute,
+          StreamSvgIcon.mute(
             size: 16,
           ),
           Text(

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
@@ -111,8 +112,7 @@ class GiphyAttachment extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              StreamIcons.lightning,
+                            StreamSvgIcon.lightning(
                               color: StreamChatTheme.of(context).accentColor,
                               size: 16.0,
                             ),
@@ -144,8 +144,7 @@ class GiphyAttachment extends StatelessWidget {
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
-                            icon: Icon(
-                              StreamIcons.left,
+                            icon: StreamSvgIcon.left(
                               size: 24.0,
                             ),
                             splashRadius: 16,
@@ -172,8 +171,7 @@ class GiphyAttachment extends StatelessWidget {
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
-                            icon: Icon(
-                              StreamIcons.right,
+                            icon: StreamSvgIcon.right(
                               size: 24.0,
                             ),
                             splashRadius: 16,
@@ -253,8 +251,7 @@ class GiphyAttachment extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  StreamIcons.eye,
+                StreamSvgIcon.eye(
                   color: Colors.black.withOpacity(0.5),
                   size: 16.0,
                 ),
@@ -326,8 +323,7 @@ class GiphyAttachment extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        StreamIcons.lightning,
+                      StreamSvgIcon.lightning(
                         color: Colors.white,
                         size: 16,
                       ),

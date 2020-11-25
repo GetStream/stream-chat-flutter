@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
 import 'main.dart';
-import 'neumorphic_button.dart';
 import 'new_group_chat_screen.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -164,8 +163,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                       ),
                       Positioned(
-                        child: Icon(
-                          StreamIcons.close,
+                        child: StreamSvgIcon.close(
                           color: Colors.white,
                         ),
                       ),
@@ -193,10 +191,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
-                        NeumorphicButton(
-                          child: Icon(
-                            StreamIcons.group,
-                            color: Color(0xFF006CFF),
+                        StreamNeumorphicButton(
+                          child: Center(
+                            child: StreamSvgIcon.contacts(
+                              color: Color(0xFF006CFF),
+                              size: 24,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8),
@@ -289,8 +289,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.all(24),
-                                          child: Icon(
-                                            StreamIcons.search,
+                                          child: StreamSvgIcon.search(
                                             size: 96,
                                             color: Colors.grey,
                                           ),
