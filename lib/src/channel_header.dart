@@ -64,12 +64,16 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Callback to call when the image is tapped.
   final VoidCallback onImageTap;
 
+  /// If true the typing indicator will be rendered if a user is typing
+  final bool showTypingIndicator;
+
   /// Creates a channel header
   ChannelHeader({
     Key key,
     this.showBackButton = true,
     this.onBackPressed,
     this.onTitleTap,
+    this.showTypingIndicator = true,
     this.onImageTap,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
@@ -116,6 +120,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
               SizedBox(height: 2),
               ChannelInfo(
+                showTypingIndicator: showTypingIndicator,
                 channel: channel,
                 textStyle:
                     StreamChatTheme.of(context).channelPreviewTheme.subtitle,

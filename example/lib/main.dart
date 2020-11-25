@@ -223,16 +223,38 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChannelHeader(),
+      appBar: ChannelHeader(
+        showTypingIndicator: false,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
-            child: MessageListView(
-              threadBuilder: (_, parentMessage) {
-                return ThreadPage(
-                  parent: parentMessage,
-                );
-              },
+            child: Stack(
+              children: <Widget>[
+                MessageListView(
+                  threadBuilder: (_, parentMessage) {
+                    return ThreadPage(
+                      parent: parentMessage,
+                    );
+                  },
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    color: Color(0xffFCFCFC).withOpacity(.9),
+                    child: TypingIndicator(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           MessageInput(),
