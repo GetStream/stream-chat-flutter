@@ -73,7 +73,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                 actions: [
                   if (_selectedUsers.isNotEmpty)
                     IconButton(
-                      icon: StreamSvgIcon.right(
+                      icon: StreamSvgIcon.arrow_right(
                         color: Color(0xFF006CFF),
                       ),
                       onPressed: () async {

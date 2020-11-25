@@ -373,4 +373,16 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.arrow_right({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_arrow_right.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }
