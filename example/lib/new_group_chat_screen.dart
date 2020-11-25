@@ -47,10 +47,12 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: UsersBloc(
         child: Scaffold(
+          backgroundColor: Color.fromRGBO(252, 252, 252, 1),
           body: NestedScrollView(
             floatHeaderSlivers: true,
             headerSliverBuilder:
@@ -74,8 +76,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   actions: [
                     if (_selectedUsers.isNotEmpty)
                       IconButton(
-                        icon: Icon(
-                          StreamIcons.arrow_right,
+                        icon: StreamSvgIcon.right(
                           color: Color(0xFF006CFF),
                         ),
                         onPressed: () async {
@@ -116,8 +117,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          StreamIcons.search,
+                        prefixIcon: StreamSvgIcon.search(
                           color: Colors.black,
                           size: 24,
                         ),
@@ -181,8 +181,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                         ),
                                         child: Padding(
                                           padding: const EdgeInsets.all(0.0),
-                                          child: Icon(
-                                            StreamIcons.close,
+                                          child: StreamSvgIcon.close(
+                                            color: Colors.black,
                                             size: 24,
                                           ),
                                         ),
@@ -288,8 +288,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(24),
-                                child: Icon(
-                                  StreamIcons.search,
+                                child: StreamSvgIcon.search(
                                   size: 96,
                                   color: Colors.grey,
                                 ),

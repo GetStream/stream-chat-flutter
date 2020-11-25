@@ -39,8 +39,11 @@ void main() {
         ),
       );
 
+      await tester.pump(Duration(milliseconds: 1000));
+
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
-      expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsOneWidget);
+      expect(find.byKey(Key('StreamSvgIcon-Icon_thumbs_up_reaction.svg')),
+          findsOneWidget);
     },
   );
 
@@ -87,9 +90,12 @@ void main() {
       );
       await tester.pump();
 
+      await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
-      expect(find.byIcon(StreamIcons.thumbs_up_reaction), findsNWidgets(2));
-      expect(find.byIcon(StreamIcons.love_reaction), findsNWidgets(2));
+      expect(find.byKey(Key('StreamSvgIcon-Icon_thumbs_up_reaction.svg')),
+          findsNWidgets(2));
+      expect(find.byKey(Key('StreamSvgIcon-Icon_love_reaction.svg')),
+          findsNWidgets(2));
       expect(find.text(testUserId), findsNWidgets(2));
     },
   );

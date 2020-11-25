@@ -7,6 +7,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 import '../stream_chat_flutter.dart';
@@ -200,8 +201,7 @@ class _ChannelListViewState extends State<ChannelListView>
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  StreamIcons.message,
+                                child: StreamSvgIcon.message(
                                   size: 136,
                                   color: Color(0xffDBDBDB),
                                 ),
@@ -517,7 +517,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: StreamIcons.mute,
+                    iconWidget: StreamSvgIcon.mute(),
                     onTap: () async {
                       if (!channel.isMuted) {
                         await channel.mute();
@@ -529,7 +529,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   if (channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
                       color: backgroundColor,
-                      icon: StreamIcons.user_minus,
+                      iconWidget: StreamSvgIcon.userRemove(),
                       onTap: () async {
                         final confirm = await showConfirmationDialog(
                           context,

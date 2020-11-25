@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 typedef ChipBuilder<T> = Widget Function(BuildContext context, T chip);
 typedef OnChipAdded<T> = void Function(T chip);
@@ -124,13 +124,15 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: IconButton(
-                      icon: Icon(
-                        _chips.isEmpty
-                            ? StreamIcons.user
-                            : StreamIcons.user_add,
-                        color: Colors.black.withOpacity(0.5),
-                        size: 24,
-                      ),
+                      icon: _chips.isEmpty
+                          ? StreamSvgIcon.user(
+                              color: Colors.black.withOpacity(0.5),
+                              size: 24,
+                            )
+                          : StreamSvgIcon.userAdd(
+                              color: Colors.black.withOpacity(0.5),
+                              size: 24,
+                            ),
                       onPressed:
                           !_pauseItemAddition ? null : resumeItemAddition,
                       alignment: Alignment.topRight,

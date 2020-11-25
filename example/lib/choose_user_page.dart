@@ -196,8 +196,7 @@ class ChooseUserPage extends StatelessWidget {
                           );
                         },
                         leading: CircleAvatar(
-                          child: Icon(
-                            StreamIcons.settings,
+                          child: StreamSvgIcon.settings(
                             color: Colors.black,
                           ),
                           backgroundColor:

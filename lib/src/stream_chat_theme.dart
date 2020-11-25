@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
@@ -353,23 +352,23 @@ class StreamChatThemeData {
       reactionIcons: [
         ReactionIcon(
           type: 'love',
-          iconData: StreamIcons.love_reaction,
+          assetName: 'Icon_love_reaction.svg',
         ),
         ReactionIcon(
           type: 'thumbs_up',
-          iconData: StreamIcons.thumbs_up_reaction,
+          assetName: 'Icon_thumbs_up_reaction.svg',
         ),
         ReactionIcon(
           type: 'thumbs_down',
-          iconData: StreamIcons.thumbs_down_reaction,
+          assetName: 'Icon_thumbs_down_reaction.svg',
         ),
         ReactionIcon(
           type: 'lol',
-          iconData: StreamIcons.LOL_reaction,
+          assetName: 'Icon_LOL_reaction.svg',
         ),
         ReactionIcon(
           type: 'wut',
-          iconData: StreamIcons.wut_reaction,
+          assetName: 'Icon_wut_reaction.svg',
         ),
       ],
     );
