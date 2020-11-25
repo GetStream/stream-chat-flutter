@@ -57,7 +57,6 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
-                // floating: true,
                 pinned: true,
                 forceElevated: true,
                 elevation: 1,
