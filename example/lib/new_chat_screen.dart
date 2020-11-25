@@ -243,67 +243,71 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
             Expanded(
               child: _showUserList
-                  ? UsersBloc(
-                      child: UserListView(
-                        selectedUsers: _selectedUsers,
-                        groupAlphabetically: _isSearchActive ? false : true,
-                        onUserTap: (user, _) {
-                          _controller.clear();
-                          if (!_selectedUsers.contains(user)) {
-                            _chipInputTextFieldState
-                              ..addItem(user)
-                              ..pauseItemAddition();
-                          } else {
-                            _chipInputTextFieldState.removeItem(user);
-                          }
-                        },
-                        pagination: PaginationParams(
-                          limit: 25,
-                        ),
-                        filter: {
-                          if (_userNameQuery.isNotEmpty)
-                            'name': {
-                              r'$autocomplete': _userNameQuery,
-                            },
-                          'id': {
-                            r'$ne': StreamChat.of(context).user.id,
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onPanDown: (_) => FocusScope.of(context).unfocus(),
+                      child: UsersBloc(
+                        child: UserListView(
+                          selectedUsers: _selectedUsers,
+                          groupAlphabetically: _isSearchActive ? false : true,
+                          onUserTap: (user, _) {
+                            _controller.clear();
+                            if (!_selectedUsers.contains(user)) {
+                              _chipInputTextFieldState
+                                ..addItem(user)
+                                ..pauseItemAddition();
+                            } else {
+                              _chipInputTextFieldState.removeItem(user);
+                            }
                           },
-                        },
-                        sort: [
-                          SortOption(
-                            'name',
-                            direction: 1,
+                          pagination: PaginationParams(
+                            limit: 25,
                           ),
-                        ],
-                        emptyBuilder: (_) {
-                          return LayoutBuilder(
-                            builder: (context, viewportConstraints) {
-                              return SingleChildScrollView(
-                                physics: AlwaysScrollableScrollPhysics(),
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: viewportConstraints.maxHeight,
-                                  ),
-                                  child: Center(
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(24),
-                                          child: StreamSvgIcon.search(
-                                            size: 96,
-                                            color: Colors.grey,
+                          filter: {
+                            if (_userNameQuery.isNotEmpty)
+                              'name': {
+                                r'$autocomplete': _userNameQuery,
+                              },
+                            'id': {
+                              r'$ne': StreamChat.of(context).user.id,
+                            },
+                          },
+                          sort: [
+                            SortOption(
+                              'name',
+                              direction: 1,
+                            ),
+                          ],
+                          emptyBuilder: (_) {
+                            return LayoutBuilder(
+                              builder: (context, viewportConstraints) {
+                                return SingleChildScrollView(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: viewportConstraints.maxHeight,
+                                    ),
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(24),
+                                            child: StreamSvgIcon.search(
+                                              size: 96,
+                                              color: Colors.grey,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                            'No user matches these keywords...'),
-                                      ],
+                                          Text(
+                                              'No user matches these keywords...'),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     )
                   : MessageListView(),

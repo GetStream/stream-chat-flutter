@@ -238,68 +238,72 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
               ),
             ];
           },
-          body: UsersBloc(
-            child: UserListView(
-              selectedUsers: _selectedUsers,
-              pullToRefresh: false,
-              groupAlphabetically: _isSearchActive ? false : true,
-              onUserTap: (user, _) {
-                if (!_selectedUsers.contains(user)) {
-                  setState(() {
-                    _selectedUsers.add(user);
-                  });
-                } else {
-                  setState(() {
-                    _selectedUsers.remove(user);
-                  });
-                }
-              },
-              pagination: PaginationParams(
-                limit: 25,
-              ),
-              filter: {
-                if (_userNameQuery.isNotEmpty)
-                  'name': {
-                    r'$autocomplete': _userNameQuery,
-                  },
-                'id': {
-                  r'$ne': StreamChat.of(context).user.id,
-                }
-              },
-              sort: [
-                SortOption(
-                  'name',
-                  direction: 1,
+          body: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onPanDown: (_) => FocusScope.of(context).unfocus(),
+            child: UsersBloc(
+              child: UserListView(
+                selectedUsers: _selectedUsers,
+                pullToRefresh: false,
+                groupAlphabetically: _isSearchActive ? false : true,
+                onUserTap: (user, _) {
+                  if (!_selectedUsers.contains(user)) {
+                    setState(() {
+                      _selectedUsers.add(user);
+                    });
+                  } else {
+                    setState(() {
+                      _selectedUsers.remove(user);
+                    });
+                  }
+                },
+                pagination: PaginationParams(
+                  limit: 25,
                 ),
-              ],
-              emptyBuilder: (_) {
-                return LayoutBuilder(
-                  builder: (context, viewportConstraints) {
-                    return SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: viewportConstraints.maxHeight,
-                        ),
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: StreamSvgIcon.search(
-                                  size: 96,
-                                  color: Colors.grey,
+                filter: {
+                  if (_userNameQuery.isNotEmpty)
+                    'name': {
+                      r'$autocomplete': _userNameQuery,
+                    },
+                  'id': {
+                    r'$ne': StreamChat.of(context).user.id,
+                  }
+                },
+                sort: [
+                  SortOption(
+                    'name',
+                    direction: 1,
+                  ),
+                ],
+                emptyBuilder: (_) {
+                  return LayoutBuilder(
+                    builder: (context, viewportConstraints) {
+                      return SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: StreamSvgIcon.search(
+                                    size: 96,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
-                              Text('No user matches these keywords...'),
-                            ],
+                                Text('No user matches these keywords...'),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ),
