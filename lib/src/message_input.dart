@@ -1556,8 +1556,8 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size > _kMaxAttachmentSize) {
       if (attachmentType == 'video') {
-        final mediaInfo = await CompressVideoService.instance
-            .compressVideo(file.path, _kMaxAttachmentSize);
+        final mediaInfo =
+            await CompressVideoService.instance.compressVideo(file.path);
         file = PlatformFile(
           name: mediaInfo.title,
           size: mediaInfo.filesize,
