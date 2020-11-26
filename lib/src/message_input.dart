@@ -20,7 +20,6 @@ import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
-import 'package:stream_chat_flutter/src/video_thumbnail.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
 
@@ -847,15 +846,13 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _addAttachment(Media medium) async {
+    final attachment = _SendingAttachment(
+      id: medium.id,
+    );
     try {
-      final attachment = _SendingAttachment(
-        id: medium.id,
-      );
-
       setState(() {
         _attachments.add(attachment);
       });
-
       final mediaFile = await medium.getFile();
 
       var file = PlatformFile(
@@ -936,6 +933,9 @@ class MessageInputState extends State<MessageInput> {
         });
       }
     } catch (e, s) {
+      setState(() {
+        _attachments.remove(attachment);
+      });
       print(s);
       Scaffold.of(context).showSnackBar(
         SnackBar(
