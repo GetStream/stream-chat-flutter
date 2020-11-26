@@ -176,10 +176,12 @@ class _MessageListViewState extends State<MessageListView> {
         : streamChannel.channel.state.messagesStream;
 
     return StreamBuilder<List<Message>>(
-        stream: messagesStream,
-        initialData: widget.parentMessage != null
-            ? streamChannel.channel.state.threads[widget.parentMessage.id]
-            : streamChannel.channel.state.messages,
+        stream: messagesStream.map((messages) => messages
+            .where((e) =>
+                !e.isDeleted ||
+                (e.isDeleted &&
+                    e.user.id == streamChannel.channel.client.state.user.id))
+            .toList()),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(

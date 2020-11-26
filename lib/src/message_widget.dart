@@ -286,6 +286,10 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           transform: Matrix4.rotationY(
                                               widget.reverse ? pi : 0),
                                           child: DeletedMessage(
+                                            borderRadiusGeometry:
+                                                widget.borderRadiusGeometry,
+                                            borderSide: widget.borderSide,
+                                            shape: widget.shape,
                                             messageTheme: widget.messageTheme,
                                           ),
                                         )
@@ -407,6 +411,34 @@ class _MessageWidgetState extends State<MessageWidget> {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 4.0),
                   child: _buildReadIndicator(),
+                ),
+              ),
+            ),
+          if (widget.message.isDeleted)
+            Transform(
+              transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+              alignment: Alignment.center,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    StreamSvgIcon.eye(
+                      color: Colors.black.withOpacity(0.5),
+                      size: 16.0,
+                    ),
+                    SizedBox(
+                      width: 8.0,
+                    ),
+                    Text(
+                      'Only visible to you',
+                      style: TextStyle(
+                        color: Colors.black.withOpacity(0.5),
+                        fontSize: 12.0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
