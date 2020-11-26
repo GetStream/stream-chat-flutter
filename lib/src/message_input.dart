@@ -866,8 +866,7 @@ class MessageInputState extends State<MessageInput> {
 
       if (file.size > _kMaxAttachmentSize) {
         if (medium.mediaType == MediaType.video) {
-          final mediaInfo =
-              await CompressVideoService.instance.compressVideo(file.path);
+          final mediaInfo = await CompressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
             Scaffold.of(context).showSnackBar(
@@ -1561,8 +1560,7 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size > _kMaxAttachmentSize) {
       if (attachmentType == 'video') {
-        final mediaInfo =
-            await CompressVideoService.instance.compressVideo(file.path);
+        final mediaInfo = await CompressVideoService.compressVideo(file.path);
         file = PlatformFile(
           name: mediaInfo.title,
           size: mediaInfo.filesize,

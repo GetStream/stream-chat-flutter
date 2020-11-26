@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:synchronized/synchronized.dart';
 import 'package:video_compress/video_compress.dart';
 
-class CompressVideoService {
-  static final CompressVideoService instance = CompressVideoService._();
+class ICompressVideoService {
+  static final ICompressVideoService instance = ICompressVideoService._();
   final _lock = Lock();
-  CompressVideoService._();
+  ICompressVideoService._();
 
   Future<MediaInfo> compressVideo(String path) async {
     return _lock.synchronized(() {
@@ -15,3 +15,6 @@ class CompressVideoService {
     });
   }
 }
+
+ICompressVideoService get CompressVideoService =>
+    ICompressVideoService.instance;
