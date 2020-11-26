@@ -1316,10 +1316,18 @@ class MessageInputState extends State<MessageInput> {
           children: [
             Positioned.fill(
               child: Container(
-                child: VideoThumbnail(
-                  file: File(
-                    attachment.file.path,
-                  ),
+                child: FutureBuilder<File>(
+                  future: VideoCompress.getFileThumbnail(attachment.file.path),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Offstage();
+                    }
+
+                    return Image.file(
+                      snapshot.data,
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
             ),
