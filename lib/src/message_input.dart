@@ -14,6 +14,7 @@ import 'package:media_gallery/media_gallery.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/compress_video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -21,6 +22,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail.dart';
 import 'package:substring_highlight/substring_highlight.dart';
+import 'package:video_compress/video_compress.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -43,6 +45,8 @@ enum DefaultAttachmentTypes {
 }
 
 const _kMinMediaPickerSize = 360.0;
+
+const _kMaxAttachmentSize = 20480; //20MB
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -797,7 +801,6 @@ class MessageInputState extends State<MessageInput> {
                   var status = await (Platform.isAndroid
                       ? Permission.storage.status
                       : Permission.photos.status);
-                  print('status: ${status}');
                   if (status.isPermanentlyDenied || status.isDenied) {
                     if (await openAppSettings()) {
                       setState(() {});
@@ -844,55 +847,102 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _addAttachment(Media medium) async {
-    final attachment = _SendingAttachment(
-      id: medium.id,
-    );
-
-    setState(() {
-      _attachments.add(attachment);
-    });
-
-    final mediaFile = await medium.getFile();
-
-    final file = PlatformFile(
-      path: mediaFile.path,
-      bytes: mediaFile.readAsBytesSync(),
-    );
-
-    final channel = StreamChannel.of(context).channel;
-    setState(() {
-      attachment
-        ..file = file
-        ..attachment = Attachment(
-          localUri: file.path != null ? Uri.parse(file.path) : null,
-          type: medium.mediaType == MediaType.image ? 'image' : 'video',
-        );
-    });
-
-    final url = await _uploadAttachment(
-        file,
-        medium.mediaType == MediaType.image
-            ? DefaultAttachmentTypes.image
-            : DefaultAttachmentTypes.video,
-        channel);
-
-    final fileType = medium.mediaType == MediaType.image
-        ? DefaultAttachmentTypes.image
-        : DefaultAttachmentTypes.video;
-
-    if (fileType == DefaultAttachmentTypes.image) {
-      attachment.attachment = attachment.attachment.copyWith(
-        imageUrl: url,
+    try {
+      final attachment = _SendingAttachment(
+        id: medium.id,
       );
-    } else {
-      attachment.attachment = attachment.attachment.copyWith(
-        assetUrl: url,
+
+      setState(() {
+        _attachments.add(attachment);
+      });
+
+      final mediaFile = await medium.getFile();
+
+      var file = PlatformFile(
+        path: mediaFile.path,
+        size: (await mediaFile.length()) ~/ 1024,
+        bytes: mediaFile.readAsBytesSync(),
+      );
+
+      if (file.size > _kMaxAttachmentSize) {
+        if (medium.mediaType == MediaType.video) {
+          final mediaInfo = await CompressVideoService.compressVideo(file.path);
+
+          if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
+            Scaffold.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
+                ),
+              ),
+            );
+
+            setState(() {
+              _attachments.remove(attachment);
+            });
+            return;
+          }
+          file = PlatformFile(
+            name: file.name,
+            size: mediaInfo.filesize,
+            bytes: await mediaInfo.file.readAsBytes(),
+            path: mediaInfo.path,
+          );
+        } else {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'The file is too large to upload. The file size limit is 20MB',
+              ),
+            ),
+          );
+        }
+      }
+
+      final channel = StreamChannel.of(context).channel;
+      setState(() {
+        attachment
+          ..file = file
+          ..attachment = Attachment(
+            localUri: file.path != null ? Uri.parse(file.path) : null,
+            type: medium.mediaType == MediaType.image ? 'image' : 'video',
+          );
+      });
+
+      final url = await _uploadAttachment(
+          file,
+          medium.mediaType == MediaType.image
+              ? DefaultAttachmentTypes.image
+              : DefaultAttachmentTypes.video,
+          channel);
+
+      final fileType = medium.mediaType == MediaType.image
+          ? DefaultAttachmentTypes.image
+          : DefaultAttachmentTypes.video;
+
+      if (fileType == DefaultAttachmentTypes.image) {
+        attachment.attachment = attachment.attachment.copyWith(
+          imageUrl: url,
+        );
+      } else {
+        attachment.attachment = attachment.attachment.copyWith(
+          assetUrl: url,
+        );
+      }
+
+      if (mounted) {
+        setState(() {
+          attachment.uploaded = true;
+        });
+      }
+    } catch (e, s) {
+      print(s);
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error adding the attachment: $e'),
+        ),
       );
     }
-
-    setState(() {
-      attachment.uploaded = true;
-    });
   }
 
   CircleAvatar _buildGiphyIcon() {
@@ -1267,9 +1317,10 @@ class MessageInputState extends State<MessageInput> {
             Positioned.fill(
               child: Container(
                 child: VideoThumbnail(
-                    file: File(
-                  attachment.file.path,
-                )),
+                  file: File(
+                    attachment.file.path,
+                  ),
+                ),
               ),
             ),
             Positioned(
@@ -1496,7 +1547,6 @@ class MessageInputState extends State<MessageInput> {
       );
       if (res?.files?.isNotEmpty == true) {
         file = res.files.single;
-        print('file.bytes?.length: ${file.bytes?.length}');
       }
     }
 
@@ -1506,6 +1556,26 @@ class MessageInputState extends State<MessageInput> {
 
     if (file == null) {
       return;
+    }
+
+    if (file.size > _kMaxAttachmentSize) {
+      if (attachmentType == 'video') {
+        final mediaInfo = await CompressVideoService.compressVideo(file.path);
+        file = PlatformFile(
+          name: mediaInfo.title,
+          size: mediaInfo.filesize,
+          bytes: await mediaInfo.file.readAsBytes(),
+          path: mediaInfo.path,
+        );
+      } else {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'The file is too large to upload. The file size limit is 20MB',
+            ),
+          ),
+        );
+      }
     }
 
     final channel = StreamChannel.of(context).channel;

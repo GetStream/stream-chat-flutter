@@ -30,6 +30,7 @@ dependencies:
   flutter_keyboard_visibility: ^3.3.0
   stream_chat: ^0.2.13+1
   mime: ^0.9.6+3
+  video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4
   lottie: ^0.7.0+1
@@ -42,6 +43,7 @@ dependencies:
   permission_handler: ^5.0.1+1
   transparent_image: ^1.0.0
   ezanimation: ^0.4.1
+  synchronized: ^2.2.0+2
 
 flutter:
   assets:
