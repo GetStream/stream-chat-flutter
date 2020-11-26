@@ -133,8 +133,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                               color: Colors.black.withOpacity(0.5),
                               size: 24,
                             ),
-                      onPressed:
-                          !_pauseItemAddition ? null : resumeItemAddition,
+                      onPressed: resumeItemAddition,
                       alignment: Alignment.topRight,
                       visualDensity: VisualDensity.compact,
                       padding: const EdgeInsets.all(0),
