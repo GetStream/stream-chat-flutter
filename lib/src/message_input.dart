@@ -380,6 +380,7 @@ class MessageInputState extends State<MessageInput> {
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
+                    isDense: true,
                     hintText: _getHint(),
                     prefixText: _commandEnabled ? null : '   ',
                     border: OutlineInputBorder(
@@ -392,7 +393,10 @@ class MessageInputState extends State<MessageInput> {
                         borderSide: BorderSide(color: Colors.transparent)),
                     disabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
-                    contentPadding: EdgeInsets.all(8),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 13,
+                    ),
                     prefixIcon: _commandEnabled
                         ? Padding(
                             padding:
@@ -665,8 +669,8 @@ class MessageInputState extends State<MessageInput> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 IconButton(
+                  iconSize: 24,
                   icon: StreamSvgIcon.pictures(
-                    size: 24,
                     color: _filePickerIndex == 0
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -678,8 +682,8 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
+                  iconSize: 32,
                   icon: StreamSvgIcon.files(
-                    size: 24,
                     color: _filePickerIndex == 1
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -689,8 +693,8 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
+                  iconSize: 24,
                   icon: StreamSvgIcon.camera(
-                    size: 24,
                     color: _filePickerIndex == 2
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
@@ -700,8 +704,9 @@ class MessageInputState extends State<MessageInput> {
                   },
                 ),
                 IconButton(
+                  padding: const EdgeInsets.all(0),
+                  iconSize: 24,
                   icon: StreamSvgIcon.record(
-                    size: 24,
                     color: _filePickerIndex == 3
                         ? StreamChatTheme.of(context).accentColor
                         : Colors.black.withOpacity(0.5),
