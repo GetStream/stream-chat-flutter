@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/back_button.dart';
-import 'package:stream_chat_flutter/src/channel_info.dart';
-import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_icons.dart';
-
-import './channel_name.dart';
-import 'channel_image.dart';
 import 'image_actions_modal.dart';
 import 'stream_channel.dart';
 

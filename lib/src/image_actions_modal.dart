@@ -6,11 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import '../stream_chat_flutter.dart';
-import 'stream_icons.dart';
-
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 
 class ImageActionsModal extends StatelessWidget {
   final Message message;

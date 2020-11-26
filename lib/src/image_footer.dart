@@ -7,22 +7,15 @@ import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'dart:typed_data';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/back_button.dart';
-import 'package:stream_chat_flutter/src/channel_info.dart';
-import 'package:stream_chat_flutter/src/channel_name.dart';
-import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_icons.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import './channel_name.dart';
-import 'channel_image.dart';
 import 'stream_channel.dart';
 
 class ImageFooter extends StatefulWidget {
