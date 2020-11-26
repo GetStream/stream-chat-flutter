@@ -877,6 +877,11 @@ class MessageInputState extends State<MessageInput> {
                 ),
               ),
             );
+
+            setState(() {
+              _attachments.remove(attachment);
+            });
+            return;
           }
           file = PlatformFile(
             name: file.name,
