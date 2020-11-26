@@ -8,7 +8,6 @@ class CompressVideoService {
   CompressVideoService._();
 
   Future<MediaInfo> compressVideo(String path) async {
-    print('VideoCompress.isCompressing: ${VideoCompress.isCompressing}');
     return _lock.synchronized(() {
       return VideoCompress.compressVideo(
         path,
