@@ -1,10 +1,10 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-
+import 'package:dio/dio.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import '../stream_chat_flutter.dart';
 import 'stream_icons.dart';
 
@@ -122,14 +122,21 @@ class ImageActionsModal extends StatelessWidget {
                           Navigator.pop(context);
                           Navigator.pop(context);
                         }),
-                        _buildButton(context, 'Save Image', StreamIcons.save_1,
-                            () async {
+                        _buildButton(
+                            context,
+                            'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',
+                            StreamIcons.save_1, () async {
                           var url = urls[currentIndex].imageUrl ??
                               urls[currentIndex].assetUrl ??
                               urls[currentIndex].thumbUrl;
-                          var file = await _downloadFile(url);
 
-                          Navigator.pop(context);
+                          if (urls[currentIndex].type == 'video') {
+                            await _saveVideo(url);
+                            Navigator.pop(context);
+                          } else {
+                            await _saveImage(url);
+                            Navigator.pop(context);
+                          }
                         }),
                         if (StreamChat.of(context).user.id == message.user.id)
                           _buildButton(context, 'Delete', StreamIcons.delete,
@@ -181,13 +188,22 @@ class ImageActionsModal extends StatelessWidget {
     );
   }
 
-  static Future<File> _downloadFile(String url) async {
-    var _client = http.Client();
-    var req = await _client.get(Uri.parse(url));
-    var bytes = req.bodyBytes;
-    var dir = (await getTemporaryDirectory()).path;
-    var file = File('$dir/${basename(url)}');
-    await file.writeAsBytes(bytes);
-    return file;
+  Future<void> _saveImage(String url) async {
+    var response = await Dio()
+        .get(url, options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 60,
+        name: "${DateTime.now().millisecondsSinceEpoch}");
+    return result;
+  }
+
+  Future<void> _saveVideo(String url) async {
+    var appDocDir = await getTemporaryDirectory();
+    var savePath =
+        appDocDir.path + "/${DateTime.now().millisecondsSinceEpoch}.mp4";
+    await Dio().download(url, savePath);
+    final result = await ImageGallerySaver.saveFile(savePath);
+    print(result);
   }
 }

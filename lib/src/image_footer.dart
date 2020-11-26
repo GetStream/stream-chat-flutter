@@ -6,7 +6,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_saver/gallery_saver.dart';
+import 'package:dio/dio.dart';
+import 'dart:typed_data';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
@@ -380,15 +383,20 @@ class _ImageFooterState extends State<ImageFooter> {
                             child: Material(
                               child: InkWell(
                                 onTap: () async {
-                                  await GallerySaver.saveImage((widget
-                                              .urls[widget.currentPage]
-                                              .imageUrl ??
-                                          widget.urls[widget.currentPage]
-                                              .assetUrl ??
-                                          widget.urls[widget.currentPage]
-                                              .thumbUrl)
-                                      .split('?')[0]);
-                                  Navigator.pop(context);
+                                  var url = widget
+                                          .urls[widget.currentPage].imageUrl ??
+                                      widget
+                                          .urls[widget.currentPage].assetUrl ??
+                                      widget.urls[widget.currentPage].thumbUrl;
+
+                                  if (widget.urls[widget.currentPage].type ==
+                                      'video') {
+                                    await _saveVideo(url);
+                                    Navigator.pop(context);
+                                  } else {
+                                    await _saveImage(url);
+                                    Navigator.pop(context);
+                                  }
                                 },
                                 child: SizedBox.expand(
                                   child: Center(
@@ -696,6 +704,25 @@ class _ImageFooterState extends State<ImageFooter> {
 
     _selectedUsers.clear();
     Navigator.pop(context);
+  }
+
+  Future<void> _saveImage(String url) async {
+    var response = await Dio()
+        .get(url, options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 60,
+        name: "${DateTime.now().millisecondsSinceEpoch}");
+    return result;
+  }
+
+  Future<void> _saveVideo(String url) async {
+    var appDocDir = await getTemporaryDirectory();
+    var savePath =
+        appDocDir.path + "/${DateTime.now().millisecondsSinceEpoch}.mp4";
+    await Dio().download(url, savePath);
+    final result = await ImageGallerySaver.saveFile(savePath);
+    print(result);
   }
 }
 

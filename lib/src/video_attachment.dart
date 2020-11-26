@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/full_screen_image.dart';
-import 'package:stream_chat_flutter/src/full_screen_video.dart';
+import 'package:stream_chat_flutter/src/full_screen_media.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -84,14 +83,19 @@ class _VideoAttachmentState extends State<VideoAttachment> {
 
     return GestureDetector(
       onTap: () {
+        final channel = StreamChannel.of(context).channel;
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => FullScreenMedia(
-              mediaAttachments: [widget.attachment],
-              userName: widget.message.user.name,
-              sentAt: widget.message.createdAt,
-              message: widget.message,
+            builder: (_) => StreamChannel(
+              channel: channel,
+              child: FullScreenMedia(
+                mediaAttachments: [widget.attachment],
+                userName: widget.message.user.name,
+                sentAt: widget.message.createdAt,
+                message: widget.message,
+              ),
             ),
           ),
         );

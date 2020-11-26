@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
-import 'full_screen_image.dart';
+import 'full_screen_media.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;

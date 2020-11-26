@@ -3,7 +3,7 @@ import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/full_screen_image.dart';
+import 'package:stream_chat_flutter/src/full_screen_media.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ImageGroup extends StatelessWidget {
