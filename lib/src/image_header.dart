@@ -30,7 +30,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final String sentAt;
 
-  final List<String> urls;
+  final List<Attachment> urls;
   final currentIndex;
 
   /// Creates a channel header

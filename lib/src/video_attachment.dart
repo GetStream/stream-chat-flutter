@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/full_screen_image.dart';
 import 'package:stream_chat_flutter/src/full_screen_video.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -13,11 +14,13 @@ class VideoAttachment extends StatefulWidget {
   final Attachment attachment;
   final MessageTheme messageTheme;
   final Size size;
+  final Message message;
 
   VideoAttachment({
     Key key,
     @required this.attachment,
     @required this.messageTheme,
+    this.message,
     this.size,
   }) : super(key: key);
 
@@ -84,8 +87,11 @@ class _VideoAttachmentState extends State<VideoAttachment> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => FullScreenVideo(
-              attachment: widget.attachment,
+            builder: (_) => FullScreenMedia(
+              mediaAttachments: [widget.attachment],
+              userName: widget.message.user.name,
+              sentAt: widget.message.createdAt,
+              message: widget.message,
             ),
           ),
         );

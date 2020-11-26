@@ -1,16 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/image_footer.dart';
 import 'package:stream_chat_flutter/src/image_header.dart';
+import 'package:video_player/video_player.dart';
 
 import '../stream_chat_flutter.dart';
 
 /// A full screen image widget
-class FullScreenImage extends StatefulWidget {
+class FullScreenMedia extends StatefulWidget {
   /// The url of the image
-  final List<String> urls;
+  final List<Attachment> mediaAttachments;
   final Message message;
 
   final int startIndex;
@@ -18,9 +20,9 @@ class FullScreenImage extends StatefulWidget {
   final DateTime sentAt;
 
   /// Instantiate a new FullScreenImage
-  const FullScreenImage({
+  const FullScreenMedia({
     Key key,
-    @required this.urls,
+    @required this.mediaAttachments,
     this.message,
     this.startIndex = 0,
     this.userName = '',
@@ -28,10 +30,10 @@ class FullScreenImage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FullScreenImageState createState() => _FullScreenImageState();
+  _FullScreenMediaState createState() => _FullScreenMediaState();
 }
 
-class _FullScreenImageState extends State<FullScreenImage>
+class _FullScreenMediaState extends State<FullScreenMedia>
     with SingleTickerProviderStateMixin {
   bool _optionsShown = true;
 
@@ -40,6 +42,8 @@ class _FullScreenImageState extends State<FullScreenImage>
 
   int _currentPage;
 
+  List<VideoPackage> videoPackages = [];
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +51,14 @@ class _FullScreenImageState extends State<FullScreenImage>
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     _pageController = PageController(initialPage: widget.startIndex);
     _currentPage = widget.startIndex;
+    widget.mediaAttachments
+        .where((element) => element.type == 'video')
+        .toList()
+        .forEach((element) {
+      videoPackages.add(VideoPackage(context, element, () {
+        setState(() {});
+      }));
+    });
   }
 
   @override
@@ -66,36 +78,63 @@ class _FullScreenImageState extends State<FullScreenImage>
                     });
                   },
                   itemBuilder: (context, position) {
-                    return PhotoView(
-                      imageProvider:
-                          CachedNetworkImageProvider(widget.urls[position]),
-                      maxScale: PhotoViewComputedScale.covered,
-                      minScale: PhotoViewComputedScale.contained,
-                      heroAttributes: PhotoViewHeroAttributes(
-                        tag: widget.urls,
-                      ),
-                      backgroundDecoration: BoxDecoration(
-                        color: ColorTween(
-                                begin: StreamChatTheme.of(context)
-                                    .channelTheme
-                                    .channelHeaderTheme
-                                    .color,
-                                end: Colors.black)
-                            .lerp(_controller.value),
-                      ),
-                      onTapUp: (a, b, c) {
-                        setState(() {
-                          _optionsShown = !_optionsShown;
-                        });
-                        if (_controller.isCompleted) {
-                          _controller.reverse();
-                        } else {
-                          _controller.forward();
-                        }
-                      },
-                    );
+                    if (widget.mediaAttachments[position].type == 'image') {
+                      return PhotoView(
+                        imageProvider: CachedNetworkImageProvider(
+                            widget.mediaAttachments[position].imageUrl ??
+                                widget.mediaAttachments[position].assetUrl ??
+                                widget.mediaAttachments[position].thumbUrl),
+                        maxScale: PhotoViewComputedScale.covered,
+                        minScale: PhotoViewComputedScale.contained,
+                        heroAttributes: PhotoViewHeroAttributes(
+                          tag: widget.mediaAttachments,
+                        ),
+                        backgroundDecoration: BoxDecoration(
+                          color: ColorTween(
+                                  begin: StreamChatTheme.of(context)
+                                      .channelTheme
+                                      .channelHeaderTheme
+                                      .color,
+                                  end: Colors.black)
+                              .lerp(_controller.value),
+                        ),
+                        onTapUp: (a, b, c) {
+                          setState(() {
+                            _optionsShown = !_optionsShown;
+                          });
+                          if (_controller.isCompleted) {
+                            _controller.reverse();
+                          } else {
+                            _controller.forward();
+                          }
+                        },
+                      );
+                    } else if (widget.mediaAttachments[position].type ==
+                        'video') {
+                      if (!videoPackages[position].initialised) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            _optionsShown = !_optionsShown;
+                          });
+                          if (_controller.isCompleted) {
+                            _controller.reverse();
+                          } else {
+                            _controller.forward();
+                          }
+                        },
+                        child: Chewie(
+                          controller: videoPackages[position].chewieController,
+                        ),
+                      );
+                    }
+                    return Container();
                   },
-                  itemCount: widget.urls.length,
+                  itemCount: widget.mediaAttachments.length,
                 );
               }),
           AnimatedOpacity(
@@ -106,19 +145,20 @@ class _FullScreenImageState extends State<FullScreenImage>
               children: [
                 ImageHeader(
                   userName: widget.userName,
-                  sentAt:
-                      'Sent ${getDay(widget.message.createdAt)} at ${Jiffy(widget.sentAt.toLocal()).format('HH:mm')}',
+                  sentAt: widget.message.createdAt == null
+                      ? ''
+                      : 'Sent ${getDay(widget.message.createdAt)} at ${Jiffy(widget.sentAt.toLocal()).format('HH:mm')}',
                   onBackPressed: () {
                     Navigator.of(context).pop();
                   },
                   message: widget.message,
-                  urls: widget.urls,
+                  urls: widget.mediaAttachments,
                   currentIndex: _currentPage,
                 ),
                 ImageFooter(
                   currentPage: _currentPage,
-                  totalPages: widget.urls.length,
-                  urls: widget.urls,
+                  totalPages: widget.mediaAttachments.length,
+                  urls: widget.mediaAttachments,
                   message: widget.message,
                 ),
               ],
@@ -143,5 +183,54 @@ class _FullScreenImageState extends State<FullScreenImage>
     } else {
       return 'on ${Jiffy(dateTime).format("MMM do")}';
     }
+  }
+
+  @override
+  void dispose() {
+    videoPackages.forEach((element) {
+      element.dispose();
+    });
+    super.dispose();
+  }
+}
+
+class VideoPackage {
+  VideoPlayerController _videoPlayerController;
+  ChewieController _chewieController;
+  bool initialised = false;
+  VoidCallback onInit;
+  BuildContext context;
+
+  ///
+  VideoPackage(this.context, Attachment attachment, this.onInit) {
+    _videoPlayerController = VideoPlayerController.network(attachment.assetUrl);
+    _videoPlayerController.initialize().whenComplete(() {
+      initialised = true;
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController,
+        autoInitialize: false,
+        aspectRatio: _videoPlayerController.value.aspectRatio,
+      );
+      onInit();
+    });
+
+    VoidCallback errorListener;
+    errorListener = () {
+      if (_videoPlayerController.value.hasError) {
+        Navigator.pop(context);
+        launchURL(context, attachment.titleLink);
+      }
+      _videoPlayerController.removeListener(errorListener);
+    };
+    _videoPlayerController.addListener(errorListener);
+  }
+
+  get videoPlayer => _videoPlayerController;
+
+  get chewieController => _chewieController;
+
+  void dispose() {
+    _videoPlayerController.dispose();
+    _chewieController.dispose();
   }
 }

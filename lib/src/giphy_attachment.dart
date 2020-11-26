@@ -67,11 +67,9 @@ class GiphyAttachment extends StatelessWidget {
 
                           return StreamChannel(
                             channel: channel,
-                            child: FullScreenImage(
-                              urls: [
-                                attachment.imageUrl ??
-                                    attachment.assetUrl ??
-                                    attachment.thumbUrl
+                            child: FullScreenMedia(
+                              mediaAttachments: [
+                                attachment,
                               ],
                               userName: message.user.name,
                               sentAt: message.createdAt,
@@ -295,11 +293,9 @@ class GiphyAttachment extends StatelessWidget {
 
             return StreamChannel(
               channel: channel,
-              child: FullScreenImage(
-                urls: [
-                  attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl
+              child: FullScreenMedia(
+                mediaAttachments: [
+                  attachment,
                 ],
                 userName: message.user.name,
                 sentAt: message.createdAt,

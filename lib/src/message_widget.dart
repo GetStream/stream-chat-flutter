@@ -180,6 +180,7 @@ class MessageWidget extends StatefulWidget {
                 MediaQuery.of(context).size.width * 0.8,
                 MediaQuery.of(context).size.height * 0.3,
               ),
+              message: message,
             );
           },
           'giphy': (context, message, attachment) {

@@ -1,16 +1,22 @@
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_icons.dart';
 
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
+
 class ImageActionsModal extends StatelessWidget {
   final Message message;
   final String userName;
   final String sentAt;
-  final List<String> urls;
+  final List<Attachment> urls;
   final currentIndex;
 
   ImageActionsModal(
@@ -118,8 +124,11 @@ class ImageActionsModal extends StatelessWidget {
                         }),
                         _buildButton(context, 'Save Image', StreamIcons.save_1,
                             () async {
-                          await GallerySaver.saveImage(
-                              urls[currentIndex].split('?')[0]);
+                          var url = urls[currentIndex].imageUrl ??
+                              urls[currentIndex].assetUrl ??
+                              urls[currentIndex].thumbUrl;
+                          var file = await _downloadFile(url);
+
                           Navigator.pop(context);
                         }),
                         if (StreamChat.of(context).user.id == message.user.id)
@@ -170,5 +179,15 @@ class ImageActionsModal extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static Future<File> _downloadFile(String url) async {
+    var _client = http.Client();
+    var req = await _client.get(Uri.parse(url));
+    var bytes = req.bodyBytes;
+    var dir = (await getTemporaryDirectory()).path;
+    var file = File('$dir/${basename(url)}');
+    await file.writeAsBytes(bytes);
+    return file;
   }
 }

@@ -36,7 +36,7 @@ class ImageFooter extends StatefulWidget {
   final int currentPage;
   final int totalPages;
 
-  final List<String> urls;
+  final List<Attachment> urls;
   final Message message;
 
   /// Creates a channel header
@@ -186,7 +186,9 @@ class _ImageFooterState extends State<ImageFooter> {
                     padding: const EdgeInsets.all(1.0),
                     child: AspectRatio(
                       child: CachedNetworkImage(
-                        imageUrl: widget.urls[position],
+                        imageUrl: widget.urls[position].imageUrl ??
+                            widget.urls[position].assetUrl ??
+                            widget.urls[position].thumbUrl,
                         fit: BoxFit.cover,
                       ),
                       aspectRatio: 1.0,
@@ -378,8 +380,13 @@ class _ImageFooterState extends State<ImageFooter> {
                             child: Material(
                               child: InkWell(
                                 onTap: () async {
-                                  await GallerySaver.saveImage(widget
-                                      .urls[widget.currentPage]
+                                  await GallerySaver.saveImage((widget
+                                              .urls[widget.currentPage]
+                                              .imageUrl ??
+                                          widget.urls[widget.currentPage]
+                                              .assetUrl ??
+                                          widget.urls[widget.currentPage]
+                                              .thumbUrl)
                                       .split('?')[0]);
                                   Navigator.pop(context);
                                 },
@@ -518,7 +525,9 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               iconSize: 24.0,
               onPressed: () async {
-                var url = widget.urls[widget.currentPage];
+                var url = widget.urls[widget.currentPage].imageUrl ??
+                    widget.urls[widget.currentPage].assetUrl ??
+                    widget.urls[widget.currentPage].thumbUrl;
                 var type = url?.split('?')?.first?.split('.')?.last ?? 'jpg';
                 var request = await HttpClient().getUrl(Uri.parse(url));
                 var response = await request.close();
