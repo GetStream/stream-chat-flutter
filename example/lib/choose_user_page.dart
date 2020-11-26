@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'notifications_service.dart';
+import 'routes/routes.dart';
 
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
@@ -132,7 +133,7 @@ class ChooseUserPage extends StatelessWidget {
 
                             final secureStorage = FlutterSecureStorage();
                             final client = StreamChat.of(context).client;
-
+                            client.apiKey = kDefaultStreamApiKey;
                             await client.setUser(
                               user,
                               token,
@@ -154,18 +155,11 @@ class ChooseUserPage extends StatelessWidget {
                             if (!kIsWeb) {
                               initNotifications(client);
                             }
-
-                            Navigator.pop(context);
-                            await Navigator.pushReplacement(
+                            Navigator.pushNamedAndRemoveUntil(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return StreamChat(
-                                    client: client,
-                                    child: ChannelListPage(),
-                                  );
-                                },
-                              ),
+                              Routes.CHANNEL_LIST,
+                              ModalRoute.withName(Routes.CHANNEL_LIST),
+                              arguments: client,
                             );
                           },
                           leading: UserAvatar(
@@ -188,16 +182,10 @@ class ChooseUserPage extends StatelessWidget {
                       }),
                       ListTile(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AdvancedOptionsPage(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, Routes.ADVANCED_OPTIONS);
                         },
                         leading: CircleAvatar(
-                          child: Icon(
-                            StreamIcons.settings,
+                          child: StreamSvgIcon.settings(
                             color: Colors.black,
                           ),
                           backgroundColor:

@@ -7,6 +7,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'main.dart';
 import 'notifications_service.dart';
+import 'choose_user_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   @override
@@ -44,8 +46,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
               ),
         ),
         leading: IconButton(
-          icon: Icon(
-            StreamIcons.left,
+          icon: StreamSvgIcon.left(
             color: Colors.black,
           ),
           onPressed: () {
@@ -286,6 +287,20 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                               if (!kIsWeb) {
                                 initNotifications(client);
                               }
+
+                              final secureStorage = FlutterSecureStorage();
+                              secureStorage.write(
+                                key: kStreamApiKey,
+                                value: apiKey,
+                              );
+                              secureStorage.write(
+                                key: kStreamUserId,
+                                value: userId,
+                              );
+                              secureStorage.write(
+                                key: kStreamToken,
+                                value: userToken,
+                              );
                             } catch (e) {
                               var errorText = 'Error connecting, retry';
                               if (e is Map) {

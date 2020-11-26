@@ -10,6 +10,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'notifications_service.dart';
+import 'routes/app_routes.dart';
+import 'routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,19 +49,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      //TODO change to system once dark theme is implemented
-      themeMode: ThemeMode.light,
-      builder: (context, widget) {
-        return StreamChat(
-          child: widget,
-          client: client,
-        );
-      },
-      home: client.state.user == null ? ChooseUserPage() : ChannelListPage(),
+    return StreamChat(
+      client: client,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        //TODO change to system once dark theme is implemented
+        themeMode: ThemeMode.light,
+        onGenerateRoute: AppRoutes.generateRoute,
+        initialRoute: client.state.user == null
+            ? Routes.CHOOSE_USER
+            : Routes.CHANNEL_LIST,
+      ),
     );
   }
 }
@@ -69,21 +71,17 @@ class ChannelListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Stream Chat',
-          style: TextStyle(color: Colors.black),
-        ),
+      appBar: ChannelListHeader(
+        onNewChatButtonTap: () {
+          Navigator.pushNamed(context, Routes.NEW_CHAT);
+        },
       ),
       drawer: _buildDrawer(context, user),
       drawerEdgeDragWidth: 50,
       body: ChannelsBloc(
         child: ChannelListView(
           onStartChatPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return NewChatScreen();
-            }));
+            Navigator.pushNamed(context, Routes.NEW_CHAT);
           },
           swipeToAction: true,
           filter: {
@@ -141,13 +139,14 @@ class ChannelListPage extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: Icon(StreamIcons.edit),
+                leading: StreamSvgIcon.penWrite(
+                  color: Colors.black.withOpacity(.5),
+                ),
                 onTap: () {
-                  Navigator.of(context)
-                    ..pop()
-                    ..push(MaterialPageRoute(builder: (context) {
-                      return NewChatScreen();
-                    }));
+                  Navigator.popAndPushNamed(
+                    context,
+                    Routes.NEW_CHAT,
+                  );
                 },
                 title: Text(
                   'New direct message',
@@ -157,13 +156,14 @@ class ChannelListPage extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: Icon(StreamIcons.group),
+                leading: StreamSvgIcon.contacts(
+                  color: Colors.black.withOpacity(.5),
+                ),
                 onTap: () {
-                  Navigator.of(context)
-                    ..pop()
-                    ..push(MaterialPageRoute(builder: (context) {
-                      return NewGroupChatScreen();
-                    }));
+                  Navigator.popAndPushNamed(
+                    context,
+                    Routes.NEW_GROUP_CHAT,
+                  );
                 },
                 title: Text(
                   'New group',
@@ -182,14 +182,14 @@ class ChannelListPage extends StatelessWidget {
                       final secureStorage = FlutterSecureStorage();
                       await secureStorage.deleteAll();
                       Navigator.pop(context);
-                      await Navigator.pushReplacement(
+                      Navigator.pushReplacementNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => ChooseUserPage(),
-                        ),
+                        Routes.CHOOSE_USER,
                       );
                     },
-                    leading: Icon(StreamIcons.user),
+                    leading: StreamSvgIcon.user(
+                      color: Colors.black.withOpacity(.5),
+                    ),
                     title: Text(
                       'Sign out',
                       style: TextStyle(
@@ -215,7 +215,9 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChannelHeader(),
+      appBar: ChannelHeader(
+        showTypingIndicator: false,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -228,14 +230,19 @@ class ChannelPage extends StatelessWidget {
                     );
                   },
                 ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4,
-                    ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    color: Color(0xffFCFCFC).withOpacity(.9),
                     child: TypingIndicator(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                     ),
                   ),
                 ),

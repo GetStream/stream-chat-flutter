@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 
@@ -8,9 +9,10 @@ class TypingIndicator extends StatelessWidget {
   const TypingIndicator({
     Key key,
     this.channel,
-    this.alternativeWidget = const SizedBox(),
+    this.alternativeWidget,
     this.style,
     this.alignment = Alignment.centerLeft,
+    this.padding = const EdgeInsets.all(0),
   }) : super(key: key);
 
   /// Style of the text widget
@@ -21,6 +23,9 @@ class TypingIndicator extends StatelessWidget {
 
   /// Widget built when no typings is happening
   final Widget alternativeWidget;
+
+  /// The padding of this widget
+  final EdgeInsets padding;
 
   final Alignment alignment;
 
@@ -35,20 +40,33 @@ class TypingIndicator extends StatelessWidget {
         return AnimatedSwitcher(
           duration: Duration(milliseconds: 300),
           child: snapshot.data?.isNotEmpty == true
-              ? Align(
-                  key: Key('typings'),
-                  alignment: alignment,
-                  child: Text(
-                    '${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing...',
-                    maxLines: 1,
-                    style: style,
+              ? Padding(
+                  padding: padding,
+                  child: Align(
+                    key: Key('typings'),
+                    alignment: alignment,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Lottie.asset(
+                          'animations/typing_dots.json',
+                          package: 'stream_chat_flutter',
+                          height: 4,
+                        ),
+                        Text(
+                          '  ${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing',
+                          maxLines: 1,
+                          style: style,
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : Align(
                   key: Key('alternative'),
                   alignment: alignment,
                   child: Container(
-                    child: alternativeWidget,
+                    child: alternativeWidget ?? Offstage(),
                   ),
                 ),
         );

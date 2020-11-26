@@ -5,8 +5,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
 import 'main.dart';
-import 'neumorphic_button.dart';
 import 'new_group_chat_screen.dart';
+import 'routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
   @override
@@ -164,8 +164,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                       ),
                       Positioned(
-                        child: Icon(
-                          StreamIcons.close,
+                        child: StreamSvgIcon.close(
                           color: Colors.white,
                         ),
                       ),
@@ -184,19 +183,21 @@ class _NewChatScreenState extends State<NewChatScreen> {
               Container(
                 child: InkWell(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(builder: (_) => NewGroupChatScreen()),
+                      Routes.NEW_GROUP_CHAT,
                     );
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
-                        NeumorphicButton(
-                          child: Icon(
-                            StreamIcons.group,
-                            color: Color(0xFF006CFF),
+                        StreamNeumorphicButton(
+                          child: Center(
+                            child: StreamSvgIcon.contacts(
+                              color: Color(0xFF006CFF),
+                              size: 24,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8),
@@ -243,68 +244,71 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
             Expanded(
               child: _showUserList
-                  ? UsersBloc(
-                      child: UserListView(
-                        selectedUsers: _selectedUsers,
-                        groupAlphabetically: _isSearchActive ? false : true,
-                        onUserTap: (user, _) {
-                          _controller.clear();
-                          if (!_selectedUsers.contains(user)) {
-                            _chipInputTextFieldState
-                              ..addItem(user)
-                              ..pauseItemAddition();
-                          } else {
-                            _chipInputTextFieldState.removeItem(user);
-                          }
-                        },
-                        pagination: PaginationParams(
-                          limit: 25,
-                        ),
-                        filter: {
-                          if (_userNameQuery.isNotEmpty)
-                            'name': {
-                              r'$autocomplete': _userNameQuery,
-                            },
-                          'id': {
-                            r'$ne': StreamChat.of(context).user.id,
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onPanDown: (_) => FocusScope.of(context).unfocus(),
+                      child: UsersBloc(
+                        child: UserListView(
+                          selectedUsers: _selectedUsers,
+                          groupAlphabetically: _isSearchActive ? false : true,
+                          onUserTap: (user, _) {
+                            _controller.clear();
+                            if (!_selectedUsers.contains(user)) {
+                              _chipInputTextFieldState
+                                ..addItem(user)
+                                ..pauseItemAddition();
+                            } else {
+                              _chipInputTextFieldState.removeItem(user);
+                            }
                           },
-                        },
-                        sort: [
-                          SortOption(
-                            'name',
-                            direction: 1,
+                          pagination: PaginationParams(
+                            limit: 25,
                           ),
-                        ],
-                        emptyBuilder: (_) {
-                          return LayoutBuilder(
-                            builder: (context, viewportConstraints) {
-                              return SingleChildScrollView(
-                                physics: AlwaysScrollableScrollPhysics(),
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: viewportConstraints.maxHeight,
-                                  ),
-                                  child: Center(
-                                    child: Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(24),
-                                          child: Icon(
-                                            StreamIcons.search,
-                                            size: 96,
-                                            color: Colors.grey,
+                          filter: {
+                            if (_userNameQuery.isNotEmpty)
+                              'name': {
+                                r'$autocomplete': _userNameQuery,
+                              },
+                            'id': {
+                              r'$ne': StreamChat.of(context).user.id,
+                            },
+                          },
+                          sort: [
+                            SortOption(
+                              'name',
+                              direction: 1,
+                            ),
+                          ],
+                          emptyBuilder: (_) {
+                            return LayoutBuilder(
+                              builder: (context, viewportConstraints) {
+                                return SingleChildScrollView(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: viewportConstraints.maxHeight,
+                                    ),
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(24),
+                                            child: StreamSvgIcon.search(
+                                              size: 96,
+                                              color: Colors.grey,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                            'No user matches these keywords...'),
-                                      ],
+                                          Text(
+                                              'No user matches these keywords...'),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     )
                   : MessageListView(),
@@ -331,16 +335,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
     channel.update({
       'draft': false,
     });
-    Navigator.pushReplacement(
+    Navigator.pushNamedAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (context) {
-          return StreamChannel(
-            child: ChannelPage(),
-            channel: channel,
-          );
-        },
-      ),
+      Routes.CHANNEL_PAGE,
+      ModalRoute.withName(Routes.CHANNEL_LIST),
+      arguments: channel,
     );
   }
 }

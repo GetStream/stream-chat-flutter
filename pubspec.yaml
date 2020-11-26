@@ -30,27 +30,28 @@ dependencies:
   flutter_keyboard_visibility: ^3.3.0
   stream_chat: ^0.2.13+1
   mime: ^0.9.6+3
+  video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4
+  lottie: ^0.7.0+1
   substring_highlight: ^0.1.2
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
   image_gallery_saver: ^1.6.6
   esys_flutter_share: ^1.0.2
-  media_gallery:
-    git: https://github.com/imtoori/media_gallery.git
+  photo_manager: ^0.5.8
   permission_handler: ^5.0.1+1
   transparent_image: ^1.0.0
+  ezanimation: ^0.4.1
+  synchronized: ^2.2.0+2
 
 flutter:
   assets:
     - images/
     - svgs/
-  fonts:
-   - family: stream-icons
-     fonts:
-      - asset: fonts/stream-icons.ttf
+    - lib/svgs/
+    - animations/
 
 dev_dependencies:
   pedantic: ^1.9.0

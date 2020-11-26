@@ -6,6 +6,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -175,10 +176,12 @@ class _MessageListViewState extends State<MessageListView> {
         : streamChannel.channel.state.messagesStream;
 
     return StreamBuilder<List<Message>>(
-        stream: messagesStream,
-        initialData: widget.parentMessage != null
-            ? streamChannel.channel.state.threads[widget.parentMessage.id]
-            : streamChannel.channel.state.messages,
+        stream: messagesStream.map((messages) => messages
+            .where((e) =>
+                !e.isDeleted ||
+                (e.isDeleted &&
+                    e.user.id == streamChannel.channel.client.state.user.id))
+            .toList()),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(
@@ -308,19 +311,8 @@ class _MessageListViewState extends State<MessageListView> {
                   return messageWidget;
                 },
               ),
-              if (streamChannel.channel.state.members.contains((Member e) =>
-                      e.userId == streamChannel.channel.client.state.user.id) &&
-                  widget.showScrollToBottom)
-                StreamBuilder<int>(
-                    stream: streamChannel.channel.state.unreadCountStream,
-                    builder: (context, snapshot) {
-                      if (!_showScrollToBottom ||
-                          !snapshot.hasData ||
-                          snapshot.data == 0) {
-                        return SizedBox();
-                      }
-                      return _buildScrollToBottom(snapshot.data);
-                    }),
+              if (widget.showScrollToBottom && _showScrollToBottom)
+                _buildScrollToBottom(),
               Positioned(
                 top: 20.0,
                 child: ValueListenableBuilder<Iterable<ItemPosition>>(
@@ -363,7 +355,8 @@ class _MessageListViewState extends State<MessageListView> {
             position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
   }
 
-  Widget _buildScrollToBottom(int unreadCount) {
+  Widget _buildScrollToBottom() {
+    final streamChannel = StreamChannel.of(context);
     return Positioned(
       bottom: 8,
       right: 8,
@@ -374,8 +367,7 @@ class _MessageListViewState extends State<MessageListView> {
         children: [
           FloatingActionButton(
             backgroundColor: Colors.white,
-            child: Icon(
-              StreamIcons.down,
+            child: StreamSvgIcon.down(
               color: Colors.black,
             ),
             onPressed: () {
@@ -389,24 +381,34 @@ class _MessageListViewState extends State<MessageListView> {
               );
             },
           ),
-          Positioned(
-            width: 20,
-            height: 20,
-            left: 10,
-            top: -10,
-            child: CircleAvatar(
-              child: Padding(
-                padding: const EdgeInsets.all(3.0),
-                child: Text(
-                  unreadCount.toString(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          if (streamChannel.channel.state.members.any((Member e) =>
+              e.userId == streamChannel.channel.client.state.user.id))
+            StreamBuilder<int>(
+                stream: streamChannel.channel.state.unreadCountStream,
+                initialData: streamChannel.channel.state.unreadCount,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData || snapshot.data <= 0) {
+                    return Offstage();
+                  }
+                  return Positioned(
+                    width: 20,
+                    height: 20,
+                    left: 10,
+                    top: -10,
+                    child: CircleAvatar(
+                      child: Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: Text(
+                          snapshot.data.toString(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
         ],
       ),
     );

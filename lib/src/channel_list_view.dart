@@ -7,6 +7,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 
 import '../stream_chat_flutter.dart';
@@ -166,123 +167,123 @@ class _ChannelListViewState extends State<ChannelListView>
     ChannelsBlocState channelsBlocState,
   ) {
     return StreamBuilder<List<Channel>>(
-        stream: channelsBlocState.channelsStream,
-        builder: (context, snapshot) {
-          var child;
-          if (snapshot.hasError) {
-            child = _buildErrorWidget(
-              snapshot,
-              context,
-              channelsBlocState,
-            );
-          } else if (!snapshot.hasData) {
-            child = _buildLoadingWidget();
-          } else {
-            final channels = snapshot.data;
+      stream: channelsBlocState.channelsStream,
+      builder: (context, snapshot) {
+        var child;
+        if (snapshot.hasError) {
+          child = _buildErrorWidget(
+            snapshot,
+            context,
+            channelsBlocState,
+          );
+        } else if (!snapshot.hasData) {
+          child = _buildLoadingWidget();
+        } else {
+          final channels = snapshot.data;
 
-            if (channels.isEmpty && widget.emptyBuilder != null) {
-              child = widget.emptyBuilder(context);
-            }
+          if (channels.isEmpty && widget.emptyBuilder != null) {
+            child = widget.emptyBuilder(context);
+          }
 
-            if (channels.isEmpty && widget.emptyBuilder == null) {
-              child = LayoutBuilder(
-                builder: (context, viewportConstraints) {
-                  return SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: Stack(
-                      children: [
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: viewportConstraints.maxHeight,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  StreamIcons.message,
-                                  size: 136,
-                                  color: Color(0xffDBDBDB),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Let’s start chatting!',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
-                                  horizontal: 52,
-                                ),
-                                child: Text(
-                                  'How about sending your first message to a friend?',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xff7A7A7A),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+          if (channels.isEmpty && widget.emptyBuilder == null) {
+            child = LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Stack(
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: viewportConstraints.maxHeight,
                         ),
-                        if (widget.onStartChatPressed != null)
-                          Positioned(
-                            right: 0,
-                            left: 0,
-                            bottom: 32,
-                            child: Center(
-                              child: FlatButton(
-                                onPressed: widget.onStartChatPressed,
-                                child: Text(
-                                  'Start a chat',
-                                  style: TextStyle(
-                                    color:
-                                        StreamChatTheme.of(context).accentColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: StreamSvgIcon.message(
+                                size: 136,
+                                color: Color(0xffDBDBDB),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Let’s start chatting!',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal: 52,
+                              ),
+                              child: Text(
+                                'How about sending your first message to a friend?',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xff7A7A7A),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (widget.onStartChatPressed != null)
+                        Positioned(
+                          right: 0,
+                          left: 0,
+                          bottom: 32,
+                          child: Center(
+                            child: FlatButton(
+                              onPressed: widget.onStartChatPressed,
+                              child: Text(
+                                'Start a chat',
+                                style: TextStyle(
+                                  color:
+                                      StreamChatTheme.of(context).accentColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }
-
-            if (channels.isNotEmpty) {
-              child = ListView.custom(
-                physics: AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                childrenDelegate: SliverChildBuilderDelegate(
-                  (context, i) {
-                    return _itemBuilder(context, i, channels);
-                  },
-                  childCount: (channels.length * 2) + 1,
-                  findChildIndexCallback: (key) {
-                    final ValueKey<String> valueKey = key;
-                    final index = channels.indexWhere(
-                        (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
-                    return index != -1 ? (index * 2) : null;
-                  },
-                ),
-              );
-            }
+                        ),
+                    ],
+                  ),
+                );
+              },
+            );
           }
 
-          return AnimatedSwitcher(
-            child: child,
-            duration: Duration(milliseconds: 500),
-          );
-        });
+          if (channels.isNotEmpty) {
+            child = ListView.custom(
+              physics: AlwaysScrollableScrollPhysics(),
+              controller: _scrollController,
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, i) {
+                  return _itemBuilder(context, i, channels);
+                },
+                childCount: (channels.length * 2) + 1,
+                findChildIndexCallback: (key) {
+                  final ValueKey<String> valueKey = key;
+                  final index = channels.indexWhere(
+                      (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
+                  return index != -1 ? (index * 2) : null;
+                },
+              ),
+            );
+          }
+        }
+
+        return AnimatedSwitcher(
+          child: child,
+          duration: Duration(milliseconds: 500),
+        );
+      },
+    );
   }
 
   Widget _buildLoadingWidget() {
@@ -517,7 +518,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   ),
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: StreamIcons.mute,
+                    iconWidget: StreamSvgIcon.mute(),
                     onTap: () async {
                       if (!channel.isMuted) {
                         await channel.mute();
@@ -529,7 +530,7 @@ class _ChannelListViewState extends State<ChannelListView>
                   if (channel.isGroup && !channel.isDistinct)
                     IconSlideAction(
                       color: backgroundColor,
-                      icon: StreamIcons.user_minus,
+                      iconWidget: StreamSvgIcon.userRemove(),
                       onTap: () async {
                         final confirm = await showConfirmationDialog(
                           context,
