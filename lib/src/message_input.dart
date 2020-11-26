@@ -10,9 +10,9 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart' as httpParser;
 import 'package:image_picker/image_picker.dart';
-import 'package:media_gallery/media_gallery.dart';
 import 'package:mime/mime.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/compress_video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
@@ -845,7 +845,7 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  void _addAttachment(Media medium) async {
+  void _addAttachment(AssetEntity medium) async {
     final attachment = _SendingAttachment(
       id: medium.id,
     );
@@ -853,16 +853,16 @@ class MessageInputState extends State<MessageInput> {
       setState(() {
         _attachments.add(attachment);
       });
-      final mediaFile = await medium.getFile();
+      final mediaFile = await medium.file;
 
       var file = PlatformFile(
         path: mediaFile.path,
-        size: (await mediaFile.length()) ~/ 1024,
+        size: ((await mediaFile.length()) / 1024).ceil(),
         bytes: mediaFile.readAsBytesSync(),
       );
 
       if (file.size > _kMaxAttachmentSize) {
-        if (medium.mediaType == MediaType.video) {
+        if (medium.type == AssetType.video) {
           final mediaInfo = await CompressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
@@ -902,18 +902,18 @@ class MessageInputState extends State<MessageInput> {
           ..file = file
           ..attachment = Attachment(
             localUri: file.path != null ? Uri.parse(file.path) : null,
-            type: medium.mediaType == MediaType.image ? 'image' : 'video',
+            type: medium.type == AssetType.image ? 'image' : 'video',
           );
       });
 
       final url = await _uploadAttachment(
           file,
-          medium.mediaType == MediaType.image
+          medium.type == AssetType.image
               ? DefaultAttachmentTypes.image
               : DefaultAttachmentTypes.video,
           channel);
 
-      final fileType = medium.mediaType == MediaType.image
+      final fileType = medium.type == AssetType.image
           ? DefaultAttachmentTypes.image
           : DefaultAttachmentTypes.video;
 
@@ -936,6 +936,7 @@ class MessageInputState extends State<MessageInput> {
       setState(() {
         _attachments.remove(attachment);
       });
+      print(e);
       print(s);
       Scaffold.of(context).showSnackBar(
         SnackBar(

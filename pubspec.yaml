@@ -38,8 +38,7 @@ dependencies:
   flutter_slidable: ^0.5.4
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
-  media_gallery:
-    git: https://github.com/imtoori/media_gallery.git
+  photo_manager: ^0.5.8
   permission_handler: ^5.0.1+1
   transparent_image: ^1.0.0
   ezanimation: ^0.4.1
