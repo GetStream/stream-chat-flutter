@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -144,8 +145,6 @@ class UserListView extends StatefulWidget {
 
 class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
-  final ScrollController _scrollController = ScrollController();
-
   bool get _isListView => widget.crossAxisCount == 1;
 
   @override
@@ -158,14 +157,6 @@ class _UserListViewState extends State<UserListView>
       pagination: widget.pagination,
       options: widget.options,
     );
-
-    _scrollController.addListener(() {
-      usersBloc.queryUsersLoading.first.then((loading) {
-        if (!loading) {
-          _listenUserPagination(usersBloc);
-        }
-      });
-    });
   }
 
   @override
@@ -327,57 +318,41 @@ class _UserListViewState extends State<UserListView>
           );
         }
 
-        if (_isListView) {
-          return ListView.custom(
-            physics: AlwaysScrollableScrollPhysics(),
-            controller: _scrollController,
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, i) {
-                return _listItemBuilder(context, i, items);
-              },
-              childCount: (items.length * 2) + 1,
-              findChildIndexCallback: (key) {
-                final ValueKey<String> valueKey = key;
-                final index =
-                    items.indexWhere((item) => item.key == valueKey.value);
-                return index != -1 ? (index * 2) : null;
-              },
-            ),
-          );
-        }
-        return GridView.custom(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: widget.crossAxisCount,
-          ),
-          physics: AlwaysScrollableScrollPhysics(),
-          controller: _scrollController,
-          childrenDelegate: SliverChildBuilderDelegate(
-            (context, i) {
-              return _gridItemBuilder(context, i, items);
-            },
-            childCount: items.length,
-            findChildIndexCallback: (key) {
-              final ValueKey<String> valueKey = key;
-              final index =
-                  items.indexWhere((item) => item.key == valueKey.value);
-              return index != -1 ? index : null;
-            },
-          ),
+        final child = _isListView
+            ? ListView.separated(
+                physics: AlwaysScrollableScrollPhysics(),
+                // controller: _scrollController,
+                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+                separatorBuilder: (_, index) {
+                  if (widget.separatorBuilder != null) {
+                    return widget.separatorBuilder(context, index);
+                  }
+                  return _separatorBuilder(context, index);
+                },
+                itemBuilder: (context, index) {
+                  return _listItemBuilder(context, index, items);
+                },
+              )
+            : GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: widget.crossAxisCount,
+                ),
+                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+                physics: AlwaysScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return _gridItemBuilder(context, index, items);
+                },
+              );
+
+        return LazyLoadScrollView(
+          onEndOfPage: () => _listenUserPagination(usersBlocState),
+          child: child,
         );
       },
     );
   }
 
   Widget _listItemBuilder(BuildContext context, int i, List<ListItem> items) {
-    if (i % 2 != 0) {
-      if (widget.separatorBuilder != null) {
-        return widget.separatorBuilder(context, i);
-      }
-      return _separatorBuilder(context, i);
-    }
-
-    i = i ~/ 2;
-
     final usersProvider = UsersBloc.of(context);
     if (i < items.length) {
       final item = items[i];
@@ -507,18 +482,14 @@ class _UserListViewState extends State<UserListView>
   }
 
   void _listenUserPagination(UsersBlocState usersProvider) {
-    if (_scrollController.position.maxScrollExtent ==
-            _scrollController.offset &&
-        _scrollController.offset != 0) {
-      usersProvider.queryUsers(
-        filter: widget.filter,
-        sort: widget.sort,
-        pagination: widget.pagination.copyWith(
-          offset: usersProvider.users?.length ?? 0,
-        ),
-        options: widget.options,
-      );
-    }
+    usersProvider.queryUsers(
+      filter: widget.filter,
+      sort: widget.sort,
+      pagination: widget.pagination.copyWith(
+        offset: usersProvider.users?.length ?? 0,
+      ),
+      options: widget.options,
+    );
   }
 
   @override
