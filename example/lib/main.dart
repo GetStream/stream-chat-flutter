@@ -215,7 +215,9 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChannelHeader(),
+      appBar: ChannelHeader(
+        showTypingIndicator: false,
+      ),
       body: Column(
         children: <Widget>[
           Expanded(
@@ -228,14 +230,19 @@ class ChannelPage extends StatelessWidget {
                     );
                   },
                 ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4,
-                    ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    color: Color(0xffFCFCFC).withOpacity(.9),
                     child: TypingIndicator(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                     ),
                   ),
                 ),

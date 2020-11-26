@@ -8,10 +8,14 @@ class ChannelInfo extends StatelessWidget {
   /// The style of the text displayed
   final TextStyle textStyle;
 
+  /// If true the typing indicator will be rendered if a user is typing
+  final bool showTypingIndicator;
+
   const ChannelInfo({
     Key key,
     @required this.channel,
     this.textStyle,
+    this.showTypingIndicator = true,
   }) : super(key: key);
 
   @override
@@ -73,6 +77,10 @@ class ChannelInfo extends StatelessWidget {
           );
         }
       }
+    }
+
+    if (!showTypingIndicator) {
+      return alternativeWidget;
     }
 
     return TypingIndicator(
