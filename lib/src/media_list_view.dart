@@ -6,6 +6,17 @@ import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'dart:ui' as ui;
 
+extension on Duration {
+  String format() {
+    final s = '$this'.split('.')[0].padLeft(8, '0');
+    if (s.startsWith('00:')) {
+      return s.replaceFirst('00:', '');
+    }
+
+    return s;
+  }
+}
+
 class MediaListView extends StatefulWidget {
   final List<String> selectedIds;
   final void Function(AssetEntity media) onSelect;
@@ -100,7 +111,7 @@ class _MediaListViewState extends State<MediaListView> {
                       right: 4,
                       bottom: 10,
                       child: Text(
-                        '${media.videoDuration.inMinutes}:${media.videoDuration.inSeconds.toString().padLeft(2, '0')}',
+                        media.videoDuration.format(),
                         style: TextStyle(
                           color: Colors.white,
                         ),
