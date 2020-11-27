@@ -60,51 +60,53 @@ class MyApp extends StatelessWidget {
         //TODO change to system once dark theme is implemented
         themeMode: ThemeMode.light,
         onGenerateRoute: AppRoutes.generateRoute,
-        initialRoute: client.state.user == null
-            ? Routes.CHOOSE_USER
-            : Routes.CHANNEL_LIST,
+        initialRoute:
+            client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
       ),
     );
   }
 }
 
-class ChannelListPage extends StatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  _ChannelListPageState createState() => _ChannelListPageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _ChannelListPageState extends State<ChannelListPage> {
-  TextEditingController _controller;
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
 
-  String _channelQuery = '';
+  bool _isSelected(int index) => _currentIndex == index;
 
-  bool _isSearchActive = false;
-
-  Timer _debounce;
-
-  void _channelQueryListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted) {
-        setState(() {
-          _channelQuery = _controller.text;
-          _isSearchActive = _channelQuery.isNotEmpty;
-        });
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController()..addListener(_channelQueryListener);
-  }
-
-  @override
-  void dispose() {
-    _controller?.removeListener(_channelQueryListener);
-    _controller?.dispose();
-    super.dispose();
+  List<BottomNavigationBarItem> get _navBarItems {
+    return <BottomNavigationBarItem>[
+      BottomNavigationBarItem(
+        icon: Stack(
+          overflow: Overflow.visible,
+          children: [
+            StreamSvgIcon.message(
+              color: _isSelected(0) ? Colors.black : Colors.grey,
+            ),
+            Positioned(
+              top: -3,
+              right: -16,
+              child: UnreadIndicator(),
+            ),
+          ],
+        ),
+        label: 'Chats',
+      ),
+      BottomNavigationBarItem(
+        icon: Stack(
+          overflow: Overflow.visible,
+          children: [
+            StreamSvgIcon.mentions(
+              color: _isSelected(1) ? Colors.black : Colors.grey,
+            ),
+          ],
+        ),
+        label: 'Mentions',
+      ),
+    ];
   }
 
   @override
@@ -118,63 +120,22 @@ class _ChannelListPageState extends State<ChannelListPage> {
       ),
       drawer: _buildDrawer(context, user),
       drawerEdgeDragWidth: 50,
-      body: ChannelsBloc(
-        child: MessageSearchBloc(
-          child: Column(
-            children: [
-              SearchTextField(
-                controller: _controller,
-              ),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onPanDown: (_) => FocusScope.of(context).unfocus(),
-                    child: _isSearchActive
-                        ? MessageSearchListView(
-                            messageQuery: _channelQuery,
-                            filters: {
-                              'members': {
-                                r'$in': [user.id]
-                              }
-                            },
-                            sortOptions: [
-                              SortOption(
-                                'created_at',
-                                direction: SortOption.ASC,
-                              ),
-                            ],
-                            paginationParams: PaginationParams(limit: 20),
-                            onItemTap: (message) {},
-                          )
-                        : ChannelListView(
-                            onStartChatPressed: () {
-                              Navigator.pushNamed(context, Routes.NEW_CHAT);
-                            },
-                            swipeToAction: true,
-                            filter: {
-                              'members': {
-                                r'$in': [user.id],
-                              },
-                              'draft': {
-                                r'$ne': true,
-                              },
-                            },
-                            options: {
-                              'presence': true,
-                            },
-                            pagination: PaginationParams(
-                              limit: 20,
-                            ),
-                            channelWidget: ChannelPage(),
-                          ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        items: _navBarItems,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+        },
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          ChannelListPage(),
+          UserMentionPage(),
+        ],
       ),
     );
   }
@@ -276,6 +237,115 @@ class _ChannelListPageState extends State<ChannelListPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class UserMentionPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('On Pause Right Now!'),
+    );
+  }
+}
+
+class ChannelListPage extends StatefulWidget {
+  @override
+  _ChannelListPageState createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  TextEditingController _controller;
+
+  String _channelQuery = '';
+
+  bool _isSearchActive = false;
+
+  Timer _debounce;
+
+  void _channelQueryListener() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        setState(() {
+          _channelQuery = _controller.text;
+          _isSearchActive = _channelQuery.isNotEmpty;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController()..addListener(_channelQueryListener);
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_channelQueryListener);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = StreamChat.of(context).user;
+    return ChannelsBloc(
+      child: MessageSearchBloc(
+        child: Column(
+          children: [
+            SearchTextField(
+              controller: _controller,
+            ),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (_) => FocusScope.of(context).unfocus(),
+                  child: _isSearchActive
+                      ? MessageSearchListView(
+                          messageQuery: _channelQuery,
+                          filters: {
+                            'members': {
+                              r'$in': [user.id]
+                            }
+                          },
+                          sortOptions: [
+                            SortOption(
+                              'created_at',
+                              direction: SortOption.ASC,
+                            ),
+                          ],
+                          paginationParams: PaginationParams(limit: 20),
+                          onItemTap: (message) {},
+                        )
+                      : ChannelListView(
+                          onStartChatPressed: () {
+                            Navigator.pushNamed(context, Routes.NEW_CHAT);
+                          },
+                          swipeToAction: true,
+                          filter: {
+                            'members': {
+                              r'$in': [user.id],
+                            },
+                          },
+                          options: {
+                            'presence': true,
+                          },
+                          pagination: PaginationParams(
+                            limit: 20,
+                          ),
+                          channelWidget: ChannelPage(),
+                        ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
