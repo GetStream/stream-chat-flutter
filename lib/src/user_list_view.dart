@@ -62,7 +62,6 @@ class UserListView extends StatefulWidget {
     this.separatorBuilder,
     this.onImageTap,
     this.selectedUsers,
-    this.swipeToAction = false,
     this.pullToRefresh = true,
     this.groupAlphabetically = false,
     this.crossAxisCount = 1,
@@ -74,9 +73,6 @@ class UserListView extends StatefulWidget {
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
-
-  /// If true a default swipe to action behaviour will be added to this widget
-  final bool swipeToAction;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
