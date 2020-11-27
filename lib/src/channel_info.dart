@@ -80,7 +80,7 @@ class ChannelInfo extends StatelessWidget {
     }
 
     if (!showTypingIndicator) {
-      return alternativeWidget;
+      return alternativeWidget ?? Offstage();
     }
 
     return TypingIndicator(
