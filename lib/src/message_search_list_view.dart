@@ -7,6 +7,9 @@ import 'package:stream_chat_flutter/src/message_search_item.dart';
 import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
+/// Callback called when tapping on a user
+typedef MessageSearchItemTapCallback = void Function(Message);
+
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef MessageSearchItemBuilder = Widget Function(BuildContext, Message);
 
@@ -50,6 +53,7 @@ class MessageSearchListView extends StatefulWidget {
     this.errorBuilder,
     this.separatorBuilder,
     this.itemBuilder,
+    this.onItemTap,
     this.showResultCount = true,
   }) : super(key: key);
 
@@ -75,6 +79,9 @@ class MessageSearchListView extends StatefulWidget {
 
   /// Builder used to create a custom item preview
   final MessageSearchItemBuilder itemBuilder;
+
+  /// Function called when tapping on a [MessageSearchItem]
+  final MessageSearchItemTapCallback onItemTap;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -124,7 +131,10 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     if (widget.itemBuilder != null) {
       return widget.itemBuilder(context, message);
     }
-    return MessageSearchItem(message: message);
+    return MessageSearchItem(
+      message: message,
+      onTap: () => widget.onItemTap(message),
+    );
   }
 
   Widget _buildQueryProgressIndicator(
