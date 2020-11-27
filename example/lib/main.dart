@@ -137,6 +137,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                             }
                           },
                           paginationParams: PaginationParams(limit: 20),
+                          onItemTap: (message) {},
                         )
                       : ChannelListView(
                           onStartChatPressed: () {
