@@ -32,8 +32,6 @@ class MessageSearchItem extends StatelessWidget {
     final message = getMessageResponse.message;
     final channel = getMessageResponse.channel;
     final channelName = channel.extraData['name'];
-    print('channel.extraData: ${channel.extraData}');
-    print('channelName: ${channelName}');
     final user = message.user;
     return ListTile(
       onTap: onTap,
@@ -48,7 +46,7 @@ class MessageSearchItem extends StatelessWidget {
       title: Row(
         children: [
           Text(
-            user.name,
+            user.id == StreamChat.of(context).user.id ? 'You' : user.name,
             style: StreamChatTheme.of(context).channelPreviewTheme.title,
           ),
           if (channelName != null)
