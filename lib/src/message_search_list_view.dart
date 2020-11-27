@@ -7,6 +7,9 @@ import 'package:stream_chat_flutter/src/message_search_item.dart';
 import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
+/// Builder used to create a custom [ListUserItem] from a [User]
+typedef MessageSearchItemBuilder = Widget Function(BuildContext, Message);
+
 ///
 /// It shows the list of searched messages.
 ///
@@ -46,7 +49,8 @@ class MessageSearchListView extends StatefulWidget {
     this.emptyBuilder,
     this.errorBuilder,
     this.separatorBuilder,
-    this.pullToRefresh = true,
+    this.itemBuilder,
+    this.showResultCount = true,
   }) : super(key: key);
 
   /// Message String to search on
@@ -69,8 +73,8 @@ class MessageSearchListView extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams paginationParams;
 
-  /// Set it to false to disable the pull-to-refresh widget
-  final bool pullToRefresh;
+  /// Builder used to create a custom item preview
+  final MessageSearchItemBuilder itemBuilder;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -80,6 +84,9 @@ class MessageSearchListView extends StatefulWidget {
 
   /// Builder used to create a custom item separator
   final IndexedWidgetBuilder separatorBuilder;
+
+  /// Set it to false to hide total results text
+  final bool showResultCount;
 
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
@@ -101,22 +108,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   @override
   Widget build(BuildContext context) {
     final messageSearchBloc = MessageSearchBloc.of(context);
-
-    if (!widget.pullToRefresh) {
-      return _buildListView(messageSearchBloc);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        return messageSearchBloc.search(
-          filter: widget.filters,
-          sort: widget.sortOptions,
-          query: widget.messageQuery,
-          pagination: widget.paginationParams,
-        );
-      },
-      child: _buildListView(messageSearchBloc),
-    );
+    return _buildListView(messageSearchBloc);
   }
 
   Widget _separatorBuilder(BuildContext context, int index) {
@@ -129,6 +121,9 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   }
 
   Widget _listItemBuilder(BuildContext context, Message message) {
+    if (widget.itemBuilder != null) {
+      return widget.itemBuilder(context, message);
+    }
     return MessageSearchItem(message: message);
   }
 
@@ -293,7 +288,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           ),
         );
 
-        if (true) {
+        if (widget.showResultCount) {
           child = Column(
             children: [
               Container(
