@@ -245,6 +245,7 @@ class StreamChatThemeData {
         title: TextStyle(
           fontSize: 14,
           color: isDark ? Colors.white : Colors.black,
+          fontWeight: FontWeight.bold
         ),
         subtitle: TextStyle(
           fontSize: 12.5,
