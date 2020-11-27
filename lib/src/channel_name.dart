@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../stream_chat_flutter.dart';
@@ -25,29 +26,46 @@ class ChannelName extends StatelessWidget {
   Widget build(BuildContext context) {
     final client = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
-    return StreamBuilder<Map<String, dynamic>>(
-      stream: channel.extraDataStream,
-      initialData: channel.extraData,
-      builder: (context, snapshot) {
-        String title;
-        if (snapshot.data['name'] == null) {
-          final otherMembers = channel.state.members
-              .where((member) => member.userId != client.user.id);
-          if (otherMembers.isNotEmpty) {
-            final exceedingMembers = otherMembers.length - 5;
-            title =
-                '${otherMembers.take(5).map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
-          } else {
-            title = channel.id;
-          }
-        } else {
-          title = snapshot.data['name'];
-        }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return StreamBuilder<Map<String, dynamic>>(
+          stream: channel.extraDataStream,
+          initialData: channel.extraData,
+          builder: (context, snapshot) {
+            String title;
+            if (snapshot.data['name'] == null) {
+              final otherMembers = channel.state.members
+                  .where((member) => member.userId != client.user.id);
+              if (otherMembers.isNotEmpty) {
+                final maxWidth = constraints.maxWidth;
+                final maxChars = maxWidth / textStyle.fontSize;
+                int currentChars = 0;
+                final currentMembers = <Member>[];
+                otherMembers.forEach((element) {
+                  final newLength = currentChars + element.user.name.length;
+                  if (newLength < maxChars) {
+                    currentChars = newLength;
+                    currentMembers.add(element);
+                  }
+                });
 
-        return Text(
-          title,
-          style: textStyle,
-          overflow: TextOverflow.ellipsis,
+                final exceedingMembers =
+                    otherMembers.length - currentMembers.length;
+                title =
+                    '${currentMembers.map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+              } else {
+                title = channel.id;
+              }
+            } else {
+              title = snapshot.data['name'];
+            }
+
+            return Text(
+              title,
+              style: textStyle,
+              overflow: TextOverflow.ellipsis,
+            );
+          },
         );
       },
     );
