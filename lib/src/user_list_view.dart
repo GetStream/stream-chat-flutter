@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/users_bloc.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'stream_chat.dart';
 import 'user_item.dart';
 
 /// Callback called when tapping on a user
@@ -41,8 +40,8 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// ```
 ///
 ///
-/// Make sure to have a [StreamChat] ancestor in order to provide the information about the channels.
-/// The widget uses a [ListView.custom] to render the list of channels.
+/// Make sure to have a [UsersBloc] ancestor in order to provide the information about the users.
+/// The widget uses a [ListView.separated], [GridView.builder] to render the list, grid of channels.
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
@@ -321,7 +320,6 @@ class _UserListViewState extends State<UserListView>
         final child = _isListView
             ? ListView.separated(
                 physics: AlwaysScrollableScrollPhysics(),
-                // controller: _scrollController,
                 itemCount: items.isNotEmpty ? items.length + 1 : items.length,
                 separatorBuilder: (_, index) {
                   if (widget.separatorBuilder != null) {
