@@ -37,7 +37,6 @@ class _MediaListViewState extends State<MediaListView> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
         ),
-        cacheExtent: 1000,
         itemBuilder: (
           context,
           position,
@@ -88,7 +87,7 @@ class _MediaListViewState extends State<MediaListView> {
                       ),
                     ),
                   ),
-                  if (media.type == AssetType.video)
+                  if (media.type == AssetType.video) ...[
                     Positioned(
                       left: 8,
                       bottom: 10,
@@ -97,6 +96,17 @@ class _MediaListViewState extends State<MediaListView> {
                         package: 'stream_chat_flutter',
                       ),
                     ),
+                    Positioned(
+                      right: 4,
+                      bottom: 10,
+                      child: Text(
+                        '${media.videoDuration.inMinutes}:${media.videoDuration.inSeconds.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ]
                 ],
               ),
               onTap: () {

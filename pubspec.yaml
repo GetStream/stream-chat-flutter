@@ -39,7 +39,6 @@ dependencies:
   carousel_slider: ^2.2.1
   clipboard: ^0.1.2+8
   photo_manager: ^0.5.8
-  permission_handler: ^5.0.1+1
   transparent_image: ^1.0.0
   ezanimation: ^0.4.1
   synchronized: ^2.2.0+2

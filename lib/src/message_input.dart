@@ -11,7 +11,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http_parser/http_parser.dart' as httpParser;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/compress_video_service.dart';
@@ -22,6 +21,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -772,10 +772,8 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildPickerSection() {
     switch (_filePickerIndex) {
       case 0:
-        return FutureBuilder<PermissionStatus>(
-            future: Platform.isAndroid
-                ? Permission.storage.status
-                : Permission.photos.status,
+        return FutureBuilder<bool>(
+            future: PhotoManager.requestPermission(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Center(
@@ -783,10 +781,10 @@ class MessageInputState extends State<MessageInput> {
                 );
               }
 
-              if (snapshot.data.isGranted) {
+              if (snapshot.data) {
                 return MediaListView(
                   selectedIds: _attachments.map((e) => e.id).toList(),
-                  onSelect: (media) {
+                  onSelect: (media) async {
                     if (!_attachments
                         .any((element) => element.id == media.id)) {
                       _addAttachment(media);
@@ -802,22 +800,7 @@ class MessageInputState extends State<MessageInput> {
 
               return InkWell(
                 onTap: () async {
-                  var status = await (Platform.isAndroid
-                      ? Permission.storage.status
-                      : Permission.photos.status);
-                  if (status.isPermanentlyDenied || status.isDenied) {
-                    if (await openAppSettings()) {
-                      setState(() {});
-                    }
-                  } else {
-                    status = await (Platform.isAndroid
-                            ? Permission.storage
-                            : Permission.photos)
-                        .request();
-                    if (status.isGranted) {
-                      setState(() {});
-                    }
-                  }
+                  PhotoManager.openSetting();
                 },
                 child: Container(
                   color: Color(0xFFF2F2F2),
@@ -858,7 +841,7 @@ class MessageInputState extends State<MessageInput> {
       setState(() {
         _attachments.add(attachment);
       });
-      final mediaFile = await medium.file;
+      final mediaFile = await medium.originFile;
 
       var file = PlatformFile(
         path: mediaFile.path,
@@ -1326,7 +1309,10 @@ class MessageInputState extends State<MessageInput> {
                   future: VideoCompress.getFileThumbnail(attachment.file.path),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return Offstage();
+                      return Image.asset(
+                        'images/placeholder.png',
+                        package: 'stream_chat_flutter',
+                      );
                     }
 
                     return Image.file(
@@ -1405,15 +1391,6 @@ class MessageInputState extends State<MessageInput> {
               _filePickerSize = _kMinMediaPickerSize;
             });
           } else {
-            final status = await (Platform.isAndroid
-                ? Permission.storage.status
-                : Permission.photos.status);
-            if (status.isUndetermined) {
-              await (Platform.isAndroid
-                      ? Permission.storage
-                      : Permission.photos)
-                  .request();
-            }
             showAttachmentModal();
           }
         },
@@ -1646,14 +1623,20 @@ class MessageInputState extends State<MessageInput> {
 
   Future<String> _uploadImage(PlatformFile file, Channel channel) async {
     final filename = file.name ?? file.path?.split('/')?.last;
+    httpParser.MediaType mimeType;
+    if (filename != null) {
+      if (filename.toLowerCase().endsWith('heic')) {
+        mimeType = httpParser.MediaType.parse('image/heic');
+      } else {
+        mimeType = httpParser.MediaType.parse(lookupMimeType(filename));
+      }
+    }
     final bytes = file.bytes;
     final res = await channel.sendImage(
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: filename != null
-            ? httpParser.MediaType.parse(lookupMimeType(filename))
-            : null,
+        contentType: mimeType,
       ),
     );
     return res.file;
