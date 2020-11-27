@@ -13,13 +13,13 @@ class MessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
   const MessageSearchItem({
     Key key,
-    @required this.message,
+    @required this.getMessageResponse,
     this.onTap,
     this.showOnlineStatus = true,
   }) : super(key: key);
 
   /// [Message] displayed
-  final Message message;
+  final GetMessageResponse getMessageResponse;
 
   /// Function called when tapping this widget
   final VoidCallback onTap;
@@ -29,9 +29,12 @@ class MessageSearchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = Message.fromJson(message.extraData['message']);
-    final user = data.user;
-    debugPrint(message.toJson().toString());
+    final message = getMessageResponse.message;
+    final channel = getMessageResponse.channel;
+    final channelName = channel.extraData['name'];
+    print('channel.extraData: ${channel.extraData}');
+    print('channelName: ${channelName}');
+    final user = message.user;
     return ListTile(
       onTap: onTap,
       leading: UserAvatar(
@@ -42,15 +45,34 @@ class MessageSearchItem extends StatelessWidget {
           width: 40,
         ),
       ),
-      title: Text(
-        user.name,
-        style: StreamChatTheme.of(context).channelPreviewTheme.title,
+      title: Row(
+        children: [
+          Text(
+            user.name,
+            style: StreamChatTheme.of(context).channelPreviewTheme.title,
+          ),
+          if (channelName != null)
+            Text(
+              ' in ',
+              style: StreamChatTheme.of(context)
+                  .channelPreviewTheme
+                  .title
+                  .copyWith(
+                    fontWeight: FontWeight.normal,
+                  ),
+            ),
+          if (channelName != null)
+            Text(
+              channelName,
+              style: StreamChatTheme.of(context).channelPreviewTheme.title,
+            ),
+        ],
       ),
       subtitle: Row(
         children: [
-          Expanded(child: _buildSubtitle(context, data)),
+          Expanded(child: _buildSubtitle(context, message)),
           SizedBox(width: 16),
-          _buildDate(context, data),
+          _buildDate(context, message),
         ],
       ),
     );

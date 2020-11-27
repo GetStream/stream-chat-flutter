@@ -139,6 +139,12 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                 r'$in': [user.id]
                               }
                             },
+                            sortOptions: [
+                              SortOption(
+                                'created_at',
+                                direction: SortOption.ASC,
+                              ),
+                            ],
                             paginationParams: PaginationParams(limit: 20),
                             onItemTap: (message) {},
                           )

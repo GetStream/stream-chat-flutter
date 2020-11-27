@@ -8,10 +8,11 @@ import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
 /// Callback called when tapping on a user
-typedef MessageSearchItemTapCallback = void Function(Message);
+typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 
 /// Builder used to create a custom [ListUserItem] from a [User]
-typedef MessageSearchItemBuilder = Widget Function(BuildContext, Message);
+typedef MessageSearchItemBuilder = Widget Function(
+    BuildContext, GetMessageResponse);
 
 ///
 /// It shows the list of searched messages.
@@ -127,13 +128,14 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
   }
 
-  Widget _listItemBuilder(BuildContext context, Message message) {
+  Widget _listItemBuilder(
+      BuildContext context, GetMessageResponse getMessageResponse) {
     if (widget.itemBuilder != null) {
-      return widget.itemBuilder(context, message);
+      return widget.itemBuilder(context, getMessageResponse);
     }
     return MessageSearchItem(
-      message: message,
-      onTap: () => widget.onItemTap(message),
+      getMessageResponse: getMessageResponse,
+      onTap: () => widget.onItemTap(getMessageResponse),
     );
   }
 
@@ -165,7 +167,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   }
 
   Widget _buildListView(MessageSearchBlocState messageSearchBloc) {
-    return StreamBuilder<List<Message>>(
+    return StreamBuilder<List<GetMessageResponse>>(
       stream: messageSearchBloc.messagesStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -276,7 +278,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             filter: widget.filters,
             sort: widget.sortOptions,
             pagination: widget.paginationParams.copyWith(
-              offset: messageSearchBloc.messages?.length ?? 0,
+              offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
             query: widget.messageQuery,
           ),

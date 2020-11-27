@@ -36,12 +36,14 @@ class MessageSearchBloc extends StatefulWidget {
 class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
   /// The current messages list
-  List<Message> get messages => _messagesController.value;
+  List<GetMessageResponse> get messageResponses => _messageResponses.value;
 
   /// The current messages list as a stream
-  Stream<List<Message>> get messagesStream => _messagesController.stream;
+  Stream<List<GetMessageResponse>> get messagesStream =>
+      _messageResponses.stream;
 
-  final BehaviorSubject<List<Message>> _messagesController = BehaviorSubject();
+  final BehaviorSubject<List<GetMessageResponse>> _messageResponses =
+      BehaviorSubject();
 
   final BehaviorSubject<bool> _queryMessagesLoadingController =
       BehaviorSubject.seeded(false);
@@ -69,7 +71,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
           pagination.offset == null ||
           pagination.offset == 0;
 
-      final oldMessages = List<Message>.from(messages ?? []);
+      final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
       final messageResponse = await client.search(
         filter,
@@ -79,10 +81,10 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       );
 
       if (clear) {
-        _messagesController.add(messageResponse.results);
+        _messageResponses.add(messageResponse.results);
       } else {
         final temp = oldMessages + messageResponse.results;
-        _messagesController.add(temp);
+        _messageResponses.add(temp);
       }
 
       _queryMessagesLoadingController.add(false);
@@ -99,7 +101,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
 
   @override
   void dispose() {
-    _messagesController.close();
+    _messageResponses.close();
     _queryMessagesLoadingController.close();
     super.dispose();
   }

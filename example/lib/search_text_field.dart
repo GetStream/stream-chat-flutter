@@ -78,7 +78,7 @@ class SearchTextField extends StatelessWidget {
                     Future.microtask(
                       () => [
                         controller.clear(),
-                        onChanged(''),
+                        if (onChanged != null) onChanged(''),
                       ],
                     );
                   }
