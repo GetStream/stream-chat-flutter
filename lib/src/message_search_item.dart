@@ -49,7 +49,7 @@ class MessageSearchItem extends StatelessWidget {
             user.id == StreamChat.of(context).user.id ? 'You' : user.name,
             style: StreamChatTheme.of(context).channelPreviewTheme.title,
           ),
-          if (channelName != null)
+          if (channelName != null) ...[
             Text(
               ' in ',
               style: StreamChatTheme.of(context)
@@ -59,11 +59,11 @@ class MessageSearchItem extends StatelessWidget {
                     fontWeight: FontWeight.normal,
                   ),
             ),
-          if (channelName != null)
             Text(
               channelName,
               style: StreamChatTheme.of(context).channelPreviewTheme.title,
             ),
+          ],
         ],
       ),
       subtitle: Row(
