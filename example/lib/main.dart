@@ -128,38 +128,42 @@ class _ChannelListPageState extends State<ChannelListPage> {
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 350),
-                  child: _isSearchActive
-                      ? MessageSearchListView(
-                          messageQuery: _channelQuery,
-                          filters: {
-                            'members': {
-                              r'$in': [user.id]
-                            }
-                          },
-                          paginationParams: PaginationParams(limit: 20),
-                          onItemTap: (message) {},
-                        )
-                      : ChannelListView(
-                          onStartChatPressed: () {
-                            Navigator.pushNamed(context, Routes.NEW_CHAT);
-                          },
-                          swipeToAction: true,
-                          filter: {
-                            'members': {
-                              r'$in': [user.id],
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanDown: (_) => FocusScope.of(context).unfocus(),
+                    child: _isSearchActive
+                        ? MessageSearchListView(
+                            messageQuery: _channelQuery,
+                            filters: {
+                              'members': {
+                                r'$in': [user.id]
+                              }
                             },
-                            'draft': {
-                              r'$ne': true,
+                            paginationParams: PaginationParams(limit: 20),
+                            onItemTap: (message) {},
+                          )
+                        : ChannelListView(
+                            onStartChatPressed: () {
+                              Navigator.pushNamed(context, Routes.NEW_CHAT);
                             },
-                          },
-                          options: {
-                            'presence': true,
-                          },
-                          pagination: PaginationParams(
-                            limit: 20,
+                            swipeToAction: true,
+                            filter: {
+                              'members': {
+                                r'$in': [user.id],
+                              },
+                              'draft': {
+                                r'$ne': true,
+                              },
+                            },
+                            options: {
+                              'presence': true,
+                            },
+                            pagination: PaginationParams(
+                              limit: 20,
+                            ),
+                            channelWidget: ChannelPage(),
                           ),
-                          channelWidget: ChannelPage(),
-                        ),
+                  ),
                 ),
               ),
             ],
