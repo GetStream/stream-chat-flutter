@@ -3,13 +3,29 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// It shows the current [Message] preview.
+///
+/// Usually you don't use this widget as it's the default item used by [MessageSearchListView].
+///
+/// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class MessageSearchItem extends StatelessWidget {
-  final Message message;
-
+  /// Instantiate a new MessageSearchItem
   const MessageSearchItem({
     Key key,
     @required this.message,
+    this.onTap,
+    this.showOnlineStatus = true,
   }) : super(key: key);
+
+  /// [Message] displayed
+  final Message message;
+
+  /// Function called when tapping this widget
+  final VoidCallback onTap;
+
+  /// If true the [MessageSearchItem] will show the current online Status
+  final bool showOnlineStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +33,10 @@ class MessageSearchItem extends StatelessWidget {
     final user = data.user;
     debugPrint(message.toJson().toString());
     return ListTile(
+      onTap: onTap,
       leading: UserAvatar(
         user: user,
+        showOnlineStatus: showOnlineStatus,
         constraints: BoxConstraints.tightFor(
           height: 40,
           width: 40,
@@ -31,6 +49,7 @@ class MessageSearchItem extends StatelessWidget {
       subtitle: Row(
         children: [
           Expanded(child: _buildSubtitle(context, data)),
+          SizedBox(width: 16),
           _buildDate(context, data),
         ],
       ),

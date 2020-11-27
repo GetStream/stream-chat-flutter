@@ -7,22 +7,36 @@ import 'package:stream_chat_flutter/src/message_search_item.dart';
 import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
+///
+/// It shows the list of searched messages.
+///
+/// ```dart
+/// class MessageSearchPage extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       body: MessageSearchListView(
+///               messageQuery: _channelQuery,
+///               filters: {
+///                 'members': {
+///                   r'$in': [user.id]
+///                 }
+///               },
+///               paginationParams: PaginationParams(limit: 20),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+///
+/// Make sure to have a [MessageSearchBloc] ancestor in order to provide the information about the messages.
+/// The widget uses a [ListView.separated] to render the list of messages.
+///
+/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// Modify it to change the widget appearance.
 class MessageSearchListView extends StatefulWidget {
-  final String messageQuery;
-  final Map<String, dynamic> filters;
-  final List<SortOption> sortOptions;
-  final PaginationParams paginationParams;
-  final bool pullToRefresh;
-
-  /// The builder used when the channel list is empty.
-  final WidgetBuilder emptyBuilder;
-
-  /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
-
-  /// Builder used to create a custom item separator
-  final IndexedWidgetBuilder separatorBuilder;
-
+  /// Instantiate a new MessageSearchListView
   const MessageSearchListView({
     Key key,
     @required this.messageQuery,
@@ -34,6 +48,38 @@ class MessageSearchListView extends StatefulWidget {
     this.separatorBuilder,
     this.pullToRefresh = true,
   }) : super(key: key);
+
+  /// Message String to search on
+  final String messageQuery;
+
+  /// The query filters to use.
+  /// You can query on any of the custom fields you've defined on the [Channel].
+  /// You can also filter other built-in channel fields.
+  final Map<String, dynamic> filters;
+
+  /// The sorting used for the channels matching the filters.
+  /// Sorting is based on field and direction, multiple sorting options can be provided.
+  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
+  /// Direction can be ascending or descending.
+  final List<SortOption> sortOptions;
+
+  /// Pagination parameters
+  /// limit: the number of users to return (max is 30)
+  /// offset: the offset (max is 1000)
+  /// message_limit: how many messages should be included to each channel
+  final PaginationParams paginationParams;
+
+  /// Set it to false to disable the pull-to-refresh widget
+  final bool pullToRefresh;
+
+  /// The builder used when the channel list is empty.
+  final WidgetBuilder emptyBuilder;
+
+  /// The builder that will be used in case of error
+  final Widget Function(Error error) errorBuilder;
+
+  /// Builder used to create a custom item separator
+  final IndexedWidgetBuilder separatorBuilder;
 
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
