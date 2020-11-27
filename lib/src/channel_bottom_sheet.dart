@@ -30,10 +30,13 @@ class ChannelBottomSheet extends StatelessWidget {
                 vertical: 2.0,
               ),
               child: Center(
-                child: ChannelName(
+                child: StreamChannel(
+                  showLoading: false,
                   channel: channel,
-                  textStyle:
-                      StreamChatTheme.of(context).channelPreviewTheme.title,
+                  child: ChannelName(
+                    textStyle:
+                        StreamChatTheme.of(context).channelPreviewTheme.title,
+                  ),
                 ),
               ),
             ),
