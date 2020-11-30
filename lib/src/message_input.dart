@@ -1556,7 +1556,7 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
-    final mimeType = _getMimeType(file.name);
+    final mimeType = _getMimeType(file.path.split('/').last);
 
     if (mimeType.type == 'video' || mimeType.type == 'image') {
       attachmentType = mimeType.type;
