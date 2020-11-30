@@ -28,6 +28,7 @@ void main() async {
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
     persistenceEnabled: true,
+    backgroundKeepAlive: Duration(seconds: 3),
   );
 
   if (userId != null) {
