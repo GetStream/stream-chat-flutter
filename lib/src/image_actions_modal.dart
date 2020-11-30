@@ -83,8 +83,7 @@ class ImageActionsModal extends StatelessWidget {
                 ],
               ),
               IconButton(
-                icon: Icon(
-                  StreamIcons.close,
+                icon: StreamSvgIcon.close(
                   size: 24.0,
                   color: Colors.white,
                 ),
@@ -111,17 +110,31 @@ class ImageActionsModal extends StatelessWidget {
                     children: ListTile.divideTiles(
                       context: context,
                       tiles: [
-                        _buildButton(context, 'Reply',
-                            StreamIcons.curve_line_down_left, () {}),
-                        _buildButton(context, 'Show in Chat', StreamIcons.eye,
-                            () {
+                        _buildButton(
+                            context,
+                            'Reply',
+                            StreamSvgIcon.Icon_curve_line_left_up(
+                              size: 24.0,
+                              color: Colors.black.withOpacity(0.5),
+                            ),
+                            () {}),
+                        _buildButton(
+                            context,
+                            'Show in Chat',
+                            StreamSvgIcon.eye(
+                              size: 24.0,
+                              color: Colors.black,
+                            ), () {
                           Navigator.pop(context);
                           Navigator.pop(context);
                         }),
                         _buildButton(
                             context,
                             'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',
-                            StreamIcons.save_1, () async {
+                            StreamSvgIcon.Icon_save(
+                              size: 24.0,
+                              color: Colors.black.withOpacity(0.5),
+                            ), () async {
                           var url = urls[currentIndex].imageUrl ??
                               urls[currentIndex].assetUrl ??
                               urls[currentIndex].thumbUrl;
@@ -135,8 +148,13 @@ class ImageActionsModal extends StatelessWidget {
                           }
                         }),
                         if (StreamChat.of(context).user.id == message.user.id)
-                          _buildButton(context, 'Delete', StreamIcons.delete,
-                              () {
+                          _buildButton(
+                              context,
+                              'Delete',
+                              StreamSvgIcon.delete(
+                                size: 24.0,
+                                color: Colors.black,
+                              ), () {
                             Navigator.pop(context);
                             Navigator.pop(context);
                             StreamChat.of(context).client.deleteMessage(
@@ -157,7 +175,7 @@ class ImageActionsModal extends StatelessWidget {
   }
 
   Widget _buildButton(
-      context, String title, IconData iconData, VoidCallback onTap,
+      context, String title, StreamSvgIcon icon, VoidCallback onTap,
       {Color color}) {
     var titleStyle = TextStyle(
       fontSize: 14.5,
@@ -174,11 +192,7 @@ class ImageActionsModal extends StatelessWidget {
             style:
                 color == null ? titleStyle : titleStyle.copyWith(color: color),
           ),
-          leading: Icon(
-            iconData,
-            color: color ?? StreamChatTheme.of(context).primaryIconTheme.color,
-            size: 24.0,
-          ),
+          leading: icon,
         ),
       ),
     );

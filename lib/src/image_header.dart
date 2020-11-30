@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'image_actions_modal.dart';
 import 'stream_channel.dart';
 
@@ -49,8 +49,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       elevation: 1,
       leading: showBackButton
           ? IconButton(
-              icon: Icon(
-                StreamIcons.close,
+              icon: StreamSvgIcon.close(
                 color: Colors.black,
                 size: 24.0,
               ),
@@ -61,10 +60,8 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
       actions: <Widget>[
         IconButton(
-          icon: Icon(
-            StreamIcons.menu_point_v,
+          icon: StreamSvgIcon.Icon_menu_point_v(
             color: Colors.black,
-            size: 24.0,
           ),
           onPressed: () {
             _showMessageActionModalBottomSheet(context);

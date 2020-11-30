@@ -12,7 +12,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_icons.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -81,8 +80,7 @@ class _ImageFooterState extends State<ImageFooter> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: Icon(
-                StreamIcons.share_1,
+              icon: StreamSvgIcon.icon_SHARE(
                 size: 24.0,
                 color: Colors.black,
               ),
@@ -111,8 +109,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
             ),
             IconButton(
-              icon: Icon(
-                StreamIcons.grid,
+              icon: StreamSvgIcon.Icon_grid(
                 color: Colors.black,
               ),
               onPressed: () {
@@ -160,8 +157,7 @@ class _ImageFooterState extends State<ImageFooter> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: IconButton(
-                      icon: Icon(
-                        StreamIcons.close,
+                      icon: StreamSvgIcon.close(
                         color: Colors.black,
                       ),
                       onPressed: () {
@@ -446,13 +442,11 @@ class _ImageFooterState extends State<ImageFooter> {
                     prefixIconConstraints:
                         BoxConstraints.tight(Size(38.0, 38.0)),
                     prefixIcon: Transform.scale(
-                      scale: 1.2,
-                      alignment: Alignment.center,
-                      child: Icon(
-                        StreamIcons.search,
-                        color: Colors.black,
-                      ),
-                    ),
+                        scale: 1.2,
+                        alignment: Alignment.center,
+                        child: StreamSvgIcon.search(
+                          color: Colors.black,
+                        )),
                     hintText: 'Search',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32.0),
@@ -472,8 +466,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 width: 8.0,
               ),
               IconButton(
-                icon: Icon(
-                  StreamIcons.close_circle,
+                icon: StreamSvgIcon.close_small(
                   color: Colors.black.withOpacity(0.5),
                 ),
                 onPressed: () {
@@ -494,8 +487,7 @@ class _ImageFooterState extends State<ImageFooter> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: IconButton(
-              icon: Icon(
-                StreamIcons.search,
+              icon: StreamSvgIcon.search(
                 color: Colors.black,
               ),
               iconSize: 24.0,
@@ -520,8 +512,7 @@ class _ImageFooterState extends State<ImageFooter> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: IconButton(
-              icon: Icon(
-                StreamIcons.share,
+              icon: StreamSvgIcon.search(
                 color: Colors.black,
               ),
               iconSize: 24.0,
@@ -612,8 +603,7 @@ class _ImageFooterState extends State<ImageFooter> {
                             },
                             child: Transform.rotate(
                               angle: -pi / 2,
-                              child: Icon(
-                                StreamIcons.send_message,
+                              child: StreamSvgIcon.Icon_send_message(
                                 color: StreamChatTheme.of(context).accentColor,
                               ),
                             ),
@@ -630,8 +620,7 @@ class _ImageFooterState extends State<ImageFooter> {
                         child: Center(
                             child: InkWell(
                           onTap: () {},
-                          child: Icon(
-                            StreamIcons.send_message,
+                          child: StreamSvgIcon.Icon_send_message(
                             color: Colors.grey,
                           ),
                         )),
