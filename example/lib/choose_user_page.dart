@@ -155,11 +155,9 @@ class ChooseUserPage extends StatelessWidget {
                             if (!kIsWeb) {
                               initNotifications(client);
                             }
-                            Navigator.pushNamedAndRemoveUntil(
+                            Navigator.pushReplacementNamed(
                               context,
-                              Routes.CHANNEL_LIST,
-                              ModalRoute.withName(Routes.CHANNEL_LIST),
-                              arguments: client,
+                              Routes.HOME,
                             );
                           },
                           leading: UserAvatar(

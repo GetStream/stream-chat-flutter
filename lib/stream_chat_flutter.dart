@@ -41,3 +41,4 @@ export 'src/video_attachment.dart';
 export 'src/message_search_bloc.dart';
 export 'src/message_search_item.dart';
 export 'src/message_search_list_view.dart';
+export 'src/unread_indicator.dart';
