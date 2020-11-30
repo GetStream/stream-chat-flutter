@@ -1549,8 +1549,23 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
+    final channel = StreamChannel.of(context).channel;
+    final attachment = _SendingAttachment(
+      file: file,
+      attachment: Attachment(
+        localUri: file.path != null ? Uri.parse(file.path) : null,
+        type: attachmentType,
+      ),
+    );
+
+    setState(() {
+      _attachments.add(attachment);
+    });
+
+    final mimeType = _getMimeType(file.name);
+
     if (file.size > _kMaxAttachmentSize) {
-      if (attachmentType == 'video') {
+      if (attachmentType == 'video' || mimeType?.type == 'video') {
         final mediaInfo = await CompressVideoService.compressVideo(file.path);
         file = PlatformFile(
           name: mediaInfo.title,
@@ -1566,21 +1581,12 @@ class MessageInputState extends State<MessageInput> {
             ),
           ),
         );
+        setState(() {
+          _attachments.remove(attachment);
+        });
+        return;
       }
     }
-
-    final channel = StreamChannel.of(context).channel;
-    final attachment = _SendingAttachment(
-      file: file,
-      attachment: Attachment(
-        localUri: file.path != null ? Uri.parse(file.path) : null,
-        type: attachmentType,
-      ),
-    );
-
-    setState(() {
-      _attachments.add(attachment);
-    });
 
     final url = await _uploadAttachment(file, fileType, channel);
 
@@ -1622,7 +1628,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadImage(PlatformFile file, Channel channel) async {
-    final filename = file.name ?? file.path?.split('/')?.last;
+    final filename = file.path?.split('/')?.last;
     final mimeType = _getMimeType(filename);
     final bytes = file.bytes;
     final res = await channel.sendImage(
@@ -1649,7 +1655,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Future<String> _uploadFile(PlatformFile file, Channel channel) async {
-    final filename = file.name ?? file.path?.split('/')?.last;
+    final filename = file.path?.split('/')?.last;
     final mimeType = _getMimeType(filename);
     final bytes = file.bytes;
     final res = await channel.sendFile(
