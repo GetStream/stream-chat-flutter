@@ -1623,14 +1623,7 @@ class MessageInputState extends State<MessageInput> {
 
   Future<String> _uploadImage(PlatformFile file, Channel channel) async {
     final filename = file.name ?? file.path?.split('/')?.last;
-    httpParser.MediaType mimeType;
-    if (filename != null) {
-      if (filename.toLowerCase().endsWith('heic')) {
-        mimeType = httpParser.MediaType.parse('image/heic');
-      } else {
-        mimeType = httpParser.MediaType.parse(lookupMimeType(filename));
-      }
-    }
+    final mimeType = _getMimeType(filename);
     final bytes = file.bytes;
     final res = await channel.sendImage(
       MultipartFile.fromBytes(
@@ -1642,14 +1635,28 @@ class MessageInputState extends State<MessageInput> {
     return res.file;
   }
 
+  httpParser.MediaType _getMimeType(String filename) {
+    httpParser.MediaType mimeType;
+    if (filename != null) {
+      if (filename.toLowerCase().endsWith('heic')) {
+        mimeType = httpParser.MediaType.parse('image/heic');
+      } else {
+        mimeType = httpParser.MediaType.parse(lookupMimeType(filename));
+      }
+    }
+
+    return mimeType;
+  }
+
   Future<String> _uploadFile(PlatformFile file, Channel channel) async {
     final filename = file.name ?? file.path?.split('/')?.last;
+    final mimeType = _getMimeType(filename);
     final bytes = file.bytes;
     final res = await channel.sendFile(
       MultipartFile.fromBytes(
         bytes,
         filename: filename,
-        contentType: httpParser.MediaType.parse(lookupMimeType(filename)),
+        contentType: mimeType,
       ),
     );
     return res.file;
