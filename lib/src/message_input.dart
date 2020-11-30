@@ -869,7 +869,7 @@ class MessageInputState extends State<MessageInput> {
           }
           file = PlatformFile(
             name: file.name,
-            size: mediaInfo.filesize,
+            size: (mediaInfo.filesize / 1024).ceil(),
             bytes: await mediaInfo.file.readAsBytes(),
             path: mediaInfo.path,
           );
@@ -1294,6 +1294,12 @@ class MessageInputState extends State<MessageInput> {
             ? Image.memory(
                 attachment.file.bytes,
                 fit: BoxFit.cover,
+                errorBuilder: (context, _, __) {
+                  return Image.asset(
+                    'images/placeholder.png',
+                    package: 'stream_chat_flutter',
+                  );
+                },
               )
             : Image.network(
                 attachment.attachment.imageUrl,
@@ -1520,6 +1526,7 @@ class MessageInputState extends State<MessageInput> {
       }
       final bytes = await pickedFile.readAsBytes();
       file = PlatformFile(
+        size: (bytes.length / 1024).ceil(),
         path: pickedFile.path,
         bytes: bytes,
       );
@@ -1549,6 +1556,12 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
+    final mimeType = _getMimeType(file.name);
+
+    if (mimeType.type == 'video' || mimeType.type == 'image') {
+      attachmentType = mimeType.type;
+    }
+
     final channel = StreamChannel.of(context).channel;
     final attachment = _SendingAttachment(
       file: file,
@@ -1562,17 +1575,18 @@ class MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    final mimeType = _getMimeType(file.name);
-
     if (file.size > _kMaxAttachmentSize) {
-      if (attachmentType == 'video' || mimeType?.type == 'video') {
+      if (attachmentType == 'video') {
         final mediaInfo = await CompressVideoService.compressVideo(file.path);
         file = PlatformFile(
           name: mediaInfo.title,
-          size: mediaInfo.filesize,
+          size: (mediaInfo.filesize / 1024).ceil(),
           bytes: await mediaInfo.file.readAsBytes(),
           path: mediaInfo.path,
         );
+        setState(() {
+          attachment.file = file;
+        });
       } else {
         Scaffold.of(context).showSnackBar(
           SnackBar(
