@@ -60,7 +60,7 @@ class _ImageFooterState extends State<ImageFooter> {
   TextEditingController _searchController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
 
-  List<User> _selectedUsers = [];
+  Set<User> _selectedUsers = {};
   bool _loading = false;
 
   @override
@@ -204,171 +204,93 @@ class _ImageFooterState extends State<ImageFooter> {
     showDialog(
       context: context,
       builder: (context) {
-        return StreamChannel(
-          channel: channel,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: StatefulBuilder(builder: (modalContext, modalSetState) {
-              return Align(
-                alignment: _userSearchMode
-                    ? Alignment.topCenter
-                    : Alignment.bottomCenter,
-                child: Material(
-                  color: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Stack(
+        return StatefulBuilder(builder: (context, modalSetState) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+            child: Material(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Scaffold(
+                body: UsersBloc(
+                  child: Column(
                     children: [
-                      ListView(
-                        children: [
-                          if (!_userSearchMode &&
-                              MediaQuery.of(context).viewInsets.bottom == 0.0)
-                            GestureDetector(
-                              child: Container(
-                                height:
-                                    MediaQuery.of(modalContext).size.height / 2,
-                                color: Colors.transparent,
-                              ),
-                              onTapUp: (val) {
-                                Navigator.pop(modalContext);
+                      _buildTextInputSection(modalSetState),
+                      Expanded(
+                        child: UserListView(
+                          selectedUsers: _selectedUsers,
+                          onUserTap: (user, _) {
+                            _searchController.clear();
+                            if (!_selectedUsers.contains(user)) {
+                              modalSetState(() {
+                                _selectedUsers.add(user);
+                              });
+                            } else {
+                              modalSetState(() {
+                                _selectedUsers.remove(user);
+                              });
+                            }
+                          },
+                          crossAxisCount: 3,
+                          pagination: PaginationParams(
+                            limit: 25,
+                          ),
+                          filter: {
+                            if (_searchController.text.isNotEmpty)
+                              'name': {
+                                r'$autocomplete': _searchController.text,
                               },
+                            'id': {
+                              r'$ne': StreamChat.of(context).user.id,
+                            },
+                          },
+                          sort: [
+                            SortOption(
+                              'name',
+                              direction: 1,
                             ),
-                          Container(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              vertical: 4.0,
-                            ),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(16.0),
-                                  topLeft: Radius.circular(16.0),
-                                )),
-                            child: _buildTextInputSection(modalSetState),
-                          ),
-                          Container(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                bottomRight: Radius.circular(
-                                    _userSearchMode ? 16.0 : 0.0),
-                                bottomLeft: Radius.circular(
-                                    _userSearchMode ? 16.0 : 0.0),
-                              ),
-                            ),
-                            child: FutureBuilder<QueryUsersResponse>(
-                                future: _userQuery,
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-
-                                  var filteredData =
-                                      snapshot.data.users.toList();
-
-                                  if (_userSearchMode &&
-                                      _searchController.text.length > 0) {
-                                    filteredData = snapshot.data.users
-                                        .where((element) => element.name
-                                            .toLowerCase()
-                                            .contains(_searchController.text
-                                                .toLowerCase()))
-                                        .toList();
-                                  }
-
-                                  return GridView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, position) {
-                                      var user = filteredData[position];
-                                      var isUserSelected =
-                                          _selectedUsers.contains(user);
-
-                                      return Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Stack(
-                                              children: [
-                                                CircleAvatar(
-                                                  maxRadius: 32.0,
-                                                  child: UserAvatar(
-                                                    onTap: (user) {
-                                                      if (isUserSelected) {
-                                                        _selectedUsers
-                                                            .remove(user);
-                                                      } else {
-                                                        _selectedUsers
-                                                            .add(user);
-                                                      }
-                                                      modalSetState(() {});
-                                                    },
-                                                    user: user,
-                                                    constraints:
-                                                        BoxConstraints.tightFor(
-                                                      height: isUserSelected
-                                                          ? 56
-                                                          : 64,
-                                                      width: isUserSelected
-                                                          ? 56
-                                                          : 64,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            32),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                user.name,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle2,
-                                                textAlign: TextAlign.center,
-                                                maxLines: 2,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    itemCount: filteredData.length,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 4,
-                                      childAspectRatio: 0.75,
+                          ],
+                          emptyBuilder: (_) {
+                            return LayoutBuilder(
+                              builder: (context, viewportConstraints) {
+                                return SingleChildScrollView(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: viewportConstraints.maxHeight,
                                     ),
-                                  );
-                                }),
-                          ),
-                        ],
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(24),
+                                            child: StreamSvgIcon.search(
+                                              size: 96,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          Text(
+                                              'No user matches these keywords...'),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
+                      if (_selectedUsers.isNotEmpty)
+                        _buildShareTextInputSection(modalSetState),
                       if (!_userSearchMode && _selectedUsers.isEmpty)
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
                             color: Colors.white,
                             height: 48.0,
-                            margin: EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                            ),
                             child: Material(
                               child: InkWell(
                                 onTap: () async {
@@ -392,7 +314,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                     child: Text(
                                       'Save to Photos',
                                       style: TextStyle(
-                                        color: StreamChatTheme.of(modalContext)
+                                        color: StreamChatTheme.of(context)
                                             .accentColor,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -403,15 +325,13 @@ class _ImageFooterState extends State<ImageFooter> {
                             ),
                           ),
                         ),
-                      if (!_userSearchMode && _selectedUsers.isNotEmpty)
-                        _buildShareTextInputSection(modalSetState),
                     ],
                   ),
                 ),
-              );
-            }),
-          ),
-        );
+              ),
+            ),
+          );
+        });
       },
     );
   }
@@ -440,13 +360,14 @@ class _ImageFooterState extends State<ImageFooter> {
                   decoration: InputDecoration(
                     isDense: true,
                     prefixIconConstraints:
-                        BoxConstraints.tight(Size(38.0, 38.0)),
-                    prefixIcon: Transform.scale(
-                        scale: 1.2,
-                        alignment: Alignment.center,
-                        child: StreamSvgIcon.search(
-                          color: Colors.black,
-                        )),
+                        BoxConstraints.tight(Size(36.0, 44.0)),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 6.0),
+                      child: StreamSvgIcon.search(
+                        color: Colors.black,
+                      ),
+                    ),
                     hintText: 'Search',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32.0),
@@ -512,10 +433,9 @@ class _ImageFooterState extends State<ImageFooter> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: IconButton(
-              icon: StreamSvgIcon.search(
+              icon: StreamSvgIcon.share_arrow(
                 color: Colors.black,
               ),
-              iconSize: 24.0,
               onPressed: () async {
                 var url = widget.urls[widget.currentPage].imageUrl ??
                     widget.urls[widget.currentPage].assetUrl ??
@@ -580,54 +500,32 @@ class _ImageFooterState extends State<ImageFooter> {
                       ),
                     ),
                   ),
-                  AnimatedCrossFade(
-                    crossFadeState: _messageController.text.isNotEmpty
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    firstChild: IconTheme(
-                      data: StreamChatTheme.of(context)
-                          .channelTheme
-                          .messageInputButtonIconTheme,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InkWell(
-                            onTap: () async {
-                              modalSetState(() {
-                                _loading = true;
-                              });
-                              await sendMessage();
-                              modalSetState(() {
-                                _loading = false;
-                              });
-                            },
-                            child: Transform.rotate(
-                              angle: -pi / 2,
-                              child: StreamSvgIcon.Icon_send_message(
-                                color: StreamChatTheme.of(context).accentColor,
-                              ),
+                  IconTheme(
+                    data: StreamChatTheme.of(context)
+                        .channelTheme
+                        .messageInputButtonIconTheme,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: InkWell(
+                          onTap: () async {
+                            modalSetState(() {
+                              _loading = true;
+                            });
+                            await sendMessage();
+                            modalSetState(() {
+                              _loading = false;
+                            });
+                          },
+                          child: Transform.rotate(
+                            angle: -pi / 2,
+                            child: StreamSvgIcon.Icon_send_message(
+                              color: StreamChatTheme.of(context).accentColor,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    secondChild: IconTheme(
-                      data: StreamChatTheme.of(context)
-                          .channelTheme
-                          .messageInputButtonIconTheme,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                            child: InkWell(
-                          onTap: () {},
-                          child: StreamSvgIcon.Icon_send_message(
-                            color: Colors.grey,
-                          ),
-                        )),
-                      ),
-                    ),
-                    duration: Duration(milliseconds: 300),
-                    alignment: Alignment.center,
                   ),
                 ],
               ),

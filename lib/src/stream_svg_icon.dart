@@ -469,4 +469,16 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.share_arrow({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'share_arrow.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }
