@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'stream_channel.dart';
@@ -31,8 +31,10 @@ class ImageFooter extends StatefulWidget {
   final int currentPage;
   final int totalPages;
 
-  final List<Attachment> urls;
+  final List<Attachment> mediaAttachments;
   final Message message;
+
+  final List<VideoPackage> videoPackages;
 
   /// Creates a channel header
   ImageFooter({
@@ -42,8 +44,9 @@ class ImageFooter extends StatefulWidget {
     this.onImageTap,
     this.currentPage = 0,
     this.totalPages = 0,
-    this.urls,
+    this.mediaAttachments,
     this.message,
+    this.videoPackages,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -55,19 +58,12 @@ class ImageFooter extends StatefulWidget {
 }
 
 class _ImageFooterState extends State<ImageFooter> {
-  Future<QueryUsersResponse> _userQuery;
   bool _userSearchMode = false;
   TextEditingController _searchController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
 
   Set<User> _selectedUsers = {};
   bool _loading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _userQuery = _queryUsers(context);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +119,10 @@ class _ImageFooterState extends State<ImageFooter> {
   }
 
   Widget _buildPhotosModal(context) {
+    var videoAttachments = widget.mediaAttachments
+        .where((element) => element.type == 'video')
+        .toList();
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -174,20 +174,33 @@ class _ImageFooterState extends State<ImageFooter> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context, position) {
-                  return Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: AspectRatio(
-                      child: CachedNetworkImage(
-                        imageUrl: widget.urls[position].imageUrl ??
-                            widget.urls[position].assetUrl ??
-                            widget.urls[position].thumbUrl,
-                        fit: BoxFit.cover,
+                  if (widget.mediaAttachments[position].type == 'video') {
+                    var controllerPackage = widget.videoPackages[
+                        videoAttachments
+                            .indexOf(widget.mediaAttachments[position])];
+
+                    return FittedBox(
+                      child: Chewie(
+                        controller: controllerPackage.chewieController,
                       ),
-                      aspectRatio: 1.0,
-                    ),
-                  );
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: AspectRatio(
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              widget.mediaAttachments[position].imageUrl ??
+                                  widget.mediaAttachments[position].assetUrl ??
+                                  widget.mediaAttachments[position].thumbUrl,
+                          fit: BoxFit.cover,
+                        ),
+                        aspectRatio: 1.0,
+                      ),
+                    );
+                  }
                 },
-                itemCount: widget.urls.length,
+                itemCount: widget.mediaAttachments.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3),
               ),
@@ -206,7 +219,12 @@ class _ImageFooterState extends State<ImageFooter> {
       builder: (context) {
         return StatefulBuilder(builder: (context, modalSetState) {
           return Padding(
-            padding: const EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+            padding: EdgeInsets.only(
+                top: _userSearchMode
+                    ? 16.0
+                    : MediaQuery.of(context).size.height / 2,
+                left: 8.0,
+                right: 8.0),
             child: Material(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16.0),
@@ -233,7 +251,7 @@ class _ImageFooterState extends State<ImageFooter> {
                               });
                             }
                           },
-                          crossAxisCount: 3,
+                          crossAxisCount: 4,
                           pagination: PaginationParams(
                             limit: 25,
                           ),
@@ -295,12 +313,18 @@ class _ImageFooterState extends State<ImageFooter> {
                               child: InkWell(
                                 onTap: () async {
                                   var url = widget
-                                          .urls[widget.currentPage].imageUrl ??
+                                          .mediaAttachments[widget.currentPage]
+                                          .imageUrl ??
                                       widget
-                                          .urls[widget.currentPage].assetUrl ??
-                                      widget.urls[widget.currentPage].thumbUrl;
+                                          .mediaAttachments[widget.currentPage]
+                                          .assetUrl ??
+                                      widget
+                                          .mediaAttachments[widget.currentPage]
+                                          .thumbUrl;
 
-                                  if (widget.urls[widget.currentPage].type ==
+                                  if (widget
+                                          .mediaAttachments[widget.currentPage]
+                                          .type ==
                                       'video') {
                                     await _saveVideo(url);
                                     Navigator.pop(context);
@@ -437,9 +461,10 @@ class _ImageFooterState extends State<ImageFooter> {
                 color: Colors.black,
               ),
               onPressed: () async {
-                var url = widget.urls[widget.currentPage].imageUrl ??
-                    widget.urls[widget.currentPage].assetUrl ??
-                    widget.urls[widget.currentPage].thumbUrl;
+                var url =
+                    widget.mediaAttachments[widget.currentPage].imageUrl ??
+                        widget.mediaAttachments[widget.currentPage].assetUrl ??
+                        widget.mediaAttachments[widget.currentPage].thumbUrl;
                 var type = url?.split('?')?.first?.split('.')?.last ?? 'jpg';
                 var request = await HttpClient().getUrl(Uri.parse(url));
                 var response = await request.close();
@@ -530,20 +555,6 @@ class _ImageFooterState extends State<ImageFooter> {
                 ],
               ),
       ),
-    );
-  }
-
-  Future<QueryUsersResponse> _queryUsers(context) {
-    return StreamChat.of(context).client.queryUsers(
-      pagination: PaginationParams(
-        limit: 25,
-      ),
-      sort: [
-        SortOption(
-          'name',
-          direction: SortOption.ASC,
-        ),
-      ],
     );
   }
 

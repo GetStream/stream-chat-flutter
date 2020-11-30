@@ -63,6 +63,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
 
   @override
   Widget build(BuildContext context) {
+    var videoAttachments = widget.mediaAttachments
+        .where((element) => element.type == 'video')
+        .toList();
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -113,7 +117,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       );
                     } else if (widget.mediaAttachments[position].type ==
                         'video') {
-                      if (!videoPackages[position].initialised) {
+                      var controllerPackage = videoPackages[videoAttachments
+                          .indexOf(widget.mediaAttachments[position])];
+
+                      if (!controllerPackage.initialised) {
                         return Center(
                           child: CircularProgressIndicator(),
                         );
@@ -130,7 +137,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                           }
                         },
                         child: Chewie(
-                          controller: videoPackages[position].chewieController,
+                          controller: controllerPackage.chewieController,
                         ),
                       );
                     }
@@ -160,8 +167,9 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                 ImageFooter(
                   currentPage: _currentPage,
                   totalPages: widget.mediaAttachments.length,
-                  urls: widget.mediaAttachments,
+                  mediaAttachments: widget.mediaAttachments,
                   message: widget.message,
+                  videoPackages: videoPackages,
                 ),
               ],
             ),
