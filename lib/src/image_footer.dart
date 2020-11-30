@@ -465,7 +465,10 @@ class _ImageFooterState extends State<ImageFooter> {
                     widget.mediaAttachments[widget.currentPage].imageUrl ??
                         widget.mediaAttachments[widget.currentPage].assetUrl ??
                         widget.mediaAttachments[widget.currentPage].thumbUrl;
-                var type = url?.split('?')?.first?.split('.')?.last ?? 'jpg';
+                var type =
+                    widget.mediaAttachments[widget.currentPage].type == 'image'
+                        ? 'jpg'
+                        : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
                 var request = await HttpClient().getUrl(Uri.parse(url));
                 var response = await request.close();
                 var bytes = await consolidateHttpClientResponseBytes(response);
@@ -583,7 +586,7 @@ class _ImageFooterState extends State<ImageFooter> {
 
       message = (Message()).copyWith(
         text: text,
-        attachments: attachments,
+        attachments: [attachments[widget.currentPage]],
         mentionedUsers: [],
         showInChannel: false,
       );

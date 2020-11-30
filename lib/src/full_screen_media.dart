@@ -82,7 +82,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                     });
                   },
                   itemBuilder: (context, position) {
-                    print(widget.mediaAttachments[position].type);
                     if (widget.mediaAttachments[position].type == 'image' ||
                         widget.mediaAttachments[position].type == 'giphy') {
                       return PhotoView(
