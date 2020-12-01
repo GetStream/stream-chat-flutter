@@ -300,6 +300,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
           children: [
             SearchTextField(
               controller: _controller,
+              showCloseButton: _isSearchActive,
             ),
             Expanded(
               child: AnimatedSwitcher(
