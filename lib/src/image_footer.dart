@@ -582,8 +582,6 @@ class _ImageFooterState extends State<ImageFooter> {
       final message = Message(
         text: text,
         attachments: [attachments[widget.currentPage]],
-        mentionedUsers: [],
-        showInChannel: false,
       );
 
       await c.sendMessage(message);
