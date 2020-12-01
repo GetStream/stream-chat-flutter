@@ -225,6 +225,9 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     var user = StreamChat.of(context).user;
 
+    bool hasFiles =
+        widget.message.attachments.any((element) => element.type == 'file');
+
     return Portal(
       child: Padding(
         padding: widget.padding ?? EdgeInsets.all(8),
@@ -298,33 +301,38 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           ),
                                         )
                                       : Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(8.0),
-                                              topRight: Radius.circular(8.0),
-                                              bottomRight: Radius.circular(8.0),
-                                            ),
-                                            border: Border.fromBorderSide(
-                                                BorderSide(
-                                              color: Color(0xFFE6E6E6),
-                                            )),
-                                            color: widget.message.attachments
-                                                    .where((element) =>
-                                                        element.type == 'file')
-                                                    .isEmpty
-                                                ? Colors.transparent
-                                                : (user.id ==
-                                                        widget.message.user.id
-                                                    ? Color(0xFFE6E6E6)
-                                                    : Colors.white),
-                                          ),
-                                          padding: EdgeInsets.all(widget
-                                                  .message.attachments
+                                          decoration: widget.message.attachments
                                                   .where((element) =>
                                                       element.type == 'file')
                                                   .isEmpty
-                                              ? 0.0
-                                              : 2.0),
+                                              ? null
+                                              : BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(8.0),
+                                                    topRight:
+                                                        Radius.circular(8.0),
+                                                    bottomRight:
+                                                        Radius.circular(8.0),
+                                                  ),
+                                                  border: hasFiles
+                                                      ? Border.fromBorderSide(
+                                                          BorderSide(
+                                                          color:
+                                                              Color(0xFFE6E6E6),
+                                                        ))
+                                                      : null,
+                                                  color: hasFiles
+                                                      ? (user.id ==
+                                                              widget.message
+                                                                  .user.id
+                                                          ? Color(0xFFE6E6E6)
+                                                          : Colors.white)
+                                                      : Colors.transparent,
+                                                ),
+                                          padding: EdgeInsets.all(
+                                              hasFiles ? 2.0 : 0.0),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,

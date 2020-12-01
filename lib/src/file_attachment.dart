@@ -6,11 +6,13 @@ import 'package:stream_chat_flutter/src/utils.dart';
 class FileAttachment extends StatelessWidget {
   final Attachment attachment;
   final Size size;
+  final Widget trailing;
 
   const FileAttachment({
     Key key,
     @required this.attachment,
     this.size,
+    this.trailing,
   }) : super(key: key);
 
   @override
@@ -22,8 +24,13 @@ class FileAttachment extends StatelessWidget {
         },
         child: Container(
           width: size?.width ?? 100,
+          margin: trailing != null ? EdgeInsets.only(top: 4.0) : null,
           decoration: BoxDecoration(
             color: Colors.white,
+            borderRadius: trailing != null ? BorderRadius.circular(16.0) : null,
+            border: trailing != null
+                ? Border.fromBorderSide(BorderSide(color: Color(0xFFE6E6E6)))
+                : null,
           ),
           child: ListTile(
             dense: true,
@@ -45,14 +52,15 @@ class FileAttachment extends StatelessWidget {
                 color: Colors.black.withOpacity(0.5),
               ),
             ),
-            trailing: IconButton(
-              icon: StreamSvgIcon.cloud_download(
-                color: Colors.black,
-              ),
-              onPressed: () {
-                launchURL(context, attachment.assetUrl);
-              },
-            ),
+            trailing: trailing ??
+                IconButton(
+                  icon: StreamSvgIcon.cloud_download(
+                    color: Colors.black,
+                  ),
+                  onPressed: () {
+                    launchURL(context, attachment.assetUrl);
+                  },
+                ),
           ),
         ),
       ),

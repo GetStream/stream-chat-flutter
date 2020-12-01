@@ -1201,44 +1201,72 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildAttachments() {
     return _attachments.isEmpty
         ? Container()
-        : LimitedBox(
-            maxHeight: 104.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: _attachments
+        : Column(
+            children: [
+              ..._attachments
+                  .where((e) => e.attachment.type == 'file')
                   .map(
-                    (attachment) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: <Widget>[
-                            AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Container(
-                                height: 104,
-                                width: 104,
-                                child: _buildAttachment(attachment),
-                              ),
-                            ),
-                            _buildRemoveButton(attachment),
-                            attachment.uploaded
-                                ? SizedBox()
-                                : Positioned.fill(
-                                    child: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                  ),
-                          ],
-                        ),
+                    (e) => FileAttachment(
+                      attachment: e.attachment,
+                      size: Size(
+                        MediaQuery.of(context).size.width * 0.6,
+                        MediaQuery.of(context).size.height * 0.3,
+                      ),
+                      trailing: IconButton(
+                        icon: StreamSvgIcon.close_small(),
+                        onPressed: () {
+                          setState(() {
+                            _attachments.remove(e);
+                          });
+                        },
                       ),
                     ),
                   )
                   .toList(),
-            ),
+              if (_attachments.any((e) => e.attachment.type != 'file'))
+                LimitedBox(
+                  maxHeight: 104.0,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: _attachments
+                        .where((e) => e.attachment.type != 'file')
+                        .map(
+                          (attachment) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Stack(
+                                children: <Widget>[
+                                  AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: Container(
+                                      height: 104,
+                                      width: 104,
+                                      child: _buildAttachment(attachment),
+                                    ),
+                                  ),
+                                  _buildRemoveButton(attachment),
+                                  attachment.uploaded
+                                      ? SizedBox()
+                                      : Positioned.fill(
+                                          child: Center(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+            ],
           );
   }
 
