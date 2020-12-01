@@ -1203,26 +1203,35 @@ class MessageInputState extends State<MessageInput> {
         ? Container()
         : Column(
             children: [
-              ..._attachments
-                  .where((e) => e.attachment.type == 'file')
-                  .map(
-                    (e) => FileAttachment(
-                      attachment: e.attachment,
-                      size: Size(
-                        MediaQuery.of(context).size.width * 0.6,
-                        MediaQuery.of(context).size.height * 0.3,
-                      ),
-                      trailing: IconButton(
-                        icon: StreamSvgIcon.close_small(),
-                        onPressed: () {
-                          setState(() {
-                            _attachments.remove(e);
-                          });
-                        },
-                      ),
-                    ),
-                  )
-                  .toList(),
+              LimitedBox(
+                maxHeight: 73.0,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: _attachments
+                      .where((e) => e.attachment.type == 'file')
+                      .map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: FileAttachment(
+                            attachment: e.attachment,
+                            size: Size(
+                              MediaQuery.of(context).size.width * 0.55,
+                              MediaQuery.of(context).size.height * 0.3,
+                            ),
+                            trailing: IconButton(
+                              icon: StreamSvgIcon.close_small(),
+                              onPressed: () {
+                                setState(() {
+                                  _attachments.remove(e);
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
               if (_attachments.any((e) => e.attachment.type != 'file'))
                 LimitedBox(
                   maxHeight: 104.0,
