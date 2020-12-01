@@ -338,6 +338,30 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  factory StreamSvgIcon.download({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_download.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.cloud_download({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_cloud_download.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   factory StreamSvgIcon.copy({
     double size,
     Color color,
@@ -476,6 +500,222 @@ class StreamSvgIcon extends StatelessWidget {
   }) {
     return StreamSvgIcon(
       assetName: 'share_arrow.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_7z({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_7z.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_csv({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_CSV.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_doc({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_DOC.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_docx({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_DOCX.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_Generic({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_Generic.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_html({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_html.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_md({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_MD.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_odt({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_ODT.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_pdf({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_PDF.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_ppt({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_PPT.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_pptx({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_PPTX.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_rar({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_RAR.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_rtf({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_RTF.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_tar({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_TAR.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_txt({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_TXT.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_xls({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_XLS.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_xlsx({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_XLSX.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.filetype_zip({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'filetype_ZIP.svg',
       color: color,
       width: size,
       height: size,

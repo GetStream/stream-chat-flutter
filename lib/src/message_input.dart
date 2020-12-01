@@ -1562,12 +1562,24 @@ class MessageInputState extends State<MessageInput> {
       attachmentType = mimeType.type;
     }
 
+    Map<String, dynamic> extraDataMap = {};
+
+    if (mimeType?.subtype != null) {
+      extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();
+    }
+
+    if (file.size != null) {
+      extraDataMap['file_size'] = file.size;
+    }
+
     final channel = StreamChannel.of(context).channel;
     final attachment = _SendingAttachment(
       file: file,
       attachment: Attachment(
         localUri: file.path != null ? Uri.parse(file.path) : null,
         type: attachmentType,
+        extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
+        title: file.name ?? 'File',
       ),
     );
 

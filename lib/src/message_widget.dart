@@ -223,6 +223,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         widget.message.attachments?.any((element) => element.type == 'giphy') ==
             true;
 
+    var user = StreamChat.of(context).user;
+
     return Portal(
       child: Padding(
         padding: widget.padding ?? EdgeInsets.all(8),
@@ -295,18 +297,47 @@ class _MessageWidgetState extends State<MessageWidget> {
                                             messageTheme: widget.messageTheme,
                                           ),
                                         )
-                                      : Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            ..._parseAttachments(context),
-                                            if (widget.message.text
-                                                    .trim()
-                                                    .isNotEmpty &&
-                                                !isGiphy)
-                                              _buildTextBubble(context),
-                                          ],
+                                      : Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(8.0),
+                                              topRight: Radius.circular(8.0),
+                                              bottomRight: Radius.circular(8.0),
+                                            ),
+                                            border: Border.fromBorderSide(
+                                                BorderSide(
+                                              color: Color(0xFFE6E6E6),
+                                            )),
+                                            color: widget.message.attachments
+                                                    .where((element) =>
+                                                        element.type == 'file')
+                                                    .isEmpty
+                                                ? Colors.transparent
+                                                : (user.id ==
+                                                        widget.message.user.id
+                                                    ? Color(0xFFE6E6E6)
+                                                    : Colors.white),
+                                          ),
+                                          padding: EdgeInsets.all(widget
+                                                  .message.attachments
+                                                  .where((element) =>
+                                                      element.type == 'file')
+                                                  .isEmpty
+                                              ? 0.0
+                                              : 2.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              ..._parseAttachments(context),
+                                              if (widget.message.text
+                                                      .trim()
+                                                      .isNotEmpty &&
+                                                  !isGiphy)
+                                                _buildTextBubble(context),
+                                            ],
+                                          ),
                                         ),
                                 ),
                                 if (widget.showReactionPickerIndicator)
