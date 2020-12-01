@@ -1719,17 +1719,17 @@ class MessageInputState extends State<MessageInput> {
     if (_commandEnabled) {
       return 'Icon_search.svg';
     } else {
-      return 'Icon_circle_up.svg';
+      return 'Icon_circle_right.svg';
     }
   }
 
   String _getSendIcon() {
     if (widget.editMessage != null) {
-      return 'Icon_circle_right.svg';
+      return 'Icon_circle_up.svg';
     } else if (_commandEnabled) {
       return 'Icon_search.svg';
     } else {
-      return 'Icon_circle_right.svg';
+      return 'Icon_circle_up.svg';
     }
   }
 
