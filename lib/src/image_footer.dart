@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -59,11 +60,44 @@ class ImageFooter extends StatefulWidget {
 
 class _ImageFooterState extends State<ImageFooter> {
   bool _userSearchMode = false;
-  TextEditingController _searchController = TextEditingController();
+  TextEditingController _searchController;
   TextEditingController _messageController = TextEditingController();
+
+  String _userNameQuery;
+  bool _isSearchActive = false;
 
   Set<User> _selectedUsers = {};
   bool _loading = false;
+
+  Timer _debounce;
+
+  Function modalSetStateCallback;
+
+  void _userNameListener() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted && modalSetStateCallback != null) {
+        modalSetStateCallback(() {
+          _userNameQuery = _searchController.text;
+          _isSearchActive = _userNameQuery.isNotEmpty;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController()..addListener(_userNameListener);
+  }
+
+  @override
+  void dispose() {
+    _searchController?.clear();
+    _searchController?.removeListener(_userNameListener);
+    _searchController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +252,7 @@ class _ImageFooterState extends State<ImageFooter> {
       context: context,
       builder: (context) {
         return StatefulBuilder(builder: (context, modalSetState) {
+          modalSetStateCallback = modalSetState;
           return Padding(
             padding: EdgeInsets.only(
                 top: _userSearchMode
@@ -258,7 +293,7 @@ class _ImageFooterState extends State<ImageFooter> {
                           filter: {
                             if (_searchController.text.isNotEmpty)
                               'name': {
-                                r'$autocomplete': _searchController.text,
+                                r'$autocomplete': _userNameQuery,
                               },
                             'id': {
                               r'$ne': StreamChat.of(context).user.id,
@@ -376,9 +411,6 @@ class _ImageFooterState extends State<ImageFooter> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
-                  onChanged: (val) {
-                    modalSetState(() {});
-                  },
                   cursorColor: Colors.black,
                   autofocus: true,
                   decoration: InputDecoration(
