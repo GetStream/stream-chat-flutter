@@ -609,7 +609,7 @@ class _ImageFooterState extends State<ImageFooter> {
         ],
       });
 
-      await c.create();
+      await c.watch();
 
       final message = Message(
         text: text,
