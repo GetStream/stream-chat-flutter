@@ -110,7 +110,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
           children: <Widget>[
             Expanded(
               child: FittedBox(
-                fit: BoxFit.cover,
+                fit: BoxFit.none,
                 child: Stack(
                   children: <Widget>[
                     Chewie(
