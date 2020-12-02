@@ -481,6 +481,11 @@ class _ChannelListViewState extends State<ChannelListView>
                         onTap: () {
                           onTap(channel, widget.channelWidget);
                         },
+                        onLongPress: widget.onChannelLongPress != null
+                            ? () {
+                                widget.onChannelLongPress(channel);
+                              }
+                            : null,
                       ),
                     ),
                   ),
