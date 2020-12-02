@@ -135,8 +135,13 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                             _controller.forward();
                           }
                         },
-                        child: Chewie(
-                          controller: controllerPackage.chewieController,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 50.0,
+                          ),
+                          child: Chewie(
+                            controller: controllerPackage.chewieController,
+                          ),
                         ),
                       );
                     }
@@ -175,6 +180,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       _pageController.animateToPage(val,
                           duration: Duration(milliseconds: 300),
                           curve: Curves.easeInOut);
+                      Navigator.pop(context);
                     });
                   },
                 ),
