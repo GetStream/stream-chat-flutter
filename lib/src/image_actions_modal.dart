@@ -149,19 +149,22 @@ class ImageActionsModal extends StatelessWidget {
                         }),
                         if (StreamChat.of(context).user.id == message.user.id)
                           _buildButton(
-                              context,
-                              'Delete',
-                              StreamSvgIcon.delete(
-                                size: 24.0,
-                                color: Colors.black,
-                              ), () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                            StreamChat.of(context).client.deleteMessage(
-                                  message,
-                                  StreamChannel.of(context).channel.cid,
-                                );
-                          }, color: Colors.red),
+                            context,
+                            'Delete',
+                            StreamSvgIcon.delete(
+                              size: 24.0,
+                              color: Color(0xffFF3742),
+                            ),
+                            () {
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                              StreamChat.of(context).client.deleteMessage(
+                                    message,
+                                    StreamChannel.of(context).channel.cid,
+                                  );
+                            },
+                            color: Color(0xffFF3742),
+                          ),
                       ],
                     ).toList(),
                   ),
