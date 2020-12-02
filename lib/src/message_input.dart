@@ -108,6 +108,7 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
+    this.enableFileAndImageAttachment = false,
   }) : super(key: key);
 
   /// Message to edit
@@ -155,6 +156,9 @@ class MessageInput extends StatefulWidget {
 
   /// The focus node associated to the TextField
   final FocusNode focusNode;
+
+  /// Enables adding both file+images at the same time
+  final bool enableFileAndImageAttachment;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -787,7 +791,14 @@ class MessageInputState extends State<MessageInput> {
                   onSelect: (media) async {
                     if (!_attachments
                         .any((element) => element.id == media.id)) {
-                      _addAttachment(media);
+                      if (widget.enableFileAndImageAttachment) {
+                        _addAttachment(media);
+                      } else {
+                        if (!_attachments.any(
+                            (element) => element.attachment?.type == 'file')) {
+                          _addAttachment(media);
+                        }
+                      }
                     } else {
                       setState(() {
                         _attachments
@@ -850,7 +861,7 @@ class MessageInputState extends State<MessageInput> {
       );
 
       if (file.size > _kMaxAttachmentSize) {
-        if (medium.type == AssetType.video) {
+        if (medium?.type == AssetType.video) {
           final mediaInfo = await CompressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
@@ -1203,42 +1214,44 @@ class MessageInputState extends State<MessageInput> {
         ? Container()
         : Column(
             children: [
-              LimitedBox(
-                maxHeight: 73.0,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: _attachments
-                      .where((e) => e.attachment.type == 'file')
-                      .map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: FileAttachment(
-                            attachment: e.attachment,
-                            size: Size(
-                              MediaQuery.of(context).size.width * 0.55,
-                              MediaQuery.of(context).size.height * 0.3,
-                            ),
-                            trailing: IconButton(
-                              icon: StreamSvgIcon.close_small(),
-                              onPressed: () {
-                                setState(() {
-                                  _attachments.remove(e);
-                                });
-                              },
+              if (_attachments.any((e) => e.attachment?.type == 'file'))
+                LimitedBox(
+                  maxHeight: 73.0,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: _attachments
+                        .where((e) => e.attachment?.type == 'file')
+                        .map(
+                          (e) => Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: FileAttachment(
+                              attachment: e.attachment,
+                              size: Size(
+                                MediaQuery.of(context).size.width * 0.55,
+                                MediaQuery.of(context).size.height * 0.3,
+                              ),
+                              trailing: IconButton(
+                                icon: StreamSvgIcon.close_small(),
+                                onPressed: () {
+                                  setState(() {
+                                    _attachments.remove(e);
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        )
+                        .toList(),
+                  ),
                 ),
-              ),
-              if (_attachments.any((e) => e.attachment.type != 'file'))
+              if (_attachments.any((e) => e.attachment?.type != 'file'))
                 LimitedBox(
                   maxHeight: 104.0,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: _attachments
-                        .where((e) => e.attachment.type != 'file')
+                        .where((e) => e.attachment?.type != 'file')
                         .map(
                           (attachment) => Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -1312,9 +1325,9 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildAttachment(_SendingAttachment attachment) {
     if (widget.attachmentThumbnailBuilders
-            ?.containsKey(attachment.attachment.type) ==
+            ?.containsKey(attachment.attachment?.type) ==
         true) {
-      return widget.attachmentThumbnailBuilders[attachment.attachment.type](
+      return widget.attachmentThumbnailBuilders[attachment.attachment?.type](
         context,
         attachment,
       );
@@ -1324,7 +1337,7 @@ class MessageInputState extends State<MessageInput> {
       return SizedBox();
     }
 
-    switch (attachment.attachment.type) {
+    switch (attachment.attachment?.type) {
       case 'image':
       case 'giphy':
         return attachment.file != null
@@ -1568,6 +1581,11 @@ class MessageInputState extends State<MessageInput> {
         bytes: bytes,
       );
     } else {
+      if (_attachments.any((element) => element.attachment.type != 'file') &&
+          !widget.enableFileAndImageAttachment) {
+        return;
+      }
+
       FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
         type = FileType.image;
