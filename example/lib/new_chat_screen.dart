@@ -338,7 +338,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     Navigator.pushNamedAndRemoveUntil(
       context,
       Routes.CHANNEL_PAGE,
-      ModalRoute.withName(Routes.CHANNEL_LIST),
+      ModalRoute.withName(Routes.HOME),
       arguments: channel,
     );
   }

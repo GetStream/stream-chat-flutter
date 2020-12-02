@@ -13,11 +13,11 @@ class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments;
     switch (settings.name) {
-      case Routes.CHANNEL_LIST:
+      case Routes.HOME:
         return MaterialPageRoute(
-            settings: const RouteSettings(name: Routes.CHANNEL_LIST),
+            settings: const RouteSettings(name: Routes.HOME),
             builder: (_) {
-              return ChannelListPage();
+              return HomePage();
             });
       case Routes.CHOOSE_USER:
         return MaterialPageRoute(

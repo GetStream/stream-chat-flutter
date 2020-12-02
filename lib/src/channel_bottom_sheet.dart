@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_info.dart';
 import 'channel_name.dart';
@@ -12,13 +13,11 @@ import 'user_avatar.dart';
 class ChannelBottomSheet extends StatelessWidget {
   const ChannelBottomSheet({
     Key key,
-    @required this.channel,
   }) : super(key: key);
-
-  final Channel channel;
 
   @override
   Widget build(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -31,10 +30,13 @@ class ChannelBottomSheet extends StatelessWidget {
                 vertical: 2.0,
               ),
               child: Center(
-                child: ChannelName(
+                child: StreamChannel(
+                  showLoading: false,
                   channel: channel,
-                  textStyle:
-                      StreamChatTheme.of(context).channelPreviewTheme.title,
+                  child: ChannelName(
+                    textStyle:
+                        StreamChatTheme.of(context).channelPreviewTheme.title,
+                  ),
                 ),
               ),
             ),

@@ -28,7 +28,7 @@ dependencies:
   file_picker: ^2.0.12
   image_picker: ^0.6.7+2
   flutter_keyboard_visibility: ^3.3.0
-  stream_chat: ^0.2.13+1
+  stream_chat: ^0.2.14
   mime: ^0.9.6+3
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5
@@ -41,7 +41,6 @@ dependencies:
   image_gallery_saver: ^1.6.6
   esys_flutter_share: ^1.0.2
   photo_manager: ^0.5.8
-  permission_handler: ^5.0.1+1
   transparent_image: ^1.0.0
   ezanimation: ^0.4.1
   synchronized: ^2.2.0+2

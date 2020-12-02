@@ -157,9 +157,8 @@ class ChooseUserPage extends StatelessWidget {
                             }
                             Navigator.pushNamedAndRemoveUntil(
                               context,
-                              Routes.CHANNEL_LIST,
-                              ModalRoute.withName(Routes.CHANNEL_LIST),
-                              arguments: client,
+                              Routes.HOME,
+                              ModalRoute.withName(Routes.HOME),
                             );
                           },
                           leading: UserAvatar(

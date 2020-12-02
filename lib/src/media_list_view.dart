@@ -6,6 +6,17 @@ import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'dart:ui' as ui;
 
+extension on Duration {
+  String format() {
+    final s = '$this'.split('.')[0].padLeft(8, '0');
+    if (s.startsWith('00:')) {
+      return s.replaceFirst('00:', '');
+    }
+
+    return s;
+  }
+}
+
 class MediaListView extends StatefulWidget {
   final List<String> selectedIds;
   final void Function(AssetEntity media) onSelect;
@@ -37,7 +48,6 @@ class _MediaListViewState extends State<MediaListView> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
         ),
-        cacheExtent: 1000,
         itemBuilder: (
           context,
           position,
@@ -88,7 +98,7 @@ class _MediaListViewState extends State<MediaListView> {
                       ),
                     ),
                   ),
-                  if (media.type == AssetType.video)
+                  if (media.type == AssetType.video) ...[
                     Positioned(
                       left: 8,
                       bottom: 10,
@@ -97,6 +107,17 @@ class _MediaListViewState extends State<MediaListView> {
                         package: 'stream_chat_flutter',
                       ),
                     ),
+                    Positioned(
+                      right: 4,
+                      bottom: 10,
+                      child: Text(
+                        media.videoDuration.format(),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ]
                 ],
               ),
               onTap: () {

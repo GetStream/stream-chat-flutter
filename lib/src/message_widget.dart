@@ -287,6 +287,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           transform: Matrix4.rotationY(
                                               widget.reverse ? pi : 0),
                                           child: DeletedMessage(
+                                            reverse: widget.reverse,
                                             borderRadiusGeometry:
                                                 widget.borderRadiusGeometry,
                                             borderSide: widget.borderSide,

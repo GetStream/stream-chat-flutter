@@ -33,7 +33,8 @@ void showLocalNotification(Message message, ChannelModel channel) async {
 }
 
 Future backgroundHandler(Map<String, dynamic> notification) async {
-  final messageId = notification['data']['message_id'];
+  print('new notification ${notification}');
+  final messageId = notification['data']['id'];
 
   final notificationData =
       await NotificationService.getAndStoreMessage(messageId);

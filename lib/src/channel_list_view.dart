@@ -511,7 +511,10 @@ class _ChannelListViewState extends State<ChannelListView>
                         ),
                         context: context,
                         builder: (context) {
-                          return ChannelBottomSheet(channel: channel);
+                          return StreamChannel(
+                            child: ChannelBottomSheet(),
+                            channel: channel,
+                          );
                         },
                       );
                     },

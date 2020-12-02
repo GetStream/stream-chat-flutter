@@ -12,6 +12,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'notifications_service.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
+import 'search_text_field.dart';
+import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,15 +60,55 @@ class MyApp extends StatelessWidget {
         //TODO change to system once dark theme is implemented
         themeMode: ThemeMode.light,
         onGenerateRoute: AppRoutes.generateRoute,
-        initialRoute: client.state.user == null
-            ? Routes.CHOOSE_USER
-            : Routes.CHANNEL_LIST,
+        initialRoute:
+            client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
       ),
     );
   }
 }
 
-class ChannelListPage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  bool _isSelected(int index) => _currentIndex == index;
+
+  List<BottomNavigationBarItem> get _navBarItems {
+    return <BottomNavigationBarItem>[
+      BottomNavigationBarItem(
+        icon: Stack(
+          overflow: Overflow.visible,
+          children: [
+            StreamSvgIcon.message(
+              color: _isSelected(0) ? Colors.black : Colors.grey,
+            ),
+            Positioned(
+              top: -3,
+              right: -16,
+              child: UnreadIndicator(),
+            ),
+          ],
+        ),
+        label: 'Chats',
+      ),
+      BottomNavigationBarItem(
+        icon: Stack(
+          overflow: Overflow.visible,
+          children: [
+            StreamSvgIcon.mentions(
+              color: _isSelected(1) ? Colors.black : Colors.grey,
+            ),
+          ],
+        ),
+        label: 'Mentions',
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
@@ -78,28 +120,22 @@ class ChannelListPage extends StatelessWidget {
       ),
       drawer: _buildDrawer(context, user),
       drawerEdgeDragWidth: 50,
-      body: ChannelsBloc(
-        child: ChannelListView(
-          onStartChatPressed: () {
-            Navigator.pushNamed(context, Routes.NEW_CHAT);
-          },
-          swipeToAction: true,
-          filter: {
-            'members': {
-              '\$in': [user.id],
-            },
-            'draft': {
-              r'$ne': true,
-            },
-          },
-          options: {
-            'presence': true,
-          },
-          pagination: PaginationParams(
-            limit: 20,
-          ),
-          channelWidget: ChannelPage(),
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        items: _navBarItems,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+        },
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          ChannelListPage(),
+          UserMentionPage(),
+        ],
       ),
     );
   }
@@ -207,6 +243,178 @@ class ChannelListPage extends StatelessWidget {
   }
 }
 
+class UserMentionPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('On Pause Right Now!'),
+    );
+  }
+}
+
+class ChannelListPage extends StatefulWidget {
+  @override
+  _ChannelListPageState createState() => _ChannelListPageState();
+}
+
+class _ChannelListPageState extends State<ChannelListPage> {
+  TextEditingController _controller;
+
+  String _channelQuery = '';
+
+  bool _isSearchActive = false;
+
+  Timer _debounce;
+
+  void _channelQueryListener() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        setState(() {
+          _channelQuery = _controller.text;
+          _isSearchActive = _channelQuery.isNotEmpty;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController()..addListener(_channelQueryListener);
+  }
+
+  @override
+  void dispose() {
+    _controller?.removeListener(_channelQueryListener);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = StreamChat.of(context).user;
+    return ChannelsBloc(
+      child: MessageSearchBloc(
+        child: Column(
+          children: [
+            SearchTextField(
+              controller: _controller,
+              showCloseButton: _isSearchActive,
+            ),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (_) => FocusScope.of(context).unfocus(),
+                  child: _isSearchActive
+                      ? MessageSearchListView(
+                          messageQuery: _channelQuery,
+                          filters: {
+                            'members': {
+                              r'$in': [user.id]
+                            }
+                          },
+                          sortOptions: [
+                            SortOption(
+                              'created_at',
+                              direction: SortOption.ASC,
+                            ),
+                          ],
+                          paginationParams: PaginationParams(limit: 20),
+                          onItemTap: (message) {},
+                        )
+                      : ChannelListView(
+                          onStartChatPressed: () {
+                            Navigator.pushNamed(context, Routes.NEW_CHAT);
+                          },
+                          swipeToAction: true,
+                          filter: {
+                            'members': {
+                              r'$in': [user.id],
+                            },
+                          },
+                          options: {
+                            'presence': true,
+                          },
+                          pagination: PaginationParams(
+                            limit: 20,
+                          ),
+                          channelWidget: ChannelPage(),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ChannelQuerySearchResultPage extends StatelessWidget {
+  final Stream<List<Message>> searchResultStream;
+
+  const ChannelQuerySearchResultPage({
+    Key key,
+    @required this.searchResultStream,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Message>>(
+      initialData: const <Message>[],
+      stream: searchResultStream,
+      builder: (context, snapshot) {
+        final result = snapshot.data;
+        return Column(
+          children: [
+            if (result.isNotEmpty)
+              Container(
+                width: double.maxFinite,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withOpacity(0.02),
+                      Colors.white.withOpacity(0.05),
+                    ],
+                    stops: [0, 1],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 8,
+                  ),
+                  child: Text(
+                    '${result.length} results',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.5),
+                    ),
+                  ),
+                ),
+              ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: result.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: UserAvatar(),
+                    title: Text(result[index].toJson().toString()),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
     Key key,
@@ -215,6 +423,7 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: ChannelHeader(
         showTypingIndicator: false,
       ),
