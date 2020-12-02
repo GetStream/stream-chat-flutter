@@ -322,36 +322,6 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                     BorderRadius.zero,
                                               ),
                                           color: _getBackgroundColor(),
-                                          // decoration: widget.message.attachments
-                                          //         .where((element) =>
-                                          //             element.type == 'file')
-                                          //         .isEmpty
-                                          //     ? null
-                                          //     : BoxDecoration(
-                                          //         borderRadius:
-                                          //             BorderRadius.only(
-                                          //           topLeft:
-                                          //               Radius.circular(8.0),
-                                          //           topRight:
-                                          //               Radius.circular(8.0),
-                                          //           bottomRight:
-                                          //               Radius.circular(8.0),
-                                          //         ),
-                                          //         border: hasFiles
-                                          //             ? Border.fromBorderSide(
-                                          //                 BorderSide(
-                                          //                 color:
-                                          //                     Color(0xFFE6E6E6),
-                                          //               ))
-                                          //             : null,
-                                          //         color: hasFiles
-                                          //             ? (user.id ==
-                                          //                     widget.message
-                                          //                         .user.id
-                                          //                 ? Color(0xFFE6E6E6)
-                                          //                 : Colors.white)
-                                          //             : Colors.transparent,
-                                          //       ),
                                           child: Padding(
                                             padding: EdgeInsets.all(
                                                 hasFiles ? 2.0 : 0.0),
