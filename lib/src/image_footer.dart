@@ -36,6 +36,7 @@ class ImageFooter extends StatefulWidget {
   final Message message;
 
   final List<VideoPackage> videoPackages;
+  final ValueChanged<int> mediaSelectedCallBack;
 
   /// Creates a channel header
   ImageFooter({
@@ -48,6 +49,7 @@ class ImageFooter extends StatefulWidget {
     this.mediaAttachments,
     this.message,
     this.videoPackages,
+    this.mediaSelectedCallBack,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -213,23 +215,33 @@ class _ImageFooterState extends State<ImageFooter> {
                         videoAttachments
                             .indexOf(widget.mediaAttachments[position])];
 
-                    return FittedBox(
-                      child: Chewie(
-                        controller: controllerPackage.chewieController,
+                    return InkWell(
+                      onTap: () {
+                        widget.mediaSelectedCallBack(position);
+                      },
+                      child: FittedBox(
+                        child: Chewie(
+                          controller: controllerPackage.chewieController,
+                        ),
                       ),
                     );
                   } else {
-                    return Padding(
-                      padding: const EdgeInsets.all(1.0),
-                      child: AspectRatio(
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              widget.mediaAttachments[position].imageUrl ??
-                                  widget.mediaAttachments[position].assetUrl ??
-                                  widget.mediaAttachments[position].thumbUrl,
-                          fit: BoxFit.cover,
+                    return InkWell(
+                      onTap: () {
+                        widget.mediaSelectedCallBack(position);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: AspectRatio(
+                          child: CachedNetworkImage(
+                            imageUrl: widget
+                                    .mediaAttachments[position].imageUrl ??
+                                widget.mediaAttachments[position].assetUrl ??
+                                widget.mediaAttachments[position].thumbUrl,
+                            fit: BoxFit.cover,
+                          ),
+                          aspectRatio: 1.0,
                         ),
-                        aspectRatio: 1.0,
                       ),
                     );
                   }

@@ -169,6 +169,14 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                   mediaAttachments: widget.mediaAttachments,
                   message: widget.message,
                   videoPackages: videoPackages,
+                  mediaSelectedCallBack: (val) {
+                    setState(() {
+                      _currentPage = val;
+                      _pageController.animateToPage(val,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut);
+                    });
+                  },
                 ),
               ],
             ),
