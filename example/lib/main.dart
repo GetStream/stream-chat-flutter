@@ -294,130 +294,136 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
-    return ChannelsBloc(
-      child: MessageSearchBloc(
-        child: Column(
-          children: [
-            SearchTextField(
-              controller: _controller,
-              showCloseButton: _isSearchActive,
-            ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onPanDown: (_) => FocusScope.of(context).unfocus(),
-                  child: _isSearchActive
-                      ? MessageSearchListView(
-                          messageQuery: _channelQuery,
-                          filters: {
-                            'members': {
-                              r'$in': [user.id]
-                            }
-                          },
-                          sortOptions: [
-                            SortOption(
-                              'created_at',
-                              direction: SortOption.ASC,
-                            ),
-                          ],
-                          paginationParams: PaginationParams(limit: 20),
-                          onItemTap: (message) {},
-                        )
-                      : ChannelListView(
-                          onStartChatPressed: () {
-                            Navigator.pushNamed(context, Routes.NEW_CHAT);
-                          },
-                          swipeToAction: true,
-                          filter: {
-                            'members': {
-                              r'$in': [user.id],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_isSearchActive) {
+          _controller.clear();
+          setState(() => _isSearchActive = false);
+          return false;
+        }
+        return true;
+      },
+      child: ChannelsBloc(
+        child: MessageSearchBloc(
+          child: Column(
+            children: [
+              SearchTextField(
+                controller: _controller,
+                showCloseButton: _isSearchActive,
+              ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanDown: (_) => FocusScope.of(context).unfocus(),
+                    child: _isSearchActive
+                        ? MessageSearchListView(
+                            messageQuery: _channelQuery,
+                            filters: {
+                              'members': {
+                                r'$in': [user.id]
+                              }
                             },
-                          },
-                          options: {
-                            'presence': true,
-                          },
-                          pagination: PaginationParams(
-                            limit: 20,
+                            sortOptions: [
+                              SortOption(
+                                'created_at',
+                                direction: SortOption.ASC,
+                              ),
+                            ],
+                            paginationParams: PaginationParams(limit: 20),
+                            onItemTap: (messageResponse) async {
+                              final client = StreamChat.of(context).client;
+                              final message = messageResponse.message;
+                              final channel = Channel.fromState(
+                                client,
+                                ChannelState(
+                                  channel: messageResponse.channel,
+                                  messages: [message],
+                                ),
+                              );
+                              await Future.wait([
+                                channel.query(
+                                  messagesPagination: PaginationParams(
+                                    lessThan: message.id,
+                                    limit: 25,
+                                  ),
+                                  preferOffline: true,
+                                ),
+                                channel.query(
+                                  messagesPagination: PaginationParams(
+                                    greaterThan: message.id,
+                                    limit: 25,
+                                  ),
+                                  preferOffline: true,
+                                ),
+                              ]);
+                              final messages = channel.state.messages;
+                              final totalMessages = messages.length;
+                              final messageIndex = messages
+                                  .indexWhere((e) => e.id == message.id);
+                              final initialIndex = totalMessages - messageIndex;
+                              final bool isFirstMessage = messageIndex == 0;
+                              Navigator.pushNamed(
+                                context,
+                                Routes.CHANNEL_PAGE,
+                                arguments: ChannelPageArgs(
+                                  channel: channel,
+                                  initialScrollIndex: initialIndex,
+                                  initialAlignment: isFirstMessage ? 0 : 0.5,
+                                ),
+                              );
+                            },
+                          )
+                        : ChannelListView(
+                            onStartChatPressed: () {
+                              Navigator.pushNamed(context, Routes.NEW_CHAT);
+                            },
+                            swipeToAction: true,
+                            filter: {
+                              'members': {
+                                r'$in': [user.id],
+                              },
+                            },
+                            options: {
+                              'presence': true,
+                            },
+                            pagination: PaginationParams(
+                              limit: 20,
+                            ),
+                            channelWidget: ChannelPage(),
                           ),
-                          channelWidget: ChannelPage(),
-                        ),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class ChannelQuerySearchResultPage extends StatelessWidget {
-  final Stream<List<Message>> searchResultStream;
+class ChannelPageArgs {
+  final Channel channel;
+  final int initialScrollIndex;
+  final double initialAlignment;
 
-  const ChannelQuerySearchResultPage({
-    Key key,
-    @required this.searchResultStream,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Message>>(
-      initialData: const <Message>[],
-      stream: searchResultStream,
-      builder: (context, snapshot) {
-        final result = snapshot.data;
-        return Column(
-          children: [
-            if (result.isNotEmpty)
-              Container(
-                width: double.maxFinite,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.02),
-                      Colors.white.withOpacity(0.05),
-                    ],
-                    stops: [0, 1],
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 8,
-                  ),
-                  child: Text(
-                    '${result.length} results',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                  ),
-                ),
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: result.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: UserAvatar(),
-                    title: Text(result[index].toJson().toString()),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  const ChannelPageArgs({
+    this.channel,
+    this.initialScrollIndex = 0,
+    this.initialAlignment = 0,
+  });
 }
 
 class ChannelPage extends StatelessWidget {
+  final int initialScrollIndex;
+  final double initialAlignment;
+
   const ChannelPage({
     Key key,
+    this.initialScrollIndex = 0,
+    this.initialAlignment = 0,
   }) : super(key: key);
 
   @override
@@ -433,6 +439,8 @@ class ChannelPage extends StatelessWidget {
             child: Stack(
               children: <Widget>[
                 MessageListView(
+                  initialScrollIndex: initialScrollIndex,
+                  initialAlignment: initialAlignment,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,
@@ -467,10 +475,14 @@ class ChannelPage extends StatelessWidget {
 
 class ThreadPage extends StatelessWidget {
   final Message parent;
+  final int initialScrollIndex;
+  final double initialAlignment;
 
   ThreadPage({
     Key key,
     this.parent,
+    this.initialScrollIndex = 0,
+    this.initialAlignment = 0,
   }) : super(key: key);
 
   @override
@@ -484,6 +496,8 @@ class ThreadPage extends StatelessWidget {
           Expanded(
             child: MessageListView(
               parentMessage: parent,
+              initialScrollIndex: initialScrollIndex,
+              initialAlignment: initialAlignment,
             ),
           ),
           if (parent.type != 'deleted')

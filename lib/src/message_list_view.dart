@@ -480,8 +480,8 @@ class _MessageListViewState extends State<MessageListView> {
           } else {
             streamChannel.getReplies(widget.parentMessage.id);
           }
+          _topWasVisible = !topIsVisible;
         }
-        _topWasVisible = topIsVisible;
       },
     );
   }
@@ -515,14 +515,21 @@ class _MessageListViewState extends State<MessageListView> {
       key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
-        if (isVisible &&
-            !_bottomWasVisible &&
-            streamChannel.channel.config?.readEvents == true) {
-          if (streamChannel.channel.state.unreadCount > 0) {
+        if (isVisible && !_bottomWasVisible) {
+          if (widget.parentMessage == null) {
+            streamChannel.queryMessages(direction: QueryDirection.bottom);
+          } else {
+            streamChannel.getReplies(
+              widget.parentMessage.id,
+              direction: QueryDirection.bottom,
+            );
+          }
+          if (streamChannel.channel.config?.readEvents == true &&
+              streamChannel.channel.state.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
+          _bottomWasVisible = !isVisible;
         }
-        _bottomWasVisible = isVisible;
         if (mounted) {
           setState(() {
             _showScrollToBottom = !isVisible;

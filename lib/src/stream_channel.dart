@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+enum QueryDirection { top, bottom }
+
 /// Widget used to provide information about the channel to the widget tree
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
@@ -52,34 +54,57 @@ class StreamChannelState extends State<StreamChannel> {
   /// The stream notifying the state of queryMessage call
   Stream<bool> get queryMessage => _queryMessageController.stream;
 
-  bool _paginationEnded = false;
+  bool _topPaginationEnded = false;
+  bool _bottomPaginationEnded = false;
 
   /// Calls [channel.query] updating [queryMessage] stream
-  void queryMessages() {
-    if (_queryMessageController.value == true || _paginationEnded) {
+  void queryMessages({QueryDirection direction = QueryDirection.top}) {
+    if (_queryMessageController.value == true ||
+        (_topPaginationEnded && _bottomPaginationEnded)) {
       return;
     }
 
     _queryMessageController.add(true);
 
-    String firstId;
-    if (channel.state.messages.isNotEmpty) {
-      firstId = channel.state.messages.first.id;
-    }
+    String id;
+    PaginationParams params;
 
-    final messageLimit = 50;
+    final messageLimit = 25;
+
+    if (channel.state.messages.isNotEmpty) {
+      switch (direction) {
+        case QueryDirection.top:
+          id = channel.state.messages.first.id;
+          params = PaginationParams(
+            lessThan: id,
+            limit: messageLimit,
+          );
+          break;
+        case QueryDirection.bottom:
+          id = channel.state.messages.last.id;
+          params = PaginationParams(
+            greaterThan: id,
+            limit: messageLimit,
+          );
+          break;
+      }
+    }
 
     widget.channel
         .query(
-      messagesPagination: PaginationParams(
-        lessThan: firstId,
-        limit: messageLimit,
-      ),
+      messagesPagination: params,
       preferOffline: true,
     )
         .then((res) {
       if (res.messages.isEmpty || res.messages.length < messageLimit) {
-        _paginationEnded = true;
+        switch (direction) {
+          case QueryDirection.top:
+            _topPaginationEnded = true;
+            break;
+          case QueryDirection.bottom:
+            _bottomPaginationEnded = true;
+            break;
+        }
       }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
@@ -90,35 +115,60 @@ class StreamChannelState extends State<StreamChannel> {
   }
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
-  Future<void> getReplies(String parentId) async {
-    if (_queryMessageController.value == true || _paginationEnded) {
+  Future<void> getReplies(
+    String parentId, {
+    QueryDirection direction = QueryDirection.top,
+  }) async {
+    if (_queryMessageController.value == true ||
+        (_topPaginationEnded && _bottomPaginationEnded)) {
       return;
     }
 
     _queryMessageController.add(true);
 
-    String firstId;
+    String id;
+    PaginationParams params;
+
+    final messageLimit = 50;
+
     if (widget.channel.state.threads.containsKey(parentId)) {
       final thread = widget.channel.state.threads[parentId];
-
       if (thread != null && thread.isNotEmpty) {
-        firstId = thread?.first?.id;
+        switch (direction) {
+          case QueryDirection.top:
+            id = thread?.first?.id;
+            params = PaginationParams(
+              lessThan: id,
+              limit: messageLimit,
+            );
+            break;
+          case QueryDirection.bottom:
+            id = thread?.last?.id;
+            params = PaginationParams(
+              greaterThan: id,
+              limit: messageLimit,
+            );
+            break;
+        }
       }
     }
 
-    final messageLimit = 50;
     return widget.channel
         .getReplies(
       parentId,
-      PaginationParams(
-        lessThan: firstId,
-        limit: messageLimit,
-      ),
+      params,
       preferOffline: true,
     )
         .then((res) {
       if (res.messages.isEmpty || res.messages.length < messageLimit) {
-        _paginationEnded = true;
+        switch (direction) {
+          case QueryDirection.top:
+            _topPaginationEnded = true;
+            break;
+          case QueryDirection.bottom:
+            _bottomPaginationEnded = true;
+            break;
+        }
       }
       _queryMessageController.add(false);
     }).catchError((e, stack) {
