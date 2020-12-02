@@ -1,3 +1,7 @@
+## 0.2.15
+
+- Add onLongPress on channel when using custom channel builder
+
 ## 0.2.14
 
 - Add onMessageTap callbacks
