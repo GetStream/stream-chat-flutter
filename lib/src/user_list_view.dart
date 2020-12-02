@@ -361,7 +361,7 @@ class _UserListViewState extends State<UserListView>
                 header,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: 14.5,
                     color: Colors.black.withOpacity(0.3)),
               ),
             ),

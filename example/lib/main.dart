@@ -123,6 +123,9 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         items: _navBarItems,
+        selectedLabelStyle: StreamChatTheme.of(context).textTheme.footnoteBold,
+        unselectedLabelStyle:
+            StreamChatTheme.of(context).textTheme.footnoteBold,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,

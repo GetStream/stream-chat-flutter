@@ -210,9 +210,9 @@ class _ChannelListViewState extends State<ChannelListView>
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 'Let’s start chatting!',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .headline,
                               ),
                             ),
                             Padding(
@@ -223,10 +223,12 @@ class _ChannelListViewState extends State<ChannelListView>
                               child: Text(
                                 'How about sending your first message to a friend?',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xff7A7A7A),
-                                ),
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .body
+                                    .copyWith(
+                                      color: Color(0xff7A7A7A),
+                                    ),
                               ),
                             ),
                           ],
@@ -242,11 +244,13 @@ class _ChannelListViewState extends State<ChannelListView>
                               onPressed: widget.onStartChatPressed,
                               child: Text(
                                 'Start a chat',
-                                style: TextStyle(
-                                  color:
-                                      StreamChatTheme.of(context).accentColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .bodyBold
+                                    .copyWith(
+                                      color: StreamChatTheme.of(context)
+                                          .accentColor,
+                                    ),
                               ),
                             ),
                           ),

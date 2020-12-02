@@ -83,13 +83,19 @@ class UserItem extends StatelessWidget {
           : null,
       title: Text(
         user.name,
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: StreamChatTheme.of(context).textTheme.bodyBold,
       ),
       subtitle: showLastOnline ? _buildLastActive(context) : null,
     );
   }
 
   Widget _buildLastActive(context) {
-    return Text('Last online ${Jiffy(user.lastActive).fromNow()}');
+    return Text(
+      'Last online ${Jiffy(user.lastActive).fromNow()}',
+      style: StreamChatTheme.of(context)
+          .textTheme
+          .footnote
+          .copyWith(color: Colors.black.withOpacity(.5)),
+    );
   }
 }

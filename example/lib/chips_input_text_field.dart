@@ -78,10 +78,10 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Text(
                       'TO:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black.withOpacity(0.5),
-                      ),
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .footnote
+                          .copyWith(color: Colors.black.withOpacity(.5)),
                     ),
                   ),
                   SizedBox(width: 12),
@@ -111,10 +111,11 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                               disabledBorder: InputBorder.none,
                               contentPadding: const EdgeInsets.only(top: 4.0),
                               hintText: widget.hint,
-                              hintStyle: TextStyle(
-                                color: Colors.black.withOpacity(0.5),
-                                fontSize: 14,
-                              ),
+                              hintStyle: StreamChatTheme.of(context)
+                                  .textTheme
+                                  .body
+                                  .copyWith(
+                                      color: Colors.black.withOpacity(.5)),
                             ),
                           ),
                       ],

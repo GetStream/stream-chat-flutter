@@ -126,8 +126,6 @@ class MessageSearchItem extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-            color:
-                StreamChatTheme.of(context).channelPreviewTheme.subtitle.color,
             fontStyle: (message.isSystem || message.isDeleted)
                 ? FontStyle.italic
                 : FontStyle.normal,

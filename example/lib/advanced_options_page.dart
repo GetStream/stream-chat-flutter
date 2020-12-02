@@ -39,11 +39,13 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
         backgroundColor: StreamChatTheme.of(context).primaryColor,
         elevation: 1,
         centerTitle: true,
+        brightness: Theme.of(context).brightness,
         title: Text(
           'Advanced Options',
-          style: Theme.of(context).textTheme.subtitle1.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: StreamChatTheme.of(context)
+              .textTheme
+              .headlineBold
+              .copyWith(color: Colors.black),
         ),
         leading: IconButton(
           icon: StreamSvgIcon.left(

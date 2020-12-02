@@ -261,7 +261,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     color: Colors.grey,
                                   ),
                                 ),
-                                Text('No user matches these keywords...'),
+                                Text(
+                                  'No user matches these keywords...',
+                                  style: StreamChatTheme.of(context)
+                                      .textTheme
+                                      .footnote
+                                      .copyWith(
+                                          color: Colors.black.withOpacity(.5)),
+                                ),
                               ],
                             ),
                           ),

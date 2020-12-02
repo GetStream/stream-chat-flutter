@@ -113,10 +113,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
         leading: const StreamBackButton(),
         title: Text(
           'New Chat',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-          ),
+          style: StreamChatTheme.of(context)
+              .textTheme
+              .headlineBold
+              .copyWith(color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -203,10 +203,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         SizedBox(width: 8),
                         Text(
                           'Create a Group',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: StreamChatTheme.of(context).textTheme.bodyBold,
                         ),
                       ],
                     ),
@@ -233,13 +230,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     horizontal: 8,
                   ),
                   child: Text(
-                    _isSearchActive
-                        ? "Matches for \"$_userNameQuery\""
-                        : 'On the platform',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                  ),
+                      _isSearchActive
+                          ? "Matches for \"$_userNameQuery\""
+                          : 'On the platform',
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .footnote
+                          .copyWith(color: Colors.black.withOpacity(.5))),
                 ),
               ),
             Expanded(
@@ -299,7 +296,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                             ),
                                           ),
                                           Text(
-                                              'No user matches these keywords...'),
+                                            'No user matches these keywords...',
+                                            style: StreamChatTheme.of(context)
+                                                .textTheme
+                                                .footnote
+                                                .copyWith(
+                                                    color: Colors.black
+                                                        .withOpacity(.5)),
+                                          ),
                                         ],
                                       ),
                                     ),

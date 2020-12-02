@@ -195,10 +195,10 @@ class _MessageListViewState extends State<MessageListView> {
             return Center(
               child: Text(
                 'No chats here yet...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black.withOpacity(.5),
-                ),
+                style: StreamChatTheme.of(context)
+                    .textTheme
+                    .footnote
+                    .copyWith(color: Colors.black.withOpacity(.5)),
               ),
             );
           }

@@ -49,6 +49,9 @@ class ChannelPreview extends StatelessWidget {
           return Opacity(
             opacity: snapshot.data ? 0.5 : 1,
             child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+              ),
               onTap: () {
                 if (onTap != null) {
                   onTap(channel);

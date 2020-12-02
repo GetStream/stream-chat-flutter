@@ -42,6 +42,9 @@ class StreamChatTheme extends InheritedWidget {
 
 /// Theme data
 class StreamChatThemeData {
+  /// The text themes used in the widgets
+  final TextTheme textTheme;
+
   /// Primary color of the chat widgets
   final Color primaryColor;
 
@@ -80,6 +83,7 @@ class StreamChatThemeData {
 
   /// Create a theme from scratch
   StreamChatThemeData({
+    this.textTheme,
     this.primaryColor,
     this.secondaryColor,
     this.accentColor,
@@ -131,6 +135,7 @@ class StreamChatThemeData {
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
   StreamChatThemeData copyWith({
+    TextTheme textTheme,
     Color primaryColor,
     Color secondaryColor,
     Color accentColor,
@@ -145,6 +150,16 @@ class StreamChatThemeData {
     List<ReactionIcon> reactionIcons,
   }) =>
       StreamChatThemeData(
+        textTheme: this.textTheme?.copyWith(
+              title: textTheme?.title,
+              body: textTheme?.body,
+              bodyBold: textTheme?.bodyBold,
+              captionBold: textTheme?.captionBold,
+              footnote: textTheme?.footnote,
+              footnoteBold: textTheme?.footnoteBold,
+              headline: textTheme?.headline,
+              headlineBold: textTheme?.headlineBold,
+            ),
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
         primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
@@ -152,17 +167,12 @@ class StreamChatThemeData {
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
         backgroundColor: backgroundColor ?? this.backgroundColor,
-        channelPreviewTheme: channelPreviewTheme?.copyWith(
-              title:
-                  channelPreviewTheme.title ?? this.channelPreviewTheme.title,
-              subtitle: channelPreviewTheme.subtitle ??
-                  this.channelPreviewTheme.subtitle,
-              lastMessageAt: channelPreviewTheme.lastMessageAt ??
-                  this.channelPreviewTheme.lastMessageAt,
-              avatarTheme: channelPreviewTheme.avatarTheme ??
-                  this.channelPreviewTheme.avatarTheme,
-            ) ??
-            this.channelPreviewTheme,
+        channelPreviewTheme: this.channelPreviewTheme?.copyWith(
+              title: channelPreviewTheme.title,
+              subtitle: channelPreviewTheme.subtitle,
+              lastMessageAt: channelPreviewTheme.lastMessageAt,
+              avatarTheme: channelPreviewTheme.avatarTheme,
+            ),
         channelTheme: channelTheme?.copyWith(
               channelHeaderTheme: channelTheme.channelHeaderTheme ??
                   this.channelTheme.channelHeaderTheme,
@@ -218,7 +228,9 @@ class StreamChatThemeData {
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
     final accentColor = Color(0xff006cff);
     final isDark = theme.brightness == Brightness.dark;
+    final textTheme = TextTheme();
     return StreamChatThemeData(
+      textTheme: textTheme,
       secondaryColor: Color(0xffEAEAEA),
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
@@ -242,19 +254,12 @@ class StreamChatThemeData {
             width: 40,
           ),
         ),
-        title: TextStyle(
-            fontSize: 14,
-            color: isDark ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold),
-        subtitle: TextStyle(
-          fontSize: 12.5,
-          color: (isDark ? Colors.white : Colors.black).withOpacity(0.5),
+        title: textTheme.bodyBold,
+        subtitle: textTheme.footnote.copyWith(
+          color: Color(0xff7A7A7A),
         ),
-        lastMessageAt: TextStyle(
-          fontSize: 11,
-          color: isDark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
+        lastMessageAt: textTheme.footnote.copyWith(
+          color: Colors.black.withOpacity(.5),
         ),
       ),
       channelTheme: ChannelTheme(
@@ -371,6 +376,73 @@ class StreamChatThemeData {
           assetName: 'Icon_wut_reaction.svg',
         ),
       ],
+    );
+  }
+}
+
+class TextTheme {
+  final TextStyle title;
+  final TextStyle headlineBold;
+  final TextStyle headline;
+  final TextStyle bodyBold;
+  final TextStyle body;
+  final TextStyle footnoteBold;
+  final TextStyle footnote;
+  final TextStyle captionBold;
+
+  TextTheme({
+    this.title = const TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+    ),
+    this.headlineBold = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+    ),
+    this.headline = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
+    this.bodyBold = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+    ),
+    this.body = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
+    this.footnoteBold = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+    ),
+    this.footnote = const TextStyle(
+      fontSize: 12,
+    ),
+    this.captionBold = const TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+    ),
+  });
+
+  TextTheme copyWith({
+    TextStyle body,
+    TextStyle title,
+    TextStyle headlineBold,
+    TextStyle headline,
+    TextStyle bodyBold,
+    TextStyle footnoteBold,
+    TextStyle footnote,
+    TextStyle captionBold,
+  }) {
+    return TextTheme(
+      body: body ?? this.body,
+      title: title ?? this.title,
+      headlineBold: headlineBold ?? this.headlineBold,
+      headline: headline ?? this.headline,
+      bodyBold: bodyBold ?? this.bodyBold,
+      footnoteBold: footnoteBold ?? this.footnoteBold,
+      footnote: footnote ?? this.footnote,
+      captionBold: captionBold ?? this.captionBold,
     );
   }
 }
