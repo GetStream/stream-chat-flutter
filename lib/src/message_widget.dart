@@ -357,7 +357,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                 hasFiles ? 2.0 : 0.0),
                                             child: Column(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.end,
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
                                                 ..._parseAttachments(context),
