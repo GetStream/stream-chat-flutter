@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/full_screen_video.dart';
+import 'package:stream_chat_flutter/src/full_screen_media.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
@@ -13,11 +13,13 @@ class VideoAttachment extends StatefulWidget {
   final Attachment attachment;
   final MessageTheme messageTheme;
   final Size size;
+  final Message message;
 
   VideoAttachment({
     Key key,
     @required this.attachment,
     @required this.messageTheme,
+    this.message,
     this.size,
   }) : super(key: key);
 
@@ -81,11 +83,19 @@ class _VideoAttachmentState extends State<VideoAttachment> {
 
     return GestureDetector(
       onTap: () {
+        final channel = StreamChannel.of(context).channel;
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => FullScreenVideo(
-              attachment: widget.attachment,
+            builder: (_) => StreamChannel(
+              channel: channel,
+              child: FullScreenMedia(
+                mediaAttachments: [widget.attachment],
+                userName: widget.message.user.name,
+                sentAt: widget.message.createdAt,
+                message: widget.message,
+              ),
             ),
           ),
         );
@@ -100,7 +110,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
           children: <Widget>[
             Expanded(
               child: FittedBox(
-                fit: BoxFit.cover,
+                fit: BoxFit.none,
                 child: Stack(
                   children: <Widget>[
                     Chewie(

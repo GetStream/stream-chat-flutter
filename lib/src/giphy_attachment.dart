@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
-import 'full_screen_image.dart';
+import 'full_screen_media.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;
@@ -64,10 +64,18 @@ class GiphyAttachment extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return FullScreenImage(
-                            url: attachment.imageUrl ??
-                                attachment.assetUrl ??
-                                attachment.thumbUrl,
+                          final channel = StreamChannel.of(context).channel;
+
+                          return StreamChannel(
+                            channel: channel,
+                            child: FullScreenMedia(
+                              mediaAttachments: [
+                                attachment,
+                              ],
+                              userName: message.user.name,
+                              sentAt: message.createdAt,
+                              message: message,
+                            ),
                           );
                         }));
                       },
@@ -278,10 +286,18 @@ class GiphyAttachment extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) {
-            return FullScreenImage(
-              url: attachment.imageUrl ??
-                  attachment.assetUrl ??
-                  attachment.thumbUrl,
+            var channel = StreamChannel.of(context).channel;
+
+            return StreamChannel(
+              channel: channel,
+              child: FullScreenMedia(
+                mediaAttachments: [
+                  attachment,
+                ],
+                userName: message.user.name,
+                sentAt: message.createdAt,
+                message: message,
+              ),
             );
           }));
         },

@@ -397,4 +397,88 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.Icon_curve_line_left_up({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_curve_line_left_up.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.icon_SHARE({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'icon_SHARE.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_grid({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_grid.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_send_message({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_send_message.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_menu_point_v({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_menu_point_v.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_save({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_save.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.share_arrow({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'share_arrow.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }
