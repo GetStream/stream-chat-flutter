@@ -300,51 +300,74 @@ class _MessageWidgetState extends State<MessageWidget> {
                                             messageTheme: widget.messageTheme,
                                           ),
                                         )
-                                      : Container(
-                                          decoration: widget.message.attachments
-                                                  .where((element) =>
-                                                      element.type == 'file')
-                                                  .isEmpty
-                                              ? null
-                                              : BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(8.0),
-                                                    topRight:
-                                                        Radius.circular(8.0),
-                                                    bottomRight:
-                                                        Radius.circular(8.0),
-                                                  ),
-                                                  border: hasFiles
-                                                      ? Border.fromBorderSide(
-                                                          BorderSide(
-                                                          color:
-                                                              Color(0xFFE6E6E6),
-                                                        ))
-                                                      : null,
-                                                  color: hasFiles
-                                                      ? (user.id ==
-                                                              widget.message
-                                                                  .user.id
-                                                          ? Color(0xFFE6E6E6)
-                                                          : Colors.white)
-                                                      : Colors.transparent,
-                                                ),
-                                          padding: EdgeInsets.all(
-                                              hasFiles ? 2.0 : 0.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: <Widget>[
-                                              ..._parseAttachments(context),
-                                              if (widget.message.text
-                                                      .trim()
-                                                      .isNotEmpty &&
-                                                  !isGiphy)
-                                                _buildTextBubble(context),
-                                            ],
+                                      : Material(
+                                          shape: widget.shape ??
+                                              RoundedRectangleBorder(
+                                                side: !hasFiles
+                                                    ? BorderSide.none
+                                                    : widget.borderSide ??
+                                                        BorderSide(
+                                                          color: Theme.of(context)
+                                                                      .brightness ==
+                                                                  Brightness
+                                                                      .dark
+                                                              ? Colors.white
+                                                                  .withAlpha(24)
+                                                              : Colors.black
+                                                                  .withAlpha(
+                                                                      24),
+                                                        ),
+                                                borderRadius: widget
+                                                        .borderRadiusGeometry ??
+                                                    BorderRadius.zero,
+                                              ),
+                                          color: _getBackgroundColor(),
+                                          // decoration: widget.message.attachments
+                                          //         .where((element) =>
+                                          //             element.type == 'file')
+                                          //         .isEmpty
+                                          //     ? null
+                                          //     : BoxDecoration(
+                                          //         borderRadius:
+                                          //             BorderRadius.only(
+                                          //           topLeft:
+                                          //               Radius.circular(8.0),
+                                          //           topRight:
+                                          //               Radius.circular(8.0),
+                                          //           bottomRight:
+                                          //               Radius.circular(8.0),
+                                          //         ),
+                                          //         border: hasFiles
+                                          //             ? Border.fromBorderSide(
+                                          //                 BorderSide(
+                                          //                 color:
+                                          //                     Color(0xFFE6E6E6),
+                                          //               ))
+                                          //             : null,
+                                          //         color: hasFiles
+                                          //             ? (user.id ==
+                                          //                     widget.message
+                                          //                         .user.id
+                                          //                 ? Color(0xFFE6E6E6)
+                                          //                 : Colors.white)
+                                          //             : Colors.transparent,
+                                          //       ),
+                                          child: Padding(
+                                            padding: EdgeInsets.all(
+                                                hasFiles ? 2.0 : 0.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                ..._parseAttachments(context),
+                                                if (widget.message.text
+                                                        .trim()
+                                                        .isNotEmpty &&
+                                                    !isGiphy)
+                                                  _buildTextBubble(context),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                 ),
