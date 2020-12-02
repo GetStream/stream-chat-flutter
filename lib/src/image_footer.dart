@@ -246,8 +246,6 @@ class _ImageFooterState extends State<ImageFooter> {
   }
 
   Widget _buildShareModal(context) {
-    final channel = StreamChannel.of(context).channel;
-
     showDialog(
       context: context,
       builder: (context) {
@@ -613,19 +611,12 @@ class _ImageFooterState extends State<ImageFooter> {
 
       await c.create();
 
-      Future sendingFuture;
-      Message message;
-
-      message = (Message()).copyWith(
+      final message = Message(
         text: text,
         attachments: [attachments[widget.currentPage]],
-        mentionedUsers: [],
-        showInChannel: false,
       );
 
-      sendingFuture = c.sendMessage(message);
-
-      await sendingFuture;
+      await c.sendMessage(message);
     }
 
     _selectedUsers.clear();
