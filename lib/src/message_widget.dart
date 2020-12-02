@@ -668,46 +668,40 @@ class _MessageWidgetState extends State<MessageWidget> {
         [];
   }
 
-  Padding wrapAttachmentWidget(
+  Widget wrapAttachmentWidget(
     BuildContext context,
     Widget attachmentWidget, {
     Attachment attachment,
   }) {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: 4,
-      ),
-      child: GestureDetector(
-        onTap: () => retryMessage(context),
-        onLongPress: () => onLongPress(context),
-        child: Material(
-          color: attachment?.type == 'giphy'
-              ? Colors.white
-              : _getBackgroundColor(),
-          clipBehavior: Clip.hardEdge,
-          shape: attachmentShape,
-          child: Padding(
-            padding: widget.attachmentPadding,
-            child: Material(
-              clipBehavior: Clip.hardEdge,
-              shape: attachmentShape,
-              type: MaterialType.transparency,
-              child: Transform(
-                transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    getFailedMessageWidget(
-                      context,
-                      padding: const EdgeInsets.all(8.0),
-                    ),
-                    attachmentWidget,
-                  ],
-                ),
+    return GestureDetector(
+      onTap: () => retryMessage(context),
+      onLongPress: () => onLongPress(context),
+      child: Material(
+        color:
+            attachment?.type == 'giphy' ? Colors.white : _getBackgroundColor(),
+        clipBehavior: Clip.hardEdge,
+        shape: attachmentShape,
+        child: Padding(
+          padding: widget.attachmentPadding,
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            shape: attachmentShape,
+            type: MaterialType.transparency,
+            child: Transform(
+              transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  getFailedMessageWidget(
+                    context,
+                    padding: const EdgeInsets.all(8.0),
+                  ),
+                  attachmentWidget,
+                ],
               ),
             ),
           ),
