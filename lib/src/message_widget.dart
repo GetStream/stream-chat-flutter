@@ -227,7 +227,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
     final hasFiles =
-        widget.message.attachments.any((element) => element.type == 'file');
+        widget.message.attachments?.any((element) => element.type == 'file') ==
+            true;
 
     return Portal(
       child: Padding(
