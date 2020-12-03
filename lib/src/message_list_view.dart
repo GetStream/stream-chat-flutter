@@ -532,7 +532,8 @@ class _MessageListViewState extends State<MessageListView> {
           newMessages.first.id != _messages.first.id) {
         if (!_scrollController.hasClients ||
             _scrollController.offset < _newMessageLoadingOffset) {
-          if (streamChannel.channel.state.unreadCount > 0) {
+          if (streamChannel.channel.state.unreadCount > 0 &&
+              streamChannel.channel.config?.readEvents == true) {
             streamChannel.channel.markRead();
           }
           setState(() {
