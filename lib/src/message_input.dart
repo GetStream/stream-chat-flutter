@@ -108,7 +108,6 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
-    this.enableFileAndImageAttachment = false,
   }) : super(key: key);
 
   /// Message to edit
@@ -156,9 +155,6 @@ class MessageInput extends StatefulWidget {
 
   /// The focus node associated to the TextField
   final FocusNode focusNode;
-
-  /// Enables adding both file+images at the same time
-  final bool enableFileAndImageAttachment;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -662,6 +658,34 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildFilePickerSection() {
+    var _attachmentContainsFile =
+        _attachments.any((element) => element.attachment.type == 'file');
+
+    Color _getIconColor(int index) {
+      switch (index) {
+        case 0:
+          return _attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+        case 1:
+          return !_attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+        case 2:
+          return _attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+        case 3:
+          return _attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+      }
+    }
+
     return AnimatedContainer(
       duration: _animateContainer ? Duration(milliseconds: 300) : Duration.zero,
       height: _openFilePickerSection ? _filePickerSize : 0,
@@ -675,49 +699,49 @@ class MessageInputState extends State<MessageInput> {
                 IconButton(
                   iconSize: 24,
                   icon: StreamSvgIcon.pictures(
-                    color: _filePickerIndex == 0
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(0),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _filePickerIndex = 0;
-                    });
-                  },
+                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          setState(() {
+                            _filePickerIndex = 0;
+                          });
+                        },
                 ),
                 IconButton(
                   iconSize: 32,
                   icon: StreamSvgIcon.files(
-                    color: _filePickerIndex == 1
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(1),
                   ),
-                  onPressed: () {
-                    pickFile(DefaultAttachmentTypes.file, false);
-                  },
+                  onPressed: !_attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          pickFile(DefaultAttachmentTypes.file, false);
+                        },
                 ),
                 IconButton(
                   iconSize: 24,
                   icon: StreamSvgIcon.camera(
-                    color: _filePickerIndex == 2
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(2),
                   ),
-                  onPressed: () {
-                    pickFile(DefaultAttachmentTypes.image, true);
-                  },
+                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          pickFile(DefaultAttachmentTypes.image, true);
+                        },
                 ),
                 IconButton(
                   padding: const EdgeInsets.all(0),
                   iconSize: 24,
                   icon: StreamSvgIcon.record(
-                    color: _filePickerIndex == 3
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(3),
                   ),
-                  onPressed: () {
-                    pickFile(DefaultAttachmentTypes.video, true);
-                  },
+                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          pickFile(DefaultAttachmentTypes.video, true);
+                        },
                 ),
               ],
             ),
@@ -774,6 +798,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildPickerSection() {
+    var _attachmentContainsFile =
+        _attachments.any((element) => element.attachment.type == 'file');
+
     switch (_filePickerIndex) {
       case 0:
         return FutureBuilder<bool>(
@@ -786,26 +813,22 @@ class MessageInputState extends State<MessageInput> {
               }
 
               if (snapshot.data) {
-                return MediaListView(
-                  selectedIds: _attachments.map((e) => e.id).toList(),
-                  onSelect: (media) async {
-                    if (!_attachments
-                        .any((element) => element.id == media.id)) {
-                      if (widget.enableFileAndImageAttachment) {
+                return IgnorePointer(
+                  ignoring: _attachmentContainsFile,
+                  child: MediaListView(
+                    selectedIds: _attachments.map((e) => e.id).toList(),
+                    onSelect: (media) async {
+                      if (!_attachments
+                          .any((element) => element.id == media.id)) {
                         _addAttachment(media);
                       } else {
-                        if (!_attachments.any(
-                            (element) => element.attachment?.type == 'file')) {
-                          _addAttachment(media);
-                        }
+                        setState(() {
+                          _attachments
+                              .removeWhere((element) => element.id == media.id);
+                        });
                       }
-                    } else {
-                      setState(() {
-                        _attachments
-                            .removeWhere((element) => element.id == media.id);
-                      });
-                    }
-                  },
+                    },
+                  ),
                 );
               }
 
@@ -1581,11 +1604,6 @@ class MessageInputState extends State<MessageInput> {
         bytes: bytes,
       );
     } else {
-      if (_attachments.any((element) => element.attachment.type != 'file') &&
-          !widget.enableFileAndImageAttachment) {
-        return;
-      }
-
       FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
         type = FileType.image;
