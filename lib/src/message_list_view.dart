@@ -164,6 +164,7 @@ class _MessageListViewState extends State<MessageListView> {
   Function _onThreadTap;
   bool _showScrollToBottom = false;
   ItemPositionsListener _itemPositionListener;
+  int messageListLength;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +203,22 @@ class _MessageListViewState extends State<MessageListView> {
               ),
             );
           }
+
+          final newMessagesListLength = messages.length;
+
+          if (_itemPositionListener.itemPositions.value?.isNotEmpty == true &&
+              messageListLength != null) {
+            final first = _itemPositionListener.itemPositions.value.first;
+            final diff = newMessagesListLength - messageListLength;
+            if (diff > 0) {
+              _scrollController.jumpTo(
+                index: first.index + diff,
+                alignment: first.itemLeadingEdge,
+              );
+            }
+          }
+
+          messageListLength = newMessagesListLength;
 
           return Stack(
             alignment: Alignment.center,
