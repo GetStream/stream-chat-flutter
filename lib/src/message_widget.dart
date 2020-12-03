@@ -301,22 +301,19 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           ),
                                         )
                                       : Material(
+                                          clipBehavior: Clip.antiAlias,
                                           shape: widget.shape ??
                                               RoundedRectangleBorder(
-                                                side: !hasFiles
-                                                    ? BorderSide.none
-                                                    : widget.borderSide ??
-                                                        BorderSide(
-                                                          color: Theme.of(context)
-                                                                      .brightness ==
-                                                                  Brightness
-                                                                      .dark
-                                                              ? Colors.white
-                                                                  .withAlpha(24)
-                                                              : Colors.black
-                                                                  .withAlpha(
-                                                                      24),
-                                                        ),
+                                                side: widget.borderSide ??
+                                                    BorderSide(
+                                                      color: Theme.of(context)
+                                                                  .brightness ==
+                                                              Brightness.dark
+                                                          ? Colors.white
+                                                              .withAlpha(24)
+                                                          : Colors.black
+                                                              .withAlpha(24),
+                                                    ),
                                                 borderRadius: widget
                                                         .borderRadiusGeometry ??
                                                     BorderRadius.zero,
@@ -327,7 +324,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                 hasFiles ? 2.0 : 0.0),
                                             child: Column(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
+                                                  CrossAxisAlignment.start,
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
                                                 ..._parseAttachments(context),
@@ -828,17 +825,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     BuildContext context,
     Widget child,
   }) {
-    return Material(
-      shape: widget.shape ??
-          RoundedRectangleBorder(
-            side: widget.borderSide ??
-                BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withAlpha(24)
-                      : Colors.black.withAlpha(24),
-                ),
-            borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-          ),
+    return Container(
       color: _getBackgroundColor(),
       child: child,
     );
