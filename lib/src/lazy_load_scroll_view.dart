@@ -15,7 +15,7 @@ class LazyLoadScrollView extends StatefulWidget {
   final VoidCallback onEndOfPage;
 
   /// The offset to take into account when triggering [onEndOfPage] in pixels
-  final int scrollOffset;
+  final double scrollOffset;
 
   /// Used to determine if loading of new data has finished. You should use set this if you aren't using a FutureBuilder or StreamBuilder
   final bool isLoading;
