@@ -1254,13 +1254,23 @@ class MessageInputState extends State<MessageInput> {
                                 MediaQuery.of(context).size.width * 0.55,
                                 MediaQuery.of(context).size.height * 0.3,
                               ),
-                              trailing: IconButton(
-                                icon: StreamSvgIcon.close_small(),
-                                onPressed: () {
-                                  setState(() {
-                                    _attachments.remove(e);
-                                  });
-                                },
+                              trailing: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: InkWell(
+                                  child: CircleAvatar(
+                                    backgroundColor:
+                                        Colors.black.withOpacity(0.2),
+                                    maxRadius: 12.0,
+                                    child: StreamSvgIcon.close(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      _attachments.remove(e);
+                                    });
+                                  },
+                                ),
                               ),
                             ),
                           ),
