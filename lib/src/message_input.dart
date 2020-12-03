@@ -1087,7 +1087,7 @@ class MessageInputState extends State<MessageInput> {
                                             offset: rejoin.length,
                                           ),
                                         );
-
+                                        _debounce.cancel();
                                         _mentionsOverlay?.remove();
                                         _mentionsOverlay = null;
                                       },
@@ -1294,6 +1294,7 @@ class MessageInputState extends State<MessageInput> {
                             padding: const EdgeInsets.all(8.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
+                              clipBehavior: Clip.antiAlias,
                               child: Stack(
                                 children: <Widget>[
                                   AspectRatio(
