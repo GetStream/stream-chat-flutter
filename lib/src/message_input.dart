@@ -1247,29 +1247,33 @@ class MessageInputState extends State<MessageInput> {
                         .map(
                           (e) => Padding(
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: FileAttachment(
-                              attachment: e.attachment,
-                              size: Size(
-                                MediaQuery.of(context).size.width * 0.55,
-                                MediaQuery.of(context).size.height * 0.3,
-                              ),
-                              trailing: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  child: CircleAvatar(
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.2),
-                                    maxRadius: 12.0,
-                                    child: StreamSvgIcon.close(
-                                      color: Colors.white,
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              clipBehavior: Clip.antiAlias,
+                              child: FileAttachment(
+                                attachment: e.attachment,
+                                size: Size(
+                                  MediaQuery.of(context).size.width * 0.55,
+                                  MediaQuery.of(context).size.height * 0.3,
+                                ),
+                                trailing: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: InkWell(
+                                    child: CircleAvatar(
+                                      backgroundColor:
+                                          Colors.black.withOpacity(0.2),
+                                      maxRadius: 12.0,
+                                      child: StreamSvgIcon.close(
+                                        color: Colors.white,
+                                      ),
                                     ),
+                                    onTap: () {
+                                      setState(() {
+                                        _attachments.remove(e);
+                                      });
+                                    },
                                   ),
-                                  onTap: () {
-                                    setState(() {
-                                      _attachments.remove(e);
-                                    });
-                                  },
                                 ),
                               ),
                             ),
