@@ -659,7 +659,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildFilePickerSection() {
     var _attachmentContainsFile =
-        _attachments.any((element) => element.attachment.type == 'file');
+        _attachments.any((element) => element?.attachment?.type == 'file');
 
     Color _getIconColor(int index) {
       switch (index) {
@@ -924,7 +924,7 @@ class MessageInputState extends State<MessageInput> {
           ..file = file
           ..attachment = Attachment(
             localUri: file.path != null ? Uri.parse(file.path) : null,
-            type: medium.type == AssetType.image ? 'image' : 'video',
+            type: medium?.type == AssetType.image ? 'image' : 'video',
           );
       });
 
