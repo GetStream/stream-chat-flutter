@@ -223,6 +223,13 @@ class _MessageWidgetState extends State<MessageWidget> {
         widget.message.attachments?.any((element) => element.type == 'giphy') ==
             true;
 
+    final isOnlyEmoji =
+        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
+
+    final hasFiles =
+        widget.message.attachments?.any((element) => element.type == 'file') ==
+            true;
+
     return Portal(
       child: Padding(
         padding: widget.padding ?? EdgeInsets.all(8),
@@ -295,18 +302,46 @@ class _MessageWidgetState extends State<MessageWidget> {
                                             messageTheme: widget.messageTheme,
                                           ),
                                         )
-                                      : Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            ..._parseAttachments(context),
-                                            if (widget.message.text
-                                                    .trim()
-                                                    .isNotEmpty &&
-                                                !isGiphy)
-                                              _buildTextBubble(context),
-                                          ],
+                                      : Material(
+                                          clipBehavior: Clip.antiAlias,
+                                          shape: widget.shape ??
+                                              RoundedRectangleBorder(
+                                                side: isOnlyEmoji
+                                                    ? BorderSide.none
+                                                    : widget.borderSide ??
+                                                        BorderSide(
+                                                          color: Theme.of(context)
+                                                                      .brightness ==
+                                                                  Brightness
+                                                                      .dark
+                                                              ? Colors.white
+                                                                  .withAlpha(24)
+                                                              : Colors.black
+                                                                  .withAlpha(
+                                                                      24),
+                                                        ),
+                                                borderRadius: widget
+                                                        .borderRadiusGeometry ??
+                                                    BorderRadius.zero,
+                                              ),
+                                          color: _getBackgroundColor(),
+                                          child: Padding(
+                                            padding: EdgeInsets.all(
+                                                hasFiles ? 2.0 : 0.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                ..._parseAttachments(context),
+                                                if (widget.message.text
+                                                        .trim()
+                                                        .isNotEmpty &&
+                                                    !isGiphy)
+                                                  _buildTextBubble(context),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                 ),
                                 if (widget.showReactionPickerIndicator)
@@ -629,46 +664,40 @@ class _MessageWidgetState extends State<MessageWidget> {
         [];
   }
 
-  Padding wrapAttachmentWidget(
+  Widget wrapAttachmentWidget(
     BuildContext context,
     Widget attachmentWidget, {
     Attachment attachment,
   }) {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: 4,
-      ),
-      child: GestureDetector(
-        onTap: () => retryMessage(context),
-        onLongPress: () => onLongPress(context),
-        child: Material(
-          color: attachment?.type == 'giphy'
-              ? Colors.white
-              : _getBackgroundColor(),
-          clipBehavior: Clip.hardEdge,
-          shape: attachmentShape,
-          child: Padding(
-            padding: widget.attachmentPadding,
-            child: Material(
-              clipBehavior: Clip.hardEdge,
-              shape: attachmentShape,
-              type: MaterialType.transparency,
-              child: Transform(
-                transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    getFailedMessageWidget(
-                      context,
-                      padding: const EdgeInsets.all(8.0),
-                    ),
-                    attachmentWidget,
-                  ],
-                ),
+    return GestureDetector(
+      onTap: () => retryMessage(context),
+      onLongPress: () => onLongPress(context),
+      child: Material(
+        color:
+            attachment?.type == 'giphy' ? Colors.white : _getBackgroundColor(),
+        clipBehavior: Clip.hardEdge,
+        shape: attachmentShape,
+        child: Padding(
+          padding: widget.attachmentPadding,
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            shape: attachmentShape,
+            type: MaterialType.transparency,
+            child: Transform(
+              transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  getFailedMessageWidget(
+                    context,
+                    padding: const EdgeInsets.all(8.0),
+                  ),
+                  attachmentWidget,
+                ],
               ),
             ),
           ),
@@ -798,26 +827,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     return SizedBox();
   }
 
-  Widget _wrapTextInBubble({
-    BuildContext context,
-    Widget child,
-  }) {
-    return Material(
-      shape: widget.shape ??
-          RoundedRectangleBorder(
-            side: widget.borderSide ??
-                BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withAlpha(24)
-                      : Colors.black.withAlpha(24),
-                ),
-            borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-          ),
-      color: _getBackgroundColor(),
-      child: child,
-    );
-  }
-
   Widget _buildTextBubble(BuildContext context) {
     final isOnlyEmoji =
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
@@ -858,13 +867,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         ],
       ),
     );
-
-    if (!isOnlyEmoji) {
-      child = _wrapTextInBubble(
-        context: context,
-        child: child,
-      );
-    }
     return GestureDetector(
       onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
@@ -873,6 +875,9 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Color _getBackgroundColor() {
+    final isOnlyEmoji =
+        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
+
     if ((widget.message.status == MessageSendingStatus.FAILED ||
         widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
         widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
@@ -885,6 +890,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       return Color(0xFFE9F2FF);
     }
 
+    if (isOnlyEmoji) {
+      return Colors.transparent;
+    }
     return widget.messageTheme.messageBackgroundColor;
   }
 
