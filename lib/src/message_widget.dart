@@ -223,9 +223,10 @@ class _MessageWidgetState extends State<MessageWidget> {
         widget.message.attachments?.any((element) => element.type == 'giphy') ==
             true;
 
-    var user = StreamChat.of(context).user;
+    final isOnlyEmoji =
+        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
-    bool hasFiles =
+    final hasFiles =
         widget.message.attachments.any((element) => element.type == 'file');
 
     return Portal(
@@ -304,16 +305,20 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           clipBehavior: Clip.antiAlias,
                                           shape: widget.shape ??
                                               RoundedRectangleBorder(
-                                                side: widget.borderSide ??
-                                                    BorderSide(
-                                                      color: Theme.of(context)
-                                                                  .brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.white
-                                                              .withAlpha(24)
-                                                          : Colors.black
-                                                              .withAlpha(24),
-                                                    ),
+                                                side: isOnlyEmoji
+                                                    ? BorderSide.none
+                                                    : widget.borderSide ??
+                                                        BorderSide(
+                                                          color: Theme.of(context)
+                                                                      .brightness ==
+                                                                  Brightness
+                                                                      .dark
+                                                              ? Colors.white
+                                                                  .withAlpha(24)
+                                                              : Colors.black
+                                                                  .withAlpha(
+                                                                      24),
+                                                        ),
                                                 borderRadius: widget
                                                         .borderRadiusGeometry ??
                                                     BorderRadius.zero,
@@ -821,16 +826,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     return SizedBox();
   }
 
-  Widget _wrapTextInBubble({
-    BuildContext context,
-    Widget child,
-  }) {
-    return Container(
-      color: _getBackgroundColor(),
-      child: child,
-    );
-  }
-
   Widget _buildTextBubble(BuildContext context) {
     final isOnlyEmoji =
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
@@ -871,13 +866,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         ],
       ),
     );
-
-    if (!isOnlyEmoji) {
-      child = _wrapTextInBubble(
-        context: context,
-        child: child,
-      );
-    }
     return GestureDetector(
       onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
@@ -886,6 +874,9 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Color _getBackgroundColor() {
+    final isOnlyEmoji =
+        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
+
     if ((widget.message.status == MessageSendingStatus.FAILED ||
         widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
         widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
@@ -898,6 +889,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       return Color(0xFFE9F2FF);
     }
 
+    if (isOnlyEmoji) {
+      return Colors.transparent;
+    }
     return widget.messageTheme.messageBackgroundColor;
   }
 
