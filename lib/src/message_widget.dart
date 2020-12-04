@@ -186,9 +186,7 @@ class MessageWidget extends StatefulWidget {
           'giphy': (context, message, attachment) {
             return GiphyAttachment(
               attachment: attachment,
-              messageTheme: messageTheme.copyWith(
-                messageBackgroundColor: Colors.white,
-              ),
+              messageTheme: messageTheme,
               message: message,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,
@@ -218,13 +216,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
         ? widget.messageTheme.avatarTheme.constraints.maxWidth + 16.0
         : 6.0;
-
-    final isGiphy =
-        widget.message.attachments?.any((element) => element.type == 'giphy') ==
-            true;
-
-    final isOnlyEmoji =
-        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
     final hasFiles =
         widget.message.attachments?.any((element) => element.type == 'file') ==
@@ -484,6 +475,10 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
+  bool get isGiphy =>
+      widget.message.attachments?.any((element) => element.type == 'giphy') ==
+      true;
+
   Widget _buildReadIndicator() {
     var padding = 0.0;
     return Stack(
@@ -675,9 +670,8 @@ class _MessageWidgetState extends State<MessageWidget> {
       onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
       child: Material(
-        color:
-            attachment?.type == 'giphy' ? Colors.white : _getBackgroundColor(),
-        clipBehavior: Clip.hardEdge,
+        color: _getBackgroundColor(),
+        clipBehavior: Clip.antiAlias,
         shape: attachmentShape,
         child: Padding(
           padding: widget.attachmentPadding,
@@ -828,9 +822,6 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildTextBubble(BuildContext context) {
-    final isOnlyEmoji =
-        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
-
     Widget child = Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
@@ -874,10 +865,11 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Color _getBackgroundColor() {
-    final isOnlyEmoji =
-        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
+  bool get isOnlyEmoji =>
+      widget.message.text.characters.isNotEmpty &&
+      widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
+  Color _getBackgroundColor() {
     if ((widget.message.status == MessageSendingStatus.FAILED ||
         widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
         widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
@@ -893,6 +885,11 @@ class _MessageWidgetState extends State<MessageWidget> {
     if (isOnlyEmoji) {
       return Colors.transparent;
     }
+
+    if (isGiphy) {
+      return Colors.transparent;
+    }
+
     return widget.messageTheme.messageBackgroundColor;
   }
 
