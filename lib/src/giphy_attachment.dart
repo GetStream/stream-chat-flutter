@@ -79,26 +79,32 @@ class GiphyAttachment extends StatelessWidget {
                           );
                         }));
                       },
-                      child: CachedNetworkImage(
-                        height: size?.height,
-                        width: size?.width,
-                        placeholder: (_, __) {
-                          return Container(
-                            width: size?.width,
-                            height: size?.height,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                        imageUrl: attachment.thumbUrl ??
-                            attachment.imageUrl ??
-                            attachment.assetUrl,
-                        errorWidget: (context, url, error) => AttachmentError(
-                          attachment: attachment,
-                          size: size,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
                         ),
-                        fit: BoxFit.cover,
+                        child: CachedNetworkImage(
+                          height: size?.height,
+                          width: size?.width,
+                          placeholder: (_, __) {
+                            return Container(
+                              width: size?.width,
+                              height: size?.height,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          imageUrl: attachment.thumbUrl ??
+                              attachment.imageUrl ??
+                              attachment.assetUrl,
+                          errorWidget: (context, url, error) => AttachmentError(
+                            attachment: attachment,
+                            size: size,
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
