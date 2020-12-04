@@ -5,8 +5,10 @@ import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+import '../stream_chat_flutter.dart';
 import './channel_name.dart';
 import 'channel_image.dart';
+import 'chat_info_screen.dart';
 import 'stream_channel.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
@@ -97,7 +99,26 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(right: 10.0),
           child: Center(
             child: ChannelImage(
-              onTap: onImageTap,
+              onTap: onImageTap ??
+                  () {
+                    var currentUser = StreamChat.of(context).user;
+                    var otherUser = channel.state.members.firstWhere(
+                        (element) => element.user.id != currentUser.id);
+
+                    if (channel.memberCount == 2) {
+                      if (otherUser != null) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => StreamChannel(
+                                      channel: channel,
+                                      child: ChatInfoScreen(
+                                        user: otherUser.user,
+                                      ),
+                                    )));
+                      }
+                    }
+                  },
             ),
           ),
         ),
