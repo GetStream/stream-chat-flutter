@@ -92,18 +92,18 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
     return Column(
       children: [
-        _OptionListTile(
-          title: 'Notifications',
-          leading: StreamSvgIcon.Icon_notification(
-            size: 24.0,
-            color: Colors.black.withOpacity(0.5),
-          ),
-          trailing: CupertinoSwitch(
-            value: true,
-            onChanged: (val) {},
-          ),
-          onTap: () {},
-        ),
+        // _OptionListTile(
+        //   title: 'Notifications',
+        //   leading: StreamSvgIcon.Icon_notification(
+        //     size: 24.0,
+        //     color: Colors.black.withOpacity(0.5),
+        //   ),
+        //   trailing: CupertinoSwitch(
+        //     value: true,
+        //     onChanged: (val) {},
+        //   ),
+        //   onTap: () {},
+        // ),
         StreamBuilder<bool>(
             stream: StreamChannel.of(context).channel.isMutedStream,
             builder: (context, snapshot) {
@@ -143,7 +143,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         _OptionListTile(
           title: '615 Photos & Videos',
           leading: StreamSvgIcon.pictures(
-            size: 24.0,
+            size: 32.0,
             color: Colors.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
@@ -152,21 +152,36 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         _OptionListTile(
           title: '8 Files',
           leading: StreamSvgIcon.files(
-            size: 24.0,
+            size: 32.0,
             color: Colors.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {},
         ),
-        _OptionListTile(
-          title: '2 Shared groups',
-          leading: StreamSvgIcon.Icon_group(
-            size: 24.0,
-            color: Colors.black.withOpacity(0.5),
-          ),
-          trailing: StreamSvgIcon.right(),
-          onTap: () {},
-        ),
+        StreamBuilder<List<Channel>>(
+            stream: StreamChat.of(context).client.queryChannels(
+              filter: {
+                'members': [StreamChat.of(context).user.id, widget.user.id],
+              },
+            ),
+            builder: (context, snapshot) {
+              return _OptionListTile(
+                title:
+                    '${snapshot.data == null ? '0' : snapshot.data.length} Shared groups',
+                leading: StreamSvgIcon.Icon_group(
+                  size: 24.0,
+                  color: Colors.black.withOpacity(0.5),
+                ),
+                trailing: StreamSvgIcon.right(),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => _SharedGroupsScreen(
+                              StreamChat.of(context).user, widget.user)));
+                },
+              );
+            }),
       ],
     );
   }
@@ -285,35 +300,111 @@ class _OptionListTile extends StatelessWidget {
         ),
         Material(
           color: Colors.white,
-          child: InkWell(
-            onTap: onTap,
-            child: Row(
-              children: [
-                if (leading != null)
-                  Padding(
-                    padding: const EdgeInsets.all(22.0),
-                    child: leading,
+          child: Container(
+            height: 56.0,
+            child: InkWell(
+              onTap: onTap,
+              child: Row(
+                children: [
+                  if (leading != null)
+                    Expanded(
+                      child: Center(child: leading),
+                    ),
+                  if (leading == null)
+                    SizedBox(
+                      width: 16.0,
+                    ),
+                  Expanded(
+                      flex: 4,
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, color: titleColor),
+                      )),
+                  Expanded(
+                    child: Center(
+                      child: trailing ?? Container(),
+                    ),
                   ),
-                if (leading == null)
-                  SizedBox(
-                    width: 16.0,
-                  ),
-                Expanded(
-                    child: Text(
-                  title,
-                  style:
-                      TextStyle(fontWeight: FontWeight.w600, color: titleColor),
-                )),
-                if (trailing != null)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: trailing,
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SharedGroupsScreen extends StatefulWidget {
+  final User mainUser;
+  final User otherUser;
+
+  _SharedGroupsScreen(this.mainUser, this.otherUser);
+
+  @override
+  __SharedGroupsScreenState createState() => __SharedGroupsScreenState();
+}
+
+class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
+  @override
+  Widget build(BuildContext context) {
+    var chat = StreamChat.of(context);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        brightness: Theme.of(context).brightness,
+        elevation: 1,
+        centerTitle: true,
+        title: Text(
+          'Shared Groups',
+          style: TextStyle(color: Colors.black, fontSize: 16.0),
+        ),
+        leading: Center(
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              child: StreamSvgIcon.left(
+                color: Colors.black,
+                size: 24.0,
+              ),
+              width: 24.0,
+              height: 24.0,
+            ),
+          ),
+        ),
+        backgroundColor: StreamChatTheme.of(context).primaryColor,
+      ),
+      body: StreamBuilder<List<Channel>>(
+        stream: chat.client.queryChannels(
+          filter: {
+            'members': [widget.mainUser.id, widget.otherUser.id],
+          },
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, position) {
+              return StreamChannel(
+                channel: snapshot.data[position],
+                child: ChannelPreview(
+                  channel: snapshot.data[position],
+                  onTap: (val) {},
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
