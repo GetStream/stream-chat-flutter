@@ -316,28 +316,9 @@ class _ChannelListViewState extends State<ChannelListView>
           builder: (context) {
             Widget child;
             if (widget.channelPreviewBuilder != null) {
-              child = Stack(
-                children: [
-                  widget.channelPreviewBuilder(
-                    context,
-                    channel,
-                  ),
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          onTap(channel, widget.channelWidget);
-                        },
-                        onLongPress: widget.onChannelLongPress != null
-                            ? () {
-                                widget.onChannelLongPress(channel);
-                              }
-                            : null,
-                      ),
-                    ),
-                  ),
-                ],
+              child = widget.channelPreviewBuilder(
+                context,
+                channel,
               );
             } else {
               child = ChannelPreview(
