@@ -31,7 +31,7 @@ class MessageText extends StatelessWidget {
       ) {
         if (link.startsWith('@')) {
           final mentionedUser = message.mentionedUsers.firstWhere(
-            (u) => '@${u.name.replaceAll(' ', '')}' == link,
+            (u) => '@${u.name}' == link,
             orElse: () => null,
           );
 
