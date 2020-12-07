@@ -95,7 +95,7 @@ class MessageInput extends StatefulWidget {
     this.attachmentThumbnailBuilders,
     this.inputTextStyle,
     this.attachmentIconColor,
-    this.autofocus,
+    this.autofocus = false,
   }) : super(key: key);
 
   /// Message to edit
@@ -262,7 +262,7 @@ class MessageInputState extends State<MessageInput> {
             });
           },
           style: widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
-          autofocus: widget.autofocus ?? false,
+          autofocus: widget.autofocus,
           decoration: InputDecoration(
             hintText: 'Write a message',
             hintStyle:
