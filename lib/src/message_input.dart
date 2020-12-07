@@ -95,6 +95,7 @@ class MessageInput extends StatefulWidget {
     this.attachmentThumbnailBuilders,
     this.inputTextStyle,
     this.attachmentIconColor,
+    this.autofocus,
   }) : super(key: key);
 
   /// Message to edit
@@ -102,6 +103,9 @@ class MessageInput extends StatefulWidget {
 
   /// Message to start with
   final Message initialMessage;
+
+  /// If set true TextField will be active by default. Default is false.
+  final bool autofocus;
 
   /// Function called after sending the message
   final void Function(Message) onMessageSent;
@@ -258,7 +262,7 @@ class MessageInputState extends State<MessageInput> {
             });
           },
           style: widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
-          autofocus: false,
+          autofocus: widget.autofocus ?? false,
           decoration: InputDecoration(
             hintText: 'Write a message',
             hintStyle:
