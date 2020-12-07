@@ -140,7 +140,9 @@ class ReplyMessageWidget extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: _getBackgroundColor(),
-        border: showBorder ? Border.all(color: Colors.black.withOpacity(0.08)) : null,
+        border: showBorder
+            ? Border.all(color: Colors.black.withOpacity(0.08))
+            : null,
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(12),
           topLeft: Radius.circular(12),
