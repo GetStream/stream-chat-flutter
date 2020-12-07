@@ -13,6 +13,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
 import 'stream_channel.dart';
+import 'swipeable.dart';
 
 typedef MessageBuilder = Widget Function(
   BuildContext,
@@ -25,6 +26,9 @@ typedef ParentMessageBuilder = Widget Function(
 );
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
+
+typedef OnMessageSwiped = void Function(Message);
+typedef ReplyTapCallback = void Function(Message);
 
 class MessageDetails {
   /// True if the message belongs to the current user
@@ -106,12 +110,14 @@ class MessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
+    this.onReplyTap,
     this.dateDividerBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
     this.initialScrollIndex = 0,
     this.initialAlignment = 0,
     this.scrollController,
     this.itemPositionListener,
+    this.onMessageSwiped,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -152,6 +158,12 @@ class MessageListView extends StatefulWidget {
 
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
+
+  /// Called when message item gets swiped
+  final OnMessageSwiped onMessageSwiped;
+
+  ///
+  final ReplyTapCallback onReplyTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -273,7 +285,7 @@ class _MessageListViewState extends State<MessageListView> {
                     if (widget.messageBuilder != null) {
                       messageWidget = Builder(
                         key: ValueKey<String>('MESSAGE-${message.id}'),
-                        builder: (_) => widget.messageBuilder(
+                        builder: (context) => widget.messageBuilder(
                             context,
                             MessageDetails(
                               context,
@@ -540,6 +552,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     return MessageWidget(
       showReplyIndicator: false,
+      showThreadReplyIndicator: false,
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
@@ -597,47 +610,54 @@ class _MessageListViewState extends State<MessageListView> {
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
 
-    return MessageWidget(
-      key: ValueKey<String>('MESSAGE-${message.id}'),
-      message: message,
-      reverse: isMyMessage,
-      showReactions: !message.isDeleted,
-      padding: EdgeInsets.only(
-        left: 8.0,
-        right: 8.0,
-        bottom: index == 0 ? 30 : (isNextUser ? 5 : 10),
+    return Swipeable(
+      onSwipeEnd: () => widget.onMessageSwiped(message),
+      backgroundIcon: StreamSvgIcon.reply(
+        color: StreamChatTheme.of(context).accentColor,
       ),
-      showUsername: !isMyMessage && !isNextUser,
-      showSendingIndicator: isMyMessage &&
-              (index == 0 || message.status != MessageSendingStatus.SENT)
-          ? DisplayWidget.show
-          : DisplayWidget.hide,
-      showTimestamp: !isNextUser || readList?.isNotEmpty == true,
-      showEditMessage: isMyMessage,
-      showDeleteMessage: isMyMessage,
-      borderSide: isMyMessage ? BorderSide.none : null,
-      onThreadTap: _onThreadTap,
-      attachmentBorderRadiusGeometry: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
+      child: MessageWidget(
+        key: ValueKey<String>('MESSAGE-${message.id}'),
+        message: message,
+        reverse: isMyMessage,
+        showReactions: !message.isDeleted,
+        padding: EdgeInsets.only(
+          left: 8.0,
+          right: 8.0,
+          bottom: index == 0 ? 30 : (isNextUser ? 5 : 10),
+        ),
+        showUsername: !isMyMessage && !isNextUser,
+        showSendingIndicator: isMyMessage &&
+                (index == 0 || message.status != MessageSendingStatus.SENT)
+            ? DisplayWidget.show
+            : DisplayWidget.hide,
+        showTimestamp: !isNextUser || readList?.isNotEmpty == true,
+        showEditMessage: isMyMessage,
+        showDeleteMessage: isMyMessage,
+        borderSide: isMyMessage ? BorderSide.none : null,
+        onThreadTap: _onThreadTap,
+        onReplyTap: widget.onReplyTap,
+        attachmentBorderRadiusGeometry: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+        attachmentPadding: const EdgeInsets.all(2),
+        borderRadiusGeometry: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+        showUserAvatar: isMyMessage
+            ? DisplayWidget.gone
+            : (isNextUser ? DisplayWidget.hide : DisplayWidget.show),
+        messageTheme: isMyMessage
+            ? StreamChatTheme.of(context).ownMessageTheme
+            : StreamChatTheme.of(context).otherMessageTheme,
+        readList: readList,
+        allRead: allRead,
       ),
-      attachmentPadding: const EdgeInsets.all(2),
-      borderRadiusGeometry: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
-      ),
-      showUserAvatar: isMyMessage
-          ? DisplayWidget.gone
-          : (isNextUser ? DisplayWidget.hide : DisplayWidget.show),
-      messageTheme: isMyMessage
-          ? StreamChatTheme.of(context).ownMessageTheme
-          : StreamChatTheme.of(context).otherMessageTheme,
-      readList: readList,
-      allRead: allRead,
     );
   }
 

@@ -15,7 +15,8 @@ import 'stream_chat_theme.dart';
 
 class MessageActionsModal extends StatelessWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  final void Function(Message) onThreadTap;
+  final void Function(Message) onThreadReplyTap;
+  final void Function(Message) onReplyTap;
   final Message message;
   final MessageTheme messageTheme;
   final bool showReactions;
@@ -23,6 +24,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool showCopyMessage;
   final bool showEditMessage;
   final bool showReply;
+  final bool showThreadReply;
   final bool reverse;
   final ShapeBorder messageShape;
   final DisplayWidget showUserAvatar;
@@ -34,9 +36,11 @@ class MessageActionsModal extends StatelessWidget {
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
-    this.onThreadTap,
+    this.onReplyTap,
+    this.onThreadReplyTap,
     this.showCopyMessage = true,
     this.showReply = true,
+    this.showThreadReply = true,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -114,6 +118,7 @@ class MessageActionsModal extends StatelessWidget {
                                 showReactions: false,
                                 showUsername: false,
                                 showReplyIndicator: false,
+                                showThreadReplyIndicator: false,
                                 showUserAvatar: showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
@@ -158,6 +163,12 @@ class MessageActionsModal extends StatelessWidget {
                                               message.status == null) &&
                                           message.parentId == null)
                                         _buildReplyButton(context),
+                                      if (showThreadReply &&
+                                          (message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              message.status == null) &&
+                                          message.parentId == null)
+                                        _buildThreadReplyButton(context),
                                       if (showEditMessage)
                                         _buildEditMessage(context),
                                       if (showDeleteMessage)
@@ -178,6 +189,24 @@ class MessageActionsModal extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildReplyButton(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Reply',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: StreamSvgIcon.reply(
+        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        if (onReplyTap != null) {
+          onReplyTap(message);
+        }
+      },
     );
   }
 
@@ -313,7 +342,7 @@ class MessageActionsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildReplyButton(BuildContext context) {
+  Widget _buildThreadReplyButton(BuildContext context) {
     return ListTile(
       title: Text(
         'Thread reply',
@@ -324,8 +353,8 @@ class MessageActionsModal extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
-        if (onThreadTap != null) {
-          onThreadTap(message);
+        if (onThreadReplyTap != null) {
+          onThreadReplyTap(message);
         }
       },
     );

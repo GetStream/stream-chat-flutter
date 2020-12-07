@@ -415,10 +415,31 @@ class ChannelQuerySearchResultPage extends StatelessWidget {
   }
 }
 
-class ChannelPage extends StatelessWidget {
-  const ChannelPage({
-    Key key,
-  }) : super(key: key);
+class ChannelPage extends StatefulWidget {
+  @override
+  _ChannelPageState createState() => _ChannelPageState();
+}
+
+class _ChannelPageState extends State<ChannelPage> {
+  Message _replyMessage;
+  FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _reply(Message message) {
+    setState(() => _replyMessage = message);
+    _focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -433,6 +454,8 @@ class ChannelPage extends StatelessWidget {
             child: Stack(
               children: <Widget>[
                 MessageListView(
+                  onMessageSwiped: _reply,
+                  onReplyTap: _reply,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,
@@ -458,7 +481,10 @@ class ChannelPage extends StatelessWidget {
               ],
             ),
           ),
-          MessageInput(),
+          MessageInput(
+            focusNode: _focusNode,
+            replyMessage: _replyMessage,
+          ),
         ],
       ),
     );

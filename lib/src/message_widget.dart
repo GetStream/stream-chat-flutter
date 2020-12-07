@@ -11,11 +11,13 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
+import 'package:stream_chat_flutter/src/reply_message_widget.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'image_group.dart';
 import 'message_text.dart';
+import 'extension.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 
@@ -46,6 +48,7 @@ class MessageWidget extends StatefulWidget {
 
   /// The function called when tapping on replies
   final void Function(Message) onThreadTap;
+  final void Function(Message) onReplyTap;
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
   final Widget Function(BuildContext, Message) textBuilder;
 
@@ -54,6 +57,9 @@ class MessageWidget extends StatefulWidget {
 
   /// The message
   final Message message;
+
+  /// The replyMessage
+  final Message replyMessage;
 
   /// The message theme
   final MessageTheme messageTheme;
@@ -99,6 +105,9 @@ class MessageWidget extends StatefulWidget {
 
   final bool allRead;
 
+  /// If true the widget will show the thread reply indicator
+  final bool showThreadReplyIndicator;
+
   /// If true the widget will show the reply indicator
   final bool showReplyIndicator;
 
@@ -127,6 +136,7 @@ class MessageWidget extends StatefulWidget {
     Key key,
     @required this.message,
     @required this.messageTheme,
+    this.replyMessage,
     this.reverse = false,
     this.translateUserAvatar = true,
     this.shape,
@@ -140,6 +150,8 @@ class MessageWidget extends StatefulWidget {
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = DisplayWidget.show,
     this.showReplyIndicator = true,
+    this.showThreadReplyIndicator = true,
+    this.onReplyTap,
     this.onThreadTap,
     this.showUsername = true,
     this.showTimestamp = true,
@@ -213,6 +225,8 @@ class MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<MessageWidget> {
+  bool get _hasReplyMessage => widget.replyMessage != null;
+
   @override
   Widget build(BuildContext context) {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
@@ -229,6 +243,9 @@ class _MessageWidgetState extends State<MessageWidget> {
     final hasFiles =
         widget.message.attachments?.any((element) => element.type == 'file') ==
             true;
+
+    final isMyMessage =
+        widget.message.user.id == StreamChat.of(context).user.id;
 
     return Portal(
       child: Padding(
@@ -306,7 +323,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           clipBehavior: Clip.antiAlias,
                                           shape: widget.shape ??
                                               RoundedRectangleBorder(
-                                                side: isOnlyEmoji
+                                                side: isOnlyEmoji &&
+                                                        !_hasReplyMessage
                                                     ? BorderSide.none
                                                     : widget.borderSide ??
                                                         BorderSide(
@@ -333,6 +351,19 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   CrossAxisAlignment.start,
                                               mainAxisSize: MainAxisSize.min,
                                               children: <Widget>[
+                                                if (_hasReplyMessage)
+                                                  ReplyMessageWidget(
+                                                    message:
+                                                        widget.replyMessage,
+                                                    messageTheme: isMyMessage
+                                                        ? StreamChatTheme.of(
+                                                                context)
+                                                            .otherMessageTheme
+                                                        : StreamChatTheme.of(
+                                                                context)
+                                                            .ownMessageTheme,
+                                                    reverse: widget.reverse,
+                                                  ),
                                                 ..._parseAttachments(context),
                                                 if (widget.message.text
                                                         .trim()
@@ -367,7 +398,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         ),
                       ],
                     ),
-                    if (widget.showReplyIndicator &&
+                    if (widget.showThreadReplyIndicator &&
                         widget.message.replyCount > 0)
                       _buildReplyIndicator(leftPadding),
                   ],
@@ -393,7 +424,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     var splitList = host.split('.');
     var hostName = splitList.length == 3 ? splitList[1] : splitList[0];
     var hostDisplayName = urlAttachment.authorName?.capitalize() ??
-        _getWebsiteName(hostName.toLowerCase()) ??
+        getWebsiteName(hostName.toLowerCase()) ??
         hostName.capitalize();
 
     return UrlAttachment(
@@ -562,14 +593,16 @@ class _MessageWidgetState extends State<MessageWidget> {
               showDeleteMessage: widget.showDeleteMessage,
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
-              onThreadTap: widget.onThreadTap,
+              onReplyTap: widget.onReplyTap,
+              onThreadReplyTap: widget.onThreadTap,
               showEditMessage: widget.showEditMessage &&
                   widget.message.attachments
                           ?.any((element) => element.type == 'giphy') !=
                       true,
               showReactions: widget.showReactions,
-              showReply:
-                  widget.showReplyIndicator && widget.onThreadTap != null,
+              showReply: widget.showReplyIndicator,
+              showThreadReply:
+                  widget.showThreadReplyIndicator && widget.onThreadTap != null,
             ),
           );
         });
@@ -878,6 +911,10 @@ class _MessageWidgetState extends State<MessageWidget> {
     final isOnlyEmoji =
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
+    if (_hasReplyMessage) {
+      return widget.messageTheme.messageBackgroundColor;
+    }
+
     if ((widget.message.status == MessageSendingStatus.FAILED ||
         widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
         widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
@@ -916,47 +953,6 @@ class _MessageWidgetState extends State<MessageWidget> {
             channel.cid,
           );
       return;
-    }
-  }
-
-  String _getWebsiteName(String hostName) {
-    switch (hostName) {
-      case 'reddit':
-        return 'Reddit';
-      case 'youtube':
-        return 'Youtube';
-      case 'wikipedia':
-        return 'Wikipedia';
-      case 'twitter':
-        return 'Twitter';
-      case 'facebook':
-        return 'Facebook';
-      case 'amazon':
-        return 'Amazon';
-      case 'yelp':
-        return 'Yelp';
-      case 'imdb':
-        return 'IMDB';
-      case 'pinterest':
-        return 'Pinterest';
-      case 'tripadvisor':
-        return 'TripAdvisor';
-      case 'instagram':
-        return 'Instagram';
-      case 'walmart':
-        return 'Walmart';
-      case 'craigslist':
-        return 'Craigslist';
-      case 'ebay':
-        return 'eBay';
-      case 'linkedin':
-        return 'LinkedIn';
-      case 'google':
-        return 'Google';
-      case 'apple':
-        return 'Apple';
-      default:
-        return null;
     }
   }
 }

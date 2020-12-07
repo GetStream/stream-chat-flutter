@@ -32,7 +32,7 @@ class FileAttachment extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              child: _getFileTypeImage(attachment.extraData['mime_type']),
+              child: getFileTypeImage(attachment.extraData['mime_type']),
               height: 40.0,
               width: 33.33,
               margin: EdgeInsets.all(8.0),
@@ -115,64 +115,5 @@ class FileAttachment extends StatelessWidget {
         // ),
       ),
     );
-  }
-
-  StreamSvgIcon _getFileTypeImage(String type) {
-    switch (type) {
-      case '7z':
-        return StreamSvgIcon.filetype_7z();
-        break;
-      case 'csv':
-        return StreamSvgIcon.filetype_csv();
-        break;
-      case 'doc':
-        return StreamSvgIcon.filetype_doc();
-        break;
-      case 'docx':
-        return StreamSvgIcon.filetype_docx();
-        break;
-      case 'html':
-        return StreamSvgIcon.filetype_html();
-        break;
-      case 'md':
-        return StreamSvgIcon.filetype_md();
-        break;
-      case 'odt':
-        return StreamSvgIcon.filetype_odt();
-        break;
-      case 'pdf':
-        return StreamSvgIcon.filetype_pdf();
-        break;
-      case 'ppt':
-        return StreamSvgIcon.filetype_ppt();
-        break;
-      case 'pptx':
-        return StreamSvgIcon.filetype_pptx();
-        break;
-      case 'rar':
-        return StreamSvgIcon.filetype_rar();
-        break;
-      case 'rtf':
-        return StreamSvgIcon.filetype_rtf();
-        break;
-      case 'tar':
-        return StreamSvgIcon.filetype_tar();
-        break;
-      case 'txt':
-        return StreamSvgIcon.filetype_txt();
-        break;
-      case 'xls':
-        return StreamSvgIcon.filetype_xls();
-        break;
-      case 'xlsx':
-        return StreamSvgIcon.filetype_xlsx();
-        break;
-      case 'zip':
-        return StreamSvgIcon.filetype_zip();
-        break;
-      default:
-        return StreamSvgIcon.filetype_Generic();
-        break;
-    }
   }
 }

@@ -326,6 +326,18 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  factory StreamSvgIcon.reply({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_curve_line_left_up_big.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   factory StreamSvgIcon.edit({
     double size,
     Color color,
