@@ -1,3 +1,8 @@
+## 0.2.16
+
+- Do not wrap channel preview builder. Users will have to implement they're custom onTap/onLongPress implementation
+- Make public autofocus field of the TextField of message_input
+
 ## 0.2.15
 
 - Add onLongPress on channel when using custom channel builder
