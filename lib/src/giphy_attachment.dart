@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 import 'attachment_error.dart';
-import 'full_screen_image.dart';
+import 'full_screen_media.dart';
 
 class GiphyAttachment extends StatelessWidget {
   final Attachment attachment;
@@ -64,64 +64,75 @@ class GiphyAttachment extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return FullScreenImage(
-                            url: attachment.imageUrl ??
-                                attachment.assetUrl ??
-                                attachment.thumbUrl,
+                          final channel = StreamChannel.of(context).channel;
+
+                          return StreamChannel(
+                            channel: channel,
+                            child: FullScreenMedia(
+                              mediaAttachments: [
+                                attachment,
+                              ],
+                              userName: message.user.name,
+                              sentAt: message.createdAt,
+                              message: message,
+                            ),
                           );
                         }));
                       },
-                      child: CachedNetworkImage(
-                        height: size?.height,
-                        width: size?.width,
-                        placeholder: (_, __) {
-                          return Container(
-                            width: size?.width,
-                            height: size?.height,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                        imageUrl: attachment.thumbUrl ??
-                            attachment.imageUrl ??
-                            attachment.assetUrl,
-                        errorWidget: (context, url, error) => AttachmentError(
-                          attachment: attachment,
-                          size: size,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
                         ),
-                        fit: BoxFit.cover,
+                        child: CachedNetworkImage(
+                          height: size?.height,
+                          width: size?.width,
+                          placeholder: (_, __) {
+                            return Container(
+                              width: size?.width,
+                              height: size?.height,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          imageUrl: attachment.thumbUrl ??
+                              attachment.imageUrl ??
+                              attachment.assetUrl,
+                          errorWidget: (context, url, error) => AttachmentError(
+                            attachment: attachment,
+                            size: size,
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 0,
-                    top: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(16.0),
-                          )),
+                    bottom: 16,
+                    left: 16,
+                    child: Material(
+                      color: Colors.black.withOpacity(.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 8.0,
-                          right: 8.0,
-                          top: 8.0,
-                          bottom: 4.0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
                         ),
                         child: Row(
                           children: [
                             StreamSvgIcon.lightning(
-                              color: StreamChatTheme.of(context).accentColor,
-                              size: 16.0,
+                              color: Colors.white,
+                              size: 16,
                             ),
                             Text(
                               'GIPHY',
                               style: TextStyle(
-                                color: StreamChatTheme.of(context).accentColor,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 11.0,
+                                fontSize: 11,
                               ),
                             ),
                           ],
@@ -278,10 +289,18 @@ class GiphyAttachment extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) {
-            return FullScreenImage(
-              url: attachment.imageUrl ??
-                  attachment.assetUrl ??
-                  attachment.thumbUrl,
+            var channel = StreamChannel.of(context).channel;
+
+            return StreamChannel(
+              channel: channel,
+              child: FullScreenMedia(
+                mediaAttachments: [
+                  attachment,
+                ],
+                userName: message.user.name,
+                sentAt: message.createdAt,
+                message: message,
+              ),
             );
           }));
         },

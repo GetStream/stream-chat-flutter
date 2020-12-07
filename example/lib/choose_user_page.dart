@@ -13,41 +13,41 @@ import 'routes/routes.dart';
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
 const kStreamToken = 'STREAM_TOKEN';
-const kDefaultStreamApiKey = 's2dxdhpxd94g';
+const kDefaultStreamApiKey = 'uj7qrdbfrzvg';
 
 class ChooseUserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final users = <String, User>{
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0._JHWzo92fpTWZMZriJHXqOng6ShYVmWrdaIaPwEPKBg':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0.lCz-idDgaZ-xszjnuB_hTfeIOhTFmJtTB2fEjhwrcCI':
           User(
         id: 'vishal',
         extraData: {
           'name': 'Vishal',
         },
       ),
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.1AvvK2TvEsfcxAlfOK2iUMFACucnk6N-Q8f5bbfnjCM':
           User(
         id: 'super-band-9',
         extraData: {
           'name': 'John Doe',
         },
       ),
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic2FsdmF0b3JlIn0.GMEKyEhONmFnqtkf1TR1A3oUOSIWhjfQv5RpI906dAM':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic2FsdmF0b3JlIn0.uQ-pz8e1_C-Df2rIFpkkvWf7g4M0aW2Zkr7pHVhmU1Y':
           User(
         id: 'salvatore',
         extraData: {
           'name': 'Salvatore',
         },
       ),
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.GTalMeZHaBdpIM5w-KWrVIDSy-ODkHTRkf1GZbWAveM':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.feLvMytd5_3-eETKrRdwtO3jcA0HxD8woFUbFU7gQCg':
           User(
         id: 'tommaso',
         extraData: {
           'name': 'Tommaso',
         },
       ),
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiamFhcCJ9.xpGE2lu4OoYS7-2yy6PbF0gJnxOaxeGO4EU6xo4EdMU':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiamFhcCJ9.VLkLs6KH-jRRkPvhYMa4_lqN0R6WiK7JhJVmYvxcKz0':
           User(
         id: 'jaap',
         extraData: {

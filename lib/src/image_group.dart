@@ -3,7 +3,8 @@ import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/full_screen_image.dart';
+import 'package:stream_chat_flutter/src/full_screen_media.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ImageGroup extends StatelessWidget {
   const ImageGroup({
@@ -107,37 +108,21 @@ class ImageGroup extends StatelessWidget {
     BuildContext context, [
     int index,
   ]) {
+    final channel = StreamChannel.of(context).channel;
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) {
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              iconTheme: IconThemeData(
-                color: Colors.white,
-              ),
-            ),
-            backgroundColor: Colors.black,
-            body: SizedBox.expand(
-              child: CarouselSlider(
-                items: images
-                    .map((image) => FullScreenImage(
-                          url: image.imageUrl ??
-                              image.thumbUrl ??
-                              image.assetUrl,
-                        ))
-                    .toList(),
-                options: CarouselOptions(
-                  initialPage: index ?? 0,
-                  enableInfiniteScroll: false,
-                  viewportFraction: 0.95,
-                  height: MediaQuery.of(context).size.height,
-                ),
-              ),
-            ),
-          );
-        },
+        builder: (context) => StreamChannel(
+          channel: channel,
+          child: FullScreenMedia(
+            mediaAttachments: images,
+            startIndex: index,
+            userName: message.user.name,
+            sentAt: message.createdAt,
+            message: message,
+          ),
+        ),
       ),
     );
   }
