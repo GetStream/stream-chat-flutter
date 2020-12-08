@@ -162,7 +162,7 @@ class ReplyMessageWidget extends StatelessWidget {
     final isOnlyEmoji =
         message.text.characters.every((c) => Emoji.byChar(c) != null);
     var msg = _hasAttachments && !_containsText
-        ? message.copyWith(text: message.attachments.last?.title ?? 'File')
+        ? message.copyWith(text: message.attachments.last?.title ?? '')
         : message;
     if (msg.text.length > textLimit) {
       msg = msg.copyWith(text: '${msg.text.substring(0, textLimit - 3)}...');
