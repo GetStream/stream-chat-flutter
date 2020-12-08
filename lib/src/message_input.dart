@@ -1461,16 +1461,31 @@ class MessageInputState extends State<MessageInput> {
         padding:
             const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
         child: StreamSvgIcon.lightning(
-          color: Color(0xFF000000).withAlpha(128),
+          color: _commandsOverlay != null
+              ? StreamChatTheme.of(context).accentColor
+              : Color(0xFF000000).withAlpha(128),
         ),
       ),
-      onTap: () {
+      onTap: () async {
+        if (_openFilePickerSection) {
+          setState(() {
+            _animateContainer = false;
+            _openFilePickerSection = false;
+            _filePickerSize = _kMinMediaPickerSize;
+          });
+          await Future.delayed(Duration(milliseconds: 300));
+        }
+
         if (_commandsOverlay == null) {
-          _commandsOverlay = _buildCommandsOverlayEntry();
-          Overlay.of(context).insert(_commandsOverlay);
+          setState(() {
+            _commandsOverlay = _buildCommandsOverlayEntry();
+            Overlay.of(context).insert(_commandsOverlay);
+          });
         } else {
-          _commandsOverlay?.remove();
-          _commandsOverlay = null;
+          setState(() {
+            _commandsOverlay?.remove();
+            _commandsOverlay = null;
+          });
         }
       },
     );
