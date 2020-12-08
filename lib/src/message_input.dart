@@ -151,6 +151,9 @@ class MessageInput extends StatefulWidget {
   /// Color used for attachment icon.
   final Color attachmentIconColor;
 
+  /// Text for the hint of InputDecoration. Default is 'Write a message'.
+  final String hintText = 'Write a message';
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -264,7 +267,7 @@ class MessageInputState extends State<MessageInput> {
           style: widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
           autofocus: widget.autofocus,
           decoration: InputDecoration(
-            hintText: 'Write a message',
+            hintText: widget.hintText,
             hintStyle:
                 widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
             prefixText: '   ',
