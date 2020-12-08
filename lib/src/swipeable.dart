@@ -70,12 +70,10 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    print(_moveAnimation.value.dx);
-
     final delta = details.primaryDelta;
-    if (delta.isNegative) return;
-
     _dragExtent += delta;
+
+    if (_dragExtent.isNegative) return;
 
     var movePastThresholdPixels = widget.threshold;
     var newPos = _dragExtent.abs() / context.size.width;
