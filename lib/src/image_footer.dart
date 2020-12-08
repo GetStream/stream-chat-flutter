@@ -220,6 +220,7 @@ class _ImageFooterState extends State<ImageFooter> {
                         widget.mediaSelectedCallBack(position);
                       },
                       child: FittedBox(
+                        fit: BoxFit.cover,
                         child: Chewie(
                           controller: controllerPackage.chewieController,
                         ),

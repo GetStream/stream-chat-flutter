@@ -637,7 +637,12 @@ class _MessageListViewState extends State<MessageListView> {
       showDeleteMessage: isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
       onThreadTap: _onThreadTap,
-      attachmentBorderRadiusGeometry: BorderRadius.circular(16),
+      attachmentBorderRadiusGeometry: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
+        topRight: Radius.circular(16),
+        bottomRight: Radius.circular(16),
+      ),
       attachmentPadding: const EdgeInsets.all(2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),

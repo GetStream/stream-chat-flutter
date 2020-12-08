@@ -658,6 +658,34 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildFilePickerSection() {
+    var _attachmentContainsFile =
+        _attachments.any((element) => element?.attachment?.type == 'file');
+
+    Color _getIconColor(int index) {
+      switch (index) {
+        case 0:
+          return _attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+        case 1:
+          return !_attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+        case 2:
+          return _attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+        case 3:
+          return _attachmentContainsFile && _attachments.isNotEmpty
+              ? Colors.black.withOpacity(0.2)
+              : Colors.black.withOpacity(0.5);
+          break;
+      }
+    }
+
     return AnimatedContainer(
       duration: _animateContainer ? Duration(milliseconds: 300) : Duration.zero,
       height: _openFilePickerSection ? _filePickerSize : 0,
@@ -671,49 +699,49 @@ class MessageInputState extends State<MessageInput> {
                 IconButton(
                   iconSize: 24,
                   icon: StreamSvgIcon.pictures(
-                    color: _filePickerIndex == 0
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(0),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _filePickerIndex = 0;
-                    });
-                  },
+                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          setState(() {
+                            _filePickerIndex = 0;
+                          });
+                        },
                 ),
                 IconButton(
                   iconSize: 32,
                   icon: StreamSvgIcon.files(
-                    color: _filePickerIndex == 1
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(1),
                   ),
-                  onPressed: () {
-                    pickFile(DefaultAttachmentTypes.file, false);
-                  },
+                  onPressed: !_attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          pickFile(DefaultAttachmentTypes.file, false);
+                        },
                 ),
                 IconButton(
                   iconSize: 24,
                   icon: StreamSvgIcon.camera(
-                    color: _filePickerIndex == 2
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(2),
                   ),
-                  onPressed: () {
-                    pickFile(DefaultAttachmentTypes.image, true);
-                  },
+                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          pickFile(DefaultAttachmentTypes.image, true);
+                        },
                 ),
                 IconButton(
                   padding: const EdgeInsets.all(0),
                   iconSize: 24,
                   icon: StreamSvgIcon.record(
-                    color: _filePickerIndex == 3
-                        ? StreamChatTheme.of(context).accentColor
-                        : Colors.black.withOpacity(0.5),
+                    color: _getIconColor(3),
                   ),
-                  onPressed: () {
-                    pickFile(DefaultAttachmentTypes.video, true);
-                  },
+                  onPressed: _attachmentContainsFile && _attachments.isNotEmpty
+                      ? null
+                      : () {
+                          pickFile(DefaultAttachmentTypes.video, true);
+                        },
                 ),
               ],
             ),
@@ -770,6 +798,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildPickerSection() {
+    var _attachmentContainsFile =
+        _attachments.any((element) => element.attachment.type == 'file');
+
     switch (_filePickerIndex) {
       case 0:
         return FutureBuilder<bool>(
@@ -782,19 +813,22 @@ class MessageInputState extends State<MessageInput> {
               }
 
               if (snapshot.data) {
-                return MediaListView(
-                  selectedIds: _attachments.map((e) => e.id).toList(),
-                  onSelect: (media) async {
-                    if (!_attachments
-                        .any((element) => element.id == media.id)) {
-                      _addAttachment(media);
-                    } else {
-                      setState(() {
-                        _attachments
-                            .removeWhere((element) => element.id == media.id);
-                      });
-                    }
-                  },
+                return IgnorePointer(
+                  ignoring: _attachmentContainsFile,
+                  child: MediaListView(
+                    selectedIds: _attachments.map((e) => e.id).toList(),
+                    onSelect: (media) async {
+                      if (!_attachments
+                          .any((element) => element.id == media.id)) {
+                        _addAttachment(media);
+                      } else {
+                        setState(() {
+                          _attachments
+                              .removeWhere((element) => element.id == media.id);
+                        });
+                      }
+                    },
+                  ),
                 );
               }
 
@@ -850,7 +884,7 @@ class MessageInputState extends State<MessageInput> {
       );
 
       if (file.size > _kMaxAttachmentSize) {
-        if (medium.type == AssetType.video) {
+        if (medium?.type == AssetType.video) {
           final mediaInfo = await CompressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
@@ -890,7 +924,7 @@ class MessageInputState extends State<MessageInput> {
           ..file = file
           ..attachment = Attachment(
             localUri: file.path != null ? Uri.parse(file.path) : null,
-            type: medium.type == AssetType.image ? 'image' : 'video',
+            type: medium?.type == AssetType.image ? 'image' : 'video',
           );
       });
 
@@ -1053,7 +1087,7 @@ class MessageInputState extends State<MessageInput> {
                                             offset: rejoin.length,
                                           ),
                                         );
-
+                                        _debounce.cancel();
                                         _mentionsOverlay?.remove();
                                         _mentionsOverlay = null;
                                       },
@@ -1201,44 +1235,98 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildAttachments() {
     return _attachments.isEmpty
         ? Container()
-        : LimitedBox(
-            maxHeight: 104.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: _attachments
-                  .map(
-                    (attachment) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Stack(
-                          children: <Widget>[
-                            AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Container(
-                                height: 104,
-                                width: 104,
-                                child: _buildAttachment(attachment),
-                              ),
-                            ),
-                            _buildRemoveButton(attachment),
-                            attachment.uploaded
-                                ? SizedBox()
-                                : Positioned.fill(
-                                    child: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(),
+        : Column(
+            children: [
+              if (_attachments.any((e) => e.attachment?.type == 'file'))
+                LimitedBox(
+                  maxHeight: 73.0,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: _attachments
+                        .where((e) => e.attachment?.type == 'file')
+                        .map(
+                          (e) => Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              clipBehavior: Clip.antiAlias,
+                              child: FileAttachment(
+                                attachment: e.attachment,
+                                size: Size(
+                                  MediaQuery.of(context).size.width * 0.55,
+                                  MediaQuery.of(context).size.height * 0.3,
+                                ),
+                                trailing: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: InkWell(
+                                    child: CircleAvatar(
+                                      backgroundColor:
+                                          Colors.black.withOpacity(0.2),
+                                      maxRadius: 12.0,
+                                      child: StreamSvgIcon.close(
+                                        color: Colors.white,
                                       ),
                                     ),
+                                    onTap: () {
+                                      setState(() {
+                                        _attachments.remove(e);
+                                      });
+                                    },
                                   ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              if (_attachments.any((e) => e.attachment?.type != 'file'))
+                LimitedBox(
+                  maxHeight: 104.0,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: _attachments
+                        .where((e) => e.attachment?.type != 'file')
+                        .map(
+                          (attachment) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              clipBehavior: Clip.antiAlias,
+                              child: Stack(
+                                children: <Widget>[
+                                  AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: Container(
+                                      height: 104,
+                                      width: 104,
+                                      child: _buildAttachment(attachment),
+                                    ),
+                                  ),
+                                  _buildRemoveButton(attachment),
+                                  attachment.uploaded
+                                      ? SizedBox()
+                                      : Positioned.fill(
+                                          child: Center(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+            ],
           );
   }
 
@@ -1275,9 +1363,9 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildAttachment(_SendingAttachment attachment) {
     if (widget.attachmentThumbnailBuilders
-            ?.containsKey(attachment.attachment.type) ==
+            ?.containsKey(attachment.attachment?.type) ==
         true) {
-      return widget.attachmentThumbnailBuilders[attachment.attachment.type](
+      return widget.attachmentThumbnailBuilders[attachment.attachment?.type](
         context,
         attachment,
       );
@@ -1287,7 +1375,7 @@ class MessageInputState extends State<MessageInput> {
       return SizedBox();
     }
 
-    switch (attachment.attachment.type) {
+    switch (attachment.attachment?.type) {
       case 'image':
       case 'giphy':
         return attachment.file != null
@@ -1562,12 +1650,24 @@ class MessageInputState extends State<MessageInput> {
       attachmentType = mimeType.type;
     }
 
+    Map<String, dynamic> extraDataMap = {};
+
+    if (mimeType?.subtype != null) {
+      extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();
+    }
+
+    if (file.size != null) {
+      extraDataMap['file_size'] = file.size;
+    }
+
     final channel = StreamChannel.of(context).channel;
     final attachment = _SendingAttachment(
       file: file,
       attachment: Attachment(
         localUri: file.path != null ? Uri.parse(file.path) : null,
         type: attachmentType,
+        extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
+        title: file.name ?? 'File',
       ),
     );
 
