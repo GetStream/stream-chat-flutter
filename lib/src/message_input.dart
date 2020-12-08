@@ -1925,6 +1925,7 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
+    _replyMessage = null;
 
     setState(() {
       _messageIsPresent = false;
