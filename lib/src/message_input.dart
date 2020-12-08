@@ -354,7 +354,7 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(24.0),
             border: Border.all(
               color: Colors.grey,
             ),
@@ -404,26 +404,45 @@ class MessageInputState extends State<MessageInput> {
                             child: Chip(
                               backgroundColor:
                                   StreamChatTheme.of(context).accentColor,
-                              label: Text(
-                                _chosenCommand?.name ?? "",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              avatar: StreamSvgIcon.lightning(
-                                color: Colors.white,
+                              padding: EdgeInsets.zero,
+                              labelPadding:
+                                  EdgeInsets.symmetric(horizontal: 9.0),
+                              label: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  StreamSvgIcon.lightning(
+                                    color: Colors.white,
+                                    size: 16.0,
+                                  ),
+                                  Text(
+                                    _chosenCommand?.name?.toUpperCase() ?? "",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12.0),
+                                  ),
+                                ],
                               ),
                             ),
                           )
                         : null,
                     suffixIcon: _commandEnabled
-                        ? IconButton(
-                            icon: Icon(Icons.cancel_outlined),
-                            onPressed: () {
+                        ? InkWell(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: StreamSvgIcon.close_small(),
+                            ),
+                            onTap: () {
                               setState(() {
                                 _commandEnabled = false;
                               });
                             },
                           )
                         : null,
+                    suffixIconConstraints: BoxConstraints(
+                      maxHeight: 24.0,
+                      maxWidth: 40.0,
+                    ),
                   ),
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -1784,7 +1803,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildIdleSendButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
       child: Center(
           child: InkWell(
         onTap: () {
@@ -1793,6 +1812,8 @@ class MessageInputState extends State<MessageInput> {
         child: StreamSvgIcon(
           assetName: _getIdleSendIcon(),
           color: Colors.grey,
+          height: 24.0,
+          width: 24.0,
         ),
       )),
     );
@@ -1801,7 +1822,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildSendButton(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
         child: InkWell(
           onTap: () {
             sendMessage();
@@ -1809,6 +1830,8 @@ class MessageInputState extends State<MessageInput> {
           child: StreamSvgIcon(
             assetName: _getSendIcon(),
             color: StreamChatTheme.of(context).accentColor,
+            height: 24.0,
+            width: 24.0,
           ),
         ),
       ),
