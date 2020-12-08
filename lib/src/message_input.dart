@@ -96,6 +96,7 @@ class MessageInput extends StatefulWidget {
     this.inputTextStyle,
     this.attachmentIconColor,
     this.autofocus = false,
+    this.hintText = 'Write a message',
   }) : super(key: key);
 
   /// Message to edit
@@ -152,7 +153,7 @@ class MessageInput extends StatefulWidget {
   final Color attachmentIconColor;
 
   /// Text for the hint of InputDecoration. Default is 'Write a message'.
-  final String hintText = 'Write a message';
+  final String hintText;
 
   @override
   MessageInputState createState() => MessageInputState();
