@@ -147,7 +147,10 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             color: Colors.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => _MediaDisplayScreen()));
+          },
         ),
         _OptionListTile(
           title: '8 Files',
@@ -156,7 +159,10 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             color: Colors.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => _FileDisplayScreen()));
+          },
         ),
         StreamBuilder<List<Channel>>(
             stream: StreamChat.of(context).client.queryChannels(
@@ -404,6 +410,74 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _MediaDisplayScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        brightness: Theme.of(context).brightness,
+        elevation: 1,
+        centerTitle: true,
+        title: Text(
+          'Photos & Videos',
+          style: TextStyle(color: Colors.black, fontSize: 16.0),
+        ),
+        leading: Center(
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              child: StreamSvgIcon.left(
+                color: Colors.black,
+                size: 24.0,
+              ),
+              width: 24.0,
+              height: 24.0,
+            ),
+          ),
+        ),
+        backgroundColor: StreamChatTheme.of(context).primaryColor,
+      ),
+    );
+  }
+}
+
+class _FileDisplayScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        brightness: Theme.of(context).brightness,
+        elevation: 1,
+        centerTitle: true,
+        title: Text(
+          'Files',
+          style: TextStyle(color: Colors.black, fontSize: 16.0),
+        ),
+        leading: Center(
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              child: StreamSvgIcon.left(
+                color: Colors.black,
+                size: 24.0,
+              ),
+              width: 24.0,
+              height: 24.0,
+            ),
+          ),
+        ),
+        backgroundColor: StreamChatTheme.of(context).primaryColor,
       ),
     );
   }
