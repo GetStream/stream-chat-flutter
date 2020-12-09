@@ -167,6 +167,8 @@ class StreamChatThemeData {
                   channelTheme.inputGradient ?? this.channelTheme.inputGradient,
               inputBackground: channelTheme.inputBackground ??
                   this.channelTheme.inputBackground,
+              messageInputDecoration: channelTheme.messageInputDecoration ??
+                  this.channelTheme.messageInputDecoration,
             ) ??
             this.channelTheme,
         ownMessageTheme: ownMessageTheme?.copyWith(
@@ -247,6 +249,12 @@ class StreamChatThemeData {
         ),
       ),
       channelTheme: ChannelTheme(
+        messageInputDecoration: InputDecoration(
+          hintText: 'Write a message',
+          hintStyle: theme.textTheme.bodyText2,
+          prefixText: '   ',
+          border: InputBorder.none,
+        ),
         messageInputButtonIconTheme: theme.iconTheme.copyWith(
           color: accentColor,
         ),
@@ -354,12 +362,16 @@ class ChannelTheme {
   /// Background color of [MessageInput]
   final Color inputBackground;
 
+  /// InputDecoration of [MessageInput]
+  final InputDecoration messageInputDecoration;
+
   ChannelTheme({
     this.channelHeaderTheme,
     this.messageInputButtonIconTheme,
     this.messageInputButtonTheme,
     this.inputBackground,
     this.inputGradient,
+    this.messageInputDecoration,
   });
 
   /// Creates a copy of [ChannelTheme] with specified attributes overridden.
@@ -369,6 +381,7 @@ class ChannelTheme {
     ButtonThemeData messageInputButtonTheme,
     Gradient inputGradient,
     Color inputBackground,
+    InputDecoration messageInputDecoration,
   }) =>
       ChannelTheme(
         channelHeaderTheme: channelHeaderTheme?.copyWith(
@@ -386,6 +399,8 @@ class ChannelTheme {
             messageInputButtonTheme ?? this.messageInputButtonTheme,
         inputGradient: inputGradient ?? this.inputGradient,
         inputBackground: inputBackground ?? this.inputBackground,
+        messageInputDecoration:
+            messageInputDecoration ?? this.messageInputDecoration,
       );
 }
 
