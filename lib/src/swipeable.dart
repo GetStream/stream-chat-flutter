@@ -135,7 +135,6 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
                 FadeTransition(
                   opacity: _iconFadeAnimation,
                   child: Container(
-                    margin: const EdgeInsets.all(8),
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
