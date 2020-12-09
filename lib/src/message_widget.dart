@@ -317,58 +317,64 @@ class _MessageWidgetState extends State<MessageWidget> {
                                             messageTheme: widget.messageTheme,
                                           ),
                                         )
-                                      : Material(
-                                          clipBehavior: Clip.antiAlias,
-                                          shape: widget.shape ??
-                                              RoundedRectangleBorder(
-                                                side: isOnlyEmoji &&
-                                                        !_hasReplyMessage
-                                                    ? BorderSide.none
-                                                    : widget.borderSide ??
-                                                        BorderSide(
-                                                          color: Theme.of(context)
-                                                                      .brightness ==
-                                                                  Brightness
-                                                                      .dark
-                                                              ? Colors.white
-                                                                  .withAlpha(24)
-                                                              : Colors.black
-                                                                  .withAlpha(
-                                                                      24),
-                                                        ),
-                                                borderRadius: widget
-                                                        .borderRadiusGeometry ??
-                                                    BorderRadius.zero,
+                                      : GestureDetector(
+                                          onTap: () => retryMessage(context),
+                                          onLongPress: () =>
+                                              onLongPress(context),
+                                          child: Material(
+                                            clipBehavior: Clip.antiAlias,
+                                            shape: widget.shape ??
+                                                RoundedRectangleBorder(
+                                                  side: isOnlyEmoji &&
+                                                          !_hasReplyMessage
+                                                      ? BorderSide.none
+                                                      : widget.borderSide ??
+                                                          BorderSide(
+                                                            color: Theme.of(context)
+                                                                        .brightness ==
+                                                                    Brightness
+                                                                        .dark
+                                                                ? Colors.white
+                                                                    .withAlpha(
+                                                                        24)
+                                                                : Colors.black
+                                                                    .withAlpha(
+                                                                        24),
+                                                          ),
+                                                  borderRadius: widget
+                                                          .borderRadiusGeometry ??
+                                                      BorderRadius.zero,
+                                                ),
+                                            color: _getBackgroundColor(),
+                                            child: Padding(
+                                              padding: EdgeInsets.all(
+                                                  hasFiles ? 2.0 : 0.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  if (_hasReplyMessage)
+                                                    ReplyMessageWidget(
+                                                      message:
+                                                          widget.replyMessage,
+                                                      messageTheme: isMyMessage
+                                                          ? StreamChatTheme.of(
+                                                                  context)
+                                                              .otherMessageTheme
+                                                          : StreamChatTheme.of(
+                                                                  context)
+                                                              .ownMessageTheme,
+                                                      reverse: widget.reverse,
+                                                    ),
+                                                  ..._parseAttachments(context),
+                                                  if (widget.message.text
+                                                          .trim()
+                                                          .isNotEmpty &&
+                                                      !isGiphy)
+                                                    _buildTextBubble(context),
+                                                ],
                                               ),
-                                          color: _getBackgroundColor(),
-                                          child: Padding(
-                                            padding: EdgeInsets.all(
-                                                hasFiles ? 2.0 : 0.0),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                if (_hasReplyMessage)
-                                                  ReplyMessageWidget(
-                                                    message:
-                                                        widget.replyMessage,
-                                                    messageTheme: isMyMessage
-                                                        ? StreamChatTheme.of(
-                                                                context)
-                                                            .otherMessageTheme
-                                                        : StreamChatTheme.of(
-                                                                context)
-                                                            .ownMessageTheme,
-                                                    reverse: widget.reverse,
-                                                  ),
-                                                ..._parseAttachments(context),
-                                                if (widget.message.text
-                                                        .trim()
-                                                        .isNotEmpty &&
-                                                    !isGiphy)
-                                                  _buildTextBubble(context),
-                                              ],
                                             ),
                                           ),
                                         ),
@@ -706,33 +712,29 @@ class _MessageWidgetState extends State<MessageWidget> {
   }) {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
-    return GestureDetector(
-      onTap: () => retryMessage(context),
-      onLongPress: () => onLongPress(context),
-      child: Material(
-        color: _getBackgroundColor(),
-        clipBehavior: Clip.antiAlias,
-        shape: attachmentShape,
-        child: Padding(
-          padding: widget.attachmentPadding,
-          child: Material(
-            clipBehavior: Clip.hardEdge,
-            shape: attachmentShape,
-            type: MaterialType.transparency,
-            child: Transform(
-              transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  getFailedMessageWidget(
-                    context,
-                    padding: const EdgeInsets.all(8.0),
-                  ),
-                  attachmentWidget,
-                ],
-              ),
+    return Material(
+      color: _getBackgroundColor(),
+      clipBehavior: Clip.antiAlias,
+      shape: attachmentShape,
+      child: Padding(
+        padding: widget.attachmentPadding,
+        child: Material(
+          clipBehavior: Clip.hardEdge,
+          shape: attachmentShape,
+          type: MaterialType.transparency,
+          child: Transform(
+            transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                getFailedMessageWidget(
+                  context,
+                  padding: const EdgeInsets.all(8.0),
+                ),
+                attachmentWidget,
+              ],
             ),
           ),
         ),
@@ -862,7 +864,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildTextBubble(BuildContext context) {
-    Widget child = Transform(
+    return Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
       child: Column(
@@ -898,11 +900,6 @@ class _MessageWidgetState extends State<MessageWidget> {
             _buildUrlAttachment(),
         ],
       ),
-    );
-    return GestureDetector(
-      onTap: () => retryMessage(context),
-      onLongPress: () => onLongPress(context),
-      child: child,
     );
   }
 
