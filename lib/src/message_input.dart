@@ -683,14 +683,10 @@ class MessageInputState extends State<MessageInput> {
     Color _getIconColor(int index) {
       switch (index) {
         case 0:
-          return _attachmentContainsFile && _attachments.isNotEmpty
-              ? Colors.black.withOpacity(0.2)
-              : Colors.black.withOpacity(0.5);
+          return _attachments.isEmpty ? StreamChatTheme.of(context).accentColor : (!_attachmentContainsFile ? StreamChatTheme.of(context).accentColor : Colors.black.withOpacity(0.2));
           break;
         case 1:
-          return !_attachmentContainsFile && _attachments.isNotEmpty
-              ? Colors.black.withOpacity(0.2)
-              : Colors.black.withOpacity(0.5);
+          return _attachmentContainsFile ? StreamChatTheme.of(context).accentColor : (_attachments.isEmpty ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.2));
           break;
         case 2:
           return _attachmentContainsFile && _attachments.isNotEmpty
