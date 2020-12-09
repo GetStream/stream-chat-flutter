@@ -818,7 +818,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildPickerSection() {
     var _attachmentContainsFile =
-        _attachments.any((element) => element.attachment.type == 'file');
+        _attachments.any((element) => element.attachment?.type == 'file');
 
     switch (_filePickerIndex) {
       case 0:
