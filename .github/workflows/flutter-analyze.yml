@@ -17,4 +17,8 @@ jobs:
       with:
         channel: 'beta'
     - run: flutter pub get
+
+    - name: 'Flutter Format Check'
+      run: flutter format --set-exit-if-changed --dry-run .
+
     - run: flutter analyze
