@@ -67,7 +67,11 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 SizedBox(height: 15.0),
                 _OptionListTile(
                   title: '@user',
-                  trailing: Text(widget.user.name),
+                  trailing: Text(
+                    widget.user.name,
+                    style: TextStyle(
+                        color: Colors.black.withOpacity(0.5), fontSize: 16.0),
+                  ),
                   onTap: () {},
                 ),
               ],
@@ -198,7 +202,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       title: 'Delete',
       leading: StreamSvgIcon.delete(
         color: Colors.red,
-        size: 20.0,
+        size: 24.0,
       ),
       onTap: () {
         _showDeleteDialog();
@@ -290,15 +294,12 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       if (otherMember.online) {
         alternativeWidget = Text(
           'Online',
-          style: StreamChatTheme.of(context)
-              .channelTheme
-              .channelHeaderTheme
-              .lastMessageAt,
+          style: TextStyle(color: Colors.black.withOpacity(0.5)),
         );
       } else {
         alternativeWidget = Text(
           'Last seen ${Jiffy(otherMember.lastActive).fromNow()}',
-          //style: textStyle,
+          style: TextStyle(color: Colors.black.withOpacity(0.5)),
         );
       }
     }
@@ -428,15 +429,87 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             itemBuilder: (context, position) {
               return StreamChannel(
                 channel: snapshot.data[position],
-                child: ChannelPreview(
-                  channel: snapshot.data[position],
-                  onTap: (val) {},
-                ),
+                child: _buildListTile(snapshot.data[position]),
               );
             },
           );
         },
       ),
+    );
+  }
+
+  Widget _buildListTile(Channel channel) {
+    var extraData = channel.extraData;
+    var members = channel.state.members;
+
+    var textStyle = TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold);
+
+    return Container(
+      height: 64.0,
+      child: LayoutBuilder(builder: (context, constraints) {
+        String title;
+        if (extraData['name'] == null) {
+          final otherMembers = members.where(
+              (member) => member.userId != StreamChat.of(context).user.id);
+          if (otherMembers.isNotEmpty) {
+            final maxWidth = constraints.maxWidth;
+            final maxChars = maxWidth / textStyle.fontSize;
+            var currentChars = 0;
+            final currentMembers = <Member>[];
+            otherMembers.forEach((element) {
+              final newLength = currentChars + element.user.name.length;
+              if (newLength < maxChars) {
+                currentChars = newLength;
+                currentMembers.add(element);
+              }
+            });
+
+            final exceedingMembers =
+                otherMembers.length - currentMembers.length;
+            title =
+                '${currentMembers.map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+          } else {
+            title = 'No title';
+          }
+        } else {
+          title = extraData['name'];
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ChannelImage(
+                      channel: channel,
+                      constraints:
+                          BoxConstraints(maxWidth: 40.0, maxHeight: 40.0),
+                    ),
+                  ),
+                  Expanded(
+                      child: Text(
+                    title,
+                    style: textStyle,
+                  )),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '${channel.memberCount} members',
+                      style: TextStyle(color: Colors.black.withOpacity(0.5)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              height: 1.0,
+              color: Color(0xffe6e6e6),
+            ),
+          ],
+        );
+      }),
     );
   }
 }
