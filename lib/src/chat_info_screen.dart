@@ -55,6 +55,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                       maxHeight: 72.0,
                     ),
                     borderRadius: BorderRadius.circular(36.0),
+                    showOnlineStatus: false,
                   ),
                 ),
                 SizedBox(height: 15.0),
@@ -304,7 +305,28 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       }
     }
 
-    return alternativeWidget;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.user.online)
+          Material(
+            type: MaterialType.circle,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              constraints: BoxConstraints.tightFor(
+                width: 28,
+                height: 12,
+              ),
+              child: Material(
+                shape: CircleBorder(),
+                color: Color(0xff20E070),
+              ),
+            ),
+            color: Colors.white,
+          ),
+        alternativeWidget,
+      ],
+    );
   }
 }
 
