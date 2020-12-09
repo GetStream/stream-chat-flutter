@@ -116,6 +116,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         inputGradient: themeData?.channelTheme?.inputGradient,
         messageInputButtonTheme:
             themeData?.channelTheme?.messageInputButtonTheme,
+        messageInputDecoration: themeData?.channelTheme?.messageInputDecoration,
       ),
       ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
         replies: themeData?.ownMessageTheme?.replies,

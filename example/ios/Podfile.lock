@@ -38,7 +38,7 @@ PODS:
   - Firebase/Messaging (6.33.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 4.7.0)
-  - firebase_core (0.5.1):
+  - firebase_core (0.5.2-1):
     - Firebase/CoreOnly (~> 6.33.0)
     - Flutter
   - firebase_messaging (7.0.3):
@@ -227,7 +227,7 @@ SPEC CHECKSUMS:
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
   Firebase: 8db6f2d1b2c5e2984efba4949a145875a8f65fe5
-  firebase_core: aa25a5dc6b492ecab37587c53d8420135f0cac90
+  firebase_core: 7423d688a1c6f2f2d859d64ae26991be39989781
   firebase_messaging: 0aea2cd5885b65e19ede58ee3507f485c992cc75
   FirebaseCore: d889d9e12535b7f36ac8bfbf1713a0836a3012cd
   FirebaseCoreDiagnostics: 770ac5958e1372ce67959ae4b4f31d8e127c3ac1
@@ -256,8 +256,8 @@ SPEC CHECKSUMS:
   SwiftyGif: e466e86c660d343357ab944a819a101c4127cb40
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
-  wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
+  wakelock: bfc7955c418d0db797614075aabbc58a39ab5107
 
 PODFILE CHECKSUM: eb001256612a59f8f9e4d083ad8b9671e69dd184
 
-COCOAPODS: 1.10.0.rc.1
+COCOAPODS: 1.10.0

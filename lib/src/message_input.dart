@@ -263,13 +263,15 @@ class MessageInputState extends State<MessageInput> {
           },
           style: widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
           autofocus: widget.autofocus,
-          decoration: InputDecoration(
-            hintText: 'Write a message',
-            hintStyle:
-                widget.inputTextStyle ?? Theme.of(context).textTheme.bodyText2,
-            prefixText: '   ',
-            border: InputBorder.none,
-          ),
+          decoration:
+              StreamChatTheme.of(context).channelTheme.messageInputDecoration ??
+                  InputDecoration(
+                    hintText: 'Write a message',
+                    hintStyle: widget.inputTextStyle ??
+                        Theme.of(context).textTheme.bodyText2,
+                    prefixText: '   ',
+                    border: InputBorder.none,
+                  ),
           textCapitalization: TextCapitalization.sentences,
         ),
       ),
