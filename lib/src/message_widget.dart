@@ -892,8 +892,9 @@ class _MessageWidgetState extends State<MessageWidget> {
             ),
           ),
           if (widget.message.attachments
-                  ?.any((element) => element.ogScrapeUrl != null) ==
-              true)
+                      ?.any((element) => element.ogScrapeUrl != null) ==
+                  true &&
+              !_hasReplyMessage)
             _buildUrlAttachment(),
         ],
       ),

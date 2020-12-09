@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:video_player/video_player.dart';
 
 import 'attachment_error.dart';
 import 'image_attachment.dart';
@@ -11,6 +12,55 @@ import 'message_text.dart';
 import 'stream_chat_theme.dart';
 import 'user_avatar.dart';
 import 'utils.dart';
+
+typedef ReplyMessageAttachmentThumbnailBuilder = Widget Function(
+  BuildContext,
+  Attachment,
+);
+
+class _VideoAttachmentThumbnail extends StatefulWidget {
+  final Size size;
+  final Attachment attachment;
+
+  const _VideoAttachmentThumbnail({
+    Key key,
+    @required this.attachment,
+    this.size = const Size(32, 32),
+  }) : super(key: key);
+
+  @override
+  _VideoAttachmentThumbnailState createState() =>
+      _VideoAttachmentThumbnailState();
+}
+
+class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
+  VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(widget.attachment.assetUrl)
+      ..initialize().then((_) {
+        setState(() {}); //when your thumbnail will show.
+      });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: widget.size.height,
+        width: widget.size.width,
+        child: _controller.value.initialized
+            ? VideoPlayer(_controller)
+            : CircularProgressIndicator());
+  }
+}
 
 ///
 class ReplyMessageWidget extends StatelessWidget {
@@ -29,7 +79,9 @@ class ReplyMessageWidget extends StatelessWidget {
   /// limit of the text message shown
   final int textLimit;
 
-  final Map<String, Widget Function(Attachment attachment)> _attachmentBuilders;
+  /// Map that defines a thumbnail builder for an attachment type
+  final Map<String, ReplyMessageAttachmentThumbnailBuilder>
+      attachmentThumbnailBuilders;
 
   ///
   ReplyMessageWidget({
@@ -39,69 +91,8 @@ class ReplyMessageWidget extends StatelessWidget {
     this.reverse = false,
     this.showBorder = false,
     this.textLimit = 170,
-  })  : _attachmentBuilders = {
-          'image': (attachment) {
-            return ImageAttachment(
-              attachment: attachment,
-              message: message,
-              messageTheme: messageTheme,
-              size: Size(32, 32),
-            );
-          },
-          'video': (attachment) {
-            final size = Size(32, 32);
-            if (attachment.thumbUrl != null) {
-              return Container(
-                height: size.height,
-                width: size.width,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(
-                      attachment.thumbUrl,
-                    ),
-                  ),
-                ),
-              );
-            }
-            return AttachmentError(
-              attachment: attachment,
-              size: size,
-            );
-          },
-          'giphy': (attachment) {
-            final size = Size(32, 32);
-            return CachedNetworkImage(
-              height: size?.height,
-              width: size?.width,
-              placeholder: (_, __) {
-                return Container(
-                  width: size?.width,
-                  height: size?.height,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
-              imageUrl: attachment.thumbUrl ??
-                  attachment.imageUrl ??
-                  attachment.assetUrl,
-              errorWidget: (context, url, error) => AttachmentError(
-                attachment: attachment,
-                size: size,
-              ),
-              fit: BoxFit.cover,
-            );
-          },
-          'file': (attachment) {
-            return Container(
-              height: 32,
-              width: 32,
-              child: getFileTypeImage(attachment.extraData['mime_type']),
-            );
-          },
-        },
-        super(key: key);
+    this.attachmentThumbnailBuilders,
+  }) : super(key: key);
 
   bool get _hasAttachments => message.attachments?.isNotEmpty == true;
 
@@ -215,18 +206,26 @@ class ReplyMessageWidget extends StatelessWidget {
       );
       child = _buildUrlAttachment(attachment);
     } else {
+      ReplyMessageAttachmentThumbnailBuilder attachmentBuilder;
       attachment = message.attachments.last;
-      final attachmentBuilder = _attachmentBuilders[attachment.type];
+      if (attachmentThumbnailBuilders?.containsKey(attachment?.type) == true) {
+        attachmentBuilder = attachmentThumbnailBuilders[attachment?.type];
+      }
+      attachmentBuilder = _defaultAttachmentBuilder[attachment?.type];
       if (attachmentBuilder == null) {
         child = Offstage();
       }
-      child = attachmentBuilder(attachment);
+      child = attachmentBuilder(context, attachment);
     }
-    return Material(
-      clipBehavior: Clip.hardEdge,
-      color: Colors.transparent,
-      shape: attachment.type == 'file' ? null : _getDefaultShape(context),
-      child: child,
+    return Transform(
+      transform: Matrix4.rotationY(reverse ? pi : 0),
+      alignment: Alignment.center,
+      child: Material(
+        clipBehavior: Clip.hardEdge,
+        color: Colors.transparent,
+        shape: attachment.type == 'file' ? null : _getDefaultShape(context),
+        child: child,
+      ),
     );
   }
 
@@ -257,6 +256,56 @@ class ReplyMessageWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Map<String, ReplyMessageAttachmentThumbnailBuilder>
+      get _defaultAttachmentBuilder {
+    return {
+      'image': (_, attachment) {
+        return ImageAttachment(
+          attachment: attachment,
+          message: message,
+          messageTheme: messageTheme,
+          size: Size(32, 32),
+        );
+      },
+      'video': (_, attachment) {
+        return _VideoAttachmentThumbnail(
+          key: ValueKey(attachment.assetUrl),
+          attachment: attachment,
+        );
+      },
+      'giphy': (_, attachment) {
+        final size = Size(32, 32);
+        return CachedNetworkImage(
+          height: size?.height,
+          width: size?.width,
+          placeholder: (_, __) {
+            return Container(
+              width: size?.width,
+              height: size?.height,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+          imageUrl:
+              attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
+          errorWidget: (context, url, error) => AttachmentError(
+            attachment: attachment,
+            size: size,
+          ),
+          fit: BoxFit.cover,
+        );
+      },
+      'file': (_, attachment) {
+        return Container(
+          height: 32,
+          width: 32,
+          child: getFileTypeImage(attachment.extraData['mime_type']),
+        );
+      },
+    };
   }
 
   Color _getBackgroundColor() {
