@@ -1,3 +1,5 @@
+## 0.2.17+1
+
 ## 0.2.17
 
 - Expose messageInputDecoration as part of the theme
