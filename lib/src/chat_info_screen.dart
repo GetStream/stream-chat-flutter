@@ -58,7 +58,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                     showOnlineStatus: false,
                   ),
                 ),
-                SizedBox(height: 15.0),
+                //SizedBox(height: 4.0),
                 Text(
                   widget.user.name,
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
