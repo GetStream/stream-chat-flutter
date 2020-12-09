@@ -68,10 +68,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 SizedBox(height: 15.0),
                 _OptionListTile(
                   title: '@user',
-                  trailing: Text(
-                    widget.user.name,
-                    style: TextStyle(
-                        color: Colors.black.withOpacity(0.5), fontSize: 16.0),
+                  trailing: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      widget.user.name,
+                      style: TextStyle(
+                          color: Colors.black.withOpacity(0.5), fontSize: 16.0),
+                    ),
                   ),
                   onTap: () {},
                 ),
