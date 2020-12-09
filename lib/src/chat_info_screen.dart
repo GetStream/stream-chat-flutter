@@ -1,6 +1,7 @@
 import 'package:emojis/emojis.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
 
 import '../stream_chat_flutter.dart';
 
@@ -62,7 +63,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 7.0),
-                Text('Online for 5 minutes'),
+                _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
                 _OptionListTile(
                   title: '@user',
@@ -278,6 +279,31 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             ],
           );
         });
+  }
+
+  Widget _buildConnectedTitleState() {
+    var alternativeWidget;
+
+    final otherMember = widget.user;
+
+    if (otherMember != null) {
+      if (otherMember.online) {
+        alternativeWidget = Text(
+          'Online',
+          style: StreamChatTheme.of(context)
+              .channelTheme
+              .channelHeaderTheme
+              .lastMessageAt,
+        );
+      } else {
+        alternativeWidget = Text(
+          'Last seen ${Jiffy(otherMember.lastActive).fromNow()}',
+          //style: textStyle,
+        );
+      }
+    }
+
+    return alternativeWidget;
   }
 }
 
