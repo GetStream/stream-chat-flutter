@@ -1,3 +1,7 @@
+## 0.2.17
+
+- Expose messageInputDecoration as part of the theme
+
 ## 0.2.16
 
 - Do not wrap channel preview builder. Users will have to implement they're custom onTap/onLongPress implementation
