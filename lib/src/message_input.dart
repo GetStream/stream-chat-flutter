@@ -405,6 +405,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildRepyToMessage(),
               _buildAttachments(),

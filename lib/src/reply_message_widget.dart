@@ -117,8 +117,9 @@ class ReplyMessageWidget extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8, bottom: 6, right: 4, left: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(child: _buildMessage(context)),
+          Flexible(child: _buildMessage(context)),
           SizedBox(width: 4),
           _buildUserAvatar(),
         ],
@@ -132,7 +133,7 @@ class ReplyMessageWidget extends StatelessWidget {
         _parseAttachments(context),
         SizedBox(width: 8),
       ],
-      Expanded(child: _buildTextMessage()),
+      Flexible(child: _buildTextMessage()),
     ];
     return Container(
       constraints: BoxConstraints(
@@ -151,6 +152,7 @@ class ReplyMessageWidget extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment:
             reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: reverse ? children.reversed.toList() : children,
