@@ -683,10 +683,18 @@ class MessageInputState extends State<MessageInput> {
     Color _getIconColor(int index) {
       switch (index) {
         case 0:
-          return _attachments.isEmpty ? StreamChatTheme.of(context).accentColor : (!_attachmentContainsFile ? StreamChatTheme.of(context).accentColor : Colors.black.withOpacity(0.2));
+          return _attachments.isEmpty
+              ? StreamChatTheme.of(context).accentColor
+              : (!_attachmentContainsFile
+                  ? StreamChatTheme.of(context).accentColor
+                  : Colors.black.withOpacity(0.2));
           break;
         case 1:
-          return _attachmentContainsFile ? StreamChatTheme.of(context).accentColor : (_attachments.isEmpty ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.2));
+          return _attachmentContainsFile
+              ? StreamChatTheme.of(context).accentColor
+              : (_attachments.isEmpty
+                  ? Colors.black.withOpacity(0.5)
+                  : Colors.black.withOpacity(0.2));
           break;
         case 2:
           return _attachmentContainsFile && _attachments.isNotEmpty
@@ -1268,6 +1276,8 @@ class MessageInputState extends State<MessageInput> {
                               clipBehavior: Clip.antiAlias,
                               child: FileAttachment(
                                 attachment: e.attachment,
+                                attachmentType: FileAttachmentType.local,
+                                file: e.file,
                                 size: Size(
                                   MediaQuery.of(context).size.width * 0.55,
                                   MediaQuery.of(context).size.height * 0.3,
@@ -1676,11 +1686,15 @@ class MessageInputState extends State<MessageInput> {
 
     final mimeType = _getMimeType(file.path.split('/').last);
 
-    if (mimeType.type == 'video' || mimeType.type == 'image') {
-      attachmentType = mimeType.type;
-    }
-
     Map<String, dynamic> extraDataMap = {};
+
+    if (camera) {
+      if (mimeType.type == 'video' || mimeType.type == 'image') {
+        attachmentType = mimeType.type;
+      }
+    } else {
+      attachmentType = 'file';
+    }
 
     if (mimeType?.subtype != null) {
       extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();

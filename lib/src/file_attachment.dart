@@ -1,18 +1,28 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'media_utils.dart';
+
+enum FileAttachmentType { local, online }
 
 class FileAttachment extends StatelessWidget {
   final Attachment attachment;
   final Size size;
   final Widget trailing;
+  final FileAttachmentType attachmentType;
+  final PlatformFile file;
 
   const FileAttachment({
     Key key,
     @required this.attachment,
     this.size,
     this.trailing,
+    this.attachmentType = FileAttachmentType.online,
+    this.file,
   }) : super(key: key);
 
   @override
@@ -32,7 +42,7 @@ class FileAttachment extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              child: _getFileTypeImage(attachment.extraData['mime_type']),
+              child: _getFileTypeImage(),
               height: 40.0,
               width: 33.33,
               margin: EdgeInsets.all(8.0),
@@ -117,8 +127,38 @@ class FileAttachment extends StatelessWidget {
     );
   }
 
-  StreamSvgIcon _getFileTypeImage(String type) {
-    switch (type) {
+  Widget _getFileTypeImage() {
+    if ((MediaUtils.getMimeType(attachment.title).type == 'image')) {
+      switch (attachmentType) {
+        case FileAttachmentType.local:
+          return Image.memory(
+            file.bytes,
+            fit: BoxFit.cover,
+          );
+          break;
+        case FileAttachmentType.online:
+          return CachedNetworkImage(
+            imageUrl: attachment.imageUrl ??
+                attachment.assetUrl ??
+                attachment.thumbUrl,
+            fit: BoxFit.cover,
+            progressIndicatorBuilder: (context, _, progress) {
+              return Center(
+                child: Container(
+                  width: 20.0,
+                  height: 20.0,
+                  child: CircularProgressIndicator(
+                    backgroundColor: StreamChatTheme.of(context).accentColor,
+                  ),
+                ),
+              );
+            },
+          );
+          break;
+      }
+    }
+
+    switch (attachment.extraData['mime_type']) {
       case '7z':
         return StreamSvgIcon.filetype_7z();
         break;
