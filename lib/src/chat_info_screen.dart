@@ -67,7 +67,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
                 _OptionListTile(
-                  title: '@user',
+                  title: '@${widget.user.id}',
                   trailing: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
@@ -156,7 +156,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   onTap: () {},
         // ),
         _OptionListTile(
-          title: '615 Photos & Videos',
+          title: 'Photos & Videos',
           leading: StreamSvgIcon.pictures(
             size: 32.0,
             color: Colors.black.withOpacity(0.5),
@@ -168,7 +168,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           },
         ),
         _OptionListTile(
-          title: '8 Files',
+          title: 'Files',
           leading: StreamSvgIcon.files(
             size: 32.0,
             color: Colors.black.withOpacity(0.5),
@@ -179,41 +179,21 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 MaterialPageRoute(builder: (context) => _FileDisplayScreen()));
           },
         ),
-        StreamBuilder<List<Channel>>(
-            stream: StreamChat.of(context).client.queryChannels(
-              filter: {
-                r'$and': [
-                  {
-                    'members': {
-                      r'$in': [widget.user.id],
-                    },
-                  },
-                  {
-                    'members': {
-                      r'$in': [StreamChat.of(context).user.id],
-                    },
-                  }
-                ],
-              },
-            ),
-            builder: (context, snapshot) {
-              return _OptionListTile(
-                title:
-                    '${snapshot.data == null ? '0' : snapshot.data.length} Shared groups',
-                leading: StreamSvgIcon.Icon_group(
-                  size: 24.0,
-                  color: Colors.black.withOpacity(0.5),
-                ),
-                trailing: StreamSvgIcon.right(),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => _SharedGroupsScreen(
-                              StreamChat.of(context).user, widget.user)));
-                },
-              );
-            }),
+        _OptionListTile(
+          title: 'Shared groups',
+          leading: StreamSvgIcon.Icon_group(
+            size: 24.0,
+            color: Colors.black.withOpacity(0.5),
+          ),
+          trailing: StreamSvgIcon.right(),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => _SharedGroupsScreen(
+                        StreamChat.of(context).user, widget.user)));
+          },
+        ),
       ],
     );
   }
