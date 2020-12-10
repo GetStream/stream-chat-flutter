@@ -19,6 +19,7 @@ class ChatInfoScreen extends StatefulWidget {
 class _ChatInfoScreenState extends State<ChatInfoScreen> {
   @override
   Widget build(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
     return Scaffold(
       backgroundColor: Color(0xFFe6e6e6),
       body: ListView(
@@ -31,7 +32,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           SizedBox(
             height: 8.0,
           ),
-          _buildDeleteListTile(),
+          if ([
+            'admin',
+            'owner',
+          ].contains(channel.state.members
+              .firstWhere((m) => m.userId == channel.client.state.user.id,
+                  orElse: () => null)
+              ?.role))
+            _buildDeleteListTile(),
         ],
       ),
     );
@@ -212,78 +220,23 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     );
   }
 
-  void _showDeleteDialog() {
+  void _showDeleteDialog() async {
+    final res = await showConfirmationDialog(
+      context,
+      title: 'Delete Conversation',
+      okText: 'DELETE',
+      question: 'Are you sure you want to delete this conversation?',
+      cancelText: 'CANCEL',
+      icon: StreamSvgIcon.delete(
+        color: Colors.red,
+      ),
+    );
     var channel = StreamChannel.of(context).channel;
-
-    showModalBottomSheet(
-        backgroundColor: Colors.white,
-        context: context,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
-        )),
-        builder: (context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 26.0,
-              ),
-              StreamSvgIcon.delete(
-                color: Colors.red,
-              ),
-              SizedBox(
-                height: 26.0,
-              ),
-              Text(
-                'Delete Conversation',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
-              ),
-              SizedBox(
-                height: 7.0,
-              ),
-              Text('Are you sure you want to delete this conversation?'),
-              SizedBox(
-                height: 36.0,
-              ),
-              Container(
-                color: Color(0xffe6e6e6),
-                height: 1.0,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  FlatButton(
-                    child: Text(
-                      'CANCEL',
-                      style: TextStyle(
-                          color: Colors.black.withOpacity(0.5),
-                          fontWeight: FontWeight.w400),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  FlatButton(
-                    child: Text(
-                      'DELETE',
-                      style: TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.w400),
-                    ),
-                    onPressed: () {
-                      channel.delete().then((value) {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          );
-        });
+    if (res == true) {
+      await channel.delete().then((value) {
+        Navigator.pop(context);
+      });
+    }
   }
 
   Widget _buildConnectedTitleState() {

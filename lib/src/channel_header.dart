@@ -100,7 +100,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
           child: Center(
             child: ChannelImage(
               onTap: onImageTap ??
-                  () {
+                  () async {
                     if (channel.memberCount == 2 && channel.isDistinct) {
                       final currentUser = StreamChat.of(context).user;
                       final otherUser = channel.state.members.firstWhere(
@@ -108,7 +108,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                         orElse: () => null,
                       );
                       if (otherUser != null) {
-                        Navigator.push(
+                        final pop = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => StreamChannel(
@@ -119,6 +119,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                             ),
                           ),
                         );
+
+                        if (pop == true) {
+                          Navigator.pop(context);
+                        }
                       }
                     }
                   },
