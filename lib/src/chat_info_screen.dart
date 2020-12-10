@@ -461,7 +461,18 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
       body: StreamBuilder<List<Channel>>(
         stream: chat.client.queryChannels(
           filter: {
-            'members': [widget.mainUser.id, widget.otherUser.id],
+            r'$and': [
+              {
+                'members': {
+                  r'$in': [widget.otherUser.id],
+                },
+              },
+              {
+                'members': {
+                  r'$in': [widget.mainUser.id],
+                },
+              }
+            ],
           },
         ),
         builder: (context, snapshot) {
