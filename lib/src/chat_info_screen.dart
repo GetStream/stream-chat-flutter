@@ -137,18 +137,24 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 onTap: () {},
               );
             }),
-        _OptionListTile(
-          title: 'Block User',
-          leading: StreamSvgIcon.Icon_user_delete(
-            size: 24.0,
-            color: Colors.black.withOpacity(0.5),
-          ),
-          trailing: CupertinoSwitch(
-            value: true,
-            onChanged: (val) {},
-          ),
-          onTap: () {},
-        ),
+        // _OptionListTile(
+        //   title: 'Block User',
+        //   leading: StreamSvgIcon.Icon_user_delete(
+        //     size: 24.0,
+        //     color: Colors.black.withOpacity(0.5),
+        //   ),
+        //   trailing: CupertinoSwitch(
+        //     value: widget.user.banned,
+        //     onChanged: (val) {
+        //       if (widget.user.banned) {
+        //         channel.channel.shadowBan(widget.user.id, {});
+        //       } else {
+        //         channel.channel.unbanUser(widget.user.id);
+        //       }
+        //     },
+        //   ),
+        //   onTap: () {},
+        // ),
         _OptionListTile(
           title: '615 Photos & Videos',
           leading: StreamSvgIcon.pictures(
