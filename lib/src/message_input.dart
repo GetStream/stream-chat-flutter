@@ -1697,7 +1697,7 @@ class MessageInputState extends State<MessageInput> {
         localUri: file.path != null ? Uri.parse(file.path) : null,
         type: attachmentType,
         extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
-        title: mimeType.type == 'file' ? file.name : null,
+        title: file.name,
       ),
     );
 
