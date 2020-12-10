@@ -182,7 +182,18 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         StreamBuilder<List<Channel>>(
             stream: StreamChat.of(context).client.queryChannels(
               filter: {
-                'members': [StreamChat.of(context).user.id, widget.user.id],
+                r'$and': [
+                  {
+                    'members': {
+                      r'$in': [widget.user.id],
+                    },
+                  },
+                  {
+                    'members': {
+                      r'$in': [StreamChat.of(context).user.id],
+                    },
+                  }
+                ],
               },
             ),
             builder: (context, snapshot) {
@@ -386,8 +397,13 @@ class _OptionListTile extends StatelessWidget {
                             fontWeight: FontWeight.w600, color: titleColor),
                       )),
                   Expanded(
-                    child: Center(
-                      child: trailing ?? Container(),
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: trailing ?? Container(),
+                      ),
                     ),
                   ),
                 ],
