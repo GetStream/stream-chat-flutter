@@ -78,8 +78,9 @@ class UrlAttachment extends StatelessWidget {
               children: [
                 if (urlAttachment.title != null)
                   Text(
-                    urlAttachment.title,
+                    urlAttachment.title.trim(),
                     maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 12.0,

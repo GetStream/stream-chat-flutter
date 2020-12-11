@@ -326,14 +326,17 @@ class MessageInputState extends State<MessageInput> {
     return AnimatedCrossFade(
       crossFadeState:
           _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      firstChild: IconButton(
-        onPressed: () {
+      firstChild: InkWell(
+        onTap: () {
           setState(() {
             _actionsShrunk = false;
           });
         },
-        icon: StreamSvgIcon.emptyCircleLeft(
-          color: StreamChatTheme.of(context).accentColor,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
+          child: StreamSvgIcon.emptyCircleLeft(
+            color: StreamChatTheme.of(context).accentColor,
+          ),
         ),
       ),
       secondChild: Row(
@@ -354,11 +357,12 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(24.0),
             border: Border.all(
               color: Colors.grey,
             ),
           ),
+          padding: _attachments.isEmpty ? null : EdgeInsets.all(6.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -404,26 +408,45 @@ class MessageInputState extends State<MessageInput> {
                             child: Chip(
                               backgroundColor:
                                   StreamChatTheme.of(context).accentColor,
-                              label: Text(
-                                _chosenCommand?.name ?? "",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              avatar: StreamSvgIcon.lightning(
-                                color: Colors.white,
+                              padding: EdgeInsets.zero,
+                              labelPadding:
+                                  EdgeInsets.symmetric(horizontal: 9.0),
+                              label: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  StreamSvgIcon.lightning(
+                                    color: Colors.white,
+                                    size: 16.0,
+                                  ),
+                                  Text(
+                                    _chosenCommand?.name?.toUpperCase() ?? "",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12.0),
+                                  ),
+                                ],
                               ),
                             ),
                           )
                         : null,
                     suffixIcon: _commandEnabled
-                        ? IconButton(
-                            icon: Icon(Icons.cancel_outlined),
-                            onPressed: () {
+                        ? InkWell(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: StreamSvgIcon.close_small(),
+                            ),
+                            onTap: () {
                               setState(() {
                                 _commandEnabled = false;
                               });
                             },
                           )
                         : null,
+                    suffixIconConstraints: BoxConstraints(
+                      maxHeight: 24.0,
+                      maxWidth: 40.0,
+                    ),
                   ),
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -664,14 +687,18 @@ class MessageInputState extends State<MessageInput> {
     Color _getIconColor(int index) {
       switch (index) {
         case 0:
-          return _attachmentContainsFile && _attachments.isNotEmpty
-              ? Colors.black.withOpacity(0.2)
-              : Colors.black.withOpacity(0.5);
+          return _attachments.isEmpty
+              ? StreamChatTheme.of(context).accentColor
+              : (!_attachmentContainsFile
+                  ? StreamChatTheme.of(context).accentColor
+                  : Colors.black.withOpacity(0.2));
           break;
         case 1:
-          return !_attachmentContainsFile && _attachments.isNotEmpty
-              ? Colors.black.withOpacity(0.2)
-              : Colors.black.withOpacity(0.5);
+          return _attachmentContainsFile
+              ? StreamChatTheme.of(context).accentColor
+              : (_attachments.isEmpty
+                  ? Colors.black.withOpacity(0.5)
+                  : Colors.black.withOpacity(0.2));
           break;
         case 2:
           return _attachmentContainsFile && _attachments.isNotEmpty
@@ -799,7 +826,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildPickerSection() {
     var _attachmentContainsFile =
-        _attachments.any((element) => element.attachment.type == 'file');
+        _attachments.any((element) => element.attachment?.type == 'file');
 
     switch (_filePickerIndex) {
       case 0:
@@ -813,22 +840,38 @@ class MessageInputState extends State<MessageInput> {
               }
 
               if (snapshot.data) {
-                return IgnorePointer(
-                  ignoring: _attachmentContainsFile,
-                  child: MediaListView(
-                    selectedIds: _attachments.map((e) => e.id).toList(),
-                    onSelect: (media) async {
-                      if (!_attachments
-                          .any((element) => element.id == media.id)) {
-                        _addAttachment(media);
-                      } else {
-                        setState(() {
-                          _attachments
-                              .removeWhere((element) => element.id == media.id);
-                        });
-                      }
+                if (_attachmentContainsFile) {
+                  return GestureDetector(
+                    onTap: () {
+                      pickFile(DefaultAttachmentTypes.file);
                     },
-                  ),
+                    child: Container(
+                      constraints: BoxConstraints.expand(),
+                      color: Color(0xfff2f2f2),
+                      child: Text(
+                        'Add more files',
+                        style: TextStyle(
+                          color: StreamChatTheme.of(context).accentColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                    ),
+                  );
+                }
+                return MediaListView(
+                  selectedIds: _attachments.map((e) => e.id).toList(),
+                  onSelect: (media) async {
+                    if (!_attachments
+                        .any((element) => element.id == media.id)) {
+                      _addAttachment(media);
+                    } else {
+                      setState(() {
+                        _attachments
+                            .removeWhere((element) => element.id == media.id);
+                      });
+                    }
+                  },
                 );
               }
 
@@ -1253,6 +1296,8 @@ class MessageInputState extends State<MessageInput> {
                               clipBehavior: Clip.antiAlias,
                               child: FileAttachment(
                                 attachment: e.attachment,
+                                attachmentType: FileAttachmentType.local,
+                                file: e.file,
                                 size: Size(
                                   MediaQuery.of(context).size.width * 0.55,
                                   MediaQuery.of(context).size.height * 0.3,
@@ -1442,16 +1487,31 @@ class MessageInputState extends State<MessageInput> {
         padding:
             const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
         child: StreamSvgIcon.lightning(
-          color: Color(0xFF000000).withAlpha(128),
+          color: _commandsOverlay != null
+              ? StreamChatTheme.of(context).accentColor
+              : Color(0xFF000000).withAlpha(128),
         ),
       ),
-      onTap: () {
+      onTap: () async {
+        if (_openFilePickerSection) {
+          setState(() {
+            _animateContainer = false;
+            _openFilePickerSection = false;
+            _filePickerSize = _kMinMediaPickerSize;
+          });
+          await Future.delayed(Duration(milliseconds: 300));
+        }
+
         if (_commandsOverlay == null) {
-          _commandsOverlay = _buildCommandsOverlayEntry();
-          Overlay.of(context).insert(_commandsOverlay);
+          setState(() {
+            _commandsOverlay = _buildCommandsOverlayEntry();
+            Overlay.of(context).insert(_commandsOverlay);
+          });
         } else {
-          _commandsOverlay?.remove();
-          _commandsOverlay = null;
+          setState(() {
+            _commandsOverlay?.remove();
+            _commandsOverlay = null;
+          });
         }
       },
     );
@@ -1646,11 +1706,15 @@ class MessageInputState extends State<MessageInput> {
 
     final mimeType = _getMimeType(file.path.split('/').last);
 
-    if (mimeType.type == 'video' || mimeType.type == 'image') {
-      attachmentType = mimeType.type;
-    }
-
     Map<String, dynamic> extraDataMap = {};
+
+    if (camera) {
+      if (mimeType.type == 'video' || mimeType.type == 'image') {
+        attachmentType = mimeType.type;
+      }
+    } else {
+      attachmentType = 'file';
+    }
 
     if (mimeType?.subtype != null) {
       extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();
@@ -1667,7 +1731,7 @@ class MessageInputState extends State<MessageInput> {
         localUri: file.path != null ? Uri.parse(file.path) : null,
         type: attachmentType,
         extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
-        title: file.name ?? 'File',
+        title: file.name,
       ),
     );
 
@@ -1784,7 +1848,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildIdleSendButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
       child: Center(
           child: InkWell(
         onTap: () {
@@ -1793,6 +1857,8 @@ class MessageInputState extends State<MessageInput> {
         child: StreamSvgIcon(
           assetName: _getIdleSendIcon(),
           color: Colors.grey,
+          height: 24.0,
+          width: 24.0,
         ),
       )),
     );
@@ -1801,7 +1867,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildSendButton(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
         child: InkWell(
           onTap: () {
             sendMessage();
@@ -1809,6 +1875,8 @@ class MessageInputState extends State<MessageInput> {
           child: StreamSvgIcon(
             assetName: _getSendIcon(),
             color: StreamChatTheme.of(context).accentColor,
+            height: 24.0,
+            width: 24.0,
           ),
         ),
       ),
