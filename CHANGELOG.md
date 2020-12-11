@@ -1,3 +1,7 @@
+## 0.2.17+1
+
+- Fix mention tap bug
+
 ## 0.2.17
 
 - Expose messageInputDecoration as part of the theme
