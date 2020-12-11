@@ -99,7 +99,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                     height: 3.0,
                   ),
                   Text(
-                    '${widget.attachment.extraData['file_size'] ?? 'N/A'} bytes',
+                    '${_getSizeText(widget.attachment.extraData['file_size'])}',
                     style: TextStyle(
                       color: Colors.black.withOpacity(0.5),
                       fontSize: 14.0,
@@ -282,6 +282,20 @@ class _FileAttachmentState extends State<FileAttachment> {
       default:
         return StreamSvgIcon.filetype_Generic();
         break;
+    }
+  }
+
+  String _getSizeText(int bytes) {
+    if (bytes == null) {
+      return 'Size N/A';
+    }
+
+    if (bytes <= 1000) {
+      return '${bytes} bytes';
+    } else if (bytes <= 100000) {
+      return '${(bytes / 1000).toStringAsFixed(2)} KB';
+    } else {
+      return '${(bytes / 1000000).toStringAsFixed(2)} MB';
     }
   }
 }
