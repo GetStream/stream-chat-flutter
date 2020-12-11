@@ -326,14 +326,17 @@ class MessageInputState extends State<MessageInput> {
     return AnimatedCrossFade(
       crossFadeState:
           _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      firstChild: IconButton(
-        onPressed: () {
+      firstChild: InkWell(
+        onTap: () {
           setState(() {
             _actionsShrunk = false;
           });
         },
-        icon: StreamSvgIcon.emptyCircleLeft(
-          color: StreamChatTheme.of(context).accentColor,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
+          child: StreamSvgIcon.emptyCircleLeft(
+            color: StreamChatTheme.of(context).accentColor,
+          ),
         ),
       ),
       secondChild: Row(
