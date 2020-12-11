@@ -841,12 +841,13 @@ class MessageInputState extends State<MessageInput> {
 
               if (snapshot.data) {
                 if (_attachmentContainsFile) {
-                  return Container(
-                    color: Color(0xfff2f2f2),
-                    child: InkWell(
-                      onTap: () {
-                        pickFile(DefaultAttachmentTypes.file);
-                      },
+                  return GestureDetector(
+                    onTap: () {
+                      pickFile(DefaultAttachmentTypes.file);
+                    },
+                    child: Container(
+                      constraints: BoxConstraints.expand(),
+                      color: Color(0xfff2f2f2),
                       child: Text(
                         'Add more files',
                         style: TextStyle(
@@ -854,8 +855,8 @@ class MessageInputState extends State<MessageInput> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      alignment: Alignment.center,
                     ),
-                    alignment: Alignment.center,
                   );
                 }
                 return MediaListView(
