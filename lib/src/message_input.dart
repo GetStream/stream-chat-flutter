@@ -362,6 +362,7 @@ class MessageInputState extends State<MessageInput> {
               color: Colors.grey,
             ),
           ),
+          padding: EdgeInsets.all(6.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
