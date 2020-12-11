@@ -839,22 +839,37 @@ class MessageInputState extends State<MessageInput> {
               }
 
               if (snapshot.data) {
-                return IgnorePointer(
-                  ignoring: _attachmentContainsFile,
-                  child: MediaListView(
-                    selectedIds: _attachments.map((e) => e.id).toList(),
-                    onSelect: (media) async {
-                      if (!_attachments
-                          .any((element) => element.id == media.id)) {
-                        _addAttachment(media);
-                      } else {
-                        setState(() {
-                          _attachments
-                              .removeWhere((element) => element.id == media.id);
-                        });
-                      }
-                    },
-                  ),
+                if (_attachmentContainsFile) {
+                  return Container(
+                    color: Color(0xfff2f2f2),
+                    child: InkWell(
+                      onTap: () {
+                        pickFile(DefaultAttachmentTypes.file);
+                      },
+                      child: Text(
+                        'Add more files',
+                        style: TextStyle(
+                          color: StreamChatTheme.of(context).accentColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                  );
+                }
+                return MediaListView(
+                  selectedIds: _attachments.map((e) => e.id).toList(),
+                  onSelect: (media) async {
+                    if (!_attachments
+                        .any((element) => element.id == media.id)) {
+                      _addAttachment(media);
+                    } else {
+                      setState(() {
+                        _attachments
+                            .removeWhere((element) => element.id == media.id);
+                      });
+                    }
+                  },
                 );
               }
 
