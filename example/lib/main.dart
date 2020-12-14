@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
-        //TODO change to system once dark theme is implemented
+        //TODO change to system once dark  theme is implemented
         themeMode: ThemeMode.light,
         onGenerateRoute: AppRoutes.generateRoute,
         initialRoute:
