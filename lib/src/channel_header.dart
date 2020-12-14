@@ -9,6 +9,7 @@ import '../stream_chat_flutter.dart';
 import './channel_name.dart';
 import 'channel_image.dart';
 import 'chat_info_screen.dart';
+import 'group_info_screen.dart';
 import 'stream_channel.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
@@ -124,6 +125,16 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                           Navigator.pop(context);
                         }
                       }
+                    } else {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StreamChannel(
+                            channel: channel,
+                            child: GroupInfoScreen(),
+                          ),
+                        ),
+                      );
                     }
                   },
             ),

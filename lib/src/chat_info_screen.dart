@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../stream_chat_flutter.dart';
+import 'channel_file_display_screen.dart';
+import 'channel_media_display_screen.dart';
+import 'option_list_tile.dart';
 
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {
@@ -74,7 +77,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 SizedBox(height: 7.0),
                 _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
-                _OptionListTile(
+                OptionListTile(
                   title: '@${widget.user.id}',
                   trailing: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -124,7 +127,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         StreamBuilder<bool>(
             stream: StreamChannel.of(context).channel.isMutedStream,
             builder: (context, snapshot) {
-              return _OptionListTile(
+              return OptionListTile(
                 title: 'Mute user',
                 leading: StreamSvgIcon.mute(
                   size: 23.0,
@@ -163,7 +166,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   ),
         //   onTap: () {},
         // ),
-        _OptionListTile(
+        OptionListTile(
           title: 'Photos & Videos',
           leading: StreamSvgIcon.pictures(
             size: 32.0,
@@ -171,11 +174,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => _MediaDisplayScreen()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ChannelMediaDisplayScreen()));
           },
         ),
-        _OptionListTile(
+        OptionListTile(
           title: 'Files',
           leading: StreamSvgIcon.files(
             size: 32.0,
@@ -183,11 +188,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => _FileDisplayScreen()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ChannelFileDisplayScreen()));
           },
         ),
-        _OptionListTile(
+        OptionListTile(
           title: 'Shared groups',
           leading: StreamSvgIcon.Icon_group(
             size: 24.0,
@@ -207,7 +214,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   }
 
   Widget _buildDeleteListTile() {
-    return _OptionListTile(
+    return OptionListTile(
       title: 'Delete',
       leading: StreamSvgIcon.delete(
         color: Colors.red,
@@ -278,72 +285,6 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             color: Colors.white,
           ),
         alternativeWidget,
-      ],
-    );
-  }
-}
-
-class _OptionListTile extends StatelessWidget {
-  final String title;
-  final StreamSvgIcon leading;
-  final Widget trailing;
-  final VoidCallback onTap;
-  final Color titleColor;
-
-  _OptionListTile({
-    this.title,
-    this.leading,
-    this.trailing,
-    this.onTap,
-    this.titleColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          color: Color(0xffe6e6e6),
-          height: 2.0,
-        ),
-        Material(
-          color: Colors.white,
-          child: Container(
-            height: 56.0,
-            child: InkWell(
-              onTap: onTap,
-              child: Row(
-                children: [
-                  if (leading != null)
-                    Expanded(
-                      child: Center(child: leading),
-                    ),
-                  if (leading == null)
-                    SizedBox(
-                      width: 16.0,
-                    ),
-                  Expanded(
-                      flex: 4,
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, color: titleColor),
-                      )),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: trailing ?? Container(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -501,74 +442,6 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
           ],
         );
       }),
-    );
-  }
-}
-
-class _MediaDisplayScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        brightness: Theme.of(context).brightness,
-        elevation: 1,
-        centerTitle: true,
-        title: Text(
-          'Photos & Videos',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
-        ),
-        leading: Center(
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Container(
-              child: StreamSvgIcon.left(
-                color: Colors.black,
-                size: 24.0,
-              ),
-              width: 24.0,
-              height: 24.0,
-            ),
-          ),
-        ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
-      ),
-    );
-  }
-}
-
-class _FileDisplayScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        brightness: Theme.of(context).brightness,
-        elevation: 1,
-        centerTitle: true,
-        title: Text(
-          'Files',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
-        ),
-        leading: Center(
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Container(
-              child: StreamSvgIcon.left(
-                color: Colors.black,
-                size: 24.0,
-              ),
-              width: 24.0,
-              height: 24.0,
-            ),
-          ),
-        ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
-      ),
     );
   }
 }

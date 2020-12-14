@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/group_info_screen.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
@@ -82,6 +83,16 @@ class ChannelPreview extends StatelessWidget {
                             ),
                           );
                         }
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StreamChannel(
+                              channel: channel,
+                              child: GroupInfoScreen(),
+                            ),
+                          ),
+                        );
                       }
                     },
               ),
