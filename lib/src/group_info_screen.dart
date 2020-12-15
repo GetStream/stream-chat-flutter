@@ -27,6 +27,11 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   Timer _debounce;
   Function modalSetStateCallback;
 
+  final FocusNode _focusNode = FocusNode();
+
+  bool namedChanged = false;
+  String changedName = '';
+
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
@@ -49,6 +54,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     _nameController = TextEditingController.fromValue(
         TextEditingValue(text: channel.channel.extraData['name']));
     _searchController = TextEditingController()..addListener(_userNameListener);
+
+    _nameController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -74,10 +83,19 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         title: Column(
           children: [
             // TODO: Add member names instead of Demo (if name = null)
-            Text(
-              channel.channel.extraData['name'] ?? 'Demo',
-              style: TextStyle(color: Colors.black),
-            ),
+            FutureBuilder<QueryMembersResponse>(
+                future: _memberQueryFuture,
+                builder: (context, snapshot) {
+                  return Text(
+                    _getChannelName(MediaQuery.of(context).size.width,
+                        members: snapshot.data?.members
+                            ?.map((e) => e.user)
+                            ?.toList()),
+                    style: TextStyle(color: Colors.black),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                }),
             SizedBox(
               height: 3.0,
             ),
@@ -208,6 +226,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildNameTile() {
+    var channel = StreamChannel.of(context).channel;
+    var channelName = channel.extraData['name'];
+
     return Material(
       color: Colors.white,
       child: Container(
@@ -228,6 +249,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             ),
             Expanded(
               child: TextField(
+                focusNode: _focusNode,
                 controller: _nameController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration.collapsed(
@@ -242,6 +264,48 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
               ),
             ),
+            if ((channelName == null) ||
+                (channelName != _nameController.text.trim()))
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    child: StreamSvgIcon.close_small(),
+                    onTap: () {
+                      setState(() {
+                        _nameController.text =
+                            _getChannelName(MediaQuery.of(context).size.width);
+                        _focusNode.unfocus();
+                      });
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0, left: 8.0),
+                    child: InkWell(
+                      child: StreamSvgIcon.check(
+                        color: StreamChatTheme.of(context).accentColor,
+                        size: 24.0,
+                      ),
+                      onTap: () {
+                        StreamChannel.of(context).channel.update({
+                          'name': _nameController.text.trim(),
+                        }).then((value) {
+                          setState(() {
+                            _focusNode.unfocus();
+                            namedChanged = true;
+                            changedName = _nameController.text.trim();
+                          });
+                        }).catchError((err) {
+                          setState(() {
+                            _nameController.text = channelName;
+                            _focusNode.unfocus();
+                          });
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -490,6 +554,19 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
       ],
     );
+  }
+
+  String _getChannelName(double width, {List<User> members}) {
+    if (namedChanged) {
+      return changedName;
+    }
+
+    if (StreamChannel.of(context).channel.extraData['name'] == null &&
+        members != null) {
+      return '${members[0].name} & ${members.length - 1} others';
+    }
+
+    return StreamChannel.of(context).channel.extraData['name'] ?? '';
   }
 
   String _getLastSeen(User user) {
