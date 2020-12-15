@@ -343,7 +343,10 @@ class MessageInputState extends State<MessageInput> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (!widget.disableAttachments) _buildAttachmentButton(),
-          if (widget.editMessage == null) _buildCommandButton(),
+          if (widget.editMessage == null &&
+              StreamChannel.of(context).channel?.config?.commands?.isNotEmpty ==
+                  true)
+            _buildCommandButton(),
         ],
       ),
       duration: Duration(milliseconds: 300),
@@ -543,11 +546,12 @@ class MessageInputState extends State<MessageInput> {
   void _checkCommands(String s, BuildContext context) {
     if (s.startsWith('/')) {
       var matchedCommandsList = StreamChannel.of(context)
-          .channel
-          .config
-          .commands
-          .where((element) => element.name == s.substring(1))
-          .toList();
+              .channel
+              .config
+              ?.commands
+              ?.where((element) => element.name == s.substring(1))
+              ?.toList() ??
+          [];
 
       if (matchedCommandsList.length == 1) {
         _chosenCommand = matchedCommandsList[0];
@@ -568,11 +572,12 @@ class MessageInputState extends State<MessageInput> {
   OverlayEntry _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
-        .channel
-        .config
-        .commands
-        .where((c) => c.name.contains(text.replaceFirst('/', '')))
-        .toList();
+            .channel
+            .config
+            ?.commands
+            ?.where((c) => c.name.contains(text.replaceFirst('/', '')))
+            ?.toList() ??
+        [];
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -1927,8 +1932,6 @@ class MessageInputState extends State<MessageInput> {
     _mentionsOverlay?.remove();
     _mentionsOverlay = null;
 
-    final channel = StreamChannel.of(context).channel;
-
     Future sendingFuture;
     Message message;
     if (widget.editMessage != null) {
@@ -1952,6 +1955,8 @@ class MessageInputState extends State<MessageInput> {
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending(message);
     }
+
+    final channel = StreamChannel.of(context).channel;
 
     if (widget.editMessage == null ||
         widget.editMessage.status == MessageSendingStatus.FAILED) {

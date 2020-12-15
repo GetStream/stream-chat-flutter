@@ -173,15 +173,15 @@ class _MessageListViewState extends State<MessageListView> {
         ? streamChannel.channel.state.threadsStream
             .where((threads) => threads.containsKey(widget.parentMessage.id))
             .map((threads) => threads[widget.parentMessage.id])
-        : streamChannel.channel.state.messagesStream;
+        : streamChannel.channel.state?.messagesStream;
 
     return StreamBuilder<List<Message>>(
-        stream: messagesStream.map((messages) => messages
-            .where((e) =>
+        stream: messagesStream?.map((messages) => messages
+            ?.where((e) =>
                 !e.isDeleted ||
                 (e.isDeleted &&
                     e.user.id == streamChannel.channel.client.state.user.id))
-            .toList()),
+            ?.toList()),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(

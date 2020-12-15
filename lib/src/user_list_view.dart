@@ -190,7 +190,7 @@ class _UserListViewState extends State<UserListView>
           }
           final groupedUsers = <String, List<User>>{};
           for (var e in temp) {
-            final alphabet = e.name[0];
+            final alphabet = e.name[0]?.toUpperCase();
             groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
           }
           final items = <ListItem>[];
