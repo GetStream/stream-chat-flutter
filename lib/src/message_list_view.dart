@@ -529,7 +529,7 @@ class _MessageListViewState extends State<MessageListView> {
                     child: Padding(
                       padding: const EdgeInsets.all(3.0),
                       child: Text(
-                        snapshot.data.toString(),
+                        '$unreadCount',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
