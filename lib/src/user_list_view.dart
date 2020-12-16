@@ -339,7 +339,9 @@ class _UserListViewState extends State<UserListView>
               );
 
         return LazyLoadScrollView(
-          onEndOfPage: () => _listenUserPagination(usersBlocState),
+          onEndOfPage: () async {
+            return _listenUserPagination(usersBlocState);
+          },
           child: child,
         );
       },

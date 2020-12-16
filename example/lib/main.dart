@@ -337,40 +337,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
                               final message = messageResponse.message;
                               final channel = Channel.fromState(
                                 client,
-                                ChannelState(
-                                  channel: messageResponse.channel,
-                                  messages: [message],
-                                ),
+                                ChannelState(channel: messageResponse.channel),
                               );
-                              await Future.wait([
-                                channel.query(
-                                  messagesPagination: PaginationParams(
-                                    lessThan: message.id,
-                                    limit: 25,
-                                  ),
-                                  preferOffline: true,
-                                ),
-                                channel.query(
-                                  messagesPagination: PaginationParams(
-                                    greaterThan: message.id,
-                                    limit: 25,
-                                  ),
-                                  preferOffline: true,
-                                ),
-                              ]);
-                              final messages = channel.state.messages;
-                              final totalMessages = messages.length;
-                              final messageIndex = messages
-                                  .indexWhere((e) => e.id == message.id);
-                              final initialIndex = totalMessages - messageIndex;
-                              final bool isFirstMessage = messageIndex == 0;
                               Navigator.pushNamed(
                                 context,
                                 Routes.CHANNEL_PAGE,
                                 arguments: ChannelPageArgs(
                                   channel: channel,
-                                  initialScrollIndex: initialIndex,
-                                  initialAlignment: isFirstMessage ? 0 : 0.5,
+                                  initialMessage: message,
                                 ),
                               );
                             },
@@ -406,24 +380,24 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
 class ChannelPageArgs {
   final Channel channel;
-  final int initialScrollIndex;
-  final double initialAlignment;
+  final Message initialMessage;
 
   const ChannelPageArgs({
     this.channel,
-    this.initialScrollIndex = 0,
-    this.initialAlignment = 0,
+    this.initialMessage,
   });
 }
 
 class ChannelPage extends StatelessWidget {
   final int initialScrollIndex;
   final double initialAlignment;
+  final bool highlightInitialMessage;
 
   const ChannelPage({
     Key key,
-    this.initialScrollIndex = 0,
-    this.initialAlignment = 0,
+    this.initialScrollIndex,
+    this.initialAlignment,
+    this.highlightInitialMessage = false,
   }) : super(key: key);
 
   @override
@@ -441,6 +415,7 @@ class ChannelPage extends StatelessWidget {
                 MessageListView(
                   initialScrollIndex: initialScrollIndex,
                   initialAlignment: initialAlignment,
+                  highlightInitialMessage: highlightInitialMessage,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,
@@ -481,8 +456,8 @@ class ThreadPage extends StatelessWidget {
   ThreadPage({
     Key key,
     this.parent,
-    this.initialScrollIndex = 0,
-    this.initialAlignment = 0,
+    this.initialScrollIndex,
+    this.initialAlignment,
   }) : super(key: key);
 
   @override

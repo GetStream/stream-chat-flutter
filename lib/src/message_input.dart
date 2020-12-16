@@ -21,7 +21,6 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -436,6 +435,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Timer _debounce;
+
   void _onChanged(BuildContext context, String s) {
     if (_debounce?.isActive == true) _debounce.cancel();
     _debounce = Timer(
@@ -1859,7 +1859,8 @@ class MessageInputState extends State<MessageInput> {
     _mentionsOverlay?.remove();
     _mentionsOverlay = null;
 
-    final channel = StreamChannel.of(context).channel;
+    final streamChannel = StreamChannel.of(context);
+    final channel = streamChannel.channel;
 
     Future sendingFuture;
     Message message;
@@ -1883,6 +1884,10 @@ class MessageInputState extends State<MessageInput> {
 
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending(message);
+    }
+
+    if (!channel.state.isUpToDate) {
+      await streamChannel.reloadChannel();
     }
 
     if (widget.editMessage == null ||
@@ -1970,6 +1975,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   bool _initialized = false;
+
   @override
   void didChangeDependencies() {
     if (widget.editMessage != null && !_initialized) {

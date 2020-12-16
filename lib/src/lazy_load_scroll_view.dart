@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 enum _LoadingStatus { LOADING, STABLE }
@@ -9,10 +10,10 @@ class LazyLoadScrollView extends StatefulWidget {
   final Widget child;
 
   /// Called when the [child] reaches the start of the list
-  final VoidCallback onStartOfPage;
+  final AsyncCallback onStartOfPage;
 
   /// Called when the [child] reaches the end of the list
-  final VoidCallback onEndOfPage;
+  final AsyncCallback onEndOfPage;
 
   /// The offset to take into account when triggering [onEndOfPage] in pixels
   final double scrollOffset;
@@ -39,14 +40,6 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   _LoadingStatus _loadMoreStatus = _LoadingStatus.STABLE;
 
   @override
-  void didUpdateWidget(LazyLoadScrollView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!widget.isLoading) {
-      _loadMoreStatus = _LoadingStatus.STABLE;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return NotificationListener(
       child: widget.child,
@@ -62,7 +55,11 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
         if (_loadMoreStatus != null &&
             _loadMoreStatus == _LoadingStatus.STABLE) {
           _loadMoreStatus = _LoadingStatus.LOADING;
-          widget.onEndOfPage();
+          if (widget.onEndOfPage != null) {
+            widget.onEndOfPage().whenComplete(() {
+              _loadMoreStatus = _LoadingStatus.STABLE;
+            });
+          }
         }
       }
       if (notification.metrics.minScrollExtent < notification.metrics.pixels &&
@@ -71,7 +68,11 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
         if (_loadMoreStatus != null &&
             _loadMoreStatus == _LoadingStatus.STABLE) {
           _loadMoreStatus = _LoadingStatus.LOADING;
-          widget.onStartOfPage();
+          if (widget.onStartOfPage != null) {
+            widget.onStartOfPage().whenComplete(() {
+              _loadMoreStatus = _LoadingStatus.STABLE;
+            });
+          }
         }
       }
       return true;
@@ -81,14 +82,22 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
         if (_loadMoreStatus != null &&
             _loadMoreStatus == _LoadingStatus.STABLE) {
           _loadMoreStatus = _LoadingStatus.LOADING;
-          widget.onEndOfPage();
+          if (widget.onEndOfPage != null) {
+            widget.onEndOfPage().whenComplete(() {
+              _loadMoreStatus = _LoadingStatus.STABLE;
+            });
+          }
         }
       }
       if (notification.overscroll < 0) {
         if (_loadMoreStatus != null &&
             _loadMoreStatus == _LoadingStatus.STABLE) {
           _loadMoreStatus = _LoadingStatus.LOADING;
-          widget.onStartOfPage();
+          if (widget.onStartOfPage != null) {
+            widget.onStartOfPage().whenComplete(() {
+              _loadMoreStatus = _LoadingStatus.STABLE;
+            });
+          }
         }
       }
       return true;

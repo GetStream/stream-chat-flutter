@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
@@ -109,10 +111,11 @@ class MessageListView extends StatefulWidget {
     this.onThreadTap,
     this.dateDividerBuilder,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
-    this.initialScrollIndex = 0,
-    this.initialAlignment = 0,
+    this.initialScrollIndex,
+    this.initialAlignment,
     this.scrollController,
     this.itemPositionListener,
+    this.highlightInitialMessage = false,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -154,6 +157,11 @@ class MessageListView extends StatefulWidget {
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
 
+  /// If true the list will highlight the initialMessage if there is any.
+  ///
+  /// Also See [StreamChannel]
+  final bool highlightInitialMessage;
+
   @override
   _MessageListViewState createState() => _MessageListViewState();
 }
@@ -166,6 +174,51 @@ class _MessageListViewState extends State<MessageListView> {
   ItemPositionsListener _itemPositionListener;
   int _messageListLength;
 
+  int get _initialIndex {
+    if (widget.initialScrollIndex != null) return widget.initialScrollIndex;
+    final streamChannel = StreamChannel.of(context);
+    if (streamChannel.initialMessageId != null) {
+      final messages = streamChannel.channel.state.messages;
+      final totalMessages = messages.length;
+      final messageIndex = messages.indexWhere((e) {
+        return e.id == streamChannel.initialMessageId;
+      });
+      return totalMessages - messageIndex - 1;
+    }
+    return 0;
+  }
+
+  double get _initialAlignment {
+    if (widget.initialAlignment != null) return widget.initialAlignment;
+    final streamChannel = StreamChannel.of(context);
+    if (streamChannel.initialMessageId != null) {
+      final messages = streamChannel.channel.state.messages;
+      final messageIndex = messages.indexWhere((e) {
+        return e.id == streamChannel.initialMessageId;
+      });
+      final isFirstMessage = messageIndex == 0;
+      return isFirstMessage ? 0 : 0.5;
+    }
+    return 0;
+  }
+
+  bool _isInitialMessage(String id) {
+    final streamChannel = StreamChannel.of(context);
+    return streamChannel.initialMessageId == id;
+  }
+
+  bool get _upToDate => StreamChannel.of(context).channel.state.isUpToDate;
+
+  bool _topPaginationActive = false;
+  bool _bottomPaginationActive = false;
+
+  bool get _paginationActive => _topPaginationActive || _bottomPaginationActive;
+
+  int initialIndex;
+  double initialAlignment;
+
+  List<Message> messages = <Message>[];
+
   @override
   Widget build(BuildContext context) {
     final streamChannel = StreamChannel.of(context);
@@ -175,6 +228,11 @@ class _MessageListViewState extends State<MessageListView> {
             .where((threads) => threads.containsKey(widget.parentMessage.id))
             .map((threads) => threads[widget.parentMessage.id])
         : streamChannel.channel.state.messagesStream;
+
+    if (!_paginationActive && !_upToDate) {
+      initialIndex = _initialIndex;
+      initialAlignment = _initialAlignment;
+    }
 
     return StreamBuilder<List<Message>>(
         stream: messagesStream.map((messages) => messages
@@ -190,32 +248,40 @@ class _MessageListViewState extends State<MessageListView> {
             );
           }
 
-          final messages = snapshot.data?.reversed?.toList() ?? [];
+          final messageList = snapshot.data?.reversed?.toList() ?? [];
 
-          if (messages.isEmpty) {
-            return Center(
-              child: Text(
-                'No chats here yet...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black.withOpacity(.5),
+          if (messageList.isEmpty) {
+            if (_upToDate) {
+              return Center(
+                child: Text(
+                  'No chats here yet...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black.withOpacity(.5),
+                  ),
                 ),
-              ),
-            );
+              );
+            }
+          } else {
+            messages = messageList;
           }
 
           final newMessagesListLength = messages.length;
 
-          if (_itemPositionListener.itemPositions.value?.isNotEmpty == true &&
-              _messageListLength != null) {
-            final first = _itemPositionListener.itemPositions.value.first;
-            final diff = newMessagesListLength - _messageListLength;
-            if (diff > 0) {
-              _scrollController.jumpTo(
-                index: first.index + diff,
-                alignment: first.itemLeadingEdge,
-              );
+          if (_bottomPaginationActive) {
+            if (_itemPositionListener.itemPositions.value?.isNotEmpty == true &&
+                _messageListLength != null) {
+              final first = _itemPositionListener.itemPositions.value.first;
+              final diff = newMessagesListLength - _messageListLength;
+              if (diff > 0) {
+                initialIndex = first.index + diff;
+                initialAlignment = first.itemLeadingEdge;
+              }
             }
+          } else if (!_topPaginationActive && _upToDate) {
+            // Reset the index in-case we send any new message
+            initialIndex = 0;
+            initialAlignment = 0;
           }
 
           _messageListLength = newMessagesListLength;
@@ -224,28 +290,32 @@ class _MessageListViewState extends State<MessageListView> {
             alignment: Alignment.center,
             children: [
               LazyLoadScrollView(
-                onStartOfPage: () => _paginateData(
-                  streamChannel,
-                  QueryDirection.bottom,
-                ),
-                onEndOfPage: () => _paginateData(
-                  streamChannel,
-                  QueryDirection.top,
-                ),
+                onStartOfPage: () async {
+                  if (!_upToDate) {
+                    _topPaginationActive = false;
+                    _bottomPaginationActive = true;
+                    _paginateData(streamChannel, QueryDirection.bottom);
+                  }
+                },
+                onEndOfPage: () async {
+                  _topPaginationActive = true;
+                  _bottomPaginationActive = false;
+                  _paginateData(streamChannel, QueryDirection.top);
+                },
                 child: ScrollablePositionedList.builder(
+                  key: ValueKey(initialIndex + initialAlignment),
                   itemPositionsListener: _itemPositionListener,
                   addAutomaticKeepAlives: true,
-                  key: Key('messageListView'),
-                  initialScrollIndex: widget.initialScrollIndex,
-                  initialAlignment: widget.initialAlignment,
+                  initialScrollIndex: initialIndex ?? 0,
+                  initialAlignment: initialAlignment ?? 0,
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: true,
                   itemCount: messages.length +
-                      1 +
+                      2 +
                       (widget.parentMessage != null ? 1 : 0),
                   itemBuilder: (context, i) {
-                    if (i == messages.length + 1) {
+                    if (i == messages.length + 2) {
                       if (widget.parentMessageBuilder != null) {
                         return widget.parentMessageBuilder(
                           context,
@@ -273,16 +343,24 @@ class _MessageListViewState extends State<MessageListView> {
                         );
                       }
                     }
-
-                    if (i == messages.length) {
-                      return _buildLoadingIndicator(streamChannel);
+                    if (i == messages.length + 1) {
+                      return _buildLoadingIndicator(
+                        streamChannel,
+                        QueryDirection.top,
+                      );
                     }
-                    final message = messages[i];
-                    final nextMessage = i > 0 ? messages[i - 1] : null;
+                    if (i == 0) {
+                      return _buildLoadingIndicator(
+                        streamChannel,
+                        QueryDirection.bottom,
+                      );
+                    }
+                    final message = messages[i - 1];
+                    final nextMessage = (i - 1) > 0 ? messages[i - 2] : null;
 
                     Widget messageWidget;
 
-                    if (i == 0) {
+                    if (i == 1) {
                       messageWidget = _buildBottomMessage(
                         context,
                         message,
@@ -339,8 +417,7 @@ class _MessageListViewState extends State<MessageListView> {
                   },
                 ),
               ),
-              if (widget.showScrollToBottom && _showScrollToBottom)
-                _buildScrollToBottom(),
+              if (widget.showScrollToBottom) _buildScrollToBottom(),
               Positioned(
                 top: 20.0,
                 child: ValueListenableBuilder<Iterable<ItemPosition>>(
@@ -380,7 +457,7 @@ class _MessageListViewState extends State<MessageListView> {
     if (widget.parentMessage == null) {
       channel.queryMessages(direction: direction);
     } else {
-      channel.getReplies(widget.parentMessage.id, direction: direction);
+      channel.getReplies(widget.parentMessage.id);
     }
   }
 
@@ -393,91 +470,117 @@ class _MessageListViewState extends State<MessageListView> {
 
   Widget _buildScrollToBottom() {
     final streamChannel = StreamChannel.of(context);
-    return Positioned(
-      bottom: 8,
-      right: 8,
-      width: 40,
-      height: 40,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          FloatingActionButton(
-            backgroundColor: Colors.white,
-            child: StreamSvgIcon.down(
-              color: Colors.black,
-            ),
-            onPressed: () {
-              setState(() {
-                _showScrollToBottom = false;
-              });
-              _scrollController.scrollTo(
-                index: 0,
-                duration: Duration(seconds: 1),
-                curve: Curves.easeInOut,
-              );
-            },
-          ),
-          if (streamChannel.channel.state.members.any((Member e) =>
-              e.userId == streamChannel.channel.client.state.user.id))
-            StreamBuilder<int>(
-                stream: streamChannel.channel.state.unreadCountStream,
-                initialData: streamChannel.channel.state.unreadCount,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.data <= 0) {
-                    return Offstage();
+    return StreamBuilder<Tuple2<bool, int>>(
+      stream: Rx.combineLatest2(
+        streamChannel.channel.state.isUpToDateStream,
+        streamChannel.channel.state.unreadCountStream,
+        (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
+      ),
+      builder: (_, snapshot) {
+        if (snapshot.hasError) {
+          return Offstage();
+        } else if (!snapshot.hasData) {
+          return Offstage();
+        }
+        final isUpToDate = snapshot.data.item1;
+        final showScrollToBottom = !isUpToDate || _showScrollToBottom;
+        if (!showScrollToBottom) {
+          return Offstage();
+        }
+        final unreadCount = snapshot.data.item2;
+        final showUnreadCount = unreadCount > 0 &&
+            streamChannel.channel.state.members.any(
+                (e) => e.userId == streamChannel.channel.client.state.user.id);
+        return Positioned(
+          bottom: 8,
+          right: 8,
+          width: 40,
+          height: 40,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              FloatingActionButton(
+                backgroundColor: Colors.white,
+                child: StreamSvgIcon.down(
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  if (!_upToDate) {
+                    _bottomPaginationActive = false;
+                    _topPaginationActive = false;
+                    streamChannel.reloadChannel();
+                  } else {
+                    setState(() => _showScrollToBottom = false);
+                    _scrollController.scrollTo(
+                      index: 0,
+                      duration: Duration(seconds: 1),
+                      curve: Curves.easeInOut,
+                    );
                   }
-                  return Positioned(
-                    width: 20,
-                    height: 20,
-                    left: 10,
-                    top: -10,
-                    child: CircleAvatar(
-                      child: Padding(
-                        padding: const EdgeInsets.all(3.0),
-                        child: Text(
-                          snapshot.data.toString(),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
+                },
+              ),
+              if (showUnreadCount)
+                Positioned(
+                  width: 20,
+                  height: 20,
+                  left: 10,
+                  top: -10,
+                  child: CircleAvatar(
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Text(
+                        snapshot.data.toString(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  );
-                }),
-        ],
-      ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Container _buildLoadingIndicator(StreamChannelState streamChannel) {
-    return Container(
-      key: Key('LOADING-INDICATOR'),
-      height: 50,
-      width: double.infinity,
-      child: StreamBuilder<bool>(
-          stream: streamChannel.queryMessage,
-          initialData: false,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Container(
-                color: Color(0xffd0021B).withAlpha(26),
-                child: Center(
-                  child: Text('Error loading messages'),
-                ),
-              );
-            }
-            if (!snapshot.data) {
-              return SizedBox();
-            }
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+  Widget _buildLoadingIndicator(
+    StreamChannelState streamChannel,
+    QueryDirection direction,
+  ) {
+    final stream = direction == QueryDirection.top
+        ? streamChannel.queryTopMessages
+        : streamChannel.queryBottomMessages;
+    return StreamBuilder<bool>(
+        key: Key('LOADING-INDICATOR'),
+        stream: stream,
+        initialData: false,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Container(
+              color: Color(0xffd0021B).withAlpha(26),
+              child: Center(
+                child: Text('Error loading messages'),
               ),
             );
-          }),
-    );
+          }
+          if (!snapshot.data) {
+            if (direction == QueryDirection.top) {
+              return Container(
+                height: 50,
+                width: double.infinity,
+              );
+            }
+            return Offstage();
+          }
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: const CupertinoActivityIndicator(),
+            ),
+          );
+        });
   }
 
   Widget _buildTopMessage(
@@ -544,9 +647,7 @@ class _MessageListViewState extends State<MessageListView> {
           _bottomWasVisible = !isVisible;
         }
         if (mounted) {
-          setState(() {
-            _showScrollToBottom = !isVisible;
-          });
+          setState(() => _showScrollToBottom = !isVisible);
         }
       },
       child: messageWidget,
@@ -602,7 +703,7 @@ class _MessageListViewState extends State<MessageListView> {
     final userId = StreamChat.of(context).user.id;
     final isMyMessage = message.user.id == userId;
     final isNextUser =
-        index - 1 >= 0 && message.user.id == messages[index - 1]?.user?.id;
+        index - 2 >= 0 && message.user.id == messages[index - 2]?.user?.id;
 
     final channel = StreamChannel.of(context).channel;
     final readList = channel.state?.read
@@ -673,24 +774,12 @@ class _MessageListViewState extends State<MessageListView> {
 
     _messageNewListener =
         streamChannel.channel.on(EventType.messageNew).listen((event) {
-      final firstElementInViewport =
-          _itemPositionListener.itemPositions.value.first;
       if (event.message.user.id == streamChannel.channel.client.state.user.id) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollController.jumpTo(
             index: 0,
           );
         });
-      } else {
-        if (firstElementInViewport.index != 0) {
-          _scrollController.jumpTo(
-            index: firstElementInViewport.index + 1,
-            alignment: firstElementInViewport.itemLeadingEdge,
-          );
-        }
-      }
-      if (firstElementInViewport.index == 0) {
-        streamChannel.channel.markRead();
       }
     });
 

@@ -10,18 +10,22 @@ enum QueryDirection { top, bottom }
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
 class StreamChannel extends StatefulWidget {
-  StreamChannel({
+  const StreamChannel({
     Key key,
     @required this.child,
     @required this.channel,
     this.showLoading = true,
-  }) : super(
-          key: key,
-        );
+    this.initialMessageId,
+  })  : assert(child != null),
+        assert(channel != null),
+        super(key: key);
 
   final Widget child;
   final Channel channel;
   final bool showLoading;
+
+  /// If passed the channel will load from this particular message.
+  final String initialMessageId;
 
   /// Use this method to get the current [StreamChannelState] instance
   static StreamChannelState of(BuildContext context) {
@@ -45,135 +49,123 @@ class StreamChannelState extends State<StreamChannel> {
   /// Current channel
   Channel get channel => widget.channel;
 
+  /// InitialMessageId
+  String get initialMessageId => widget.initialMessageId;
+
   /// Current channel state stream
   Stream<ChannelState> get channelStateStream =>
       widget.channel.state.channelStateStream;
 
-  final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
+  final _queryTopMessagesController = BehaviorSubject.seeded(false);
+  final _queryBottomMessagesController = BehaviorSubject.seeded(false);
 
-  /// The stream notifying the state of queryMessage call
-  Stream<bool> get queryMessage => _queryMessageController.stream;
+  /// The stream notifying the state of [_queryTopMessages] call
+  Stream<bool> get queryTopMessages => _queryTopMessagesController.stream;
+
+  /// The stream notifying the state of [_queryBottomMessages] call
+  Stream<bool> get queryBottomMessages => _queryBottomMessagesController.stream;
 
   bool _topPaginationEnded = false;
   bool _bottomPaginationEnded = false;
 
-  /// Calls [channel.query] updating [queryMessage] stream
-  void queryMessages({QueryDirection direction = QueryDirection.top}) {
-    if (_queryMessageController.value == true ||
-        (_topPaginationEnded && _bottomPaginationEnded)) {
+  Future<void> _queryTopMessages({
+    int limit = 20,
+    bool preferOffline = false,
+  }) async {
+    if (_topPaginationEnded || _queryTopMessagesController?.value == true) {
       return;
     }
+    _queryTopMessagesController.add(true);
 
-    _queryMessageController.add(true);
-
-    String id;
-    PaginationParams params;
-
-    final messageLimit = 25;
-
-    if (channel.state.messages.isNotEmpty) {
-      switch (direction) {
-        case QueryDirection.top:
-          id = channel.state.messages.first.id;
-          params = PaginationParams(
-            lessThan: id,
-            limit: messageLimit,
-          );
-          break;
-        case QueryDirection.bottom:
-          id = channel.state.messages.last.id;
-          params = PaginationParams(
-            greaterThan: id,
-            limit: messageLimit,
-          );
-          break;
-      }
+    if (channel.state.messages.isEmpty) {
+      return _queryTopMessagesController.add(false);
     }
 
-    widget.channel
-        .query(
-      messagesPagination: params,
-      preferOffline: true,
-    )
-        .then((res) {
-      if (res.messages.isEmpty || res.messages.length < messageLimit) {
-        switch (direction) {
-          case QueryDirection.top:
-            _topPaginationEnded = true;
-            break;
-          case QueryDirection.bottom:
-            _bottomPaginationEnded = true;
-            break;
-        }
+    final oldestMessage = channel.state.messages.first;
+
+    try {
+      final state = await queryBeforeMessage(
+        oldestMessage.id,
+        limit: limit,
+        preferOffline: preferOffline,
+      );
+      if (state.messages.isEmpty || state.messages.length < limit) {
+        _topPaginationEnded = true;
       }
-      _queryMessageController.add(false);
-    }).catchError((e, stack) {
-      if (!_queryMessageController.isClosed) {
-        _queryMessageController.addError(e, stack);
+      _queryTopMessagesController.add(false);
+    } catch (e, stk) {
+      _queryTopMessagesController.addError(e, stk);
+    }
+  }
+
+  Future<void> _queryBottomMessages({
+    int limit = 20,
+    bool preferOffline = false,
+  }) async {
+    if (_bottomPaginationEnded ||
+        _queryBottomMessagesController?.value == true ||
+        channel?.state?.isUpToDate == true) return;
+    _queryBottomMessagesController.add(true);
+
+    if (channel.state.messages.isEmpty) {
+      return _queryBottomMessagesController.add(false);
+    }
+
+    final recentMessage = channel.state.messages.last;
+
+    try {
+      final state = await queryAfterMessage(
+        recentMessage.id,
+        limit: limit,
+        preferOffline: preferOffline,
+      );
+      if (state.messages.isEmpty || state.messages.length < limit) {
+        _bottomPaginationEnded = true;
       }
-    });
+      _queryBottomMessagesController.add(false);
+    } catch (e, stk) {
+      _queryBottomMessagesController.addError(e, stk);
+    }
+  }
+
+  /// Calls [channel.query] updating [queryMessage] stream
+  Future<void> queryMessages({QueryDirection direction = QueryDirection.top}) {
+    if (direction == QueryDirection.top) return _queryTopMessages();
+    return _queryBottomMessages();
   }
 
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(
     String parentId, {
-    QueryDirection direction = QueryDirection.top,
+    int limit = 50,
+    bool preferOffline = false,
   }) async {
-    if (_queryMessageController.value == true ||
-        (_topPaginationEnded && _bottomPaginationEnded)) {
-      return;
+    if (_topPaginationEnded || _queryTopMessagesController.value) return;
+    _queryTopMessagesController.add(true);
+
+    if (!channel.state.threads.containsKey(parentId)) {
+      return _queryTopMessagesController.add(false);
     }
 
-    _queryMessageController.add(true);
+    final thread = channel.state.threads[parentId];
 
-    String id;
-    PaginationParams params;
+    if (thread.isEmpty) return _queryTopMessagesController.add(false);
 
-    final messageLimit = 50;
+    final message = thread.first;
 
-    if (widget.channel.state.threads.containsKey(parentId)) {
-      final thread = widget.channel.state.threads[parentId];
-      if (thread != null && thread.isNotEmpty) {
-        switch (direction) {
-          case QueryDirection.top:
-            id = thread?.first?.id;
-            params = PaginationParams(
-              lessThan: id,
-              limit: messageLimit,
-            );
-            break;
-          case QueryDirection.bottom:
-            id = thread?.last?.id;
-            params = PaginationParams(
-              greaterThan: id,
-              limit: messageLimit,
-            );
-            break;
-        }
+    try {
+      final state = await queryBeforeMessage(
+        message.id,
+        limit: limit,
+        preferOffline: preferOffline,
+      );
+      if (state.messages.isEmpty || state.messages.length < limit) {
+        _topPaginationEnded = true;
       }
+      _queryTopMessagesController.add(false);
+    } catch (e, stk) {
+      _queryTopMessagesController.addError(e, stk);
     }
-
-    return widget.channel
-        .getReplies(
-      parentId,
-      params,
-      preferOffline: true,
-    )
-        .then((res) {
-      if (res.messages.isEmpty || res.messages.length < messageLimit) {
-        switch (direction) {
-          case QueryDirection.top:
-            _topPaginationEnded = true;
-            break;
-          case QueryDirection.bottom:
-            _bottomPaginationEnded = true;
-            break;
-        }
-      }
-      _queryMessageController.add(false);
-    }).catchError((e, stack) {
-      _queryMessageController.addError(e, stack);
-    });
   }
 
   /// Query the channel members and watchers
@@ -190,41 +182,148 @@ class StreamChannelState extends State<StreamChannel> {
     );
   }
 
+  /// Loads channel at specific message
+  Future<void> loadChannelAtMessage(
+    String messageId, {
+    int before = 20,
+    int after = 20,
+    bool preferOffline = false,
+  }) {
+    return queryAtMessage(
+      messageId: messageId,
+      before: before,
+      after: after,
+      preferOffline: preferOffline,
+    );
+  }
+
+  ///
+  Future<void> queryAtMessage({
+    String messageId,
+    int before = 20,
+    int after = 20,
+    bool preferOffline = false,
+  }) async {
+    if (channel.state == null) return;
+    channel.state.isUpToDate = false;
+    channel.state.truncate();
+
+    if (messageId == null) {
+      await channel.query(
+        messagesPagination: PaginationParams(
+          limit: before,
+        ),
+        preferOffline: preferOffline,
+      );
+      channel.state.isUpToDate = true;
+      return;
+    }
+
+    return Future.wait([
+      queryBeforeMessage(
+        messageId,
+        limit: before,
+        preferOffline: preferOffline,
+      ),
+      queryAfterMessage(
+        messageId,
+        limit: after,
+        preferOffline: preferOffline,
+      ),
+    ]);
+  }
+
+  ///
+  Future<ChannelState> queryBeforeMessage(
+    String messageId, {
+    int limit = 20,
+    bool preferOffline = false,
+  }) {
+    return channel.query(
+      messagesPagination: PaginationParams(
+        lessThan: messageId,
+        limit: limit,
+      ),
+      preferOffline: preferOffline,
+    );
+  }
+
+  ///
+  Future<ChannelState> queryAfterMessage(
+    String messageId, {
+    int limit = 20,
+    bool preferOffline = false,
+  }) async {
+    final state = await channel.query(
+      messagesPagination: PaginationParams(
+        greaterThanOrEqual: messageId,
+        limit: limit,
+      ),
+      preferOffline: preferOffline,
+    );
+    if (state.messages.isEmpty || state.messages.length < limit) {
+      channel.state.isUpToDate = true;
+    }
+    return state;
+  }
+
+  /// Reloads the channel with latest message
+  Future<void> reloadChannel() => queryAtMessage(before: 30);
+
+  List<Future<bool>> _futures;
+
+  Future<bool> get _loadChannelAtMessage async {
+    try {
+      await loadChannelAtMessage(initialMessageId);
+      return true;
+    } catch (e, stk) {
+      print('Error: $e\nStack: $stk');
+      rethrow;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _futures = [widget.channel.initialized];
+    if (initialMessageId != null) {
+      _futures.add(_loadChannelAtMessage);
+    }
+  }
+
   @override
   void dispose() {
-    _queryMessageController.close();
+    _queryTopMessagesController.close();
+    _queryBottomMessagesController.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.channel == null) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    return FutureBuilder<bool>(
-      future: widget.channel.initialized,
-      initialData: widget.channel.state != null,
+    Widget child = FutureBuilder<List<bool>>(
+      future: Future.wait(_futures),
+      initialData: [
+        channel.state != null,
+        if (initialMessageId != null) false,
+      ],
       builder: (context, snapshot) {
-        if (widget.showLoading && (!snapshot.hasData || !snapshot.data)) {
-          return Container(
-            height: 30,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+        final initialized = snapshot.data[0];
+        final dataLoaded = initialMessageId == null ? true : snapshot.data[1];
+        if (widget.showLoading && (!initialized || !dataLoaded)) {
+          return Center(
+            child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError) {
-          return Container(
-            height: 30,
-            child: Center(
-              child: Text(snapshot.error),
-            ),
+          return Center(
+            child: Text(snapshot.error),
           );
-        } else {
-          return widget.child;
         }
+        return widget.child;
       },
     );
+    if (initialMessageId != null) {
+      child = Material(child: child);
+    }
+    return child;
   }
 }

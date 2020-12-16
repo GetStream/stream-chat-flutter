@@ -37,9 +37,9 @@ class AppRoutes {
               final arg = args as ChannelPageArgs;
               return StreamChannel(
                 channel: arg.channel,
+                initialMessageId: arg.initialMessage?.id,
                 child: ChannelPage(
-                  initialScrollIndex: arg.initialScrollIndex,
-                  initialAlignment: arg.initialAlignment,
+                  highlightInitialMessage: arg.initialMessage != null,
                 ),
               );
             });

@@ -13,13 +13,13 @@ import 'routes/routes.dart';
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
 const kStreamToken = 'STREAM_TOKEN';
-const kDefaultStreamApiKey = 'uj7qrdbfrzvg';
+const kDefaultStreamApiKey = 's2dxdhpxd94g';
 
 class ChooseUserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final users = <String, User>{
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0.lCz-idDgaZ-xszjnuB_hTfeIOhTFmJtTB2fEjhwrcCI':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0._JHWzo92fpTWZMZriJHXqOng6ShYVmWrdaIaPwEPKBg':
           User(
         id: 'vishal',
         extraData: {
