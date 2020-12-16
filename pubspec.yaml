@@ -29,10 +29,9 @@ dependencies:
   image_picker: ^0.6.7+2
   flutter_keyboard_visibility: ^3.3.0
   stream_chat:
-    path: ../stream-chat-dart
-#    git:
-#      url: https://github.com/GetStream/stream-chat-dart
-#      ref: two-way-pagination
+    git:
+      url: https://github.com/GetStream/stream-chat-dart
+      ref: two-way-pagination
   mime: ^0.9.6+3
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5
