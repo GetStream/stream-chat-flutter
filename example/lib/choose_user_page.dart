@@ -13,7 +13,7 @@ import 'routes/routes.dart';
 const kStreamApiKey = 'STREAM_API_KEY';
 const kStreamUserId = 'STREAM_USER_ID';
 const kStreamToken = 'STREAM_TOKEN';
-const kDefaultStreamApiKey = 's2dxdhpxd94g';
+const kDefaultStreamApiKey = 'uj7qrdbfrzvg';
 
 class ChooseUserPage extends StatelessWidget {
   @override
