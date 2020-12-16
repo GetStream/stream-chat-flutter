@@ -358,7 +358,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   context,
                   Routes.CHANNEL_PAGE,
                   ModalRoute.withName(Routes.HOME),
-                  arguments: channel,
+                  arguments: ChannelPageArgs(channel: channel),
                 );
               },
             ),
