@@ -1287,10 +1287,11 @@ class MessageInputState extends State<MessageInput> {
             children: [
               if (_attachments.any((e) => e.attachment?.type == 'file'))
                 LimitedBox(
-                  maxHeight: 73.0,
+                  maxHeight: 136.0,
                   child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: _attachments
+                    reverse: true,
+                    shrinkWrap: true,
+                    children: _attachments.reversed
                         .where((e) => e.attachment?.type == 'file')
                         .map(
                           (e) => Padding(
@@ -1304,8 +1305,8 @@ class MessageInputState extends State<MessageInput> {
                                 attachmentType: FileAttachmentType.local,
                                 file: e.file,
                                 size: Size(
-                                  MediaQuery.of(context).size.width * 0.55,
-                                  MediaQuery.of(context).size.height * 0.3,
+                                  MediaQuery.of(context).size.width * 0.65,
+                                  56.0,
                                 ),
                                 trailing: Padding(
                                   padding: const EdgeInsets.all(8.0),
