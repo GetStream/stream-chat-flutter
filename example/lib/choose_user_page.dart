@@ -19,7 +19,7 @@ class ChooseUserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final users = <String, User>{
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0._JHWzo92fpTWZMZriJHXqOng6ShYVmWrdaIaPwEPKBg':
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0.lCz-idDgaZ-xszjnuB_hTfeIOhTFmJtTB2fEjhwrcCI':
           User(
         id: 'vishal',
         extraData: {
