@@ -37,6 +37,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   bool _showUserList = true;
 
+  bool _channelExisted = false;
+
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
@@ -56,11 +58,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
     _searchFocusNode.addListener(() async {
       if (_searchFocusNode.hasFocus && !_showUserList) {
-        if (channel.extraData['draft'] == true) {
-          await channel.stopWatching();
-          channel.dispose();
-          channel.client.state.channels.remove(channel.cid);
-        }
         setState(() {
           _showUserList = true;
         });
@@ -71,19 +68,38 @@ class _NewChatScreenState extends State<NewChatScreen> {
       if (_messageInputFocusNode.hasFocus && _selectedUsers.isNotEmpty) {
         final chatState = StreamChat.of(context);
 
-        channel = chatState.client.channel(
-          'messaging',
-          extraData: {
+        final res = await chatState.client.queryChannels(
+          options: {
+            'state': false,
+            'watch': false,
+          },
+          filter: {
             'members': [
               ..._selectedUsers.map((e) => e.id),
               chatState.user.id,
             ],
-            'draft': true,
+            'distinct': true,
           },
-        );
+          messageLimit: 0,
+          paginationParams: PaginationParams(
+            limit: 1,
+          ),
+        ).first;
 
-        if (!chatState.client.state.channels.containsKey(channel.cid)) {
+        final _channelExisted = res.length == 1;
+        if (_channelExisted) {
+          channel = res.first;
           await channel.watch();
+        } else {
+          channel = chatState.client.channel(
+            'messaging',
+            extraData: {
+              'members': [
+                ..._selectedUsers.map((e) => e.id),
+                chatState.user.id,
+              ],
+            },
+          );
         }
 
         setState(() {
@@ -134,6 +150,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                 return GestureDetector(
                   onTap: () {
                     _chipInputTextFieldState.removeItem(user);
+                    _searchFocusNode.requestFocus();
                   },
                   child: Stack(
                     alignment: AlignmentDirectional.centerStart,
@@ -311,35 +328,43 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         ),
                       ),
                     )
-                  : MessageListView(),
+                  : FutureBuilder<bool>(
+                      future: channel.initialized,
+                      builder: (context, snapshot) {
+                        if (snapshot.data == true) {
+                          return MessageListView();
+                        }
+
+                        return Center(
+                          child: Text(
+                            'No chats here yet...',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(.5),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
             MessageInput(
               focusNode: _messageInputFocusNode,
+              preMessageSending: (message) async {
+                await channel.watch();
+                return message;
+              },
               onMessageSent: (m) {
-                if (!m.isEphemeral) {
-                  _updateChannelAndNavigate(context);
-                } else {
-                  channel.on('message.new').first.then((_) {
-                    _updateChannelAndNavigate(context);
-                  });
-                }
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  Routes.CHANNEL_PAGE,
+                  ModalRoute.withName(Routes.HOME),
+                  arguments: channel,
+                );
               },
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void _updateChannelAndNavigate(BuildContext context) {
-    channel.update({
-      'draft': false,
-    });
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      Routes.CHANNEL_PAGE,
-      ModalRoute.withName(Routes.HOME),
-      arguments: ChannelPageArgs(channel: channel),
     );
   }
 }

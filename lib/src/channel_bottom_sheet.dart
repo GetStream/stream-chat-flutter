@@ -69,40 +69,26 @@ class ChannelBottomSheet extends StatelessWidget {
               ),
             ),
             Divider(),
-            StreamBuilder<bool>(
-                stream: channel.isMutedStream,
-                initialData: channel.isMuted,
-                builder: (context, snapshot) {
-                  return ListTile(
-                    leading: StreamSvgIcon.mute(
-                      size: 22,
-                      color: StreamChatTheme.of(context).primaryIconTheme.color,
-                    ),
-                    title: Text('Mute ${channel.isGroup ? 'group' : 'user'}'),
-                    trailing: Switch(
-                      onChanged: (bool muted) async {
-                        if (muted) {
-                          await channel.mute();
-                        } else {
-                          await channel.unmute();
-                        }
-                      },
-                      value: snapshot.data,
-                    ),
-                  );
-                }),
-            Divider(),
             if (channel.isGroup && !channel.isDistinct)
               ListTile(
                 leading: StreamSvgIcon.userRemove(
-                  size: 22,
-                  color: Colors.black,
+                  size: 24,
+                  color: Color(0xff7A7A7A),
                 ),
-                title: Text('Leave Group'),
+                title: Text(
+                  'Leave Group',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 onTap: () async {
                   final confirm = await showConfirmationDialog(
                     context,
-                    'Do you want to leave the group?',
+                    title: 'Leave Group',
+                    okText: 'LEAVE',
+                    question: 'Are you sure you want to leave this group?',
+                    cancelText: 'CANCEL',
+                    icon: StreamSvgIcon.userRemove(
+                      color: Colors.red,
+                    ),
                   );
                   if (confirm == true) {
                     await channel
@@ -111,11 +97,17 @@ class ChannelBottomSheet extends StatelessWidget {
                   }
                 },
               ),
-            if (!channel.isGroup && !channel.isDistinct)
+            if ([
+              'admin',
+              'owner',
+            ].contains(channel.state.members
+                .firstWhere((m) => m.userId == channel.client.state.user.id,
+                    orElse: () => null)
+                ?.role))
               ListTile(
-                leading: Icon(
-                  Icons.delete_outline,
+                leading: StreamSvgIcon.delete(
                   color: Color(0xFFFF3742),
+                  size: 24,
                 ),
                 title: Text(
                   'Delete chat',
@@ -124,14 +116,22 @@ class ChannelBottomSheet extends StatelessWidget {
                   ),
                 ),
                 onTap: () async {
-                  final confirm = await showConfirmationDialog(
+                  final res = await showConfirmationDialog(
                     context,
-                    'Do you want to delete the chat?',
+                    title: 'Delete Conversation',
+                    okText: 'DELETE',
+                    question:
+                        'Are you sure you want to delete this conversation?',
+                    cancelText: 'CANCEL',
+                    icon: StreamSvgIcon.delete(
+                      color: Colors.red,
+                    ),
                   );
-                  if (confirm == true) {
-                    await channel
-                        .removeMembers([StreamChat.of(context).user.id]);
-                    Navigator.pop(context);
+                  var channel = StreamChannel.of(context).channel;
+                  if (res == true) {
+                    await channel.delete().then((value) {
+                      Navigator.pop(context);
+                    });
                   }
                 },
               ),
