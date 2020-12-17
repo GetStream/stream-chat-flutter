@@ -14,15 +14,15 @@ class ChannelsBloc extends StatefulWidget {
   /// Set this to true to prevent channels to be brought to the top of the list when a new message arrives
   final bool lockChannelsOrder;
 
-  /// Function used to sort the channels when a message.new event is received
-  final List<Channel> Function(List<Channel>) sortChannels;
+  /// Comparator used to sort the channels when a message.new event is received
+  final Comparator<Channel> channelsComparator;
 
   /// Instantiate a new ChannelsBloc
   const ChannelsBloc({
     Key key,
     this.child,
     this.lockChannelsOrder = false,
-    this.sortChannels,
+    this.channelsComparator,
   }) : super(key: key);
 
   @override
@@ -146,12 +146,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
           }
         }
 
-        if (widget.sortChannels != null) {
-          final sortedChannels = widget.sortChannels(newChannels);
-          _channelsController.add(sortedChannels);
-        } else {
-          _channelsController.add(newChannels);
+        if (widget.channelsComparator != null) {
+          newChannels.sort(widget.channelsComparator);
         }
+        _channelsController.add(newChannels);
       }));
     }
 
