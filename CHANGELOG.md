@@ -1,3 +1,7 @@
+## 0.2.17+2
+
+- Expose ChannelsBloc.channelsComparator to sort channels on message.new event
+
 ## 0.2.17+1
 
 - Fix mention tap bug
