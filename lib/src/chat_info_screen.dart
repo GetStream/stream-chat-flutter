@@ -174,10 +174,27 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
+            final channel = StreamChannel.of(context).channel;
+
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ChannelMediaDisplayScreen()));
+              context,
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: MessageSearchBloc(
+                    child: ChannelMediaDisplayScreen(
+                      sortOptions: [
+                        SortOption(
+                          'created_at',
+                          direction: SortOption.ASC,
+                        ),
+                      ],
+                      paginationParams: PaginationParams(limit: 20),
+                    ),
+                  ),
+                ),
+              ),
+            );
           },
         ),
         OptionListTile(
@@ -188,10 +205,27 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
+            final channel = StreamChannel.of(context).channel;
+
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ChannelFileDisplayScreen()));
+              context,
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: MessageSearchBloc(
+                    child: ChannelFileDisplayScreen(
+                      sortOptions: [
+                        SortOption(
+                          'created_at',
+                          direction: SortOption.ASC,
+                        ),
+                      ],
+                      paginationParams: PaginationParams(limit: 20),
+                    ),
+                  ),
+                ),
+              ),
+            );
           },
         ),
         OptionListTile(

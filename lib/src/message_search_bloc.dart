@@ -55,6 +55,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   /// Calls [Client.search] updating [queryMessagesLoading] stream
   Future<void> search({
     Map<String, dynamic> filter,
+    Map<String, dynamic> messageFilter,
     List<SortOption> sort,
     String query,
     PaginationParams pagination,
@@ -78,6 +79,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         sort,
         query,
         pagination,
+        messageFilters: messageFilter,
       );
 
       if (clear) {
