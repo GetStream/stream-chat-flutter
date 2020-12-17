@@ -183,22 +183,15 @@ class _MessageListViewState extends State<MessageListView> {
       final messageIndex = messages.indexWhere((e) {
         return e.id == streamChannel.initialMessageId;
       });
-      return totalMessages - messageIndex;
+      final index = totalMessages - messageIndex;
+      if (index != 0) return index - 1;
+      return index;
     }
     return 0;
   }
 
   double get _initialAlignment {
     if (widget.initialAlignment != null) return widget.initialAlignment;
-    final streamChannel = StreamChannel.of(context);
-    if (streamChannel.initialMessageId != null) {
-      final messages = streamChannel.channel.state.messages;
-      final messageIndex = messages.indexWhere((e) {
-        return e.id == streamChannel.initialMessageId;
-      });
-      final isFirstMessage = messageIndex == 0;
-      return isFirstMessage ? 0 : 0.5;
-    }
     return 0;
   }
 
@@ -212,12 +205,12 @@ class _MessageListViewState extends State<MessageListView> {
   bool _topPaginationActive = false;
   bool _bottomPaginationActive = false;
 
-  bool get _paginationActive => _topPaginationActive || _bottomPaginationActive;
-
   int initialIndex;
   double initialAlignment;
 
   List<Message> messages = <Message>[];
+
+  bool initialMessageHighlightComplete = false;
 
   @override
   Widget build(BuildContext context) {
@@ -228,11 +221,6 @@ class _MessageListViewState extends State<MessageListView> {
             .where((threads) => threads.containsKey(widget.parentMessage.id))
             .map((threads) => threads[widget.parentMessage.id])
         : streamChannel.channel.state?.messagesStream;
-
-    if (!_paginationActive && !_upToDate) {
-      initialIndex = _initialIndex;
-      initialAlignment = _initialAlignment;
-    }
 
     return WillPopScope(
       onWillPop: () async {
@@ -275,21 +263,22 @@ class _MessageListViewState extends State<MessageListView> {
 
             final newMessagesListLength = messages.length;
 
-            if (_bottomPaginationActive) {
-              if (_itemPositionListener.itemPositions.value?.isNotEmpty ==
-                      true &&
-                  _messageListLength != null) {
-                final first = _itemPositionListener.itemPositions.value.first;
-                final diff = newMessagesListLength - _messageListLength;
-                if (diff > 0) {
-                  initialIndex = first.index + diff;
-                  initialAlignment = first.itemLeadingEdge;
+            if (_messageListLength != null) {
+              if (_bottomPaginationActive) {
+                if (_itemPositionListener.itemPositions.value?.isNotEmpty ==
+                    true) {
+                  final first = _itemPositionListener.itemPositions.value.first;
+                  final diff = newMessagesListLength - _messageListLength;
+                  if (diff > 0) {
+                    initialIndex = first.index + diff;
+                    initialAlignment = first.itemLeadingEdge;
+                  }
                 }
+              } else if (!_topPaginationActive && _upToDate) {
+                // Reset the index in-case we send any new message
+                initialIndex = 0;
+                initialAlignment = 0;
               }
-            } else if (!_topPaginationActive && _upToDate) {
-              // Reset the index in-case we send any new message
-              initialIndex = 0;
-              initialAlignment = 0;
             }
 
             _messageListLength = newMessagesListLength;
@@ -731,7 +720,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
 
-    return MessageWidget(
+    Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
       reverse: isMyMessage,
@@ -773,6 +762,30 @@ class _MessageListViewState extends State<MessageListView> {
       readList: readList,
       allRead: allRead,
     );
+
+    if (!initialMessageHighlightComplete &&
+        widget.highlightInitialMessage &&
+        _isInitialMessage(message.id)) {
+      final accentColor = Theme.of(context).accentColor;
+      child = TweenAnimationBuilder<Color>(
+        tween: ColorTween(
+          begin: accentColor.withOpacity(0.7),
+          end: Colors.transparent,
+        ),
+        duration: const Duration(seconds: 2),
+        child: child,
+        onEnd: () {
+          initialMessageHighlightComplete = true;
+        },
+        builder: (_, color, child) {
+          return Container(
+            color: color,
+            child: child,
+          );
+        },
+      );
+    }
+    return child;
   }
 
   StreamSubscription _messageNewListener;
@@ -784,6 +797,9 @@ class _MessageListViewState extends State<MessageListView> {
         widget.itemPositionListener ?? ItemPositionsListener.create();
 
     final streamChannel = StreamChannel.of(context);
+
+    initialIndex = _initialIndex;
+    initialAlignment = _initialAlignment;
 
     _messageNewListener =
         streamChannel.channel.on(EventType.messageNew).listen((event) {

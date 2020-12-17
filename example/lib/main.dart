@@ -339,7 +339,9 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                 messageResponse.channel.type,
                                 id: messageResponse.channel.id,
                               );
-                              await channel.watch();
+                              if (channel.state == null) {
+                                await channel.watch();
+                              }
                               Navigator.pushNamed(
                                 context,
                                 Routes.CHANNEL_PAGE,
