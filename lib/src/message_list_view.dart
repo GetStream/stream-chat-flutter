@@ -294,13 +294,13 @@ class _MessageListViewState extends State<MessageListView> {
                   if (!_upToDate) {
                     _topPaginationActive = false;
                     _bottomPaginationActive = true;
-                    _paginateData(streamChannel, QueryDirection.bottom);
+                    return _paginateData(streamChannel, QueryDirection.bottom);
                   }
                 },
                 onEndOfPage: () async {
                   _topPaginationActive = true;
                   _bottomPaginationActive = false;
-                  _paginateData(streamChannel, QueryDirection.top);
+                  return _paginateData(streamChannel, QueryDirection.top);
                 },
                 child: ScrollablePositionedList.builder(
                   key: ValueKey(initialIndex + initialAlignment),
@@ -453,11 +453,12 @@ class _MessageListViewState extends State<MessageListView> {
         });
   }
 
-  void _paginateData(StreamChannelState channel, QueryDirection direction) {
+  Future<void> _paginateData(
+      StreamChannelState channel, QueryDirection direction) {
     if (widget.parentMessage == null) {
-      channel.queryMessages(direction: direction);
+      return channel.queryMessages(direction: direction);
     } else {
-      channel.getReplies(widget.parentMessage.id);
+      return channel.getReplies(widget.parentMessage.id);
     }
   }
 
