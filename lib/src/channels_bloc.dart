@@ -58,6 +58,11 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
 
+  /// Set the current channel list
+  set channels(List<Channel> newChannels) {
+    _channelsController.add(newChannels);
+  }
+
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
       _queryChannelsLoadingController.stream;
