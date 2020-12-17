@@ -14,11 +14,15 @@ class ChannelsBloc extends StatefulWidget {
   /// Set this to true to prevent channels to be brought to the top of the list when a new message arrives
   final bool lockChannelsOrder;
 
+  /// Function used to sort the channels when a message.new event is received
+  final List<Channel> Function(List<Channel>) sortChannels;
+
   /// Instantiate a new ChannelsBloc
   const ChannelsBloc({
     Key key,
     this.child,
     this.lockChannelsOrder = false,
+    this.sortChannels,
   }) : super(key: key);
 
   @override
@@ -57,11 +61,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
       BehaviorSubject.seeded(false);
 
   final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
-
-  /// Set the current channel list
-  set channels(List<Channel> newChannels) {
-    _channelsController.add(newChannels);
-  }
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -146,7 +145,13 @@ class ChannelsBlocState extends State<ChannelsBloc>
             }
           }
         }
-        _channelsController.add(newChannels);
+
+        if (widget.sortChannels != null) {
+          final sortedChannels = widget.sortChannels(newChannels);
+          _channelsController.add(sortedChannels);
+        } else {
+          _channelsController.add(newChannels);
+        }
       }));
     }
 
