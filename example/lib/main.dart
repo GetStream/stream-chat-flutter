@@ -335,10 +335,11 @@ class _ChannelListPageState extends State<ChannelListPage> {
                             onItemTap: (messageResponse) async {
                               final client = StreamChat.of(context).client;
                               final message = messageResponse.message;
-                              final channel = Channel.fromState(
-                                client,
-                                ChannelState(channel: messageResponse.channel),
+                              final channel = client.channel(
+                                messageResponse.channel.type,
+                                id: messageResponse.channel.id,
                               );
+                              await channel.watch();
                               Navigator.pushNamed(
                                 context,
                                 Routes.CHANNEL_PAGE,

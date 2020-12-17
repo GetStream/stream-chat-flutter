@@ -183,7 +183,7 @@ class _MessageListViewState extends State<MessageListView> {
       final messageIndex = messages.indexWhere((e) {
         return e.id == streamChannel.initialMessageId;
       });
-      return totalMessages - messageIndex - 1;
+      return totalMessages - messageIndex;
     }
     return 0;
   }
@@ -234,223 +234,235 @@ class _MessageListViewState extends State<MessageListView> {
       initialAlignment = _initialAlignment;
     }
 
-    return StreamBuilder<List<Message>>(
-        stream: messagesStream?.map((messages) => messages
-            ?.where((e) =>
-                !e.isDeleted ||
-                (e.isDeleted &&
-                    e.user.id == streamChannel.channel.client.state.user.id))
-            ?.toList()),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final messageList = snapshot.data?.reversed?.toList() ?? [];
-
-          if (messageList.isEmpty) {
-            if (_upToDate) {
+    return WillPopScope(
+      onWillPop: () async {
+        if (!_upToDate) {
+          await streamChannel.reloadChannel();
+        }
+        return true;
+      },
+      child: StreamBuilder<List<Message>>(
+          stream: messagesStream?.map((messages) => messages
+              ?.where((e) =>
+                  !e.isDeleted ||
+                  (e.isDeleted &&
+                      e.user.id == streamChannel.channel.client.state.user.id))
+              ?.toList()),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
               return Center(
-                child: Text(
-                  'No chats here yet...',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black.withOpacity(.5),
-                  ),
-                ),
+                child: CircularProgressIndicator(),
               );
             }
-          } else {
-            messages = messageList;
-          }
 
-          final newMessagesListLength = messages.length;
+            final messageList = snapshot.data?.reversed?.toList() ?? [];
 
-          if (_bottomPaginationActive) {
-            if (_itemPositionListener.itemPositions.value?.isNotEmpty == true &&
-                _messageListLength != null) {
-              final first = _itemPositionListener.itemPositions.value.first;
-              final diff = newMessagesListLength - _messageListLength;
-              if (diff > 0) {
-                initialIndex = first.index + diff;
-                initialAlignment = first.itemLeadingEdge;
+            if (messageList.isEmpty) {
+              if (_upToDate) {
+                return Center(
+                  child: Text(
+                    'No chats here yet...',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black.withOpacity(.5),
+                    ),
+                  ),
+                );
               }
+            } else {
+              messages = messageList;
             }
-          } else if (!_topPaginationActive && _upToDate) {
-            // Reset the index in-case we send any new message
-            initialIndex = 0;
-            initialAlignment = 0;
-          }
 
-          _messageListLength = newMessagesListLength;
+            final newMessagesListLength = messages.length;
 
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              LazyLoadScrollView(
-                onStartOfPage: () async {
-                  if (!_upToDate) {
-                    _topPaginationActive = false;
-                    _bottomPaginationActive = true;
-                    return _paginateData(streamChannel, QueryDirection.bottom);
-                  }
-                },
-                onEndOfPage: () async {
-                  _topPaginationActive = true;
-                  _bottomPaginationActive = false;
-                  return _paginateData(streamChannel, QueryDirection.top);
-                },
-                child: ScrollablePositionedList.builder(
-                  key: ValueKey(initialIndex + initialAlignment),
-                  itemPositionsListener: _itemPositionListener,
-                  addAutomaticKeepAlives: true,
-                  initialScrollIndex: initialIndex ?? 0,
-                  initialAlignment: initialAlignment ?? 0,
-                  physics: widget.scrollPhysics,
-                  itemScrollController: _scrollController,
-                  reverse: true,
-                  itemCount: messages.length +
-                      2 +
-                      (widget.parentMessage != null ? 1 : 0),
-                  itemBuilder: (context, i) {
-                    if (i == messages.length + 2) {
-                      if (widget.parentMessageBuilder != null) {
-                        return widget.parentMessageBuilder(
+            if (_bottomPaginationActive) {
+              if (_itemPositionListener.itemPositions.value?.isNotEmpty ==
+                      true &&
+                  _messageListLength != null) {
+                final first = _itemPositionListener.itemPositions.value.first;
+                final diff = newMessagesListLength - _messageListLength;
+                if (diff > 0) {
+                  initialIndex = first.index + diff;
+                  initialAlignment = first.itemLeadingEdge;
+                }
+              }
+            } else if (!_topPaginationActive && _upToDate) {
+              // Reset the index in-case we send any new message
+              initialIndex = 0;
+              initialAlignment = 0;
+            }
+
+            _messageListLength = newMessagesListLength;
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                LazyLoadScrollView(
+                  onStartOfPage: () async {
+                    if (!_upToDate) {
+                      _topPaginationActive = false;
+                      _bottomPaginationActive = true;
+                      return _paginateData(
+                          streamChannel, QueryDirection.bottom);
+                    }
+                  },
+                  onEndOfPage: () async {
+                    _topPaginationActive = true;
+                    _bottomPaginationActive = false;
+                    return _paginateData(streamChannel, QueryDirection.top);
+                  },
+                  child: ScrollablePositionedList.builder(
+                    key: ValueKey(initialIndex + initialAlignment),
+                    itemPositionsListener: _itemPositionListener,
+                    addAutomaticKeepAlives: true,
+                    initialScrollIndex: initialIndex ?? 0,
+                    initialAlignment: initialAlignment ?? 0,
+                    physics: widget.scrollPhysics,
+                    itemScrollController: _scrollController,
+                    reverse: true,
+                    itemCount: messages.length +
+                        2 +
+                        (widget.parentMessage != null ? 1 : 0),
+                    itemBuilder: (context, i) {
+                      if (i == messages.length + 2) {
+                        if (widget.parentMessageBuilder != null) {
+                          return widget.parentMessageBuilder(
+                            context,
+                            widget.parentMessage,
+                          );
+                        } else {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              buildParentMessage(widget.parentMessage),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 32),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    'Start of thread',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  color: Theme.of(context)
+                                      .accentColor
+                                      .withAlpha(50),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      }
+                      if (i == messages.length + 1) {
+                        return _buildLoadingIndicator(
+                          streamChannel,
+                          QueryDirection.top,
+                        );
+                      }
+                      if (i == 0) {
+                        return _buildLoadingIndicator(
+                          streamChannel,
+                          QueryDirection.bottom,
+                        );
+                      }
+                      final message = messages[i - 1];
+                      final nextMessage = (i - 1) > 0 ? messages[i - 2] : null;
+
+                      Widget messageWidget;
+
+                      if (i == 1) {
+                        messageWidget = _buildBottomMessage(
                           context,
-                          widget.parentMessage,
+                          message,
+                          messages,
+                          streamChannel,
+                        );
+                      } else if (i == messages.length - 1) {
+                        messageWidget = _buildTopMessage(
+                          context,
+                          message,
+                          messages,
+                          streamChannel,
                         );
                       } else {
+                        if (widget.messageBuilder != null) {
+                          messageWidget = Builder(
+                            key: ValueKey<String>('MESSAGE-${message.id}'),
+                            builder: (_) => widget.messageBuilder(
+                                context,
+                                MessageDetails(
+                                  context,
+                                  message,
+                                  messages,
+                                  i,
+                                ),
+                                messages),
+                          );
+                        } else {
+                          messageWidget = buildMessage(message, messages, i);
+                        }
+                      }
+
+                      if (nextMessage != null &&
+                          !Jiffy(message.createdAt.toLocal()).isSame(
+                              nextMessage.createdAt.toLocal(), Units.DAY)) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            buildParentMessage(widget.parentMessage),
+                            messageWidget,
                             Padding(
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 32),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                  'Start of thread',
-                                  textAlign: TextAlign.center,
-                                ),
-                                color:
-                                    Theme.of(context).accentColor.withAlpha(50),
-                              ),
+                                  const EdgeInsets.symmetric(vertical: 12.0),
+                              child: widget.dateDividerBuilder != null
+                                  ? widget.dateDividerBuilder(
+                                      nextMessage.createdAt.toLocal())
+                                  : DateDivider(
+                                      dateTime: nextMessage.createdAt.toLocal(),
+                                    ),
                             ),
                           ],
                         );
                       }
-                    }
-                    if (i == messages.length + 1) {
-                      return _buildLoadingIndicator(
-                        streamChannel,
-                        QueryDirection.top,
-                      );
-                    }
-                    if (i == 0) {
-                      return _buildLoadingIndicator(
-                        streamChannel,
-                        QueryDirection.bottom,
-                      );
-                    }
-                    final message = messages[i - 1];
-                    final nextMessage = (i - 1) > 0 ? messages[i - 2] : null;
 
-                    Widget messageWidget;
-
-                    if (i == 1) {
-                      messageWidget = _buildBottomMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel,
-                      );
-                    } else if (i == messages.length - 1) {
-                      messageWidget = _buildTopMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel,
-                      );
-                    } else {
-                      if (widget.messageBuilder != null) {
-                        messageWidget = Builder(
-                          key: ValueKey<String>('MESSAGE-${message.id}'),
-                          builder: (_) => widget.messageBuilder(
-                              context,
-                              MessageDetails(
-                                context,
-                                message,
-                                messages,
-                                i,
-                              ),
-                              messages),
-                        );
-                      } else {
-                        messageWidget = buildMessage(message, messages, i);
+                      return messageWidget;
+                    },
+                  ),
+                ),
+                if (widget.showScrollToBottom) _buildScrollToBottom(),
+                Positioned(
+                  top: 20.0,
+                  child: ValueListenableBuilder<Iterable<ItemPosition>>(
+                    valueListenable: _itemPositionListener.itemPositions,
+                    builder: (context, values, _) {
+                      final items = _itemPositionListener.itemPositions?.value;
+                      if (items.isEmpty || messages.isEmpty) {
+                        return SizedBox();
                       }
-                    }
 
-                    if (nextMessage != null &&
-                        !Jiffy(message.createdAt.toLocal()).isSame(
-                            nextMessage.createdAt.toLocal(), Units.DAY)) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          messageWidget,
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: widget.dateDividerBuilder != null
-                                ? widget.dateDividerBuilder(
-                                    nextMessage.createdAt.toLocal())
-                                : DateDivider(
-                                    dateTime: nextMessage.createdAt.toLocal(),
-                                  ),
-                          ),
-                        ],
-                      );
-                    }
+                      var index = _getTopElement(values).index;
 
-                    return messageWidget;
-                  },
+                      if (index > messages.length) {
+                        return SizedBox();
+                      }
+
+                      if (index == messages.length) {
+                        index = max(index - 1, 0);
+                      }
+
+                      return widget.dateDividerBuilder != null
+                          ? widget.dateDividerBuilder(
+                              messages[index].createdAt.toLocal(),
+                            )
+                          : DateDivider(
+                              dateTime: messages[index].createdAt.toLocal(),
+                            );
+                    },
+                  ),
                 ),
-              ),
-              if (widget.showScrollToBottom) _buildScrollToBottom(),
-              Positioned(
-                top: 20.0,
-                child: ValueListenableBuilder<Iterable<ItemPosition>>(
-                  valueListenable: _itemPositionListener.itemPositions,
-                  builder: (context, values, _) {
-                    final items = _itemPositionListener.itemPositions?.value;
-                    if (items.isEmpty || messages.isEmpty) {
-                      return SizedBox();
-                    }
-
-                    var index = _getTopElement(values).index;
-
-                    if (index > messages.length) {
-                      return SizedBox();
-                    }
-
-                    if (index == messages.length) {
-                      index = max(index - 1, 0);
-                    }
-
-                    return widget.dateDividerBuilder != null
-                        ? widget.dateDividerBuilder(
-                            messages[index].createdAt.toLocal(),
-                          )
-                        : DateDivider(
-                            dateTime: messages[index].createdAt.toLocal(),
-                          );
-                  },
-                ),
-              ),
-            ],
-          );
-        });
+              ],
+            );
+          }),
+    );
   }
 
   Future<void> _paginateData(

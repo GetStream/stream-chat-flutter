@@ -307,15 +307,28 @@ class StreamChannelState extends State<StreamChannel> {
         if (initialMessageId != null) false,
       ],
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          if (snapshot.error is Error) {
+            print((snapshot.error as Error).stackTrace);
+          }
+          var message = snapshot.error.toString();
+          if (snapshot.error is DioError) {
+            final dioError = snapshot.error as DioError;
+            if (dioError.type == DioErrorType.RESPONSE) {
+              message = dioError.message;
+            } else {
+              message = 'Check your connection and retry';
+            }
+          }
+          return Center(
+            child: Text(message),
+          );
+        }
         final initialized = snapshot.data[0];
         final dataLoaded = initialMessageId == null ? true : snapshot.data[1];
         if (widget.showLoading && (!initialized || !dataLoaded)) {
           return Center(
             child: CircularProgressIndicator(),
-          );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text(snapshot.error),
           );
         }
         return widget.child;
