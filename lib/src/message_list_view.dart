@@ -511,6 +511,7 @@ class _MessageListViewState extends State<MessageListView> {
                     _bottomPaginationActive = false;
                     _topPaginationActive = false;
                     streamChannel.reloadChannel();
+                    streamChannel.channel.markRead();
                   } else {
                     setState(() => _showScrollToBottom = false);
                     _scrollController.scrollTo(
@@ -642,7 +643,8 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible && !_bottomWasVisible) {
-          if (streamChannel.channel.config?.readEvents == true &&
+          if (streamChannel.channel.state.isUpToDate &&
+              streamChannel.channel.config?.readEvents == true &&
               streamChannel.channel.state.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
