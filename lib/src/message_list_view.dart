@@ -522,7 +522,8 @@ class _MessageListViewState extends State<MessageListView> {
         .map((messages) =>
             messages
                 ?.where((m) =>
-                    !(m.status == MessageSendingStatus.FAILED && m.isDeleted))
+                    !(m.status == MessageSendingStatus.FAILED && m.isDeleted) &&
+                    m.shadowed != true)
                 ?.toList() ??
             [])
         .listen((newMessages) {

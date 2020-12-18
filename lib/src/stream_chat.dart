@@ -184,6 +184,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
               .on(EventType.messageNew)
               .where((e) => e.user?.id != user.id)
               .where((e) => e.message.silent != true)
+              .where((e) => e.message.shadowed != true)
               .listen((event) async {
             final channel = client.channel(
               event.channelType,
