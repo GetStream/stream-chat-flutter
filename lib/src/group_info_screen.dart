@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/chat_info_screen.dart';
 import 'package:stream_chat_flutter/src/option_list_tile.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
@@ -52,7 +53,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
       filter: {},
     );
     _nameController = TextEditingController.fromValue(
-        TextEditingValue(text: channel.channel.extraData['name']));
+        TextEditingValue(text: channel.channel.extraData['name'] ?? ''));
     _searchController = TextEditingController()..addListener(_userNameListener);
 
     _nameController.addListener(() {
@@ -160,60 +161,65 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           itemCount: snapshot.data.members.length,
           itemBuilder: (context, position) {
             return Material(
-              child: Container(
-                height: 65.0,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 12.0),
-                          child: UserAvatar(
-                            user: snapshot.data.members[position].user,
-                            constraints:
-                                BoxConstraints(maxHeight: 40.0, maxWidth: 40.0),
+              child: InkWell(
+                onTap: () {
+                  var userMember = snapshot.data.members.firstWhere((e) => e.user.id == StreamChat.of(context).user.id);
+                  _showUserInfoModal(snapshot.data.members[position].user, userMember.role == 'owner');
+                },
+                child: Container(
+                  height: 65.0,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 12.0),
+                            child: UserAvatar(
+                              user: snapshot.data.members[position].user,
+                              constraints: BoxConstraints(
+                                  maxHeight: 40.0, maxWidth: 40.0),
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                snapshot.data.members[position].user.name,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(
-                                height: 1.0,
-                              ),
-                              Text(
-                                _getLastSeen(
-                                    snapshot.data.members[position].user),
-                                style: TextStyle(
-                                    color: Colors.black.withOpacity(0.5)),
-                              ),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  snapshot.data.members[position].user.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(
+                                  height: 1.0,
+                                ),
+                                Text(
+                                  _getLastSeen(
+                                      snapshot.data.members[position].user),
+                                  style: TextStyle(
+                                      color: Colors.black.withOpacity(0.5)),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            snapshot.data.members[position].user.id ==
-                                    channel.channel.createdBy.id
-                                ? 'Owner'
-                                : '',
-                            style:
-                                TextStyle(color: Colors.black.withOpacity(0.5)),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              snapshot.data.members[position].role == 'owner'
+                                  ? 'Owner'
+                                  : '',
+                              style: TextStyle(
+                                  color: Colors.black.withOpacity(0.5)),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      height: 1.0,
-                      color: Color(0xffdbdbdb),
-                    ),
-                  ],
+                        ],
+                      ),
+                      Container(
+                        height: 1.0,
+                        color: Color(0xffdbdbdb),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               color: Colors.white,
@@ -227,7 +233,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   Widget _buildNameTile() {
     var channel = StreamChannel.of(context).channel;
-    var channelName = channel.extraData['name'];
+    var channelName = channel.extraData['name'] ?? '';
 
     return Material(
       color: Colors.white,
@@ -415,23 +421,24 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           },
         ),
-        OptionListTile(
-          title: 'Leave Group',
-          leading: StreamSvgIcon.userRemove(
-            size: 24.0,
-            color: Colors.black.withOpacity(0.5),
+        if (!channel.channel.isDistinct)
+          OptionListTile(
+            title: 'Leave Group',
+            leading: StreamSvgIcon.userRemove(
+              size: 24.0,
+              color: Colors.black.withOpacity(0.5),
+            ),
+            trailing: Container(
+              height: 24.0,
+              width: 24.0,
+            ),
+            onTap: () async {
+              await channel.channel
+                  .removeMembers([StreamChat.of(context).user.id]);
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
           ),
-          trailing: Container(
-            height: 24.0,
-            width: 24.0,
-          ),
-          onTap: () async {
-            await channel.channel
-                .removeMembers([StreamChat.of(context).user.id]);
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
-        ),
       ],
     );
   }
@@ -588,6 +595,207 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
       ],
     );
+  }
+
+  void _showUserInfoModal(User user, bool isUserAdmin) {
+    var channel = StreamChannel.of(context).channel;
+
+    showModalBottomSheet(
+      context: context,
+      clipBehavior: Clip.antiAlias,
+      isScrollControlled: true,
+      builder: (context) {
+        return StreamChannel(
+          channel: channel,
+          child: Material(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 24.0,
+                ),
+                Center(
+                  child: Text(
+                    user.name,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                _buildConnectedTitleState(user),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: UserAvatar(
+                      user: user,
+                      constraints: BoxConstraints(
+                        maxHeight: 64.0,
+                        minHeight: 64.0,
+                      ),
+                      borderRadius: BorderRadius.circular(32.0),
+                    ),
+                  ),
+                ),
+                if (StreamChat.of(context).user.id != user.id)
+                  _buildModalListTile(
+                      StreamSvgIcon.user(
+                        color: Color(0xff7a7a7a),
+                        size: 24.0,
+                      ),
+                      'View info', () async {
+                    var client = StreamChat.of(context).client;
+
+                    var c = client.channel('messaging', extraData: {
+                      'members': [
+                        user.id,
+                        StreamChat.of(context).user.id,
+                      ],
+                    });
+
+                    await c.watch();
+
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StreamChannel(
+                          channel: c,
+                          child: ChatInfoScreen(
+                            user: user,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                _buildModalListTile(
+                    StreamSvgIcon.message(
+                      color: Color(0xff7a7a7a),
+                      size: 24.0,
+                    ),
+                    'Message',
+                    () {}),
+                if (!channel.isDistinct && StreamChat.of(context).user.id != user.id && isUserAdmin)
+                  _buildModalListTile(
+                      StreamSvgIcon.userAdd(
+                        color: Color(0xff7a7a7a),
+                        size: 24.0,
+                      ),
+                      'Make Owner', () {
+                    // TODO: I have no clue how to make someone an owner
+                  }),
+                if (!channel.isDistinct && StreamChat.of(context).user.id != user.id && isUserAdmin)
+                  _buildModalListTile(
+                      StreamSvgIcon.userRemove(
+                        color: Colors.red,
+                        size: 24.0,
+                      ),
+                      'Remove From Group', () async {
+                    await channel.removeMembers([user.id]);
+                    Navigator.pop(context);
+                    _memberQueryFuture = channel.queryMembers(
+                      filter: {},
+                    );
+                  }, color: Colors.red),
+                _buildModalListTile(
+                    StreamSvgIcon.close_small(
+                      color: Color(0xff7a7a7a),
+                      size: 24.0,
+                    ),
+                    'Cancel', () {
+                  Navigator.pop(context);
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          topRight: Radius.circular(16.0),
+        ),
+      ),
+    );
+  }
+
+  void _showRemoveUserModal(User user) {}
+
+  Widget _buildConnectedTitleState(User user) {
+    var alternativeWidget;
+
+    final otherMember = user;
+
+    if (otherMember != null) {
+      if (otherMember.online) {
+        alternativeWidget = Text(
+          'Online',
+          style: TextStyle(color: Colors.black.withOpacity(0.5)),
+        );
+      } else {
+        alternativeWidget = Text(
+          'Last seen ${Jiffy(otherMember.lastActive).fromNow()}',
+          style: TextStyle(color: Colors.black.withOpacity(0.5)),
+        );
+      }
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (user.online)
+          Material(
+            type: MaterialType.circle,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              constraints: BoxConstraints.tightFor(
+                width: 28,
+                height: 12,
+              ),
+              child: Material(
+                shape: CircleBorder(),
+                color: Color(0xff20E070),
+              ),
+            ),
+            color: Colors.white,
+          ),
+        alternativeWidget,
+      ],
+    );
+  }
+
+  Widget _buildModalListTile(Widget leading, String title, VoidCallback onTap,
+      {Color color = Colors.black}) {
+    return Material(
+        child: InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            height: 1.0,
+            color: Color(0xffdbdbdb),
+          ),
+          Container(
+            height: 64.0,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: leading,
+                ),
+                Expanded(
+                    child: Text(
+                  title,
+                  style: TextStyle(color: color, fontWeight: FontWeight.bold),
+                ))
+              ],
+            ),
+          ),
+        ],
+      ),
+    ));
   }
 
   String _getChannelName(double width, {List<User> members}) {
