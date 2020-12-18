@@ -15,6 +15,15 @@ class LazyLoadScrollView extends StatefulWidget {
   /// Called when the [child] reaches the end of the list
   final AsyncCallback onEndOfPage;
 
+  /// Called when the list scrolling starts
+  final VoidCallback onPageScrollStart;
+
+  /// Called when the list scrolling ends
+  final VoidCallback onPageScrollEnd;
+
+  /// Called every time the [child] is in-between the list
+  final VoidCallback onInBetweenOfPage;
+
   /// The offset to take into account when triggering [onEndOfPage]/[onStartOfPage] in pixels
   final double scrollOffset;
 
@@ -27,6 +36,9 @@ class LazyLoadScrollView extends StatefulWidget {
     @required this.child,
     this.onStartOfPage,
     this.onEndOfPage,
+    this.onPageScrollStart,
+    this.onPageScrollEnd,
+    this.onInBetweenOfPage,
     this.isLoading = false,
     this.scrollOffset = 100,
   })  : assert(child != null),
@@ -49,12 +61,34 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   }
 
   bool _onNotification(Notification notification) {
+    if (notification is ScrollStartNotification) {
+      if (widget.onPageScrollStart != null) {
+        widget.onPageScrollStart();
+        return true;
+      }
+    }
+    if (notification is ScrollEndNotification) {
+      if (widget.onPageScrollEnd != null) {
+        widget.onPageScrollEnd();
+        return true;
+      }
+    }
     if (notification is ScrollUpdateNotification) {
       final pixels = notification.metrics.pixels;
-      final extentBefore = notification.metrics.extentBefore;
-      final extentAfter = notification.metrics.extentAfter;
+      final maxScrollExtent = notification.metrics.maxScrollExtent;
+      final minScrollExtent = notification.metrics.minScrollExtent;
       final scrollOffset = widget.scrollOffset;
 
+      if (pixels > (minScrollExtent + scrollOffset) &&
+          pixels < (maxScrollExtent - scrollOffset)) {
+        if (widget.onInBetweenOfPage != null) {
+          widget.onInBetweenOfPage();
+          return true;
+        }
+      }
+
+      final extentBefore = notification.metrics.extentBefore;
+      final extentAfter = notification.metrics.extentAfter;
       final scrollingDown = _scrollPosition < pixels;
 
       if (scrollOffset == null || scrollOffset == 0) {

@@ -212,6 +212,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool initialMessageHighlightComplete = false;
 
+  bool _inBetweenList = false;
+
   @override
   Widget build(BuildContext context) {
     final streamChannel = StreamChannel.of(context);
@@ -264,7 +266,7 @@ class _MessageListViewState extends State<MessageListView> {
             final newMessagesListLength = messages.length;
 
             if (_messageListLength != null) {
-              if (_bottomPaginationActive) {
+              if (_bottomPaginationActive || (_inBetweenList && _upToDate)) {
                 if (_itemPositionListener.itemPositions.value?.isNotEmpty ==
                     true) {
                   final first = _itemPositionListener.itemPositions.value.first;
@@ -288,17 +290,27 @@ class _MessageListViewState extends State<MessageListView> {
               children: [
                 LazyLoadScrollView(
                   onStartOfPage: () async {
+                    _inBetweenList = false;
                     if (!_upToDate) {
                       _topPaginationActive = false;
                       _bottomPaginationActive = true;
                       return _paginateData(
-                          streamChannel, QueryDirection.bottom);
+                        streamChannel,
+                        QueryDirection.bottom,
+                      );
                     }
                   },
                   onEndOfPage: () async {
+                    _inBetweenList = false;
                     _topPaginationActive = true;
                     _bottomPaginationActive = false;
-                    return _paginateData(streamChannel, QueryDirection.top);
+                    return _paginateData(
+                      streamChannel,
+                      QueryDirection.top,
+                    );
+                  },
+                  onInBetweenOfPage: () {
+                    _inBetweenList = true;
                   },
                   child: ScrollablePositionedList.builder(
                     key: ValueKey(initialIndex + initialAlignment),
@@ -803,6 +815,10 @@ class _MessageListViewState extends State<MessageListView> {
 
     _messageNewListener =
         streamChannel.channel.on(EventType.messageNew).listen((event) {
+      if (_upToDate) {
+        _bottomPaginationActive = false;
+        _topPaginationActive = false;
+      }
       if (event.message.user.id == streamChannel.channel.client.state.user.id) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollController.jumpTo(
