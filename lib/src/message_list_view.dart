@@ -655,9 +655,10 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible && !_bottomWasVisible) {
-          if (streamChannel.channel.state.isUpToDate &&
-              streamChannel.channel.config?.readEvents == true &&
-              streamChannel.channel.state.unreadCount > 0) {
+          final channel = streamChannel.channel;
+          if (_upToDate &&
+              channel.config?.readEvents == true &&
+              channel.state.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
           _bottomWasVisible = !isVisible;
