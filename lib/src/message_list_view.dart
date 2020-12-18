@@ -519,11 +519,13 @@ class _MessageListViewState extends State<MessageListView> {
                   color: Colors.black,
                 ),
                 onPressed: () {
+                  if (unreadCount > 0) {
+                    streamChannel.channel.markRead();
+                  }
                   if (!_upToDate) {
                     _bottomPaginationActive = false;
                     _topPaginationActive = false;
                     streamChannel.reloadChannel();
-                    streamChannel.channel.markRead();
                   } else {
                     setState(() => _showScrollToBottom = false);
                     _scrollController.scrollTo(

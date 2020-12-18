@@ -24,7 +24,7 @@ void main() async {
 
   final client = Client(
     apiKey ?? kDefaultStreamApiKey,
-    logLevel: Level.SEVERE,
+    logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
     persistenceEnabled: true,
