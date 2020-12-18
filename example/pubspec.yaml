@@ -1,6 +1,6 @@
 name: example
 description: A new Flutter project.
-version: 1.0.93+96
+version: 1.0.92+95
 
 environment:
   sdk: ">=2.2.2 <3.0.0"

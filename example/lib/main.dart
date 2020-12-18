@@ -24,7 +24,7 @@ void main() async {
 
   final client = Client(
     apiKey ?? kDefaultStreamApiKey,
-    logLevel: Level.INFO,
+    logLevel: Level.SEVERE,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
     persistenceEnabled: true,
@@ -213,12 +213,16 @@ class _HomePageState extends State<HomePage> {
                   alignment: Alignment.bottomCenter,
                   child: ListTile(
                     onTap: () async {
-                      await StreamChat.of(context).client.disconnect();
+                      Navigator.pop(context);
 
                       final secureStorage = FlutterSecureStorage();
                       await secureStorage.deleteAll();
-                      Navigator.pop(context);
-                      Navigator.pushReplacementNamed(
+
+                      StreamChat.of(context).client.disconnect(
+                            clearUser: true,
+                          );
+
+                      await Navigator.pushReplacementNamed(
                         context,
                         Routes.CHOOSE_USER,
                       );
