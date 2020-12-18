@@ -745,7 +745,8 @@ class _MessageListViewState extends State<MessageListView> {
       padding: EdgeInsets.only(
         left: 8.0,
         right: 8.0,
-        bottom: index == 0 ? 30 : (isNextUser ? 5 : 10),
+        bottom: index == 0 ? 30 : (isNextUser ? 2 : 7),
+        top: 3,
       ),
       showUsername: !isMyMessage && !isNextUser,
       showSendingIndicator: isMyMessage &&
