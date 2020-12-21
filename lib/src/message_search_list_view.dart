@@ -14,6 +14,10 @@ typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 typedef MessageSearchItemBuilder = Widget Function(
     BuildContext, GetMessageResponse);
 
+/// Builder used when [MessageSearchListView] is empty
+typedef EmptyMessageSearchBuilder = Widget Function(
+    BuildContext context, String searchQuery);
+
 ///
 /// It shows the list of searched messages.
 ///
@@ -85,7 +89,7 @@ class MessageSearchListView extends StatefulWidget {
   final MessageSearchItemTapCallback onItemTap;
 
   /// The builder used when the channel list is empty.
-  final WidgetBuilder emptyBuilder;
+  final EmptyMessageSearchBuilder emptyBuilder;
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
@@ -250,11 +254,10 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
         final items = snapshot.data;
 
-        if (items.isEmpty && widget.emptyBuilder != null) {
-          return widget.emptyBuilder(context);
-        }
-
-        if (items.isEmpty && widget.emptyBuilder == null) {
+        if (items.isEmpty) {
+          if (widget.emptyBuilder != null) {
+            return widget.emptyBuilder(context, widget.messageQuery);
+          }
           return LayoutBuilder(
             builder: (context, viewportConstraints) {
               return SingleChildScrollView(

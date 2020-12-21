@@ -133,7 +133,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                           context,
                           Routes.CHANNEL_PAGE,
                           ModalRoute.withName(Routes.HOME),
-                          arguments: channel,
+                          arguments: ChannelPageArgs(channel: channel),
                         );
                       },
               ),

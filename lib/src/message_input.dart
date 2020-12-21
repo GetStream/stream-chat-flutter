@@ -461,6 +461,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Timer _debounce;
+
   void _onChanged(BuildContext context, String s) {
     if (_debounce?.isActive == true) _debounce.cancel();
     _debounce = Timer(
@@ -1956,7 +1957,11 @@ class MessageInputState extends State<MessageInput> {
       message = await widget.preMessageSending(message);
     }
 
-    final channel = StreamChannel.of(context).channel;
+    final streamChannel = StreamChannel.of(context);
+    final channel = streamChannel.channel;
+    if (!channel.state.isUpToDate) {
+      await streamChannel.reloadChannel();
+    }
 
     if (widget.editMessage == null ||
         widget.editMessage.status == MessageSendingStatus.FAILED) {
@@ -2043,6 +2048,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   bool _initialized = false;
+
   @override
   void didChangeDependencies() {
     if (widget.editMessage != null && !_initialized) {
