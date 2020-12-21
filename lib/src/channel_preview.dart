@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/group_info_screen.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
 import 'channel_unread_indicator.dart';
-import 'chat_info_screen.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -62,39 +60,7 @@ class ChannelPreview extends StatelessWidget {
                 }
               },
               leading: ChannelImage(
-                onTap: onImageTap ??
-                    () {
-                      if (channel.memberCount == 2 && channel.isDistinct) {
-                        final currentUser = StreamChat.of(context).user;
-                        final otherUser = channel.state.members.firstWhere(
-                          (element) => element.user.id != currentUser.id,
-                          orElse: () => null,
-                        );
-                        if (otherUser != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StreamChannel(
-                                channel: channel,
-                                child: ChatInfoScreen(
-                                  user: otherUser.user,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StreamChannel(
-                              channel: channel,
-                              child: GroupInfoScreen(),
-                            ),
-                          ),
-                        );
-                      }
-                    },
+                onTap: onImageTap,
               ),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -7,6 +7,8 @@ import '../main.dart';
 import '../group_chat_details_screen.dart';
 import '../new_group_chat_screen.dart';
 import '../new_chat_screen.dart';
+import '../chat_info_screen.dart';
+import '../group_info_screen.dart';
 
 class AppRoutes {
   /// Add entry for new route here
@@ -58,6 +60,20 @@ class AppRoutes {
               return GroupChatDetailsScreen(
                 selectedUsers: args,
               );
+            });
+      case Routes.CHAT_INFO_SCREEN:
+        return MaterialPageRoute(
+            settings: const RouteSettings(name: Routes.CHAT_INFO_SCREEN),
+            builder: (_) {
+              return ChatInfoScreen(
+                user: args,
+              );
+            });
+      case Routes.GROUP_INFO_SCREEN:
+        return MaterialPageRoute(
+            settings: const RouteSettings(name: Routes.GROUP_INFO_SCREEN),
+            builder: (_) {
+              return GroupInfoScreen();
             });
     }
   }

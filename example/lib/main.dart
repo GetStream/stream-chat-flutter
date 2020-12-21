@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:example/choose_user_page.dart';
+import 'package:example/chat_info_screen.dart';
+import 'package:example/group_info_screen.dart';
 import 'package:example/new_chat_screen.dart';
 import 'package:example/new_group_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -426,6 +428,44 @@ class ChannelPage extends StatelessWidget {
       backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: ChannelHeader(
         showTypingIndicator: false,
+        onImageTap: () async {
+          var channel = StreamChannel.of(context).channel;
+
+          if (channel.memberCount == 2 && channel.isDistinct) {
+            final currentUser = StreamChat.of(context).user;
+            final otherUser = channel.state.members.firstWhere(
+              (element) => element.user.id != currentUser.id,
+              orElse: () => null,
+            );
+            if (otherUser != null) {
+              final pop = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StreamChannel(
+                    child: ChatInfoScreen(
+                      user: otherUser.user,
+                    ),
+                    channel: channel,
+                  ),
+                ),
+              );
+
+              if (pop == true) {
+                Navigator.pop(context);
+              }
+            }
+          } else {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  child: GroupInfoScreen(),
+                  channel: channel,
+                ),
+              ),
+            );
+          }
+        },
       ),
       body: Column(
         children: <Widget>[

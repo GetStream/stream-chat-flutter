@@ -3,10 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 
-import '../stream_chat_flutter.dart';
-import 'channel_file_display_screen.dart';
-import 'channel_media_display_screen.dart';
-import 'option_list_tile.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {

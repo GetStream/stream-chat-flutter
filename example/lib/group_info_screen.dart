@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter/src/chat_info_screen.dart';
+import 'file:///Users/deven9852/Stream/stream-chat-flutter/example/lib/chat_info_screen.dart';
 import 'package:stream_chat_flutter/src/option_list_tile.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
-import '../stream_chat_flutter.dart';
-import 'channel_file_display_screen.dart';
-import 'channel_media_display_screen.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'main.dart';
 
 class GroupInfoScreen extends StatefulWidget {
   @override
@@ -83,7 +82,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         leadingWidth: 36.0,
         title: Column(
           children: [
-            // TODO: Add member names instead of Demo (if name = null)
             FutureBuilder<QueryMembersResponse>(
                 future: _memberQueryFuture,
                 builder: (context, snapshot) {
@@ -163,8 +161,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             return Material(
               child: InkWell(
                 onTap: () {
-                  var userMember = snapshot.data.members.firstWhere((e) => e.user.id == StreamChat.of(context).user.id);
-                  _showUserInfoModal(snapshot.data.members[position].user, userMember.role == 'owner');
+                  var userMember = snapshot.data.members.firstWhere(
+                      (e) => e.user.id == StreamChat.of(context).user.id);
+                  _showUserInfoModal(snapshot.data.members[position].user,
+                      userMember.role == 'owner');
                 },
                 child: Container(
                   height: 65.0,
@@ -675,9 +675,31 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       color: Color(0xff7a7a7a),
                       size: 24.0,
                     ),
-                    'Message',
-                    () {}),
-                if (!channel.isDistinct && StreamChat.of(context).user.id != user.id && isUserAdmin)
+                    'Message', () async {
+                  var client = StreamChat.of(context).client;
+
+                  var c = client.channel('messaging', extraData: {
+                    'members': [
+                      user.id,
+                      StreamChat.of(context).user.id,
+                    ],
+                  });
+
+                  await c.watch();
+
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StreamChannel(
+                        channel: c,
+                        child: ChannelPage(),
+                      ),
+                    ),
+                  );
+                }),
+                if (!channel.isDistinct &&
+                    StreamChat.of(context).user.id != user.id &&
+                    isUserAdmin)
                   _buildModalListTile(
                       StreamSvgIcon.userAdd(
                         color: Color(0xff7a7a7a),
@@ -686,7 +708,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       'Make Owner', () {
                     // TODO: I have no clue how to make someone an owner
                   }),
-                if (!channel.isDistinct && StreamChat.of(context).user.id != user.id && isUserAdmin)
+                if (!channel.isDistinct &&
+                    StreamChat.of(context).user.id != user.id &&
+                    isUserAdmin)
                   _buildModalListTile(
                       StreamSvgIcon.userRemove(
                         color: Colors.red,
