@@ -21,7 +21,6 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -302,7 +301,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text('Send also as direct message'),
+            child: Text('Also send as direct message'),
           ),
         ],
       ),
