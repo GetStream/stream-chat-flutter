@@ -89,7 +89,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           paginationParams.offset == null ||
           paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
-      client
+      await client
           .queryChannels(
         filter: filter,
         sort: sortOptions,
