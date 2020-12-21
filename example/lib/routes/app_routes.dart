@@ -34,9 +34,13 @@ class AppRoutes {
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.CHANNEL_PAGE),
             builder: (_) {
+              final arg = args as ChannelPageArgs;
               return StreamChannel(
-                channel: args as Channel,
-                child: ChannelPage(),
+                channel: arg.channel,
+                initialMessageId: arg.initialMessage?.id,
+                child: ChannelPage(
+                  highlightInitialMessage: arg.initialMessage != null,
+                ),
               );
             });
       case Routes.NEW_CHAT:
