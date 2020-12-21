@@ -1,6 +1,6 @@
 ## 0.2.18
 
-- Updatede llc dependency
+- Updated llc dependency
 
 ## 0.2.17+2
 
