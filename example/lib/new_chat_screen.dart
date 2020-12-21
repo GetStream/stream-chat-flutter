@@ -84,7 +84,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
           paginationParams: PaginationParams(
             limit: 1,
           ),
-        ).first;
+        );
 
         final _channelExisted = res.length == 1;
         if (_channelExisted) {
