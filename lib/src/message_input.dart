@@ -21,7 +21,6 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_channel.dart';
@@ -343,7 +342,10 @@ class MessageInputState extends State<MessageInput> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (!widget.disableAttachments) _buildAttachmentButton(),
-          if (widget.editMessage == null) _buildCommandButton(),
+          if (widget.editMessage == null &&
+              StreamChannel.of(context).channel?.config?.commands?.isNotEmpty ==
+                  true)
+            _buildCommandButton(),
         ],
       ),
       duration: Duration(milliseconds: 300),
@@ -459,6 +461,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Timer _debounce;
+
   void _onChanged(BuildContext context, String s) {
     if (_debounce?.isActive == true) _debounce.cancel();
     _debounce = Timer(
@@ -543,11 +546,12 @@ class MessageInputState extends State<MessageInput> {
   void _checkCommands(String s, BuildContext context) {
     if (s.startsWith('/')) {
       var matchedCommandsList = StreamChannel.of(context)
-          .channel
-          .config
-          .commands
-          .where((element) => element.name == s.substring(1))
-          .toList();
+              .channel
+              .config
+              ?.commands
+              ?.where((element) => element.name == s.substring(1))
+              ?.toList() ??
+          [];
 
       if (matchedCommandsList.length == 1) {
         _chosenCommand = matchedCommandsList[0];
@@ -568,11 +572,12 @@ class MessageInputState extends State<MessageInput> {
   OverlayEntry _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
-        .channel
-        .config
-        .commands
-        .where((c) => c.name.contains(text.replaceFirst('/', '')))
-        .toList();
+            .channel
+            .config
+            ?.commands
+            ?.where((c) => c.name.contains(text.replaceFirst('/', '')))
+            ?.toList() ??
+        [];
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -1282,10 +1287,11 @@ class MessageInputState extends State<MessageInput> {
             children: [
               if (_attachments.any((e) => e.attachment?.type == 'file'))
                 LimitedBox(
-                  maxHeight: 73.0,
+                  maxHeight: 136.0,
                   child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: _attachments
+                    reverse: true,
+                    shrinkWrap: true,
+                    children: _attachments.reversed
                         .where((e) => e.attachment?.type == 'file')
                         .map(
                           (e) => Padding(
@@ -1299,8 +1305,8 @@ class MessageInputState extends State<MessageInput> {
                                 attachmentType: FileAttachmentType.local,
                                 file: e.file,
                                 size: Size(
-                                  MediaQuery.of(context).size.width * 0.55,
-                                  MediaQuery.of(context).size.height * 0.3,
+                                  MediaQuery.of(context).size.width * 0.65,
+                                  56.0,
                                 ),
                                 trailing: Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -1927,8 +1933,6 @@ class MessageInputState extends State<MessageInput> {
     _mentionsOverlay?.remove();
     _mentionsOverlay = null;
 
-    final channel = StreamChannel.of(context).channel;
-
     Future sendingFuture;
     Message message;
     if (widget.editMessage != null) {
@@ -1951,6 +1955,12 @@ class MessageInputState extends State<MessageInput> {
 
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending(message);
+    }
+
+    final streamChannel = StreamChannel.of(context);
+    final channel = streamChannel.channel;
+    if (!channel.state.isUpToDate) {
+      await streamChannel.reloadChannel();
     }
 
     if (widget.editMessage == null ||
@@ -2038,6 +2048,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   bool _initialized = false;
+
   @override
   void didChangeDependencies() {
     if (widget.editMessage != null && !_initialized) {

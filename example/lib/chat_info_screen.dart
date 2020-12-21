@@ -363,8 +363,8 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
         ),
         backgroundColor: StreamChatTheme.of(context).primaryColor,
       ),
-      body: StreamBuilder<List<Channel>>(
-        stream: chat.client.queryChannels(
+      body: FutureBuilder<List<Channel>>(
+        future: chat.client.queryChannels(
           filter: {
             r'$and': [
               {

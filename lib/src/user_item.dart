@@ -90,6 +90,8 @@ class UserItem extends StatelessWidget {
   }
 
   Widget _buildLastActive(context) {
-    return Text('Last online ${Jiffy(user.lastActive).fromNow()}');
+    return user.online == true
+        ? Text('Online')
+        : Text('Last online ${Jiffy(user.lastActive).fromNow()}');
   }
 }
