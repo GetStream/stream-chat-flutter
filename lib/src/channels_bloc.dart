@@ -100,12 +100,11 @@ class ChannelsBlocState extends State<ChannelsBloc>
           final l = oldChannels + channels;
           _channelsController.add(l);
         }
+        _queryChannelsLoadingController.sink.add(false);
       }).catchError((err, stackTrace) {
         print(err);
         print(stackTrace);
         _queryChannelsLoadingController.addError(err, stackTrace);
-      }).whenComplete(() {
-        _queryChannelsLoadingController.sink.add(false);
       });
     } catch (err, stackTrace) {
       _queryChannelsLoadingController.addError(err, stackTrace);
