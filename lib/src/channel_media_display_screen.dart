@@ -103,8 +103,8 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
           item.message.attachments
               .where((e) => e.type == 'image' || e.type == 'video')
               .forEach((e) {
-                VideoPlayerController controller;
-            if(e.type == 'video') {
+            VideoPlayerController controller;
+            if (e.type == 'video') {
               controller = VideoPlayerController.network(e.assetUrl);
               controller.initialize();
             }
@@ -156,10 +156,12 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                       ),
                     );
                   },
-                  child: media[position].attachment.type == 'image' ? CachedNetworkImage(
-                    imageUrl: media[position].attachment.imageUrl,
-                    fit: BoxFit.cover,
-                  ) : VideoPlayer(media[position].videoPlayer),
+                  child: media[position].attachment.type == 'image'
+                      ? CachedNetworkImage(
+                          imageUrl: media[position].attachment.imageUrl,
+                          fit: BoxFit.cover,
+                        )
+                      : VideoPlayer(media[position].videoPlayer),
                 ),
               );
             },

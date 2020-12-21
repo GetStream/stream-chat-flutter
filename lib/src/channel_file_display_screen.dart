@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -102,9 +101,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
         Map<Attachment, Message> media = {};
 
         for (var item in snapshot.data) {
-          item.message.attachments
-              .where((e) => e.type == 'file')
-              .forEach((e) {
+          item.message.attachments.where((e) => e.type == 'file').forEach((e) {
             media[e] = item.message;
           });
         }
