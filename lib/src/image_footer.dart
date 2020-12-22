@@ -68,7 +68,7 @@ class _ImageFooterState extends State<ImageFooter> {
   String _userNameQuery;
   bool _isSearchActive = false;
 
-  Set<User> _selectedUsers = {};
+  List<Channel> _selectedChannels = [];
   bool _loading = false;
 
   Timer _debounce;
@@ -278,78 +278,86 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               clipBehavior: Clip.antiAlias,
               child: Scaffold(
+                resizeToAvoidBottomInset: false,
                 body: UsersBloc(
                   child: Column(
                     children: [
                       _buildTextInputSection(modalSetState),
+                      if (_userSearchMode)
+                        SizedBox(
+                          height: 22.0,
+                        ),
                       Expanded(
-                        child: UserListView(
-                          selectedUsers: _selectedUsers,
-                          onUserTap: (user, _) {
-                            _searchController.clear();
-                            if (!_selectedUsers.contains(user)) {
-                              modalSetState(() {
-                                _selectedUsers.add(user);
-                              });
-                            } else {
-                              modalSetState(() {
-                                _selectedUsers.remove(user);
-                              });
-                            }
-                          },
-                          crossAxisCount: 4,
-                          pagination: PaginationParams(
-                            limit: 25,
-                          ),
-                          filter: {
-                            if (_searchController.text.isNotEmpty)
-                              'name': {
-                                r'$autocomplete': _userNameQuery,
-                              },
-                            'id': {
-                              r'$ne': StreamChat.of(context).user.id,
+                        child: ChannelsBloc(
+                          child: ChannelListView(
+                            selectedChannels: _selectedChannels,
+                            onChannelTap: (user, _) {
+                              _searchController.clear();
+                              if (!_selectedChannels.contains(user)) {
+                                modalSetState(() {
+                                  _selectedChannels.add(user);
+                                });
+                              } else {
+                                modalSetState(() {
+                                  _selectedChannels.remove(user);
+                                });
+                              }
                             },
-                          },
-                          sort: [
-                            SortOption(
-                              'name',
-                              direction: 1,
+                            crossAxisCount: 4,
+                            pagination: PaginationParams(
+                              limit: 25,
                             ),
-                          ],
-                          emptyBuilder: (_) {
-                            return LayoutBuilder(
-                              builder: (context, viewportConstraints) {
-                                return SingleChildScrollView(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minHeight: viewportConstraints.maxHeight,
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(24),
-                                            child: StreamSvgIcon.search(
-                                              size: 96,
-                                              color: Colors.grey,
+                            filter: {
+                              if (_searchController.text.isNotEmpty)
+                                'name': {
+                                  r'$autocomplete': _userNameQuery,
+                                },
+                              'id': {
+                                r'$ne': StreamChat.of(context).user.id,
+                              },
+                            },
+                            sort: [
+                              SortOption(
+                                'name',
+                                direction: 1,
+                              ),
+                            ],
+                            emptyBuilder: (_) {
+                              return LayoutBuilder(
+                                builder: (context, viewportConstraints) {
+                                  return SingleChildScrollView(
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight:
+                                            viewportConstraints.maxHeight,
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(24),
+                                              child: StreamSvgIcon.search(
+                                                size: 96,
+                                                color: Colors.grey,
+                                              ),
                                             ),
-                                          ),
-                                          Text(
-                                              'No user matches these keywords...'),
-                                        ],
+                                            Text(
+                                                'No user matches these keywords...'),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      if (_selectedUsers.isNotEmpty)
+                      if (_selectedChannels.isNotEmpty)
                         _buildShareTextInputSection(modalSetState),
-                      if (!_userSearchMode && _selectedUsers.isEmpty)
+                      if (!_userSearchMode && _selectedChannels.isEmpty)
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
@@ -614,25 +622,16 @@ class _ImageFooterState extends State<ImageFooter> {
 
     final client = StreamChat.of(context).client;
 
-    for (var user in _selectedUsers) {
-      var c = client.channel('messaging', extraData: {
-        'members': [
-          user.id,
-          StreamChat.of(context).user.id,
-        ],
-      });
-
-      await c.watch();
-
+    for (var channel in _selectedChannels) {
       final message = Message(
         text: text,
         attachments: [attachments[widget.currentPage]],
       );
 
-      await c.sendMessage(message);
+      await channel.sendMessage(message);
     }
 
-    _selectedUsers.clear();
+    _selectedChannels.clear();
     Navigator.pop(context);
   }
 

@@ -74,6 +74,8 @@ class ChannelListView extends StatefulWidget {
     this.onStartChatPressed,
     this.swipeToAction = false,
     this.pullToRefresh = true,
+    this.crossAxisCount = 1,
+    this.selectedChannels = const [],
   }) : super(key: key);
 
   /// The builder that will be used in case of error
@@ -133,6 +135,11 @@ class ChannelListView extends StatefulWidget {
 
   /// Callback used in the default empty list widget
   final VoidCallback onStartChatPressed;
+
+  /// The number of children in the cross axis.
+  final int crossAxisCount;
+
+  final List<Channel> selectedChannels;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -259,22 +266,35 @@ class _ChannelListViewState extends State<ChannelListView>
           }
 
           if (channels.isNotEmpty) {
-            child = ListView.custom(
-              physics: AlwaysScrollableScrollPhysics(),
-              controller: _scrollController,
-              childrenDelegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  return _itemBuilder(context, i, channels);
+            if (widget.crossAxisCount > 1) {
+              child = GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: widget.crossAxisCount),
+                itemCount: channels.length,
+                physics: AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                itemBuilder: (context, index) {
+                  return _gridItemBuilder(context, index, channels);
                 },
-                childCount: (channels.length * 2) + 1,
-                findChildIndexCallback: (key) {
-                  final ValueKey<String> valueKey = key;
-                  final index = channels.indexWhere(
-                      (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
-                  return index != -1 ? (index * 2) : null;
-                },
-              ),
-            );
+              );
+            } else {
+              child = ListView.custom(
+                physics: AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                childrenDelegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    return _itemBuilder(context, i, channels);
+                  },
+                  childCount: (channels.length * 2) + 1,
+                  findChildIndexCallback: (key) {
+                    final ValueKey<String> valueKey = key;
+                    final index = channels.indexWhere(
+                        (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
+                    return index != -1 ? (index * 2) : null;
+                  },
+                ),
+              );
+            }
           }
         }
 
@@ -579,6 +599,47 @@ class _ChannelListViewState extends State<ChannelListView>
     } else {
       return _buildQueryProgressIndicator(context, channelsProvider);
     }
+  }
+
+  Widget _gridItemBuilder(BuildContext context, int i, List<Channel> channels) {
+    var channel = channels[i];
+
+    var selected = widget.selectedChannels.contains(channel);
+
+    return Container(
+      key: ValueKey<String>('CHANNEL-${channel.id}'),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ChannelImage(
+            channel: channel,
+            borderRadius: BorderRadius.circular(32),
+            selected: selected,
+            constraints: BoxConstraints.tightFor(
+              width: 64,
+              height: 64,
+            ),
+            onTap: () {
+              widget.onChannelTap(channel, null);
+            },
+          ),
+          SizedBox(height: 7),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: StreamChannel(
+              child: ChannelName(
+                textStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              channel: channel,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildQueryProgressIndicator(

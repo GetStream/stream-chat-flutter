@@ -52,6 +52,7 @@ class ChannelImage extends StatelessWidget {
     this.onTap,
     this.showOnlineStatus = true,
     this.borderRadius,
+    this.selected = false,
   }) : super(key: key);
 
   final BorderRadius borderRadius;
@@ -66,6 +67,8 @@ class ChannelImage extends StatelessWidget {
   final VoidCallback onTap;
 
   final bool showOnlineStatus;
+
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +102,7 @@ class ChannelImage extends StatelessWidget {
                             onTap();
                           }
                         : null,
+                    selected: selected,
                   );
                 });
           } else {
@@ -111,12 +115,14 @@ class ChannelImage extends StatelessWidget {
                 .toList();
             return GroupImage(
               images: images,
+              borderRadius: borderRadius,
               constraints: constraints ??
                   StreamChatTheme.of(context)
                       .channelPreviewTheme
                       .avatarTheme
                       .constraints,
               onTap: onTap,
+              selected: selected,
             );
           }
 
