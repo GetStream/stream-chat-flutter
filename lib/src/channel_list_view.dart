@@ -65,6 +65,7 @@ class ChannelListView extends StatefulWidget {
     this.errorBuilder,
     this.emptyBuilder,
     this.onImageTap,
+    this.loadingBuilder,
     this.pullToRefresh = true,
   }) : super(key: key);
 
@@ -78,6 +79,9 @@ class ChannelListView extends StatefulWidget {
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
   final Map<String, dynamic> filter;
+
+  /// The builder used while loading.
+  final WidgetBuilder loadingBuilder;
 
   /// Query channels options.
   ///
@@ -224,9 +228,11 @@ class _ChannelListViewState extends State<ChannelListView>
                     constraints: BoxConstraints(
                       minHeight: viewportConstraints.maxHeight,
                     ),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: widget.loadingBuilder != null
+                        ? widget.loadingBuilder(context)
+                        : Center(
+                            child: CircularProgressIndicator(),
+                          ),
                   ),
                 );
               },
@@ -339,6 +345,9 @@ class _ChannelListViewState extends State<ChannelListView>
         ),
       );
     } else {
+      if (widget.loadingBuilder != null) {
+        return widget.loadingBuilder(context);
+      }
       return _buildQueryProgressIndicator(context, channelsProvider);
     }
   }

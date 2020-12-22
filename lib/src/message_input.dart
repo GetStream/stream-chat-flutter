@@ -27,6 +27,11 @@ enum ActionsLocation {
   right,
 }
 
+enum SendButtonLocation {
+  inside,
+  outside,
+}
+
 enum DefaultAttachmentTypes {
   image,
   video,
@@ -96,6 +101,8 @@ class MessageInput extends StatefulWidget {
     this.inputTextStyle,
     this.attachmentIconColor,
     this.autofocus = false,
+    this.sendButtonLocation = SendButtonLocation.inside,
+    this.animationDuration = const Duration(milliseconds: 300),
   }) : super(key: key);
 
   /// Message to edit
@@ -141,12 +148,18 @@ class MessageInput extends StatefulWidget {
   /// The location of the custom actions
   final ActionsLocation actionsLocation;
 
+  /// The location of the send button
+  final SendButtonLocation sendButtonLocation;
+
   /// Map that defines a thumbnail builder for an attachment type
   final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
 
   /// Text style used in message text field. If null, [MessageInput] uses
   /// `Theme.of(context).textTheme.bodyText2`.
   final TextStyle inputTextStyle;
+
+  /// The duration of the send button animation
+  final Duration animationDuration;
 
   /// Color used for attachment icon.
   final Color attachmentIconColor;
@@ -194,17 +207,26 @@ class MessageInputState extends State<MessageInput> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              _buildBorder(context),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAttachments(),
-                  _buildTextField(context),
-                ],
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: <Widget>[
+                    _buildBorder(context),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildAttachments(),
+                        _buildTextField(context),
+                      ],
+                    ),
+                  ],
+                ),
               ),
+              if (widget.sendButtonLocation == SendButtonLocation.outside)
+                _animateSendButton(context),
             ],
           ),
         ),
@@ -221,14 +243,18 @@ class MessageInputState extends State<MessageInput> {
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
-        _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
+        if (widget.sendButtonLocation == SendButtonLocation.inside)
+          _animateSendButton(context),
       ],
     );
   }
 
-  AnimatedCrossFade _animateSendButton(BuildContext context) {
+  Widget _animateSendButton(BuildContext context) {
+    if (widget.animationDuration == Duration.zero) {
+      return _buildSendButton(context);
+    }
     return AnimatedCrossFade(
       crossFadeState: ((_messageIsPresent || _attachments.isNotEmpty) &&
               _attachments.every((a) => a.uploaded == true))
@@ -236,7 +262,7 @@ class MessageInputState extends State<MessageInput> {
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
       secondChild: SizedBox(),
-      duration: Duration(milliseconds: 300),
+      duration: widget.animationDuration,
       alignment: Alignment.center,
     );
   }
@@ -851,12 +877,14 @@ class MessageInputState extends State<MessageInput> {
         color: Colors.transparent,
         child: IconButton(
           key: Key('sendButton'),
-          onPressed: () {
-            sendMessage();
-          },
+          onPressed: (textEditingController.text.trim().isEmpty &&
+                  _attachments.isEmpty)
+              ? null
+              : () {
+                  sendMessage();
+                },
           icon: Icon(
             Icons.send,
-            color: StreamChatTheme.of(context).accentColor,
           ),
         ),
       ),
