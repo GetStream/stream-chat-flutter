@@ -113,7 +113,7 @@ class MessageActionsModal extends StatelessWidget {
                                 messageTheme: messageTheme,
                                 showReactions: false,
                                 showUsername: false,
-                                showReplyIndicator: false,
+                                showThreadReplyIndicator: false,
                                 showUserAvatar: showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,

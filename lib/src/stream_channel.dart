@@ -267,6 +267,19 @@ class StreamChannelState extends State<StreamChannel> {
     return state;
   }
 
+  ///
+  Future<Message> getMessage(String messageId) async {
+    var message = channel.state.messages.firstWhere(
+      (it) => it.id == messageId,
+      orElse: () => null,
+    );
+    if (message == null) {
+      final response = await channel.getMessagesById([messageId]);
+      message = response.messages.first;
+    }
+    return message;
+  }
+
   /// Reloads the channel with latest message
   Future<void> reloadChannel() => queryAtMessage(before: 30);
 

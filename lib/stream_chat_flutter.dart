@@ -21,7 +21,6 @@ export 'src/message_list_view.dart';
 export 'src/message_text.dart';
 export 'src/message_widget.dart';
 export 'src/reaction_picker.dart';
-export 'src/reply_indicator.dart';
 export 'src/sending_indicator.dart';
 export 'src/stream_channel.dart';
 export 'src/stream_chat.dart';

@@ -241,7 +241,7 @@ class _MessageListViewState extends State<MessageListView> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               );
             }
 
@@ -336,18 +336,25 @@ class _MessageListViewState extends State<MessageListView> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
                               buildParentMessage(widget.parentMessage),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 32),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    'Start of thread',
-                                    textAlign: TextAlign.center,
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0XFFF7F7F7),
+                                      Color(0XFFFCFCFC),
+                                    ],
                                   ),
-                                  color: Theme.of(context)
-                                      .accentColor
-                                      .withAlpha(50),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
+                                    textAlign: TextAlign.center,
+                                    style: StreamChatTheme.of(context)
+                                        .channelTheme
+                                        .channelHeaderTheme
+                                        .lastMessageAt,
+                                  ),
                                 ),
                               ),
                             ],
@@ -585,7 +592,7 @@ class _MessageListViewState extends State<MessageListView> {
           if (!snapshot.data) {
             if (direction == QueryDirection.top) {
               return Container(
-                height: 50,
+                height: 52,
                 width: double.infinity,
               );
             }
@@ -679,7 +686,8 @@ class _MessageListViewState extends State<MessageListView> {
     final isMyMessage = message.user.id == StreamChat.of(context).user.id;
 
     return MessageWidget(
-      showReplyIndicator: false,
+      showThreadReplyIndicator: false,
+      showInChannelIndicator: false,
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
@@ -748,6 +756,8 @@ class _MessageListViewState extends State<MessageListView> {
         bottom: index == 0 ? 30 : (isNextUser ? 2 : 7),
         top: 3,
       ),
+      showInChannelIndicator: widget.parentMessage == null,
+      showThreadReplyIndicator: widget.parentMessage == null,
       showUsername: !isMyMessage && !isNextUser,
       showSendingIndicator: isMyMessage &&
               (index == 0 || message.status != MessageSendingStatus.SENT)

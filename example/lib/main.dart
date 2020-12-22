@@ -470,6 +470,7 @@ class ThreadPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: ThreadHeader(
         parent: parent,
       ),
