@@ -85,7 +85,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           paginationParams.offset == null ||
           paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
-      client
+      await client
           .queryChannels(
         filter: filter,
         sort: sortOptions,
@@ -93,21 +93,18 @@ class ChannelsBlocState extends State<ChannelsBloc>
         paginationParams: paginationParams,
         onlyOffline: onlyOffline,
       )
-          .listen((channels) {
+          .then((channels) {
         if (clear) {
           _channelsController.add(channels);
         } else {
           final l = oldChannels + channels;
           _channelsController.add(l);
         }
-      }, onDone: () {
         _queryChannelsLoadingController.sink.add(false);
-      }, onError: (err, stackTrace) {
-        print(err);
-        print(stackTrace);
-        _queryChannelsLoadingController.addError(err, stackTrace);
       });
     } catch (err, stackTrace) {
+      print(err);
+      print(stackTrace);
       _queryChannelsLoadingController.addError(err, stackTrace);
     }
   }

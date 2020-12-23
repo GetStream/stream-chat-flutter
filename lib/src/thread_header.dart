@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+
+import 'back_button.dart';
+import 'channel_name.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/thread_header_paint.png)
@@ -77,43 +79,50 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       elevation: 1,
+      leading: showBackButton
+          ? StreamBackButton(
+              onPressed: onBackPressed,
+              showUnreads: true,
+            )
+          : SizedBox(),
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-      actions: <Widget>[
-        Container(
-          child: showBackButton
-              ? AspectRatio(
-                  aspectRatio: 1,
-                  child: IconButton(
-                    onPressed: onBackPressed ?? () => Navigator.pop(context),
-                    icon: StreamSvgIcon.close(
-                      size: 24,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                )
-              : SizedBox(),
-        ),
-      ],
-      centerTitle: false,
-      title: Text.rich(
-        TextSpan(
-          text: 'Thread',
-          children: [
-            TextSpan(
-              text:
-                  '   ${parent.replyCount} ${parent.replyCount == 1 ? 'reply' : 'replies'}',
-              style: StreamChatTheme.of(context)
-                  .channelTheme
-                  .channelHeaderTheme
-                  .lastMessageAt,
-            ),
-          ],
-        ),
-        style:
-            StreamChatTheme.of(context).channelTheme.channelHeaderTheme.title,
+      centerTitle: true,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Thread Reply',
+            style: StreamChatTheme.of(context)
+                .channelTheme
+                .channelHeaderTheme
+                .title,
+          ),
+          SizedBox(height: 2),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'with ',
+                style: StreamChatTheme.of(context)
+                    .channelTheme
+                    .channelHeaderTheme
+                    .lastMessageAt,
+              ),
+              Flexible(
+                child: ChannelName(
+                  textStyle: StreamChatTheme.of(context)
+                      .channelTheme
+                      .channelHeaderTheme
+                      .lastMessageAt,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

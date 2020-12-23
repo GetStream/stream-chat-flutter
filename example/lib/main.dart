@@ -213,12 +213,16 @@ class _HomePageState extends State<HomePage> {
                   alignment: Alignment.bottomCenter,
                   child: ListTile(
                     onTap: () async {
-                      await StreamChat.of(context).client.disconnect();
+                      Navigator.pop(context);
 
                       final secureStorage = FlutterSecureStorage();
                       await secureStorage.deleteAll();
-                      Navigator.pop(context);
-                      Navigator.pushReplacementNamed(
+
+                      StreamChat.of(context).client.disconnect(
+                            clearUser: true,
+                          );
+
+                      await Navigator.pushReplacementNamed(
                         context,
                         Routes.CHOOSE_USER,
                       );
@@ -294,128 +298,115 @@ class _ChannelListPageState extends State<ChannelListPage> {
   @override
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
-    return ChannelsBloc(
-      child: MessageSearchBloc(
-        child: Column(
-          children: [
-            SearchTextField(
-              controller: _controller,
-              showCloseButton: _isSearchActive,
-            ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onPanDown: (_) => FocusScope.of(context).unfocus(),
-                  child: _isSearchActive
-                      ? MessageSearchListView(
-                          messageQuery: _channelQuery,
-                          filters: {
-                            'members': {
-                              r'$in': [user.id]
-                            }
-                          },
-                          sortOptions: [
-                            SortOption(
-                              'created_at',
-                              direction: SortOption.ASC,
-                            ),
-                          ],
-                          paginationParams: PaginationParams(limit: 20),
-                          onItemTap: (message) {},
-                        )
-                      : ChannelListView(
-                          onStartChatPressed: () {
-                            Navigator.pushNamed(context, Routes.NEW_CHAT);
-                          },
-                          swipeToAction: true,
-                          filter: {
-                            'members': {
-                              r'$in': [user.id],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_isSearchActive) {
+          _controller.clear();
+          setState(() => _isSearchActive = false);
+          return false;
+        }
+        return true;
+      },
+      child: ChannelsBloc(
+        child: MessageSearchBloc(
+          child: Column(
+            children: [
+              SearchTextField(
+                controller: _controller,
+                showCloseButton: _isSearchActive,
+              ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanDown: (_) => FocusScope.of(context).unfocus(),
+                    child: _isSearchActive
+                        ? MessageSearchListView(
+                            messageQuery: _channelQuery,
+                            filters: {
+                              'members': {
+                                r'$in': [user.id]
+                              }
                             },
-                          },
-                          options: {
-                            'presence': true,
-                          },
-                          pagination: PaginationParams(
-                            limit: 20,
+                            sortOptions: [
+                              SortOption(
+                                'created_at',
+                                direction: SortOption.ASC,
+                              ),
+                            ],
+                            paginationParams: PaginationParams(limit: 20),
+                            onItemTap: (messageResponse) async {
+                              final client = StreamChat.of(context).client;
+                              final message = messageResponse.message;
+                              final channel = client.channel(
+                                messageResponse.channel.type,
+                                id: messageResponse.channel.id,
+                              );
+                              if (channel.state == null) {
+                                await channel.watch();
+                              }
+                              Navigator.pushNamed(
+                                context,
+                                Routes.CHANNEL_PAGE,
+                                arguments: ChannelPageArgs(
+                                  channel: channel,
+                                  initialMessage: message,
+                                ),
+                              );
+                            },
+                          )
+                        : ChannelListView(
+                            onStartChatPressed: () {
+                              Navigator.pushNamed(context, Routes.NEW_CHAT);
+                            },
+                            swipeToAction: true,
+                            filter: {
+                              'members': {
+                                r'$in': [user.id],
+                              },
+                            },
+                            options: {
+                              'presence': true,
+                            },
+                            pagination: PaginationParams(
+                              limit: 20,
+                            ),
+                            channelWidget: ChannelPage(),
                           ),
-                          channelWidget: ChannelPage(),
-                        ),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class ChannelQuerySearchResultPage extends StatelessWidget {
-  final Stream<List<Message>> searchResultStream;
+class ChannelPageArgs {
+  final Channel channel;
+  final Message initialMessage;
 
-  const ChannelQuerySearchResultPage({
-    Key key,
-    @required this.searchResultStream,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Message>>(
-      initialData: const <Message>[],
-      stream: searchResultStream,
-      builder: (context, snapshot) {
-        final result = snapshot.data;
-        return Column(
-          children: [
-            if (result.isNotEmpty)
-              Container(
-                width: double.maxFinite,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.02),
-                      Colors.white.withOpacity(0.05),
-                    ],
-                    stops: [0, 1],
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 8,
-                  ),
-                  child: Text(
-                    '${result.length} results',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                  ),
-                ),
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: result.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: UserAvatar(),
-                    title: Text(result[index].toJson().toString()),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  const ChannelPageArgs({
+    this.channel,
+    this.initialMessage,
+  });
 }
 
 class ChannelPage extends StatefulWidget {
+  final int initialScrollIndex;
+  final double initialAlignment;
+  final bool highlightInitialMessage;
+
+  const ChannelPage({
+    Key key,
+    this.initialScrollIndex,
+    this.initialAlignment,
+    this.highlightInitialMessage = false,
+  }) : super(key: key);
+
   @override
   _ChannelPageState createState() => _ChannelPageState();
 }
@@ -454,6 +445,9 @@ class _ChannelPageState extends State<ChannelPage> {
             child: Stack(
               children: <Widget>[
                 MessageListView(
+                  initialScrollIndex: widget.initialScrollIndex,
+                  initialAlignment: widget.initialAlignment,
+                  highlightInitialMessage: widget.highlightInitialMessage,
                   onMessageSwiped: _reply,
                   onReplyTap: _reply,
                   threadBuilder: (_, parentMessage) {
@@ -493,15 +487,20 @@ class _ChannelPageState extends State<ChannelPage> {
 
 class ThreadPage extends StatelessWidget {
   final Message parent;
+  final int initialScrollIndex;
+  final double initialAlignment;
 
   ThreadPage({
     Key key,
     this.parent,
+    this.initialScrollIndex,
+    this.initialAlignment,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: ThreadHeader(
         parent: parent,
       ),
@@ -510,6 +509,8 @@ class ThreadPage extends StatelessWidget {
           Expanded(
             child: MessageListView(
               parentMessage: parent,
+              initialScrollIndex: initialScrollIndex,
+              initialAlignment: initialAlignment,
             ),
           ),
           if (parent.type != 'deleted')

@@ -733,4 +733,40 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.Icon_group({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_group.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_notification({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_notification.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_user_delete({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_user_delete.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }
