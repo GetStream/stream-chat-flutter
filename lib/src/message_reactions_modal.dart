@@ -105,7 +105,7 @@ class MessageReactionsModal extends StatelessWidget {
                                 showReactions: false,
                                 showUsername: false,
                                 showUserAvatar: showUserAvatar,
-                                showReplyIndicator: false,
+                                showThreadReplyIndicator: false,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
                                 showSendingIndicator: DisplayWidget.gone,

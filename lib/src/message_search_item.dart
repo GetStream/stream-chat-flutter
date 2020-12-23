@@ -77,16 +77,16 @@ class MessageSearchItem extends StatelessWidget {
   }
 
   Widget _buildDate(BuildContext context, Message message) {
-    final lastUpdatedAt = message.updatedAt;
+    final createdAt = message.createdAt;
     String stringDate;
     final now = DateTime.now();
 
-    if (now.year != lastUpdatedAt.year ||
-        now.month != lastUpdatedAt.month ||
-        now.day != lastUpdatedAt.day) {
-      stringDate = Jiffy(lastUpdatedAt.toLocal()).format('dd/MM/yyyy');
+    if (now.year != createdAt.year ||
+        now.month != createdAt.month ||
+        now.day != createdAt.day) {
+      stringDate = Jiffy(createdAt.toLocal()).format('dd/MM/yyyy');
     } else {
-      stringDate = Jiffy(lastUpdatedAt.toLocal()).format('HH:mm');
+      stringDate = Jiffy(createdAt.toLocal()).format('HH:mm');
     }
 
     return Text(

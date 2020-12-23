@@ -180,7 +180,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
       MediaThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
     final bytes = await media.thumbData;
-    if (bytes.isEmpty) return null;
+    if (bytes?.isNotEmpty != true) return null;
 
     return await decode(bytes);
   }

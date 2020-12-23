@@ -91,7 +91,9 @@ class UserItem extends StatelessWidget {
 
   Widget _buildLastActive(context) {
     return Text(
-      'Last online ${Jiffy(user.lastActive).fromNow()}',
+      user.online == true
+          ? 'Online'
+          : 'Last online ${Jiffy(user.lastActive).fromNow()}',
       style: StreamChatTheme.of(context)
           .textTheme
           .footnote

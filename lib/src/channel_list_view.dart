@@ -528,44 +528,33 @@ class _ChannelListViewState extends State<ChannelListView>
                       );
                     },
                   ),
-                  IconSlideAction(
-                    color: backgroundColor,
-                    iconWidget: StreamSvgIcon.mute(),
-                    onTap: () async {
-                      if (!channel.isMuted) {
-                        await channel.mute();
-                      } else {
-                        await channel.unmute();
-                      }
-                    },
-                  ),
-                  if (channel.isGroup && !channel.isDistinct)
+                  if ([
+                    'admin',
+                    'owner',
+                  ].contains(channel.state.members
+                      .firstWhere(
+                          (m) => m.userId == channel.client.state.user.id,
+                          orElse: () => null)
+                      ?.role))
                     IconSlideAction(
                       color: backgroundColor,
-                      iconWidget: StreamSvgIcon.userRemove(),
+                      iconWidget: StreamSvgIcon.delete(
+                        color: Color(0xFFFF3742),
+                      ),
                       onTap: () async {
-                        final confirm = await showConfirmationDialog(
+                        final res = await showConfirmationDialog(
                           context,
-                          'Do you want to leave the group?',
+                          title: 'Delete Conversation',
+                          okText: 'DELETE',
+                          question:
+                              'Are you sure you want to delete this conversation?',
+                          cancelText: 'CANCEL',
+                          icon: StreamSvgIcon.delete(
+                            color: Color(0xFFFF3742),
+                          ),
                         );
-                        if (confirm == true) {
-                          await channel
-                              .removeMembers([StreamChat.of(context).user.id]);
-                        }
-                      },
-                    ),
-                  if (!channel.isGroup && !channel.isDistinct)
-                    IconSlideAction(
-                      color: backgroundColor,
-                      icon: Icons.delete_outline,
-                      onTap: () async {
-                        final confirm = await showConfirmationDialog(
-                          context,
-                          'Do you want to delete the chat?',
-                        );
-                        if (confirm == true) {
-                          await channel
-                              .removeMembers([StreamChat.of(context).user.id]);
+                        if (res == true) {
+                          await channel.delete();
                         }
                       },
                     ),
