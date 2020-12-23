@@ -411,7 +411,7 @@ class _MessageListViewState extends State<MessageListView> {
                         if (widget.messageBuilder != null) {
                           messageWidget = Builder(
                             key: ValueKey<String>('MESSAGE-${message.id}'),
-                            builder: (_) => widget.messageBuilder(
+                            builder: (context) => widget.messageBuilder(
                                 context,
                                 MessageDetails(
                                   context,
