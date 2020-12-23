@@ -394,7 +394,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         showUsername ||
                         showTimeStamp ||
                         showInChannel)
-                      _buildBottomRows(leftPadding)
+                      _buildBottomRow(leftPadding)
                   ],
                 ),
               ],
@@ -405,7 +405,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Widget _buildBottomRows(double leftPadding) {
+  Widget _buildBottomRow(double leftPadding) {
     final deleted = widget.message.isDeleted;
     var children = <Widget>[];
     if (deleted) {
