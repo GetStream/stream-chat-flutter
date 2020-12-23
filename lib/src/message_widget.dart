@@ -428,29 +428,35 @@ class _MessageWidgetState extends State<MessageWidget> {
           ],
         ),
       );
-    } else {
-      final showSendingIndicator =
-          widget.showSendingIndicator == DisplayWidget.show;
-      final replyCount = widget.message.replyCount;
-      final msg = showInChannel
-          ? 'Thread Reply'
-          : replyCount != 0
-              ? '$replyCount ${replyCount > 1 ? 'Thread Replies' : 'Thread Reply'}'
-              : 'Thread Reply';
-
+    } else if (showInChannel) {
       final onThreadTap = () async {
         try {
-          var message = widget.message;
-          if (showInChannel && message.parentId != null) {
-            final channel = StreamChannel.of(context);
-            message = await channel.getMessage(widget.message.parentId);
-          }
+          final channel = StreamChannel.of(context);
+          final message = await channel.getMessage(widget.message.parentId);
           return widget.onThreadTap(message);
         } catch (e, stk) {
           print(e);
           print(stk);
           return null;
         }
+      };
+      children.add(
+        InkWell(
+          onTap: widget.onThreadTap != null ? onThreadTap : null,
+          child: Text('Thread Reply', style: widget.messageTheme?.replies),
+        ),
+      );
+    } else {
+      final showSendingIndicator =
+          widget.showSendingIndicator == DisplayWidget.show;
+      final replyCount = widget.message.replyCount;
+      final msg = replyCount != 0
+          ? '$replyCount ${replyCount > 1 ? 'Thread Replies' : 'Thread Reply'}'
+          : 'Thread Reply';
+
+      final onThreadTap = () async {
+        var message = widget.message;
+        return widget.onThreadTap(message);
       };
 
       children.addAll([
@@ -463,7 +469,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               child: _buildReadIndicator(),
             ),
           ),
-        if (showThreadReplyIndicator || showInChannel)
+        if (showThreadReplyIndicator)
           InkWell(
             onTap: widget.onThreadTap != null ? onThreadTap : null,
             child: Text(msg, style: widget.messageTheme?.replies),
