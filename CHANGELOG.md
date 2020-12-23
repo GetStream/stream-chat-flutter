@@ -1,6 +1,16 @@
-## 0.2.18
+## 0.2.20
 
 - Implement shadowban
+
+## 0.2.19
+
+- Updated llc dependency
+- Added loading builder in channellistview
+- Added sendButtonLocation and animationduration to messageinput
+
+## 0.2.18
+
+- Updated llc dependency
 
 ## 0.2.17+2
 
