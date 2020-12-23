@@ -339,6 +339,8 @@ class _MessageListViewState extends State<MessageListView> {
                               Container(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
                                     colors: [
                                       Color(0XFFF7F7F7),
                                       Color(0XFFFCFCFC),
