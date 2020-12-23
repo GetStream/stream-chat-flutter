@@ -134,40 +134,6 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomMessages();
   }
 
-  //if (_queryMessageController.value == true || _paginationEnded) {
-  //       return;
-  //     }
-  //
-  //     _queryMessageController.add(true);
-  //
-  //     String firstId;
-  //     if (widget.channel.state.threads.containsKey(parentId)) {
-  //       final thread = widget.channel.state.threads[parentId];
-  //
-  //       if (thread != null && thread.isNotEmpty) {
-  //         firstId = thread?.first?.id;
-  //       }
-  //     }
-  //
-  //     final messageLimit = 50;
-  //     return widget.channel
-  //         .getReplies(
-  //       parentId,
-  //       PaginationParams(
-  //         lessThan: firstId,
-  //         limit: messageLimit,
-  //       ),
-  //       preferOffline: true,
-  //     )
-  //         .then((res) {
-  //       if (res.messages.isEmpty || res.messages.length < messageLimit) {
-  //         _paginationEnded = true;
-  //       }
-  //       _queryMessageController.add(false);
-  //     }).catchError((e, stack) {
-  //       _queryMessageController.addError(e, stack);
-  //     });
-
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(
     String parentId, {
