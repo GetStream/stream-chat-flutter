@@ -312,11 +312,13 @@ class _ChannelListViewState extends State<ChannelListView>
       children: List.generate(
         25,
         (i) {
-          if (i % 2 != 0) {
-            if (widget.separatorBuilder != null) {
-              return widget.separatorBuilder(context, i);
+          if (widget.crossAxisCount == 1) {
+            if (i % 2 != 0) {
+              if (widget.separatorBuilder != null) {
+                return widget.separatorBuilder(context, i);
+              }
+              return _separatorBuilder(context, i);
             }
-            return _separatorBuilder(context, i);
           }
           return _buildLoadingItem();
         },
@@ -325,63 +327,96 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   Shimmer _buildLoadingItem() {
-    return Shimmer.fromColors(
-      baseColor: Color(0xffE5E5E5),
-      highlightColor: Color(0xffffffff),
-      child: ListTile(
-        leading: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          constraints: BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
+    if (widget.crossAxisCount > 1) {
+      return Shimmer.fromColors(
+        baseColor: Color(0xffE5E5E5),
+        highlightColor: Color(0xffffffff),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 4.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                for (int i = 0; i < widget.crossAxisCount; i++)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: BoxConstraints.tightFor(
+                      height: 70,
+                      width: 70,
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
+          ],
         ),
-        title: Align(
-          alignment: Alignment.centerLeft,
-          child: Container(
+      );
+    } else {
+      return Shimmer.fromColors(
+        baseColor: Color(0xffE5E5E5),
+        highlightColor: Color(0xffffffff),
+        child: ListTile(
+          leading: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(11),
+              shape: BoxShape.circle,
             ),
             constraints: BoxConstraints.tightFor(
-              height: 16,
-              width: 82,
+              height: 40,
+              width: 40,
             ),
           ),
-        ),
-        subtitle: Row(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                constraints: BoxConstraints.tightFor(
-                  height: 16,
-                  width: 238,
-                ),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 16),
+          title: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(11),
               ),
               constraints: BoxConstraints.tightFor(
                 height: 16,
-                width: 42,
+                width: 82,
               ),
             ),
-          ],
+          ),
+          subtitle: Row(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  constraints: BoxConstraints.tightFor(
+                    height: 16,
+                    width: 238,
+                  ),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                constraints: BoxConstraints.tightFor(
+                  height: 16,
+                  width: 42,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Widget _buildErrorWidget(
