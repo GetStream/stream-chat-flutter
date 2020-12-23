@@ -112,11 +112,13 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
                     .channelHeaderTheme
                     .lastMessageAt,
               ),
-              ChannelName(
-                textStyle: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .lastMessageAt,
+              Flexible(
+                child: ChannelName(
+                  textStyle: StreamChatTheme.of(context)
+                      .channelTheme
+                      .channelHeaderTheme
+                      .lastMessageAt,
+                ),
               ),
             ],
           ),
