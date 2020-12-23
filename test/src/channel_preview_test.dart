@@ -24,6 +24,11 @@ void main() {
         'name': 'test name',
       });
       when(channelState.unreadCount).thenReturn(1);
+      when(channelState.messages).thenReturn([
+        Message(
+          text: 'hello',
+        )
+      ]);
       when(channelState.lastMessage).thenReturn(Message(
         text: 'hello',
       ));

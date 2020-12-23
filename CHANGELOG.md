@@ -1,3 +1,7 @@
+## 0.2.20
+
+- Implement shadowban
+
 ## 0.2.19
 
 - Updated llc dependency
