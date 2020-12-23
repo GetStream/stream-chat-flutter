@@ -134,6 +134,40 @@ class StreamChannelState extends State<StreamChannel> {
     return _queryBottomMessages();
   }
 
+  //if (_queryMessageController.value == true || _paginationEnded) {
+  //       return;
+  //     }
+  //
+  //     _queryMessageController.add(true);
+  //
+  //     String firstId;
+  //     if (widget.channel.state.threads.containsKey(parentId)) {
+  //       final thread = widget.channel.state.threads[parentId];
+  //
+  //       if (thread != null && thread.isNotEmpty) {
+  //         firstId = thread?.first?.id;
+  //       }
+  //     }
+  //
+  //     final messageLimit = 50;
+  //     return widget.channel
+  //         .getReplies(
+  //       parentId,
+  //       PaginationParams(
+  //         lessThan: firstId,
+  //         limit: messageLimit,
+  //       ),
+  //       preferOffline: true,
+  //     )
+  //         .then((res) {
+  //       if (res.messages.isEmpty || res.messages.length < messageLimit) {
+  //         _paginationEnded = true;
+  //       }
+  //       _queryMessageController.add(false);
+  //     }).catchError((e, stack) {
+  //       _queryMessageController.addError(e, stack);
+  //     });
+
   /// Calls [channel.getReplies] updating [queryMessage] stream
   Future<void> getReplies(
     String parentId, {
@@ -143,23 +177,24 @@ class StreamChannelState extends State<StreamChannel> {
     if (_topPaginationEnded || _queryTopMessagesController.value) return;
     _queryTopMessagesController.add(true);
 
-    if (!channel.state.threads.containsKey(parentId)) {
-      return _queryTopMessagesController.add(false);
+    Message message;
+    if (channel.state.threads.containsKey(parentId)) {
+      final thread = channel.state.threads[parentId];
+      if (thread.isNotEmpty) {
+        message = thread.first;
+      }
     }
 
-    final thread = channel.state.threads[parentId];
-
-    if (thread.isEmpty) return _queryTopMessagesController.add(false);
-
-    final message = thread.first;
-
     try {
-      final state = await queryBeforeMessage(
-        message.id,
-        limit: limit,
+      final response = await channel.getReplies(
+        parentId,
+        PaginationParams(
+          lessThan: message?.id,
+          limit: limit,
+        ),
         preferOffline: preferOffline,
       );
-      if (state.messages.isEmpty || state.messages.length < limit) {
+      if (response.messages.isEmpty || response.messages.length < limit) {
         _topPaginationEnded = true;
       }
       _queryTopMessagesController.add(false);
