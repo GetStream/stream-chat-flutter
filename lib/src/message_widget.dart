@@ -547,6 +547,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           }
 
           return Padding(
+            key: Key(attachment.hashCode.toString()),
             padding: EdgeInsets.only(
               bottom: 4,
             ),
