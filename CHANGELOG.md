@@ -1,3 +1,7 @@
+## 0.2.20+1
+
+- Fixed bug that caused video attachment to show the same preview
+
 ## 0.2.20
 
 - Implement shadowban
