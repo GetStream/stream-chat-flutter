@@ -92,7 +92,9 @@ class _ImageFooterState extends State<ImageFooter> {
   void initState() {
     super.initState();
     _searchController = TextEditingController()..addListener(_userNameListener);
-    _messageFocusNode.addListener(() {setState(() {});});
+    _messageFocusNode.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
