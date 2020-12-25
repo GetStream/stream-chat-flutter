@@ -64,6 +64,7 @@ class _ImageFooterState extends State<ImageFooter> {
   bool _userSearchMode = false;
   TextEditingController _searchController;
   TextEditingController _messageController = TextEditingController();
+  FocusNode _messageFocusNode = FocusNode();
 
   String _userNameQuery;
   bool _isSearchActive = false;
@@ -91,6 +92,7 @@ class _ImageFooterState extends State<ImageFooter> {
   void initState() {
     super.initState();
     _searchController = TextEditingController()..addListener(_userNameListener);
+    _messageFocusNode.addListener(() {setState(() {});});
   }
 
   @override
@@ -258,7 +260,7 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  Widget _buildShareModal(context) {
+  void _buildShareModal(context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -266,7 +268,7 @@ class _ImageFooterState extends State<ImageFooter> {
           modalSetStateCallback = modalSetState;
           return Padding(
             padding: EdgeInsets.only(
-                top: _userSearchMode
+                top: _userSearchMode || _messageFocusNode.hasFocus
                     ? 16.0
                     : MediaQuery.of(context).size.height / 2,
                 left: 8.0,
@@ -278,7 +280,6 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               clipBehavior: Clip.antiAlias,
               child: Scaffold(
-                resizeToAvoidBottomInset: false,
                 body: UsersBloc(
                   child: Column(
                     children: [
@@ -552,6 +553,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       padding: const EdgeInsets.only(left: 8.0),
                       child: TextField(
                         controller: _messageController,
+                        focusNode: _messageFocusNode,
                         onChanged: (val) {
                           modalSetState(() {});
                         },
