@@ -110,7 +110,7 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
-    this.replyMessage,
+    this.replyToMessage,
   }) : super(key: key);
 
   /// Message to edit
@@ -160,7 +160,7 @@ class MessageInput extends StatefulWidget {
   final FocusNode focusNode;
 
   ///
-  final Message replyMessage;
+  final Message replyToMessage;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -203,9 +203,9 @@ class MessageInputState extends State<MessageInput> {
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
 
-  Message _replyMessage;
+  Message _replyToMessage;
 
-  bool get _hasReplyMessage => _replyMessage != null;
+  bool get _hasReplyToMessage => _replyToMessage != null;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +224,7 @@ class MessageInputState extends State<MessageInput> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_hasReplyMessage)
+            if (_hasReplyToMessage)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -242,7 +242,7 @@ class MessageInputState extends State<MessageInput> {
                     visualDensity: VisualDensity.compact,
                     icon: StreamSvgIcon.close_small(),
                     onPressed: () {
-                      setState(() => _replyMessage = null);
+                      setState(() => _replyToMessage = null);
                     },
                   ),
                 ],
@@ -417,7 +417,7 @@ class MessageInputState extends State<MessageInput> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildRepyToMessage(),
+              _buildReplyToMessage(),
               _buildAttachments(),
               LimitedBox(
                 maxHeight: widget.maxHeight,
@@ -1321,20 +1321,20 @@ class MessageInputState extends State<MessageInput> {
     _commandsOverlay = null;
   }
 
-  Widget _buildRepyToMessage() {
-    if (!_hasReplyMessage) {
+  Widget _buildReplyToMessage() {
+    if (!_hasReplyToMessage) {
       return Offstage();
     }
-    final containsUrl = _replyMessage.attachments
+    final containsUrl = _replyToMessage.attachments
             ?.any((element) => element.ogScrapeUrl != null) ==
         true;
     return Transform(
       transform: Matrix4.rotationY(pi),
       alignment: Alignment.center,
-      child: ReplyMessageWidget(
+      child: ReplyToMessageWidget(
         reverse: true,
         showBorder: !containsUrl,
-        message: _replyMessage,
+        message: _replyToMessage,
         messageTheme: StreamChatTheme.of(context).otherMessageTheme,
       ),
     );
@@ -1982,7 +1982,7 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
-    _replyMessage = null;
+    _replyToMessage = null;
 
     setState(() {
       _messageIsPresent = false;
@@ -2011,6 +2011,12 @@ class MessageInputState extends State<MessageInput> {
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
         showInChannel: widget.parentMessage != null ? _sendAsDm : null,
+      );
+    }
+
+    if (widget.replyToMessage != null) {
+      message = message.copyWith(
+        replyToMessageId: widget.replyToMessage.id,
       );
     }
 
@@ -2057,7 +2063,7 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
 
-    _replyMessage = widget.replyMessage;
+    _replyToMessage = widget.replyToMessage;
 
     _focusNode = widget.focusNode ?? FocusNode();
 
@@ -2124,8 +2130,8 @@ class MessageInputState extends State<MessageInput> {
   @override
   void didUpdateWidget(MessageInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.replyMessage?.id != _replyMessage?.id) {
-      _replyMessage = widget.replyMessage;
+    if (widget.replyToMessage?.id != _replyToMessage?.id) {
+      _replyToMessage = widget.replyToMessage;
     }
   }
 }

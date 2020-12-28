@@ -58,9 +58,6 @@ class MessageWidget extends StatefulWidget {
   /// The message
   final Message message;
 
-  /// The replyMessage
-  final Message replyMessage;
-
   /// The message theme
   final MessageTheme messageTheme;
 
@@ -140,7 +137,6 @@ class MessageWidget extends StatefulWidget {
     Key key,
     @required this.message,
     @required this.messageTheme,
-    this.replyMessage,
     this.reverse = false,
     this.translateUserAvatar = true,
     this.shape,
@@ -241,7 +237,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool get showInChannel =>
       widget.showInChannelIndicator && widget.message?.showInChannel == true;
 
-  bool get _hasReplyMessage => widget.replyMessage != null;
+  bool get _hasReplyToMessage => widget.message?.replyToMessage != null;
 
   @override
   Widget build(BuildContext context) {
@@ -352,7 +348,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                     shape: widget.shape ??
                                                         RoundedRectangleBorder(
                                                           side: isOnlyEmoji &&
-                                                                  !_hasReplyMessage
+                                                                  !_hasReplyToMessage
                                                               ? BorderSide.none
                                                               : widget.borderSide ??
                                                                   BorderSide(
@@ -383,10 +379,11 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                         mainAxisSize:
                                                             MainAxisSize.min,
                                                         children: <Widget>[
-                                                          if (_hasReplyMessage)
-                                                            ReplyMessageWidget(
+                                                          if (_hasReplyToMessage)
+                                                            ReplyToMessageWidget(
                                                               message: widget
-                                                                  .replyMessage,
+                                                                  .message
+                                                                  .replyToMessage,
                                                               messageTheme: isMyMessage
                                                                   ? StreamChatTheme.of(
                                                                           context)
@@ -941,7 +938,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           if (widget.message.attachments
                       ?.any((element) => element.ogScrapeUrl != null) ==
                   true &&
-              !_hasReplyMessage)
+              !_hasReplyToMessage)
             _buildUrlAttachment(),
         ],
       ),
@@ -953,7 +950,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
   Color _getBackgroundColor() {
-    if (_hasReplyMessage) {
+    if (_hasReplyToMessage) {
       return widget.messageTheme.messageBackgroundColor;
     }
 
