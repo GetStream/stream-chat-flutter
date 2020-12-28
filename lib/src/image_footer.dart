@@ -16,8 +16,6 @@ import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'stream_channel.dart';
-
 class ImageFooter extends StatefulWidget {
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
@@ -66,8 +64,7 @@ class _ImageFooterState extends State<ImageFooter> {
   TextEditingController _messageController = TextEditingController();
   FocusNode _messageFocusNode = FocusNode();
 
-  String _userNameQuery;
-  bool _isSearchActive = false;
+  String _channelNameQuery;
 
   List<Channel> _selectedChannels = [];
   bool _loading = false;
@@ -81,8 +78,7 @@ class _ImageFooterState extends State<ImageFooter> {
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted && modalSetStateCallback != null) {
         modalSetStateCallback(() {
-          _userNameQuery = _searchController.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
+          _channelNameQuery = _searchController.text;
         });
       }
     });
@@ -294,15 +290,15 @@ class _ImageFooterState extends State<ImageFooter> {
                         child: ChannelsBloc(
                           child: ChannelListView(
                             selectedChannels: _selectedChannels,
-                            onChannelTap: (user, _) {
+                            onChannelTap: (channel, _) {
                               _searchController.clear();
-                              if (!_selectedChannels.contains(user)) {
+                              if (!_selectedChannels.contains(channel)) {
                                 modalSetState(() {
-                                  _selectedChannels.add(user);
+                                  _selectedChannels.add(channel);
                                 });
                               } else {
                                 modalSetState(() {
-                                  _selectedChannels.remove(user);
+                                  _selectedChannels.remove(channel);
                                 });
                               }
                             },
@@ -313,7 +309,7 @@ class _ImageFooterState extends State<ImageFooter> {
                             filter: {
                               if (_searchController.text.isNotEmpty)
                                 'name': {
-                                  r'$autocomplete': _userNameQuery,
+                                  r'$autocomplete': _channelNameQuery,
                                 },
                               'id': {
                                 r'$ne': StreamChat.of(context).user.id,
@@ -346,7 +342,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                               ),
                                             ),
                                             Text(
-                                                'No user matches these keywords...'),
+                                                'No chat matches these keywords...'),
                                           ],
                                         ),
                                       ),
@@ -623,8 +619,6 @@ class _ImageFooterState extends State<ImageFooter> {
     final attachments = widget.message.attachments;
 
     _messageController.clear();
-
-    final client = StreamChat.of(context).client;
 
     for (var channel in _selectedChannels) {
       final message = Message(
