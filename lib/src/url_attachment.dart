@@ -51,10 +51,12 @@ class UrlAttachment extends StatelessWidget {
                         ),
                         child: Text(
                           hostDisplayName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF006CFF),
-                          ),
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .bodyBold
+                              .copyWith(
+                                color: Color(0xFF006CFF),
+                              ),
                         ),
                       ),
                       decoration: BoxDecoration(
@@ -81,18 +83,18 @@ class UrlAttachment extends StatelessWidget {
                     urlAttachment.title.trim(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.0,
-                    ),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .body
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                 if (urlAttachment.text != null)
                   Text(
                     urlAttachment.text,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12.0,
-                    ),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .body
+                        .copyWith(fontWeight: FontWeight.w400),
                   ),
               ],
             ),

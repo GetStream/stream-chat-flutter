@@ -420,10 +420,10 @@ class _MessageWidgetState extends State<MessageWidget> {
             SizedBox(width: 8.0),
             Text(
               'Only visible to you',
-              style: TextStyle(
-                color: Colors.black.withOpacity(0.5),
-                fontSize: 12.0,
-              ),
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .footnote
+                  .copyWith(color: Colors.black.withOpacity(0.5)),
             ),
           ],
         ),

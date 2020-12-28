@@ -45,7 +45,7 @@ Future<bool> showConfirmationDialog(
             ),
             Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             SizedBox(
               height: 7.0,

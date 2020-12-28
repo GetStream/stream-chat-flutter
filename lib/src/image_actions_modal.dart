@@ -66,11 +66,10 @@ class ImageActionsModal extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       userName,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .headlineBold
+                          .copyWith(color: Colors.white),
                     ),
                   ),
                   Text(

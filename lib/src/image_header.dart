@@ -81,11 +81,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
             children: <Widget>[
               Text(
                 userName,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
+                style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
               Text(
                 sentAt,

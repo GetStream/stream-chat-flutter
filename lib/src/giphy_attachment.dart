@@ -220,9 +220,12 @@ class GiphyAttachment extends StatelessWidget {
                       },
                       child: Text(
                         'Cancel',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black.withOpacity(0.5)),
+                        style: StreamChatTheme.of(context)
+                            .textTheme
+                            .bodyBold
+                            .copyWith(
+                              color: Colors.black.withOpacity(0.5),
+                            ),
                       ),
                     ),
                   ),
@@ -271,10 +274,10 @@ class GiphyAttachment extends StatelessWidget {
                 ),
                 Text(
                   'Only visible to you',
-                  style: TextStyle(
-                    color: Colors.black.withOpacity(0.5),
-                    fontSize: 12.0,
-                  ),
+                  style: StreamChatTheme.of(context)
+                      .textTheme
+                      .footnote
+                      .copyWith(color: Colors.black.withOpacity(0.5)),
                 ),
               ],
             ),

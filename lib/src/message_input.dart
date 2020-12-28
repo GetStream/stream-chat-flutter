@@ -423,8 +423,10 @@ class MessageInputState extends State<MessageInput> {
                                   ),
                                   Text(
                                     _chosenCommand?.name?.toUpperCase() ?? "",
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 12.0),
+                                    style: StreamChatTheme.of(context)
+                                        .textTheme
+                                        .footnote
+                                        .copyWith(color: Colors.white),
                                   ),
                                 ],
                               ),
@@ -899,11 +901,12 @@ class MessageInputState extends State<MessageInput> {
                       Center(
                         child: Text(
                           'Allow access to your gallery',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: StreamChatTheme.of(context).accentColor,
-                          ),
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .bodyBold
+                              .copyWith(
+                                color: StreamChatTheme.of(context).accentColor,
+                              ),
                         ),
                       ),
                     ],

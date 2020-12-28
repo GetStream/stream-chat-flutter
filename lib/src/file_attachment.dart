@@ -88,10 +88,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                 children: [
                   Text(
                     widget.attachment?.title ?? 'File',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                    ),
+                    style: StreamChatTheme.of(context).textTheme.bodyBold,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -100,10 +97,10 @@ class _FileAttachmentState extends State<FileAttachment> {
                   ),
                   Text(
                     '${_getSizeText(widget.attachment.extraData['file_size'])}',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                      fontSize: 14.0,
-                    ),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .body
+                        .copyWith(color: Colors.black.withOpacity(0.5)),
                   ),
                 ],
               ),

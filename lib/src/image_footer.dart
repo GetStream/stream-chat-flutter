@@ -130,11 +130,7 @@ class _ImageFooterState extends State<ImageFooter> {
                   children: <Widget>[
                     Text(
                       '${widget.currentPage + 1} of ${widget.totalPages}',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
+                      style: StreamChatTheme.of(context).textTheme.headlineBold,
                     ),
                   ],
                 ),
@@ -182,11 +178,8 @@ class _ImageFooterState extends State<ImageFooter> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         'Photos',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
+                        style:
+                            StreamChatTheme.of(context).textTheme.headlineBold,
                       ),
                     ),
                   ),
@@ -490,11 +483,7 @@ class _ImageFooterState extends State<ImageFooter> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Select a Chat to Share',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-              ),
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
           ),
           Padding(
