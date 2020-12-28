@@ -1,3 +1,7 @@
+## 0.2.20+2
+
+- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message arrives
+
 ## 0.2.20+1
 
 - Fixed bug that caused video attachment to show the same preview
