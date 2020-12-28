@@ -24,6 +24,7 @@ void main() async {
 
   final client = Client(
     apiKey ?? kDefaultStreamApiKey,
+    baseURL: 'https://chat-proxy-oregon.stream-io-api.com',
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
@@ -477,7 +478,7 @@ class _ChannelPageState extends State<ChannelPage> {
           ),
           MessageInput(
             focusNode: _focusNode,
-            replyMessage: _replyMessage,
+            replyToMessage: _replyMessage,
           ),
         ],
       ),
