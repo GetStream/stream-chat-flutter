@@ -17,12 +17,16 @@ class ChannelsBloc extends StatefulWidget {
   /// Comparator used to sort the channels when a message.new event is received
   final Comparator<Channel> channelsComparator;
 
+  /// Function used to evaluate if a channel should be added to the list when a message.new event is received
+  final bool Function(Event) shouldAddChannel;
+
   /// Instantiate a new ChannelsBloc
   const ChannelsBloc({
     Key key,
     this.child,
     this.lockChannelsOrder = false,
     this.channelsComparator,
+    this.shouldAddChannel,
   }) : super(key: key);
 
   @override
@@ -128,7 +132,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
             final channel = newChannels.removeAt(index);
             newChannels.insert(0, channel);
           }
-        } else {
+        } else if (widget.shouldAddChannel != null &&
+            widget.shouldAddChannel(e)) {
           final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
           if (hiddenIndex > -1) {
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
