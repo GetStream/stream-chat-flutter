@@ -278,21 +278,19 @@ class _ChannelListViewState extends State<ChannelListView>
                 },
               );
             } else {
-              child = ListView.custom(
+              child = ListView.separated(
                 physics: AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                childrenDelegate: SliverChildBuilderDelegate(
-                  (context, i) {
-                    return _itemBuilder(context, i, channels);
-                  },
-                  childCount: (channels.length * 2) + 1,
-                  findChildIndexCallback: (key) {
-                    final ValueKey<String> valueKey = key;
-                    final index = channels.indexWhere(
-                        (channel) => 'CHANNEL-${channel.id}' == valueKey.value);
-                    return index != -1 ? (index * 2) : null;
-                  },
-                ),
+                itemCount:
+                    channels.isNotEmpty ? channels.length + 1 : channels.length,
+                separatorBuilder: (_, index) {
+                  if (widget.separatorBuilder != null) {
+                    return widget.separatorBuilder(context, index);
+                  }
+                  return _separatorBuilder(context, index);
+                },
+                itemBuilder: (context, index) {
+                  return _listItemBuilder(context, index, channels);
+                },
               );
             }
           }
@@ -483,20 +481,10 @@ class _ChannelListViewState extends State<ChannelListView>
     );
   }
 
-  Widget _itemBuilder(context, int i, List<Channel> channels) {
-    if (i % 2 != 0) {
-      if (widget.separatorBuilder != null) {
-        return widget.separatorBuilder(context, i);
-      }
-      return _separatorBuilder(context, i);
-    }
-
-    i = i ~/ 2;
-
+  Widget _listItemBuilder(BuildContext context, int i, List<Channel> channels) {
     final channelsProvider = ChannelsBloc.of(context);
     if (i < channels.length) {
       final channel = channels[i];
-
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {
         onTap = widget.onChannelTap;
