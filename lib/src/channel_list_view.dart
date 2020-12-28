@@ -203,7 +203,9 @@ class _ChannelListViewState extends State<ChannelListView>
                               padding: const EdgeInsets.all(8.0),
                               child: StreamSvgIcon.message(
                                 size: 136,
-                                color: Color(0xffDBDBDB),
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .greyGainsboro,
                               ),
                             ),
                             Padding(
@@ -227,7 +229,9 @@ class _ChannelListViewState extends State<ChannelListView>
                                     .textTheme
                                     .body
                                     .copyWith(
-                                      color: Color(0xff7A7A7A),
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .grey,
                                     ),
                               ),
                             ),
@@ -311,7 +315,7 @@ class _ChannelListViewState extends State<ChannelListView>
   Shimmer _buildLoadingItem() {
     return Shimmer.fromColors(
       baseColor: Color(0xffE5E5E5),
-      highlightColor: Color(0xffffffff),
+      highlightColor: StreamChatTheme.of(context).colorTheme.white,
       child: ListTile(
         leading: Container(
           decoration: BoxDecoration(

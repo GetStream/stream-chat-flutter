@@ -502,6 +502,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               child: CustomPaint(
                 size: const Size(16, 32),
                 painter: _ThreadReplyPainter(
+                  context: context,
                   color: widget.messageTheme.replyThreadColor,
                 ),
               ),
@@ -916,7 +917,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     if (widget.message.attachments
             ?.any((element) => element.ogScrapeUrl != null) ==
         true) {
-      return Color(0xFFE9F2FF);
+      return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
 
     if (isOnlyEmoji) {
@@ -997,13 +998,14 @@ class _MessageWidgetState extends State<MessageWidget> {
 
 class _ThreadReplyPainter extends CustomPainter {
   final Color color;
+  final BuildContext context;
 
-  const _ThreadReplyPainter({@required this.color});
+  const _ThreadReplyPainter({this.context, @required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color ?? Color(0XFFDBDBDB)
+      ..color = color ?? StreamChatTheme.of(context).colorTheme.greyGainsboro
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;

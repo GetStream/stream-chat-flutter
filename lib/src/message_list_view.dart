@@ -342,7 +342,9 @@ class _MessageListViewState extends State<MessageListView> {
                                     end: Alignment.bottomCenter,
                                     colors: [
                                       Color(0XFFF7F7F7),
-                                      Color(0XFFFCFCFC),
+                                      StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .whiteSmoke,
                                     ],
                                   ),
                                 ),

@@ -73,7 +73,7 @@ class ChannelBottomSheet extends StatelessWidget {
               ListTile(
                 leading: StreamSvgIcon.userRemove(
                   size: 24,
-                  color: Color(0xff7A7A7A),
+                  color: StreamChatTheme.of(context).colorTheme.grey,
                 ),
                 title: Text(
                   'Leave Group',

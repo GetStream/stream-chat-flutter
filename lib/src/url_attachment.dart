@@ -63,7 +63,7 @@ class UrlAttachment extends StatelessWidget {
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(16.0),
                         ),
-                        color: Color(0xFFE9F2FF),
+                        color: StreamChatTheme.of(context).colorTheme.blueAlice,
                       ),
                     ),
                   ),

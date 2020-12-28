@@ -724,7 +724,7 @@ class MessageInputState extends State<MessageInput> {
       duration: _animateContainer ? Duration(milliseconds: 300) : Duration.zero,
       height: _openFilePickerSection ? _filePickerSize : 0,
       child: Material(
-        color: Color(0xFFF2F2F2),
+        color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
             Row(
@@ -806,7 +806,8 @@ class MessageInputState extends State<MessageInput> {
                         width: 40.0,
                         height: 4.0,
                         decoration: BoxDecoration(
-                          color: Color(0xFFF2F2F2),
+                          color:
+                              StreamChatTheme.of(context).colorTheme.whiteSmoke,
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                       ),
@@ -854,7 +855,7 @@ class MessageInputState extends State<MessageInput> {
                     },
                     child: Container(
                       constraints: BoxConstraints.expand(),
-                      color: Color(0xfff2f2f2),
+                      color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       child: Text(
                         'Add more files',
                         style: TextStyle(
@@ -887,7 +888,7 @@ class MessageInputState extends State<MessageInput> {
                   PhotoManager.openSetting();
                 },
                 child: Container(
-                  color: Color(0xFFF2F2F2),
+                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,

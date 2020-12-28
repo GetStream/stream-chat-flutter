@@ -45,6 +45,9 @@ class StreamChatThemeData {
   /// The text themes used in the widgets
   final TextTheme textTheme;
 
+  /// The text themes used in the widgets
+  final ColorTheme colorTheme;
+
   /// Primary color of the chat widgets
   final Color primaryColor;
 
@@ -84,6 +87,7 @@ class StreamChatThemeData {
   /// Create a theme from scratch
   StreamChatThemeData({
     this.textTheme,
+    this.colorTheme,
     this.primaryColor,
     this.secondaryColor,
     this.accentColor,
@@ -136,6 +140,7 @@ class StreamChatThemeData {
   /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
   StreamChatThemeData copyWith({
     TextTheme textTheme,
+    ColorTheme colorTheme,
     Color primaryColor,
     Color secondaryColor,
     Color accentColor,
@@ -159,6 +164,16 @@ class StreamChatThemeData {
               footnoteBold: textTheme?.footnoteBold,
               headline: textTheme?.headline,
               headlineBold: textTheme?.headlineBold,
+            ),
+        colorTheme: this.colorTheme?.copyWith(
+              black: colorTheme?.black,
+              grey: colorTheme?.grey,
+              greyGainsboro: colorTheme?.greyGainsboro,
+              greyWhisper: colorTheme?.greyWhisper,
+              whiteSmoke: colorTheme?.whiteSmoke,
+              whiteSnow: colorTheme?.whiteSnow,
+              white: colorTheme?.white,
+              blueAlice: colorTheme?.blueAlice,
             ),
         primaryColor: primaryColor ?? this.primaryColor,
         secondaryColor: secondaryColor ?? this.secondaryColor,
@@ -233,8 +248,10 @@ class StreamChatThemeData {
     final accentColor = Color(0xff006cff);
     final isDark = theme.brightness == Brightness.dark;
     final textTheme = TextTheme();
+    final colorTheme = isDark ? ColorTheme.dark() : ColorTheme.light();
     return StreamChatThemeData(
       textTheme: textTheme,
+      colorTheme: colorTheme,
       secondaryColor: Color(0xffEAEAEA),
       accentColor: accentColor,
       primaryColor: isDark ? Colors.black : Colors.white,
@@ -451,6 +468,78 @@ class TextTheme {
       footnote: footnote ?? this.footnote,
       captionBold: captionBold ?? this.captionBold,
     );
+  }
+}
+
+enum ColorThemeType {
+  light,
+  dark,
+}
+
+class ColorTheme {
+  final Color black;
+  final Color grey;
+  final Color greyGainsboro;
+  final Color greyWhisper;
+  final Color whiteSmoke;
+  final Color whiteSnow;
+  final Color white;
+  final Color blueAlice;
+
+  ColorTheme.light({
+    this.black = const Color(0xff000000),
+    this.grey = const Color(0xff7a7a7a),
+    this.greyGainsboro = const Color(0xffdbdbdb),
+    this.greyWhisper = const Color(0xffecebeb),
+    this.whiteSmoke = const Color(0xfff2f2f2),
+    this.whiteSnow = const Color(0xfffcfcfc),
+    this.white = const Color(0xffffffff),
+    this.blueAlice = const Color(0xffe9f2ff),
+  });
+
+  ColorTheme.dark({
+    this.black = const Color(0xffffffff),
+    this.grey = const Color(0xff7a7a7a),
+    this.greyGainsboro = const Color(0xff2d2f2f),
+    this.greyWhisper = const Color(0xff1c1e22),
+    this.whiteSmoke = const Color(0xff13151b),
+    this.whiteSnow = const Color(0xff070A0D),
+    this.white = const Color(0xff101418),
+    this.blueAlice = const Color(0xff00193D),
+  });
+
+  ColorTheme copyWith({
+    ColorThemeType type = ColorThemeType.light,
+    Color black,
+    Color grey,
+    Color greyGainsboro,
+    Color greyWhisper,
+    Color whiteSmoke,
+    Color whiteSnow,
+    Color white,
+    Color blueAlice,
+  }) {
+    return type == ColorThemeType.light
+        ? ColorTheme.light(
+            black: black ?? this.black,
+            grey: grey ?? this.grey,
+            greyGainsboro: greyGainsboro ?? this.greyGainsboro,
+            greyWhisper: greyWhisper ?? this.greyWhisper,
+            whiteSmoke: whiteSmoke ?? this.whiteSmoke,
+            whiteSnow: whiteSnow ?? this.whiteSnow,
+            white: white ?? this.white,
+            blueAlice: blueAlice ?? this.blueAlice,
+          )
+        : ColorTheme.dark(
+            black: black ?? this.black,
+            grey: grey ?? this.grey,
+            greyGainsboro: greyGainsboro ?? this.greyGainsboro,
+            greyWhisper: greyWhisper ?? this.greyWhisper,
+            whiteSmoke: whiteSmoke ?? this.whiteSmoke,
+            whiteSnow: whiteSnow ?? this.whiteSnow,
+            white: white ?? this.white,
+            blueAlice: blueAlice ?? this.blueAlice,
+          );
   }
 }
 

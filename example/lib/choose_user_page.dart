@@ -171,7 +171,9 @@ class ChooseUserPage extends StatelessWidget {
                                 .textTheme
                                 .footnote
                                 .copyWith(
-                                  color: Color(0xff7A7A7A),
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .grey,
                                 ),
                           ),
                           trailing: SvgPicture.asset(
@@ -202,7 +204,8 @@ class ChooseUserPage extends StatelessWidget {
                               .textTheme
                               .footnote
                               .copyWith(
-                                color: Color(0xff7A7A7A),
+                                color:
+                                    StreamChatTheme.of(context).colorTheme.grey,
                               ),
                         ),
                         trailing: SvgPicture.asset(
