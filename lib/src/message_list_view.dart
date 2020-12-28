@@ -116,6 +116,7 @@ class MessageListView extends StatefulWidget {
     this.scrollController,
     this.itemPositionListener,
     this.highlightInitialMessage = false,
+    this.highlightColor = const Color(0XFFFBF4DD),
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -161,6 +162,11 @@ class MessageListView extends StatefulWidget {
   ///
   /// Also See [StreamChannel]
   final bool highlightInitialMessage;
+
+  /// The color used for highlighting the initialMessage if there is any.
+  ///
+  /// Also See [highlightInitialMessage]
+  final Color highlightColor;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -796,13 +802,12 @@ class _MessageListViewState extends State<MessageListView> {
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
         _isInitialMessage(message.id)) {
-      final accentColor = Theme.of(context).accentColor;
       child = TweenAnimationBuilder<Color>(
         tween: ColorTween(
-          begin: accentColor.withOpacity(0.7),
-          end: Colors.transparent,
+          begin: widget.highlightColor,
+          end: Colors.white10,
         ),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
         child: child,
         onEnd: () {
           initialMessageHighlightComplete = true;
