@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'file:///Users/deven9852/Stream/stream-chat-flutter/example/lib/chat_info_screen.dart';
 import 'package:stream_chat_flutter/src/option_list_tile.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'chat_info_screen.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'main.dart';
@@ -701,7 +701,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     StreamChat.of(context).user.id != user.id &&
                     isUserAdmin)
                   _buildModalListTile(
-                      StreamSvgIcon.userAdd(
+                      StreamSvgIcon.Icon_user_settings(
                         color: Color(0xff7a7a7a),
                         size: 24.0,
                       ),

@@ -246,7 +246,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
   Widget _buildDeleteListTile() {
     return OptionListTile(
-      title: 'Delete',
+      title: 'Delete Conversation',
       leading: StreamSvgIcon.delete(
         color: Colors.red,
         size: 24.0,

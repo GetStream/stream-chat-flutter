@@ -93,7 +93,36 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 
         if (snapshot.data.isEmpty) {
           return Center(
-            child: Text('Nothing here...'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StreamSvgIcon.pictures(
+                  size: 136.0,
+                  color: Color(0xffdbdbdb),
+                ),
+                SizedBox(
+                  height: 16.0,
+                ),
+                Text(
+                  'No Media',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Color(0xff000000),
+                  ),
+                ),
+                SizedBox(
+                  height: 8.0,
+                ),
+                Text(
+                  'Photos or video sent in this chat will \nappear here',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Color(0xff000000).withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
           );
         }
 
@@ -157,9 +186,13 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     );
                   },
                   child: media[position].attachment.type == 'image'
-                      ? CachedNetworkImage(
-                          imageUrl: media[position].attachment.imageUrl,
-                          fit: BoxFit.cover,
+                      ? ImageAttachment(
+                          attachment: media[position].attachment,
+                          message: media[position].message,
+                          size: Size(
+                            MediaQuery.of(context).size.width * 0.8,
+                            MediaQuery.of(context).size.height * 0.3,
+                          ),
                         )
                       : VideoPlayer(media[position].videoPlayer),
                 ),

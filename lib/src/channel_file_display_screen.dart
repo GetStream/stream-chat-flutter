@@ -94,7 +94,36 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
 
         if (snapshot.data.isEmpty) {
           return Center(
-            child: Text('Nothing here...'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StreamSvgIcon.files(
+                  size: 136.0,
+                  color: Color(0xffdbdbdb),
+                ),
+                SizedBox(
+                  height: 16.0,
+                ),
+                Text(
+                  'No Media',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Color(0xff000000),
+                  ),
+                ),
+                SizedBox(
+                  height: 8.0,
+                ),
+                Text(
+                  'Files sent in this chat will appear here',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Color(0xff000000).withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
           );
         }
 
