@@ -25,7 +25,7 @@ Future<bool> showConfirmationDialog(
   String cancelText,
 }) {
   return showModalBottomSheet(
-      backgroundColor: Colors.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       context: context,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -65,7 +65,10 @@ Future<bool> showConfirmationDialog(
                   child: Text(
                     cancelText,
                     style: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.5),
                         fontWeight: FontWeight.w400),
                   ),
                   onPressed: () {

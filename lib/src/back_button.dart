@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
 
+import '../stream_chat_flutter.dart';
+
 class StreamBackButton extends StatelessWidget {
   const StreamBackButton({
     Key key,
@@ -36,8 +38,8 @@ class StreamBackButton extends StatelessWidget {
             child: StreamSvgIcon.left(
               size: 24,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
+                  ? StreamChatTheme.of(context).colorTheme.white
+                  : StreamChatTheme.of(context).colorTheme.black,
             ),
           ),
         ),

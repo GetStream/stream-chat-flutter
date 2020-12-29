@@ -22,7 +22,7 @@ class SearchTextField extends StatelessWidget {
     return Container(
       height: 36,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: StreamChatTheme.of(context).colorTheme.white,
         border: Border.all(
           color: Colors.grey.shade300,
         ),
@@ -48,15 +48,16 @@ class SearchTextField extends StatelessWidget {
                     right: 8,
                   ),
                   child: StreamSvgIcon.search(
-                    color: Colors.black,
+                    color: StreamChatTheme.of(context).colorTheme.black,
                     size: 24,
                   ),
                 ),
                 hintText: hintText,
-                hintStyle: StreamChatTheme.of(context)
-                    .textTheme
-                    .body
-                    .copyWith(color: Colors.black.withOpacity(.5)),
+                hintStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5)),
                 contentPadding: const EdgeInsets.all(0),
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,

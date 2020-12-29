@@ -327,10 +327,16 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                                           .brightness ==
                                                                       Brightness
                                                                           .dark
-                                                                  ? Colors.white
+                                                                  ? StreamChatTheme.of(
+                                                                          context)
+                                                                      .colorTheme
+                                                                      .white
                                                                       .withAlpha(
                                                                           24)
-                                                                  : Colors.black
+                                                                  : StreamChatTheme.of(
+                                                                          context)
+                                                                      .colorTheme
+                                                                      .black
                                                                       .withAlpha(
                                                                           24),
                                                             ),
@@ -414,16 +420,18 @@ class _MessageWidgetState extends State<MessageWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             StreamSvgIcon.eye(
-              color: Colors.black.withOpacity(0.5),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
               size: 16.0,
             ),
             SizedBox(width: 8.0),
             Text(
               'Only visible to you',
-              style: StreamChatTheme.of(context)
-                  .textTheme
-                  .footnote
-                  .copyWith(color: Colors.black.withOpacity(0.5)),
+              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5)),
             ),
           ],
         ),
@@ -551,7 +559,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           bottom: 0,
           top: 0,
           child: Material(
-            color: Colors.white,
+            color: StreamChatTheme.of(context).colorTheme.white,
             clipBehavior: Clip.antiAlias,
             shape: CircleBorder(),
             child: Padding(
@@ -664,8 +672,8 @@ class _MessageWidgetState extends State<MessageWidget> {
           widget.borderSide ??
           BorderSide(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withAlpha(24)
-                : Colors.black.withAlpha(24),
+                ? StreamChatTheme.of(context).colorTheme.white.withAlpha(24)
+                : StreamChatTheme.of(context).colorTheme.black.withAlpha(24),
           ),
       borderRadius: widget.attachmentBorderRadiusGeometry ??
           widget.borderRadiusGeometry ??
@@ -820,8 +828,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         'MESSAGE FAILED · CLICK TO TRY AGAIN',
         style: widget.messageTheme.messageText.copyWith(
           color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
+              ? StreamChatTheme.of(context).colorTheme.white.withOpacity(.5)
+              : StreamChatTheme.of(context).colorTheme.black.withOpacity(.5),
           fontSize: 11,
         ),
       );
@@ -831,8 +839,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
         style: widget.messageTheme.messageText.copyWith(
           color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
+              ? StreamChatTheme.of(context).colorTheme.white.withOpacity(.5)
+              : StreamChatTheme.of(context).colorTheme.black.withOpacity(.5),
           fontSize: 11,
         ),
       );
@@ -842,8 +850,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
         style: widget.messageTheme.messageText.copyWith(
           color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
+              ? StreamChatTheme.of(context).colorTheme.white.withOpacity(.5)
+              : StreamChatTheme.of(context).colorTheme.black.withOpacity(.5),
           fontSize: 11,
         ),
       );

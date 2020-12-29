@@ -319,7 +319,7 @@ class _ChannelListViewState extends State<ChannelListView>
       child: ListTile(
         leading: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: StreamChatTheme.of(context).colorTheme.white,
             shape: BoxShape.circle,
           ),
           constraints: BoxConstraints.tightFor(
@@ -331,7 +331,7 @@ class _ChannelListViewState extends State<ChannelListView>
           alignment: Alignment.centerLeft,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: StreamChatTheme.of(context).colorTheme.white,
               borderRadius: BorderRadius.circular(11),
             ),
             constraints: BoxConstraints.tightFor(
@@ -346,7 +346,7 @@ class _ChannelListViewState extends State<ChannelListView>
               alignment: Alignment.centerLeft,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 constraints: BoxConstraints.tightFor(
@@ -358,7 +358,7 @@ class _ChannelListViewState extends State<ChannelListView>
             Container(
               margin: const EdgeInsets.only(left: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: StreamChatTheme.of(context).colorTheme.white,
                 borderRadius: BorderRadius.circular(11),
               ),
               constraints: BoxConstraints.tightFor(
@@ -622,8 +622,8 @@ class _ChannelListViewState extends State<ChannelListView>
     return Container(
       height: 1,
       color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.white.withOpacity(0.1)
-          : Colors.black.withOpacity(0.1),
+          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
+          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
     );
   }
 

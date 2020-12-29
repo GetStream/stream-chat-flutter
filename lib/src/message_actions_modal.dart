@@ -69,7 +69,10 @@ class MessageActionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.1),
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .black
+                    .withOpacity(0.1),
               ),
             ),
           ),

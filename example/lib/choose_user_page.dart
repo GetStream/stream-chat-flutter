@@ -113,7 +113,9 @@ class ChooseUserPage extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: Colors.white,
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .white,
                                   ),
                                   height: 100,
                                   width: 100,
@@ -189,7 +191,7 @@ class ChooseUserPage extends StatelessWidget {
                         },
                         leading: CircleAvatar(
                           child: StreamSvgIcon.settings(
-                            color: Colors.black,
+                            color: StreamChatTheme.of(context).colorTheme.black,
                           ),
                           backgroundColor:
                               StreamChatTheme.of(context).secondaryColor,

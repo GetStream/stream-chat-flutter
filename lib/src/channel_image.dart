@@ -149,7 +149,9 @@ class ChannelImage extends StatelessWidget {
                                     ? snapshot.data['name'][0]
                                     : '',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

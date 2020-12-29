@@ -108,7 +108,10 @@ class ReactionBubble extends StatelessWidget {
               color: (!highlightOwnReactions ||
                       reaction.user.id == StreamChat.of(context).user.id)
                   ? StreamChatTheme.of(context).accentColor
-                  : Colors.black.withOpacity(.5),
+                  : StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5),
             )
           : Icon(
               Icons.help_outline_rounded,
@@ -116,7 +119,10 @@ class ReactionBubble extends StatelessWidget {
               color: (!highlightOwnReactions ||
                       reaction.user.id == StreamChat.of(context).user.id)
                   ? StreamChatTheme.of(context).accentColor
-                  : Colors.black.withOpacity(.5),
+                  : StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5),
             ),
     );
   }

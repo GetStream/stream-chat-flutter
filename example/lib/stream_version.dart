@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class StreamVersion extends StatelessWidget {
   const StreamVersion({
@@ -28,7 +29,8 @@ class StreamVersion extends StatelessWidget {
             'Stream SDK v ${streamChatDep}',
             style: TextStyle(
               fontSize: 14.5,
-              color: Colors.black.withOpacity(.13),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.13),
             ),
           );
         },

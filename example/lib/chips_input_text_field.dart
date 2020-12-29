@@ -66,7 +66,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       onTap: _pauseItemAddition ? resumeItemAddition : null,
       child: Material(
         elevation: 1,
-        color: Colors.white,
+        color: StreamChatTheme.of(context).colorTheme.white,
         child: Container(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -81,7 +81,11 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                       style: StreamChatTheme.of(context)
                           .textTheme
                           .footnote
-                          .copyWith(color: Colors.black.withOpacity(.5)),
+                          .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5)),
                     ),
                   ),
                   SizedBox(width: 12),
@@ -115,7 +119,10 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                                   .textTheme
                                   .body
                                   .copyWith(
-                                      color: Colors.black.withOpacity(.5)),
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .black
+                                          .withOpacity(.5)),
                             ),
                           ),
                       ],
@@ -127,11 +134,17 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                     child: IconButton(
                       icon: _chips.isEmpty
                           ? StreamSvgIcon.user(
-                              color: Colors.black.withOpacity(0.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5),
                               size: 24,
                             )
                           : StreamSvgIcon.userAdd(
-                              color: Colors.black.withOpacity(0.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5),
                               size: 24,
                             ),
                       onPressed: resumeItemAddition,

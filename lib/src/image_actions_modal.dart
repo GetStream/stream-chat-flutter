@@ -34,7 +34,7 @@ class ImageActionsModal extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.8),
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.8),
                 Colors.transparent,
               ],
               stops: [0.0, 0.4],
@@ -69,7 +69,9 @@ class ImageActionsModal extends StatelessWidget {
                       style: StreamChatTheme.of(context)
                           .textTheme
                           .headlineBold
-                          .copyWith(color: Colors.white),
+                          .copyWith(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.white),
                     ),
                   ),
                   Text(
@@ -77,14 +79,18 @@ class ImageActionsModal extends StatelessWidget {
                     style: StreamChatTheme.of(context)
                         .channelPreviewTheme
                         .subtitle
-                        .copyWith(color: Colors.white.withOpacity(0.5)),
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .white
+                                .withOpacity(0.5)),
                   ),
                 ],
               ),
               IconButton(
                 icon: StreamSvgIcon.close(
                   size: 24.0,
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -114,7 +120,10 @@ class ImageActionsModal extends StatelessWidget {
                             'Reply',
                             StreamSvgIcon.Icon_curve_line_left_up(
                               size: 24.0,
-                              color: Colors.black.withOpacity(0.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5),
                             ),
                             () {}),
                         _buildButton(
@@ -122,7 +131,8 @@ class ImageActionsModal extends StatelessWidget {
                             'Show in Chat',
                             StreamSvgIcon.eye(
                               size: 24.0,
-                              color: Colors.black,
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
                             ), () {
                           Navigator.pop(context);
                           Navigator.pop(context);
@@ -132,7 +142,10 @@ class ImageActionsModal extends StatelessWidget {
                             'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                             StreamSvgIcon.Icon_save(
                               size: 24.0,
-                              color: Colors.black.withOpacity(0.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5),
                             ), () async {
                           var url = urls[currentIndex].imageUrl ??
                               urls[currentIndex].assetUrl ??
@@ -181,7 +194,7 @@ class ImageActionsModal extends StatelessWidget {
       {Color color}) {
     var titleStyle = TextStyle(
       fontSize: 14.5,
-      color: Colors.black,
+      color: StreamChatTheme.of(context).colorTheme.black,
     );
 
     return Material(

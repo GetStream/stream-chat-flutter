@@ -254,7 +254,11 @@ class _MessageListViewState extends State<MessageListView> {
                     style: StreamChatTheme.of(context)
                         .textTheme
                         .footnote
-                        .copyWith(color: Colors.black.withOpacity(.5)),
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5)),
                   ),
                 );
               }
@@ -524,9 +528,9 @@ class _MessageListViewState extends State<MessageListView> {
             clipBehavior: Clip.none,
             children: [
               FloatingActionButton(
-                backgroundColor: Colors.white,
+                backgroundColor: StreamChatTheme.of(context).colorTheme.white,
                 child: StreamSvgIcon.down(
-                  color: Colors.black,
+                  color: StreamChatTheme.of(context).colorTheme.black,
                 ),
                 onPressed: () {
                   if (unreadCount > 0) {

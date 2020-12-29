@@ -55,10 +55,10 @@ class MyApp extends StatelessWidget {
       client: client,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: ThemeData.light(),
+        theme: ThemeData.dark(),
         darkTheme: ThemeData.dark(),
         //TODO change to system once dark  theme is implemented
-        themeMode: ThemeMode.light,
+        themeMode: ThemeMode.dark,
         onGenerateRoute: AppRoutes.generateRoute,
         initialRoute:
             client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
@@ -84,7 +84,9 @@ class _HomePageState extends State<HomePage> {
           overflow: Overflow.visible,
           children: [
             StreamSvgIcon.message(
-              color: _isSelected(0) ? Colors.black : Colors.grey,
+              color: _isSelected(0)
+                  ? StreamChatTheme.of(context).colorTheme.black
+                  : Colors.grey,
             ),
             Positioned(
               top: -3,
@@ -100,7 +102,9 @@ class _HomePageState extends State<HomePage> {
           overflow: Overflow.visible,
           children: [
             StreamSvgIcon.mentions(
-              color: _isSelected(1) ? Colors.black : Colors.grey,
+              color: _isSelected(1)
+                  ? StreamChatTheme.of(context).colorTheme.black
+                  : Colors.grey,
             ),
           ],
         ),
@@ -127,7 +131,7 @@ class _HomePageState extends State<HomePage> {
         unselectedLabelStyle:
             StreamChatTheme.of(context).textTheme.footnoteBold,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.black,
+        selectedItemColor: StreamChatTheme.of(context).colorTheme.black,
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() => _currentIndex = index);
@@ -179,7 +183,10 @@ class _HomePageState extends State<HomePage> {
               ),
               ListTile(
                 leading: StreamSvgIcon.penWrite(
-                  color: Colors.black.withOpacity(.5),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5),
                 ),
                 onTap: () {
                   Navigator.popAndPushNamed(
@@ -196,7 +203,10 @@ class _HomePageState extends State<HomePage> {
               ),
               ListTile(
                 leading: StreamSvgIcon.contacts(
-                  color: Colors.black.withOpacity(.5),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5),
                 ),
                 onTap: () {
                   Navigator.popAndPushNamed(
@@ -231,7 +241,10 @@ class _HomePageState extends State<HomePage> {
                       );
                     },
                     leading: StreamSvgIcon.user(
-                      color: Colors.black.withOpacity(.5),
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(.5),
                     ),
                     title: Text(
                       'Sign out',

@@ -145,7 +145,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildConnectedTitleState(BuildContext context) => Text(
         'Stream Chat',
         style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
-              color: Colors.black,
+              color: StreamChatTheme.of(context).colorTheme.black,
             ),
       );
 

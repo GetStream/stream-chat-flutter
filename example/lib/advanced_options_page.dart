@@ -45,11 +45,11 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
           style: StreamChatTheme.of(context)
               .textTheme
               .headlineBold
-              .copyWith(color: Colors.black),
+              .copyWith(color: StreamChatTheme.of(context).colorTheme.black),
         ),
         leading: IconButton(
           icon: StreamSvgIcon.left(
-            color: Colors.black,
+            color: StreamChatTheme.of(context).colorTheme.black,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -89,7 +89,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     },
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.black,
+                      color: StreamChatTheme.of(context).colorTheme.black,
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(fontSize: 0),
@@ -98,7 +98,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fontWeight: FontWeight.bold,
                         color: _apiKeyError != null
                             ? Color(0xffff3742)
-                            : Colors.black.withOpacity(.5),
+                            : StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5),
                       ),
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -133,7 +136,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       },
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
@@ -143,7 +146,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           fontSize: 14,
                           color: _userIdError != null
                               ? Color(0xffff3742)
-                              : Colors.black.withOpacity(.5),
+                              : StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -178,7 +184,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       },
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
@@ -188,7 +194,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           fontSize: 14,
                           color: _userTokenError != null
                               ? Color(0xffff3742)
-                              : Colors.black.withOpacity(.5),
+                              : StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -210,7 +219,10 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         labelStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black.withOpacity(.5),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -232,7 +244,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         child: Text(
                           'Login',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: StreamChatTheme.of(context).colorTheme.white,
                             fontSize: 16,
                           ),
                         ),
@@ -257,7 +269,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: Colors.white,
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .white,
                                   ),
                                   height: 100,
                                   width: 100,

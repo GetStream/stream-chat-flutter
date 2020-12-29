@@ -254,7 +254,7 @@ class StreamChatThemeData {
       colorTheme: colorTheme,
       secondaryColor: Color(0xffEAEAEA),
       accentColor: accentColor,
-      primaryColor: isDark ? Colors.black : Colors.white,
+      primaryColor: isDark ? colorTheme.black : colorTheme.white,
       primaryIconTheme: IconThemeData(
           color: isDark ? Colors.white : Colors.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),

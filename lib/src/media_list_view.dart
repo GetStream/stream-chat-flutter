@@ -6,6 +6,8 @@ import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'dart:ui' as ui;
 
+import '../stream_chat_flutter.dart';
+
 extension on Duration {
   String format() {
     final s = '$this'.split('.')[0].padLeft(8, '0');
@@ -80,7 +82,10 @@ class _MediaListViewState extends State<MediaListView> {
                             ? 1.0
                             : 0.0,
                         child: Container(
-                          color: Colors.black.withOpacity(0.5),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5),
                           alignment: Alignment.topRight,
                           padding: const EdgeInsets.only(
                             top: 8,
@@ -88,10 +93,12 @@ class _MediaListViewState extends State<MediaListView> {
                           ),
                           child: CircleAvatar(
                             radius: 12,
-                            backgroundColor: Colors.white,
+                            backgroundColor:
+                                StreamChatTheme.of(context).colorTheme.white,
                             child: StreamSvgIcon.check(
                               size: 24,
-                              color: Colors.black,
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
                             ),
                           ),
                         ),
@@ -113,7 +120,7 @@ class _MediaListViewState extends State<MediaListView> {
                       child: Text(
                         media.videoDuration.format(),
                         style: TextStyle(
-                          color: Colors.white,
+                          color: StreamChatTheme.of(context).colorTheme.white,
                         ),
                       ),
                     ),

@@ -83,7 +83,9 @@ class ImageGroup extends StatelessWidget {
                                         child: Text(
                                           '${images.length - 4} +',
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: StreamChatTheme.of(context)
+                                                .colorTheme
+                                                .white,
                                             fontSize: 28,
                                           ),
                                         ),

@@ -41,8 +41,8 @@ class DateDivider extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: (Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white)
+                  ? StreamChatTheme.of(context).colorTheme.black
+                  : StreamChatTheme.of(context).colorTheme.white)
               .withOpacity(0.5),
           borderRadius: BorderRadius.circular(
             8,
@@ -51,7 +51,7 @@ class DateDivider extends StatelessWidget {
         child: Text(
           dayInfo,
           style: StreamChatTheme.of(context).textTheme.footnoteBold.copyWith(
-                color: Colors.white,
+                color: StreamChatTheme.of(context).colorTheme.white,
                 fontWeight: FontWeight.bold,
               ),
         ),

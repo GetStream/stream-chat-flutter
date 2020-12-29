@@ -100,7 +100,9 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                                       .channelTheme
                                       .channelHeaderTheme
                                       .color,
-                                  end: Colors.black)
+                                  end: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .black)
                               .lerp(_controller.value),
                         ),
                         onTapUp: (a, b, c) {

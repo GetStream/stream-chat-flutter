@@ -50,7 +50,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: StreamSvgIcon.close(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
               onPressed: onBackPressed,
@@ -61,7 +61,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: <Widget>[
         IconButton(
           icon: StreamSvgIcon.Icon_menu_point_v(
-            color: Colors.black,
+            color: StreamChatTheme.of(context).colorTheme.black,
           ),
           onPressed: () {
             _showMessageActionModalBottomSheet(context);

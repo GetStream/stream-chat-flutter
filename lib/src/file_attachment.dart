@@ -63,7 +63,7 @@ class _FileAttachmentState extends State<FileAttachment> {
         height: 56.0,
         margin: widget.trailing != null ? EdgeInsets.only(top: 4.0) : null,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: StreamChatTheme.of(context).colorTheme.white,
           borderRadius:
               widget.trailing != null ? BorderRadius.circular(16.0) : null,
           border: widget.trailing != null
@@ -97,10 +97,11 @@ class _FileAttachmentState extends State<FileAttachment> {
                   ),
                   Text(
                     '${_getSizeText(widget.attachment.extraData['file_size'])}',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .body
-                        .copyWith(color: Colors.black.withOpacity(0.5)),
+                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.5)),
                   ),
                 ],
               ),
@@ -110,7 +111,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                 widget.trailing ??
                     IconButton(
                       icon: StreamSvgIcon.cloud_download(
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       onPressed: () {
                         launchURL(context, widget.attachment.assetUrl);
@@ -138,13 +139,13 @@ class _FileAttachmentState extends State<FileAttachment> {
         //   subtitle: Text(
         //     '${attachment.extraData['file_size'] ?? 'N/A'} bytes',
         //     style: TextStyle(
-        //       color: Colors.black.withOpacity(0.5),
+        //       color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
         //     ),
         //   ),
         //   trailing: trailing ??
         //       IconButton(
         //         icon: StreamSvgIcon.cloud_download(
-        //           color: Colors.black,
+        //           color: StreamChatTheme.of(context).colorTheme.black,
         //         ),
         //         onPressed: () {
         //           launchURL(context, attachment.assetUrl);

@@ -125,14 +125,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
       backgroundColor: Color.fromRGBO(252, 252, 252, 1),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
         leading: const StreamBackButton(),
         title: Text(
           'New Chat',
           style: StreamChatTheme.of(context)
               .textTheme
               .headlineBold
-              .copyWith(color: Colors.black),
+              .copyWith(color: StreamChatTheme.of(context).colorTheme.black),
         ),
         centerTitle: true,
       ),
@@ -157,7 +157,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.05),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.05),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.only(left: 24),
@@ -165,7 +168,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
                           child: Text(
                             user.name,
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .black),
                           ),
                         ),
                       ),
@@ -182,7 +188,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       ),
                       Positioned(
                         child: StreamSvgIcon.close(
-                          color: Colors.white,
+                          color: StreamChatTheme.of(context).colorTheme.white,
                         ),
                       ),
                     ],
@@ -235,8 +241,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withOpacity(0.02),
-                      Colors.white.withOpacity(0.05),
+                      StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(0.02),
+                      StreamChatTheme.of(context)
+                          .colorTheme
+                          .white
+                          .withOpacity(0.05),
                     ],
                     stops: [0, 1],
                   ),
@@ -253,7 +265,11 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       style: StreamChatTheme.of(context)
                           .textTheme
                           .footnote
-                          .copyWith(color: Colors.black.withOpacity(.5))),
+                          .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5))),
                 ),
               ),
             Expanded(
@@ -318,7 +334,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                                 .textTheme
                                                 .footnote
                                                 .copyWith(
-                                                    color: Colors.black
+                                                    color: StreamChatTheme.of(
+                                                            context)
+                                                        .colorTheme
+                                                        .black
                                                         .withOpacity(.5)),
                                           ),
                                         ],
@@ -344,7 +363,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             'No chats here yet...',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.black.withOpacity(.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5),
                             ),
                           ),
                         );

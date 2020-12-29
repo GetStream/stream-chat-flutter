@@ -356,7 +356,8 @@ class _UserListViewState extends State<UserListView>
         headerItem: (header) {
           return Container(
             key: ValueKey<String>('HEADER-$header'),
-            color: Colors.black.withOpacity(0.05),
+            color:
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.05),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
               child: Text(
@@ -364,7 +365,10 @@ class _UserListViewState extends State<UserListView>
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14.5,
-                    color: Colors.black.withOpacity(0.3)),
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(0.3)),
               ),
             ),
           );
@@ -472,8 +476,8 @@ class _UserListViewState extends State<UserListView>
     return Container(
       height: 1,
       color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.white.withOpacity(0.1)
-          : Colors.black.withOpacity(0.1),
+          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
+          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
     );
   }
 

@@ -41,8 +41,14 @@ class DeletedMessage extends StatelessWidget {
               side: borderSide ??
                   BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withAlpha(24)
-                        : Colors.black.withAlpha(24),
+                        ? StreamChatTheme.of(context)
+                            .colorTheme
+                            .white
+                            .withAlpha(24)
+                        : StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withAlpha(24),
                   ),
             ),
         child: Padding(
@@ -58,8 +64,8 @@ class DeletedMessage extends StatelessWidget {
               style: messageTheme.messageText.copyWith(
                 fontStyle: FontStyle.italic,
                 color: (Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black)
+                        ? StreamChatTheme.of(context).colorTheme.white
+                        : StreamChatTheme.of(context).colorTheme.black)
                     .withOpacity(.5),
               ),
             ),

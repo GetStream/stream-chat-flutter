@@ -112,7 +112,10 @@ class GiphyAttachment extends StatelessWidget {
                     bottom: 16,
                     left: 16,
                     child: Material(
-                      color: Colors.black.withOpacity(.5),
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -124,13 +127,16 @@ class GiphyAttachment extends StatelessWidget {
                         child: Row(
                           children: [
                             StreamSvgIcon.lightning(
-                              color: Colors.white,
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.white,
                               size: 16,
                             ),
                             Text(
                               'GIPHY',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,
                               ),
@@ -202,7 +208,10 @@ class GiphyAttachment extends StatelessWidget {
                 height: 4.0,
               ),
               Container(
-                color: Colors.black.withOpacity(0.2),
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .black
+                    .withOpacity(0.2),
                 width: double.infinity,
                 height: 0.5,
               ),
@@ -224,14 +233,20 @@ class GiphyAttachment extends StatelessWidget {
                             .textTheme
                             .bodyBold
                             .copyWith(
-                              color: Colors.black.withOpacity(0.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5),
                             ),
                       ),
                     ),
                   ),
                   Container(
                     width: 0.5,
-                    color: Colors.black.withOpacity(0.2),
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(0.2),
                     height: 50.0,
                   ),
                   Expanded(
@@ -266,7 +281,10 @@ class GiphyAttachment extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 StreamSvgIcon.eye(
-                  color: Colors.black.withOpacity(0.5),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5),
                   size: 16.0,
                 ),
                 SizedBox(
@@ -277,7 +295,11 @@ class GiphyAttachment extends StatelessWidget {
                   style: StreamChatTheme.of(context)
                       .textTheme
                       .footnote
-                      .copyWith(color: Colors.black.withOpacity(0.5)),
+                      .copyWith(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5)),
                 ),
               ],
             ),
@@ -334,7 +356,10 @@ class GiphyAttachment extends StatelessWidget {
               bottom: 8,
               left: 8,
               child: Material(
-                color: Colors.black.withOpacity(.5),
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .black
+                    .withOpacity(.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -346,13 +371,13 @@ class GiphyAttachment extends StatelessWidget {
                   child: Row(
                     children: [
                       StreamSvgIcon.lightning(
-                        color: Colors.white,
+                        color: StreamChatTheme.of(context).colorTheme.white,
                         size: 16,
                       ),
                       Text(
                         'GIPHY',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: StreamChatTheme.of(context).colorTheme.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
                         ),

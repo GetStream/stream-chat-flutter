@@ -76,7 +76,7 @@ class UserItem extends StatelessWidget {
           ? CircleAvatar(
               child: StreamSvgIcon.check(
                 size: 20,
-                color: Colors.white,
+                color: StreamChatTheme.of(context).colorTheme.white,
               ),
               radius: 10,
             )
@@ -94,10 +94,8 @@ class UserItem extends StatelessWidget {
       user.online == true
           ? 'Online'
           : 'Last online ${Jiffy(user.lastActive).fromNow()}',
-      style: StreamChatTheme.of(context)
-          .textTheme
-          .footnote
-          .copyWith(color: Colors.black.withOpacity(.5)),
+      style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+          color: StreamChatTheme.of(context).colorTheme.black.withOpacity(.5)),
     );
   }
 }

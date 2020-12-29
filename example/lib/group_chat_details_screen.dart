@@ -62,12 +62,12 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         backgroundColor: Color.fromRGBO(252, 252, 252, 1),
         appBar: AppBar(
           elevation: 1,
-          backgroundColor: Colors.white,
+          backgroundColor: StreamChatTheme.of(context).colorTheme.white,
           leading: const StreamBackButton(),
           title: Text(
             'Name of Group Chat',
             style: TextStyle(
-              color: Colors.black,
+              color: StreamChatTheme.of(context).colorTheme.black,
               fontSize: 16,
             ),
           ),
@@ -82,7 +82,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     'NAME',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.black.withOpacity(0.5),
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(0.5),
                     ),
                   ),
                   SizedBox(width: 16),
@@ -99,7 +102,11 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         contentPadding: const EdgeInsets.all(0),
                         hintText: 'Choose a group chat name',
                         hintStyle: TextStyle(
-                            fontSize: 14, color: Colors.black.withOpacity(.5)),
+                            fontSize: 14,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5)),
                       ),
                     ),
                   ),
@@ -167,16 +174,28 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   separatorBuilder: (_, __) => Container(
                     height: 1,
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.1),
+                        ? StreamChatTheme.of(context)
+                            .colorTheme
+                            .white
+                            .withOpacity(0.1)
+                        : StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.1),
                   ),
                   itemBuilder: (_, index) {
                     if (index == _selectedUsers.length) {
                       return Container(
                         height: 1,
                         color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.black.withOpacity(0.1),
+                            ? StreamChatTheme.of(context)
+                                .colorTheme
+                                .white
+                                .withOpacity(0.1)
+                            : StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(0.1),
                       );
                     }
                     final user = _selectedUsers[index];
@@ -200,7 +219,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       trailing: IconButton(
                         icon: Icon(
                           Icons.clear_rounded,
-                          color: Colors.black,
+                          color: StreamChatTheme.of(context).colorTheme.black,
                         ),
                         padding: const EdgeInsets.all(0),
                         splashRadius: 24,

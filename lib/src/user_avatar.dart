@@ -99,7 +99,7 @@ class UserAvatar extends StatelessWidget {
                       color: Color(0xff20E070),
                     ),
                   ),
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                 ),
               ),
             ),

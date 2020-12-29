@@ -114,7 +114,7 @@ class _ImageFooterState extends State<ImageFooter> {
             IconButton(
               icon: StreamSvgIcon.icon_SHARE(
                 size: 24.0,
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
               ),
               onPressed: () {
                 _buildShareModal(context);
@@ -138,7 +138,7 @@ class _ImageFooterState extends State<ImageFooter> {
             ),
             IconButton(
               icon: StreamSvgIcon.Icon_grid(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
               ),
               onPressed: () {
                 _buildPhotosModal(context);
@@ -166,7 +166,7 @@ class _ImageFooterState extends State<ImageFooter> {
           children: [
             Container(
               decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(16.0),
                     topLeft: Radius.circular(16.0),
@@ -187,7 +187,7 @@ class _ImageFooterState extends State<ImageFooter> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                       icon: StreamSvgIcon.close(
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       onPressed: () {
                         Navigator.pop(context);
@@ -198,7 +198,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StreamChatTheme.of(context).colorTheme.white,
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -346,7 +346,7 @@ class _ImageFooterState extends State<ImageFooter> {
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
-                            color: Colors.white,
+                            color: StreamChatTheme.of(context).colorTheme.white,
                             height: 48.0,
                             child: Material(
                               child: InkWell(
@@ -415,7 +415,7 @@ class _ImageFooterState extends State<ImageFooter> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
-                  cursorColor: Colors.black,
+                  cursorColor: StreamChatTheme.of(context).colorTheme.black,
                   autofocus: true,
                   decoration: InputDecoration(
                     isDense: true,
@@ -425,19 +425,25 @@ class _ImageFooterState extends State<ImageFooter> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 2.0, horizontal: 6.0),
                       child: StreamSvgIcon.search(
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                     ),
                     hintText: 'Search',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32.0),
-                      borderSide:
-                          BorderSide(color: Colors.black.withOpacity(0.08)),
+                      borderSide: BorderSide(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.08)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(32.0),
-                      borderSide:
-                          BorderSide(color: Colors.black.withOpacity(0.08)),
+                      borderSide: BorderSide(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.08)),
                     ),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -448,7 +454,10 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               IconButton(
                 icon: StreamSvgIcon.close_small(
-                  color: Colors.black.withOpacity(0.5),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5),
                 ),
                 onPressed: () {
                   modalSetState(() {
@@ -469,7 +478,7 @@ class _ImageFooterState extends State<ImageFooter> {
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: IconButton(
               icon: StreamSvgIcon.search(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
               ),
               iconSize: 24.0,
               onPressed: () {
@@ -490,7 +499,7 @@ class _ImageFooterState extends State<ImageFooter> {
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: IconButton(
               icon: StreamSvgIcon.share_arrow(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
               ),
               onPressed: () async {
                 var url =
@@ -517,7 +526,7 @@ class _ImageFooterState extends State<ImageFooter> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        color: Colors.white,
+        color: StreamChatTheme.of(context).colorTheme.white,
         height: 56.0,
         child: _loading
             ? Center(
@@ -547,13 +556,19 @@ class _ImageFooterState extends State<ImageFooter> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(32.0),
                             borderSide: BorderSide(
-                              color: Colors.black.withOpacity(0.16),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.16),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(32.0),
                               borderSide: BorderSide(
-                                color: Colors.black.withOpacity(0.16),
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .black
+                                    .withOpacity(0.16),
                               )),
                           contentPadding: EdgeInsets.symmetric(vertical: 12.0),
                         ),
