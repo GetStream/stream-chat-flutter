@@ -12,6 +12,7 @@ class ImageAttachment extends StatelessWidget {
   final Message message;
   final MessageTheme messageTheme;
   final Size size;
+  final bool showTitle;
 
   const ImageAttachment({
     Key key,
@@ -19,6 +20,7 @@ class ImageAttachment extends StatelessWidget {
     @required this.message,
     @required this.size,
     this.messageTheme,
+    this.showTitle = true,
   }) : super(key: key);
 
   @override
@@ -83,7 +85,7 @@ class ImageAttachment extends StatelessWidget {
                   ),
                 ),
               ),
-              if (attachment.title != null)
+              if (showTitle && attachment.title != null)
                 Material(
                   color: messageTheme.messageBackgroundColor,
                   child: AttachmentTitle(
@@ -93,7 +95,8 @@ class ImageAttachment extends StatelessWidget {
                 ),
             ],
           ),
-          if (attachment.titleLink != null || attachment.ogScrapeUrl != null)
+          if (showTitle &&
+              (attachment.titleLink != null || attachment.ogScrapeUrl != null))
             Positioned.fill(
               child: Material(
                 color: Colors.transparent,
