@@ -180,7 +180,7 @@ class _ChannelActionsModalState extends State<ChannelActionsModal> {
                   },
                 ),
               OptionListTile(
-                leading: StreamSvgIcon.close(
+                leading: StreamSvgIcon.close_small(
                   color: Color(0xff7a7a7a),
                 ),
                 title: 'Cancel',
