@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/option_list_tile.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'chat_info_screen.dart';
-
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+
+import 'chat_info_screen.dart';
 import 'main.dart';
 
 class GroupInfoScreen extends StatefulWidget {
@@ -90,7 +90,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         members: snapshot.data?.members
                             ?.map((e) => e.user)
                             ?.toList()),
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   );
@@ -104,7 +107,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   return Text(
                     '${channel.channel.memberCount} Members, ${snapshot?.data?.members?.where((e) => e.user.online)?.length ?? 0} Online',
                     style: TextStyle(
-                        color: Colors.black.withOpacity(0.5), fontSize: 12.0),
+                      color: Colors.black.withOpacity(0.5),
+                      fontSize: 12.0,
+                    ),
                   );
                 }),
           ],
