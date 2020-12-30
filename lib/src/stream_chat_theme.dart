@@ -401,7 +401,6 @@ enum TextThemeType {
 }
 
 class TextTheme {
-  final TextThemeType type;
   final TextStyle title;
   final TextStyle headlineBold;
   final TextStyle headline;
@@ -412,7 +411,6 @@ class TextTheme {
   final TextStyle captionBold;
 
   TextTheme.light({
-    this.type = TextThemeType.light,
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
@@ -447,7 +445,6 @@ class TextTheme {
   });
 
   TextTheme.dark({
-    this.type = TextThemeType.dark,
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
@@ -490,6 +487,7 @@ class TextTheme {
   });
 
   TextTheme copyWith({
+    TextThemeType type = TextThemeType.light,
     TextStyle body,
     TextStyle title,
     TextStyle headlineBold,
