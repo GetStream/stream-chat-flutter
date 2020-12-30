@@ -301,7 +301,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text('Send also as direct message'),
+            child: Text('Also send as direct message'),
           ),
         ],
       ),

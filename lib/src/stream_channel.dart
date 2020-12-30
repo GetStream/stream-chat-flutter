@@ -143,23 +143,24 @@ class StreamChannelState extends State<StreamChannel> {
     if (_topPaginationEnded || _queryTopMessagesController.value) return;
     _queryTopMessagesController.add(true);
 
-    if (!channel.state.threads.containsKey(parentId)) {
-      return _queryTopMessagesController.add(false);
+    Message message;
+    if (channel.state.threads.containsKey(parentId)) {
+      final thread = channel.state.threads[parentId];
+      if (thread.isNotEmpty) {
+        message = thread.first;
+      }
     }
 
-    final thread = channel.state.threads[parentId];
-
-    if (thread.isEmpty) return _queryTopMessagesController.add(false);
-
-    final message = thread.first;
-
     try {
-      final state = await queryBeforeMessage(
-        message.id,
-        limit: limit,
+      final response = await channel.getReplies(
+        parentId,
+        PaginationParams(
+          lessThan: message?.id,
+          limit: limit,
+        ),
         preferOffline: preferOffline,
       );
-      if (state.messages.isEmpty || state.messages.length < limit) {
+      if (response.messages.isEmpty || response.messages.length < limit) {
         _topPaginationEnded = true;
       }
       _queryTopMessagesController.add(false);
@@ -265,6 +266,19 @@ class StreamChannelState extends State<StreamChannel> {
       channel.state.isUpToDate = true;
     }
     return state;
+  }
+
+  ///
+  Future<Message> getMessage(String messageId) async {
+    var message = channel.state.messages.firstWhere(
+      (it) => it.id == messageId,
+      orElse: () => null,
+    );
+    if (message == null) {
+      final response = await channel.getMessagesById([messageId]);
+      message = response.messages.first;
+    }
+    return message;
   }
 
   /// Reloads the channel with latest message
