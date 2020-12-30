@@ -15,9 +15,13 @@ class ChannelFileDisplayScreen extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams paginationParams;
 
-  ChannelFileDisplayScreen({
+  /// The builder used when the file list is empty.
+  final WidgetBuilder emptyBuilder;
+
+  const ChannelFileDisplayScreen({
     this.sortOptions,
     this.paginationParams,
+    this.emptyBuilder,
   });
 
   @override
@@ -93,6 +97,9 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
         }
 
         if (snapshot.data.isEmpty) {
+          if (widget.emptyBuilder != null) {
+            return widget.emptyBuilder(context);
+          }
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -101,19 +108,15 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                   size: 136.0,
                   color: Color(0xffdbdbdb),
                 ),
-                SizedBox(
-                  height: 16.0,
-                ),
+                SizedBox(height: 16.0),
                 Text(
-                  'No Media',
+                  'No Files',
                   style: TextStyle(
                     fontSize: 14.0,
                     color: Color(0xff000000),
                   ),
                 ),
-                SizedBox(
-                  height: 8.0,
-                ),
+                SizedBox(height: 8.0),
                 Text(
                   'Files sent in this chat will appear here',
                   textAlign: TextAlign.center,
@@ -127,7 +130,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
           );
         }
 
-        Map<Attachment, Message> media = {};
+        final media = <Attachment, Message>{};
 
         for (var item in snapshot.data) {
           item.message.attachments.where((e) => e.type == 'file').forEach((e) {

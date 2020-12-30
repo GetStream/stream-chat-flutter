@@ -381,9 +381,40 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
           },
         ),
         builder: (context, snapshot) {
-          if (snapshot.data == null) {
+          if (!snapshot.hasData) {
             return Center(
               child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.data.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  StreamSvgIcon.message(
+                    size: 136.0,
+                    color: Color(0xffdbdbdb),
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    'No Shared Groups',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: Color(0xff000000),
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(
+                    'Group shared with User will appear here.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: Color(0xff000000).withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 

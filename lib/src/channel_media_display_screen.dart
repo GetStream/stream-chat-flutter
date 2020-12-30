@@ -17,7 +17,14 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams paginationParams;
 
-  ChannelMediaDisplayScreen({this.sortOptions, this.paginationParams});
+  /// The builder used when the file list is empty.
+  final WidgetBuilder emptyBuilder;
+
+  const ChannelMediaDisplayScreen({
+    this.sortOptions,
+    this.paginationParams,
+    this.emptyBuilder,
+  });
 
   @override
   _ChannelMediaDisplayScreenState createState() =>
@@ -92,6 +99,9 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
         }
 
         if (snapshot.data.isEmpty) {
+          if (widget.emptyBuilder != null) {
+            return widget.emptyBuilder(context);
+          }
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -100,9 +110,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   size: 136.0,
                   color: Color(0xffdbdbdb),
                 ),
-                SizedBox(
-                  height: 16.0,
-                ),
+                SizedBox(height: 16.0),
                 Text(
                   'No Media',
                   style: TextStyle(
@@ -110,9 +118,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     color: Color(0xff000000),
                   ),
                 ),
-                SizedBox(
-                  height: 8.0,
-                ),
+                SizedBox(height: 8.0),
                 Text(
                   'Photos or video sent in this chat will \nappear here',
                   textAlign: TextAlign.center,
@@ -126,7 +132,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
           );
         }
 
-        List<_AssetPackage> media = [];
+        final media = <_AssetPackage>[];
 
         for (var item in snapshot.data) {
           item.message.attachments

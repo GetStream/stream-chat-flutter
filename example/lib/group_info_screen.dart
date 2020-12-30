@@ -671,32 +671,34 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     );
                   }),
                 _buildModalListTile(
-                    StreamSvgIcon.message(
-                      color: Color(0xff7a7a7a),
-                      size: 24.0,
-                    ),
-                    'Message', () async {
-                  var client = StreamChat.of(context).client;
+                  StreamSvgIcon.message(
+                    color: Color(0xff7a7a7a),
+                    size: 24.0,
+                  ),
+                  'Message',
+                  () async {
+                    var client = StreamChat.of(context).client;
 
-                  var c = client.channel('messaging', extraData: {
-                    'members': [
-                      user.id,
-                      StreamChat.of(context).user.id,
-                    ],
-                  });
+                    var c = client.channel('messaging', extraData: {
+                      'members': [
+                        user.id,
+                        StreamChat.of(context).user.id,
+                      ],
+                    });
 
-                  await c.watch();
+                    await c.watch();
 
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StreamChannel(
-                        channel: c,
-                        child: ChannelPage(),
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StreamChannel(
+                          channel: c,
+                          child: ChannelPage(),
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  },
+                ),
                 if (!channel.isDistinct &&
                     StreamChat.of(context).user.id != user.id &&
                     isUserAdmin)
