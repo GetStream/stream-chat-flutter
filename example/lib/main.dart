@@ -52,10 +52,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamChat(
+      streamChatThemeData: StreamChatThemeData.getDefaultTheme(
+        ThemeData.dark(),
+      ),
       client: client,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(),
+        theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
         //TODO change to system once dark  theme is implemented
         themeMode: ThemeMode.dark,
@@ -426,7 +429,7 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
+      backgroundColor: StreamChatTheme.of(context).backgroundColor,
       appBar: ChannelHeader(
         showTypingIndicator: false,
       ),

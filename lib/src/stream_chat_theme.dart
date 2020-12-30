@@ -247,18 +247,17 @@ class StreamChatThemeData {
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
     final accentColor = Color(0xff006cff);
     final isDark = theme.brightness == Brightness.dark;
-    final textTheme = TextTheme();
+    final textTheme = isDark ? TextTheme.dark() : TextTheme.light();
     final colorTheme = isDark ? ColorTheme.dark() : ColorTheme.light();
     return StreamChatThemeData(
       textTheme: textTheme,
       colorTheme: colorTheme,
       secondaryColor: Color(0xffEAEAEA),
       accentColor: accentColor,
-      primaryColor: isDark ? colorTheme.black : colorTheme.white,
-      primaryIconTheme: IconThemeData(
-          color: isDark ? Colors.white : Colors.black.withOpacity(.5)),
+      primaryColor: colorTheme.white,
+      primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),
-      backgroundColor: isDark ? Colors.black : Colors.white,
+      backgroundColor: colorTheme.white,
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
           filterQuality: FilterQuality.high,
@@ -280,7 +279,7 @@ class StreamChatThemeData {
           color: Color(0xff7A7A7A),
         ),
         lastMessageAt: textTheme.footnote.copyWith(
-          color: Colors.black.withOpacity(.5),
+          color: colorTheme.black.withOpacity(.5),
         ),
       ),
       channelTheme: ChannelTheme(
@@ -295,20 +294,17 @@ class StreamChatThemeData {
               width: 40,
             ),
           ),
-          color: isDark ? Colors.black : Colors.white,
+          color: colorTheme.white,
           title: TextStyle(
             fontSize: 14,
-            color: isDark ? Colors.white : Colors.black,
+            color: colorTheme.black,
           ),
           lastMessageAt: TextStyle(
             fontSize: 11,
-            color: isDark
-                ? Colors.white.withOpacity(.5)
-                : Colors.black.withOpacity(.5),
+            color: colorTheme.black.withOpacity(.5),
           ),
         ),
-        inputBackground:
-            isDark ? Colors.black.withAlpha(12) : Colors.white.withAlpha(12),
+        inputBackground: colorTheme.white.withAlpha(12),
         inputGradient: LinearGradient(colors: [
           Color(0xFF00AEFF),
           Color(0xFF0076FF),
@@ -317,12 +313,10 @@ class StreamChatThemeData {
       ownMessageTheme: MessageTheme(
         messageText: TextStyle(
           fontSize: 14.5,
-          color: isDark ? Colors.white : Colors.black,
+          color: colorTheme.black,
         ),
         createdAt: TextStyle(
-          color: isDark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
+          color: colorTheme.black.withOpacity(.5),
           fontSize: 12,
         ),
         replies: TextStyle(
@@ -331,7 +325,7 @@ class StreamChatThemeData {
           fontSize: 12,
         ),
         messageBackgroundColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
-        reactionsBackgroundColor: isDark ? Colors.black : Colors.white,
+        reactionsBackgroundColor: colorTheme.white,
         reactionsBorderColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
         replyThreadColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
         avatarTheme: AvatarTheme(
@@ -348,15 +342,13 @@ class StreamChatThemeData {
       otherMessageTheme: MessageTheme(
         reactionsBackgroundColor:
             isDark ? Color(0xff191919) : Color(0xffEAEAEA),
-        reactionsBorderColor: isDark ? Colors.black : Colors.white,
+        reactionsBorderColor: colorTheme.white,
         messageText: TextStyle(
           fontSize: 14.5,
-          color: isDark ? Colors.white : Colors.black,
+          color: colorTheme.black,
         ),
         createdAt: TextStyle(
-          color: isDark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
+          color: colorTheme.black.withOpacity(.5),
           fontSize: 12,
         ),
         replies: TextStyle(
@@ -367,9 +359,8 @@ class StreamChatThemeData {
         messageLinks: TextStyle(
           color: accentColor,
         ),
-        messageBackgroundColor: isDark ? Colors.black : Colors.white,
-        replyThreadColor:
-            isDark ? Colors.white.withAlpha(24) : Colors.black.withAlpha(24),
+        messageBackgroundColor: colorTheme.white,
+        replyThreadColor: colorTheme.black.withAlpha(24),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -404,7 +395,13 @@ class StreamChatThemeData {
   }
 }
 
+enum TextThemeType {
+  light,
+  dark,
+}
+
 class TextTheme {
+  final TextThemeType type;
   final TextStyle title;
   final TextStyle headlineBold;
   final TextStyle headline;
@@ -414,7 +411,8 @@ class TextTheme {
   final TextStyle footnote;
   final TextStyle captionBold;
 
-  TextTheme({
+  TextTheme.light({
+    this.type = TextThemeType.light,
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
@@ -448,6 +446,49 @@ class TextTheme {
     ),
   });
 
+  TextTheme.dark({
+    this.type = TextThemeType.dark,
+    this.title = const TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+    this.headlineBold = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+    this.headline = const TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    this.bodyBold = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+    this.body = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    this.footnoteBold = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    this.footnote = const TextStyle(
+      fontSize: 12,
+      color: Colors.white,
+    ),
+    this.captionBold = const TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+  });
+
   TextTheme copyWith({
     TextStyle body,
     TextStyle title,
@@ -458,16 +499,27 @@ class TextTheme {
     TextStyle footnote,
     TextStyle captionBold,
   }) {
-    return TextTheme(
-      body: body ?? this.body,
-      title: title ?? this.title,
-      headlineBold: headlineBold ?? this.headlineBold,
-      headline: headline ?? this.headline,
-      bodyBold: bodyBold ?? this.bodyBold,
-      footnoteBold: footnoteBold ?? this.footnoteBold,
-      footnote: footnote ?? this.footnote,
-      captionBold: captionBold ?? this.captionBold,
-    );
+    return type == TextThemeType.light
+        ? TextTheme.light(
+            body: body ?? this.body,
+            title: title ?? this.title,
+            headlineBold: headlineBold ?? this.headlineBold,
+            headline: headline ?? this.headline,
+            bodyBold: bodyBold ?? this.bodyBold,
+            footnoteBold: footnoteBold ?? this.footnoteBold,
+            footnote: footnote ?? this.footnote,
+            captionBold: captionBold ?? this.captionBold,
+          )
+        : TextTheme.dark(
+            body: body ?? this.body,
+            title: title ?? this.title,
+            headlineBold: headlineBold ?? this.headlineBold,
+            headline: headline ?? this.headline,
+            bodyBold: bodyBold ?? this.bodyBold,
+            footnoteBold: footnoteBold ?? this.footnoteBold,
+            footnote: footnote ?? this.footnote,
+            captionBold: captionBold ?? this.captionBold,
+          );
   }
 }
 
