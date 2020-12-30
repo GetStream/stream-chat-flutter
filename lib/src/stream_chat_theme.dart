@@ -257,7 +257,7 @@ class StreamChatThemeData {
       primaryColor: colorTheme.white,
       primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),
-      backgroundColor: colorTheme.white,
+      backgroundColor: colorTheme.whiteSnow,
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
           filterQuality: FilterQuality.high,
