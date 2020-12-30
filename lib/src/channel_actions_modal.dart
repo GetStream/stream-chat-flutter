@@ -16,6 +16,8 @@ class ChannelActionsModal extends StatefulWidget {
 class _ChannelActionsModalState extends State<ChannelActionsModal> {
   @override
   Widget build(BuildContext context) {
+    var channel = StreamChannel.of(context).channel;
+
     return Material(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -72,42 +74,73 @@ class _ChannelActionsModalState extends State<ChannelActionsModal> {
               SizedBox(
                 height: 17.0,
               ),
-              Container(
-                height: 94.0,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: snapshot.data.members.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        children: [
-                          UserAvatar(
-                            user: snapshot.data.members[index].user,
-                            constraints: BoxConstraints(
-                              maxHeight: 64.0,
-                              maxWidth: 64.0,
-                            ),
-                            borderRadius: BorderRadius.circular(32.0),
-                          ),
-                          SizedBox(
-                            height: 6.0,
-                          ),
-                          Text(
-                            snapshot.data.members[index].user.name,
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+              if (channel.isDistinct && channel.memberCount == 2)
+                Column(
+                  children: [
+                    UserAvatar(
+                      user: snapshot.data.members
+                          .firstWhere((e) => e.user.id != userAsMember.user.id)
+                          .user,
+                      constraints: BoxConstraints(
+                        maxHeight: 64.0,
+                        maxWidth: 64.0,
                       ),
-                    );
-                  },
+                      borderRadius: BorderRadius.circular(32.0),
+                    ),
+                    SizedBox(
+                      height: 6.0,
+                    ),
+                    Text(
+                      snapshot.data.members
+                          .firstWhere((e) => e.user.id != userAsMember.user.id)
+                          .user
+                          .name,
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ),
+              if (!(channel.isDistinct && channel.memberCount == 2))
+                Container(
+                  height: 94.0,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: snapshot.data.members.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            UserAvatar(
+                              user: snapshot.data.members[index].user,
+                              constraints: BoxConstraints(
+                                maxHeight: 64.0,
+                                maxWidth: 64.0,
+                              ),
+                              borderRadius: BorderRadius.circular(32.0),
+                            ),
+                            SizedBox(
+                              height: 6.0,
+                            ),
+                            Text(
+                              snapshot.data.members[index].user.name,
+                              style: TextStyle(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
               SizedBox(
                 height: 24,
               ),
@@ -118,18 +151,20 @@ class _ChannelActionsModalState extends State<ChannelActionsModal> {
                 title: 'View Info',
                 onTap: widget.onViewInfoTap,
               ),
-              OptionListTile(
-                leading: StreamSvgIcon.userRemove(
-                  color: Color(0xff7a7a7a),
-                ),
-                title: 'Leave Group',
-                onTap: () async {
-                  var channel = StreamChannel.of(context).channel;
+              if (!channel.isDistinct)
+                OptionListTile(
+                  leading: StreamSvgIcon.userRemove(
+                    color: Color(0xff7a7a7a),
+                  ),
+                  title: 'Leave Group',
+                  onTap: () async {
+                    var channel = StreamChannel.of(context).channel;
 
-                  await channel.removeMembers([StreamChat.of(context).user.id]);
-                  Navigator.pop(context);
-                },
-              ),
+                    await channel
+                        .removeMembers([StreamChat.of(context).user.id]);
+                    Navigator.pop(context);
+                  },
+                ),
               if (isOwner)
                 OptionListTile(
                   leading: StreamSvgIcon.delete(

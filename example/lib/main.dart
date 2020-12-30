@@ -374,8 +374,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                             ),
                             channelWidget: ChannelPage(),
                             onChannelLongPress: (channel) {
-                              if (!channel.isDistinct)
-                                _showChannelDetailsModal(channel);
+                              _showChannelDetailsModal(channel);
                             },
                           ),
                   ),
