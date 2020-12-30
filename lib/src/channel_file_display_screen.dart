@@ -90,9 +90,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
       builder: (context, snapshot) {
         if (snapshot.data == null) {
           return Center(
-            child: CircularProgressIndicator(
-              backgroundColor: StreamChatTheme.of(context).accentColor,
-            ),
+            child: const CircularProgressIndicator(),
           );
         }
 

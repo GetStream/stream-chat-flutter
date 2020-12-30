@@ -92,9 +92,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       builder: (context, snapshot) {
         if (snapshot.data == null) {
           return Center(
-            child: CircularProgressIndicator(
-              backgroundColor: StreamChatTheme.of(context).accentColor,
-            ),
+            child: const CircularProgressIndicator(),
           );
         }
 

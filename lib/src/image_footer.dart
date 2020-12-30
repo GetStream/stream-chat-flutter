@@ -16,7 +16,7 @@ import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class ImageFooter extends StatefulWidget {
+class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
@@ -61,12 +61,12 @@ class ImageFooter extends StatefulWidget {
 class _ImageFooterState extends State<ImageFooter> {
   bool _userSearchMode = false;
   TextEditingController _searchController;
-  TextEditingController _messageController = TextEditingController();
-  FocusNode _messageFocusNode = FocusNode();
+  final TextEditingController _messageController = TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode();
 
   String _channelNameQuery;
 
-  List<Channel> _selectedChannels = [];
+  final List<Channel> _selectedChannels = [];
   bool _loading = false;
 
   Timer _debounce;
@@ -103,52 +103,54 @@ class _ImageFooterState extends State<ImageFooter> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        color:
-            StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-        padding: EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: StreamSvgIcon.icon_SHARE(
-                size: 24.0,
-                color: Colors.black,
+    return SizedBox.fromSize(
+      size: widget.preferredSize,
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: StreamSvgIcon.icon_SHARE(
+                  size: 24.0,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  _buildShareModal(context);
+                },
               ),
-              onPressed: () {
-                _buildShareModal(context);
-              },
-            ),
-            InkWell(
-              onTap: widget.onTitleTap,
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      '${widget.currentPage + 1} of ${widget.totalPages}',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
+              InkWell(
+                onTap: widget.onTitleTap,
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        '${widget.currentPage + 1} of ${widget.totalPages}',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            IconButton(
-              icon: StreamSvgIcon.Icon_grid(
-                color: Colors.black,
+              IconButton(
+                icon: StreamSvgIcon.Icon_grid(
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  _buildPhotosModal(context);
+                },
               ),
-              onPressed: () {
-                _buildPhotosModal(context);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -258,8 +260,8 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  void _buildShareModal(context) {
-    showDialog(
+  void _buildShareModal(context) async {
+    final result = await showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(builder: (context, modalSetState) {
@@ -282,10 +284,6 @@ class _ImageFooterState extends State<ImageFooter> {
                   child: Column(
                     children: [
                       _buildTextInputSection(modalSetState),
-                      if (_userSearchMode)
-                        SizedBox(
-                          height: 22.0,
-                        ),
                       Expanded(
                         child: ChannelsBloc(
                           child: ChannelListView(
@@ -302,6 +300,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                 });
                               }
                             },
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             crossAxisCount: 4,
                             pagination: PaginationParams(
                               limit: 25,
@@ -342,7 +341,8 @@ class _ImageFooterState extends State<ImageFooter> {
                                               ),
                                             ),
                                             Text(
-                                                'No chat matches these keywords...'),
+                                              'No chat matches these keywords...',
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -360,42 +360,30 @@ class _ImageFooterState extends State<ImageFooter> {
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
-                            color: Colors.white,
-                            height: 48.0,
-                            child: Material(
-                              child: InkWell(
-                                onTap: () async {
-                                  var url = widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .imageUrl ??
-                                      widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .assetUrl ??
-                                      widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .thumbUrl;
-
-                                  if (widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .type ==
-                                      'video') {
+                            height: kToolbarHeight,
+                            child: SizedBox.expand(
+                              child: RaisedButton(
+                                onPressed: () async {
+                                  final attachment = widget
+                                      .mediaAttachments[widget.currentPage];
+                                  var url = attachment.imageUrl ??
+                                      attachment.assetUrl ??
+                                      attachment.thumbUrl;
+                                  if (attachment.type == 'video') {
                                     await _saveVideo(url);
-                                    Navigator.pop(context);
                                   } else {
                                     await _saveImage(url);
-                                    Navigator.pop(context);
                                   }
+                                  Navigator.pop(context);
                                 },
-                                child: SizedBox.expand(
-                                  child: Center(
-                                    child: Text(
-                                      'Save to Photos',
-                                      style: TextStyle(
-                                        color: StreamChatTheme.of(context)
-                                            .accentColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                color: Colors.white,
+                                elevation: 8,
+                                child: Text(
+                                  'Save to Photos',
+                                  style: TextStyle(
+                                    color:
+                                        StreamChatTheme.of(context).accentColor,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -411,62 +399,74 @@ class _ImageFooterState extends State<ImageFooter> {
         });
       },
     );
+    if (result == null) {
+      _selectedChannels.clear();
+    }
   }
 
   Widget _buildTextInputSection(modalSetState) {
     if (_userSearchMode) {
       return Column(
         children: [
-          SizedBox(
-            height: 16.0,
-          ),
+          SizedBox(height: 16.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: 16.0,
-              ),
+              SizedBox(width: 8.0),
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  cursorColor: Colors.black,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    prefixIconConstraints:
-                        BoxConstraints.tight(Size(36.0, 44.0)),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2.0, horizontal: 6.0),
-                      child: StreamSvgIcon.search(
-                        color: Colors.black,
+                child: Container(
+                  height: 36,
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 8,
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    cursorColor: Colors.black,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      prefixIconConstraints: BoxConstraints.tight(Size(40, 24)),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 8, right: 8),
+                        child: StreamSvgIcon.search(
+                          color: Colors.black,
+                          size: 24,
+                        ),
                       ),
+                      hintText: 'Search',
+                      hintStyle: TextStyle(
+                        color: Colors.black.withOpacity(0.5),
+                        fontSize: 14,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withOpacity(0.08),
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                        borderSide: BorderSide(
+                          color: Colors.black.withOpacity(0.08),
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.zero,
                     ),
-                    hintText: 'Search',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide:
-                          BorderSide(color: Colors.black.withOpacity(0.08)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide:
-                          BorderSide(color: Colors.black.withOpacity(0.08)),
-                    ),
-                    contentPadding: EdgeInsets.zero,
                   ),
                 ),
-              ),
-              SizedBox(
-                width: 8.0,
               ),
               IconButton(
                 icon: StreamSvgIcon.close_small(
                   color: Colors.black.withOpacity(0.5),
                 ),
+                splashRadius: 24,
                 onPressed: () {
                   modalSetState(() {
-                    _userSearchMode = false;
+                    if (_searchController.text.isNotEmpty) {
+                      _searchController.text = '';
+                    } else {
+                      _userSearchMode = false;
+                    }
                   });
                   setState(() {});
                 },
@@ -475,80 +475,80 @@ class _ImageFooterState extends State<ImageFooter> {
           ),
         ],
       );
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-            child: IconButton(
-              icon: StreamSvgIcon.search(
-                color: Colors.black,
-              ),
-              iconSize: 24.0,
-              onPressed: () {
-                modalSetState(() {
-                  _userSearchMode = true;
-                });
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Select a Chat to Share',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-            child: IconButton(
-              icon: StreamSvgIcon.share_arrow(
-                color: Colors.black,
-              ),
-              onPressed: () async {
-                var url =
-                    widget.mediaAttachments[widget.currentPage].imageUrl ??
-                        widget.mediaAttachments[widget.currentPage].assetUrl ??
-                        widget.mediaAttachments[widget.currentPage].thumbUrl;
-                var type =
-                    widget.mediaAttachments[widget.currentPage].type == 'image'
-                        ? 'jpg'
-                        : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
-                var request = await HttpClient().getUrl(Uri.parse(url));
-                var response = await request.close();
-                var bytes = await consolidateHttpClientResponseBytes(response);
-                await Share.file('File', 'image.$type', bytes, 'image/$type');
-              },
-            ),
-          ),
-        ],
-      );
     }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          child: IconButton(
+            icon: StreamSvgIcon.search(
+              color: Colors.black,
+            ),
+            iconSize: 24.0,
+            onPressed: () {
+              modalSetState(() {
+                _userSearchMode = true;
+              });
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Select a Chat to Share',
+            style: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+          child: IconButton(
+            icon: StreamSvgIcon.share_arrow(
+              color: Colors.black,
+            ),
+            onPressed: () async {
+              final attachment = widget.mediaAttachments[widget.currentPage];
+              var url = attachment.imageUrl ??
+                  attachment.assetUrl ??
+                  attachment.thumbUrl;
+              var type = attachment.type == 'image'
+                  ? 'jpg'
+                  : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
+              var request = await HttpClient().getUrl(Uri.parse(url));
+              var response = await request.close();
+              var bytes = await consolidateHttpClientResponseBytes(response);
+              await Share.file('File', 'image.$type', bytes, 'image/$type');
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildShareTextInputSection(modalSetState) {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Container(
-        color: Colors.white,
-        height: 56.0,
-        child: _loading
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            : Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+      child: BottomAppBar(
+        child: Container(
+          height: 40.0,
+          margin: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 8,
+          ),
+          child: _loading
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : Row(
+                  children: [
+                    Expanded(
                       child: TextField(
                         controller: _messageController,
                         focusNode: _messageFocusNode,
@@ -560,54 +560,52 @@ class _ImageFooterState extends State<ImageFooter> {
                           setState(() {});
                         },
                         decoration: InputDecoration(
-                          isDense: true,
                           prefixText: '     ',
                           hintText: 'Add a comment',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(32.0),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24.0),
                             borderSide: BorderSide(
                               color: Colors.black.withOpacity(0.16),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32.0),
+                              borderRadius: BorderRadius.circular(24.0),
                               borderSide: BorderSide(
                                 color: Colors.black.withOpacity(0.16),
                               )),
-                          contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                          contentPadding: const EdgeInsets.all(0),
                         ),
                       ),
                     ),
-                  ),
-                  IconTheme(
-                    data: StreamChatTheme.of(context)
-                        .channelTheme
-                        .messageInputButtonIconTheme,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: InkWell(
-                          onTap: () async {
-                            modalSetState(() {
-                              _loading = true;
-                            });
-                            await sendMessage();
-                            modalSetState(() {
-                              _loading = false;
-                            });
-                          },
-                          child: Transform.rotate(
-                            angle: -pi / 2,
-                            child: StreamSvgIcon.Icon_send_message(
-                              color: StreamChatTheme.of(context).accentColor,
-                            ),
+                    SizedBox(width: 8),
+                    IconTheme(
+                      data: StreamChatTheme.of(context)
+                          .channelTheme
+                          .messageInputButtonIconTheme,
+                      child: IconButton(
+                        onPressed: () async {
+                          modalSetState(() => _loading = true);
+                          await sendMessage();
+                          modalSetState(() => _loading = false);
+                        },
+                        splashRadius: 24,
+                        visualDensity: VisualDensity.compact,
+                        constraints: BoxConstraints.tightFor(
+                          height: 24,
+                          width: 24,
+                        ),
+                        padding: EdgeInsets.zero,
+                        icon: Transform.rotate(
+                          angle: -pi / 2,
+                          child: StreamSvgIcon.Icon_send_message(
+                            color: StreamChatTheme.of(context).accentColor,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       ),
     );
   }

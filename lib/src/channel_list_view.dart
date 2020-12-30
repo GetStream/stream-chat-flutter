@@ -75,6 +75,7 @@ class ChannelListView extends StatefulWidget {
     this.swipeToAction = false,
     this.pullToRefresh = true,
     this.crossAxisCount = 1,
+    this.padding,
     this.selectedChannels = const [],
   }) : super(key: key);
 
@@ -138,6 +139,9 @@ class ChannelListView extends StatefulWidget {
 
   /// The number of children in the cross axis.
   final int crossAxisCount;
+
+  /// The amount of space by which to inset the children.
+  final EdgeInsetsGeometry padding;
 
   final List<Channel> selectedChannels;
 
@@ -268,6 +272,7 @@ class _ChannelListViewState extends State<ChannelListView>
           if (channels.isNotEmpty) {
             if (widget.crossAxisCount > 1) {
               child = GridView.builder(
+                padding: widget.padding,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: widget.crossAxisCount),
                 itemCount: channels.length,
@@ -279,6 +284,7 @@ class _ChannelListViewState extends State<ChannelListView>
               );
             } else {
               child = ListView.separated(
+                padding: widget.padding,
                 physics: AlwaysScrollableScrollPhysics(),
                 itemCount:
                     channels.isNotEmpty ? channels.length + 1 : channels.length,
@@ -306,6 +312,7 @@ class _ChannelListViewState extends State<ChannelListView>
 
   Widget _buildLoadingWidget() {
     return ListView(
+      padding: widget.padding,
       physics: AlwaysScrollableScrollPhysics(),
       children: List.generate(
         25,
@@ -331,9 +338,7 @@ class _ChannelListViewState extends State<ChannelListView>
         highlightColor: Color(0xffffffff),
         child: Column(
           children: [
-            SizedBox(
-              height: 4.0,
-            ),
+            SizedBox(height: 4.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
