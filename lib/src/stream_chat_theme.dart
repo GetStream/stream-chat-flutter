@@ -48,18 +48,6 @@ class StreamChatThemeData {
   /// The text themes used in the widgets
   final ColorTheme colorTheme;
 
-  /// Primary color of the chat widgets
-  final Color primaryColor;
-
-  /// Secondary color of the chat widgets
-  final Color secondaryColor;
-
-  /// Accent color of the chat widgets
-  final Color accentColor;
-
-  /// Background color of the chat widgets
-  final Color backgroundColor;
-
   /// Theme of the [ChannelPreview]
   final ChannelPreviewTheme channelPreviewTheme;
 
@@ -88,10 +76,6 @@ class StreamChatThemeData {
   StreamChatThemeData({
     this.textTheme,
     this.colorTheme,
-    this.primaryColor,
-    this.secondaryColor,
-    this.accentColor,
-    this.backgroundColor,
     this.channelPreviewTheme,
     this.channelTheme,
     this.otherMessageTheme,
@@ -107,11 +91,7 @@ class StreamChatThemeData {
     final defaultTheme = getDefaultTheme(theme);
 
     return defaultTheme.copyWith(
-      accentColor: theme.accentColor,
       primaryIconTheme: theme.primaryIconTheme,
-      primaryColor: theme.colorScheme.primary,
-      secondaryColor: theme.colorScheme.secondary,
-      backgroundColor: theme.scaffoldBackgroundColor,
       channelTheme: defaultTheme.channelTheme.copyWith(
         inputGradient: LinearGradient(colors: [
           theme.accentColor.withOpacity(.5),
@@ -141,10 +121,6 @@ class StreamChatThemeData {
   StreamChatThemeData copyWith({
     TextTheme textTheme,
     ColorTheme colorTheme,
-    Color primaryColor,
-    Color secondaryColor,
-    Color accentColor,
-    Color backgroundColor,
     ChannelPreviewTheme channelPreviewTheme,
     ChannelTheme channelTheme,
     MessageTheme ownMessageTheme,
@@ -175,13 +151,9 @@ class StreamChatThemeData {
               white: colorTheme?.white,
               blueAlice: colorTheme?.blueAlice,
             ),
-        primaryColor: primaryColor ?? this.primaryColor,
-        secondaryColor: secondaryColor ?? this.secondaryColor,
         primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
-        accentColor: accentColor ?? this.accentColor,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-        backgroundColor: backgroundColor ?? this.backgroundColor,
         channelPreviewTheme: this.channelPreviewTheme?.copyWith(
               title: channelPreviewTheme.title,
               subtitle: channelPreviewTheme.subtitle,
@@ -252,12 +224,8 @@ class StreamChatThemeData {
     return StreamChatThemeData(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      secondaryColor: Color(0xffEAEAEA),
-      accentColor: accentColor,
-      primaryColor: colorTheme.white,
       primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),
-      backgroundColor: colorTheme.whiteSnow,
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
           filterQuality: FilterQuality.high,
@@ -266,7 +234,7 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
-        unreadCounterColor: Color(0xffff3742),
+        unreadCounterColor: colorTheme.accentRed,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -324,10 +292,10 @@ class StreamChatThemeData {
           fontWeight: FontWeight.w600,
           fontSize: 12,
         ),
-        messageBackgroundColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        messageBackgroundColor: colorTheme.greyGainsboro,
         reactionsBackgroundColor: colorTheme.white,
-        reactionsBorderColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
-        replyThreadColor: isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        reactionsBorderColor: colorTheme.greyWhisper,
+        replyThreadColor: colorTheme.greyWhisper,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -340,8 +308,7 @@ class StreamChatThemeData {
         ),
       ),
       otherMessageTheme: MessageTheme(
-        reactionsBackgroundColor:
-            isDark ? Color(0xff191919) : Color(0xffEAEAEA),
+        reactionsBackgroundColor: colorTheme.greyGainsboro,
         reactionsBorderColor: colorTheme.white,
         messageText: TextStyle(
           fontSize: 14.5,
@@ -535,6 +502,9 @@ class ColorTheme {
   final Color whiteSnow;
   final Color white;
   final Color blueAlice;
+  final Color accentBlue;
+  final Color accentRed;
+  final Color accentGreen;
 
   ColorTheme.light({
     this.black = const Color(0xff000000),
@@ -545,6 +515,9 @@ class ColorTheme {
     this.whiteSnow = const Color(0xfffcfcfc),
     this.white = const Color(0xffffffff),
     this.blueAlice = const Color(0xffe9f2ff),
+    this.accentBlue = const Color(0xff005FFF),
+    this.accentRed = const Color(0xffFF3742),
+    this.accentGreen = const Color(0xff20E070),
   });
 
   ColorTheme.dark({
@@ -556,6 +529,9 @@ class ColorTheme {
     this.whiteSnow = const Color(0xff070A0D),
     this.white = const Color(0xff101418),
     this.blueAlice = const Color(0xff00193D),
+    this.accentBlue = const Color(0xff005FFF),
+    this.accentRed = const Color(0xffFF3742),
+    this.accentGreen = const Color(0xff20E070),
   });
 
   ColorTheme copyWith({
@@ -568,6 +544,9 @@ class ColorTheme {
     Color whiteSnow,
     Color white,
     Color blueAlice,
+    Color accentBlue,
+    Color accentRed,
+    Color accentGreen,
   }) {
     return type == ColorThemeType.light
         ? ColorTheme.light(
@@ -579,6 +558,9 @@ class ColorTheme {
             whiteSnow: whiteSnow ?? this.whiteSnow,
             white: white ?? this.white,
             blueAlice: blueAlice ?? this.blueAlice,
+            accentBlue: accentBlue ?? this.accentBlue,
+            accentRed: accentRed ?? this.accentRed,
+            accentGreen: accentGreen ?? this.accentGreen,
           )
         : ColorTheme.dark(
             black: black ?? this.black,
@@ -589,6 +571,9 @@ class ColorTheme {
             whiteSnow: whiteSnow ?? this.whiteSnow,
             white: white ?? this.white,
             blueAlice: blueAlice ?? this.blueAlice,
+            accentBlue: accentBlue ?? this.accentBlue,
+            accentRed: accentRed ?? this.accentRed,
+            accentGreen: accentGreen ?? this.accentGreen,
           );
   }
 }

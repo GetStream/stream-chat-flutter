@@ -60,10 +60,7 @@ class MessageReactionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(0.1),
+                color: Colors.black.withOpacity(0.2),
               ),
             ),
           ),
@@ -140,6 +137,7 @@ class MessageReactionsModal extends StatelessWidget {
         horizontal: 8.0,
       ),
       child: Card(
+        color: StreamChatTheme.of(context).colorTheme.white,
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

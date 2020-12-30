@@ -47,7 +47,7 @@ class UserAvatar extends StatelessWidget {
         constraints: constraints ??
             streamChatTheme.ownMessageTheme.avatarTheme.constraints,
         decoration: BoxDecoration(
-          color: streamChatTheme.accentColor,
+          color: streamChatTheme.colorTheme.accentBlue,
         ),
         child: hasImage
             ? CachedNetworkImage(
@@ -96,7 +96,7 @@ class UserAvatar extends StatelessWidget {
                         ),
                     child: Material(
                       shape: CircleBorder(),
-                      color: Color(0xff20E070),
+                      color: streamChatTheme.colorTheme.accentGreen,
                     ),
                   ),
                   color: StreamChatTheme.of(context).colorTheme.white,

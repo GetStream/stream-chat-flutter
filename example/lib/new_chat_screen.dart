@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
 import 'main.dart';
-import 'new_group_chat_screen.dart';
 import 'routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -36,8 +35,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Timer _debounce;
 
   bool _showUserList = true;
-
-  bool _channelExisted = false;
 
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();

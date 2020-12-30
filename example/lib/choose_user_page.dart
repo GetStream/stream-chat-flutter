@@ -1,5 +1,3 @@
-import 'package:example/advanced_options_page.dart';
-import 'package:example/main.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -194,7 +192,7 @@ class ChooseUserPage extends StatelessWidget {
                             color: StreamChatTheme.of(context).colorTheme.black,
                           ),
                           backgroundColor:
-                              StreamChatTheme.of(context).secondaryColor,
+                              StreamChatTheme.of(context).colorTheme.accentBlue,
                         ),
                         title: Text(
                           'Advanced Options',

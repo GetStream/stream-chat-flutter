@@ -275,7 +275,7 @@ class MessageInputState extends State<MessageInput> {
               child: Material(
                 borderRadius: BorderRadius.circular(3),
                 color: _sendAsDm
-                    ? StreamChatTheme.of(context).accentColor
+                    ? StreamChatTheme.of(context).colorTheme.accentBlue
                     : StreamChatTheme.of(context).colorTheme.white,
                 child: InkWell(
                   onTap: () {
@@ -337,7 +337,7 @@ class MessageInputState extends State<MessageInput> {
         child: Padding(
           padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
           child: StreamSvgIcon.emptyCircleLeft(
-            color: StreamChatTheme.of(context).accentColor,
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
           ),
         ),
       ),
@@ -364,7 +364,7 @@ class MessageInputState extends State<MessageInput> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24.0),
             border: Border.all(
-              color: Colors.grey,
+              color: StreamChatTheme.of(context).colorTheme.white,
             ),
           ),
           padding: _attachments.isEmpty ? null : EdgeInsets.all(6.0),
@@ -411,8 +411,9 @@ class MessageInputState extends State<MessageInput> {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Chip(
-                              backgroundColor:
-                                  StreamChatTheme.of(context).accentColor,
+                              backgroundColor: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                               padding: EdgeInsets.zero,
                               labelPadding:
                                   EdgeInsets.symmetric(horizontal: 9.0),
@@ -612,12 +613,12 @@ class MessageInputState extends State<MessageInput> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    color: StreamChatTheme.of(context).primaryColor,
+                    color: StreamChatTheme.of(context).colorTheme.white,
                     clipBehavior: Clip.antiAlias,
                     child: Container(
                       constraints: BoxConstraints.loose(Size.fromHeight(400)),
                       decoration: BoxDecoration(
-                          color: StreamChatTheme.of(context).primaryColor,
+                          color: StreamChatTheme.of(context).colorTheme.white,
                           borderRadius: BorderRadius.circular(8.0)),
                       child: ListView(
                         padding: const EdgeInsets.all(0),
@@ -635,7 +636,8 @@ class MessageInputState extends State<MessageInput> {
                                     ),
                                     child: StreamSvgIcon.lightning(
                                       color: StreamChatTheme.of(context)
-                                          .accentColor,
+                                          .colorTheme
+                                          .accentBlue,
                                     ),
                                   ),
                                   Text(
@@ -671,17 +673,6 @@ class MessageInputState extends State<MessageInput> {
                                       ],
                                     ),
                                   ),
-                                  trailing: CircleAvatar(
-                                    backgroundColor:
-                                        StreamChatTheme.of(context).accentColor,
-                                    child: StreamSvgIcon.lightning(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .white,
-                                      size: 12.5,
-                                    ),
-                                    maxRadius: 12,
-                                  ),
                                   //subtitle: Text(c.description),
                                   onTap: () {
                                     _setCommand(c);
@@ -708,9 +699,9 @@ class MessageInputState extends State<MessageInput> {
       switch (index) {
         case 0:
           return _attachments.isEmpty
-              ? StreamChatTheme.of(context).accentColor
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
               : (!_attachmentContainsFile
-                  ? StreamChatTheme.of(context).accentColor
+                  ? StreamChatTheme.of(context).colorTheme.accentBlue
                   : StreamChatTheme.of(context)
                       .colorTheme
                       .black
@@ -718,7 +709,7 @@ class MessageInputState extends State<MessageInput> {
           break;
         case 1:
           return _attachmentContainsFile
-              ? StreamChatTheme.of(context).accentColor
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
               : (_attachments.isEmpty
                   ? StreamChatTheme.of(context)
                       .colorTheme
@@ -881,7 +872,8 @@ class MessageInputState extends State<MessageInput> {
                       child: Text(
                         'Add more files',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context).accentColor,
+                          color:
+                              StreamChatTheme.of(context).colorTheme.accentBlue,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -919,7 +911,8 @@ class MessageInputState extends State<MessageInput> {
                         'svgs/icon_picture_empty_state.svg',
                         package: 'stream_chat_flutter',
                         height: 140,
-                        color: StreamChatTheme.of(context).accentColor,
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                       ),
                       Center(
                         child: Text(
@@ -928,7 +921,9 @@ class MessageInputState extends State<MessageInput> {
                               .textTheme
                               .bodyBold
                               .copyWith(
-                                color: StreamChatTheme.of(context).accentColor,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .accentBlue,
                               ),
                         ),
                       ),
@@ -1106,7 +1101,7 @@ class MessageInputState extends State<MessageInput> {
                 child: Card(
                   margin: EdgeInsets.all(8.0),
                   elevation: 2.0,
-                  color: StreamChatTheme.of(context).primaryColor,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -1114,7 +1109,7 @@ class MessageInputState extends State<MessageInput> {
                   child: Container(
                     constraints: BoxConstraints.loose(Size.fromHeight(400)),
                     decoration: BoxDecoration(
-                      color: StreamChatTheme.of(context).primaryColor,
+                      color: StreamChatTheme.of(context).colorTheme.white,
                     ),
                     child: FutureBuilder<List<Member>>(
                         future: queryMembers ?? Future.value(members),
@@ -1142,7 +1137,8 @@ class MessageInputState extends State<MessageInput> {
                                       subtitle: Text('@${m.userId}'),
                                       trailing: StreamSvgIcon.mentions(
                                         color: StreamChatTheme.of(context)
-                                            .accentColor,
+                                            .colorTheme
+                                            .accentBlue,
                                       ),
                                       onTap: () {
                                         _mentionedUsers.add(m.user);
@@ -1207,7 +1203,7 @@ class MessageInputState extends State<MessageInput> {
         child: Card(
           margin: EdgeInsets.all(8.0),
           elevation: 2.0,
-          color: StreamChatTheme.of(context).primaryColor,
+          color: StreamChatTheme.of(context).colorTheme.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -1222,7 +1218,7 @@ class MessageInputState extends State<MessageInput> {
                   offset: Offset(0, -4),
                 ),
               ],
-              color: StreamChatTheme.of(context).primaryColor,
+              color: StreamChatTheme.of(context).colorTheme.white,
             ),
             child: ListView.builder(
                 padding: const EdgeInsets.all(0),
@@ -1238,7 +1234,9 @@ class MessageInputState extends State<MessageInput> {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: StreamSvgIcon.smile(
-                              color: StreamChatTheme.of(context).accentColor,
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                             ),
                           ),
                           Flexible(
@@ -1528,8 +1526,8 @@ class MessageInputState extends State<MessageInput> {
             const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
         child: StreamSvgIcon.lightning(
           color: _commandsOverlay != null
-              ? StreamChatTheme.of(context).accentColor
-              : Color(0xFF000000).withAlpha(128),
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
+              : StreamChatTheme.of(context).colorTheme.grey,
         ),
       ),
       onTap: () async {
@@ -1566,8 +1564,8 @@ class MessageInputState extends State<MessageInput> {
               EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
           child: StreamSvgIcon.attach(
             color: _openFilePickerSection
-                ? StreamChatTheme.of(context).accentColor
-                : Color(0xFF000000).withAlpha(128),
+                ? StreamChatTheme.of(context).colorTheme.accentBlue
+                : StreamChatTheme.of(context).colorTheme.grey,
           ),
         ),
         onTap: () async {
@@ -1896,7 +1894,7 @@ class MessageInputState extends State<MessageInput> {
         },
         child: StreamSvgIcon(
           assetName: _getIdleSendIcon(),
-          color: Colors.grey,
+          color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           height: 24.0,
           width: 24.0,
         ),
@@ -1914,7 +1912,7 @@ class MessageInputState extends State<MessageInput> {
           },
           child: StreamSvgIcon(
             assetName: _getSendIcon(),
-            color: StreamChatTheme.of(context).accentColor,
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
             height: 24.0,
             width: 24.0,
           ),

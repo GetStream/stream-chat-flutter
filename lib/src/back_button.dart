@@ -37,9 +37,7 @@ class StreamBackButton extends StatelessWidget {
             },
             child: StreamSvgIcon.left(
               size: 24,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? StreamChatTheme.of(context).colorTheme.white
-                  : StreamChatTheme.of(context).colorTheme.black,
+              color: StreamChatTheme.of(context).colorTheme.black,
             ),
           ),
         ),

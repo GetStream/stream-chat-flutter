@@ -253,7 +253,8 @@ class _ChannelListViewState extends State<ChannelListView>
                                     .bodyBold
                                     .copyWith(
                                       color: StreamChatTheme.of(context)
-                                          .accentColor,
+                                          .colorTheme
+                                          .accentBlue,
                                     ),
                               ),
                             ),
@@ -501,9 +502,7 @@ class _ChannelListViewState extends State<ChannelListView>
               );
             } else {
               final backgroundColor =
-                  Theme.of(context).brightness == Brightness.light
-                      ? Color(0xffEBEBEB)
-                      : Color(0xff141414);
+                  StreamChatTheme.of(context).colorTheme.whiteSmoke;
               child = Slidable(
                 enabled: widget.swipeToAction,
                 actionPane: SlidableBehindActionPane(),
@@ -543,7 +542,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     IconSlideAction(
                       color: backgroundColor,
                       iconWidget: StreamSvgIcon.delete(
-                        color: Color(0xFFFF3742),
+                        color: StreamChatTheme.of(context).colorTheme.accentRed,
                       ),
                       onTap: () async {
                         final res = await showConfirmationDialog(
@@ -554,7 +553,9 @@ class _ChannelListViewState extends State<ChannelListView>
                               'Are you sure you want to delete this conversation?',
                           cancelText: 'CANCEL',
                           icon: StreamSvgIcon.delete(
-                            color: Color(0xFFFF3742),
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentRed,
                           ),
                         );
                         if (res == true) {
@@ -564,7 +565,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     ),
                 ],
                 child: Container(
-                  color: StreamChatTheme.of(context).backgroundColor,
+                  color: StreamChatTheme.of(context).colorTheme.whiteSnow,
                   child: ChannelPreview(
                     onLongPress: widget.onChannelLongPress,
                     channel: channel,
@@ -621,9 +622,7 @@ class _ChannelListViewState extends State<ChannelListView>
   Widget _separatorBuilder(context, i) {
     return Container(
       height: 1,
-      color: Theme.of(context).brightness == Brightness.dark
-          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
-          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
+      color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.08),
     );
   }
 

@@ -1,12 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import '../stream_chat_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../stream_chat_flutter.dart';
 
 class ImageActionsModal extends StatelessWidget {
   final Message message;
@@ -165,7 +166,9 @@ class ImageActionsModal extends StatelessWidget {
                             'Delete',
                             StreamSvgIcon.delete(
                               size: 24.0,
-                              color: Color(0xffFF3742),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentRed,
                             ),
                             () {
                               Navigator.pop(context);
@@ -175,7 +178,9 @@ class ImageActionsModal extends StatelessWidget {
                                     StreamChannel.of(context).channel.cid,
                                   );
                             },
-                            color: Color(0xffFF3742),
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentRed,
                           ),
                       ],
                     ).toList(),

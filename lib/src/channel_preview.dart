@@ -130,7 +130,7 @@ class ChannelPreview extends StatelessWidget {
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
                                     .length ==
-                                (channel.memberCount ?? 0),
+                                ((channel.memberCount ?? 0) - 1),
                           ),
                         );
                       }

@@ -260,7 +260,9 @@ class GiphyAttachment extends StatelessWidget {
                       child: Text(
                         'Send',
                         style: TextStyle(
-                            color: StreamChatTheme.of(context).accentColor,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
                             fontWeight: FontWeight.bold),
                       ),
                     ),

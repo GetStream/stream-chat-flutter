@@ -31,7 +31,7 @@ class GroupImage extends StatelessWidget {
                   .avatarTheme
                   .constraints,
           decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).accentColor,
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
           ),
           child: Flex(
             direction: Axis.vertical,

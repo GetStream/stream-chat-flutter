@@ -107,7 +107,7 @@ class ReactionBubble extends StatelessWidget {
               height: 16,
               color: (!highlightOwnReactions ||
                       reaction.user.id == StreamChat.of(context).user.id)
-                  ? StreamChatTheme.of(context).accentColor
+                  ? StreamChatTheme.of(context).colorTheme.accentBlue
                   : StreamChatTheme.of(context)
                       .colorTheme
                       .black
@@ -118,7 +118,7 @@ class ReactionBubble extends StatelessWidget {
               size: 16,
               color: (!highlightOwnReactions ||
                       reaction.user.id == StreamChat.of(context).user.id)
-                  ? StreamChatTheme.of(context).accentColor
+                  ? StreamChatTheme.of(context).colorTheme.accentBlue
                   : StreamChatTheme.of(context)
                       .colorTheme
                       .black

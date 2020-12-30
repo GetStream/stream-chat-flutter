@@ -40,10 +40,7 @@ class DateDivider extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: (Theme.of(context).brightness == Brightness.light
-                  ? StreamChatTheme.of(context).colorTheme.black
-                  : StreamChatTheme.of(context).colorTheme.white)
-              .withOpacity(0.5),
+          color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
           borderRadius: BorderRadius.circular(
             8,
           ),

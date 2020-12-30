@@ -378,7 +378,8 @@ class _ImageFooterState extends State<ImageFooter> {
                                       'Save to Photos',
                                       style: TextStyle(
                                         color: StreamChatTheme.of(context)
-                                            .accentColor,
+                                            .colorTheme
+                                            .accentBlue,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -595,7 +596,9 @@ class _ImageFooterState extends State<ImageFooter> {
                           child: Transform.rotate(
                             angle: -pi / 2,
                             child: StreamSvgIcon.Icon_send_message(
-                              color: StreamChatTheme.of(context).accentColor,
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                             ),
                           ),
                         ),

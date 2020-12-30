@@ -1,8 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:example/choose_user_page.dart';
-import 'package:example/new_chat_screen.dart';
-import 'package:example/new_group_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import 'notifications_service.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
 import 'search_text_field.dart';
-import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,21 +49,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamChat(
-      streamChatThemeData: StreamChatThemeData.getDefaultTheme(
-        ThemeData.dark(),
-      ),
-      client: client,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.light(),
-        darkTheme: ThemeData.dark(),
-        //TODO change to system once dark  theme is implemented
-        themeMode: ThemeMode.dark,
-        onGenerateRoute: AppRoutes.generateRoute,
-        initialRoute:
-            client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
-      ),
+    return MaterialApp(
+      builder: (context, child) {
+        return StreamChat(
+          client: client,
+          child: child,
+        );
+      },
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.dark,
+      onGenerateRoute: AppRoutes.generateRoute,
+      initialRoute:
+          client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
     );
   }
 }
@@ -120,6 +117,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final user = StreamChat.of(context).user;
     return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: ChannelListHeader(
         onNewChatButtonTap: () {
           Navigator.pushNamed(context, Routes.NEW_CHAT);
@@ -128,6 +126,7 @@ class _HomePageState extends State<HomePage> {
       drawer: _buildDrawer(context, user),
       drawerEdgeDragWidth: 50,
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
         currentIndex: _currentIndex,
         items: _navBarItems,
         selectedLabelStyle: StreamChatTheme.of(context).textTheme.footnoteBold,
@@ -429,7 +428,7 @@ class ChannelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).backgroundColor,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: ChannelHeader(
         showTypingIndicator: false,
       ),

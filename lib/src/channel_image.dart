@@ -133,7 +133,7 @@ class ChannelImage extends StatelessWidget {
                       .avatarTheme
                       .constraints,
               decoration: BoxDecoration(
-                color: StreamChatTheme.of(context).accentColor,
+                color: StreamChatTheme.of(context).colorTheme.accentBlue,
               ),
               child: Stack(
                 alignment: Alignment.center,

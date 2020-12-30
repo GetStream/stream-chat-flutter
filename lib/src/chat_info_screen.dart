@@ -1,4 +1,3 @@
-import 'package:emojis/emojis.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
@@ -21,7 +20,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return Scaffold(
-      backgroundColor: Color(0xFFe6e6e6),
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       body: ListView(
         children: [
           _buildUserHeader(),
@@ -47,7 +46,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
   Widget _buildUserHeader() {
     return Material(
-      color: StreamChatTheme.of(context).colorTheme.white,
+      color: StreamChatTheme.of(context).colorTheme.whiteSnow,
       child: SafeArea(
         child: Stack(
           children: [
@@ -96,7 +95,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               top: 21,
               left: 16,
               child: InkWell(
-                child: StreamSvgIcon.left(),
+                child: StreamSvgIcon.left(
+                  color: StreamChatTheme.of(context).colorTheme.black,
+                ),
                 onTap: () {
                   Navigator.of(context).pop();
                 },
@@ -218,7 +219,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
   Widget _buildDeleteListTile() {
     return _OptionListTile(
-      title: 'Delete',
+      title: 'Delete conversation',
       leading: StreamSvgIcon.delete(
         color: Colors.red,
         size: 24.0,
@@ -290,7 +291,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               ),
               child: Material(
                 shape: CircleBorder(),
-                color: Color(0xff20E070),
+                color: StreamChatTheme.of(context).colorTheme.accentGreen,
               ),
             ),
             color: StreamChatTheme.of(context).colorTheme.white,
@@ -321,11 +322,11 @@ class _OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: Color(0xffe6e6e6),
+          color: StreamChatTheme.of(context).colorTheme.white,
           height: 2.0,
         ),
         Material(
-          color: StreamChatTheme.of(context).colorTheme.white,
+          color: StreamChatTheme.of(context).colorTheme.whiteSnow,
           child: Container(
             height: 56.0,
             child: InkWell(
@@ -409,7 +410,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
       body: FutureBuilder<List<Channel>>(
         future: chat.client.queryChannels(
@@ -559,7 +560,7 @@ class _MediaDisplayScreen extends StatelessWidget {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
     );
   }
@@ -595,7 +596,7 @@ class _FileDisplayScreen extends StatelessWidget {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
     );
   }

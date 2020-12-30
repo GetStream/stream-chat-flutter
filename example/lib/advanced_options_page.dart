@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'choose_user_page.dart';
 import 'main.dart';
 import 'notifications_service.dart';
-import 'choose_user_page.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   @override
@@ -36,7 +36,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
         elevation: 1,
         centerTitle: true,
         brightness: Theme.of(context).brightness,
@@ -97,7 +97,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: _apiKeyError != null
-                            ? Color(0xffff3742)
+                            ? StreamChatTheme.of(context).colorTheme.accentRed
                             : StreamChatTheme.of(context)
                                 .colorTheme
                                 .black
@@ -145,7 +145,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: _userIdError != null
-                              ? Color(0xffff3742)
+                              ? StreamChatTheme.of(context).colorTheme.accentRed
                               : StreamChatTheme.of(context)
                                   .colorTheme
                                   .black
@@ -193,7 +193,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: _userTokenError != null
-                              ? Color(0xffff3742)
+                              ? StreamChatTheme.of(context).colorTheme.accentRed
                               : StreamChatTheme.of(context)
                                   .colorTheme
                                   .black
@@ -238,7 +238,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: FlatButton(
-                        color: StreamChatTheme.of(context).accentColor,
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                         minWidth: double.infinity,
                         height: 48,
                         child: Text(

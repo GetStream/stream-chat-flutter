@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
+
 import 'media_utils.dart';
 
 enum FileAttachmentType { local, online }
@@ -61,7 +62,6 @@ class _FileAttachmentState extends State<FileAttachment> {
       child: Container(
         width: widget.size?.width ?? 100,
         height: 56.0,
-        margin: widget.trailing != null ? EdgeInsets.only(top: 4.0) : null,
         decoration: BoxDecoration(
           color: StreamChatTheme.of(context).colorTheme.white,
           borderRadius:
@@ -177,7 +177,8 @@ class _FileAttachmentState extends State<FileAttachment> {
                   width: 20.0,
                   height: 20.0,
                   child: CircularProgressIndicator(
-                    backgroundColor: StreamChatTheme.of(context).accentColor,
+                    backgroundColor:
+                        StreamChatTheme.of(context).colorTheme.accentBlue,
                   ),
                 ),
               );
