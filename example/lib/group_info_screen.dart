@@ -33,6 +33,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   String changedName = '';
 
   void _userNameListener() {
+    if (_searchController.text == _userNameQuery) {
+      return;
+    }
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted && modalSetStateCallback != null) {
@@ -492,7 +495,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                 r'$autocomplete': _userNameQuery,
                               },
                             'id': {
-                              r'$ne': StreamChat.of(context).user.id,
+                              r'$nin': [
+                                StreamChat.of(context).user.id,
+                                ...channel.state.members.map((e) => e.userId),
+                              ],
                             },
                           },
                           sort: [
