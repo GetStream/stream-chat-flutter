@@ -384,7 +384,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
     var chat = StreamChat.of(context);
 
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
@@ -521,7 +521,8 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             ),
             Container(
               height: 1.0,
-              color: Color(0xffe6e6e6),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
             ),
           ],
         );
