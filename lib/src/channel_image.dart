@@ -52,6 +52,9 @@ class ChannelImage extends StatelessWidget {
     this.onTap,
     this.showOnlineStatus = true,
     this.borderRadius,
+    this.selected = false,
+    this.selectionColor = const Color(0xFF006CFF),
+    this.selectionThickness = 4,
   }) : super(key: key);
 
   final BorderRadius borderRadius;
@@ -66,6 +69,12 @@ class ChannelImage extends StatelessWidget {
   final VoidCallback onTap;
 
   final bool showOnlineStatus;
+
+  final bool selected;
+
+  final Color selectionColor;
+
+  final double selectionThickness;
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +103,10 @@ class ChannelImage extends StatelessWidget {
                             .channelPreviewTheme
                             .avatarTheme
                             .constraints,
-                    onTap: onTap != null
-                        ? (_) {
-                            onTap();
-                          }
-                        : null,
+                    onTap: onTap != null ? (_) => onTap() : null,
+                    selected: selected,
+                    selectionColor: selectionColor,
+                    selectionThickness: selectionThickness,
                   );
                 });
           } else {
@@ -111,16 +119,20 @@ class ChannelImage extends StatelessWidget {
                 .toList();
             return GroupImage(
               images: images,
+              borderRadius: borderRadius,
               constraints: constraints ??
                   StreamChatTheme.of(context)
                       .channelPreviewTheme
                       .avatarTheme
                       .constraints,
               onTap: onTap,
+              selected: selected,
+              selectionColor: selectionColor,
+              selectionThickness: selectionThickness,
             );
           }
 
-          return ClipRRect(
+          Widget child = ClipRRect(
             borderRadius: borderRadius ??
                 StreamChatTheme.of(context)
                     .channelPreviewTheme
@@ -171,6 +183,29 @@ class ChannelImage extends StatelessWidget {
               ),
             ),
           );
+          if (selected) {
+            child = ClipRRect(
+              borderRadius: (borderRadius ??
+                      StreamChatTheme.of(context)
+                          .ownMessageTheme
+                          .avatarTheme
+                          .borderRadius) +
+                  BorderRadius.circular(selectionThickness),
+              child: Container(
+                constraints: constraints ??
+                    StreamChatTheme.of(context)
+                        .ownMessageTheme
+                        .avatarTheme
+                        .constraints,
+                color: selectionColor,
+                child: Padding(
+                  padding: EdgeInsets.all(selectionThickness),
+                  child: child,
+                ),
+              ),
+            );
+          }
+          return child;
         });
   }
 }

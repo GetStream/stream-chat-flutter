@@ -16,8 +16,6 @@ import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'stream_channel.dart';
-
 class ImageFooter extends StatefulWidget {
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
@@ -64,11 +62,11 @@ class _ImageFooterState extends State<ImageFooter> {
   bool _userSearchMode = false;
   TextEditingController _searchController;
   TextEditingController _messageController = TextEditingController();
+  FocusNode _messageFocusNode = FocusNode();
 
-  String _userNameQuery;
-  bool _isSearchActive = false;
+  String _channelNameQuery;
 
-  Set<User> _selectedUsers = {};
+  List<Channel> _selectedChannels = [];
   bool _loading = false;
 
   Timer _debounce;
@@ -80,8 +78,7 @@ class _ImageFooterState extends State<ImageFooter> {
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted && modalSetStateCallback != null) {
         modalSetStateCallback(() {
-          _userNameQuery = _searchController.text;
-          _isSearchActive = _userNameQuery.isNotEmpty;
+          _channelNameQuery = _searchController.text;
         });
       }
     });
@@ -91,6 +88,9 @@ class _ImageFooterState extends State<ImageFooter> {
   void initState() {
     super.initState();
     _searchController = TextEditingController()..addListener(_userNameListener);
+    _messageFocusNode.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -251,7 +251,7 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  Widget _buildShareModal(context) {
+  void _buildShareModal(context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -259,7 +259,7 @@ class _ImageFooterState extends State<ImageFooter> {
           modalSetStateCallback = modalSetState;
           return Padding(
             padding: EdgeInsets.only(
-                top: _userSearchMode
+                top: _userSearchMode || _messageFocusNode.hasFocus
                     ? 16.0
                     : MediaQuery.of(context).size.height / 2,
                 left: 8.0,
@@ -275,74 +275,81 @@ class _ImageFooterState extends State<ImageFooter> {
                   child: Column(
                     children: [
                       _buildTextInputSection(modalSetState),
+                      if (_userSearchMode)
+                        SizedBox(
+                          height: 22.0,
+                        ),
                       Expanded(
-                        child: UserListView(
-                          selectedUsers: _selectedUsers,
-                          onUserTap: (user, _) {
-                            _searchController.clear();
-                            if (!_selectedUsers.contains(user)) {
-                              modalSetState(() {
-                                _selectedUsers.add(user);
-                              });
-                            } else {
-                              modalSetState(() {
-                                _selectedUsers.remove(user);
-                              });
-                            }
-                          },
-                          crossAxisCount: 4,
-                          pagination: PaginationParams(
-                            limit: 25,
-                          ),
-                          filter: {
-                            if (_searchController.text.isNotEmpty)
-                              'name': {
-                                r'$autocomplete': _userNameQuery,
-                              },
-                            'id': {
-                              r'$ne': StreamChat.of(context).user.id,
+                        child: ChannelsBloc(
+                          child: ChannelListView(
+                            selectedChannels: _selectedChannels,
+                            onChannelTap: (channel, _) {
+                              _searchController.clear();
+                              if (!_selectedChannels.contains(channel)) {
+                                modalSetState(() {
+                                  _selectedChannels.add(channel);
+                                });
+                              } else {
+                                modalSetState(() {
+                                  _selectedChannels.remove(channel);
+                                });
+                              }
                             },
-                          },
-                          sort: [
-                            SortOption(
-                              'name',
-                              direction: 1,
+                            crossAxisCount: 4,
+                            pagination: PaginationParams(
+                              limit: 25,
                             ),
-                          ],
-                          emptyBuilder: (_) {
-                            return LayoutBuilder(
-                              builder: (context, viewportConstraints) {
-                                return SingleChildScrollView(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minHeight: viewportConstraints.maxHeight,
-                                    ),
-                                    child: Center(
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(24),
-                                            child: StreamSvgIcon.search(
-                                              size: 96,
-                                              color: Colors.grey,
+                            filter: {
+                              if (_searchController.text.isNotEmpty)
+                                'name': {
+                                  r'$autocomplete': _channelNameQuery,
+                                },
+                              'id': {
+                                r'$ne': StreamChat.of(context).user.id,
+                              },
+                            },
+                            sort: [
+                              SortOption(
+                                'name',
+                                direction: 1,
+                              ),
+                            ],
+                            emptyBuilder: (_) {
+                              return LayoutBuilder(
+                                builder: (context, viewportConstraints) {
+                                  return SingleChildScrollView(
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight:
+                                            viewportConstraints.maxHeight,
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(24),
+                                              child: StreamSvgIcon.search(
+                                                size: 96,
+                                                color: Colors.grey,
+                                              ),
                                             ),
-                                          ),
-                                          Text(
-                                              'No user matches these keywords...'),
-                                        ],
+                                            Text(
+                                                'No chat matches these keywords...'),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      if (_selectedUsers.isNotEmpty)
+                      if (_selectedChannels.isNotEmpty)
                         _buildShareTextInputSection(modalSetState),
-                      if (!_userSearchMode && _selectedUsers.isEmpty)
+                      if (!_userSearchMode && _selectedChannels.isEmpty)
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
@@ -543,6 +550,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       padding: const EdgeInsets.only(left: 8.0),
                       child: TextField(
                         controller: _messageController,
+                        focusNode: _messageFocusNode,
                         onChanged: (val) {
                           modalSetState(() {});
                         },
@@ -619,27 +627,16 @@ class _ImageFooterState extends State<ImageFooter> {
 
     _messageController.clear();
 
-    final client = StreamChat.of(context).client;
-
-    for (var user in _selectedUsers) {
-      var c = client.channel('messaging', extraData: {
-        'members': [
-          user.id,
-          StreamChat.of(context).user.id,
-        ],
-      });
-
-      await c.watch();
-
+    for (var channel in _selectedChannels) {
       final message = Message(
         text: text,
         attachments: [attachments[widget.currentPage]],
       );
 
-      await c.sendMessage(message);
+      await channel.sendMessage(message);
     }
 
-    _selectedUsers.clear();
+    _selectedChannels.clear();
     Navigator.pop(context);
   }
 

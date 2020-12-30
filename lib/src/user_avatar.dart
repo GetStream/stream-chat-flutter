@@ -61,12 +61,15 @@ class UserAvatar extends StatelessWidget {
             : streamChatTheme.defaultUserImage(context, user),
       ),
     );
+
     if (selected) {
       avatar = ClipRRect(
         borderRadius: (borderRadius ??
                 streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
             BorderRadius.circular(selectionThickness),
         child: Container(
+          constraints: constraints ??
+              streamChatTheme.ownMessageTheme.avatarTheme.constraints,
           color: selectionColor,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
