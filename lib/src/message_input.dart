@@ -364,7 +364,7 @@ class MessageInputState extends State<MessageInput> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24.0),
             border: Border.all(
-              color: StreamChatTheme.of(context).colorTheme.white,
+              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
             ),
           ),
           padding: _attachments.isEmpty ? null : EdgeInsets.all(6.0),
