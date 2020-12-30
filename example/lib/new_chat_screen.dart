@@ -119,7 +119,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: StreamChatTheme.of(context).colorTheme.white,
@@ -215,7 +215,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         StreamNeumorphicButton(
                           child: Center(
                             child: StreamSvgIcon.contacts(
-                              color: Color(0xFF006CFF),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                               size: 24,
                             ),
                           ),

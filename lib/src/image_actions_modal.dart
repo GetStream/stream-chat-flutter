@@ -35,7 +35,7 @@ class ImageActionsModal extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.8),
+                Colors.black.withOpacity(0.8),
                 Colors.transparent,
               ],
               stops: [0.0, 0.4],
@@ -110,10 +110,10 @@ class ImageActionsModal extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  color: Color(0xffe5e5e5),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: ListTile.divideTiles(
+                      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
                       context: context,
                       tiles: [
                         _buildButton(
@@ -203,6 +203,7 @@ class ImageActionsModal extends StatelessWidget {
     );
 
     return Material(
+      color: StreamChatTheme.of(context).colorTheme.white,
       child: InkWell(
         onTap: onTap,
         child: ListTile(

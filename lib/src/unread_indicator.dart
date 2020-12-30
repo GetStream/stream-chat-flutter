@@ -34,7 +34,7 @@ class UnreadIndicator extends StatelessWidget {
                 '${snapshot.data}',
                 style: TextStyle(
                   fontSize: 11,
-                  color: StreamChatTheme.of(context).colorTheme.white,
+                  color: Colors.white,
                 ),
               ),
             ),

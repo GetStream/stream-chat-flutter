@@ -58,6 +58,7 @@ class ChooseUserPage extends StatelessWidget {
         (_, value) => value..extraData['image'] = getRandomPicUrl(value));
 
     return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -191,8 +192,9 @@ class ChooseUserPage extends StatelessWidget {
                           child: StreamSvgIcon.settings(
                             color: StreamChatTheme.of(context).colorTheme.black,
                           ),
-                          backgroundColor:
-                              StreamChatTheme.of(context).colorTheme.accentBlue,
+                          backgroundColor: StreamChatTheme.of(context)
+                              .colorTheme
+                              .greyWhisper,
                         ),
                         title: Text(
                           'Advanced Options',

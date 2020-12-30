@@ -336,8 +336,8 @@ class _ChannelListViewState extends State<ChannelListView>
   Shimmer _buildLoadingItem() {
     if (widget.crossAxisCount > 1) {
       return Shimmer.fromColors(
-        baseColor: Color(0xffE5E5E5),
-        highlightColor: Color(0xffffffff),
+        baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+        highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
             SizedBox(
@@ -367,8 +367,8 @@ class _ChannelListViewState extends State<ChannelListView>
       );
     } else {
       return Shimmer.fromColors(
-        baseColor: Color(0xffE5E5E5),
-        highlightColor: StreamChatTheme.of(context).colorTheme.white,
+        baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+        highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: ListTile(
           leading: Container(
             decoration: BoxDecoration(

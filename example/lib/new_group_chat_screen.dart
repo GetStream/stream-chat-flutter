@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'group_chat_details_screen.dart';
-import 'search_text_field.dart';
 import 'routes/routes.dart';
+import 'search_text_field.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
   @override
@@ -53,7 +52,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Color.fromRGBO(252, 252, 252, 1),
+        backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
         body: NestedScrollView(
           floatHeaderSlivers: true,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -142,17 +141,16 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                             .white,
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: Colors.grey.shade100,
-                                        ),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(0.0),
-                                        child: StreamSvgIcon.close(
                                           color: StreamChatTheme.of(context)
                                               .colorTheme
-                                              .black,
-                                          size: 24,
+                                              .whiteSnow,
                                         ),
+                                      ),
+                                      child: StreamSvgIcon.close(
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .black,
+                                        size: 24,
                                       ),
                                     ),
                                   ),

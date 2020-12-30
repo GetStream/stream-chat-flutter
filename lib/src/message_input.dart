@@ -1343,7 +1343,7 @@ class MessageInputState extends State<MessageInput> {
                                           StreamChatTheme.of(context)
                                               .colorTheme
                                               .black
-                                              .withOpacity(0.2),
+                                              .withOpacity(0.6),
                                       maxRadius: 12.0,
                                       child: StreamSvgIcon.close(
                                         color: StreamChatTheme.of(context)

@@ -74,6 +74,8 @@ class UserItem extends StatelessWidget {
       ),
       trailing: selected
           ? CircleAvatar(
+              backgroundColor:
+                  StreamChatTheme.of(context).colorTheme.accentBlue,
               child: StreamSvgIcon.check(
                 size: 20,
                 color: StreamChatTheme.of(context).colorTheme.white,

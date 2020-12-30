@@ -345,10 +345,12 @@ class _MessageListViewState extends State<MessageListView> {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
-                                      Color(0XFFF7F7F7),
                                       StreamChatTheme.of(context)
                                           .colorTheme
                                           .whiteSmoke,
+                                      StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .whiteSnow,
                                     ],
                                   ),
                                 ),
@@ -844,7 +846,7 @@ class _MessageListViewState extends State<MessageListView> {
       }
       if (event.message.user.id == streamChannel.channel.client.state.user.id) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollController.jumpTo(
+          _scrollController?.jumpTo(
             index: 0,
           );
         });

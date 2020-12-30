@@ -381,33 +381,41 @@ class TextTheme {
     this.title = const TextStyle(
       fontSize: 22,
       fontWeight: FontWeight.bold,
+      color: Colors.black,
     ),
     this.headlineBold = const TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.bold,
+      color: Colors.black,
     ),
     this.headline = const TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w500,
+      color: Colors.black,
     ),
     this.bodyBold = const TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.bold,
+      color: Colors.black,
     ),
     this.body = const TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w500,
+      color: Colors.black,
     ),
     this.footnoteBold = const TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w500,
+      color: Colors.black,
     ),
     this.footnote = const TextStyle(
       fontSize: 12,
+      color: Colors.black,
     ),
     this.captionBold = const TextStyle(
       fontSize: 10,
       fontWeight: FontWeight.bold,
+      color: Colors.black,
     ),
   });
 

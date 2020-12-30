@@ -59,7 +59,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: Color.fromRGBO(252, 252, 252, 1),
+        backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
         appBar: AppBar(
           elevation: 1,
           backgroundColor: StreamChatTheme.of(context).colorTheme.white,
@@ -151,7 +151,16 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           children: [
             Container(
               width: double.maxFinite,
-              color: Colors.grey.shade50,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                    StreamChatTheme.of(context).colorTheme.whiteSnow,
+                  ],
+                ),
+              ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 8,

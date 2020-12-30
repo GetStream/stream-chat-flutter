@@ -5,10 +5,10 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
+import 'package:dio/dio.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -300,7 +300,7 @@ class _ImageFooterState extends State<ImageFooter> {
                               limit: 25,
                             ),
                             filter: {
-                              if (_searchController.text.isNotEmpty)
+                              if (_channelNameQuery?.trim()?.isNotEmpty == true)
                                 'name': {
                                   r'$autocomplete': _channelNameQuery,
                                 },
@@ -311,7 +311,7 @@ class _ImageFooterState extends State<ImageFooter> {
                             sort: [
                               SortOption(
                                 'name',
-                                direction: 1,
+                                direction: SortOption.ASC,
                               ),
                             ],
                             emptyBuilder: (_) {
@@ -356,6 +356,8 @@ class _ImageFooterState extends State<ImageFooter> {
                             color: StreamChatTheme.of(context).colorTheme.white,
                             height: 48.0,
                             child: Material(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.white,
                               child: InkWell(
                                 onTap: () async {
                                   var url = widget

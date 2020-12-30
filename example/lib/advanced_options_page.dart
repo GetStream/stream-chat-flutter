@@ -34,6 +34,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         backgroundColor: StreamChatTheme.of(context).colorTheme.white,
@@ -107,7 +108,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: Color(0xffF5F5F5),
+                      fillColor:
+                          StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       filled: true,
                       labelText:
                           'Chat API Key ${_apiKeyError != null ? ':$_apiKeyError' : ''}',
@@ -155,7 +157,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
-                        fillColor: Color(0xffF5F5F5),
+                        fillColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
                         filled: true,
                         labelText:
                             'User ID ${_userIdError != null ? ':$_userIdError' : ''}',
@@ -203,7 +206,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
-                        fillColor: Color(0xffF5F5F5),
+                        fillColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
                         filled: true,
                         labelText:
                             'User Token ${_userTokenError != null ? ':$_userTokenError' : ''}',
@@ -228,7 +232,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
-                        fillColor: Color(0xffF5F5F5),
+                        fillColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
                         filled: true,
                         labelText: 'Username (optional)',
                       ),

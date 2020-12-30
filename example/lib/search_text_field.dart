@@ -24,7 +24,7 @@ class SearchTextField extends StatelessWidget {
       decoration: BoxDecoration(
         color: StreamChatTheme.of(context).colorTheme.white,
         border: Border.all(
-          color: StreamChatTheme.of(context).colorTheme.white,
+          color: StreamChatTheme.of(context).colorTheme.greyWhisper,
         ),
         borderRadius: BorderRadius.circular(24),
       ),
