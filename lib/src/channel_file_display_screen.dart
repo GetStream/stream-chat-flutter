@@ -53,14 +53,16 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(
           'Files',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
+          style: TextStyle(
+              color: StreamChatTheme.of(context).colorTheme.black,
+              fontSize: 16.0),
         ),
         leading: Center(
           child: InkWell(
@@ -69,7 +71,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
             },
             child: Container(
               child: StreamSvgIcon.left(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
               width: 24.0,
@@ -104,14 +106,14 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
               children: [
                 StreamSvgIcon.files(
                   size: 136.0,
-                  color: Color(0xffdbdbdb),
+                  color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
                 ),
                 SizedBox(height: 16.0),
                 Text(
                   'No Files',
                   style: TextStyle(
                     fontSize: 14.0,
-                    color: Color(0xff000000),
+                    color: StreamChatTheme.of(context).colorTheme.black,
                   ),
                 ),
                 SizedBox(height: 8.0),
@@ -120,7 +122,10 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14.0,
-                    color: Color(0xff000000).withOpacity(0.5),
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(0.5),
                   ),
                 ),
               ],

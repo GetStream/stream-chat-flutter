@@ -81,7 +81,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           },
           child: Padding(
             padding: const EdgeInsets.only(left: 12.0),
-            child: StreamSvgIcon.left(),
+            child: StreamSvgIcon.left(
+              color: StreamChatTheme.of(context).colorTheme.black,
+            ),
           ),
         ),
         leadingWidth: 36.0,
