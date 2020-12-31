@@ -33,25 +33,29 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           topRight: Radius.circular(16.0),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: ListView(
         children: [
           SizedBox(
             height: 24.0,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ChannelName(
-              textStyle: StreamChatTheme.of(context).textTheme.headlineBold,
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: ChannelName(
+                textStyle: StreamChatTheme.of(context).textTheme.headlineBold,
+              ),
             ),
           ),
           SizedBox(
             height: 5.0,
           ),
-          ChannelInfo(
-            showTypingIndicator: false,
-            channel: StreamChannel.of(context).channel,
-            textStyle: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+          Center(
+            child: ChannelInfo(
+              showTypingIndicator: false,
+              channel: StreamChannel.of(context).channel,
+              textStyle:
+                  StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+            ),
           ),
           SizedBox(
             height: 17.0,
