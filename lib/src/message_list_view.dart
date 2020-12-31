@@ -259,16 +259,19 @@ class _MessageListViewState extends State<MessageListView> {
             }
 
             final messageList = snapshot.data?.reversed?.toList() ?? [];
-
             if (messageList.isEmpty) {
               if (_upToDate) {
                 return Center(
                   child: Text(
                     'No chats here yet...',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black.withOpacity(.5),
-                    ),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnote
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5)),
                   ),
                 );
               }
@@ -355,8 +358,12 @@ class _MessageListViewState extends State<MessageListView> {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
-                                      Color(0XFFF7F7F7),
-                                      Color(0XFFFCFCFC),
+                                      StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .whiteSmoke,
+                                      StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .whiteSnow,
                                     ],
                                   ),
                                 ),
@@ -536,9 +543,9 @@ class _MessageListViewState extends State<MessageListView> {
             clipBehavior: Clip.none,
             children: [
               FloatingActionButton(
-                backgroundColor: Colors.white,
+                backgroundColor: StreamChatTheme.of(context).colorTheme.white,
                 child: StreamSvgIcon.down(
-                  color: Colors.black,
+                  color: StreamChatTheme.of(context).colorTheme.black,
                 ),
                 onPressed: () {
                   if (unreadCount > 0) {
@@ -598,7 +605,10 @@ class _MessageListViewState extends State<MessageListView> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Color(0xffd0021B).withAlpha(26),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .accentRed
+                  .withOpacity(.2),
               child: Center(
                 child: Text('Error loading messages'),
               ),
@@ -867,7 +877,7 @@ class _MessageListViewState extends State<MessageListView> {
       }
       if (event.message.user.id == streamChannel.channel.client.state.user.id) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollController.jumpTo(
+          _scrollController?.jumpTo(
             index: 0,
           );
         });

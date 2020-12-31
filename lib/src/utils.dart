@@ -27,7 +27,7 @@ Future<bool> showConfirmationDialog(
   String cancelText,
 }) {
   return showModalBottomSheet(
-      backgroundColor: Colors.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       context: context,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -47,7 +47,7 @@ Future<bool> showConfirmationDialog(
             ),
             Text(
               title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             SizedBox(
               height: 7.0,
@@ -57,7 +57,8 @@ Future<bool> showConfirmationDialog(
               height: 36.0,
             ),
             Container(
-              color: Color(0xffe6e6e6),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
               height: 1.0,
             ),
             Row(
@@ -67,7 +68,10 @@ Future<bool> showConfirmationDialog(
                   child: Text(
                     cancelText,
                     style: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.5),
                         fontWeight: FontWeight.w400),
                   ),
                   onPressed: () {

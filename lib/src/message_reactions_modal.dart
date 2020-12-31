@@ -60,7 +60,7 @@ class MessageReactionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withOpacity(0.2),
               ),
             ),
           ),
@@ -110,14 +110,16 @@ class MessageReactionsModal extends StatelessWidget {
                                 translateUserAvatar: false,
                                 showSendingIndicator: DisplayWidget.gone,
                                 shape: messageShape,
-                                showReactionPickerIndicator: true,
+                                showInChannelIndicator: false,
+                                showReactionPickerIndicator: showReactions &&
+                                    (message.status ==
+                                            MessageSendingStatus.SENT ||
+                                        message.status == null),
                               ),
                             ),
                           );
                         }),
-                    SizedBox(
-                      height: 16,
-                    ),
+                    SizedBox(height: 8),
                     if (message.latestReactions?.isNotEmpty == true)
                       _buildReactionCard(context),
                   ],
@@ -137,6 +139,7 @@ class MessageReactionsModal extends StatelessWidget {
         horizontal: 8.0,
       ),
       child: Card(
+        color: StreamChatTheme.of(context).colorTheme.white,
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

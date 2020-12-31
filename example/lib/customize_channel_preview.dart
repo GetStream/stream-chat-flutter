@@ -84,10 +84,12 @@ class ChannelListPage extends StatelessWidget {
         channel: channel,
       ),
       title: ChannelName(
-        channel: channel,
         textStyle:
             StreamChatTheme.of(context).channelPreviewTheme.title.copyWith(
-                  color: Colors.black.withOpacity(opacity),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(opacity),
                 ),
       ),
       subtitle: Text(subtitle),

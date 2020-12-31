@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
+
 import 'media_utils.dart';
 
 enum FileAttachmentType { local, online }
@@ -61,13 +62,13 @@ class _FileAttachmentState extends State<FileAttachment> {
       child: Container(
         width: widget.size?.width ?? 100,
         height: 56.0,
-        margin: widget.trailing != null ? EdgeInsets.only(top: 4.0) : null,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: StreamChatTheme.of(context).colorTheme.white,
           borderRadius:
               widget.trailing != null ? BorderRadius.circular(16.0) : null,
           border: widget.trailing != null
-              ? Border.fromBorderSide(BorderSide(color: Color(0xFFE6E6E6)))
+              ? Border.fromBorderSide(BorderSide(
+                  color: StreamChatTheme.of(context).colorTheme.greyWhisper))
               : null,
         ),
         child: Row(
@@ -88,10 +89,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                 children: [
                   Text(
                     widget.attachment?.title ?? 'File',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                    ),
+                    style: StreamChatTheme.of(context).textTheme.bodyBold,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -100,10 +98,11 @@ class _FileAttachmentState extends State<FileAttachment> {
                   ),
                   Text(
                     '${getSizeText(widget.attachment.extraData['file_size'])}',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                      fontSize: 14.0,
-                    ),
+                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.5)),
                   ),
                 ],
               ),
@@ -113,7 +112,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                 widget.trailing ??
                     IconButton(
                       icon: StreamSvgIcon.cloud_download(
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       onPressed: () {
                         launchURL(context, widget.attachment.assetUrl);
@@ -148,7 +147,8 @@ class _FileAttachmentState extends State<FileAttachment> {
                   width: 20.0,
                   height: 20.0,
                   child: CircularProgressIndicator(
-                    backgroundColor: StreamChatTheme.of(context).accentColor,
+                    backgroundColor:
+                        StreamChatTheme.of(context).colorTheme.accentBlue,
                   ),
                 ),
               );

@@ -23,6 +23,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool showDeleteMessage;
   final bool showCopyMessage;
   final bool showEditMessage;
+  final bool showResendMessage;
   final bool showReply;
   final bool showThreadReply;
   final bool reverse;
@@ -40,6 +41,7 @@ class MessageActionsModal extends StatelessWidget {
     this.onThreadReplyTap,
     this.showCopyMessage = true,
     this.showReply = true,
+    this.showResendMessage = true,
     this.showThreadReply = true,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
@@ -73,7 +75,7 @@ class MessageActionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withOpacity(.2),
               ),
             ),
           ),
@@ -122,7 +124,10 @@ class MessageActionsModal extends StatelessWidget {
                                 showUserAvatar: showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
-                                showReactionPickerIndicator: true,
+                                showReactionPickerIndicator: showReactions &&
+                                    (message.status ==
+                                            MessageSendingStatus.SENT ||
+                                        message.status == null),
                                 showInChannelIndicator: false,
                                 showSendingIndicator: DisplayWidget.gone,
                                 shape: messageShape,
@@ -130,9 +135,7 @@ class MessageActionsModal extends StatelessWidget {
                             ),
                           );
                         }),
-                    SizedBox(
-                      height: 8,
-                    ),
+                    SizedBox(height: 8),
                     TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
                         duration: Duration(milliseconds: 300),
@@ -148,6 +151,9 @@ class MessageActionsModal extends StatelessWidget {
                                 horizontal: 48.0,
                               ),
                               child: Material(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .whiteSnow,
                                 clipBehavior: Clip.hardEdge,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -166,10 +172,12 @@ class MessageActionsModal extends StatelessWidget {
                                         _buildReplyButton(context),
                                       if (showThreadReply &&
                                           (message.status ==
-                                                  MessageSendingStatus.SENT ||
+                                              MessageSendingStatus.SENT ||
                                               message.status == null) &&
                                           message.parentId == null)
                                         _buildThreadReplyButton(context),
+                                      if (showResendMessage)
+                                        _buildResendMessage(context),
                                       if (showEditMessage)
                                         _buildEditMessage(context),
                                       if (showDeleteMessage)
@@ -212,9 +220,10 @@ class MessageActionsModal extends StatelessWidget {
   }
 
   Widget _buildDeleteButton(BuildContext context) {
+    final isDeleteFailed = message.status == MessageSendingStatus.FAILED_DELETE;
     return ListTile(
       title: Text(
-        'Delete message',
+        isDeleteFailed ? 'Retry deleting message' : 'Delete message',
         style:
             Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
       ),
@@ -263,6 +272,29 @@ class MessageActionsModal extends StatelessWidget {
     );
   }
 
+  Widget _buildResendMessage(BuildContext context) {
+    final isUpdateFailed = message.status == MessageSendingStatus.FAILED_UPDATE;
+    return ListTile(
+      title: Text(
+        isUpdateFailed ? 'Resend edited message' : 'Resend',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: StreamSvgIcon.circle_up(
+        color: StreamChatTheme.of(context).colorTheme.accentBlue,
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        final client = StreamChat.of(context).client;
+        final channel = StreamChannel.of(context).channel;
+        if (isUpdateFailed) {
+          client.updateMessage(message, channel.cid);
+        } else {
+          channel.sendMessage(message);
+        }
+      },
+    );
+  }
+
   void _showEditBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showModalBottomSheet(
@@ -270,6 +302,7 @@ class MessageActionsModal extends StatelessWidget {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
@@ -330,9 +363,10 @@ class MessageActionsModal extends StatelessWidget {
                     ? editMessageInputBuilder(context, message)
                     : MessageInput(
                         editMessage: message,
-                        onMessageSent: (_) {
+                        preMessageSending: (m) {
                           FocusScope.of(context).unfocus();
                           Navigator.pop(context);
+                          return m;
                         },
                       ),
               ),

@@ -32,7 +32,7 @@ class AttachmentTitle extends StatelessWidget {
               attachment.title,
               overflow: TextOverflow.ellipsis,
               style: messageTheme.messageText.copyWith(
-                color: StreamChatTheme.of(context).accentColor,
+                color: StreamChatTheme.of(context).colorTheme.accentBlue,
                 fontWeight: FontWeight.bold,
               ),
             ),
