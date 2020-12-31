@@ -92,9 +92,11 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           if (!(channel.isDistinct && channel.memberCount == 2))
             Container(
               height: 94.0,
+              alignment: Alignment.center,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: members.length,
+                shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -127,7 +129,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
               ),
             ),
           SizedBox(
-            height: 17.0,
+            height: 24.0,
           ),
           OptionListTile(
             leading: StreamSvgIcon.user(

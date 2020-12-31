@@ -41,12 +41,15 @@ class OptionListTile extends StatelessWidget {
                       width: 16.0,
                     ),
                   Expanded(
-                      flex: 4,
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, color: titleColor),
-                      )),
+                    flex: 4,
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: titleColor,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     flex: 2,
                     child: Padding(
