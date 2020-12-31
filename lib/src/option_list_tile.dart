@@ -7,6 +7,8 @@ class OptionListTile extends StatelessWidget {
   final Widget trailing;
   final VoidCallback onTap;
   final Color titleColor;
+  final Color tileColor;
+  final Color separatorColor;
 
   OptionListTile({
     this.title,
@@ -14,6 +16,8 @@ class OptionListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.titleColor,
+    this.tileColor,
+    this.separatorColor,
   });
 
   @override
@@ -21,11 +25,11 @@ class OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: Color(0xffe6e6e6),
+          color: separatorColor ?? Color(0xffe6e6e6),
           height: 2.0,
         ),
         Material(
-          color: Colors.white,
+          color: tileColor ?? Colors.white,
           child: Container(
             height: 56.0,
             child: InkWell(

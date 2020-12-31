@@ -260,13 +260,13 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     return OptionListTile(
       title: 'Delete Conversation',
       leading: StreamSvgIcon.delete(
-        color: Colors.red,
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
         size: 24.0,
       ),
       onTap: () {
         _showDeleteDialog();
       },
-      titleColor: Colors.red,
+      titleColor: StreamChatTheme.of(context).colorTheme.accentRed,
     );
   }
 
@@ -278,7 +278,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       question: 'Are you sure you want to delete this conversation?',
       cancelText: 'CANCEL',
       icon: StreamSvgIcon.delete(
-        color: Colors.red,
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
       ),
     );
     var channel = StreamChannel.of(context).channel;
@@ -416,14 +416,14 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                 children: [
                   StreamSvgIcon.message(
                     size: 136.0,
-                    color: Color(0xffdbdbdb),
+                    color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
                   ),
                   SizedBox(height: 16.0),
                   Text(
                     'No Shared Groups',
                     style: TextStyle(
                       fontSize: 14.0,
-                      color: Color(0xff000000),
+                      color: StreamChatTheme.of(context).colorTheme.black,
                     ),
                   ),
                   SizedBox(height: 8.0),
@@ -432,7 +432,10 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14.0,
-                      color: Color(0xff000000).withOpacity(0.5),
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(0.5),
                     ),
                   ),
                 ],
