@@ -167,6 +167,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
             itemBuilder: (context, position) {
               var channel = StreamChannel.of(context).channel;
+              print('NAV');
 
               return Padding(
                 padding: const EdgeInsets.all(1.0),
@@ -178,9 +179,9 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                         builder: (context) => StreamChannel(
                           channel: channel,
                           child: FullScreenMedia(
-                            mediaAttachments: [
-                              media[position].attachment,
-                            ],
+                            mediaAttachments:
+                                media.map((e) => e.attachment).toList(),
+                            startIndex: position,
                             message: media[position].message,
                             sentAt: media[position].message.createdAt,
                             userName: media[position].message.user.name,
@@ -190,13 +191,15 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                     );
                   },
                   child: media[position].attachment.type == 'image'
-                      ? ImageAttachment(
-                          attachment: media[position].attachment,
-                          message: media[position].message,
-                          showTitle: false,
-                          size: Size(
-                            MediaQuery.of(context).size.width * 0.8,
-                            MediaQuery.of(context).size.height * 0.3,
+                      ? IgnorePointer(
+                          child: ImageAttachment(
+                            attachment: media[position].attachment,
+                            message: media[position].message,
+                            showTitle: false,
+                            size: Size(
+                              MediaQuery.of(context).size.width * 0.8,
+                              MediaQuery.of(context).size.height * 0.3,
+                            ),
                           ),
                         )
                       : VideoPlayer(media[position].videoPlayer),
