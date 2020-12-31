@@ -25,6 +25,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     var isOwner = userAsMember.role == 'owner';
 
     return Material(
+      color: StreamChatTheme.of(context).colorTheme.white,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -41,11 +42,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ChannelName(
-              textStyle: TextStyle(
-                fontSize: 16.0,
-                color: Color(0xff000000),
-                fontWeight: FontWeight.bold,
-              ),
+              textStyle: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
           ),
           SizedBox(
@@ -80,10 +77,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       .firstWhere((e) => e.user.id != userAsMember.user.id)
                       .user
                       .name,
-                  style: TextStyle(
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: StreamChatTheme.of(context).textTheme.footnoteBold,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -115,10 +109,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                         ),
                         Text(
                           members[index].user.name,
-                          style: TextStyle(
-                            fontSize: 12.0,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .footnoteBold,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -133,7 +126,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           ),
           OptionListTile(
             leading: StreamSvgIcon.user(
-              color: Color(0xff7a7a7a),
+              color: StreamChatTheme.of(context).colorTheme.grey,
             ),
             title: 'View Info',
             onTap: widget.onViewInfoTap,
@@ -141,7 +134,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           if (!channel.isDistinct)
             OptionListTile(
               leading: StreamSvgIcon.userRemove(
-                color: Color(0xff7a7a7a),
+                color: StreamChatTheme.of(context).colorTheme.grey,
               ),
               title: 'Leave Group',
               onTap: () async {
@@ -151,17 +144,17 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           if (isOwner)
             OptionListTile(
               leading: StreamSvgIcon.delete(
-                color: Colors.red,
+                color: StreamChatTheme.of(context).colorTheme.accentRed,
               ),
               title: 'Delete Conversation',
-              titleColor: Colors.red,
+              titleColor: StreamChatTheme.of(context).colorTheme.accentRed,
               onTap: () async {
                 _showDeleteDialog();
               },
             ),
           OptionListTile(
             leading: StreamSvgIcon.close_small(
-              color: Color(0xff7a7a7a),
+              color: StreamChatTheme.of(context).colorTheme.grey,
             ),
             title: 'Cancel',
             onTap: () {
@@ -181,7 +174,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
       question: 'Are you sure you want to delete this conversation?',
       cancelText: 'CANCEL',
       icon: StreamSvgIcon.delete(
-        color: Colors.red,
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
       ),
     );
     var channel = StreamChannel.of(context).channel;
@@ -199,7 +192,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
       question: 'Are you sure you want to leave this conversation?',
       cancelText: 'CANCEL',
       icon: StreamSvgIcon.userRemove(
-        color: Colors.red,
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
       ),
     );
     var channel = StreamChannel.of(context).channel;
