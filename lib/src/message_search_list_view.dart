@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
 
+import '../stream_chat_flutter.dart';
 import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
@@ -127,8 +128,8 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     return Container(
       height: 1,
       color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.white.withOpacity(0.1)
-          : Colors.black.withOpacity(0.1),
+          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
+          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
     );
   }
 
@@ -151,7 +152,10 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Color(0xffd0021B).withAlpha(26),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .accentRed
+                  .withOpacity(.2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(
@@ -313,8 +317,14 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      Colors.black.withOpacity(0.02),
-                      Colors.white.withOpacity(0.05),
+                      StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(0.02),
+                      StreamChatTheme.of(context)
+                          .colorTheme
+                          .white
+                          .withOpacity(0.05),
                     ],
                     stops: [0, 1],
                   ),
@@ -327,7 +337,10 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   child: Text(
                     '${items.length} results',
                     style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(0.5),
                     ),
                   ),
                 ),

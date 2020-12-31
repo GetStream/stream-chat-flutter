@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'group_chat_details_screen.dart';
-import 'search_text_field.dart';
 import 'routes/routes.dart';
+import 'search_text_field.dart';
 
 class NewGroupChatScreen extends StatefulWidget {
   @override
@@ -51,23 +50,24 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Color.fromRGBO(252, 252, 252, 1),
-        body: NestedScrollView(
+    return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      body: SafeArea(
+        child: NestedScrollView(
           floatHeaderSlivers: true,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
+                brightness: Theme.of(context).brightness,
                 pinned: true,
                 forceElevated: true,
                 elevation: 1,
-                backgroundColor: Colors.white,
+                backgroundColor: StreamChatTheme.of(context).colorTheme.white,
                 leading: const StreamBackButton(),
                 title: Text(
                   'Add Group Members',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: StreamChatTheme.of(context).colorTheme.black,
                     fontSize: 16,
                   ),
                 ),
@@ -76,7 +76,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   if (_selectedUsers.isNotEmpty)
                     IconButton(
                       icon: StreamSvgIcon.arrow_right(
-                        color: Color(0xFF006CFF),
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                       ),
                       onPressed: () async {
                         final updatedList = await Navigator.pushNamed(
@@ -137,18 +138,21 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .white,
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: Colors.grey.shade100,
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .whiteSnow,
                                         ),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(0.0),
-                                        child: StreamSvgIcon.close(
-                                          color: Colors.black,
-                                          size: 24,
-                                        ),
+                                      child: StreamSvgIcon.close(
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .black,
+                                        size: 24,
                                       ),
                                     ),
                                   ),
@@ -180,8 +184,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          Colors.black.withOpacity(0.02),
-                          Colors.white.withOpacity(0.05),
+                          StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.02),
+                          StreamChatTheme.of(context)
+                              .colorTheme
+                              .white
+                              .withOpacity(0.05),
                         ],
                         stops: [0, 1],
                       ),
@@ -196,7 +206,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                             ? 'Matches for \"$_userNameQuery\"'
                             : 'On the platform',
                         style: TextStyle(
-                          color: Colors.black.withOpacity(0.5),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5),
                         ),
                       ),
                     ),
@@ -261,7 +274,17 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     color: Colors.grey,
                                   ),
                                 ),
-                                Text('No user matches these keywords...'),
+                                Text(
+                                  'No user matches these keywords...',
+                                  style: StreamChatTheme.of(context)
+                                      .textTheme
+                                      .footnote
+                                      .copyWith(
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .black
+                                              .withOpacity(.5)),
+                                ),
                               ],
                             ),
                           ),
@@ -292,7 +315,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: Colors.white,
+      color: StreamChatTheme.of(context).colorTheme.white,
       child: child,
     );
   }

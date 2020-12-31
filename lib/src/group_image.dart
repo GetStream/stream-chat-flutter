@@ -11,7 +11,7 @@ class GroupImage extends StatelessWidget {
     this.onTap,
     this.borderRadius,
     this.selected = false,
-    this.selectionColor = const Color(0xFF006CFF),
+    this.selectionColor,
     this.selectionThickness = 4,
   }) : super(key: key);
 
@@ -43,7 +43,7 @@ class GroupImage extends StatelessWidget {
                   .avatarTheme
                   .constraints,
           decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).accentColor,
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
           ),
           child: Flex(
             direction: Axis.vertical,
@@ -110,7 +110,8 @@ class GroupImage extends StatelessWidget {
                 streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
             BorderRadius.circular(selectionThickness),
         child: Container(
-          color: selectionColor,
+          color: selectionColor ??
+              StreamChatTheme.of(context).colorTheme.accentBlue,
           height: 64.0,
           width: 64.0,
           child: Padding(

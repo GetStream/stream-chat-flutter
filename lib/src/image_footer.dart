@@ -5,10 +5,10 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
+import 'package:dio/dio.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -175,7 +175,7 @@ class _ImageFooterState extends State<ImageFooter> {
           children: [
             Container(
               decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(16.0),
                     topLeft: Radius.circular(16.0),
@@ -187,11 +187,8 @@ class _ImageFooterState extends State<ImageFooter> {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         'Photos',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
+                        style:
+                            StreamChatTheme.of(context).textTheme.headlineBold,
                       ),
                     ),
                   ),
@@ -199,7 +196,7 @@ class _ImageFooterState extends State<ImageFooter> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                       icon: StreamSvgIcon.close(
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       onPressed: () {
                         Navigator.pop(context);
@@ -210,7 +207,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StreamChatTheme.of(context).colorTheme.white,
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -309,7 +306,7 @@ class _ImageFooterState extends State<ImageFooter> {
                               limit: 25,
                             ),
                             filter: {
-                              if (_searchController.text.isNotEmpty)
+                              if (_channelNameQuery?.trim()?.isNotEmpty == true)
                                 'name': {
                                   r'$autocomplete': _channelNameQuery,
                                 },
@@ -320,7 +317,7 @@ class _ImageFooterState extends State<ImageFooter> {
                             sort: [
                               SortOption(
                                 'name',
-                                direction: 1,
+                                direction: SortOption.ASC,
                               ),
                             ],
                             emptyBuilder: (_) {
@@ -363,30 +360,44 @@ class _ImageFooterState extends State<ImageFooter> {
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Container(
-                            height: kToolbarHeight,
-                            child: SizedBox.expand(
-                              child: RaisedButton(
-                                onPressed: () async {
-                                  final attachment = widget
-                                      .mediaAttachments[widget.currentPage];
-                                  var url = attachment.imageUrl ??
-                                      attachment.assetUrl ??
-                                      attachment.thumbUrl;
-                                  if (attachment.type == 'video') {
+                            color: StreamChatTheme.of(context).colorTheme.white,
+                            height: 48.0,
+                            child: Material(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.white,
+                              child: InkWell(
+                                onTap: () async {
+                                  var url = widget
+                                          .mediaAttachments[widget.currentPage]
+                                          .imageUrl ??
+                                      widget
+                                          .mediaAttachments[widget.currentPage]
+                                          .assetUrl ??
+                                      widget
+                                          .mediaAttachments[widget.currentPage]
+                                          .thumbUrl;
+
+                                  if (widget
+                                          .mediaAttachments[widget.currentPage]
+                                          .type ==
+                                      'video') {
                                     await _saveVideo(url);
                                   } else {
                                     await _saveImage(url);
                                   }
                                   Navigator.pop(context);
                                 },
-                                color: Colors.white,
-                                elevation: 8,
-                                child: Text(
-                                  'Save to Photos',
-                                  style: TextStyle(
-                                    color:
-                                        StreamChatTheme.of(context).accentColor,
-                                    fontWeight: FontWeight.bold,
+                                child: SizedBox.expand(
+                                  child: Center(
+                                    child: Text(
+                                      'Save to Photos',
+                                      style: TextStyle(
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .accentBlue,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -460,7 +471,10 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               IconButton(
                 icon: StreamSvgIcon.close_small(
-                  color: Colors.black.withOpacity(0.5),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5),
                 ),
                 splashRadius: 24,
                 onPressed: () {
@@ -568,13 +582,19 @@ class _ImageFooterState extends State<ImageFooter> {
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24.0),
                             borderSide: BorderSide(
-                              color: Colors.black.withOpacity(0.16),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.16),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24.0),
                               borderSide: BorderSide(
-                                color: Colors.black.withOpacity(0.16),
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .black
+                                    .withOpacity(0.16),
                               )),
                           contentPadding: const EdgeInsets.all(0),
                         ),

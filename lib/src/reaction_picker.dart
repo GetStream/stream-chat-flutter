@@ -89,7 +89,9 @@ class _ReactionPickerState extends State<ReactionPicker>
                               height: animations[index].value * 24.0,
                               width: animations[index].value * 24.0,
                               color: ownReactionIndex != -1
-                                  ? StreamChatTheme.of(context).accentColor
+                                  ? StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .accentBlue
                                   : Theme.of(context)
                                       .iconTheme
                                       .color

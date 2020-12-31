@@ -114,6 +114,9 @@ class MessageWidget extends StatefulWidget {
   /// Used in [MessageReactionsModal] and [MessageActionsModal]
   final bool showReactionPickerIndicator;
 
+  /// If true the widget will show the resendMessage indicator
+  final bool showResendMessage;
+
   final List<Read> readList;
 
   /// If true show the users username next to the timestamp of the message
@@ -157,6 +160,7 @@ class MessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
+    this.showResendMessage = true,
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -224,10 +228,26 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool get showTimeStamp =>
       widget.message.createdAt != null && widget.showTimestamp;
 
-  bool get showReadList => widget.readList?.isNotEmpty == true;
+  bool get isMessageRead => widget.readList?.isNotEmpty == true;
 
   bool get showInChannel =>
       widget.showInChannelIndicator && widget.message?.showInChannel == true;
+
+  bool get isSendFailed => widget.message.status == MessageSendingStatus.FAILED;
+
+  bool get isUpdateFailed =>
+      widget.message.status == MessageSendingStatus.FAILED_UPDATE;
+
+  bool get isDeleteFailed =>
+      widget.message.status == MessageSendingStatus.FAILED_DELETE;
+
+  bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
+
+  bool get showBottomRow =>
+      showThreadReplyIndicator ||
+      showUsername ||
+      showTimeStamp ||
+      showInChannel;
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +273,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Stack(
+                  clipBehavior: Clip.none,
                   alignment: AlignmentDirectional.bottomStart,
                   children: [
                     Column(
@@ -298,9 +319,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                             )
                                           : EdgeInsets.zero,
                                       child: (widget.message.isDeleted &&
-                                              widget.message.status !=
-                                                  MessageSendingStatus
-                                                      .FAILED_DELETE)
+                                              !isFailedState)
                                           ? Transform(
                                               alignment: Alignment.center,
                                               transform: Matrix4.rotationY(
@@ -327,10 +346,16 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                                           .brightness ==
                                                                       Brightness
                                                                           .dark
-                                                                  ? Colors.white
+                                                                  ? StreamChatTheme.of(
+                                                                          context)
+                                                                      .colorTheme
+                                                                      .white
                                                                       .withAlpha(
                                                                           24)
-                                                                  : Colors.black
+                                                                  : StreamChatTheme.of(
+                                                                          context)
+                                                                      .colorTheme
+                                                                      .black
                                                                       .withAlpha(
                                                                           24),
                                                             ),
@@ -383,18 +408,23 @@ class _MessageWidgetState extends State<MessageWidget> {
                             ),
                           ],
                         ),
-                        if (showThreadReplyIndicator ||
-                            showUsername ||
-                            showTimeStamp ||
-                            showInChannel)
-                          SizedBox(height: 20.0),
+                        if (showBottomRow) SizedBox(height: 20.0),
                       ],
                     ),
-                    if (showThreadReplyIndicator ||
-                        showUsername ||
-                        showTimeStamp ||
-                        showInChannel)
-                      _buildBottomRow(leftPadding)
+                    if (showBottomRow) _buildBottomRow(leftPadding),
+                    if (isFailedState)
+                      Positioned(
+                        left: widget.reverse ? -3 : null,
+                        right: widget.reverse ? null : -9,
+                        bottom: showBottomRow ? 20 : 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: StreamSvgIcon.error(size: 20),
+                        ),
+                      ),
                   ],
                 ),
               ],
@@ -414,16 +444,18 @@ class _MessageWidgetState extends State<MessageWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             StreamSvgIcon.eye(
-              color: Colors.black.withOpacity(0.5),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
               size: 16.0,
             ),
             SizedBox(width: 8.0),
             Text(
               'Only visible to you',
-              style: TextStyle(
-                color: Colors.black.withOpacity(0.5),
-                fontSize: 12.0,
-              ),
+              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5)),
             ),
           ],
         ),
@@ -461,14 +493,14 @@ class _MessageWidgetState extends State<MessageWidget> {
 
       children.addAll([
         if (showSendingIndicator) _buildSendingIndicator(),
-        if (showReadList)
-          SizedBox.fromSize(
-            size: Size((widget.readList.length * 10.0) + 10, 17),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 4.0),
-              child: _buildReadIndicator(),
-            ),
-          ),
+        // if (showReadList)
+        //   SizedBox.fromSize(
+        //     size: Size((widget.readList.length * 10.0) + 10, 17),
+        //     child: Padding(
+        //       padding: const EdgeInsets.only(left: 4.0),
+        //       child: _buildReadIndicator(),
+        //     ),
+        //   ),
         if (showThreadReplyIndicator)
           InkWell(
             onTap: widget.onThreadTap != null ? onThreadTap : null,
@@ -502,6 +534,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               child: CustomPaint(
                 size: const Size(16, 32),
                 painter: _ThreadReplyPainter(
+                  context: context,
                   color: widget.messageTheme.replyThreadColor,
                 ),
               ),
@@ -550,7 +583,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           bottom: 0,
           top: 0,
           child: Material(
-            color: Colors.white,
+            color: StreamChatTheme.of(context).colorTheme.white,
             clipBehavior: Clip.antiAlias,
             shape: CircleBorder(),
             child: Padding(
@@ -619,14 +652,19 @@ class _MessageWidgetState extends State<MessageWidget> {
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
-              showCopyMessage: widget.message.text?.trim()?.isNotEmpty == true,
+              showResendMessage:
+                  widget.showResendMessage && (isSendFailed || isUpdateFailed),
+              showCopyMessage: !isFailedState &&
+                  widget.message.text?.trim()?.isNotEmpty == true,
               showEditMessage: widget.showEditMessage &&
+                  !isDeleteFailed &&
                   widget.message.attachments
                           ?.any((element) => element.type == 'giphy') !=
                       true,
               showReactions: widget.showReactions,
-              showReply:
-                  widget.showThreadReplyIndicator && widget.onThreadTap != null,
+              showReply: widget.showThreadReplyIndicator &&
+                  !isFailedState &&
+                  widget.onThreadTap != null,
             ),
           );
         });
@@ -663,8 +701,8 @@ class _MessageWidgetState extends State<MessageWidget> {
           widget.borderSide ??
           BorderSide(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withAlpha(24)
-                : Colors.black.withAlpha(24),
+                ? StreamChatTheme.of(context).colorTheme.white.withAlpha(24)
+                : StreamChatTheme.of(context).colorTheme.black.withAlpha(24),
           ),
       borderRadius: widget.attachmentBorderRadiusGeometry ??
           widget.borderRadiusGeometry ??
@@ -729,7 +767,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
     return GestureDetector(
-      onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
       child: Material(
         color: _getBackgroundColor(),
@@ -744,17 +781,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             child: Transform(
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
               alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  getFailedMessageWidget(
-                    context,
-                    padding: const EdgeInsets.all(8.0),
-                  ),
-                  attachmentWidget,
-                ],
-              ),
+              child: attachmentWidget,
             ),
           ),
         ),
@@ -777,14 +804,27 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildSendingIndicator() {
-    return Container(
-      height: widget.messageTheme.createdAt.fontSize + 2,
-      width: widget.messageTheme.createdAt.fontSize + 2,
-      child: SendingIndicator(
-        message: widget.message,
-        allRead: widget.allRead,
-      ),
+    final style = widget.messageTheme.createdAt;
+    Widget child = SendingIndicator(
+      message: widget.message,
+      isMessageRead: isMessageRead,
+      size: style.fontSize,
     );
+    if (isMessageRead) {
+      child = Row(
+        children: [
+          Text(
+            widget.readList.length.toString(),
+            style: style.copyWith(
+              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+            ),
+          ),
+          SizedBox(width: 2),
+          child,
+        ],
+      );
+    }
+    return child;
   }
 
   Widget _buildUserAvatar() => Transform(
@@ -809,55 +849,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         ),
       );
 
-  Widget getFailedMessageWidget(
-    BuildContext context, {
-    EdgeInsetsGeometry padding,
-  }) {
-    Widget failedWidget;
-    if (widget.message.status == MessageSendingStatus.FAILED) {
-      failedWidget = Text(
-        'MESSAGE FAILED · CLICK TO TRY AGAIN',
-        style: widget.messageTheme.messageText.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-      );
-    }
-    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
-      failedWidget = Text(
-        'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
-        style: widget.messageTheme.messageText.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-      );
-    }
-    if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
-      failedWidget = Text(
-        'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
-        style: widget.messageTheme.messageText.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-      );
-    }
-
-    if (failedWidget != null) {
-      return Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: failedWidget,
-      );
-    }
-
-    return SizedBox();
-  }
-
   Widget _buildTextBubble(BuildContext context) {
     Widget child = Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
@@ -867,26 +858,20 @@ class _MessageWidgetState extends State<MessageWidget> {
         children: [
           Padding(
             padding: widget.textPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                getFailedMessageWidget(context),
-                widget.textBuilder != null
-                    ? widget.textBuilder(context, widget.message)
-                    : MessageText(
-                        onLinkTap: widget.onLinkTap,
-                        message: widget.message,
-                        onMentionTap: widget.onMentionTap,
-                        messageTheme: isOnlyEmoji
-                            ? widget.messageTheme.copyWith(
-                                messageText:
-                                    widget.messageTheme.messageText.copyWith(
-                                fontSize: 40,
-                              ))
-                            : widget.messageTheme,
-                      ),
-              ],
-            ),
+            child: widget.textBuilder != null
+                ? widget.textBuilder(context, widget.message)
+                : MessageText(
+                    onLinkTap: widget.onLinkTap,
+                    message: widget.message,
+                    onMentionTap: widget.onMentionTap,
+                    messageTheme: isOnlyEmoji
+                        ? widget.messageTheme.copyWith(
+                            messageText:
+                                widget.messageTheme.messageText.copyWith(
+                            fontSize: 40,
+                          ))
+                        : widget.messageTheme,
+                  ),
           ),
           if (widget.message.attachments
                   ?.any((element) => element.ogScrapeUrl != null) ==
@@ -896,7 +881,6 @@ class _MessageWidgetState extends State<MessageWidget> {
       ),
     );
     return GestureDetector(
-      onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
       child: child,
     );
@@ -907,16 +891,10 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
   Color _getBackgroundColor() {
-    if ((widget.message.status == MessageSendingStatus.FAILED ||
-        widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
-        widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
-      return Color(0xffd0021B).withOpacity(.1);
-    }
-
     if (widget.message.attachments
             ?.any((element) => element.ogScrapeUrl != null) ==
         true) {
-      return Color(0xFFE9F2FF);
+      return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
 
     if (isOnlyEmoji) {
@@ -997,13 +975,14 @@ class _MessageWidgetState extends State<MessageWidget> {
 
 class _ThreadReplyPainter extends CustomPainter {
   final Color color;
+  final BuildContext context;
 
-  const _ThreadReplyPainter({@required this.color});
+  const _ThreadReplyPainter({this.context, @required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color ?? Color(0XFFDBDBDB)
+      ..color = color ?? StreamChatTheme.of(context).colorTheme.greyGainsboro
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;

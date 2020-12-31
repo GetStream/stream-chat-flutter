@@ -214,16 +214,18 @@ class _ChannelListViewState extends State<ChannelListView>
                               padding: const EdgeInsets.all(8.0),
                               child: StreamSvgIcon.message(
                                 size: 136,
-                                color: Color(0xffDBDBDB),
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .greyGainsboro,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 'Let’s start chatting!',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .headline,
                               ),
                             ),
                             Padding(
@@ -234,10 +236,14 @@ class _ChannelListViewState extends State<ChannelListView>
                               child: Text(
                                 'How about sending your first message to a friend?',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xff7A7A7A),
-                                ),
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .body
+                                    .copyWith(
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .grey,
+                                    ),
                               ),
                             ),
                           ],
@@ -253,11 +259,14 @@ class _ChannelListViewState extends State<ChannelListView>
                               onPressed: widget.onStartChatPressed,
                               child: Text(
                                 'Start a chat',
-                                style: TextStyle(
-                                  color:
-                                      StreamChatTheme.of(context).accentColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .bodyBold
+                                    .copyWith(
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .accentBlue,
+                                    ),
                               ),
                             ),
                           ),
@@ -334,8 +343,8 @@ class _ChannelListViewState extends State<ChannelListView>
   Shimmer _buildLoadingItem() {
     if (widget.crossAxisCount > 1) {
       return Shimmer.fromColors(
-        baseColor: Color(0xffE5E5E5),
-        highlightColor: Color(0xffffffff),
+        baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+        highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
             SizedBox(height: 4.0),
@@ -363,12 +372,12 @@ class _ChannelListViewState extends State<ChannelListView>
       );
     } else {
       return Shimmer.fromColors(
-        baseColor: Color(0xffE5E5E5),
-        highlightColor: Color(0xffffffff),
+        baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+        highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: ListTile(
           leading: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: StreamChatTheme.of(context).colorTheme.white,
               shape: BoxShape.circle,
             ),
             constraints: BoxConstraints.tightFor(
@@ -380,7 +389,7 @@ class _ChannelListViewState extends State<ChannelListView>
             alignment: Alignment.centerLeft,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: StreamChatTheme.of(context).colorTheme.white,
                 borderRadius: BorderRadius.circular(11),
               ),
               constraints: BoxConstraints.tightFor(
@@ -395,7 +404,7 @@ class _ChannelListViewState extends State<ChannelListView>
                 alignment: Alignment.centerLeft,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: StreamChatTheme.of(context).colorTheme.white,
                     borderRadius: BorderRadius.circular(11),
                   ),
                   constraints: BoxConstraints.tightFor(
@@ -407,7 +416,7 @@ class _ChannelListViewState extends State<ChannelListView>
               Container(
                 margin: const EdgeInsets.only(left: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 constraints: BoxConstraints.tightFor(
@@ -541,9 +550,7 @@ class _ChannelListViewState extends State<ChannelListView>
               );
             } else {
               final backgroundColor =
-                  Theme.of(context).brightness == Brightness.light
-                      ? Color(0xffEBEBEB)
-                      : Color(0xff141414);
+                  StreamChatTheme.of(context).colorTheme.whiteSmoke;
               child = Slidable(
                 enabled: widget.swipeToAction,
                 actionPane: SlidableBehindActionPane(),
@@ -583,7 +590,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     IconSlideAction(
                       color: backgroundColor,
                       iconWidget: StreamSvgIcon.delete(
-                        color: Color(0xFFFF3742),
+                        color: StreamChatTheme.of(context).colorTheme.accentRed,
                       ),
                       onTap: () async {
                         final res = await showConfirmationDialog(
@@ -594,7 +601,9 @@ class _ChannelListViewState extends State<ChannelListView>
                               'Are you sure you want to delete this conversation?',
                           cancelText: 'CANCEL',
                           icon: StreamSvgIcon.delete(
-                            color: Color(0xFFFF3742),
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentRed,
                           ),
                         );
                         if (res == true) {
@@ -604,7 +613,7 @@ class _ChannelListViewState extends State<ChannelListView>
                     ),
                 ],
                 child: Container(
-                  color: StreamChatTheme.of(context).backgroundColor,
+                  color: StreamChatTheme.of(context).colorTheme.whiteSnow,
                   child: ChannelPreview(
                     onLongPress: widget.onChannelLongPress,
                     channel: channel,
@@ -680,7 +689,10 @@ class _ChannelListViewState extends State<ChannelListView>
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Color(0xffd0021B).withAlpha(26),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .accentRed
+                  .withOpacity(.2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(
@@ -702,9 +714,7 @@ class _ChannelListViewState extends State<ChannelListView>
   Widget _separatorBuilder(context, i) {
     return Container(
       height: 1,
-      color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.white.withOpacity(0.1)
-          : Colors.black.withOpacity(0.1),
+      color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.08),
     );
   }
 
