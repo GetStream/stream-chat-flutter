@@ -1,6 +1,6 @@
 name: example
 description: A new Flutter project.
-version: 1.0.102+105
+version: 1.0.103+106
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -22,7 +22,7 @@ dev_dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
-  flutter_launcher_icons: ^0.8.0
+  flutter_launcher_icons: ^0.8.1
   test: any
 
 flutter:
