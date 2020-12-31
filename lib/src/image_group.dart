@@ -1,6 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_options.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/full_screen_media.dart';
@@ -81,12 +79,10 @@ class ImageGroup extends StatelessWidget {
                                       color: Colors.black38,
                                       child: Center(
                                         child: Text(
-                                          '${images.length - 4} +',
+                                          '+ ${images.length - 4}',
                                           style: TextStyle(
-                                            color: StreamChatTheme.of(context)
-                                                .colorTheme
-                                                .white,
-                                            fontSize: 28,
+                                            color: Colors.white,
+                                            fontSize: 26,
                                           ),
                                         ),
                                       ),
