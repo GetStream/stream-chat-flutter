@@ -251,7 +251,7 @@ class MessageActionsModal extends StatelessWidget {
         style: Theme.of(context).textTheme.headline6,
       ),
       leading: StreamSvgIcon.circle_up(
-        color: StreamChatTheme.of(context).accentColor,
+        color: StreamChatTheme.of(context).colorTheme.accentBlue,
       ),
       onTap: () {
         Navigator.pop(context);
