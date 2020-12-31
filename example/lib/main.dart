@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       onGenerateRoute: AppRoutes.generateRoute,
       initialRoute:
           client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,

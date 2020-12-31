@@ -273,6 +273,7 @@ class MessageActionsModal extends StatelessWidget {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
