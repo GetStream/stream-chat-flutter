@@ -333,6 +333,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  height: 0.82,
                 ),
               ),
             ),

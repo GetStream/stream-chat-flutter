@@ -159,30 +159,10 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
 
               return Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StreamChannel(
-                          channel: channel,
-                          child: FullScreenMedia(
-                            mediaAttachments: [
-                              media.keys.toList()[position],
-                            ],
-                            message: media.values.toList()[position],
-                            sentAt: media.values.toList()[position].createdAt,
-                            userName: media.values.toList()[position].user.name,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: FileAttachment(
-                      attachment: media.keys.toList()[position],
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: FileAttachment(
+                    attachment: media.keys.toList()[position],
                   ),
                 ),
               );
