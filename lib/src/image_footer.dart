@@ -104,7 +104,10 @@ class _ImageFooterState extends State<ImageFooter> {
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
-      size: widget.preferredSize,
+      size: Size(
+        MediaQuery.of(context).size.width,
+        MediaQuery.of(context).padding.bottom + widget.preferredSize.height,
+      ),
       child: MediaQuery.removePadding(
         context: context,
         removeTop: true,

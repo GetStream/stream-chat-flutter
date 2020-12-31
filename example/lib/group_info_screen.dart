@@ -32,6 +32,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   bool namedChanged = false;
   String changedName = '';
 
+  int groupMemberListLength;
+
   void _userNameListener() {
     if (_searchController.text == _userNameQuery) {
       return;
@@ -161,78 +163,134 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           );
         }
 
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: snapshot.data.members.length,
-          itemBuilder: (context, position) {
-            return Material(
-              child: InkWell(
-                onTap: () {
-                  var userMember = snapshot.data.members.firstWhere(
-                      (e) => e.user.id == StreamChat.of(context).user.id);
-                  _showUserInfoModal(snapshot.data.members[position].user,
-                      userMember.role == 'owner');
-                },
-                child: Container(
-                  height: 65.0,
-                  child: Column(
-                    children: [
-                      Row(
+        groupMemberListLength ??=
+            snapshot.data.members.length > 6 ? 6 : snapshot.data.members.length;
+
+        return Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: groupMemberListLength,
+              itemBuilder: (context, position) {
+                return Material(
+                  child: InkWell(
+                    onTap: () {
+                      var userMember = snapshot.data.members.firstWhere(
+                          (e) => e.user.id == StreamChat.of(context).user.id);
+                      _showUserInfoModal(snapshot.data.members[position].user,
+                          userMember.role == 'owner');
+                    },
+                    child: Container(
+                      height: 65.0,
+                      child: Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 12.0),
-                            child: UserAvatar(
-                              user: snapshot.data.members[position].user,
-                              constraints: BoxConstraints(
-                                  maxHeight: 40.0, maxWidth: 40.0),
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  snapshot.data.members[position].user.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                          Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 12.0),
+                                child: UserAvatar(
+                                  user: snapshot.data.members[position].user,
+                                  constraints: BoxConstraints(
+                                      maxHeight: 40.0, maxWidth: 40.0),
                                 ),
-                                SizedBox(
-                                  height: 1.0,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      snapshot.data.members[position].user.name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(
+                                      height: 1.0,
+                                    ),
+                                    Text(
+                                      _getLastSeen(
+                                          snapshot.data.members[position].user),
+                                      style: TextStyle(
+                                          color: Colors.black.withOpacity(0.5)),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  _getLastSeen(
-                                      snapshot.data.members[position].user),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  snapshot.data.members[position].role ==
+                                          'owner'
+                                      ? 'Owner'
+                                      : '',
                                   style: TextStyle(
                                       color: Colors.black.withOpacity(0.5)),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              snapshot.data.members[position].role == 'owner'
-                                  ? 'Owner'
-                                  : '',
-                              style: TextStyle(
-                                  color: Colors.black.withOpacity(0.5)),
-                            ),
+                          Container(
+                            height: 1.0,
+                            color: Color(0xffdbdbdb),
                           ),
                         ],
                       ),
-                      Container(
-                        height: 1.0,
-                        color: Color(0xffdbdbdb),
-                      ),
-                    ],
+                    ),
+                  ),
+                  color: Colors.white,
+                );
+              },
+            ),
+            if (groupMemberListLength != snapshot.data.members.length)
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    groupMemberListLength = snapshot.data.members.length;
+                  });
+                },
+                child: Material(
+                  child: Container(
+                    height: 65.0,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 21.0, vertical: 12.0),
+                                child: StreamSvgIcon.down(
+                                  color: Color(0xff7a7a7a),
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${snapshot.data.members.length - groupMemberListLength} more',
+                                      style:
+                                          TextStyle(color: Color(0xff7a7a7a)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 1.0,
+                          color: Color(0xffdbdbdb),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              color: Colors.white,
-            );
-          },
+          ],
         );
       },
       future: _memberQueryFuture,
