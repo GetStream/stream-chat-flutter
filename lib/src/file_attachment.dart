@@ -67,7 +67,8 @@ class _FileAttachmentState extends State<FileAttachment> {
           borderRadius:
               widget.trailing != null ? BorderRadius.circular(16.0) : null,
           border: widget.trailing != null
-              ? Border.fromBorderSide(BorderSide(color: Color(0xFFE6E6E6)))
+              ? Border.fromBorderSide(BorderSide(
+                  color: StreamChatTheme.of(context).colorTheme.greyWhisper))
               : null,
         ),
         child: Row(

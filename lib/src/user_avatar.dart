@@ -16,7 +16,7 @@ class UserAvatar extends StatelessWidget {
     this.borderRadius,
     this.onlineIndicatorAlignment = Alignment.topRight,
     this.selected = false,
-    this.selectionColor = const Color(0xFF006CFF),
+    this.selectionColor,
     this.selectionThickness = 4,
   }) : super(key: key);
 
@@ -70,7 +70,8 @@ class UserAvatar extends StatelessWidget {
         child: Container(
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme.constraints,
-          color: selectionColor,
+          color: selectionColor ??
+              StreamChatTheme.of(context).colorTheme.accentBlue,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,

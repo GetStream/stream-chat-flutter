@@ -55,7 +55,9 @@ class UrlAttachment extends StatelessWidget {
                               .textTheme
                               .bodyBold
                               .copyWith(
-                                color: Color(0xFF006CFF),
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .accentBlue,
                               ),
                         ),
                       ),

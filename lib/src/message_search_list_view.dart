@@ -152,7 +152,10 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Color(0xffd0021B).withAlpha(26),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .accentRed
+                  .withOpacity(.2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Center(

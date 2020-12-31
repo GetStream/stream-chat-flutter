@@ -592,7 +592,10 @@ class _MessageListViewState extends State<MessageListView> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Container(
-              color: Color(0xffd0021B).withAlpha(26),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .accentRed
+                  .withOpacity(.2),
               child: Center(
                 child: Text('Error loading messages'),
               ),

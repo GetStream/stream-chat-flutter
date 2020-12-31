@@ -53,7 +53,7 @@ class ChannelImage extends StatelessWidget {
     this.showOnlineStatus = true,
     this.borderRadius,
     this.selected = false,
-    this.selectionColor = const Color(0xFF006CFF),
+    this.selectionColor,
     this.selectionThickness = 4,
   }) : super(key: key);
 
@@ -105,7 +105,8 @@ class ChannelImage extends StatelessWidget {
                             .constraints,
                     onTap: onTap != null ? (_) => onTap() : null,
                     selected: selected,
-                    selectionColor: selectionColor,
+                    selectionColor: selectionColor ??
+                        StreamChatTheme.of(context).colorTheme.accentBlue,
                     selectionThickness: selectionThickness,
                   );
                 });
@@ -127,7 +128,8 @@ class ChannelImage extends StatelessWidget {
                       .constraints,
               onTap: onTap,
               selected: selected,
-              selectionColor: selectionColor,
+              selectionColor: selectionColor ??
+                  StreamChatTheme.of(context).colorTheme.accentBlue,
               selectionThickness: selectionThickness,
             );
           }
@@ -197,7 +199,8 @@ class ChannelImage extends StatelessWidget {
                         .ownMessageTheme
                         .avatarTheme
                         .constraints,
-                color: selectionColor,
+                color: selectionColor ??
+                    StreamChatTheme.of(context).colorTheme.accentBlue,
                 child: Padding(
                   padding: EdgeInsets.all(selectionThickness),
                   child: child,

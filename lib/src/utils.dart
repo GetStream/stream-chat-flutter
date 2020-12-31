@@ -55,7 +55,8 @@ Future<bool> showConfirmationDialog(
               height: 36.0,
             ),
             Container(
-              color: Color(0xffe6e6e6),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
               height: 1.0,
             ),
             Row(

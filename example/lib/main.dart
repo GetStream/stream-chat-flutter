@@ -25,7 +25,7 @@ void main() async {
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
-    persistenceEnabled: true,
+    persistenceEnabled: false,
   );
 
   if (userId != null) {
@@ -456,7 +456,10 @@ class ChannelPage extends StatelessWidget {
                   right: 0,
                   child: Container(
                     alignment: Alignment.centerLeft,
-                    color: Color(0xffFCFCFC).withOpacity(.9),
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .whiteSnow
+                        .withOpacity(.9),
                     child: TypingIndicator(
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.symmetric(

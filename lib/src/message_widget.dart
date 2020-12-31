@@ -919,7 +919,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     if ((widget.message.status == MessageSendingStatus.FAILED ||
         widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
         widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
-      return Color(0xffd0021B).withOpacity(.1);
+      return StreamChatTheme.of(context).colorTheme.accentRed.withOpacity(.1);
     }
 
     if (widget.message.attachments

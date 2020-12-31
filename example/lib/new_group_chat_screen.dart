@@ -76,7 +76,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   if (_selectedUsers.isNotEmpty)
                     IconButton(
                       icon: StreamSvgIcon.arrow_right(
-                        color: Color(0xFF006CFF),
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                       ),
                       onPressed: () async {
                         final updatedList = await Navigator.pushNamed(

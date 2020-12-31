@@ -121,7 +121,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 padding: const EdgeInsets.all(0),
                 icon: StreamSvgIcon.check(
                   size: 24,
-                  color: _isGroupNameEmpty ? Colors.grey : Color(0xFF006CFF),
+                  color: _isGroupNameEmpty
+                      ? Colors.grey
+                      : StreamChatTheme.of(context).colorTheme.accentBlue,
                 ),
                 onPressed: _isGroupNameEmpty
                     ? null
