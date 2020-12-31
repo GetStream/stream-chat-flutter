@@ -1,6 +1,6 @@
 name: example
 description: A new Flutter project.
-version: 1.0.104+107
+version: 1.0.105+108
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -34,4 +34,5 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icon.png"
+  image_path_android: "assets/android_icon.png"
+  image_path_ios: "assets/ios_icon.png"
