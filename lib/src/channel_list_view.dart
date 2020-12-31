@@ -380,6 +380,10 @@ class _ChannelListViewState extends State<ChannelListView>
               width: 40,
             ),
           ),
+          contentPadding: const EdgeInsets.only(
+            left: 8,
+            right: 8,
+          ),
           title: Align(
             alignment: Alignment.centerLeft,
             child: Container(
@@ -394,6 +398,7 @@ class _ChannelListViewState extends State<ChannelListView>
             ),
           ),
           subtitle: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Align(
                 alignment: Alignment.centerLeft,
