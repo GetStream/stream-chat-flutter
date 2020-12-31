@@ -332,9 +332,10 @@ class MessageActionsModal extends StatelessWidget {
                     ? editMessageInputBuilder(context, message)
                     : MessageInput(
                         editMessage: message,
-                        onMessageSent: (_) {
+                        preMessageSending: (m) {
                           FocusScope.of(context).unfocus();
                           Navigator.pop(context);
+                          return m;
                         },
                       ),
               ),
