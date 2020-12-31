@@ -243,6 +243,12 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
 
+  bool get showBottomRow =>
+      showThreadReplyIndicator ||
+      showUsername ||
+      showTimeStamp ||
+      showInChannel;
+
   @override
   Widget build(BuildContext context) {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
@@ -267,6 +273,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Stack(
+                  clipBehavior: Clip.none,
                   alignment: AlignmentDirectional.bottomStart,
                   children: [
                     Column(
@@ -389,39 +396,29 @@ class _MessageWidgetState extends State<MessageWidget> {
                                           ),
                                         ),
                                       ),
-                                    if (isFailedState)
-                                      Positioned(
-                                        left: widget.reverse ? -6 : null,
-                                        right: widget.reverse ? null : -6,
-                                        bottom: 0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: StreamSvgIcon.error(
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
                                   ],
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        if (showThreadReplyIndicator ||
-                            showUsername ||
-                            showTimeStamp ||
-                            showInChannel)
-                          SizedBox(height: 20.0),
+                        if (showBottomRow) SizedBox(height: 20.0),
                       ],
                     ),
-                    if (showThreadReplyIndicator ||
-                        showUsername ||
-                        showTimeStamp ||
-                        showInChannel)
-                      _buildBottomRow(leftPadding)
+                    if (showBottomRow) _buildBottomRow(leftPadding),
+                    if (isFailedState)
+                      Positioned(
+                        left: widget.reverse ? -3 : null,
+                        right: widget.reverse ? null : -9,
+                        bottom: showBottomRow ? 20 : 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: StreamSvgIcon.error(size: 20),
+                        ),
+                      ),
                   ],
                 ),
               ],
