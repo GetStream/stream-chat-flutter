@@ -129,7 +129,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: StreamSvgIcon.userAdd(
-                    color: StreamChatTheme.of(context).accentColor),
+                    color: StreamChatTheme.of(context).colorTheme.accentBlue),
               ),
             ),
           ),
@@ -356,7 +356,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     padding: const EdgeInsets.only(right: 16.0, left: 8.0),
                     child: InkWell(
                       child: StreamSvgIcon.check(
-                        color: StreamChatTheme.of(context).accentColor,
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                         size: 24.0,
                       ),
                       onTap: () {

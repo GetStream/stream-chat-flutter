@@ -621,7 +621,9 @@ class _ImageFooterState extends State<ImageFooter> {
                         icon: Transform.rotate(
                           angle: -pi / 2,
                           child: StreamSvgIcon.Icon_send_message(
-                            color: StreamChatTheme.of(context).accentColor,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
                           ),
                         ),
                       ),

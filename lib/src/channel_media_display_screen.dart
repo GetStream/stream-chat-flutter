@@ -79,7 +79,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
       body: _buildMediaGrid(),
     );
