@@ -228,7 +228,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool get showTimeStamp =>
       widget.message.createdAt != null && widget.showTimestamp;
 
-  bool get showReadList => widget.readList?.isNotEmpty == true;
+  bool get isMessageRead => widget.readList?.isNotEmpty == true;
 
   bool get showInChannel =>
       widget.showInChannelIndicator && widget.message?.showInChannel == true;
@@ -488,14 +488,14 @@ class _MessageWidgetState extends State<MessageWidget> {
 
       children.addAll([
         if (showSendingIndicator) _buildSendingIndicator(),
-        if (showReadList)
-          SizedBox.fromSize(
-            size: Size((widget.readList.length * 10.0) + 10, 17),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 4.0),
-              child: _buildReadIndicator(),
-            ),
-          ),
+        // if (showReadList)
+        //   SizedBox.fromSize(
+        //     size: Size((widget.readList.length * 10.0) + 10, 17),
+        //     child: Padding(
+        //       padding: const EdgeInsets.only(left: 4.0),
+        //       child: _buildReadIndicator(),
+        //     ),
+        //   ),
         if (showThreadReplyIndicator)
           InkWell(
             onTap: widget.onThreadTap != null ? onThreadTap : null,
@@ -798,14 +798,27 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildSendingIndicator() {
-    return Container(
-      height: widget.messageTheme.createdAt.fontSize + 2,
-      width: widget.messageTheme.createdAt.fontSize + 2,
-      child: SendingIndicator(
-        message: widget.message,
-        allRead: widget.allRead,
-      ),
+    final style = widget.messageTheme.createdAt;
+    Widget child = SendingIndicator(
+      message: widget.message,
+      isMessageRead: isMessageRead,
+      size: style.fontSize,
     );
+    if (isMessageRead) {
+      child = Row(
+        children: [
+          Text(
+            widget.readList.length.toString(),
+            style: style.copyWith(
+              color: StreamChatTheme.of(context).accentColor,
+            ),
+          ),
+          SizedBox(width: 2),
+          child,
+        ],
+      );
+    }
+    return child;
   }
 
   Widget _buildUserAvatar() => Transform(

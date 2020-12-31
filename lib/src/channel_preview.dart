@@ -122,7 +122,11 @@ class ChannelPreview extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 4.0),
                           child: SendingIndicator(
                             message: channel.state.lastMessage,
-                            allRead: channel.state.read
+                            size: StreamChatTheme.of(context)
+                                .channelPreviewTheme
+                                .lastMessageAt
+                                .fontSize,
+                            isMessageRead: channel.state.read
                                     .where((element) => element.lastRead
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
