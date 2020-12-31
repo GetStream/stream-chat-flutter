@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'choose_user_page.dart';
 import 'main.dart';
 import 'notifications_service.dart';
-import 'choose_user_page.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   @override
@@ -34,20 +34,23 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
         elevation: 1,
         centerTitle: true,
+        brightness: Theme.of(context).brightness,
         title: Text(
           'Advanced Options',
-          style: Theme.of(context).textTheme.subtitle1.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: StreamChatTheme.of(context)
+              .textTheme
+              .headlineBold
+              .copyWith(color: StreamChatTheme.of(context).colorTheme.black),
         ),
         leading: IconButton(
           icon: StreamSvgIcon.left(
-            color: Colors.black,
+            color: StreamChatTheme.of(context).colorTheme.black,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -87,7 +90,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     },
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.black,
+                      color: StreamChatTheme.of(context).colorTheme.black,
                     ),
                     decoration: InputDecoration(
                       errorStyle: TextStyle(fontSize: 0),
@@ -95,14 +98,18 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: _apiKeyError != null
-                            ? Color(0xffff3742)
-                            : Colors.black.withOpacity(.5),
+                            ? StreamChatTheme.of(context).colorTheme.accentRed
+                            : StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5),
                       ),
                       border: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      fillColor: Color(0xffF5F5F5),
+                      fillColor:
+                          StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       filled: true,
                       labelText:
                           'Chat API Key ${_apiKeyError != null ? ':$_apiKeyError' : ''}',
@@ -131,7 +138,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       },
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
@@ -140,14 +147,18 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: _userIdError != null
-                              ? Color(0xffff3742)
-                              : Colors.black.withOpacity(.5),
+                              ? StreamChatTheme.of(context).colorTheme.accentRed
+                              : StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
-                        fillColor: Color(0xffF5F5F5),
+                        fillColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
                         filled: true,
                         labelText:
                             'User ID ${_userIdError != null ? ':$_userIdError' : ''}',
@@ -176,7 +187,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       },
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
@@ -185,14 +196,18 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: _userTokenError != null
-                              ? Color(0xffff3742)
-                              : Colors.black.withOpacity(.5),
+                              ? StreamChatTheme.of(context).colorTheme.accentRed
+                              : StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
-                        fillColor: Color(0xffF5F5F5),
+                        fillColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
                         filled: true,
                         labelText:
                             'User Token ${_userTokenError != null ? ':$_userTokenError' : ''}',
@@ -208,13 +223,17 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         labelStyle: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black.withOpacity(.5),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(.5),
                         ),
                         border: UnderlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
-                        fillColor: Color(0xffF5F5F5),
+                        fillColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
                         filled: true,
                         labelText: 'Username (optional)',
                       ),
@@ -224,13 +243,14 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: FlatButton(
-                        color: StreamChatTheme.of(context).accentColor,
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                         minWidth: double.infinity,
                         height: 48,
                         child: Text(
                           'Login',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: StreamChatTheme.of(context).colorTheme.white,
                             fontSize: 16,
                           ),
                         ),
@@ -255,7 +275,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: Colors.white,
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .white,
                                   ),
                                   height: 100,
                                   width: 100,

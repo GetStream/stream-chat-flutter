@@ -1,5 +1,3 @@
-import 'package:example/advanced_options_page.dart';
-import 'package:example/main.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +58,7 @@ class ChooseUserPage extends StatelessWidget {
         (_, value) => value..extraData['image'] = getRandomPicUrl(value));
 
     return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -80,19 +79,12 @@ class ChooseUserPage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 13.0),
               child: Text(
                 'Welcome to Stream Chat',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: StreamChatTheme.of(context).textTheme.title,
               ),
             ),
             Text(
               'Select a user to try the Flutter SDK:',
-              style: TextStyle(
-                fontSize: 14.5,
-                color: Colors.black,
-              ),
+              style: StreamChatTheme.of(context).textTheme.body,
             ),
             Expanded(
               child: Padding(
@@ -120,7 +112,9 @@ class ChooseUserPage extends StatelessWidget {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: Colors.white,
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .white,
                                   ),
                                   height: 100,
                                   width: 100,
@@ -169,9 +163,20 @@ class ChooseUserPage extends StatelessWidget {
                           ),
                           title: Text(
                             user.name,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style:
+                                StreamChatTheme.of(context).textTheme.bodyBold,
                           ),
-                          subtitle: Text('Stream test account'),
+                          subtitle: Text(
+                            'Stream test account',
+                            style: StreamChatTheme.of(context)
+                                .textTheme
+                                .footnote
+                                .copyWith(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .grey,
+                                ),
+                          ),
                           trailing: SvgPicture.asset(
                             'assets/icon_arrow_right.svg',
                             height: 24,
@@ -185,16 +190,26 @@ class ChooseUserPage extends StatelessWidget {
                         },
                         leading: CircleAvatar(
                           child: StreamSvgIcon.settings(
-                            color: Colors.black,
+                            color: StreamChatTheme.of(context).colorTheme.black,
                           ),
-                          backgroundColor:
-                              StreamChatTheme.of(context).secondaryColor,
+                          backgroundColor: StreamChatTheme.of(context)
+                              .colorTheme
+                              .greyWhisper,
                         ),
                         title: Text(
                           'Advanced Options',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: StreamChatTheme.of(context).textTheme.bodyBold,
                         ),
-                        subtitle: Text('Custom settings'),
+                        subtitle: Text(
+                          'Custom settings',
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .footnote
+                              .copyWith(
+                                color:
+                                    StreamChatTheme.of(context).colorTheme.grey,
+                              ),
+                        ),
                         trailing: SvgPicture.asset(
                           'assets/icon_arrow_right.svg',
                           height: 24,

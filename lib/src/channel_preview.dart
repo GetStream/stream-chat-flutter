@@ -50,6 +50,9 @@ class ChannelPreview extends StatelessWidget {
           return Opacity(
             opacity: snapshot.data ? 0.5 : 1,
             child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+              ),
               onTap: () {
                 if (onTap != null) {
                   onTap(channel);
@@ -122,12 +125,16 @@ class ChannelPreview extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 4.0),
                           child: SendingIndicator(
                             message: channel.state.lastMessage,
-                            allRead: channel.state.read
+                            size: StreamChatTheme.of(context)
+                                .channelPreviewTheme
+                                .lastMessageAt
+                                .fontSize,
+                            isMessageRead: channel.state.read
                                     .where((element) => element.lastRead
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
                                     .length ==
-                                (channel.memberCount ?? 0),
+                                ((channel.memberCount ?? 0) - 1),
                           ),
                         );
                       }

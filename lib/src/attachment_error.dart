@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import '../stream_chat_flutter.dart';
+
 class AttachmentError extends StatelessWidget {
   final Attachment attachment;
   final Size size;
@@ -23,12 +25,12 @@ class AttachmentError extends StatelessWidget {
     return Center(
       child: Container(
         width: size?.width,
-        height: size?.height,
-        color: Color(0xffd0021B).withOpacity(.1),
+        height: size?.height ?? 200,
+        color: StreamChatTheme.of(context).colorTheme.accentRed.withOpacity(.1),
         child: Center(
           child: Icon(
             Icons.error_outline,
-            color: Colors.white,
+            color: StreamChatTheme.of(context).colorTheme.black,
           ),
         ),
       ),
