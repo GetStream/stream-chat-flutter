@@ -757,4 +757,29 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.error({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_error.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+
+  factory StreamSvgIcon.circle_up({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_circle_up.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }

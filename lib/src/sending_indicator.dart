@@ -35,15 +35,6 @@ class SendingIndicator extends StatelessWidget {
         size: 8,
       );
     }
-    if (message.status == MessageSendingStatus.FAILED ||
-        message.status == MessageSendingStatus.FAILED_UPDATE ||
-        message.status == MessageSendingStatus.FAILED_DELETE) {
-      return Icon(
-        Icons.error_outline,
-        size: 8,
-      );
-    }
-
     return SizedBox();
   }
 }

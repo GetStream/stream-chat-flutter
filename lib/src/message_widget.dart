@@ -114,6 +114,9 @@ class MessageWidget extends StatefulWidget {
   /// Used in [MessageReactionsModal] and [MessageActionsModal]
   final bool showReactionPickerIndicator;
 
+  /// If true the widget will show the resendMessage indicator
+  final bool showResendMessage;
+
   final List<Read> readList;
 
   /// If true show the users username next to the timestamp of the message
@@ -157,6 +160,7 @@ class MessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
+    this.showResendMessage = true,
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -229,6 +233,16 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool get showInChannel =>
       widget.showInChannelIndicator && widget.message?.showInChannel == true;
 
+  bool get isSendFailed => widget.message.status == MessageSendingStatus.FAILED;
+
+  bool get isUpdateFailed =>
+      widget.message.status == MessageSendingStatus.FAILED_UPDATE;
+
+  bool get isDeleteFailed =>
+      widget.message.status == MessageSendingStatus.FAILED_DELETE;
+
+  bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
+
   @override
   Widget build(BuildContext context) {
     var leftPadding = widget.showUserAvatar != DisplayWidget.gone
@@ -298,9 +312,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                             )
                                           : EdgeInsets.zero,
                                       child: (widget.message.isDeleted &&
-                                              widget.message.status !=
-                                                  MessageSendingStatus
-                                                      .FAILED_DELETE)
+                                              !isFailedState)
                                           ? Transform(
                                               alignment: Alignment.center,
                                               transform: Matrix4.rotationY(
@@ -374,6 +386,21 @@ class _MessageWidgetState extends State<MessageWidget> {
                                               widget.messageTheme
                                                   .reactionsBorderColor,
                                             ),
+                                          ),
+                                        ),
+                                      ),
+                                    if (isFailedState)
+                                      Positioned(
+                                        left: widget.reverse ? -6 : null,
+                                        right: widget.reverse ? null : -6,
+                                        bottom: 0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: StreamSvgIcon.error(
+                                            size: 20,
                                           ),
                                         ),
                                       ),
@@ -619,14 +646,19 @@ class _MessageWidgetState extends State<MessageWidget> {
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
-              showCopyMessage: widget.message.text?.trim()?.isNotEmpty == true,
+              showResendMessage:
+                  widget.showResendMessage && (isSendFailed || isUpdateFailed),
+              showCopyMessage: !isFailedState &&
+                  widget.message.text?.trim()?.isNotEmpty == true,
               showEditMessage: widget.showEditMessage &&
+                  !isDeleteFailed &&
                   widget.message.attachments
                           ?.any((element) => element.type == 'giphy') !=
                       true,
               showReactions: widget.showReactions,
-              showReply:
-                  widget.showThreadReplyIndicator && widget.onThreadTap != null,
+              showReply: widget.showThreadReplyIndicator &&
+                  !isFailedState &&
+                  widget.onThreadTap != null,
             ),
           );
         });
@@ -729,7 +761,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
     return GestureDetector(
-      onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
       child: Material(
         color: _getBackgroundColor(),
@@ -744,17 +775,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             child: Transform(
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
               alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  getFailedMessageWidget(
-                    context,
-                    padding: const EdgeInsets.all(8.0),
-                  ),
-                  attachmentWidget,
-                ],
-              ),
+              child: attachmentWidget,
             ),
           ),
         ),
@@ -809,55 +830,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         ),
       );
 
-  Widget getFailedMessageWidget(
-    BuildContext context, {
-    EdgeInsetsGeometry padding,
-  }) {
-    Widget failedWidget;
-    if (widget.message.status == MessageSendingStatus.FAILED) {
-      failedWidget = Text(
-        'MESSAGE FAILED · CLICK TO TRY AGAIN',
-        style: widget.messageTheme.messageText.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-      );
-    }
-    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
-      failedWidget = Text(
-        'MESSAGE UPDATE FAILED · CLICK TO TRY AGAIN',
-        style: widget.messageTheme.messageText.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-      );
-    }
-    if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
-      failedWidget = Text(
-        'MESSAGE DELETE FAILED · CLICK TO TRY AGAIN',
-        style: widget.messageTheme.messageText.copyWith(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(.5)
-              : Colors.black.withOpacity(.5),
-          fontSize: 11,
-        ),
-      );
-    }
-
-    if (failedWidget != null) {
-      return Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: failedWidget,
-      );
-    }
-
-    return SizedBox();
-  }
-
   Widget _buildTextBubble(BuildContext context) {
     Widget child = Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
@@ -867,26 +839,20 @@ class _MessageWidgetState extends State<MessageWidget> {
         children: [
           Padding(
             padding: widget.textPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                getFailedMessageWidget(context),
-                widget.textBuilder != null
-                    ? widget.textBuilder(context, widget.message)
-                    : MessageText(
-                        onLinkTap: widget.onLinkTap,
-                        message: widget.message,
-                        onMentionTap: widget.onMentionTap,
-                        messageTheme: isOnlyEmoji
-                            ? widget.messageTheme.copyWith(
-                                messageText:
-                                    widget.messageTheme.messageText.copyWith(
-                                fontSize: 40,
-                              ))
-                            : widget.messageTheme,
-                      ),
-              ],
-            ),
+            child: widget.textBuilder != null
+                ? widget.textBuilder(context, widget.message)
+                : MessageText(
+                    onLinkTap: widget.onLinkTap,
+                    message: widget.message,
+                    onMentionTap: widget.onMentionTap,
+                    messageTheme: isOnlyEmoji
+                        ? widget.messageTheme.copyWith(
+                            messageText:
+                                widget.messageTheme.messageText.copyWith(
+                            fontSize: 40,
+                          ))
+                        : widget.messageTheme,
+                  ),
           ),
           if (widget.message.attachments
                   ?.any((element) => element.ogScrapeUrl != null) ==
@@ -896,7 +862,6 @@ class _MessageWidgetState extends State<MessageWidget> {
       ),
     );
     return GestureDetector(
-      onTap: () => retryMessage(context),
       onLongPress: () => onLongPress(context),
       child: child,
     );
@@ -907,12 +872,6 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
   Color _getBackgroundColor() {
-    if ((widget.message.status == MessageSendingStatus.FAILED ||
-        widget.message.status == MessageSendingStatus.FAILED_UPDATE ||
-        widget.message.status == MessageSendingStatus.FAILED_DELETE)) {
-      return Color(0xffd0021B).withOpacity(.1);
-    }
-
     if (widget.message.attachments
             ?.any((element) => element.ogScrapeUrl != null) ==
         true) {

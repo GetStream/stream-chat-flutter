@@ -22,6 +22,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool showDeleteMessage;
   final bool showCopyMessage;
   final bool showEditMessage;
+  final bool showResendMessage;
   final bool showReply;
   final bool reverse;
   final ShapeBorder messageShape;
@@ -37,6 +38,7 @@ class MessageActionsModal extends StatelessWidget {
     this.onThreadTap,
     this.showCopyMessage = true,
     this.showReply = true,
+    this.showResendMessage = true,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -159,6 +161,8 @@ class MessageActionsModal extends StatelessWidget {
                                               message.status == null) &&
                                           message.parentId == null)
                                         _buildReplyButton(context),
+                                      if (showResendMessage)
+                                        _buildResendMessage(context),
                                       if (showEditMessage)
                                         _buildEditMessage(context),
                                       if (showDeleteMessage)
@@ -183,9 +187,10 @@ class MessageActionsModal extends StatelessWidget {
   }
 
   Widget _buildDeleteButton(BuildContext context) {
+    final isDeleteFailed = message.status == MessageSendingStatus.FAILED_DELETE;
     return ListTile(
       title: Text(
-        'Delete message',
+        isDeleteFailed ? 'Retry deleting message' : 'Delete message',
         style:
             Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
       ),
@@ -230,6 +235,29 @@ class MessageActionsModal extends StatelessWidget {
       onTap: () async {
         Navigator.pop(context);
         _showEditBottomSheet(context);
+      },
+    );
+  }
+
+  Widget _buildResendMessage(BuildContext context) {
+    final isUpdateFailed = message.status == MessageSendingStatus.FAILED_UPDATE;
+    return ListTile(
+      title: Text(
+        isUpdateFailed ? 'Resend edited message' : 'Resend',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: StreamSvgIcon.circle_up(
+        color: StreamChatTheme.of(context).accentColor,
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        final client = StreamChat.of(context).client;
+        final channel = StreamChannel.of(context).channel;
+        if (isUpdateFailed) {
+          client.updateMessage(message, channel.cid);
+        } else {
+          channel.sendMessage(message);
+        }
       },
     );
   }
