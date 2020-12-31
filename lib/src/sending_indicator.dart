@@ -4,27 +4,29 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Used to show the sending status of the message
 class SendingIndicator extends StatelessWidget {
   final Message message;
-  final bool allRead;
+  final bool isMessageRead;
+  final double size;
 
   const SendingIndicator({
     Key key,
     this.message,
-    this.allRead = false,
+    this.isMessageRead = false,
+    this.size = 12,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (allRead) {
+    if (isMessageRead) {
       return Icon(
-        Icons.done_all,
-        size: 8,
+        Icons.done_all_rounded,
+        size: size,
         color: StreamChatTheme.of(context).colorTheme.accentBlue,
       );
     }
     if (message.status == MessageSendingStatus.SENT || message.status == null) {
       return Icon(
         Icons.done,
-        size: 8,
+        size: size,
         color: IconTheme.of(context).color.withOpacity(0.5),
       );
     }
@@ -32,18 +34,9 @@ class SendingIndicator extends StatelessWidget {
         message.status == MessageSendingStatus.UPDATING) {
       return Icon(
         Icons.access_time,
-        size: 8,
+        size: size,
       );
     }
-    if (message.status == MessageSendingStatus.FAILED ||
-        message.status == MessageSendingStatus.FAILED_UPDATE ||
-        message.status == MessageSendingStatus.FAILED_DELETE) {
-      return Icon(
-        Icons.error_outline,
-        size: 8,
-      );
-    }
-
     return SizedBox();
   }
 }
