@@ -172,7 +172,7 @@ class MessageActionsModal extends StatelessWidget {
                                         _buildReplyButton(context),
                                       if (showThreadReply &&
                                           (message.status ==
-                                              MessageSendingStatus.SENT ||
+                                                  MessageSendingStatus.SENT ||
                                               message.status == null) &&
                                           message.parentId == null)
                                         _buildThreadReplyButton(context),
