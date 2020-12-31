@@ -130,9 +130,7 @@ class MessageActionsModal extends StatelessWidget {
                             ),
                           );
                         }),
-                    SizedBox(
-                      height: 8,
-                    ),
+                    SizedBox(height: 8),
                     TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
                         duration: Duration(milliseconds: 300),

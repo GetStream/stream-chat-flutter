@@ -110,6 +110,7 @@ class MessageReactionsModal extends StatelessWidget {
                                 translateUserAvatar: false,
                                 showSendingIndicator: DisplayWidget.gone,
                                 shape: messageShape,
+                                showInChannelIndicator: false,
                                 showReactionPickerIndicator: showReactions &&
                                     (message.status ==
                                             MessageSendingStatus.SENT ||
@@ -118,9 +119,7 @@ class MessageReactionsModal extends StatelessWidget {
                             ),
                           );
                         }),
-                    SizedBox(
-                      height: 16,
-                    ),
+                    SizedBox(height: 8),
                     if (message.latestReactions?.isNotEmpty == true)
                       _buildReactionCard(context),
                   ],
