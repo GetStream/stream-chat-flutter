@@ -770,7 +770,6 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-
   factory StreamSvgIcon.circle_up({
     double size,
     Color color,
