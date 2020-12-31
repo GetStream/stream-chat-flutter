@@ -73,7 +73,7 @@ class ChannelBottomSheet extends StatelessWidget {
               ListTile(
                 leading: StreamSvgIcon.userRemove(
                   size: 24,
-                  color: Color(0xff7A7A7A),
+                  color: StreamChatTheme.of(context).colorTheme.grey,
                 ),
                 title: Text(
                   'Leave Group',
@@ -106,13 +106,13 @@ class ChannelBottomSheet extends StatelessWidget {
                 ?.role))
               ListTile(
                 leading: StreamSvgIcon.delete(
-                  color: Color(0xFFFF3742),
+                  color: StreamChatTheme.of(context).colorTheme.accentRed,
                   size: 24,
                 ),
                 title: Text(
                   'Delete chat',
                   style: TextStyle(
-                    color: Color(0xFFFF3742),
+                    color: StreamChatTheme.of(context).colorTheme.accentRed,
                   ),
                 ),
                 onTap: () async {
@@ -124,7 +124,7 @@ class ChannelBottomSheet extends StatelessWidget {
                         'Are you sure you want to delete this conversation?',
                     cancelText: 'CANCEL',
                     icon: StreamSvgIcon.delete(
-                      color: Colors.red,
+                      color: StreamChatTheme.of(context).colorTheme.accentRed,
                     ),
                   );
                   var channel = StreamChannel.of(context).channel;

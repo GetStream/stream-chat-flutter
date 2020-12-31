@@ -1,4 +1,3 @@
-import 'package:emojis/emojis.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
@@ -21,7 +20,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     return Scaffold(
-      backgroundColor: Color(0xFFe6e6e6),
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       body: ListView(
         children: [
           _buildUserHeader(),
@@ -47,7 +46,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
   Widget _buildUserHeader() {
     return Material(
-      color: Colors.white,
+      color: StreamChatTheme.of(context).colorTheme.whiteSnow,
       child: SafeArea(
         child: Stack(
           children: [
@@ -81,7 +80,11 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                     child: Text(
                       widget.user.name,
                       style: TextStyle(
-                          color: Colors.black.withOpacity(0.5), fontSize: 16.0),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5),
+                          fontSize: 16.0),
                     ),
                   ),
                   onTap: () {},
@@ -92,7 +95,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               top: 21,
               left: 16,
               child: InkWell(
-                child: StreamSvgIcon.left(),
+                child: StreamSvgIcon.left(
+                  color: StreamChatTheme.of(context).colorTheme.black,
+                ),
                 onTap: () {
                   Navigator.of(context).pop();
                 },
@@ -113,7 +118,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   title: 'Notifications',
         //   leading: StreamSvgIcon.Icon_notification(
         //     size: 24.0,
-        //     color: Colors.black.withOpacity(0.5),
+        //     color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
         //   ),
         //   trailing: CupertinoSwitch(
         //     value: true,
@@ -128,7 +133,10 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 title: 'Mute user',
                 leading: StreamSvgIcon.mute(
                   size: 23.0,
-                  color: Colors.black.withOpacity(0.5),
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5),
                 ),
                 trailing: snapshot.data == null
                     ? CircularProgressIndicator()
@@ -149,7 +157,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         //   title: 'Block User',
         //   leading: StreamSvgIcon.Icon_user_delete(
         //     size: 24.0,
-        //     color: Colors.black.withOpacity(0.5),
+        //     color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
         //   ),
         //   trailing: CupertinoSwitch(
         //     value: widget.user.banned,
@@ -167,7 +175,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           title: 'Photos & Videos',
           leading: StreamSvgIcon.pictures(
             size: 32.0,
-            color: Colors.black.withOpacity(0.5),
+            color:
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
@@ -179,7 +188,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           title: 'Files',
           leading: StreamSvgIcon.files(
             size: 32.0,
-            color: Colors.black.withOpacity(0.5),
+            color:
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
@@ -191,7 +201,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           title: 'Shared groups',
           leading: StreamSvgIcon.Icon_group(
             size: 24.0,
-            color: Colors.black.withOpacity(0.5),
+            color:
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
@@ -208,7 +219,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 
   Widget _buildDeleteListTile() {
     return _OptionListTile(
-      title: 'Delete',
+      title: 'Delete conversation',
       leading: StreamSvgIcon.delete(
         color: Colors.red,
         size: 24.0,
@@ -248,12 +259,20 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       if (otherMember.online) {
         alternativeWidget = Text(
           'Online',
-          style: TextStyle(color: Colors.black.withOpacity(0.5)),
+          style: TextStyle(
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .black
+                  .withOpacity(0.5)),
         );
       } else {
         alternativeWidget = Text(
           'Last seen ${Jiffy(otherMember.lastActive).fromNow()}',
-          style: TextStyle(color: Colors.black.withOpacity(0.5)),
+          style: TextStyle(
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .black
+                  .withOpacity(0.5)),
         );
       }
     }
@@ -272,10 +291,10 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
               ),
               child: Material(
                 shape: CircleBorder(),
-                color: Color(0xff20E070),
+                color: StreamChatTheme.of(context).colorTheme.accentGreen,
               ),
             ),
-            color: Colors.white,
+            color: StreamChatTheme.of(context).colorTheme.white,
           ),
         alternativeWidget,
       ],
@@ -303,11 +322,11 @@ class _OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: Color(0xffe6e6e6),
+          color: StreamChatTheme.of(context).colorTheme.white,
           height: 2.0,
         ),
         Material(
-          color: Colors.white,
+          color: StreamChatTheme.of(context).colorTheme.whiteSnow,
           child: Container(
             height: 56.0,
             child: InkWell(
@@ -365,14 +384,16 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
     var chat = StreamChat.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(
           'Shared Groups',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
+          style: TextStyle(
+              color: StreamChatTheme.of(context).colorTheme.black,
+              fontSize: 16.0),
         ),
         leading: Center(
           child: InkWell(
@@ -381,7 +402,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             },
             child: Container(
               child: StreamSvgIcon.left(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
               width: 24.0,
@@ -389,7 +410,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
       body: FutureBuilder<List<Channel>>(
         future: chat.client.queryChannels(
@@ -488,7 +509,11 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       '${channel.memberCount} members',
-                      style: TextStyle(color: Colors.black.withOpacity(0.5)),
+                      style: TextStyle(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5)),
                     ),
                   )
                 ],
@@ -496,7 +521,8 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             ),
             Container(
               height: 1.0,
-              color: Color(0xffe6e6e6),
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
             ),
           ],
         );
@@ -509,14 +535,16 @@ class _MediaDisplayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(
           'Photos & Videos',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
+          style: TextStyle(
+              color: StreamChatTheme.of(context).colorTheme.black,
+              fontSize: 16.0),
         ),
         leading: Center(
           child: InkWell(
@@ -525,7 +553,7 @@ class _MediaDisplayScreen extends StatelessWidget {
             },
             child: Container(
               child: StreamSvgIcon.left(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
               width: 24.0,
@@ -533,7 +561,7 @@ class _MediaDisplayScreen extends StatelessWidget {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
     );
   }
@@ -543,14 +571,16 @@ class _FileDisplayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
         centerTitle: true,
         title: Text(
           'Files',
-          style: TextStyle(color: Colors.black, fontSize: 16.0),
+          style: TextStyle(
+              color: StreamChatTheme.of(context).colorTheme.black,
+              fontSize: 16.0),
         ),
         leading: Center(
           child: InkWell(
@@ -559,7 +589,7 @@ class _FileDisplayScreen extends StatelessWidget {
             },
             child: Container(
               child: StreamSvgIcon.left(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
               width: 24.0,
@@ -567,7 +597,7 @@ class _FileDisplayScreen extends StatelessWidget {
             ),
           ),
         ),
-        backgroundColor: StreamChatTheme.of(context).primaryColor,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
     );
   }

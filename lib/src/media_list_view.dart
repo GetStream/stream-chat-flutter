@@ -1,10 +1,13 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'dart:ui' as ui;
+
+import '../stream_chat_flutter.dart';
 
 extension on Duration {
   String format() {
@@ -80,7 +83,10 @@ class _MediaListViewState extends State<MediaListView> {
                             ? 1.0
                             : 0.0,
                         child: Container(
-                          color: Colors.black.withOpacity(0.5),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5),
                           alignment: Alignment.topRight,
                           padding: const EdgeInsets.only(
                             top: 8,
@@ -88,10 +94,12 @@ class _MediaListViewState extends State<MediaListView> {
                           ),
                           child: CircleAvatar(
                             radius: 12,
-                            backgroundColor: Colors.white,
+                            backgroundColor:
+                                StreamChatTheme.of(context).colorTheme.white,
                             child: StreamSvgIcon.check(
                               size: 24,
-                              color: Colors.black,
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
                             ),
                           ),
                         ),
@@ -113,7 +121,7 @@ class _MediaListViewState extends State<MediaListView> {
                       child: Text(
                         media.videoDuration.format(),
                         style: TextStyle(
-                          color: Colors.white,
+                          color: StreamChatTheme.of(context).colorTheme.white,
                         ),
                       ),
                     ),
@@ -141,7 +149,15 @@ class _MediaListViewState extends State<MediaListView> {
   void _getMedia() async {
     final assetList = await PhotoManager.getAssetPathList(
       hasAll: true,
-    ).then((value) => value.singleWhere((element) => element.isAll));
+    ).then((value) {
+      if (value?.isNotEmpty == true) {
+        return value.singleWhere((element) => element.isAll);
+      }
+    });
+
+    if (assetList == null) {
+      return;
+    }
 
     final media = await assetList.getAssetListPaged(_currentPage, 50);
 

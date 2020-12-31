@@ -50,9 +50,10 @@ class MyApp extends StatelessWidget {
         client: client,
         streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
           ownMessageTheme: MessageTheme(
-            messageBackgroundColor: Colors.black,
+            messageBackgroundColor:
+                StreamChatTheme.of(context).colorTheme.black,
             messageText: TextStyle(
-              color: Colors.white,
+              color: StreamChatTheme.of(context).colorTheme.white,
             ),
             avatarTheme: AvatarTheme(
               borderRadius: BorderRadius.circular(8),

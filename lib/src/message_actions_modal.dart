@@ -71,7 +71,7 @@ class MessageActionsModal extends StatelessWidget {
                 sigmaY: 10.8731,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withOpacity(.2),
               ),
             ),
           ),
@@ -146,6 +146,9 @@ class MessageActionsModal extends StatelessWidget {
                                 horizontal: 48.0,
                               ),
                               child: Material(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .whiteSnow,
                                 clipBehavior: Clip.hardEdge,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -248,7 +251,7 @@ class MessageActionsModal extends StatelessWidget {
         style: Theme.of(context).textTheme.headline6,
       ),
       leading: StreamSvgIcon.circle_up(
-        color: StreamChatTheme.of(context).accentColor,
+        color: StreamChatTheme.of(context).colorTheme.accentBlue,
       ),
       onTap: () {
         Navigator.pop(context);
@@ -270,6 +273,7 @@ class MessageActionsModal extends StatelessWidget {
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(32),
