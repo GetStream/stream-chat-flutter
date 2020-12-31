@@ -110,7 +110,10 @@ class MessageReactionsModal extends StatelessWidget {
                                 translateUserAvatar: false,
                                 showSendingIndicator: DisplayWidget.gone,
                                 shape: messageShape,
-                                showReactionPickerIndicator: true,
+                                showReactionPickerIndicator: showReactions &&
+                                    (message.status ==
+                                            MessageSendingStatus.SENT ||
+                                        message.status == null),
                               ),
                             ),
                           );
