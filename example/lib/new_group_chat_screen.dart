@@ -50,14 +50,15 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
-        body: NestedScrollView(
+    return Scaffold(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      body: SafeArea(
+        child: NestedScrollView(
           floatHeaderSlivers: true,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
+                brightness: Theme.of(context).brightness,
                 pinned: true,
                 forceElevated: true,
                 elevation: 1,

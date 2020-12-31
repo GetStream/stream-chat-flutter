@@ -121,6 +121,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: AppBar(
+        brightness: Theme.of(context).brightness,
         elevation: 0,
         backgroundColor: StreamChatTheme.of(context).colorTheme.white,
         leading: const StreamBackButton(),
