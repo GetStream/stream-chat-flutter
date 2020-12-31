@@ -162,12 +162,18 @@ class ChannelPreview extends StatelessWidget {
         String stringDate;
         final now = DateTime.now();
 
-        if (now.year != lastMessageAt.year ||
-            now.month != lastMessageAt.month ||
-            now.day != lastMessageAt.day) {
-          stringDate = Jiffy(lastMessageAt.toLocal()).format('dd/MM/yyyy');
-        } else {
+        var startOfDay = DateTime(now.year, now.month, now.day);
+
+        if (lastMessageAt.millisecondsSinceEpoch >=
+            startOfDay.millisecondsSinceEpoch) {
           stringDate = Jiffy(lastMessageAt.toLocal()).format('HH:mm');
+        } else if (lastMessageAt.millisecondsSinceEpoch >=
+            startOfDay.subtract(Duration(days: 1)).millisecondsSinceEpoch) {
+          stringDate = 'Yesterday';
+        } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
+          stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
+        } else {
+          stringDate = Jiffy(lastMessageAt.toLocal()).format('dd/MM/yyyy');
         }
 
         return Text(

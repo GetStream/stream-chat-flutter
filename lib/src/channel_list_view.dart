@@ -567,7 +567,27 @@ class _ChannelListViewState extends State<ChannelListView>
                         context: context,
                         builder: (context) {
                           return StreamChannel(
-                            child: ChannelBottomSheet(),
+                            child: ChannelBottomSheet(
+                              onViewInfoTap: () {
+                                if (channel.memberCount == 2 &&
+                                    channel.isDistinct) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => StreamChannel(
+                                        channel: channel,
+                                        child: ChatInfoScreen(
+                                          user:
+                                              channel.state.members.first.user,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                // TODO: Add group screen
+                              },
+                            ),
                             channel: channel,
                           );
                         },
