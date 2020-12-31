@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'stream_chat_theme.dart';
+
 ///
 class Swipeable extends StatefulWidget {
   final Widget child;
@@ -139,7 +141,9 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.black.withOpacity(0.08),
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
                       ),
                     ),
                     child: widget.backgroundIcon,

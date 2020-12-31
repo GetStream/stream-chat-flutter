@@ -231,7 +231,8 @@ class MessageInputState extends State<MessageInput> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: StreamSvgIcon.reply(
-                      color: Colors.black.withOpacity(0.2),
+                      color:
+                          StreamChatTheme.of(context).colorTheme.greyGainsboro,
                     ),
                   ),
                   Text(
@@ -263,7 +264,7 @@ class MessageInputState extends State<MessageInput> {
     );
     if (widget.editMessage == null) {
       child = Material(
-        color: Colors.white,
+        color: StreamChatTheme.of(context).colorTheme.white,
         elevation: 8,
         child: child,
       );

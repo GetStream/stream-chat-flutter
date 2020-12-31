@@ -131,9 +131,11 @@ class ReplyToMessageWidget extends StatelessWidget {
         minHeight: 48.0,
       ),
       decoration: BoxDecoration(
-        color: _getBackgroundColor(),
+        color: _getBackgroundColor(context),
         border: showBorder
-            ? Border.all(color: Colors.black.withOpacity(0.08))
+            ? Border.all(
+                color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+              )
             : null,
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(12),
@@ -232,9 +234,7 @@ class ReplyToMessageWidget extends StatelessWidget {
   ShapeBorder _getDefaultShape(BuildContext context) {
     return RoundedRectangleBorder(
       side: BorderSide(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white.withAlpha(24)
-            : Colors.black.withAlpha(24),
+        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
       ),
       borderRadius: BorderRadius.circular(8),
     );
@@ -308,9 +308,9 @@ class ReplyToMessageWidget extends StatelessWidget {
     };
   }
 
-  Color _getBackgroundColor() {
+  Color _getBackgroundColor(BuildContext context) {
     if (_containsScrapeUrl) {
-      return Color(0xFFE9F2FF);
+      return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
     return messageTheme.messageBackgroundColor;
   }

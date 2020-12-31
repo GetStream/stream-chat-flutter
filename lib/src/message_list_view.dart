@@ -825,7 +825,7 @@ class _MessageListViewState extends State<MessageListView> {
       child = Swipeable(
         onSwipeEnd: () => widget.onMessageSwiped(message),
         backgroundIcon: StreamSvgIcon.reply(
-          color: StreamChatTheme.of(context).accentColor,
+          color: StreamChatTheme.of(context).colorTheme.accentBlue,
         ),
         child: child,
       );
