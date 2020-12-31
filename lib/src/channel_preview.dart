@@ -130,11 +130,14 @@ class ChannelPreview extends StatelessWidget {
                                 .lastMessageAt
                                 .fontSize,
                             isMessageRead: channel.state.read
-                                    .where((element) => element.lastRead
+                                    ?.where((element) =>
+                                        element.user.id !=
+                                        channel.client.state.user.id)
+                                    ?.where((element) => element.lastRead
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
-                                    .length ==
-                                ((channel.memberCount ?? 0) - 1),
+                                    ?.isNotEmpty ==
+                                true,
                           ),
                         );
                       }
