@@ -373,38 +373,12 @@ class _ChannelListPageState extends State<ChannelListPage> {
                               limit: 20,
                             ),
                             channelWidget: ChannelPage(),
-                            onChannelLongPress: (channel) {
-                              _showChannelDetailsModal(channel);
-                            },
                           ),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  void _showChannelDetailsModal(Channel channel) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return StreamChannel(
-            child: ChannelActionsModal(
-              onViewInfoTap: () {
-                // TODO: Go to group info screen when PR is merged
-              },
-            ),
-            channel: channel);
-      },
-      isScrollControlled: true,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
         ),
       ),
     );
