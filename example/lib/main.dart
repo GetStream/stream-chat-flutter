@@ -60,7 +60,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
+      themeMode:
+          WidgetsBinding.instance.window.platformBrightness == Brightness.light
+              ? ThemeMode.light
+              : ThemeMode.dark,
       onGenerateRoute: AppRoutes.generateRoute,
       initialRoute:
           client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,

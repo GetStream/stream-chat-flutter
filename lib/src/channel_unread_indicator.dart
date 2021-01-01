@@ -19,6 +19,7 @@ class ChannelUnreadIndicator extends StatelessWidget {
         if (!snapshot.hasData || snapshot.data == 0) {
           return SizedBox();
         }
+
         return Material(
           borderRadius: BorderRadius.circular(8),
           color: StreamChatTheme.of(context)
@@ -33,7 +34,7 @@ class ChannelUnreadIndicator extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                '${snapshot.data}',
+                '${snapshot.data > 99 ? '99+' : snapshot.data}',
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.white,

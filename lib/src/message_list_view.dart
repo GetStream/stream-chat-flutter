@@ -186,10 +186,10 @@ class _MessageListViewState extends State<MessageListView> {
   bool _showScrollToBottom = false;
   ItemPositionsListener _itemPositionListener;
   int _messageListLength;
+  StreamChannelState streamChannel;
 
   int get _initialIndex {
     if (widget.initialScrollIndex != null) return widget.initialScrollIndex;
-    final streamChannel = StreamChannel.of(context);
     if (streamChannel.initialMessageId != null) {
       final messages = streamChannel.channel.state.messages;
       final totalMessages = messages.length;
@@ -209,11 +209,10 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   bool _isInitialMessage(String id) {
-    final streamChannel = StreamChannel.of(context);
     return streamChannel.initialMessageId == id;
   }
 
-  bool get _upToDate => StreamChannel.of(context).channel.state.isUpToDate;
+  bool get _upToDate => streamChannel.channel.state.isUpToDate;
 
   bool _topPaginationActive = false;
   bool _bottomPaginationActive = false;
@@ -229,270 +228,259 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) {
-    final streamChannel = StreamChannel.of(context);
-
     final messagesStream = widget.parentMessage != null
         ? streamChannel.channel.state.threadsStream
             .where((threads) => threads.containsKey(widget.parentMessage.id))
             .map((threads) => threads[widget.parentMessage.id])
         : streamChannel.channel.state?.messagesStream;
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (!_upToDate) {
-          await streamChannel.reloadChannel();
-        }
-        return true;
-      },
-      child: StreamBuilder<List<Message>>(
-          stream: messagesStream?.map((messages) => messages
-              ?.where((e) =>
-                  !e.isDeleted ||
-                  (e.isDeleted &&
-                      e.user.id == streamChannel.channel.client.state.user.id))
-              ?.toList()),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+    return StreamBuilder<List<Message>>(
+        stream: messagesStream?.map((messages) => messages
+            ?.where((e) =>
+                !e.isDeleted ||
+                (e.isDeleted &&
+                    e.user.id == streamChannel.channel.client.state.user.id))
+            ?.toList()),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: const CircularProgressIndicator(),
+            );
+          }
+
+          final messageList = snapshot.data?.reversed?.toList() ?? [];
+          if (messageList.isEmpty) {
+            if (_upToDate) {
               return Center(
-                child: const CircularProgressIndicator(),
+                child: Text(
+                  'No chats here yet...',
+                  style: StreamChatTheme.of(context)
+                      .textTheme
+                      .footnote
+                      .copyWith(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(.5)),
+                ),
               );
             }
+          } else {
+            messages = messageList;
+          }
 
-            final messageList = snapshot.data?.reversed?.toList() ?? [];
-            if (messageList.isEmpty) {
-              if (_upToDate) {
-                return Center(
-                  child: Text(
-                    'No chats here yet...',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .footnote
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(.5)),
-                  ),
-                );
-              }
-            } else {
-              messages = messageList;
-            }
+          final newMessagesListLength = messages.length;
 
-            final newMessagesListLength = messages.length;
-
-            if (_messageListLength != null) {
-              if (_bottomPaginationActive || (_inBetweenList && _upToDate)) {
-                if (_itemPositionListener.itemPositions.value?.isNotEmpty ==
-                    true) {
-                  final first = _itemPositionListener.itemPositions.value.first;
-                  final diff = newMessagesListLength - _messageListLength;
-                  if (diff > 0) {
-                    initialIndex = first.index + diff;
-                    initialAlignment = first.itemLeadingEdge;
-                  }
+          if (_messageListLength != null) {
+            if (_bottomPaginationActive || (_inBetweenList && _upToDate)) {
+              if (_itemPositionListener.itemPositions.value?.isNotEmpty ==
+                  true) {
+                final first = _itemPositionListener.itemPositions.value.first;
+                final diff = newMessagesListLength - _messageListLength;
+                if (diff > 0) {
+                  initialIndex = first.index + diff;
+                  initialAlignment = first.itemLeadingEdge;
                 }
-              } else if (!_topPaginationActive && _upToDate) {
-                // Reset the index in-case we send any new message
-                initialIndex = 0;
-                initialAlignment = 0;
               }
+            } else if (!_topPaginationActive && _upToDate) {
+              // Reset the index in-case we send any new message
+              initialIndex = 0;
+              initialAlignment = 0;
             }
+          }
 
-            _messageListLength = newMessagesListLength;
+          _messageListLength = newMessagesListLength;
 
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                LazyLoadScrollView(
-                  onStartOfPage: () async {
-                    _inBetweenList = false;
-                    if (!_upToDate) {
-                      _topPaginationActive = false;
-                      _bottomPaginationActive = true;
-                      return _paginateData(
-                        streamChannel,
-                        QueryDirection.bottom,
-                      );
-                    }
-                  },
-                  onEndOfPage: () async {
-                    _inBetweenList = false;
-                    _topPaginationActive = true;
-                    _bottomPaginationActive = false;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              LazyLoadScrollView(
+                onStartOfPage: () async {
+                  _inBetweenList = false;
+                  if (!_upToDate) {
+                    _topPaginationActive = false;
+                    _bottomPaginationActive = true;
                     return _paginateData(
                       streamChannel,
-                      QueryDirection.top,
+                      QueryDirection.bottom,
                     );
-                  },
-                  onInBetweenOfPage: () {
-                    _inBetweenList = true;
-                  },
-                  child: ScrollablePositionedList.builder(
-                    key: ValueKey(initialIndex + initialAlignment),
-                    itemPositionsListener: _itemPositionListener,
-                    addAutomaticKeepAlives: true,
-                    initialScrollIndex: initialIndex ?? 0,
-                    initialAlignment: initialAlignment ?? 0,
-                    physics: widget.scrollPhysics,
-                    itemScrollController: _scrollController,
-                    reverse: true,
-                    itemCount: messages.length +
-                        2 +
-                        (widget.parentMessage != null ? 1 : 0),
-                    itemBuilder: (context, i) {
-                      if (i == messages.length + 2) {
-                        if (widget.parentMessageBuilder != null) {
-                          return widget.parentMessageBuilder(
-                            context,
-                            widget.parentMessage,
-                          );
-                        } else {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              buildParentMessage(widget.parentMessage),
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .whiteSmoke,
-                                      StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .whiteSnow,
-                                    ],
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
-                                    textAlign: TextAlign.center,
-                                    style: StreamChatTheme.of(context)
-                                        .channelTheme
-                                        .channelHeaderTheme
-                                        .lastMessageAt,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                      }
-                      if (i == messages.length + 1) {
-                        return _buildLoadingIndicator(
-                          streamChannel,
-                          QueryDirection.top,
-                        );
-                      }
-                      if (i == 0) {
-                        return _buildLoadingIndicator(
-                          streamChannel,
-                          QueryDirection.bottom,
-                        );
-                      }
-                      final message = messages[i - 1];
-                      final nextMessage = (i - 1) > 0 ? messages[i - 2] : null;
-
-                      Widget messageWidget;
-
-                      if (i == 1) {
-                        messageWidget = _buildBottomMessage(
+                  }
+                },
+                onEndOfPage: () async {
+                  _inBetweenList = false;
+                  _topPaginationActive = true;
+                  _bottomPaginationActive = false;
+                  return _paginateData(
+                    streamChannel,
+                    QueryDirection.top,
+                  );
+                },
+                onInBetweenOfPage: () {
+                  _inBetweenList = true;
+                },
+                child: ScrollablePositionedList.builder(
+                  key: ValueKey(initialIndex + initialAlignment),
+                  itemPositionsListener: _itemPositionListener,
+                  addAutomaticKeepAlives: true,
+                  initialScrollIndex: initialIndex ?? 0,
+                  initialAlignment: initialAlignment ?? 0,
+                  physics: widget.scrollPhysics,
+                  itemScrollController: _scrollController,
+                  reverse: true,
+                  itemCount: messages.length +
+                      2 +
+                      (widget.parentMessage != null ? 1 : 0),
+                  itemBuilder: (context, i) {
+                    if (i == messages.length + 2) {
+                      if (widget.parentMessageBuilder != null) {
+                        return widget.parentMessageBuilder(
                           context,
-                          message,
-                          messages,
-                          streamChannel,
-                        );
-                      } else if (i == messages.length - 1) {
-                        messageWidget = _buildTopMessage(
-                          context,
-                          message,
-                          messages,
-                          streamChannel,
+                          widget.parentMessage,
                         );
                       } else {
-                        if (widget.messageBuilder != null) {
-                          messageWidget = Builder(
-                            key: ValueKey<String>('MESSAGE-${message.id}'),
-                            builder: (context) => widget.messageBuilder(
-                                context,
-                                MessageDetails(
-                                  context,
-                                  message,
-                                  messages,
-                                  i,
-                                ),
-                                messages),
-                          );
-                        } else {
-                          messageWidget = buildMessage(message, messages, i);
-                        }
-                      }
-
-                      if (nextMessage != null &&
-                          !Jiffy(message.createdAt.toLocal()).isSame(
-                              nextMessage.createdAt.toLocal(), Units.DAY)) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            messageWidget,
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 12.0),
-                              child: widget.dateDividerBuilder != null
-                                  ? widget.dateDividerBuilder(
-                                      nextMessage.createdAt.toLocal())
-                                  : DateDivider(
-                                      dateTime: nextMessage.createdAt.toLocal(),
-                                    ),
+                            buildParentMessage(widget.parentMessage),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .whiteSmoke,
+                                    StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .whiteSnow,
+                                  ],
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
+                                  textAlign: TextAlign.center,
+                                  style: StreamChatTheme.of(context)
+                                      .channelTheme
+                                      .channelHeaderTheme
+                                      .lastMessageAt,
+                                ),
+                              ),
                             ),
                           ],
                         );
                       }
+                    }
+                    if (i == messages.length + 1) {
+                      return _buildLoadingIndicator(
+                        streamChannel,
+                        QueryDirection.top,
+                      );
+                    }
+                    if (i == 0) {
+                      return _buildLoadingIndicator(
+                        streamChannel,
+                        QueryDirection.bottom,
+                      );
+                    }
+                    final message = messages[i - 1];
+                    final nextMessage = (i - 1) > 0 ? messages[i - 2] : null;
 
-                      return messageWidget;
-                    },
-                  ),
+                    Widget messageWidget;
+
+                    if (i == 1) {
+                      messageWidget = _buildBottomMessage(
+                        context,
+                        message,
+                        messages,
+                        streamChannel,
+                      );
+                    } else if (i == messages.length - 1) {
+                      messageWidget = _buildTopMessage(
+                        context,
+                        message,
+                        messages,
+                        streamChannel,
+                      );
+                    } else {
+                      if (widget.messageBuilder != null) {
+                        messageWidget = Builder(
+                          key: ValueKey<String>('MESSAGE-${message.id}'),
+                          builder: (context) => widget.messageBuilder(
+                              context,
+                              MessageDetails(
+                                context,
+                                message,
+                                messages,
+                                i,
+                              ),
+                              messages),
+                        );
+                      } else {
+                        messageWidget = buildMessage(message, messages, i);
+                      }
+                    }
+
+                    if (nextMessage != null &&
+                        !Jiffy(message.createdAt.toLocal()).isSame(
+                            nextMessage.createdAt.toLocal(), Units.DAY)) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          messageWidget,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: widget.dateDividerBuilder != null
+                                ? widget.dateDividerBuilder(
+                                    nextMessage.createdAt.toLocal())
+                                : DateDivider(
+                                    dateTime: nextMessage.createdAt.toLocal(),
+                                  ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return messageWidget;
+                  },
                 ),
-                if (widget.showScrollToBottom) _buildScrollToBottom(),
-                Positioned(
-                  top: 20.0,
-                  child: ValueListenableBuilder<Iterable<ItemPosition>>(
-                    valueListenable: _itemPositionListener.itemPositions,
-                    builder: (context, values, _) {
-                      final items = _itemPositionListener.itemPositions?.value;
-                      if (items.isEmpty || messages.isEmpty) {
-                        return SizedBox();
-                      }
+              ),
+              if (widget.showScrollToBottom) _buildScrollToBottom(),
+              Positioned(
+                top: 20.0,
+                child: ValueListenableBuilder<Iterable<ItemPosition>>(
+                  valueListenable: _itemPositionListener.itemPositions,
+                  builder: (context, values, _) {
+                    final items = _itemPositionListener.itemPositions?.value;
+                    if (items.isEmpty || messages.isEmpty) {
+                      return SizedBox();
+                    }
 
-                      var index = _getTopElement(values).index;
+                    var index = _getTopElement(values).index;
 
-                      if (index > messages.length) {
-                        return SizedBox();
-                      }
+                    if (index > messages.length) {
+                      return SizedBox();
+                    }
 
-                      if (index == messages.length) {
-                        index = max(index - 1, 0);
-                      }
+                    if (index == messages.length) {
+                      index = max(index - 1, 0);
+                    }
 
-                      return widget.dateDividerBuilder != null
-                          ? widget.dateDividerBuilder(
-                              messages[index].createdAt.toLocal(),
-                            )
-                          : DateDivider(
-                              dateTime: messages[index].createdAt.toLocal(),
-                            );
-                    },
-                  ),
+                    return widget.dateDividerBuilder != null
+                        ? widget.dateDividerBuilder(
+                            messages[index].createdAt.toLocal(),
+                          )
+                        : DateDivider(
+                            dateTime: messages[index].createdAt.toLocal(),
+                          );
+                  },
                 ),
-              ],
-            );
-          }),
-    );
+              ),
+            ],
+          );
+        });
   }
 
   Future<void> _paginateData(
@@ -512,7 +500,6 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildScrollToBottom() {
-    final streamChannel = StreamChannel.of(context);
     return StreamBuilder<Tuple2<bool, int>>(
       stream: Rx.combineLatest2(
         streamChannel.channel.state.isUpToDateStream,
@@ -758,7 +745,7 @@ class _MessageListViewState extends State<MessageListView> {
     final isNextUser =
         index - 2 >= 0 && message.user.id == messages[index - 2]?.user?.id;
 
-    final channel = StreamChannel.of(context).channel;
+    final channel = streamChannel.channel;
     final readList = channel.state?.read
             ?.where((element) => element.user.id != userId)
             ?.where((read) =>
@@ -864,7 +851,7 @@ class _MessageListViewState extends State<MessageListView> {
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
 
-    final streamChannel = StreamChannel.of(context);
+    streamChannel = StreamChannel.of(context);
 
     initialIndex = _initialIndex;
     initialAlignment = _initialAlignment;
@@ -907,16 +894,13 @@ class _MessageListViewState extends State<MessageListView> {
           context,
           MaterialPageRoute(builder: (_) {
             return StreamBuilder<Message>(
-                stream: StreamChannel.of(context)
-                    .channel
-                    .state
-                    .messagesStream
-                    .map((messages) =>
+                stream: streamChannel.channel.state.messagesStream.map(
+                    (messages) =>
                         messages.firstWhere((m) => m.id == message.id)),
                 initialData: message,
                 builder: (_, snapshot) {
                   return StreamChannel(
-                    channel: StreamChannel.of(context).channel,
+                    channel: streamChannel.channel,
                     child: widget.threadBuilder(context, snapshot.data),
                   );
                 });
@@ -928,6 +912,9 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   void dispose() {
+    if (!_upToDate) {
+      streamChannel.reloadChannel();
+    }
     _messageNewListener?.cancel();
     super.dispose();
   }

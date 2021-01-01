@@ -380,6 +380,10 @@ class _ChannelListViewState extends State<ChannelListView>
               width: 40,
             ),
           ),
+          contentPadding: const EdgeInsets.only(
+            left: 8,
+            right: 8,
+          ),
           title: Align(
             alignment: Alignment.centerLeft,
             child: Container(
@@ -394,6 +398,7 @@ class _ChannelListViewState extends State<ChannelListView>
             ),
           ),
           subtitle: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Align(
                 alignment: Alignment.centerLeft,
@@ -567,7 +572,27 @@ class _ChannelListViewState extends State<ChannelListView>
                         context: context,
                         builder: (context) {
                           return StreamChannel(
-                            child: ChannelBottomSheet(),
+                            child: ChannelBottomSheet(
+                              onViewInfoTap: () {
+                                if (channel.memberCount == 2 &&
+                                    channel.isDistinct) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => StreamChannel(
+                                        channel: channel,
+                                        child: ChatInfoScreen(
+                                          user:
+                                              channel.state.members.first.user,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                // TODO: Add group screen
+                              },
+                            ),
                             channel: channel,
                           );
                         },

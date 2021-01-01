@@ -855,12 +855,13 @@ class _MessageWidgetState extends State<MessageWidget> {
     if (isMessageRead) {
       child = Row(
         children: [
-          Text(
-            widget.readList.length.toString(),
-            style: style.copyWith(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+          if (StreamChannel.of(context).channel.memberCount > 2)
+            Text(
+              widget.readList.length.toString(),
+              style: style.copyWith(
+                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              ),
             ),
-          ),
           SizedBox(width: 2),
           child,
         ],
