@@ -26,7 +26,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   final FocusNode _focusNode = FocusNode();
 
-  int groupMemberListLength;
+  bool listExpanded = false;
 
   void _userNameListener() {
     if (_searchController.text == _userNameQuery) {
@@ -155,7 +155,13 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildMembers(List<Member> members) {
-    groupMemberListLength ??= members.length > 6 ? 6 : members.length;
+    int groupMemberListLength;
+
+    if (listExpanded) {
+      groupMemberListLength = members.length;
+    } else {
+      groupMemberListLength = members.length > 6 ? 6 : members.length;
+    }
 
     return Column(
       children: [
@@ -241,7 +247,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           InkWell(
             onTap: () {
               setState(() {
-                groupMemberListLength = members.length;
+                listExpanded = true;
               });
             },
             child: Material(
