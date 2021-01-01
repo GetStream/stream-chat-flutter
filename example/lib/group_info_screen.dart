@@ -16,21 +16,15 @@ class GroupInfoScreen extends StatefulWidget {
 }
 
 class _GroupInfoScreenState extends State<GroupInfoScreen> {
-  Future _memberQueryFuture;
   TextEditingController _nameController;
 
-  bool _userSearchMode = false;
   TextEditingController _searchController;
-  bool _loading = false;
   String _userNameQuery = '';
 
   Timer _debounce;
   Function modalSetStateCallback;
 
   final FocusNode _focusNode = FocusNode();
-
-  bool namedChanged = false;
-  String changedName = '';
 
   int groupMemberListLength;
 
@@ -52,10 +46,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   void initState() {
     super.initState();
     var channel = StreamChannel.of(context);
-
-    _memberQueryFuture = channel.channel.queryMembers(
-      filter: {},
-    );
     _nameController = TextEditingController.fromValue(
         TextEditingValue(text: channel.channel.extraData['name'] ?? ''));
     _searchController = TextEditingController()..addListener(_userNameListener);
@@ -69,50 +59,59 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   Widget build(BuildContext context) {
     var channel = StreamChannel.of(context);
 
-    return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-      appBar: AppBar(
-        elevation: 1.0,
-        toolbarHeight: 56.0,
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(left: 12.0),
-            child: StreamSvgIcon.left(
-              color: StreamChatTheme.of(context).colorTheme.black,
-            ),
-          ),
-        ),
-        leadingWidth: 36.0,
-        title: Column(
-          children: [
-            FutureBuilder<QueryMembersResponse>(
-                future: _memberQueryFuture,
-                builder: (context, snapshot) {
-                  return Text(
-                    _getChannelName(MediaQuery.of(context).size.width,
-                        members: snapshot.data?.members
-                            ?.map((e) => e.user)
-                            ?.toList()),
-                    style: TextStyle(
-                      color: StreamChatTheme.of(context).colorTheme.black,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                }),
-            SizedBox(
-              height: 3.0,
-            ),
-            FutureBuilder<QueryMembersResponse>(
-                future: _memberQueryFuture,
-                builder: (context, snapshot) {
-                  return Text(
-                    '${channel.channel.memberCount} Members, ${snapshot?.data?.members?.where((e) => e.user.online)?.length ?? 0} Online',
+    return StreamBuilder<List<Member>>(
+        stream: channel.channel.state.membersStream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Container(
+              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          return Scaffold(
+            backgroundColor:
+                StreamChatTheme.of(context).colorTheme.greyGainsboro,
+            appBar: AppBar(
+              elevation: 1.0,
+              toolbarHeight: 56.0,
+              backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+              leading: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: StreamSvgIcon.left(
+                    color: StreamChatTheme.of(context).colorTheme.black,
+                  ),
+                ),
+              ),
+              leadingWidth: 36.0,
+              title: Column(
+                children: [
+                  StreamBuilder<ChannelState>(
+                      stream: channel.channelStateStream,
+                      builder: (context, state) {
+                        return Text(
+                          _getChannelName(
+                              2 * MediaQuery.of(context).size.width / 3,
+                              members: snapshot.data,
+                              extraData: state.data.channel.extraData,
+                              maxFontSize: 16.0),
+                          style: TextStyle(
+                            color: StreamChatTheme.of(context).colorTheme.black,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      }),
+                  SizedBox(
+                    height: 3.0,
+                  ),
+                  Text(
+                    '${channel.channel.memberCount} Members, ${snapshot?.data?.where((e) => e.user.online)?.length ?? 0} Online',
                     style: TextStyle(
                       color: StreamChatTheme.of(context)
                           .colorTheme
@@ -120,199 +119,178 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           .withOpacity(0.5),
                       fontSize: 12.0,
                     ),
-                  );
-                }),
-          ],
-        ),
-        centerTitle: true,
-        actions: [
-          StreamNeumorphicButton(
-            child: InkWell(
-              onTap: () {
-                _buildAddUserModal(context);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: StreamSvgIcon.userAdd(
-                    color: StreamChatTheme.of(context).colorTheme.accentBlue),
+                  ),
+                ],
               ),
-            ),
-          ),
-        ],
-      ),
-      body: ListView(
-        children: [
-          _buildMembers(),
-          Container(
-            height: 8.0,
-            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-          ),
-          _buildNameTile(),
-          _buildOptionListTiles(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMembers() {
-    var channel = StreamChannel.of(context);
-
-    return FutureBuilder<QueryMembersResponse>(
-      builder: (context, snapshot) {
-        if (snapshot.data == null) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        groupMemberListLength ??=
-            snapshot.data.members.length > 6 ? 6 : snapshot.data.members.length;
-
-        return Column(
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: groupMemberListLength,
-              itemBuilder: (context, position) {
-                return Material(
+              centerTitle: true,
+              actions: [
+                StreamNeumorphicButton(
                   child: InkWell(
                     onTap: () {
-                      var userMember = snapshot.data.members.firstWhere(
-                          (e) => e.user.id == StreamChat.of(context).user.id);
-                      _showUserInfoModal(snapshot.data.members[position].user,
-                          userMember.role == 'owner');
+                      _buildAddUserModal(context);
                     },
-                    child: Container(
-                      height: 65.0,
-                      child: Column(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamSvgIcon.userAdd(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .accentBlue),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            body: ListView(
+              children: [
+                _buildMembers(snapshot.data),
+                Container(
+                  height: 8.0,
+                  color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                ),
+                _buildNameTile(),
+                _buildOptionListTiles(),
+              ],
+            ),
+          );
+        });
+  }
+
+  Widget _buildMembers(List<Member> members) {
+    groupMemberListLength ??= members.length > 6 ? 6 : members.length;
+
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: groupMemberListLength,
+          itemBuilder: (context, position) {
+            return Material(
+              child: InkWell(
+                onTap: () {
+                  var userMember = members.firstWhere(
+                      (e) => e.user.id == StreamChat.of(context).user.id);
+                  _showUserInfoModal(
+                      members[position].user, userMember.role == 'owner');
+                },
+                child: Container(
+                  height: 65.0,
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0, vertical: 12.0),
-                                child: UserAvatar(
-                                  user: snapshot.data.members[position].user,
-                                  constraints: BoxConstraints(
-                                      maxHeight: 40.0, maxWidth: 40.0),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 12.0),
+                            child: UserAvatar(
+                              user: members[position].user,
+                              constraints: BoxConstraints(
+                                  maxHeight: 40.0, maxWidth: 40.0),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  members[position].user.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      snapshot.data.members[position].user.name,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      height: 1.0,
-                                    ),
-                                    Text(
-                                      _getLastSeen(
-                                          snapshot.data.members[position].user),
-                                      style: TextStyle(
-                                          color: StreamChatTheme.of(context)
-                                              .colorTheme
-                                              .black
-                                              .withOpacity(0.5)),
-                                    ),
-                                  ],
+                                SizedBox(
+                                  height: 1.0,
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  snapshot.data.members[position].role ==
-                                          'owner'
-                                      ? 'Owner'
-                                      : '',
+                                Text(
+                                  _getLastSeen(members[position].user),
                                   style: TextStyle(
                                       color: StreamChatTheme.of(context)
                                           .colorTheme
                                           .black
                                           .withOpacity(0.5)),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          Container(
-                            height: 1.0,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .greyGainsboro,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              members[position].role == 'owner' ? 'Owner' : '',
+                              style: TextStyle(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .black
+                                      .withOpacity(0.5)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        height: 1.0,
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              color: StreamChatTheme.of(context).colorTheme.whiteSnow,
+            );
+          },
+        ),
+        if (groupMemberListLength != members.length)
+          InkWell(
+            onTap: () {
+              setState(() {
+                groupMemberListLength = members.length;
+              });
+            },
+            child: Material(
+              color: StreamChatTheme.of(context).colorTheme.whiteSnow,
+              child: Container(
+                height: 65.0,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 21.0, vertical: 12.0),
+                            child: StreamSvgIcon.down(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.white,
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${members.length - groupMemberListLength} more',
+                                  style: TextStyle(
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .grey),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  color: StreamChatTheme.of(context).colorTheme.white,
-                );
-              },
-            ),
-            if (groupMemberListLength != snapshot.data.members.length)
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    groupMemberListLength = snapshot.data.members.length;
-                  });
-                },
-                child: Material(
-                  child: Container(
-                    height: 65.0,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 21.0, vertical: 12.0),
-                                child: StreamSvgIcon.down(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .grey,
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '${snapshot.data.members.length - groupMemberListLength} more',
-                                      style: TextStyle(
-                                          color: StreamChatTheme.of(context)
-                                              .colorTheme
-                                              .grey),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 1.0,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .greyGainsboro,
-                        ),
-                      ],
+                    Container(
+                      height: 1.0,
+                      color:
+                          StreamChatTheme.of(context).colorTheme.greyGainsboro,
                     ),
-                  ),
+                  ],
                 ),
               ),
-          ],
-        );
-      },
-      future: _memberQueryFuture,
+            ),
+          ),
+      ],
     );
   }
 
@@ -321,7 +299,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     var channelName = channel.extraData['name'] ?? '';
 
     return Material(
-      color: StreamChatTheme.of(context).colorTheme.white,
+      color: StreamChatTheme.of(context).colorTheme.whiteSnow,
       child: Container(
         height: 56.0,
         alignment: Alignment.center,
@@ -389,12 +367,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       onTap: () {
                         StreamChannel.of(context).channel.update({
                           'name': _nameController.text.trim(),
-                        }).then((value) {
-                          setState(() {
-                            _focusNode.unfocus();
-                            namedChanged = true;
-                            changedName = _nameController.text.trim();
-                          });
                         }).catchError((err) {
                           setState(() {
                             _nameController.text = channelName;
@@ -433,7 +405,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             stream: StreamChannel.of(context).channel.isMutedStream,
             builder: (context, snapshot) {
               return OptionListTile(
-                tileColor: StreamChatTheme.of(context).colorTheme.white,
+                tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
                 separatorColor:
                     StreamChatTheme.of(context).colorTheme.greyGainsboro,
                 title: 'Mute group',
@@ -460,7 +432,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               );
             }),
         OptionListTile(
-          tileColor: StreamChatTheme.of(context).colorTheme.white,
+          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           separatorColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           title: 'Photos & Videos',
           leading: StreamSvgIcon.pictures(
@@ -494,7 +466,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           },
         ),
         OptionListTile(
-          tileColor: StreamChatTheme.of(context).colorTheme.white,
+          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           separatorColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           title: 'Files',
           leading: StreamSvgIcon.files(
@@ -529,7 +501,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ),
         if (!channel.channel.isDistinct)
           OptionListTile(
-            tileColor: StreamChatTheme.of(context).colorTheme.white,
+            tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
             separatorColor:
                 StreamChatTheme.of(context).colorTheme.greyGainsboro,
             title: 'Leave Group',
@@ -582,9 +554,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                             await channel.addMembers([user.id]);
                             Navigator.pop(context);
-                            _memberQueryFuture = channel.queryMembers(
-                              filter: {},
-                            );
                             setState(() {});
                           },
                           crossAxisCount: 4,
@@ -852,9 +821,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       'Remove From Group', () async {
                     await channel.removeMembers([user.id]);
                     Navigator.pop(context);
-                    _memberQueryFuture = channel.queryMembers(
-                      filter: {},
-                    );
                   }, color: StreamChatTheme.of(context).colorTheme.accentRed),
                 _buildModalListTile(
                     context,
@@ -971,17 +937,36 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     );
   }
 
-  String _getChannelName(double width, {List<User> members}) {
-    if (namedChanged) {
-      return changedName;
-    }
+  String _getChannelName(double width,
+      {List<Member> members, Map extraData, double maxFontSize}) {
+    String title;
+    var client = StreamChat.of(context);
+    if (extraData['name'] == null) {
+      final otherMembers =
+          members.where((member) => member.user.id != client.user.id);
+      if (otherMembers.isNotEmpty) {
+        final maxWidth = width;
+        final maxChars = maxWidth / maxFontSize;
+        var currentChars = 0;
+        final currentMembers = <Member>[];
+        otherMembers.forEach((element) {
+          final newLength = currentChars + element.user.name.length;
+          if (newLength < maxChars) {
+            currentChars = newLength;
+            currentMembers.add(element);
+          }
+        });
 
-    if (StreamChannel.of(context).channel.extraData['name'] == null &&
-        members != null) {
-      return '${members[0].name} & ${members.length - 1} others';
+        final exceedingMembers = otherMembers.length - currentMembers.length;
+        title =
+            '${currentMembers.map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+      } else {
+        title = 'No title';
+      }
+    } else {
+      title = extraData['name'];
     }
-
-    return StreamChannel.of(context).channel.extraData['name'] ?? '';
+    return title;
   }
 
   String _getLastSeen(User user) {

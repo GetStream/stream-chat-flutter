@@ -423,8 +423,6 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                   ),
                                 );
                               }
-
-                              // TODO: Add group screen
                             },
                           ),
                   ),
