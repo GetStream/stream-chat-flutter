@@ -112,13 +112,14 @@ class _ImageFooterState extends State<ImageFooter> {
         context: context,
         removeTop: true,
         child: BottomAppBar(
+          color: StreamChatTheme.of(context).colorTheme.white,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
                 icon: StreamSvgIcon.icon_SHARE(
                   size: 24.0,
-                  color: Colors.black,
+                  color: StreamChatTheme.of(context).colorTheme.black,
                 ),
                 onPressed: () {
                   _buildShareModal(context);
@@ -134,11 +135,8 @@ class _ImageFooterState extends State<ImageFooter> {
                     children: <Widget>[
                       Text(
                         '${widget.currentPage + 1} of ${widget.totalPages}',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
+                        style:
+                            StreamChatTheme.of(context).textTheme.headlineBold,
                       ),
                     ],
                   ),
@@ -146,7 +144,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               IconButton(
                 icon: StreamSvgIcon.Icon_grid(
-                  color: Colors.black,
+                  color: StreamChatTheme.of(context).colorTheme.black,
                 ),
                 onPressed: () {
                   _buildPhotosModal(context);
@@ -337,7 +335,10 @@ class _ImageFooterState extends State<ImageFooter> {
                                               padding: const EdgeInsets.all(24),
                                               child: StreamSvgIcon.search(
                                                 size: 96,
-                                                color: Colors.grey,
+                                                color:
+                                                    StreamChatTheme.of(context)
+                                                        .colorTheme
+                                                        .grey,
                                               ),
                                             ),
                                             Text(
@@ -436,32 +437,41 @@ class _ImageFooterState extends State<ImageFooter> {
                   ),
                   child: TextField(
                     controller: _searchController,
-                    cursorColor: Colors.black,
+                    cursorColor: StreamChatTheme.of(context).colorTheme.black,
                     autofocus: true,
                     decoration: InputDecoration(
                       prefixIconConstraints: BoxConstraints.tight(Size(40, 24)),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.only(left: 8, right: 8),
                         child: StreamSvgIcon.search(
-                          color: Colors.black,
+                          color: StreamChatTheme.of(context).colorTheme.black,
                           size: 24,
                         ),
                       ),
                       hintText: 'Search',
                       hintStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.5),
                         fontSize: 14,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.08),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.08),
                         ),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24.0),
                         borderSide: BorderSide(
-                          color: Colors.black.withOpacity(0.08),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.08),
                         ),
                       ),
                       contentPadding: EdgeInsets.zero,
@@ -500,7 +510,7 @@ class _ImageFooterState extends State<ImageFooter> {
           padding: const EdgeInsets.symmetric(horizontal: 6.0),
           child: IconButton(
             icon: StreamSvgIcon.search(
-              color: Colors.black,
+              color: StreamChatTheme.of(context).colorTheme.black,
             ),
             iconSize: 24.0,
             onPressed: () {
@@ -517,7 +527,7 @@ class _ImageFooterState extends State<ImageFooter> {
             style: TextStyle(
               fontSize: 16.0,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: StreamChatTheme.of(context).colorTheme.black,
             ),
           ),
         ),
@@ -525,7 +535,7 @@ class _ImageFooterState extends State<ImageFooter> {
           padding: const EdgeInsets.symmetric(horizontal: 6.0),
           child: IconButton(
             icon: StreamSvgIcon.share_arrow(
-              color: Colors.black,
+              color: StreamChatTheme.of(context).colorTheme.black,
             ),
             onPressed: () async {
               final attachment = widget.mediaAttachments[widget.currentPage];

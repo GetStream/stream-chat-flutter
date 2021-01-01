@@ -76,6 +76,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 SizedBox(height: 15.0),
                 OptionListTile(
                   title: '@${widget.user.id}',
+                  tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
                   trailing: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
@@ -131,13 +132,18 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             stream: StreamChannel.of(context).channel.isMutedStream,
             builder: (context, snapshot) {
               return OptionListTile(
+                tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
                 title: 'Mute user',
-                leading: StreamSvgIcon.mute(
-                  size: 23.0,
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.5),
+                titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+                leading: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: StreamSvgIcon.mute(
+                    size: 24.0,
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(0.5),
+                  ),
                 ),
                 trailing: snapshot.data == null
                     ? CircularProgressIndicator()
@@ -174,10 +180,15 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         // ),
         OptionListTile(
           title: 'Photos & Videos',
-          leading: StreamSvgIcon.pictures(
-            size: 32.0,
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: StreamSvgIcon.pictures(
+              size: 32.0,
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+            ),
           ),
           trailing: StreamSvgIcon.right(),
           onTap: () {
@@ -206,12 +217,19 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         ),
         OptionListTile(
           title: 'Files',
-          leading: StreamSvgIcon.files(
-            size: 32.0,
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: StreamSvgIcon.files(
+              size: 32.0,
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+            ),
           ),
-          trailing: StreamSvgIcon.right(),
+          trailing: StreamSvgIcon.right(
+            color: StreamChatTheme.of(context).colorTheme.grey,
+          ),
           onTap: () {
             final channel = StreamChannel.of(context).channel;
 
@@ -238,12 +256,19 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
         ),
         OptionListTile(
           title: 'Shared groups',
-          leading: StreamSvgIcon.Icon_group(
-            size: 24.0,
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: StreamSvgIcon.Icon_group(
+              size: 24.0,
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+            ),
           ),
-          trailing: StreamSvgIcon.right(),
+          trailing: StreamSvgIcon.right(
+            color: StreamChatTheme.of(context).colorTheme.grey,
+          ),
           onTap: () {
             Navigator.push(
                 context,
@@ -259,9 +284,16 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
   Widget _buildDeleteListTile() {
     return OptionListTile(
       title: 'Delete Conversation',
-      leading: StreamSvgIcon.delete(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
-        size: 24.0,
+      tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      titleTextStyle: StreamChatTheme.of(context).textTheme.body.copyWith(
+            color: StreamChatTheme.of(context).colorTheme.accentRed,
+          ),
+      leading: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: StreamSvgIcon.delete(
+          color: StreamChatTheme.of(context).colorTheme.accentRed,
+          size: 24.0,
+        ),
       ),
       onTap: () {
         _showDeleteDialog();
