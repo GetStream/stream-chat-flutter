@@ -30,7 +30,7 @@ class OptionListTile extends StatelessWidget {
         Container(
           color: separatorColor ??
               StreamChatTheme.of(context).colorTheme.greyGainsboro,
-          height: 2.0,
+          height: 1.0,
         ),
         Material(
           color: tileColor ?? StreamChatTheme.of(context).colorTheme.white,
