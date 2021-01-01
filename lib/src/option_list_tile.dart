@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 class OptionListTile extends StatelessWidget {
@@ -32,6 +33,13 @@ class OptionListTile extends StatelessWidget {
           color: tileColor ?? Colors.white,
           child: Container(
             height: 56.0,
+          color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+          height: 1.0,
+        ),
+        Material(
+          color: StreamChatTheme.of(context).colorTheme.white,
+          child: Container(
+            height: 63.0,
             child: InkWell(
               onTap: onTap,
               child: Row(
@@ -48,10 +56,14 @@ class OptionListTile extends StatelessWidget {
                     flex: 4,
                     child: Text(
                       title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: titleColor,
-                      ),
+                      style: titleColor == null
+                          ? StreamChatTheme.of(context).textTheme.bodyBold
+                          : StreamChatTheme.of(context)
+                              .textTheme
+                              .bodyBold
+                              .copyWith(
+                                color: titleColor,
+                              ),
                     ),
                   ),
                   Expanded(

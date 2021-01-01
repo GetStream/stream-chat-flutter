@@ -350,8 +350,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                                   return MaterialApp(
                                     theme: ThemeData.light(),
                                     darkTheme: ThemeData.dark(),
-                                    //TODO change to system once dark theme is implemented
-                                    themeMode: ThemeMode.light,
+                                    themeMode: ThemeMode.system,
                                     builder: (context, widget) {
                                       return StreamChat(
                                         child: widget,
