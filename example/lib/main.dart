@@ -398,6 +398,34 @@ class _ChannelListPageState extends State<ChannelListPage> {
                               limit: 20,
                             ),
                             channelWidget: ChannelPage(),
+                            onViewInfoTap: (channel) {
+                              if (channel.memberCount == 2 &&
+                                  channel.isDistinct) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StreamChannel(
+                                      channel: channel,
+                                      child: ChatInfoScreen(
+                                        user: channel.state.members.first.user,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StreamChannel(
+                                      channel: channel,
+                                      child: GroupInfoScreen(),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              // TODO: Add group screen
+                            },
                           ),
                   ),
                 ),

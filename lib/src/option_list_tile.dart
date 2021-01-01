@@ -26,18 +26,12 @@ class OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: separatorColor ?? Color(0xffe6e6e6),
+          color: separatorColor ??
+              StreamChatTheme.of(context).colorTheme.greyGainsboro,
           height: 2.0,
         ),
         Material(
-          color: tileColor ?? Colors.white,
-          child: Container(
-            height: 56.0,
-          color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-          height: 1.0,
-        ),
-        Material(
-          color: StreamChatTheme.of(context).colorTheme.white,
+          color: tileColor ?? StreamChatTheme.of(context).colorTheme.white,
           child: Container(
             height: 63.0,
             child: InkWell(
