@@ -834,7 +834,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         size: 24.0,
                       ),
                       'Make Owner', () {
-                    // TODO: I have no clue how to make someone an owner
+                    // TODO: Add make owner implementation (Remaining from backend)
                   }),
                 if (!channel.isDistinct &&
                     StreamChat.of(context).user.id != user.id &&
