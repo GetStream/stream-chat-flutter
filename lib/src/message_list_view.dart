@@ -181,7 +181,6 @@ class MessageListView extends StatefulWidget {
 class _MessageListViewState extends State<MessageListView> {
   ItemScrollController _scrollController;
   bool _bottomWasVisible = false;
-  bool _topWasVisible = false;
   Function _onThreadTap;
   bool _showScrollToBottom = false;
   ItemPositionsListener _itemPositionListener;
@@ -772,6 +771,17 @@ class _MessageListViewState extends State<MessageListView> {
         bottom: index == 0 ? 30 : (isNextUser ? 2 : 7),
         top: 3,
       ),
+      onQuotedMessageTap: (quotedMessageId) {
+        if (messages.map((e) => e.id).contains(quotedMessageId)) {
+          final index = messages.indexWhere((m) => m.id == quotedMessageId);
+          _scrollController?.scrollTo(
+            index: index,
+            duration: const Duration(milliseconds: 350),
+          );
+        } else {
+          streamChannel.loadChannelAtMessage(quotedMessageId);
+        }
+      },
       showInChannelIndicator: widget.parentMessage == null,
       showThreadReplyIndicator: widget.parentMessage == null,
       showUsername: !isMyMessage && !isNextUser,
