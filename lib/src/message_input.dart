@@ -111,6 +111,7 @@ class MessageInput extends StatefulWidget {
     this.attachmentThumbnailBuilders,
     this.focusNode,
     this.replyToMessage,
+    this.onReplyToMessageCleared,
   }) : super(key: key);
 
   /// Message to edit
@@ -162,6 +163,9 @@ class MessageInput extends StatefulWidget {
   ///
   final Message replyToMessage;
 
+  ///
+  final VoidCallback onReplyToMessageCleared;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -203,9 +207,7 @@ class MessageInputState extends State<MessageInput> {
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
 
-  Message _replyToMessage;
-
-  bool get _hasReplyToMessage => _replyToMessage != null;
+  bool get _hasReplyToMessage => widget.replyToMessage != null;
 
   @override
   Widget build(BuildContext context) {
@@ -242,9 +244,7 @@ class MessageInputState extends State<MessageInput> {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: StreamSvgIcon.close_small(),
-                    onPressed: () {
-                      setState(() => _replyToMessage = null);
-                    },
+                    onPressed: widget.onReplyToMessageCleared,
                   ),
                 ],
               ),
@@ -1353,7 +1353,7 @@ class MessageInputState extends State<MessageInput> {
     if (!_hasReplyToMessage) {
       return Offstage();
     }
-    final containsUrl = _replyToMessage.attachments
+    final containsUrl = widget.replyToMessage.attachments
             ?.any((element) => element.ogScrapeUrl != null) ==
         true;
     return Transform(
@@ -1362,7 +1362,7 @@ class MessageInputState extends State<MessageInput> {
       child: ReplyToMessageWidget(
         reverse: true,
         showBorder: !containsUrl,
-        message: _replyToMessage,
+        message: widget.replyToMessage,
         messageTheme: StreamChatTheme.of(context).otherMessageTheme,
       ),
     );
@@ -2015,7 +2015,7 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
-    _replyToMessage = null;
+    widget.onReplyToMessageCleared();
 
     setState(() {
       _messageIsPresent = false;
@@ -2091,9 +2091,6 @@ class MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
-
-    _replyToMessage = widget.replyToMessage;
-
     _focusNode = widget.focusNode ?? FocusNode();
 
     _emojiNames = Emoji.all().map((e) => e.name);
@@ -2154,14 +2151,6 @@ class MessageInputState extends State<MessageInput> {
       _initialized = true;
     }
     super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(MessageInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.replyToMessage?.id != _replyToMessage?.id) {
-      _replyToMessage = widget.replyToMessage;
-    }
   }
 }
 
