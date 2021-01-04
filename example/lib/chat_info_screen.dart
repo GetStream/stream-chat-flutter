@@ -28,12 +28,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
       body: ListView(
         children: [
           _buildUserHeader(),
-          SizedBox(
+          Container(
             height: 8.0,
+            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           ),
           _buildOptionListTiles(),
-          SizedBox(
+          Container(
             height: 8.0,
+            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           ),
           if ([
             'admin',
@@ -139,7 +141,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 title: 'Mute user',
                 titleTextStyle: StreamChatTheme.of(context).textTheme.body,
                 leading: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 22.0),
                   child: StreamSvgIcon.mute(
                     size: 24.0,
                     color: StreamChatTheme.of(context)
@@ -186,9 +188,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: StreamSvgIcon.pictures(
-              size: 32.0,
+              size: 36.0,
               color:
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
             ),
@@ -244,7 +246,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 18.0),
             child: StreamSvgIcon.files(
               size: 32.0,
               color:
@@ -283,7 +285,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 22.0),
             child: StreamSvgIcon.Icon_group(
               size: 24.0,
               color:
@@ -313,7 +315,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             color: StreamChatTheme.of(context).colorTheme.accentRed,
           ),
       leading: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 22.0),
         child: StreamSvgIcon.delete(
           color: StreamChatTheme.of(context).colorTheme.accentRed,
           size: 24.0,
