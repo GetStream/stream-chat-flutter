@@ -34,6 +34,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
         ),
       ),
       child: ListView(
+        shrinkWrap: true,
         children: [
           SizedBox(
             height: 24.0,
