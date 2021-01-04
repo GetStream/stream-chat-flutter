@@ -92,6 +92,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   StreamBuilder<ChannelState>(
                       stream: channel.channelStateStream,
                       builder: (context, state) {
+                        if (!state.hasData) {
+                          return CircularProgressIndicator();
+                        }
+
                         return Text(
                           _getChannelName(
                               2 * MediaQuery.of(context).size.width / 3,
