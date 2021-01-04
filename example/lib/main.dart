@@ -434,7 +434,7 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  Message _replyToMessage;
+  Message _quotedMessage;
   FocusNode _focusNode;
 
   @override
@@ -450,7 +450,7 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 
   void _reply(Message message) {
-    setState(() => _replyToMessage = message);
+    setState(() => _quotedMessage = message);
     _focusNode.requestFocus();
   }
 
@@ -502,9 +502,9 @@ class _ChannelPageState extends State<ChannelPage> {
           ),
           MessageInput(
             focusNode: _focusNode,
-            replyToMessage: _replyToMessage,
-            onReplyToMessageCleared: () {
-              setState(() => _replyToMessage = null);
+            quotedMessage: _quotedMessage,
+            onQuotedMessageCleared: () {
+              setState(() => _quotedMessage = null);
             },
           ),
         ],

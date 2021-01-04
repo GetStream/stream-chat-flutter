@@ -110,8 +110,8 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
-    this.replyToMessage,
-    this.onReplyToMessageCleared,
+    this.quotedMessage,
+    this.onQuotedMessageCleared,
   }) : super(key: key);
 
   /// Message to edit
@@ -161,10 +161,10 @@ class MessageInput extends StatefulWidget {
   final FocusNode focusNode;
 
   ///
-  final Message replyToMessage;
+  final Message quotedMessage;
 
   ///
-  final VoidCallback onReplyToMessageCleared;
+  final VoidCallback onQuotedMessageCleared;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -207,7 +207,7 @@ class MessageInputState extends State<MessageInput> {
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
 
-  bool get _hasReplyToMessage => widget.replyToMessage != null;
+  bool get _hasQuotedMessage => widget.quotedMessage != null;
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +226,7 @@ class MessageInputState extends State<MessageInput> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_hasReplyToMessage)
+            if (_hasQuotedMessage)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -244,7 +244,7 @@ class MessageInputState extends State<MessageInput> {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     icon: StreamSvgIcon.close_small(),
-                    onPressed: widget.onReplyToMessageCleared,
+                    onPressed: widget.onQuotedMessageCleared,
                   ),
                 ],
               ),
@@ -1350,19 +1350,19 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildReplyToMessage() {
-    if (!_hasReplyToMessage) {
+    if (!_hasQuotedMessage) {
       return Offstage();
     }
-    final containsUrl = widget.replyToMessage.attachments
+    final containsUrl = widget.quotedMessage.attachments
             ?.any((element) => element.ogScrapeUrl != null) ==
         true;
     return Transform(
       transform: Matrix4.rotationY(pi),
       alignment: Alignment.center,
-      child: ReplyToMessageWidget(
+      child: QuotedMessageWidget(
         reverse: true,
         showBorder: !containsUrl,
-        message: widget.replyToMessage,
+        message: widget.quotedMessage,
         messageTheme: StreamChatTheme.of(context).otherMessageTheme,
       ),
     );
@@ -2015,7 +2015,7 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
-    widget.onReplyToMessageCleared();
+    widget.onQuotedMessageCleared();
 
     setState(() {
       _messageIsPresent = false;
@@ -2047,9 +2047,9 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
-    if (widget.replyToMessage != null) {
+    if (widget.quotedMessage != null) {
       message = message.copyWith(
-        replyToMessageId: widget.replyToMessage.id,
+        quotedMessageId: widget.quotedMessage.id,
       );
     }
 

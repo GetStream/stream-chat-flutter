@@ -241,7 +241,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool get showInChannel =>
       widget.showInChannelIndicator && widget.message?.showInChannel == true;
 
-  bool get _hasReplyToMessage => widget.message?.replyToMessage != null;
+  bool get _hasQuotedMessage => widget.message?.quotedMessage != null;
 
   bool get isSendFailed => widget.message.status == MessageSendingStatus.FAILED;
 
@@ -397,11 +397,11 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                         mainAxisSize:
                                                             MainAxisSize.min,
                                                         children: <Widget>[
-                                                          if (_hasReplyToMessage)
-                                                            ReplyToMessageWidget(
+                                                          if (_hasQuotedMessage)
+                                                            QuotedMessageWidget(
                                                               message: widget
                                                                   .message
-                                                                  .replyToMessage,
+                                                                  .quotedMessage,
                                                               messageTheme: isMyMessage
                                                                   ? StreamChatTheme.of(
                                                                           context)
@@ -919,7 +919,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           if (widget.message.attachments
                       ?.any((element) => element.ogScrapeUrl != null) ==
                   true &&
-              !_hasReplyToMessage)
+              !_hasQuotedMessage)
             _buildUrlAttachment(),
         ],
       ),
@@ -931,7 +931,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
   Color _getBackgroundColor() {
-    if (_hasReplyToMessage) {
+    if (_hasQuotedMessage) {
       return widget.messageTheme.messageBackgroundColor;
     }
 

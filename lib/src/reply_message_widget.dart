@@ -63,7 +63,7 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
 }
 
 ///
-class ReplyToMessageWidget extends StatelessWidget {
+class QuotedMessageWidget extends StatelessWidget {
   /// The message
   final Message message;
 
@@ -84,7 +84,7 @@ class ReplyToMessageWidget extends StatelessWidget {
       attachmentThumbnailBuilders;
 
   ///
-  ReplyToMessageWidget({
+  QuotedMessageWidget({
     Key key,
     @required this.message,
     @required this.messageTheme,
