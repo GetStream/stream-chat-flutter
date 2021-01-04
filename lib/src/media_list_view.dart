@@ -37,13 +37,12 @@ class _MediaListViewState extends State<MediaListView> {
   final _media = <AssetEntity>[];
   final ScrollController _scrollController = ScrollController();
   int _currentPage = 0;
-  bool _endPagination = false;
 
   @override
   Widget build(BuildContext context) {
     return LazyLoadScrollView(
-      onEndOfPage: () {
-        _getMedia();
+      onEndOfPage: () async {
+        return _getMedia();
       },
       child: GridView.builder(
         itemCount: _media.length,
@@ -161,11 +160,7 @@ class _MediaListViewState extends State<MediaListView> {
 
     final media = await assetList.getAssetListPaged(_currentPage, 50);
 
-    if (media.isEmpty) {
-      setState(() {
-        _endPagination = true;
-      });
-    } else {
+    if (!media.isEmpty) {
       setState(() {
         _media.addAll(media);
       });

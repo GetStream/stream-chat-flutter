@@ -48,14 +48,10 @@ class ImageFooter extends StatefulWidget {
     this.message,
     this.videoPackages,
     this.mediaSelectedCallBack,
-  })  : preferredSize = Size.fromHeight(kToolbarHeight),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   _ImageFooterState createState() => _ImageFooterState();
-
-  @override
-  final Size preferredSize;
 }
 
 class _ImageFooterState extends State<ImageFooter> {
@@ -150,7 +146,7 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  Widget _buildPhotosModal(context) {
+  void _buildPhotosModal(context) {
     var videoAttachments = widget.mediaAttachments
         .where((element) => element.type == 'video')
         .toList();

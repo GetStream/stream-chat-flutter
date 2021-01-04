@@ -573,33 +573,6 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.attachments?.any((element) => element.type == 'giphy') ==
       true;
 
-  Widget _buildReadIndicator() {
-    var padding = 0.0;
-    return Stack(
-      children: widget.readList.map((e) {
-        padding += 10.0;
-        return Positioned(
-          left: padding - 10,
-          bottom: 0,
-          top: 0,
-          child: Material(
-            color: StreamChatTheme.of(context).colorTheme.white,
-            clipBehavior: Clip.antiAlias,
-            shape: CircleBorder(),
-            child: Padding(
-              padding: const EdgeInsets.all(1.0),
-              child: UserAvatar(
-                user: e.user,
-                constraints: BoxConstraints.loose(Size.fromRadius(8)),
-                showOnlineStatus: false,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
   Widget _buildReactionIndicator(
     BuildContext context,
   ) {
