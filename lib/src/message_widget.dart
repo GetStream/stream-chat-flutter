@@ -11,7 +11,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
-import 'package:stream_chat_flutter/src/reply_message_widget.dart';
+import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -356,37 +356,39 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                         widget.messageTheme,
                                                   ),
                                                 )
-                                              : GestureDetector(
-                                                  onLongPress: () =>
-                                                      onLongPress(context),
-                                                  child: Material(
-                                                    clipBehavior:
-                                                        Clip.antiAlias,
-                                                    shape: widget.shape ??
-                                                        RoundedRectangleBorder(
-                                                          side: isOnlyEmoji
-                                                              ? BorderSide.none
-                                                              : widget.borderSide ??
-                                                                  BorderSide(
-                                                                    color: Theme.of(context).brightness ==
-                                                                            Brightness
-                                                                                .dark
-                                                                        ? StreamChatTheme.of(context)
-                                                                            .colorTheme
-                                                                            .white
-                                                                            .withAlpha(
-                                                                                24)
-                                                                        : StreamChatTheme.of(context)
-                                                                            .colorTheme
-                                                                            .black
-                                                                            .withAlpha(24),
-                                                                  ),
-                                                          borderRadius: widget
-                                                                  .borderRadiusGeometry ??
-                                                              BorderRadius.zero,
-                                                        ),
-                                                    color:
-                                                        _getBackgroundColor(),
+                                              : Material(
+                                                  clipBehavior: Clip.antiAlias,
+                                                  shape: widget.shape ??
+                                                      RoundedRectangleBorder(
+                                                        side: isOnlyEmoji
+                                                            ? BorderSide.none
+                                                            : widget.borderSide ??
+                                                                BorderSide(
+                                                                  color: Theme.of(context)
+                                                                              .brightness ==
+                                                                          Brightness
+                                                                              .dark
+                                                                      ? StreamChatTheme.of(
+                                                                              context)
+                                                                          .colorTheme
+                                                                          .white
+                                                                          .withAlpha(
+                                                                              24)
+                                                                      : StreamChatTheme.of(
+                                                                              context)
+                                                                          .colorTheme
+                                                                          .black
+                                                                          .withAlpha(
+                                                                              24),
+                                                                ),
+                                                        borderRadius: widget
+                                                                .borderRadiusGeometry ??
+                                                            BorderRadius.zero,
+                                                      ),
+                                                  color: _getBackgroundColor(),
+                                                  child: InkWell(
+                                                    onLongPress: () =>
+                                                        onLongPress(context),
                                                     child: Padding(
                                                       padding: EdgeInsets.all(
                                                           hasFiles ? 2.0 : 0.0),
@@ -399,6 +401,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                         children: <Widget>[
                                                           if (_hasQuotedMessage)
                                                             QuotedMessageWidget(
+                                                              onTap: () {},
                                                               message: widget
                                                                   .message
                                                                   .quotedMessage,

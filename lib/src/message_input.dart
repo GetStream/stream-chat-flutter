@@ -25,7 +25,7 @@ import 'package:video_compress/video_compress.dart';
 import 'extension.dart';
 
 import '../stream_chat_flutter.dart';
-import 'reply_message_widget.dart';
+import 'quoted_message_widget.dart';
 import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(PlatformFile, Channel);
@@ -2015,7 +2015,9 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
-    widget.onQuotedMessageCleared();
+    if (widget.onQuotedMessageCleared != null) {
+      widget.onQuotedMessageCleared();
+    }
 
     setState(() {
       _messageIsPresent = false;
