@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:example/choose_user_page.dart';
 import 'package:example/chat_info_screen.dart';
+import 'package:example/choose_user_page.dart';
 import 'package:example/group_info_screen.dart';
-import 'package:example/new_chat_screen.dart';
-import 'package:example/new_group_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
