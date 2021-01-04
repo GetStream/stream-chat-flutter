@@ -342,19 +342,19 @@ class StreamChatThemeData {
           assetName: 'Icon_love_reaction.svg',
         ),
         ReactionIcon(
-          type: 'thumbs_up',
+          type: 'like',
           assetName: 'Icon_thumbs_up_reaction.svg',
         ),
         ReactionIcon(
-          type: 'thumbs_down',
+          type: 'sad',
           assetName: 'Icon_thumbs_down_reaction.svg',
         ),
         ReactionIcon(
-          type: 'lol',
+          type: 'haha',
           assetName: 'Icon_LOL_reaction.svg',
         ),
         ReactionIcon(
-          type: 'wut',
+          type: 'wow',
           assetName: 'Icon_wut_reaction.svg',
         ),
       ],
