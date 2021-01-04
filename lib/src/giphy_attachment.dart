@@ -12,6 +12,7 @@ class GiphyAttachment extends StatelessWidget {
   final MessageTheme messageTheme;
   final Message message;
   final Size size;
+  final ShowMessageCallback onShowMessage;
 
   const GiphyAttachment({
     Key key,
@@ -19,6 +20,7 @@ class GiphyAttachment extends StatelessWidget {
     this.messageTheme,
     this.message,
     this.size,
+    this.onShowMessage,
   }) : super(key: key);
 
   @override
@@ -75,6 +77,7 @@ class GiphyAttachment extends StatelessWidget {
                               userName: message.user.name,
                               sentAt: message.createdAt,
                               message: message,
+                              onShowMessage: onShowMessage,
                             ),
                           );
                         }));

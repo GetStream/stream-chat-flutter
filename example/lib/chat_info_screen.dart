@@ -5,6 +5,9 @@ import 'package:jiffy/jiffy.dart';
 
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'main.dart';
+import 'routes/routes.dart';
+
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
@@ -190,7 +193,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
             ),
           ),
-          trailing: StreamSvgIcon.right(),
+          trailing: StreamSvgIcon.right(
+            color: StreamChatTheme.of(context).colorTheme.grey,
+          ),
           onTap: () {
             final channel = StreamChannel.of(context).channel;
 
@@ -208,6 +213,30 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         ),
                       ],
                       paginationParams: PaginationParams(limit: 20),
+                      onShowMessage: (m, c) async {
+                        final client = StreamChat.of(context).client;
+                        final message = m;
+                        final channel = client.channel(
+                          c.type,
+                          id: c.id,
+                        );
+                        if (channel.state == null) {
+                          await channel.watch();
+                        }
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                            initialMessage: message,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -13,6 +13,7 @@ class ImageAttachment extends StatelessWidget {
   final MessageTheme messageTheme;
   final Size size;
   final bool showTitle;
+  final ShowMessageCallback onShowMessage;
 
   const ImageAttachment({
     Key key,
@@ -21,6 +22,7 @@ class ImageAttachment extends StatelessWidget {
     @required this.size,
     this.messageTheme,
     this.showTitle = true,
+    this.onShowMessage,
   }) : super(key: key);
 
   @override
@@ -56,6 +58,7 @@ class ImageAttachment extends StatelessWidget {
                               userName: message.user.name,
                               sentAt: message.createdAt,
                               message: message,
+                              onShowMessage: onShowMessage,
                             ),
                           );
                         },

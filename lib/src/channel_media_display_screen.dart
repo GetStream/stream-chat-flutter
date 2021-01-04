@@ -20,10 +20,13 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
   /// The builder used when the file list is empty.
   final WidgetBuilder emptyBuilder;
 
+  final ShowMessageCallback onShowMessage;
+
   const ChannelMediaDisplayScreen({
     this.sortOptions,
     this.paginationParams,
     this.emptyBuilder,
+    this.onShowMessage,
   });
 
   @override
@@ -191,6 +194,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                             message: media[position].message,
                             sentAt: media[position].message.createdAt,
                             userName: media[position].message.user.name,
+                            onShowMessage: widget.onShowMessage,
                           ),
                         ),
                       ),

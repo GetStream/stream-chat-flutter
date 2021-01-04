@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chat_info_screen.dart';
 import 'main.dart';
+import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
   @override
@@ -485,6 +486,30 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         ),
                       ],
                       paginationParams: PaginationParams(limit: 20),
+                      onShowMessage: (m, c) async {
+                        final client = StreamChat.of(context).client;
+                        final message = m;
+                        final channel = client.channel(
+                          c.type,
+                          id: c.id,
+                        );
+                        if (channel.state == null) {
+                          await channel.watch();
+                        }
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                            initialMessage: message,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
