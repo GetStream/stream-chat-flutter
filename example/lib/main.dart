@@ -527,8 +527,6 @@ class ChannelPage extends StatelessWidget {
                     if (channel.state == null) {
                       await channel.watch();
                     }
-                    Navigator.pop(context);
-                    Navigator.pop(context);
                     Navigator.pushReplacementNamed(
                       context,
                       Routes.CHANNEL_PAGE,

@@ -496,14 +496,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        await Navigator.pop(context);
-                        await Future.delayed(Duration(milliseconds: 200));
-                        await Navigator.pop(context);
-                        await Future.delayed(Duration(milliseconds: 200));
-                        await Navigator.pop(context);
-                        await Future.delayed(Duration(milliseconds: 200));
-                        await Navigator.pop(context);
-                        await Navigator.pop(context);
                         await Navigator.pushNamed(
                           context,
                           Routes.CHANNEL_PAGE,
