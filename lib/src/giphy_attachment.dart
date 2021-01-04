@@ -330,6 +330,7 @@ class GiphyAttachment extends StatelessWidget {
                 userName: message.user.name,
                 sentAt: message.createdAt,
                 message: message,
+                onShowMessage: onShowMessage,
               ),
             );
           }));

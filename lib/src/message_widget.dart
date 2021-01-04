@@ -736,6 +736,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               ),
               images: images,
               message: widget.message,
+              onShowMessage: widget.onShowMessage,
             ),
           ),
         ),

@@ -223,11 +223,14 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                         if (channel.state == null) {
                           await channel.watch();
                         }
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.pop(context);
+                        await Navigator.pop(context);
+                        await Future.delayed(Duration(milliseconds: 200));
+                        await Navigator.pop(context);
+                        await Future.delayed(Duration(milliseconds: 200));
+                        await Navigator.pop(context);
+                        await Future.delayed(Duration(milliseconds: 200));
+                        await Navigator.pop(context);
+                        await Navigator.pop(context);
                         Navigator.pushNamed(
                           context,
                           Routes.CHANNEL_PAGE,
