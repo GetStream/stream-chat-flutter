@@ -22,7 +22,6 @@ void main() async {
 
   final client = Client(
     apiKey ?? kDefaultStreamApiKey,
-    baseURL: 'https://chat-proxy-oregon.stream-io-api.com',
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
