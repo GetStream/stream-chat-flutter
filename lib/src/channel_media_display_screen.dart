@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -176,8 +175,6 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                 SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
             itemBuilder: (context, position) {
               var channel = StreamChannel.of(context).channel;
-              print('NAV');
-
               return Padding(
                 padding: const EdgeInsets.all(1.0),
                 child: InkWell(
