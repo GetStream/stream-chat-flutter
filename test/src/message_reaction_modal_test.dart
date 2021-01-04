@@ -74,7 +74,7 @@ void main() {
                 ),
                 latestReactions: [
                   Reaction(
-                    type: 'thumbs_up',
+                    type: 'like',
                     user: User(id: testUserId),
                   ),
                   Reaction(
