@@ -29,6 +29,7 @@ class MediaListView extends StatefulWidget {
     this.selectedIds = const [],
     this.onSelect,
   }) : super(key: key);
+
   @override
   _MediaListViewState createState() => _MediaListViewState();
 }
@@ -42,9 +43,7 @@ class _MediaListViewState extends State<MediaListView> {
   @override
   Widget build(BuildContext context) {
     return LazyLoadScrollView(
-      onEndOfPage: () {
-        _getMedia();
-      },
+      onEndOfPage: () async => _getMedia(),
       child: GridView.builder(
         itemCount: _media.length,
         controller: _scrollController,
