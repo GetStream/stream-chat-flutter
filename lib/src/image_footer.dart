@@ -12,11 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class ImageFooter extends StatefulWidget {
+class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
@@ -48,21 +47,25 @@ class ImageFooter extends StatefulWidget {
     this.message,
     this.videoPackages,
     this.mediaSelectedCallBack,
-  }) : super(key: key);
+  })  : preferredSize = Size.fromHeight(kToolbarHeight),
+        super(key: key);
 
   @override
   _ImageFooterState createState() => _ImageFooterState();
+
+  @override
+  final Size preferredSize;
 }
 
 class _ImageFooterState extends State<ImageFooter> {
   bool _userSearchMode = false;
   TextEditingController _searchController;
-  TextEditingController _messageController = TextEditingController();
-  FocusNode _messageFocusNode = FocusNode();
+  final TextEditingController _messageController = TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode();
 
   String _channelNameQuery;
 
-  List<Channel> _selectedChannels = [];
+  final List<Channel> _selectedChannels = [];
   bool _loading = false;
 
   Timer _debounce;
@@ -99,54 +102,73 @@ class _ImageFooterState extends State<ImageFooter> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        color:
-            StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-        padding: EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: StreamSvgIcon.icon_SHARE(
-                size: 24.0,
-                color: StreamChatTheme.of(context).colorTheme.black,
+    return SizedBox.fromSize(
+      size: Size(
+        MediaQuery.of(context).size.width,
+        MediaQuery.of(context).padding.bottom + widget.preferredSize.height,
+      ),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: BottomAppBar(
+          color: StreamChatTheme.of(context).colorTheme.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: StreamSvgIcon.icon_SHARE(
+                  size: 24.0,
+                  color: StreamChatTheme.of(context).colorTheme.black,
+                ),
+                onPressed: () async {
+                  final attachment =
+                      widget.mediaAttachments[widget.currentPage];
+                  var url = attachment.imageUrl ??
+                      attachment.assetUrl ??
+                      attachment.thumbUrl;
+                  var type = attachment.type == 'image'
+                      ? 'jpg'
+                      : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
+                  var request = await HttpClient().getUrl(Uri.parse(url));
+                  var response = await request.close();
+                  var bytes =
+                      await consolidateHttpClientResponseBytes(response);
+                  await Share.file('File', 'image.$type', bytes, 'image/$type');
+                },
               ),
-              onPressed: () {
-                _buildShareModal(context);
-              },
-            ),
-            InkWell(
-              onTap: widget.onTitleTap,
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      '${widget.currentPage + 1} of ${widget.totalPages}',
-                      style: StreamChatTheme.of(context).textTheme.headlineBold,
-                    ),
-                  ],
+              InkWell(
+                onTap: widget.onTitleTap,
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        '${widget.currentPage + 1} of ${widget.totalPages}',
+                        style:
+                            StreamChatTheme.of(context).textTheme.headlineBold,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            IconButton(
-              icon: StreamSvgIcon.Icon_grid(
-                color: StreamChatTheme.of(context).colorTheme.black,
+              IconButton(
+                icon: StreamSvgIcon.Icon_grid(
+                  color: StreamChatTheme.of(context).colorTheme.black,
+                ),
+                onPressed: () {
+                  _buildPhotosModal(context);
+                },
               ),
-              onPressed: () {
-                _buildPhotosModal(context);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _buildPhotosModal(context) {
+  Widget _buildPhotosModal(context) {
     var videoAttachments = widget.mediaAttachments
         .where((element) => element.type == 'video')
         .toList();
@@ -247,305 +269,26 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  void _buildShareModal(context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, modalSetState) {
-          modalSetStateCallback = modalSetState;
-          return Padding(
-            padding: EdgeInsets.only(
-                top: _userSearchMode || _messageFocusNode.hasFocus
-                    ? 16.0
-                    : MediaQuery.of(context).size.height / 2,
-                left: 8.0,
-                right: 8.0),
-            child: Material(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16.0),
-                topRight: Radius.circular(16.0),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Scaffold(
-                body: UsersBloc(
-                  child: Column(
-                    children: [
-                      _buildTextInputSection(modalSetState),
-                      if (_userSearchMode)
-                        SizedBox(
-                          height: 22.0,
-                        ),
-                      Expanded(
-                        child: ChannelsBloc(
-                          child: ChannelListView(
-                            selectedChannels: _selectedChannels,
-                            onChannelTap: (channel, _) {
-                              _searchController.clear();
-                              if (!_selectedChannels.contains(channel)) {
-                                modalSetState(() {
-                                  _selectedChannels.add(channel);
-                                });
-                              } else {
-                                modalSetState(() {
-                                  _selectedChannels.remove(channel);
-                                });
-                              }
-                            },
-                            crossAxisCount: 4,
-                            pagination: PaginationParams(
-                              limit: 25,
-                            ),
-                            filter: {
-                              if (_channelNameQuery?.trim()?.isNotEmpty == true)
-                                'name': {
-                                  r'$autocomplete': _channelNameQuery,
-                                },
-                              'id': {
-                                r'$ne': StreamChat.of(context).user.id,
-                              },
-                            },
-                            sort: [
-                              SortOption(
-                                'name',
-                                direction: SortOption.ASC,
-                              ),
-                            ],
-                            emptyBuilder: (_) {
-                              return LayoutBuilder(
-                                builder: (context, viewportConstraints) {
-                                  return SingleChildScrollView(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        minHeight:
-                                            viewportConstraints.maxHeight,
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(24),
-                                              child: StreamSvgIcon.search(
-                                                size: 96,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text(
-                                                'No chat matches these keywords...'),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      if (_selectedChannels.isNotEmpty)
-                        _buildShareTextInputSection(modalSetState),
-                      if (!_userSearchMode && _selectedChannels.isEmpty)
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            color: StreamChatTheme.of(context).colorTheme.white,
-                            height: 48.0,
-                            child: Material(
-                              color:
-                                  StreamChatTheme.of(context).colorTheme.white,
-                              child: InkWell(
-                                onTap: () async {
-                                  var url = widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .imageUrl ??
-                                      widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .assetUrl ??
-                                      widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .thumbUrl;
-
-                                  if (widget
-                                          .mediaAttachments[widget.currentPage]
-                                          .type ==
-                                      'video') {
-                                    await _saveVideo(url);
-                                    Navigator.pop(context);
-                                  } else {
-                                    await _saveImage(url);
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                child: SizedBox.expand(
-                                  child: Center(
-                                    child: Text(
-                                      'Save to Photos',
-                                      style: TextStyle(
-                                        color: StreamChatTheme.of(context)
-                                            .colorTheme
-                                            .accentBlue,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
-  Widget _buildTextInputSection(modalSetState) {
-    if (_userSearchMode) {
-      return Column(
-        children: [
-          SizedBox(
-            height: 16.0,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 16.0,
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  cursorColor: StreamChatTheme.of(context).colorTheme.black,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    prefixIconConstraints:
-                        BoxConstraints.tight(Size(36.0, 44.0)),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2.0, horizontal: 6.0),
-                      child: StreamSvgIcon.search(
-                        color: StreamChatTheme.of(context).colorTheme.black,
-                      ),
-                    ),
-                    hintText: 'Search',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .black
-                              .withOpacity(0.08)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32.0),
-                      borderSide: BorderSide(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .black
-                              .withOpacity(0.08)),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 8.0,
-              ),
-              IconButton(
-                icon: StreamSvgIcon.close_small(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.5),
-                ),
-                onPressed: () {
-                  modalSetState(() {
-                    _userSearchMode = false;
-                  });
-                  setState(() {});
-                },
-              )
-            ],
-          ),
-        ],
-      );
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-            child: IconButton(
-              icon: StreamSvgIcon.search(
-                color: StreamChatTheme.of(context).colorTheme.black,
-              ),
-              iconSize: 24.0,
-              onPressed: () {
-                modalSetState(() {
-                  _userSearchMode = true;
-                });
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Select a Chat to Share',
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6.0),
-            child: IconButton(
-              icon: StreamSvgIcon.share_arrow(
-                color: StreamChatTheme.of(context).colorTheme.black,
-              ),
-              onPressed: () async {
-                var url =
-                    widget.mediaAttachments[widget.currentPage].imageUrl ??
-                        widget.mediaAttachments[widget.currentPage].assetUrl ??
-                        widget.mediaAttachments[widget.currentPage].thumbUrl;
-                var type =
-                    widget.mediaAttachments[widget.currentPage].type == 'image'
-                        ? 'jpg'
-                        : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
-                var request = await HttpClient().getUrl(Uri.parse(url));
-                var response = await request.close();
-                var bytes = await consolidateHttpClientResponseBytes(response);
-                await Share.file('File', 'image.$type', bytes, 'image/$type');
-              },
-            ),
-          ),
-        ],
-      );
-    }
-  }
-
   Widget _buildShareTextInputSection(modalSetState) {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Container(
-        color: StreamChatTheme.of(context).colorTheme.white,
-        height: 56.0,
-        child: _loading
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            : Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+      child: BottomAppBar(
+        child: Container(
+          height: 40.0,
+          margin: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 8,
+          ),
+          child: _loading
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : Row(
+                  children: [
+                    Expanded(
                       child: TextField(
                         controller: _messageController,
                         focusNode: _messageFocusNode,
@@ -557,11 +300,10 @@ class _ImageFooterState extends State<ImageFooter> {
                           setState(() {});
                         },
                         decoration: InputDecoration(
-                          isDense: true,
                           prefixText: '     ',
                           hintText: 'Add a comment',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(32.0),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24.0),
                             borderSide: BorderSide(
                               color: StreamChatTheme.of(context)
                                   .colorTheme
@@ -570,49 +312,48 @@ class _ImageFooterState extends State<ImageFooter> {
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(32.0),
+                              borderRadius: BorderRadius.circular(24.0),
                               borderSide: BorderSide(
                                 color: StreamChatTheme.of(context)
                                     .colorTheme
                                     .black
                                     .withOpacity(0.16),
                               )),
-                          contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                          contentPadding: const EdgeInsets.all(0),
                         ),
                       ),
                     ),
-                  ),
-                  IconTheme(
-                    data: StreamChatTheme.of(context)
-                        .channelTheme
-                        .messageInputButtonIconTheme,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: InkWell(
-                          onTap: () async {
-                            modalSetState(() {
-                              _loading = true;
-                            });
-                            await sendMessage();
-                            modalSetState(() {
-                              _loading = false;
-                            });
-                          },
-                          child: Transform.rotate(
-                            angle: -pi / 2,
-                            child: StreamSvgIcon.Icon_send_message(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .accentBlue,
-                            ),
+                    SizedBox(width: 8),
+                    IconTheme(
+                      data: StreamChatTheme.of(context)
+                          .channelTheme
+                          .messageInputButtonIconTheme,
+                      child: IconButton(
+                        onPressed: () async {
+                          modalSetState(() => _loading = true);
+                          await sendMessage();
+                          modalSetState(() => _loading = false);
+                        },
+                        splashRadius: 24,
+                        visualDensity: VisualDensity.compact,
+                        constraints: BoxConstraints.tightFor(
+                          height: 24,
+                          width: 24,
+                        ),
+                        padding: EdgeInsets.zero,
+                        icon: Transform.rotate(
+                          angle: -pi / 2,
+                          child: StreamSvgIcon.Icon_send_message(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       ),
     );
   }

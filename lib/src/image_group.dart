@@ -10,11 +10,13 @@ class ImageGroup extends StatelessWidget {
     @required this.images,
     @required this.message,
     @required this.size,
+    this.onShowMessage,
   }) : super(key: key);
 
   final List<Attachment> images;
   final Message message;
   final Size size;
+  final ShowMessageCallback onShowMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +121,7 @@ class ImageGroup extends StatelessWidget {
             userName: message.user.name,
             sentAt: message.createdAt,
             message: message,
+            onShowMessage: onShowMessage,
           ),
         ),
       ),

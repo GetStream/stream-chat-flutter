@@ -22,6 +22,8 @@ typedef ChannelTapCallback = void Function(Channel, Widget);
 /// Builder used to create a custom [ChannelPreview] from a [Channel]
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
+typedef ViewInfoCallback = void Function(Channel);
+
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
 ///
@@ -75,7 +77,9 @@ class ChannelListView extends StatefulWidget {
     this.swipeToAction = false,
     this.pullToRefresh = true,
     this.crossAxisCount = 1,
+    this.padding,
     this.selectedChannels = const [],
+    this.onViewInfoTap,
   }) : super(key: key);
 
   /// The builder that will be used in case of error
@@ -139,7 +143,12 @@ class ChannelListView extends StatefulWidget {
   /// The number of children in the cross axis.
   final int crossAxisCount;
 
+  /// The amount of space by which to inset the children.
+  final EdgeInsetsGeometry padding;
+
   final List<Channel> selectedChannels;
+
+  final ViewInfoCallback onViewInfoTap;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -277,6 +286,7 @@ class _ChannelListViewState extends State<ChannelListView>
           if (channels.isNotEmpty) {
             if (widget.crossAxisCount > 1) {
               child = GridView.builder(
+                padding: widget.padding,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: widget.crossAxisCount),
                 itemCount: channels.length,
@@ -288,6 +298,7 @@ class _ChannelListViewState extends State<ChannelListView>
               );
             } else {
               child = ListView.separated(
+                padding: widget.padding,
                 physics: AlwaysScrollableScrollPhysics(),
                 itemCount:
                     channels.isNotEmpty ? channels.length + 1 : channels.length,
@@ -315,6 +326,7 @@ class _ChannelListViewState extends State<ChannelListView>
 
   Widget _buildLoadingWidget() {
     return ListView(
+      padding: widget.padding,
       physics: AlwaysScrollableScrollPhysics(),
       children: List.generate(
         25,
@@ -340,9 +352,7 @@ class _ChannelListViewState extends State<ChannelListView>
         highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
-            SizedBox(
-              height: 4.0,
-            ),
+            SizedBox(height: 4.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -574,23 +584,7 @@ class _ChannelListViewState extends State<ChannelListView>
                           return StreamChannel(
                             child: ChannelBottomSheet(
                               onViewInfoTap: () {
-                                if (channel.memberCount == 2 &&
-                                    channel.isDistinct) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => StreamChannel(
-                                        channel: channel,
-                                        child: ChatInfoScreen(
-                                          user:
-                                              channel.state.members.first.user,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                // TODO: Add group screen
+                                widget.onViewInfoTap(channel);
                               },
                             ),
                             channel: channel,

@@ -119,6 +119,8 @@ class MessageWidget extends StatefulWidget {
 
   final List<Read> readList;
 
+  final ShowMessageCallback onShowMessage;
+
   /// If true show the users username next to the timestamp of the message
   final bool showUsername;
   final bool showTimestamp;
@@ -157,6 +159,7 @@ class MessageWidget extends StatefulWidget {
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
+    this.onShowMessage,
     this.editMessageInputBuilder,
     this.textBuilder,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
@@ -179,6 +182,7 @@ class MessageWidget extends StatefulWidget {
                 MediaQuery.of(context).size.width * 0.8,
                 MediaQuery.of(context).size.height * 0.3,
               ),
+              onShowMessage: onShowMessage,
             );
           },
           'video': (context, message, attachment) {
@@ -190,6 +194,7 @@ class MessageWidget extends StatefulWidget {
                 MediaQuery.of(context).size.height * 0.3,
               ),
               message: message,
+              onShowMessage: onShowMessage,
             );
           },
           'giphy': (context, message, attachment) {
@@ -201,6 +206,7 @@ class MessageWidget extends StatefulWidget {
                 MediaQuery.of(context).size.width * 0.8,
                 MediaQuery.of(context).size.height * 0.3,
               ),
+              onShowMessage: onShowMessage,
             );
           },
           'file': (context, message, attachment) {
@@ -710,6 +716,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               ),
               images: images,
               message: widget.message,
+              onShowMessage: widget.onShowMessage,
             ),
           ),
         ),
