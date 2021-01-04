@@ -122,6 +122,7 @@ class MessageListView extends StatefulWidget {
     this.itemPositionListener,
     this.onMessageSwiped,
     this.highlightInitialMessage = false,
+    this.onShowMessage,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -173,6 +174,8 @@ class MessageListView extends StatefulWidget {
   ///
   /// Also See [StreamChannel]
   final bool highlightInitialMessage;
+
+  final ShowMessageCallback onShowMessage;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -724,6 +727,7 @@ class _MessageListViewState extends State<MessageListView> {
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
+      onShowMessage: widget.onShowMessage,
     );
   }
 
@@ -816,6 +820,7 @@ class _MessageListViewState extends State<MessageListView> {
           : StreamChatTheme.of(context).otherMessageTheme,
       readList: readList,
       allRead: allRead,
+      onShowMessage: widget.onShowMessage,
     );
 
     if (!isThreadMessage) {

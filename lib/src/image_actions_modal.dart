@@ -15,9 +15,15 @@ class ImageActionsModal extends StatelessWidget {
   final String sentAt;
   final List<Attachment> urls;
   final currentIndex;
+  final VoidCallback onShowMessage;
 
   ImageActionsModal(
-      {this.message, this.userName, this.sentAt, this.urls, this.currentIndex});
+      {this.message,
+      this.userName,
+      this.sentAt,
+      this.urls,
+      this.currentIndex,
+      this.onShowMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -134,10 +140,8 @@ class ImageActionsModal extends StatelessWidget {
                               size: 24.0,
                               color:
                                   StreamChatTheme.of(context).colorTheme.black,
-                            ), () {
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        }),
+                            ),
+                            onShowMessage),
                         _buildButton(
                             context,
                             'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',

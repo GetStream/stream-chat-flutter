@@ -13,6 +13,9 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
+  /// Callback to call when pressing the show message button.
+  final VoidCallback onShowMessage;
+
   /// Callback to call when the header is tapped.
   final VoidCallback onTitleTap;
 
@@ -35,6 +38,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
     this.currentIndex,
     this.showBackButton = true,
     this.onBackPressed,
+    this.onShowMessage,
     this.onTitleTap,
     this.onImageTap,
     this.userName = '',
@@ -111,6 +115,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
               message: message,
               urls: urls,
               currentIndex: currentIndex,
+              onShowMessage: onShowMessage,
             ),
           );
         });

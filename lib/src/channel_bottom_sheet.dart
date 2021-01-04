@@ -5,7 +5,7 @@ import 'channel_info.dart';
 import 'option_list_tile.dart';
 
 class ChannelBottomSheet extends StatefulWidget {
-  VoidCallback onViewInfoTap;
+  final VoidCallback onViewInfoTap;
 
   ChannelBottomSheet({this.onViewInfoTap});
 
@@ -129,16 +129,22 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
             height: 24.0,
           ),
           OptionListTile(
-            leading: StreamSvgIcon.user(
-              color: StreamChatTheme.of(context).colorTheme.grey,
+            leading: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: StreamSvgIcon.user(
+                color: StreamChatTheme.of(context).colorTheme.grey,
+              ),
             ),
             title: 'View Info',
             onTap: widget.onViewInfoTap,
           ),
           if (!channel.isDistinct)
             OptionListTile(
-              leading: StreamSvgIcon.userRemove(
-                color: StreamChatTheme.of(context).colorTheme.grey,
+              leading: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: StreamSvgIcon.userRemove(
+                  color: StreamChatTheme.of(context).colorTheme.grey,
+                ),
               ),
               title: 'Leave Group',
               onTap: () async {
@@ -147,8 +153,11 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
             ),
           if (isOwner)
             OptionListTile(
-              leading: StreamSvgIcon.delete(
-                color: StreamChatTheme.of(context).colorTheme.accentRed,
+              leading: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: StreamSvgIcon.delete(
+                  color: StreamChatTheme.of(context).colorTheme.accentRed,
+                ),
               ),
               title: 'Delete Conversation',
               titleColor: StreamChatTheme.of(context).colorTheme.accentRed,
@@ -157,8 +166,11 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
               },
             ),
           OptionListTile(
-            leading: StreamSvgIcon.close_small(
-              color: StreamChatTheme.of(context).colorTheme.grey,
+            leading: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: StreamSvgIcon.close_small(
+                color: StreamChatTheme.of(context).colorTheme.grey,
+              ),
             ),
             title: 'Cancel',
             onTap: () {

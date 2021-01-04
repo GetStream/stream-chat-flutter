@@ -92,12 +92,7 @@ class StreamChatThemeData {
 
     return defaultTheme.copyWith(
       primaryIconTheme: theme.primaryIconTheme,
-      channelTheme: defaultTheme.channelTheme.copyWith(
-        inputGradient: LinearGradient(colors: [
-          theme.accentColor.withOpacity(.5),
-          theme.accentColor,
-        ]),
-      ),
+      channelTheme: defaultTheme.channelTheme,
       ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
         replies: defaultTheme.ownMessageTheme.replies.copyWith(
           color: theme.accentColor,
@@ -168,8 +163,6 @@ class StreamChatThemeData {
                       this.channelTheme.messageInputButtonIconTheme,
               messageInputButtonTheme: channelTheme.messageInputButtonTheme ??
                   this.channelTheme.messageInputButtonTheme,
-              inputGradient:
-                  channelTheme.inputGradient ?? this.channelTheme.inputGradient,
               inputBackground: channelTheme.inputBackground ??
                   this.channelTheme.inputBackground,
             ) ??
@@ -273,10 +266,6 @@ class StreamChatThemeData {
           ),
         ),
         inputBackground: colorTheme.white.withAlpha(12),
-        inputGradient: LinearGradient(colors: [
-          Color(0xFF00AEFF),
-          Color(0xFF0076FF),
-        ]),
       ),
       ownMessageTheme: MessageTheme(
         messageText: TextStyle(
@@ -342,19 +331,19 @@ class StreamChatThemeData {
           assetName: 'Icon_love_reaction.svg',
         ),
         ReactionIcon(
-          type: 'thumbs_up',
+          type: 'like',
           assetName: 'Icon_thumbs_up_reaction.svg',
         ),
         ReactionIcon(
-          type: 'thumbs_down',
+          type: 'sad',
           assetName: 'Icon_thumbs_down_reaction.svg',
         ),
         ReactionIcon(
-          type: 'lol',
+          type: 'haha',
           assetName: 'Icon_LOL_reaction.svg',
         ),
         ReactionIcon(
-          type: 'wut',
+          type: 'wow',
           assetName: 'Icon_wut_reaction.svg',
         ),
       ],
@@ -597,9 +586,6 @@ class ChannelTheme {
   /// Theme of the send button in [MessageInput]
   final ButtonThemeData messageInputButtonTheme;
 
-  /// Gradient of [MessageInput]
-  final Gradient inputGradient;
-
   /// Background color of [MessageInput]
   final Color inputBackground;
 
@@ -608,7 +594,6 @@ class ChannelTheme {
     this.messageInputButtonIconTheme,
     this.messageInputButtonTheme,
     this.inputBackground,
-    this.inputGradient,
   });
 
   /// Creates a copy of [ChannelTheme] with specified attributes overridden.
@@ -616,7 +601,6 @@ class ChannelTheme {
     ChannelHeaderTheme channelHeaderTheme,
     IconThemeData messageInputButtonIconTheme,
     ButtonThemeData messageInputButtonTheme,
-    Gradient inputGradient,
     Color inputBackground,
   }) =>
       ChannelTheme(
@@ -633,8 +617,6 @@ class ChannelTheme {
             messageInputButtonIconTheme ?? this.messageInputButtonIconTheme,
         messageInputButtonTheme:
             messageInputButtonTheme ?? this.messageInputButtonTheme,
-        inputGradient: inputGradient ?? this.inputGradient,
-        inputBackground: inputBackground ?? this.inputBackground,
       );
 }
 

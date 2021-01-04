@@ -4,10 +4,13 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 class OptionListTile extends StatelessWidget {
   final String title;
-  final StreamSvgIcon leading;
+  final Widget leading;
   final Widget trailing;
   final VoidCallback onTap;
   final Color titleColor;
+  final Color tileColor;
+  final Color separatorColor;
+  final TextStyle titleTextStyle;
 
   OptionListTile({
     this.title,
@@ -15,6 +18,9 @@ class OptionListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.titleColor,
+    this.tileColor,
+    this.separatorColor,
+    this.titleTextStyle,
   });
 
   @override
@@ -22,21 +28,19 @@ class OptionListTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+          color: separatorColor ??
+              StreamChatTheme.of(context).colorTheme.greyGainsboro,
           height: 1.0,
         ),
         Material(
-          color: StreamChatTheme.of(context).colorTheme.white,
+          color: tileColor ?? StreamChatTheme.of(context).colorTheme.white,
           child: Container(
             height: 63.0,
             child: InkWell(
               onTap: onTap,
               child: Row(
                 children: [
-                  if (leading != null)
-                    Expanded(
-                      child: Center(child: leading),
-                    ),
+                  if (leading != null) Center(child: leading),
                   if (leading == null)
                     SizedBox(
                       width: 16.0,
@@ -45,14 +49,15 @@ class OptionListTile extends StatelessWidget {
                     flex: 4,
                     child: Text(
                       title,
-                      style: titleColor == null
-                          ? StreamChatTheme.of(context).textTheme.bodyBold
-                          : StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                color: titleColor,
-                              ),
+                      style: titleTextStyle ??
+                          (titleColor == null
+                              ? StreamChatTheme.of(context).textTheme.bodyBold
+                              : StreamChatTheme.of(context)
+                                  .textTheme
+                                  .bodyBold
+                                  .copyWith(
+                                    color: titleColor,
+                                  )),
                     ),
                   ),
                   Expanded(

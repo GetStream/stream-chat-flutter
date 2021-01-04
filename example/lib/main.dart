@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:example/chat_info_screen.dart';
 import 'package:example/choose_user_page.dart';
+import 'package:example/group_info_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -394,6 +396,32 @@ class _ChannelListPageState extends State<ChannelListPage> {
                               limit: 20,
                             ),
                             channelWidget: ChannelPage(),
+                            onViewInfoTap: (channel) {
+                              if (channel.memberCount == 2 &&
+                                  channel.isDistinct) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StreamChannel(
+                                      channel: channel,
+                                      child: ChatInfoScreen(
+                                        user: channel.state.members.first.user,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StreamChannel(
+                                      channel: channel,
+                                      child: GroupInfoScreen(),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                   ),
                 ),
@@ -459,6 +487,44 @@ class _ChannelPageState extends State<ChannelPage> {
       backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: ChannelHeader(
         showTypingIndicator: false,
+        onImageTap: () async {
+          var channel = StreamChannel.of(context).channel;
+
+          if (channel.memberCount == 2 && channel.isDistinct) {
+            final currentUser = StreamChat.of(context).user;
+            final otherUser = channel.state.members.firstWhere(
+              (element) => element.user.id != currentUser.id,
+              orElse: () => null,
+            );
+            if (otherUser != null) {
+              final pop = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StreamChannel(
+                    child: ChatInfoScreen(
+                      user: otherUser.user,
+                    ),
+                    channel: channel,
+                  ),
+                ),
+              );
+
+              if (pop == true) {
+                Navigator.pop(context);
+              }
+            }
+          } else {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  child: GroupInfoScreen(),
+                  channel: channel,
+                ),
+              ),
+            );
+          }
+        },
       ),
       body: Column(
         children: <Widget>[
@@ -474,6 +540,25 @@ class _ChannelPageState extends State<ChannelPage> {
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,
+                    );
+                  },
+                  onShowMessage: (m, c) async {
+                    final client = StreamChat.of(context).client;
+                    final message = m;
+                    final channel = client.channel(
+                      c.type,
+                      id: c.id,
+                    );
+                    if (channel.state == null) {
+                      await channel.watch();
+                    }
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routes.CHANNEL_PAGE,
+                      arguments: ChannelPageArgs(
+                        channel: channel,
+                        initialMessage: message,
+                      ),
                     );
                   },
                 ),
