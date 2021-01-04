@@ -93,7 +93,16 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       stream: channel.channelStateStream,
                       builder: (context, state) {
                         if (!state.hasData) {
-                          return CircularProgressIndicator();
+                          return Text(
+                            'Loading...',
+                            style: TextStyle(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
                         }
 
                         return Text(
