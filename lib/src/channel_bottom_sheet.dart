@@ -5,7 +5,7 @@ import 'channel_info.dart';
 import 'option_list_tile.dart';
 
 class ChannelBottomSheet extends StatefulWidget {
-  VoidCallback onViewInfoTap;
+  final VoidCallback onViewInfoTap;
 
   ChannelBottomSheet({this.onViewInfoTap});
 

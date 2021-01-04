@@ -136,11 +136,11 @@ class _ReactionPickerState extends State<ReactionPicker>
 
   /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
-    StreamChannel.of(context)
-        .channel
-        .sendReaction(widget.message, reactionType, extraData: {
-      'enforce_unique': true,
-    });
+    StreamChannel.of(context).channel.sendReaction(
+          widget.message,
+          reactionType,
+          enforceUnique: true,
+        );
     pop();
   }
 
