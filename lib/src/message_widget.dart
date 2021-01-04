@@ -400,30 +400,30 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                     ),
                                                 color: _getBackgroundColor(),
                                                 child: InkWell(
-                                                onLongPress: () =>
-                                                    onLongPress(context),
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(
-                                                      hasFiles ? 2.0 : 0.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: <Widget>[
-                                                      if (_hasQuotedMessage)
-                                                        _buildQuotedMessage(
-                                                            isMyMessage),
-                                                      ..._parseAttachments(
-                                                          context),
-                                                      if (widget.message.text
-                                                              .trim()
-                                                              .isNotEmpty &&
-                                                          !isGiphy)
-                                                        _buildTextBubble(
+                                                  onLongPress: () =>
+                                                      onLongPress(context),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(
+                                                        hasFiles ? 2.0 : 0.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: <Widget>[
+                                                        if (_hasQuotedMessage)
+                                                          _buildQuotedMessage(
+                                                              isMyMessage),
+                                                        ..._parseAttachments(
                                                             context),
-                                                    ],
+                                                        if (widget.message.text
+                                                                .trim()
+                                                                .isNotEmpty &&
+                                                            !isGiphy)
+                                                          _buildTextBubble(
+                                                              context),
+                                                      ],
                                                     ),
                                                   ),
                                                 ),
