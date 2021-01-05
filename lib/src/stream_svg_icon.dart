@@ -10,9 +10,9 @@ class StreamSvgIcon extends StatelessWidget {
 
   const StreamSvgIcon({
     this.assetName,
-    this.width,
-    this.height,
     this.color,
+    this.width = 24,
+    this.height = 24,
   });
 
   @override

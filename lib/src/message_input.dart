@@ -227,26 +227,30 @@ class MessageInputState extends State<MessageInput> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (_hasQuotedMessage)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: StreamSvgIcon.reply(
-                      color:
-                          StreamChatTheme.of(context).colorTheme.greyGainsboro,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamSvgIcon.reply(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Reply to Message',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: StreamSvgIcon.close_small(),
-                    onPressed: widget.onQuotedMessageCleared,
-                  ),
-                ],
+                    Text(
+                      'Reply to Message',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.close_small(),
+                      onPressed: widget.onQuotedMessageCleared,
+                    ),
+                  ],
+                ),
               ),
             Padding(
               padding: const EdgeInsets.all(8.0),

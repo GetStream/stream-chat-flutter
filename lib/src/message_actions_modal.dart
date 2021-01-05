@@ -313,8 +313,8 @@ class MessageActionsModal extends StatelessWidget {
       backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
       builder: (context) {
@@ -326,39 +326,26 @@ class MessageActionsModal extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(
-                  top: 16.0,
-                  left: 16.0,
-                  right: 16.0,
-                ),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    IconButton(
-                      icon: StreamSvgIcon.edit(
-                        size: 22,
-                        color:
-                            StreamChatTheme.of(context).primaryIconTheme.color,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamSvgIcon.edit(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
                       ),
-                      onPressed: () {},
                     ),
                     Text(
-                      'Edit message',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(fontWeight: FontWeight.bold),
+                      'Edit Message',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        size: 22,
-                        color:
-                            StreamChatTheme.of(context).primaryIconTheme.color,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.close_small(),
+                      onPressed: Navigator.of(context).pop,
                     ),
                   ],
                 ),
