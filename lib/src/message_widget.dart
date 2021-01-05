@@ -10,14 +10,14 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
-import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
+import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'extension.dart';
 import 'image_group.dart';
 import 'message_text.dart';
-import 'extension.dart';
 
 typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
 typedef OnQuotedMessageTap = void Function(String);
