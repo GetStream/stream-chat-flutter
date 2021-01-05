@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -1107,7 +1106,7 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
-                    constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                    constraints: BoxConstraints.loose(Size.fromHeight(240)),
                     decoration: BoxDecoration(
                       color: StreamChatTheme.of(context).colorTheme.white,
                     ),
@@ -1118,6 +1117,7 @@ class MessageInputState extends State<MessageInput> {
                           return ListView(
                             padding: const EdgeInsets.all(0),
                             shrinkWrap: true,
+                            itemExtent: 60.0,
                             children: snapshot.data
                                 .map((m) => ListTile(
                                       leading: UserAvatar(
@@ -1134,7 +1134,11 @@ class MessageInputState extends State<MessageInput> {
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
-                                      subtitle: Text('@${m.userId}'),
+                                      subtitle: Text(
+                                        '@${m.userId}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                       trailing: StreamSvgIcon.mentions(
                                         color: StreamChatTheme.of(context)
                                             .colorTheme
