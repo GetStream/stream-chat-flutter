@@ -115,7 +115,7 @@ class MessageListView extends StatefulWidget {
     this.onThreadTap,
     this.onReplyTap,
     this.dateDividerBuilder,
-    this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
+    this.scrollPhysics = const ClampingScrollPhysics(),
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
