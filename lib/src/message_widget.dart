@@ -252,7 +252,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool get showInChannel =>
       widget.showInChannelIndicator && widget.message?.showInChannel == true;
 
-  bool get _hasQuotedMessage => widget.message?.quotedMessage != null;
+  bool get hasQuotedMessage => widget.message?.quotedMessage != null;
 
   bool get isSendFailed => widget.message.status == MessageSendingStatus.FAILED;
 
@@ -264,6 +264,10 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
 
+  bool get isGiphy =>
+      widget.message.attachments?.any((element) => element.type == 'giphy') ==
+      true;
+
   bool get showBottomRow =>
       showThreadReplyIndicator ||
       showUsername ||
@@ -272,13 +276,9 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var leftPadding = widget.showUserAvatar != DisplayWidget.gone
-        ? widget.messageTheme.avatarTheme.constraints.maxWidth + 14.5
-        : 6.0;
-
-    final isGiphy =
-        widget.message.attachments?.any((element) => element.type == 'giphy') ==
-            true;
+    final avatarWidth = widget.messageTheme.avatarTheme.constraints.maxWidth;
+    var leftPadding =
+        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 4.5;
 
     final isOnlyEmoji =
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
@@ -319,15 +319,13 @@ class _MessageWidgetState extends State<MessageWidget> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                if (widget.showUserAvatar == DisplayWidget.show)
+                                if (widget.showUserAvatar ==
+                                    DisplayWidget.show) ...[
                                   _buildUserAvatar(),
-                                SizedBox(width: 6),
+                                  SizedBox(width: 4),
+                                ],
                                 if (widget.showUserAvatar == DisplayWidget.hide)
-                                  SizedBox(
-                                    width: widget.messageTheme.avatarTheme
-                                            .constraints.maxWidth +
-                                        8,
-                                  ),
+                                  SizedBox(width: avatarWidth + 4),
                                 Flexible(
                                   child: PortalEntry(
                                     portal: Container(
@@ -380,22 +378,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                             ? BorderSide.none
                                                             : widget.borderSide ??
                                                                 BorderSide(
-                                                                  color: Theme.of(context)
-                                                                              .brightness ==
-                                                                          Brightness
-                                                                              .dark
-                                                                      ? StreamChatTheme.of(
-                                                                              context)
-                                                                          .colorTheme
-                                                                          .white
-                                                                          .withAlpha(
-                                                                              24)
-                                                                      : StreamChatTheme.of(
-                                                                              context)
-                                                                          .colorTheme
-                                                                          .black
-                                                                          .withAlpha(
-                                                                              24),
+                                                                  color: widget
+                                                                      .messageTheme
+                                                                      .messageBorderColor,
                                                                 ),
                                                         borderRadius: widget
                                                                 .borderRadiusGeometry ??
@@ -412,7 +397,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                       mainAxisSize:
                                                           MainAxisSize.min,
                                                       children: <Widget>[
-                                                        if (_hasQuotedMessage)
+                                                        if (hasQuotedMessage)
                                                           _buildQuotedMessage(),
                                                         ..._parseAttachments(
                                                             context),
@@ -542,6 +527,8 @@ class _MessageWidgetState extends State<MessageWidget> {
     } else {
       final showSendingIndicator =
           widget.showSendingIndicator == DisplayWidget.show;
+      final threadParticipants = widget.message.threadParticipants;
+      final showThreadParticipants = threadParticipants?.isNotEmpty == true;
       final replyCount = widget.message.replyCount;
       final msg = replyCount != 0
           ? '$replyCount ${replyCount > 1 ? 'Thread Replies' : 'Thread Reply'}'
@@ -554,19 +541,17 @@ class _MessageWidgetState extends State<MessageWidget> {
 
       children.addAll([
         if (showSendingIndicator) _buildSendingIndicator(),
-        // if (showReadList)
-        //   SizedBox.fromSize(
-        //     size: Size((widget.readList.length * 10.0) + 10, 17),
-        //     child: Padding(
-        //       padding: const EdgeInsets.only(left: 4.0),
-        //       child: _buildReadIndicator(),
-        //     ),
-        //   ),
-        if (showThreadReplyIndicator)
+        if (showThreadReplyIndicator) ...[
+          if (showThreadParticipants)
+            SizedBox.fromSize(
+              size: Size((threadParticipants.length * 8.0) + 10, 16),
+              child: _buildThreadParticipantsIndicator(),
+            ),
           InkWell(
             onTap: widget.onThreadTap != null ? onThreadTap : null,
             child: Text(msg, style: widget.messageTheme?.replies),
           ),
+        ],
         if (showUsername)
           Text(
             widget.message.user.name,
@@ -596,7 +581,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                 size: const Size(16, 32),
                 painter: _ThreadReplyPainter(
                   context: context,
-                  color: widget.messageTheme.replyThreadColor,
+                  color: widget.messageTheme.messageBorderColor,
                 ),
               ),
             ),
@@ -604,7 +589,7 @@ class _MessageWidgetState extends State<MessageWidget> {
             (child) => Transform(
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
               alignment: Alignment.center,
-              child: child,
+              child: Container(height: 16, child: Center(child: child)),
             ),
           ),
         ].insertBetween(const SizedBox(width: 8.0)),
@@ -630,9 +615,29 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  bool get isGiphy =>
-      widget.message.attachments?.any((element) => element.type == 'giphy') ==
-      true;
+  Widget _buildThreadParticipantsIndicator() {
+    var padding = 0.0;
+    return Stack(
+      children: widget.message.threadParticipants.map((user) {
+        padding += 10.0;
+        return Positioned(
+          left: padding - 10,
+          bottom: 0,
+          top: 0,
+          child: Material(
+            color: Colors.white,
+            clipBehavior: Clip.antiAlias,
+            shape: CircleBorder(),
+            child: UserAvatar(
+              user: user,
+              constraints: BoxConstraints.loose(Size.fromRadius(8)),
+              showOnlineStatus: false,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   Widget _buildReactionIndicator(
     BuildContext context,
@@ -866,21 +871,18 @@ class _MessageWidgetState extends State<MessageWidget> {
   Widget _buildUserAvatar() => Transform(
         transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         alignment: Alignment.center,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Transform.translate(
-            offset: Offset(
-              0,
-              widget.translateUserAvatar
-                  ? widget.messageTheme.avatarTheme.constraints.maxHeight / 2
-                  : 0,
-            ),
-            child: UserAvatar(
-              user: widget.message.user,
-              onTap: widget.onUserAvatarTap,
-              constraints: widget.messageTheme.avatarTheme.constraints,
-              showOnlineStatus: false,
-            ),
+        child: Transform.translate(
+          offset: Offset(
+            0,
+            widget.translateUserAvatar
+                ? widget.messageTheme.avatarTheme.constraints.maxHeight / 2
+                : 0,
+          ),
+          child: UserAvatar(
+            user: widget.message.user,
+            onTap: widget.onUserAvatarTap,
+            constraints: widget.messageTheme.avatarTheme.constraints,
+            showOnlineStatus: false,
           ),
         ),
       );
@@ -912,7 +914,7 @@ class _MessageWidgetState extends State<MessageWidget> {
           if (widget.message.attachments
                       ?.any((element) => element.ogScrapeUrl != null) ==
                   true &&
-              !_hasQuotedMessage)
+              !hasQuotedMessage)
             _buildUrlAttachment(),
         ],
       ),
@@ -924,7 +926,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
 
   Color _getBackgroundColor() {
-    if (_hasQuotedMessage) {
+    if (hasQuotedMessage) {
       return widget.messageTheme.messageBackgroundColor;
     }
 
