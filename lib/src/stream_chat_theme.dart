@@ -181,8 +181,8 @@ class StreamChatThemeData {
                   this.ownMessageTheme.messageBackgroundColor,
               avatarTheme: ownMessageTheme?.avatarTheme ??
                   this.ownMessageTheme.avatarTheme,
-              replyThreadColor: ownMessageTheme?.replyThreadColor ??
-                  this.ownMessageTheme.replyThreadColor,
+              messageBorderColor: ownMessageTheme?.messageBorderColor ??
+                  this.ownMessageTheme.messageBorderColor,
             ) ??
             this.ownMessageTheme,
         otherMessageTheme: otherMessageTheme?.copyWith(
@@ -199,10 +199,10 @@ class StreamChatThemeData {
               messageBackgroundColor:
                   otherMessageTheme?.messageBackgroundColor ??
                       this.otherMessageTheme.messageBackgroundColor,
+              messageBorderColor: otherMessageTheme?.messageBorderColor ??
+                  this.otherMessageTheme.messageBorderColor,
               avatarTheme: otherMessageTheme?.avatarTheme ??
                   this.otherMessageTheme.avatarTheme,
-              replyThreadColor: ownMessageTheme?.replyThreadColor ??
-                  this.ownMessageTheme.replyThreadColor,
             ) ??
             this.otherMessageTheme,
         reactionIcons: reactionIcons ?? this.reactionIcons,
@@ -284,7 +284,7 @@ class StreamChatThemeData {
         messageBackgroundColor: colorTheme.greyGainsboro,
         reactionsBackgroundColor: colorTheme.white,
         reactionsBorderColor: colorTheme.greyWhisper,
-        replyThreadColor: colorTheme.greyWhisper,
+        messageBorderColor: colorTheme.greyGainsboro,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -316,7 +316,7 @@ class StreamChatThemeData {
           color: accentColor,
         ),
         messageBackgroundColor: colorTheme.white,
-        replyThreadColor: colorTheme.black.withAlpha(24),
+        messageBorderColor: colorTheme.greyWhisper,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
           constraints: BoxConstraints.tightFor(
@@ -646,9 +646,9 @@ class MessageTheme {
   final TextStyle createdAt;
   final TextStyle replies;
   final Color messageBackgroundColor;
+  final Color messageBorderColor;
   final Color reactionsBackgroundColor;
   final Color reactionsBorderColor;
-  final Color replyThreadColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
@@ -657,9 +657,9 @@ class MessageTheme {
     this.messageAuthor,
     this.messageLinks,
     this.messageBackgroundColor,
+    this.messageBorderColor,
     this.reactionsBackgroundColor,
     this.reactionsBorderColor,
-    this.replyThreadColor,
     this.avatarTheme,
     this.createdAt,
   });
@@ -671,10 +671,10 @@ class MessageTheme {
     TextStyle createdAt,
     TextStyle replies,
     Color messageBackgroundColor,
+    Color messageBorderColor,
     AvatarTheme avatarTheme,
     Color reactionsBackgroundColor,
     Color reactionsBorderColor,
-    Color replyThreadColor,
   }) =>
       MessageTheme(
         messageText: messageText ?? this.messageText,
@@ -683,12 +683,12 @@ class MessageTheme {
         createdAt: createdAt ?? this.createdAt,
         messageBackgroundColor:
             messageBackgroundColor ?? this.messageBackgroundColor,
+        messageBorderColor: messageBorderColor ?? this.messageBorderColor,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         replies: replies ?? this.replies,
         reactionsBackgroundColor:
             reactionsBackgroundColor ?? this.reactionsBackgroundColor,
         reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
-        replyThreadColor: replyThreadColor ?? this.replyThreadColor,
       );
 }
 
