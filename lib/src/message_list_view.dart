@@ -775,15 +775,24 @@ class _MessageListViewState extends State<MessageListView> {
         bottom: index == 0 ? 30 : (isNextUser ? 2 : 7),
         top: 3,
       ),
-      onQuotedMessageTap: (quotedMessageId) {
-        if (messages.map((e) => e.id).contains(quotedMessageId)) {
+      onQuotedMessageTap: (quotedMessageId) async {
+        final scrollToIndex = () {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
           _scrollController?.scrollTo(
             index: index,
             duration: const Duration(milliseconds: 350),
           );
+        };
+        if (messages.map((e) => e.id).contains(quotedMessageId)) {
+          scrollToIndex();
         } else {
-          streamChannel.loadChannelAtMessage(quotedMessageId);
+          streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (messages.map((e) => e.id).contains(quotedMessageId)) {
+                scrollToIndex();
+              }
+            });
+          });
         }
       },
       showInChannelIndicator: widget.parentMessage == null,
