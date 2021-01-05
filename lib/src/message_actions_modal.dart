@@ -55,17 +55,25 @@ class MessageActionsModal extends StatelessWidget {
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
+    var messageTextLength = message.text.length;
+    if (message.quotedMessage != null) {
+      var quotedMessageLength = message.quotedMessage.text.length + 40;
+      if (message.quotedMessage.attachments?.isNotEmpty == true) {
+        quotedMessageLength += 40;
+      }
+      if (quotedMessageLength > messageTextLength) {
+        messageTextLength = quotedMessageLength;
+      }
+    }
     final roughSentenceSize =
-        message.text.length * messageTheme.messageText.fontSize * 1.2;
+        messageTextLength * messageTheme.messageText.fontSize * 1.2;
     final divFactor = message.attachments?.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        Navigator.pop(context);
-      },
+      onTap: () => Navigator.pop(context),
       child: Stack(
         children: [
           Positioned.fill(
