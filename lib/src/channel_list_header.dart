@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
@@ -45,7 +46,7 @@ typedef _TitleBuilder = Widget Function(
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
-class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
+class ChannelListHeader extends StatefulWidget implements PreferredSizeWidget {
   /// Instantiates a ChannelListHeader
   const ChannelListHeader({
     Key key,
@@ -69,77 +70,133 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onNewChatButtonTap;
 
   @override
-  Widget build(BuildContext context) {
-    final _client = client ?? StreamChat.of(context).client;
-    final user = _client.state.user;
-    return AppBar(
-      brightness: Theme.of(context).brightness,
-      elevation: 1,
-      backgroundColor:
-          StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-      centerTitle: true,
-      leading: Center(
-        child: UserAvatar(
-          user: user,
-          showOnlineStatus: false,
-          onTap: onUserAvatarTap ?? (_) => Scaffold.of(context).openDrawer(),
-          borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
+  _ChannelListHeaderState createState() => _ChannelListHeaderState();
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+class _ChannelListHeaderState extends State<ChannelListHeader> {
+  OverlayEntry _errorOverlay;
+
+  OverlayEntry _createOverlayEntry(String text) {
+    RenderBox renderBox = context.findRenderObject();
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        left: offset.dx,
+        top: offset.dy + size.height,
+        width: size.width,
+        child: Material(
+          color: StreamChatTheme.of(context).colorTheme.grey.withOpacity(0.9),
+          child: TweenAnimationBuilder<double>(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, val, wid) {
+              return Container(
+                alignment: Alignment.center,
+                height: val * 25.0,
+                child: Text(
+                  text,
+                  style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                        color: StreamChatTheme.of(context).colorTheme.white,
+                      ),
+                ),
+              );
+            },
           ),
         ),
       ),
-      actions: [
-        StreamNeumorphicButton(
-          child: IconButton(
-            icon: ValueListenableBuilder<ConnectionStatus>(
-              valueListenable: _client.wsConnectionStatus,
-              builder: (context, status, child) {
-                var color;
-                switch (status) {
-                  case ConnectionStatus.connected:
-                    color = StreamChatTheme.of(context).colorTheme.accentBlue;
-                    break;
-                  case ConnectionStatus.connecting:
-                    color = Colors.grey;
-                    break;
-                  case ConnectionStatus.disconnected:
-                    color = Colors.grey;
-                    break;
-                }
-                return SvgPicture.asset(
-                  'svgs/icon_pen_write.svg',
-                  package: 'stream_chat_flutter',
-                  width: 24.0,
-                  height: 24.0,
-                  color: color,
-                );
-              },
-            ),
-            onPressed: onNewChatButtonTap,
-          ),
-        )
-      ],
-      title: ValueListenableBuilder<ConnectionStatus>(
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final _client = widget.client ?? StreamChat.of(context).client;
+    final user = _client.state.user;
+    return ValueListenableBuilder<ConnectionStatus>(
         valueListenable: _client.wsConnectionStatus,
         builder: (context, status, child) {
-          if (titleBuilder != null) {
-            return titleBuilder(context, status, _client);
-          }
           switch (status) {
             case ConnectionStatus.connected:
-              return _buildConnectedTitleState(context);
+              if (_errorOverlay != null) {
+                _errorOverlay.remove();
+                _errorOverlay = null;
+              }
+              break;
             case ConnectionStatus.connecting:
-              return _buildConnectingTitleState(context);
+              if (_errorOverlay != null) {
+                _errorOverlay.remove();
+                _errorOverlay = null;
+              }
+              SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+                _errorOverlay = _createOverlayEntry('Reconnecting...');
+                Overlay.of(context).insert(_errorOverlay);
+              });
+              break;
             case ConnectionStatus.disconnected:
-              return _buildDisconnectedTitleState(context, _client);
-            default:
-              return Offstage();
+              if (_errorOverlay != null) {
+                _errorOverlay.remove();
+                _errorOverlay = null;
+              }
+              SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+                _errorOverlay = _createOverlayEntry('Disconnected');
+                Overlay.of(context).insert(_errorOverlay);
+              });
+              break;
           }
-        },
-      ),
-    );
+
+          return AppBar(
+            brightness: Theme.of(context).brightness,
+            elevation: 1,
+            backgroundColor: StreamChatTheme.of(context)
+                .channelTheme
+                .channelHeaderTheme
+                .color,
+            centerTitle: true,
+            leading: Center(
+              child: UserAvatar(
+                user: user,
+                showOnlineStatus: false,
+                onTap: widget.onUserAvatarTap ??
+                    (_) => Scaffold.of(context).openDrawer(),
+                borderRadius: BorderRadius.circular(20),
+                constraints: BoxConstraints.tightFor(
+                  height: 40,
+                  width: 40,
+                ),
+              ),
+            ),
+            actions: [
+              StreamNeumorphicButton(
+                child: IconButton(
+                  icon: SvgPicture.asset(
+                    'svgs/icon_pen_write.svg',
+                    package: 'stream_chat_flutter',
+                    width: 24.0,
+                    height: 24.0,
+                    color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                  ),
+                  onPressed: status == ConnectionStatus.connected
+                      ? widget.onNewChatButtonTap
+                      : null,
+                ),
+              )
+            ],
+            title: Builder(
+              builder: (context) {
+                if (widget.titleBuilder != null) {
+                  return widget.titleBuilder(context, status, _client);
+                }
+
+                return _buildConnectedTitleState(context);
+              },
+            ),
+          );
+        });
   }
 
   Widget _buildConnectedTitleState(BuildContext context) => Text(
@@ -148,71 +205,4 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
               color: StreamChatTheme.of(context).colorTheme.black,
             ),
       );
-
-  Widget _buildConnectingTitleState(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          height: 16,
-          width: 16,
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-        SizedBox(width: 10),
-        Text(
-          'Searching for Network',
-          style: StreamChatTheme.of(context)
-              .channelTheme
-              .channelHeaderTheme
-              .title
-              .copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDisconnectedTitleState(BuildContext context, Client client) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Offline...',
-          style: StreamChatTheme.of(context)
-              .channelTheme
-              .channelHeaderTheme
-              .title
-              .copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        TextButton(
-          onPressed: () async {
-            await client.disconnect();
-            return client.connect();
-          },
-          child: Text(
-            'Try Again',
-            style: StreamChatTheme.of(context)
-                .channelTheme
-                .channelHeaderTheme
-                .title
-                .copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: StreamChatTheme.of(context).colorTheme.accentBlue,
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
