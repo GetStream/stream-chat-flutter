@@ -102,7 +102,7 @@ class _ChannelListHeaderState extends State<ChannelListHeader> {
                 child: Text(
                   text,
                   style: StreamChatTheme.of(context).textTheme.body.copyWith(
-                        color: StreamChatTheme.of(context).colorTheme.white,
+                        color: Colors.white,
                       ),
                 ),
               );
@@ -205,4 +205,10 @@ class _ChannelListHeaderState extends State<ChannelListHeader> {
               color: StreamChatTheme.of(context).colorTheme.black,
             ),
       );
+
+  @override
+  void dispose() {
+    _errorOverlay?.remove();
+    super.dispose();
+  }
 }
