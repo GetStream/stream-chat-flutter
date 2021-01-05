@@ -291,7 +291,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       type: MaterialType.transparency,
       child: Portal(
         child: InkWell(
-          onLongPress: () => onLongPress(context),
+          onLongPress: widget.message.isDeleted && !isFailedState
+              ? null
+              : () => onLongPress(context),
           child: Padding(
             padding: widget.padding ?? EdgeInsets.all(8),
             child: Transform(
