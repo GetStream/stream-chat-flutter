@@ -10,9 +10,9 @@ class StreamSvgIcon extends StatelessWidget {
 
   const StreamSvgIcon({
     this.assetName,
-    this.width,
-    this.height,
     this.color,
+    this.width = 24,
+    this.height = 24,
   });
 
   @override
@@ -320,6 +320,18 @@ class StreamSvgIcon extends StatelessWidget {
   }) {
     return StreamSvgIcon(
       assetName: 'Icon_Thread_Reply.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.reply({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_curve_line_left_up_big.svg',
       color: color,
       width: size,
       height: size,

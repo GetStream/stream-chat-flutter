@@ -71,6 +71,7 @@ void main() {
                 showCopyMessage: false,
                 showDeleteMessage: false,
                 showReply: false,
+                showThreadReply: false,
                 message: Message(
                   text: 'test',
                   user: User(
@@ -87,6 +88,7 @@ void main() {
 
       await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
+      expect(find.text('Reply'), findsNothing);
       expect(find.text('Thread reply'), findsNothing);
       expect(find.text('Edit message'), findsNothing);
       expect(find.text('Delete message'), findsNothing);

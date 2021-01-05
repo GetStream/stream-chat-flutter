@@ -444,7 +444,7 @@ class ChannelPageArgs {
   });
 }
 
-class ChannelPage extends StatelessWidget {
+class ChannelPage extends StatefulWidget {
   final int initialScrollIndex;
   final double initialAlignment;
   final bool highlightInitialMessage;
@@ -455,6 +455,31 @@ class ChannelPage extends StatelessWidget {
     this.initialAlignment,
     this.highlightInitialMessage = false,
   }) : super(key: key);
+
+  @override
+  _ChannelPageState createState() => _ChannelPageState();
+}
+
+class _ChannelPageState extends State<ChannelPage> {
+  Message _quotedMessage;
+  FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _reply(Message message) {
+    setState(() => _quotedMessage = message);
+    _focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -507,9 +532,11 @@ class ChannelPage extends StatelessWidget {
             child: Stack(
               children: <Widget>[
                 MessageListView(
-                  initialScrollIndex: initialScrollIndex,
-                  initialAlignment: initialAlignment,
-                  highlightInitialMessage: highlightInitialMessage,
+                  initialScrollIndex: widget.initialScrollIndex,
+                  initialAlignment: widget.initialAlignment,
+                  highlightInitialMessage: widget.highlightInitialMessage,
+                  onMessageSwiped: _reply,
+                  onReplyTap: _reply,
                   threadBuilder: (_, parentMessage) {
                     return ThreadPage(
                       parent: parentMessage,
@@ -557,7 +584,13 @@ class ChannelPage extends StatelessWidget {
               ],
             ),
           ),
-          MessageInput(),
+          MessageInput(
+            focusNode: _focusNode,
+            quotedMessage: _quotedMessage,
+            onQuotedMessageCleared: () {
+              setState(() => _quotedMessage = null);
+            },
+          ),
         ],
       ),
     );

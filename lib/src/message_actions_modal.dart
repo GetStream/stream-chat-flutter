@@ -15,7 +15,8 @@ import 'stream_chat_theme.dart';
 
 class MessageActionsModal extends StatelessWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  final void Function(Message) onThreadTap;
+  final void Function(Message) onThreadReplyTap;
+  final void Function(Message) onReplyTap;
   final Message message;
   final MessageTheme messageTheme;
   final bool showReactions;
@@ -24,6 +25,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool showEditMessage;
   final bool showResendMessage;
   final bool showReply;
+  final bool showThreadReply;
   final bool reverse;
   final ShapeBorder messageShape;
   final DisplayWidget showUserAvatar;
@@ -35,10 +37,12 @@ class MessageActionsModal extends StatelessWidget {
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
-    this.onThreadTap,
+    this.onReplyTap,
+    this.onThreadReplyTap,
     this.showCopyMessage = true,
     this.showReply = true,
     this.showResendMessage = true,
+    this.showThreadReply = true,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -51,17 +55,25 @@ class MessageActionsModal extends StatelessWidget {
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
+    var messageTextLength = message.text.length;
+    if (message.quotedMessage != null) {
+      var quotedMessageLength = message.quotedMessage.text.length + 40;
+      if (message.quotedMessage.attachments?.isNotEmpty == true) {
+        quotedMessageLength += 40;
+      }
+      if (quotedMessageLength > messageTextLength) {
+        messageTextLength = quotedMessageLength;
+      }
+    }
     final roughSentenceSize =
-        message.text.length * messageTheme.messageText.fontSize * 1.2;
+        messageTextLength * messageTheme.messageText.fontSize * 1.2;
     final divFactor = message.attachments?.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        Navigator.pop(context);
-      },
+      onTap: () => Navigator.pop(context),
       child: Stack(
         children: [
           Positioned.fill(
@@ -116,6 +128,7 @@ class MessageActionsModal extends StatelessWidget {
                                 showReactions: false,
                                 showUsername: false,
                                 showThreadReplyIndicator: false,
+                                showReplyIndicator: false,
                                 showUserAvatar: showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
@@ -165,6 +178,12 @@ class MessageActionsModal extends StatelessWidget {
                                               message.status == null) &&
                                           message.parentId == null)
                                         _buildReplyButton(context),
+                                      if (showThreadReply &&
+                                          (message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              message.status == null) &&
+                                          message.parentId == null)
+                                        _buildThreadReplyButton(context),
                                       if (showResendMessage)
                                         _buildResendMessage(context),
                                       if (showEditMessage)
@@ -187,6 +206,24 @@ class MessageActionsModal extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildReplyButton(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Reply',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: StreamSvgIcon.reply(
+        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        if (onReplyTap != null) {
+          onReplyTap(message);
+        }
+      },
     );
   }
 
@@ -276,8 +313,8 @@ class MessageActionsModal extends StatelessWidget {
       backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
       builder: (context) {
@@ -289,39 +326,26 @@ class MessageActionsModal extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(
-                  top: 16.0,
-                  left: 16.0,
-                  right: 16.0,
-                ),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    IconButton(
-                      icon: StreamSvgIcon.edit(
-                        size: 22,
-                        color:
-                            StreamChatTheme.of(context).primaryIconTheme.color,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamSvgIcon.edit(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
                       ),
-                      onPressed: () {},
                     ),
                     Text(
-                      'Edit message',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .copyWith(fontWeight: FontWeight.bold),
+                      'Edit Message',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        size: 22,
-                        color:
-                            StreamChatTheme.of(context).primaryIconTheme.color,
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.close_small(),
+                      onPressed: Navigator.of(context).pop,
                     ),
                   ],
                 ),
@@ -348,7 +372,7 @@ class MessageActionsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildReplyButton(BuildContext context) {
+  Widget _buildThreadReplyButton(BuildContext context) {
     return ListTile(
       title: Text(
         'Thread reply',
@@ -359,8 +383,8 @@ class MessageActionsModal extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
-        if (onThreadTap != null) {
-          onThreadTap(message);
+        if (onThreadReplyTap != null) {
+          onThreadReplyTap(message);
         }
       },
     );

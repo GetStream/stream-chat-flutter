@@ -97,7 +97,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                     height: 3.0,
                   ),
                   Text(
-                    '${_getSizeText(widget.attachment.extraData['file_size'])}',
+                    '${getSizeText(widget.attachment.extraData['file_size'])}',
                     style: StreamChatTheme.of(context).textTheme.body.copyWith(
                         color: StreamChatTheme.of(context)
                             .colorTheme
@@ -122,37 +122,6 @@ class _FileAttachmentState extends State<FileAttachment> {
             ),
           ],
         ),
-
-        // ListTile(
-        //   dense: true,
-        //   leading: Container(
-        //     child: _getFileTypeImage(attachment.extraData['mime_type']),
-        //     height: 40.0,
-        //     width: 33.33,
-        //   ),
-        //   title: Text(
-        //     attachment?.title ?? 'File',
-        //     style: TextStyle(
-        //       fontWeight: FontWeight.bold,
-        //     ),
-        //     maxLines: 3,
-        //   ),
-        //   subtitle: Text(
-        //     '${attachment.extraData['file_size'] ?? 'N/A'} bytes',
-        //     style: TextStyle(
-        //       color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
-        //     ),
-        //   ),
-        //   trailing: trailing ??
-        //       IconButton(
-        //         icon: StreamSvgIcon.cloud_download(
-        //           color: StreamChatTheme.of(context).colorTheme.black,
-        //         ),
-        //         onPressed: () {
-        //           launchURL(context, attachment.assetUrl);
-        //         },
-        //       ),
-        // ),
       ),
     );
   }
@@ -226,76 +195,6 @@ class _FileAttachmentState extends State<FileAttachment> {
           break;
       }
     }
-
-    switch (widget.attachment.extraData['mime_type']) {
-      case '7z':
-        return StreamSvgIcon.filetype_7z();
-        break;
-      case 'csv':
-        return StreamSvgIcon.filetype_csv();
-        break;
-      case 'doc':
-        return StreamSvgIcon.filetype_doc();
-        break;
-      case 'docx':
-        return StreamSvgIcon.filetype_docx();
-        break;
-      case 'html':
-        return StreamSvgIcon.filetype_html();
-        break;
-      case 'md':
-        return StreamSvgIcon.filetype_md();
-        break;
-      case 'odt':
-        return StreamSvgIcon.filetype_odt();
-        break;
-      case 'pdf':
-        return StreamSvgIcon.filetype_pdf();
-        break;
-      case 'ppt':
-        return StreamSvgIcon.filetype_ppt();
-        break;
-      case 'pptx':
-        return StreamSvgIcon.filetype_pptx();
-        break;
-      case 'rar':
-        return StreamSvgIcon.filetype_rar();
-        break;
-      case 'rtf':
-        return StreamSvgIcon.filetype_rtf();
-        break;
-      case 'tar':
-        return StreamSvgIcon.filetype_tar();
-        break;
-      case 'txt':
-        return StreamSvgIcon.filetype_txt();
-        break;
-      case 'xls':
-        return StreamSvgIcon.filetype_xls();
-        break;
-      case 'xlsx':
-        return StreamSvgIcon.filetype_xlsx();
-        break;
-      case 'zip':
-        return StreamSvgIcon.filetype_zip();
-        break;
-      default:
-        return StreamSvgIcon.filetype_Generic();
-        break;
-    }
-  }
-
-  String _getSizeText(int bytes) {
-    if (bytes == null) {
-      return 'Size N/A';
-    }
-
-    if (bytes <= 1000) {
-      return '${bytes} bytes';
-    } else if (bytes <= 100000) {
-      return '${(bytes / 1000).toStringAsFixed(2)} KB';
-    } else {
-      return '${(bytes / 1000000).toStringAsFixed(2)} MB';
-    }
+    return getFileTypeImage(widget.attachment.extraData['mime_type']);
   }
 }

@@ -16,6 +16,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
 import 'stream_channel.dart';
+import 'swipeable.dart';
 
 typedef MessageBuilder = Widget Function(
   BuildContext,
@@ -28,6 +29,9 @@ typedef ParentMessageBuilder = Widget Function(
 );
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
+
+typedef OnMessageSwiped = void Function(Message);
+typedef ReplyTapCallback = void Function(Message);
 
 class MessageDetails {
   /// True if the message belongs to the current user
@@ -109,12 +113,14 @@ class MessageListView extends StatefulWidget {
     this.parentMessage,
     this.threadBuilder,
     this.onThreadTap,
+    this.onReplyTap,
     this.dateDividerBuilder,
-    this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
+    this.scrollPhysics = const ClampingScrollPhysics(),
     this.initialScrollIndex,
     this.initialAlignment,
     this.scrollController,
     this.itemPositionListener,
+    this.onMessageSwiped,
     this.highlightInitialMessage = false,
     this.onShowMessage,
   }) : super(key: key);
@@ -157,6 +163,12 @@ class MessageListView extends StatefulWidget {
 
   /// The ScrollPhysics used by the ListView
   final ScrollPhysics scrollPhysics;
+
+  /// Called when message item gets swiped
+  final OnMessageSwiped onMessageSwiped;
+
+  ///
+  final ReplyTapCallback onReplyTap;
 
   /// If true the list will highlight the initialMessage if there is any.
   ///
@@ -398,7 +410,7 @@ class _MessageListViewState extends State<MessageListView> {
                       if (widget.messageBuilder != null) {
                         messageWidget = Builder(
                           key: ValueKey<String>('MESSAGE-${message.id}'),
-                          builder: (_) => widget.messageBuilder(
+                          builder: (context) => widget.messageBuilder(
                               context,
                               MessageDetails(
                                 context,
@@ -690,6 +702,7 @@ class _MessageListViewState extends State<MessageListView> {
     return MessageWidget(
       showThreadReplyIndicator: false,
       showInChannelIndicator: false,
+      showReplyIndicator: false,
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
@@ -748,6 +761,9 @@ class _MessageListViewState extends State<MessageListView> {
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
 
+    final isThreadMessage =
+        widget.parentMessage != null || message?.showInChannel == true;
+
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
@@ -759,6 +775,26 @@ class _MessageListViewState extends State<MessageListView> {
         bottom: index == 0 ? 30 : (isNextUser ? 2 : 7),
         top: 3,
       ),
+      onQuotedMessageTap: (quotedMessageId) async {
+        final scrollToIndex = () {
+          final index = messages.indexWhere((m) => m.id == quotedMessageId);
+          _scrollController?.scrollTo(
+            index: index,
+            duration: const Duration(milliseconds: 350),
+          );
+        };
+        if (messages.map((e) => e.id).contains(quotedMessageId)) {
+          scrollToIndex();
+        } else {
+          streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (messages.map((e) => e.id).contains(quotedMessageId)) {
+                scrollToIndex();
+              }
+            });
+          });
+        }
+      },
       showInChannelIndicator: widget.parentMessage == null,
       showThreadReplyIndicator: widget.parentMessage == null,
       showUsername: !isMyMessage && !isNextUser,
@@ -771,6 +807,7 @@ class _MessageListViewState extends State<MessageListView> {
       showDeleteMessage: isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
       onThreadTap: _onThreadTap,
+      onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
@@ -794,6 +831,16 @@ class _MessageListViewState extends State<MessageListView> {
       allRead: allRead,
       onShowMessage: widget.onShowMessage,
     );
+
+    if (!isThreadMessage) {
+      child = Swipeable(
+        onSwipeEnd: () => widget.onMessageSwiped(message),
+        backgroundIcon: StreamSvgIcon.reply(
+          color: StreamChatTheme.of(context).colorTheme.accentBlue,
+        ),
+        child: child,
+      );
+    }
 
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
