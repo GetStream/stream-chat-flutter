@@ -227,22 +227,22 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
-        unreadCounterColor: colorTheme.accentRed,
-        avatarTheme: AvatarTheme(
-          borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
+          unreadCounterColor: colorTheme.accentRed,
+          avatarTheme: AvatarTheme(
+            borderRadius: BorderRadius.circular(20),
+            constraints: BoxConstraints.tightFor(
+              height: 40,
+              width: 40,
+            ),
           ),
-        ),
-        title: textTheme.bodyBold,
-        subtitle: textTheme.footnote.copyWith(
-          color: Color(0xff7A7A7A),
-        ),
-        lastMessageAt: textTheme.footnote.copyWith(
-          color: colorTheme.black.withOpacity(.5),
-        ),
-      ),
+          title: textTheme.bodyBold,
+          subtitle: textTheme.footnote.copyWith(
+            color: Color(0xff7A7A7A),
+          ),
+          lastMessageAt: textTheme.footnote.copyWith(
+            color: colorTheme.black.withOpacity(.5),
+          ),
+          indicatorIconSize: 16.0),
       channelTheme: ChannelTheme(
         messageInputButtonIconTheme: theme.iconTheme.copyWith(
           color: accentColor,
@@ -698,6 +698,7 @@ class ChannelPreviewTheme {
   final TextStyle lastMessageAt;
   final AvatarTheme avatarTheme;
   final Color unreadCounterColor;
+  final double indicatorIconSize;
 
   const ChannelPreviewTheme({
     this.title,
@@ -705,6 +706,7 @@ class ChannelPreviewTheme {
     this.lastMessageAt,
     this.avatarTheme,
     this.unreadCounterColor,
+    this.indicatorIconSize,
   });
 
   ChannelPreviewTheme copyWith({
@@ -713,6 +715,7 @@ class ChannelPreviewTheme {
     TextStyle lastMessageAt,
     AvatarTheme avatarTheme,
     Color unreadCounterColor,
+    double indicatorIconSize,
   }) =>
       ChannelPreviewTheme(
         title: title ?? this.title,
@@ -720,6 +723,7 @@ class ChannelPreviewTheme {
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
+        indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
       );
 }
 

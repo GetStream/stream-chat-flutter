@@ -104,8 +104,7 @@ class ChannelPreview extends StatelessWidget {
                             message: channel.state.lastMessage,
                             size: StreamChatTheme.of(context)
                                 .channelPreviewTheme
-                                .lastMessageAt
-                                .fontSize,
+                                .indicatorIconSize,
                             isMessageRead: channel.state.read
                                     ?.where((element) =>
                                         element.user.id !=

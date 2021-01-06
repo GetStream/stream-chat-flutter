@@ -194,6 +194,18 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  factory StreamSvgIcon.checkAll({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_check_all.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   factory StreamSvgIcon.penWrite({
     double size,
     Color color,

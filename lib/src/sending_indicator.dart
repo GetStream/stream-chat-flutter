@@ -17,15 +17,13 @@ class SendingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isMessageRead) {
-      return Icon(
-        Icons.done_all_rounded,
+      return StreamSvgIcon.checkAll(
         size: size,
         color: StreamChatTheme.of(context).colorTheme.accentBlue,
       );
     }
     if (message.status == MessageSendingStatus.SENT || message.status == null) {
-      return Icon(
-        Icons.done,
+      return StreamSvgIcon.check(
         size: size,
         color: IconTheme.of(context).color.withOpacity(0.5),
       );

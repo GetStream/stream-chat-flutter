@@ -157,6 +157,7 @@ class ChannelListView extends StatefulWidget {
 class _ChannelListViewState extends State<ChannelListView>
     with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
+  final SlidableController _slideController = SlidableController();
 
   @override
   Widget build(BuildContext context) {
@@ -562,6 +563,7 @@ class _ChannelListViewState extends State<ChannelListView>
               final backgroundColor =
                   StreamChatTheme.of(context).colorTheme.whiteSmoke;
               child = Slidable(
+                controller: _slideController,
                 enabled: widget.swipeToAction,
                 actionPane: SlidableBehindActionPane(),
                 actionExtentRatio: 0.12,
