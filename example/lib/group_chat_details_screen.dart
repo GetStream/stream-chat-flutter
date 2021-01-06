@@ -185,29 +185,14 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                   itemCount: _selectedUsers.length + 1,
                   separatorBuilder: (_, __) => Container(
                     height: 1,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? StreamChatTheme.of(context)
-                            .colorTheme
-                            .white
-                            .withOpacity(0.1)
-                        : StreamChatTheme.of(context)
-                            .colorTheme
-                            .black
-                            .withOpacity(0.1),
+                    color: StreamChatTheme.of(context).colorTheme.greyWhisper,
                   ),
                   itemBuilder: (_, index) {
                     if (index == _selectedUsers.length) {
                       return Container(
                         height: 1,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? StreamChatTheme.of(context)
-                                .colorTheme
-                                .white
-                                .withOpacity(0.1)
-                            : StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(0.1),
+                        color:
+                            StreamChatTheme.of(context).colorTheme.greyWhisper,
                       );
                     }
                     final user = _selectedUsers[index];
