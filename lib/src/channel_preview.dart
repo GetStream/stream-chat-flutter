@@ -269,14 +269,18 @@ class ChannelPreview extends StatelessWidget {
     var textList = text.split(' ');
     List<TextSpan> resList = [];
     for (var e in textList) {
-      if (mentions.any((element) => '@${element.name}' == e)) {
+      if (mentions != null &&
+          mentions.isNotEmpty &&
+          mentions.any((element) => '@${element.name}' == e)) {
         resList.add(TextSpan(
           text: '$e ',
           style: mentionsTextStyle,
         ));
-      } else if (attachments
-          .where((e) => e.title != null)
-          .any((element) => element.title == e)) {
+      } else if (attachments != null &&
+          attachments.isNotEmpty &&
+          attachments
+              .where((e) => e.title != null)
+              .any((element) => element.title == e)) {
         resList.add(TextSpan(
           text: '$e ',
           style: normalTextStyle.copyWith(fontStyle: FontStyle.italic),
