@@ -113,13 +113,35 @@ class MessageSearchItem extends StatelessWidget {
           } else if (e.type == 'giphy') {
             return '[GIF]';
           }
-          return null;
+          return e == message.attachments.last
+              ? (e.title ?? 'File')
+              : '${e.title ?? 'File'}, ';
         }).where((e) => e != null),
         message.text ?? '',
       ];
 
       text = parts.join(' ');
     }
+
+    return RichText(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: _getDisplayText(
+        text,
+        message.mentionedUsers,
+        StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+              fontStyle: (message.isSystem || message.isDeleted)
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+            ),
+        StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+              fontStyle: (message.isSystem || message.isDeleted)
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+    );
 
     return Text(
       text,
@@ -131,5 +153,26 @@ class MessageSearchItem extends StatelessWidget {
                 : FontStyle.normal,
           ),
     );
+  }
+
+  TextSpan _getDisplayText(String text, List<User> mentions,
+      TextStyle normalTextStyle, TextStyle mentionsTextStyle) {
+    var textList = text.split(' ');
+    List<TextSpan> resList = [];
+    for (var e in textList) {
+      if (mentions.any((element) => '@${element.name}' == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: mentionsTextStyle,
+        ));
+      } else {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: normalTextStyle,
+        ));
+      }
+    }
+
+    return TextSpan(children: resList);
   }
 }

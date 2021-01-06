@@ -220,7 +220,9 @@ class ChannelPreview extends StatelessWidget {
               } else if (e.type == 'giphy') {
                 return '[GIF]';
               }
-              return null;
+              return e == lastMessage.attachments.last
+                  ? e.title
+                  : '${e.title}, ';
             }).where((e) => e != null),
             lastMessage.text ?? '',
           ];
@@ -228,22 +230,53 @@ class ChannelPreview extends StatelessWidget {
           text = parts.join(' ');
         }
 
-        return Text(
-          text,
+        return RichText(
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style:
-              StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .channelPreviewTheme
-                        .subtitle
-                        .color,
-                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                        ? FontStyle.italic
-                        : FontStyle.normal,
-                  ),
+          text: _getDisplayText(
+            text,
+            lastMessage.mentionedUsers,
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                color: StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .subtitle
+                    .color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal),
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                color: StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .subtitle
+                    .color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                fontWeight: FontWeight.bold),
+          ),
         );
       },
     );
+  }
+
+  TextSpan _getDisplayText(String text, List<User> mentions,
+      TextStyle normalTextStyle, TextStyle mentionsTextStyle) {
+    var textList = text.split(' ');
+    List<TextSpan> resList = [];
+    for (var e in textList) {
+      if (mentions.any((element) => '@${element.name}' == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: mentionsTextStyle,
+        ));
+      } else {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: normalTextStyle,
+        ));
+      }
+    }
+
+    return TextSpan(children: resList);
   }
 }
