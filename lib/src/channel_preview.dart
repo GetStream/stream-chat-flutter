@@ -222,7 +222,7 @@ class ChannelPreview extends StatelessWidget {
               }
               return e == lastMessage.attachments.last
                   ? (e.title ?? 'File')
-                  : '${e.title ?? 'File'}, ';
+                  : '${e.title ?? 'File'} , ';
             }).where((e) => e != null),
             lastMessage.text ?? '',
           ];
@@ -236,6 +236,7 @@ class ChannelPreview extends StatelessWidget {
           text: _getDisplayText(
             text,
             lastMessage.mentionedUsers,
+            lastMessage.attachments,
             StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
                 color: StreamChatTheme.of(context)
                     .channelPreviewTheme
@@ -259,8 +260,12 @@ class ChannelPreview extends StatelessWidget {
     );
   }
 
-  TextSpan _getDisplayText(String text, List<User> mentions,
-      TextStyle normalTextStyle, TextStyle mentionsTextStyle) {
+  TextSpan _getDisplayText(
+      String text,
+      List<User> mentions,
+      List<Attachment> attachments,
+      TextStyle normalTextStyle,
+      TextStyle mentionsTextStyle) {
     var textList = text.split(' ');
     List<TextSpan> resList = [];
     for (var e in textList) {
@@ -268,6 +273,13 @@ class ChannelPreview extends StatelessWidget {
         resList.add(TextSpan(
           text: '$e ',
           style: mentionsTextStyle,
+        ));
+      } else if (attachments
+          .where((e) => e.title != null)
+          .any((element) => element.title == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: normalTextStyle.copyWith(fontStyle: FontStyle.italic),
         ));
       } else {
         resList.add(TextSpan(

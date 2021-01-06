@@ -115,7 +115,7 @@ class MessageSearchItem extends StatelessWidget {
           }
           return e == message.attachments.last
               ? (e.title ?? 'File')
-              : '${e.title ?? 'File'}, ';
+              : '${e.title ?? 'File'} , ';
         }).where((e) => e != null),
         message.text ?? '',
       ];
@@ -129,6 +129,7 @@ class MessageSearchItem extends StatelessWidget {
       text: _getDisplayText(
         text,
         message.mentionedUsers,
+        message.attachments,
         StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
               fontStyle: (message.isSystem || message.isDeleted)
                   ? FontStyle.italic
@@ -155,8 +156,12 @@ class MessageSearchItem extends StatelessWidget {
     );
   }
 
-  TextSpan _getDisplayText(String text, List<User> mentions,
-      TextStyle normalTextStyle, TextStyle mentionsTextStyle) {
+  TextSpan _getDisplayText(
+      String text,
+      List<User> mentions,
+      List<Attachment> attachments,
+      TextStyle normalTextStyle,
+      TextStyle mentionsTextStyle) {
     var textList = text.split(' ');
     List<TextSpan> resList = [];
     for (var e in textList) {
@@ -164,6 +169,13 @@ class MessageSearchItem extends StatelessWidget {
         resList.add(TextSpan(
           text: '$e ',
           style: mentionsTextStyle,
+        ));
+      } else if (attachments
+          .where((e) => e.title != null)
+          .any((element) => element.title == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: normalTextStyle.copyWith(fontStyle: FontStyle.italic),
         ));
       } else {
         resList.add(TextSpan(
