@@ -180,21 +180,8 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   child: Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          StreamChatTheme.of(context)
-                              .colorTheme
-                              .black
-                              .withOpacity(0.02),
-                          StreamChatTheme.of(context)
-                              .colorTheme
-                              .white
-                              .withOpacity(0.05),
-                        ],
-                        stops: [0, 1],
-                      ),
+                      gradient:
+                          StreamChatTheme.of(context).colorTheme.bgGradient,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -206,10 +193,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                             ? 'Matches for \"$_userNameQuery\"'
                             : 'On the platform',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .black
-                              .withOpacity(0.5),
+                          color: StreamChatTheme.of(context).colorTheme.grey,
                         ),
                       ),
                     ),
@@ -271,7 +255,9 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                   padding: const EdgeInsets.all(24),
                                   child: StreamSvgIcon.search(
                                     size: 96,
-                                    color: Colors.grey,
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .grey,
                                   ),
                                 ),
                                 Text(
@@ -280,10 +266,10 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                       .textTheme
                                       .footnote
                                       .copyWith(
-                                          color: StreamChatTheme.of(context)
-                                              .colorTheme
-                                              .black
-                                              .withOpacity(.5)),
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .grey,
+                                      ),
                                 ),
                               ],
                             ),

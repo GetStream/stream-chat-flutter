@@ -83,10 +83,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     'NAME',
                     style: TextStyle(
                       fontSize: 12,
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(0.5),
+                      color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
                   ),
                   SizedBox(width: 16),
@@ -103,11 +100,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         contentPadding: const EdgeInsets.all(0),
                         hintText: 'Choose a group chat name',
                         hintStyle: TextStyle(
-                            fontSize: 14,
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(.5)),
+                          fontSize: 14,
+                          color: StreamChatTheme.of(context).colorTheme.grey,
+                        ),
                       ),
                     ),
                   ),
@@ -122,7 +117,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 icon: StreamSvgIcon.check(
                   size: 24,
                   color: _isGroupNameEmpty
-                      ? Colors.grey
+                      ? StreamChatTheme.of(context).colorTheme.grey
                       : StreamChatTheme.of(context).colorTheme.accentBlue,
                 ),
                 onPressed: _isGroupNameEmpty
@@ -155,14 +150,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             Container(
               width: double.maxFinite,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                    StreamChatTheme.of(context).colorTheme.whiteSnow,
-                  ],
-                ),
+                gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -172,7 +160,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 child: Text(
                   '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    color: StreamChatTheme.of(context).colorTheme.grey,
                   ),
                 ),
               ),

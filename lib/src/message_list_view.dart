@@ -350,18 +350,9 @@ class _MessageListViewState extends State<MessageListView> {
                             buildParentMessage(widget.parentMessage),
                             Container(
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .whiteSmoke,
-                                    StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .whiteSnow,
-                                  ],
-                                ),
+                                gradient: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .bgGradient,
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -850,7 +841,8 @@ class _MessageListViewState extends State<MessageListView> {
         widget.highlightInitialMessage &&
         _isInitialMessage(message.id)) {
       final colorTheme = StreamChatTheme.of(context).colorTheme;
-      final highlightColor = widget.messageHighlightColor ?? colorTheme.yellow;
+      final highlightColor =
+          widget.messageHighlightColor ?? colorTheme.highlight;
       child = TweenAnimationBuilder<Color>(
         tween: ColorTween(
           begin: highlightColor,

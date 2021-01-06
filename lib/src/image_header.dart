@@ -106,6 +106,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
     showDialog(
         context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
         builder: (context) {
           return StreamChannel(
             channel: channel,

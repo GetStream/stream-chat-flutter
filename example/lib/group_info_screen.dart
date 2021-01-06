@@ -589,6 +589,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
     showDialog(
       context: context,
+      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       builder: (context) {
         return StatefulBuilder(builder: (context, modalSetState) {
           modalSetStateCallback = modalSetState;

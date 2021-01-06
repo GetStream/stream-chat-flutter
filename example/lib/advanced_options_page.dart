@@ -271,6 +271,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
+                              barrierColor: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .overlay,
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(

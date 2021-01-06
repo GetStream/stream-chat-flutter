@@ -157,9 +157,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 icon: StreamSvgIcon.Icon_grid(
                   color: StreamChatTheme.of(context).colorTheme.black,
                 ),
-                onPressed: () {
-                  _buildPhotosModal(context);
-                },
+                onPressed: () => _showPhotosModal(context),
               ),
             ],
           ),
@@ -168,13 +166,14 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  Widget _buildPhotosModal(context) {
+  void _showPhotosModal(context) {
     var videoAttachments = widget.mediaAttachments
         .where((element) => element.type == 'video')
         .toList();
 
     showModalBottomSheet(
       context: context,
+      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
       ),
@@ -207,9 +206,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       icon: StreamSvgIcon.close(
                         color: StreamChatTheme.of(context).colorTheme.black,
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.maybePop(context),
                     ),
                   ),
                 ],

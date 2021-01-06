@@ -363,12 +363,10 @@ class _UserListViewState extends State<UserListView>
               child: Text(
                 header,
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.5,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .black
-                        .withOpacity(0.3)),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.5,
+                  color: StreamChatTheme.of(context).colorTheme.grey,
+                ),
               ),
             ),
           );

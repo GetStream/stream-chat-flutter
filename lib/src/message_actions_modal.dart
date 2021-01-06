@@ -73,17 +73,17 @@ class MessageActionsModal extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.pop(context),
+      onTap: () => Navigator.maybePop(context),
       child: Stack(
         children: [
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(
-                sigmaX: 10.8731,
-                sigmaY: 10.8731,
+                sigmaX: 10,
+                sigmaY: 10,
               ),
               child: Container(
-                color: Colors.black.withOpacity(.2),
+                color: StreamChatTheme.of(context).colorTheme.overlay,
               ),
             ),
           ),

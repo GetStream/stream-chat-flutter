@@ -460,7 +460,10 @@ class ColorTheme {
   final Color accentBlue;
   final Color accentRed;
   final Color accentGreen;
-  final Color yellow;
+  final Color highlight;
+  final Color overlay;
+  final Color overlayDark;
+  final Gradient bgGradient;
 
   ColorTheme.light({
     this.black = const Color(0xff000000),
@@ -474,7 +477,15 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
-    this.yellow = const Color(0Xfffbf4dd),
+    this.highlight = const Color(0xfffbf4dd),
+    this.overlay = const Color.fromRGBO(0, 0, 0, 0.2),
+    this.overlayDark = const Color.fromRGBO(0, 0, 0, 0.6),
+    this.bgGradient = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [const Color(0xfff7f7f7), const Color(0xfffcfcfc)],
+      stops: [0, 1],
+    ),
   });
 
   ColorTheme.dark({
@@ -489,7 +500,15 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
-    this.yellow = const Color(0xff302d22),
+    this.highlight = const Color(0xff302d22),
+    this.overlay = const Color.fromRGBO(0, 0, 0, 0.4),
+    this.overlayDark = const Color.fromRGBO(255, 255, 255, 0.6),
+    this.bgGradient = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [const Color(0xff101214), const Color(0xff070a0d)],
+      stops: [0, 1],
+    ),
   });
 
   ColorTheme copyWith({
@@ -505,7 +524,10 @@ class ColorTheme {
     Color accentBlue,
     Color accentRed,
     Color accentGreen,
-    Color yellow,
+    Color highlight,
+    Color overlay,
+    Color overlayDark,
+    Gradient bgGradient,
   }) {
     return type == ColorThemeType.light
         ? ColorTheme.light(
@@ -520,7 +542,10 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
-            yellow: yellow ?? this.yellow,
+            highlight: highlight ?? this.highlight,
+            overlay: overlay ?? this.overlay,
+            overlayDark: overlayDark ?? this.overlayDark,
+            bgGradient: bgGradient ?? this.bgGradient,
           )
         : ColorTheme.dark(
             black: black ?? this.black,
@@ -534,7 +559,10 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
-            yellow: yellow ?? this.yellow,
+            highlight: highlight ?? this.highlight,
+            overlay: overlay ?? this.overlay,
+            overlayDark: overlayDark ?? this.overlayDark,
+            bgGradient: bgGradient ?? this.bgGradient,
           );
   }
 
@@ -552,7 +580,10 @@ class ColorTheme {
       accentBlue: other.accentBlue,
       accentRed: other.accentRed,
       accentGreen: other.accentGreen,
-      yellow: other.yellow,
+      highlight: other.highlight,
+      overlay: other.overlay,
+      overlayDark: other.overlayDark,
+      bgGradient: other.bgGradient,
     );
   }
 }

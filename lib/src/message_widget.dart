@@ -676,6 +676,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     final channel = StreamChannel.of(context).channel;
     showDialog(
         context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
         builder: (context) {
           return StreamChannel(
             channel: channel,
@@ -716,6 +717,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     final channel = StreamChannel.of(context).channel;
     showDialog(
         context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
         builder: (context) {
           return StreamChannel(
             channel: channel,

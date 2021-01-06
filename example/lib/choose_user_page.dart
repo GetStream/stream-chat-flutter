@@ -108,6 +108,9 @@ class ChooseUserPage extends StatelessWidget {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
+                              barrierColor: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .overlay,
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(
