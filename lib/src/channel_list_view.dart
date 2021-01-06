@@ -9,6 +9,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'dart:ui' as ui;
 
 import '../stream_chat_flutter.dart';
 import 'channel_bottom_sheet.dart';
@@ -157,6 +158,7 @@ class ChannelListView extends StatefulWidget {
 class _ChannelListViewState extends State<ChannelListView>
     with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
+  final SlidableController _slideController = SlidableController();
 
   @override
   Widget build(BuildContext context) {
@@ -562,6 +564,7 @@ class _ChannelListViewState extends State<ChannelListView>
               final backgroundColor =
                   StreamChatTheme.of(context).colorTheme.whiteSmoke;
               child = Slidable(
+                controller: _slideController,
                 enabled: widget.swipeToAction,
                 actionPane: SlidableBehindActionPane(),
                 actionExtentRatio: 0.12,
@@ -726,9 +729,17 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   Widget _separatorBuilder(context, i) {
-    return Container(
-      height: 1,
-      color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.08),
+    var effect = StreamChatTheme.of(context).colorTheme.borderTop;
+
+    return BackdropFilter(
+      filter: ui.ImageFilter.blur(
+        sigmaX: effect.sigmaX,
+        sigmaY: effect.sigmaY,
+      ),
+      child: Container(
+        height: 1,
+        color: effect.color.withOpacity(0.08),
+      ),
     );
   }
 

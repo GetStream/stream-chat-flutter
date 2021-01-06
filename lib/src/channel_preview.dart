@@ -104,8 +104,7 @@ class ChannelPreview extends StatelessWidget {
                             message: channel.state.lastMessage,
                             size: StreamChatTheme.of(context)
                                 .channelPreviewTheme
-                                .lastMessageAt
-                                .fontSize,
+                                .indicatorIconSize,
                             isMessageRead: channel.state.read
                                     ?.where((element) =>
                                         element.user.id !=
@@ -220,7 +219,9 @@ class ChannelPreview extends StatelessWidget {
               } else if (e.type == 'giphy') {
                 return '[GIF]';
               }
-              return null;
+              return e == lastMessage.attachments.last
+                  ? (e.title ?? 'File')
+                  : '${e.title ?? 'File'} , ';
             }).where((e) => e != null),
             lastMessage.text ?? '',
           ];
@@ -228,22 +229,69 @@ class ChannelPreview extends StatelessWidget {
           text = parts.join(' ');
         }
 
-        return Text(
-          text,
+        return Text.rich(
+          _getDisplayText(
+            text,
+            lastMessage.mentionedUsers,
+            lastMessage.attachments,
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                color: StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .subtitle
+                    .color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal),
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                color: StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .subtitle
+                    .color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                fontWeight: FontWeight.bold),
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style:
-              StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .channelPreviewTheme
-                        .subtitle
-                        .color,
-                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                        ? FontStyle.italic
-                        : FontStyle.normal,
-                  ),
         );
       },
     );
+  }
+
+  TextSpan _getDisplayText(
+      String text,
+      List<User> mentions,
+      List<Attachment> attachments,
+      TextStyle normalTextStyle,
+      TextStyle mentionsTextStyle) {
+    var textList = text.split(' ');
+    List<TextSpan> resList = [];
+    for (var e in textList) {
+      if (mentions != null &&
+          mentions.isNotEmpty &&
+          mentions.any((element) => '@${element.name}' == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: mentionsTextStyle,
+        ));
+      } else if (attachments != null &&
+          attachments.isNotEmpty &&
+          attachments
+              .where((e) => e.title != null)
+              .any((element) => element.title == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: normalTextStyle.copyWith(fontStyle: FontStyle.italic),
+        ));
+      } else {
+        resList.add(TextSpan(
+          text: e == textList.last ? '$e' : '$e ',
+          style: normalTextStyle,
+        ));
+      }
+    }
+
+    return TextSpan(children: resList);
   }
 }

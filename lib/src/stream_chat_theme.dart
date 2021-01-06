@@ -187,22 +187,22 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
-        unreadCounterColor: colorTheme.accentRed,
-        avatarTheme: AvatarTheme(
-          borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
+          unreadCounterColor: colorTheme.accentRed,
+          avatarTheme: AvatarTheme(
+            borderRadius: BorderRadius.circular(20),
+            constraints: BoxConstraints.tightFor(
+              height: 40,
+              width: 40,
+            ),
           ),
-        ),
-        title: textTheme.bodyBold,
-        subtitle: textTheme.footnote.copyWith(
-          color: Color(0xff7A7A7A),
-        ),
-        lastMessageAt: textTheme.footnote.copyWith(
-          color: colorTheme.black.withOpacity(.5),
-        ),
-      ),
+          title: textTheme.bodyBold,
+          subtitle: textTheme.footnote.copyWith(
+            color: Color(0xff7A7A7A),
+          ),
+          lastMessageAt: textTheme.footnote.copyWith(
+            color: colorTheme.black.withOpacity(.5),
+          ),
+          indicatorIconSize: 16.0),
       channelTheme: ChannelTheme(
         messageInputButtonIconTheme: theme.iconTheme.copyWith(
           color: accentColor,
@@ -478,6 +478,10 @@ class ColorTheme {
   final Color accentBlue;
   final Color accentRed;
   final Color accentGreen;
+  final Effect borderTop;
+  final Effect borderBottom;
+  final Effect shadowIconButton;
+  final Effect modalShadow;
   final Color highlight;
   final Color overlay;
   final Color overlayDark;
@@ -504,6 +508,14 @@ class ColorTheme {
       colors: [const Color(0xfff7f7f7), const Color(0xfffcfcfc)],
       stops: [0, 1],
     ),
+    this.borderTop = const Effect(
+        sigmaX: 0, sigmaY: -1, color: Color(0xff141924), blur: 0.0),
+    this.borderBottom =
+        const Effect(sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0),
+    this.shadowIconButton = const Effect(
+        sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
+    this.modalShadow = const Effect(
+        sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8.0),
   });
 
   ColorTheme.dark({
@@ -518,6 +530,14 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
+    this.borderTop = const Effect(
+        sigmaX: 0, sigmaY: -1, color: Color(0xff141924), blur: 0.0),
+    this.borderBottom =
+        const Effect(sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0),
+    this.shadowIconButton = const Effect(
+        sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
+    this.modalShadow = const Effect(
+        sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8.0),
     this.highlight = const Color(0xff302d22),
     this.overlay = const Color.fromRGBO(0, 0, 0, 0.4),
     this.overlayDark = const Color.fromRGBO(255, 255, 255, 0.6),
@@ -542,6 +562,10 @@ class ColorTheme {
     Color accentBlue,
     Color accentRed,
     Color accentGreen,
+    Effect borderTop,
+    Effect borderBottom,
+    Effect shadowIconButton,
+    Effect modalShadow,
     Color highlight,
     Color overlay,
     Color overlayDark,
@@ -560,6 +584,10 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
+            borderTop: borderTop ?? this.borderTop,
+            borderBottom: borderBottom ?? this.borderBottom,
+            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+            modalShadow: modalShadow ?? this.modalShadow,
             highlight: highlight ?? this.highlight,
             overlay: overlay ?? this.overlay,
             overlayDark: overlayDark ?? this.overlayDark,
@@ -577,6 +605,10 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
+            borderTop: borderTop ?? this.borderTop,
+            borderBottom: borderBottom ?? this.borderBottom,
+            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+            modalShadow: modalShadow ?? this.modalShadow,
             highlight: highlight ?? this.highlight,
             overlay: overlay ?? this.overlay,
             overlayDark: overlayDark ?? this.overlayDark,
@@ -602,6 +634,10 @@ class ColorTheme {
       overlay: other.overlay,
       overlayDark: other.overlayDark,
       bgGradient: other.bgGradient,
+      borderTop: other.borderTop,
+      borderBottom: other.borderBottom,
+      shadowIconButton: other.shadowIconButton,
+      modalShadow: other.modalShadow,
     );
   }
 }
@@ -761,6 +797,7 @@ class ChannelPreviewTheme {
   final TextStyle lastMessageAt;
   final AvatarTheme avatarTheme;
   final Color unreadCounterColor;
+  final double indicatorIconSize;
 
   const ChannelPreviewTheme({
     this.title,
@@ -768,6 +805,7 @@ class ChannelPreviewTheme {
     this.lastMessageAt,
     this.avatarTheme,
     this.unreadCounterColor,
+    this.indicatorIconSize,
   });
 
   ChannelPreviewTheme copyWith({
@@ -776,6 +814,7 @@ class ChannelPreviewTheme {
     TextStyle lastMessageAt,
     AvatarTheme avatarTheme,
     Color unreadCounterColor,
+    double indicatorIconSize,
   }) =>
       ChannelPreviewTheme(
         title: title ?? this.title,
@@ -783,6 +822,7 @@ class ChannelPreviewTheme {
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
+        indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
       );
 
   ChannelPreviewTheme merge(ChannelPreviewTheme other) {
@@ -834,4 +874,35 @@ class ChannelHeaderTheme {
       color: other.color,
     );
   }
+}
+
+class Effect {
+  final double sigmaX;
+  final double sigmaY;
+  final Color color;
+  final double alpha;
+  final double blur;
+
+  const Effect({
+    this.sigmaX,
+    this.sigmaY,
+    this.color,
+    this.alpha,
+    this.blur,
+  });
+
+  Effect copyWith({
+    double sigmaX,
+    double sigmaY,
+    Color color,
+    double alpha,
+    double blur,
+  }) =>
+      Effect(
+        sigmaX: sigmaX ?? this.sigmaX,
+        sigmaY: sigmaY ?? this.sigmaY,
+        color: color ?? this.color,
+        alpha: color ?? this.alpha,
+        blur: blur ?? this.blur,
+      );
 }
