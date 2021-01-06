@@ -45,6 +45,9 @@ class StreamChatThemeData {
   /// The text themes used in the widgets
   final TextTheme textTheme;
 
+  /// The button themes used in the widgets
+  final ButtonThemeData buttonTheme;
+
   /// The text themes used in the widgets
   final ColorTheme colorTheme;
 
@@ -75,6 +78,7 @@ class StreamChatThemeData {
   /// Create a theme from scratch
   const StreamChatThemeData({
     this.textTheme,
+    this.buttonTheme,
     this.colorTheme,
     this.channelPreviewTheme,
     this.channelTheme,
@@ -106,6 +110,7 @@ class StreamChatThemeData {
   /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
   StreamChatThemeData copyWith({
     TextTheme textTheme,
+    ButtonThemeData buttonTheme,
     ColorTheme colorTheme,
     ChannelPreviewTheme channelPreviewTheme,
     ChannelTheme channelTheme,
@@ -118,6 +123,7 @@ class StreamChatThemeData {
   }) =>
       StreamChatThemeData(
         textTheme: textTheme ?? this.textTheme,
+        buttonTheme: buttonTheme ?? this.buttonTheme,
         colorTheme: colorTheme ?? this.colorTheme,
         primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
@@ -133,6 +139,7 @@ class StreamChatThemeData {
     if (other == null) return this;
     return copyWith(
       textTheme: textTheme?.merge(other.textTheme) ?? other.textTheme,
+      buttonTheme: other.buttonTheme,
       colorTheme: colorTheme?.merge(other.colorTheme) ?? other.colorTheme,
       primaryIconTheme: other.primaryIconTheme,
       defaultChannelImage: other.defaultChannelImage,
@@ -159,6 +166,17 @@ class StreamChatThemeData {
     return StreamChatThemeData(
       textTheme: textTheme,
       colorTheme: colorTheme,
+      buttonTheme: ButtonThemeData(
+        height: 48.0,
+        buttonColor: isDark ? Color(0xffffffff) : Color(0xff006aff),
+        textTheme: ButtonTextTheme.accent,
+        colorScheme: theme.colorScheme.copyWith(
+          secondary: isDark ? Color(0xff005eff) : Color(0xffffffff),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(26),
+        ),
+      ),
       primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),
       defaultUserImage: (context, user) => Center(
@@ -475,7 +493,7 @@ class ColorTheme {
     this.white = const Color(0xffffffff),
     this.blueAlice = const Color(0xffe9f2ff),
     this.accentBlue = const Color(0xff005FFF),
-    this.accentRed = const Color(0xffFF3742),
+    this.accentRed = const Color(0xffFF3842),
     this.accentGreen = const Color(0xff20E070),
     this.highlight = const Color(0xfffbf4dd),
     this.overlay = const Color.fromRGBO(0, 0, 0, 0.2),
