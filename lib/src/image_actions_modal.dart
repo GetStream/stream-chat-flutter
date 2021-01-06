@@ -29,27 +29,8 @@ class ImageActionsModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Stack(
-        children: [
-          Positioned.fill(
-              child: Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.8),
-                Colors.transparent,
-              ],
-              stops: [0.0, 0.4],
-            )),
-          )),
-          _buildPage(context),
-        ],
-      ),
+      onTap: () => Navigator.maybePop(context),
+      child: _buildPage(context),
     );
   }
 
@@ -57,53 +38,14 @@ class ImageActionsModal extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 40.0,
-                ),
-              ),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      userName,
-                      style: StreamChatTheme.of(context)
-                          .textTheme
-                          .headlineBold
-                          .copyWith(
-                              color:
-                                  StreamChatTheme.of(context).colorTheme.white),
-                    ),
-                  ),
-                  Text(
-                    sentAt,
-                    style: StreamChatTheme.of(context)
-                        .channelPreviewTheme
-                        .subtitle
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .white
-                                .withOpacity(0.5)),
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: StreamSvgIcon.close(
-                  size: 24.0,
-                  color: StreamChatTheme.of(context).colorTheme.white,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+          SizedBox(
+            height: kToolbarHeight,
+            child: IconButton(
+              icon: StreamSvgIcon.close(),
+              onPressed: () => Navigator.maybePop(context),
+            ),
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -127,10 +69,8 @@ class ImageActionsModal extends StatelessWidget {
                             'Reply',
                             StreamSvgIcon.Icon_curve_line_left_up(
                               size: 24.0,
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .black
-                                  .withOpacity(0.5),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey,
                             ),
                             () {}),
                         _buildButton(
@@ -147,10 +87,8 @@ class ImageActionsModal extends StatelessWidget {
                             'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                             StreamSvgIcon.Icon_save(
                               size: 24.0,
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .black
-                                  .withOpacity(0.5),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey,
                             ), () async {
                           var url = urls[currentIndex].imageUrl ??
                               urls[currentIndex].assetUrl ??

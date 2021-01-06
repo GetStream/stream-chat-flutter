@@ -122,6 +122,7 @@ class MessageListView extends StatefulWidget {
     this.itemPositionListener,
     this.onMessageSwiped,
     this.highlightInitialMessage = false,
+    this.messageHighlightColor,
     this.onShowMessage,
   }) : super(key: key);
 
@@ -174,6 +175,9 @@ class MessageListView extends StatefulWidget {
   ///
   /// Also See [StreamChannel]
   final bool highlightInitialMessage;
+
+  /// Color used while highlighting initial message
+  final Color messageHighlightColor;
 
   final ShowMessageCallback onShowMessage;
 
@@ -346,18 +350,9 @@ class _MessageListViewState extends State<MessageListView> {
                             buildParentMessage(widget.parentMessage),
                             Container(
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .whiteSmoke,
-                                    StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .whiteSnow,
-                                  ],
-                                ),
+                                gradient: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .bgGradient,
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -845,17 +840,17 @@ class _MessageListViewState extends State<MessageListView> {
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
         _isInitialMessage(message.id)) {
-      final accentColor = Theme.of(context).accentColor;
+      final colorTheme = StreamChatTheme.of(context).colorTheme;
+      final highlightColor =
+          widget.messageHighlightColor ?? colorTheme.highlight;
       child = TweenAnimationBuilder<Color>(
         tween: ColorTween(
-          begin: accentColor.withOpacity(0.7),
-          end: Colors.transparent,
+          begin: highlightColor,
+          end: colorTheme.white.withOpacity(0),
         ),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
         child: child,
-        onEnd: () {
-          initialMessageHighlightComplete = true;
-        },
+        onEnd: () => initialMessageHighlightComplete = true,
         builder: (_, color, child) {
           return Container(
             color: color,

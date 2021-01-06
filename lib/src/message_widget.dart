@@ -374,7 +374,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   elevation: 0.0,
                                                   shape: widget.shape ??
                                                       RoundedRectangleBorder(
-                                                        side: isOnlyEmoji
+                                                        side: isOnlyEmoji &&
+                                                                !(showThreadReplyIndicator ||
+                                                                    showInChannel)
                                                             ? BorderSide.none
                                                             : widget.borderSide ??
                                                                 BorderSide(
@@ -676,6 +678,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     final channel = StreamChannel.of(context).channel;
     showDialog(
         context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
         builder: (context) {
           return StreamChannel(
             channel: channel,
@@ -716,6 +719,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     final channel = StreamChannel.of(context).channel;
     showDialog(
         context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
         builder: (context) {
           return StreamChannel(
             channel: channel,

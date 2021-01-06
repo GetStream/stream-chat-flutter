@@ -72,6 +72,7 @@ class ChooseUserPage extends StatelessWidget {
                 child: SvgPicture.asset(
                   'assets/logo.svg',
                   height: 40,
+                  color: StreamChatTheme.of(context).colorTheme.accentBlue,
                 ),
               ),
             ),
@@ -92,9 +93,8 @@ class ChooseUserPage extends StatelessWidget {
                 child: ListView.separated(
                   separatorBuilder: (context, i) {
                     return Container(
-                      width: double.infinity,
-                      color: Colors.black12,
                       height: 1,
+                      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
                     );
                   },
                   itemCount: users.length + 1,
@@ -108,6 +108,9 @@ class ChooseUserPage extends StatelessWidget {
                             showDialog(
                               barrierDismissible: false,
                               context: context,
+                              barrierColor: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .overlay,
                               builder: (context) => Center(
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -177,10 +180,10 @@ class ChooseUserPage extends StatelessWidget {
                                       .grey,
                                 ),
                           ),
-                          trailing: SvgPicture.asset(
-                            'assets/icon_arrow_right.svg',
-                            height: 24,
-                            width: 24,
+                          trailing: StreamSvgIcon.arrow_right(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
                           ),
                         );
                       }),

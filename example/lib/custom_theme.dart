@@ -39,28 +39,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
-      primarySwatch: Colors.green,
-    );
-
-    return MaterialApp(
-      theme: theme,
-      builder: (context, child) => StreamChat(
-        child: child,
-        client: client,
-        streamChatThemeData: StreamChatThemeData.fromTheme(theme).copyWith(
-          ownMessageTheme: MessageTheme(
-            messageBackgroundColor:
-                StreamChatTheme.of(context).colorTheme.black,
-            messageText: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.white,
-            ),
-            avatarTheme: AvatarTheme(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+    final themeData = ThemeData(primarySwatch: Colors.green);
+    final defaultTheme = StreamChatThemeData.fromTheme(themeData);
+    final customTheme = defaultTheme.merge(StreamChatThemeData(
+      ownMessageTheme: MessageTheme(
+        messageBackgroundColor: StreamChatTheme.of(context).colorTheme.black,
+        messageText: TextStyle(
+          color: StreamChatTheme.of(context).colorTheme.white,
+        ),
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
+    ));
+
+    return MaterialApp(
+      theme: themeData,
+      builder: (context, child) {
+        return StreamChat(
+          child: child,
+          client: client,
+          streamChatThemeData: customTheme,
+        );
+      },
       home: ChannelListPage(),
     );
   }

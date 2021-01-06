@@ -363,12 +363,10 @@ class _UserListViewState extends State<UserListView>
               child: Text(
                 header,
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.5,
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .black
-                        .withOpacity(0.3)),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.5,
+                  color: StreamChatTheme.of(context).colorTheme.grey,
+                ),
               ),
             ),
           );
@@ -478,9 +476,7 @@ class _UserListViewState extends State<UserListView>
   Widget _separatorBuilder(context, i) {
     return Container(
       height: 1,
-      color: Theme.of(context).brightness == Brightness.dark
-          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
-          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
+      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
     );
   }
 
