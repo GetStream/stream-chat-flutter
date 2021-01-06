@@ -129,16 +129,16 @@ class MessageSearchItem extends StatelessWidget {
         message.mentionedUsers,
         message.attachments,
         StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-          fontStyle: (message.isSystem || message.isDeleted)
-              ? FontStyle.italic
-              : FontStyle.normal,
-        ),
+              fontStyle: (message.isSystem || message.isDeleted)
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+            ),
         StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-          fontStyle: (message.isSystem || message.isDeleted)
-              ? FontStyle.italic
-              : FontStyle.normal,
-          fontWeight: FontWeight.bold,
-        ),
+              fontStyle: (message.isSystem || message.isDeleted)
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              fontWeight: FontWeight.bold,
+            ),
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
