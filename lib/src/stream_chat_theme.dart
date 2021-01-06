@@ -502,6 +502,10 @@ class ColorTheme {
   final Color accentBlue;
   final Color accentRed;
   final Color accentGreen;
+  final Effect borderTop;
+  final Effect borderBottom;
+  final Effect shadowIconButton;
+  final Effect modalShadow;
 
   ColorTheme.light({
     this.black = const Color(0xff000000),
@@ -515,6 +519,14 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
+    this.borderTop = const Effect(
+        sigmaX: 0, sigmaY: -1, color: Color(0xff141924), blur: 0.0),
+    this.borderBottom = const Effect(
+        sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0),
+    this.shadowIconButton = const Effect(
+        sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
+    this.modalShadow = const Effect(
+        sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8.0),
   });
 
   ColorTheme.dark({
@@ -529,6 +541,14 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
+    this.borderTop = const Effect(
+        sigmaX: 0, sigmaY: -1, color: Color(0xff141924), blur: 0.0),
+    this.borderBottom = const Effect(
+        sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0),
+    this.shadowIconButton = const Effect(
+        sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
+    this.modalShadow = const Effect(
+        sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8.0),
   });
 
   ColorTheme copyWith({
@@ -544,6 +564,10 @@ class ColorTheme {
     Color accentBlue,
     Color accentRed,
     Color accentGreen,
+    Effect borderTop,
+    Effect borderBottom,
+    Effect shadowIconButton,
+    Effect modalShadow,
   }) {
     return type == ColorThemeType.light
         ? ColorTheme.light(
@@ -558,6 +582,10 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
+            borderTop: borderTop ?? this.borderTop,
+            borderBottom: borderBottom ?? this.borderBottom,
+            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+            modalShadow: modalShadow ?? this.modalShadow,
           )
         : ColorTheme.dark(
             black: black ?? this.black,
@@ -571,6 +599,10 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
+            borderTop: borderTop ?? this.borderTop,
+            borderBottom: borderBottom ?? this.borderBottom,
+            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+            modalShadow: modalShadow ?? this.modalShadow,
           );
   }
 }
@@ -751,5 +783,36 @@ class ChannelHeaderTheme {
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         color: color ?? this.color,
+      );
+}
+
+class Effect {
+  final double sigmaX;
+  final double sigmaY;
+  final Color color;
+  final double alpha;
+  final double blur;
+
+  const Effect({
+    this.sigmaX,
+    this.sigmaY,
+    this.color,
+    this.alpha,
+    this.blur,
+  });
+
+  Effect copyWith({
+    double sigmaX,
+    double sigmaY,
+    Color color,
+    double alpha,
+    double blur,
+  }) =>
+      Effect(
+        sigmaX: sigmaX ?? this.sigmaX,
+        sigmaY: sigmaY ?? this.sigmaY,
+        color: color ?? this.color,
+        alpha: color ?? this.alpha,
+        blur: blur ?? this.blur,
       );
 }
