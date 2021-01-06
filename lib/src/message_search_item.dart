@@ -183,7 +183,7 @@ class MessageSearchItem extends StatelessWidget {
         ));
       } else {
         resList.add(TextSpan(
-          text: '$e ',
+          text: e == textList.last ? '$e' : '$e ',
           style: normalTextStyle,
         ));
       }
