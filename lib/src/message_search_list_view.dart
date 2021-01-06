@@ -313,21 +313,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               Container(
                 width: double.maxFinite,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(0.02),
-                      StreamChatTheme.of(context)
-                          .colorTheme
-                          .white
-                          .withOpacity(0.05),
-                    ],
-                    stops: [0, 1],
-                  ),
+                  gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -337,10 +323,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   child: Text(
                     '${items.length} results',
                     style: TextStyle(
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(0.5),
+                      color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
                   ),
                 ),
