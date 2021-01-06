@@ -73,7 +73,7 @@ class StreamChatThemeData {
   final List<ReactionIcon> reactionIcons;
 
   /// Create a theme from scratch
-  StreamChatThemeData({
+  const StreamChatThemeData({
     this.textTheme,
     this.colorTheme,
     this.channelPreviewTheme,
@@ -89,27 +89,18 @@ class StreamChatThemeData {
   /// Create a theme from a Material [Theme]
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
     final defaultTheme = getDefaultTheme(theme);
-
-    return defaultTheme.copyWith(
+    final customizedTheme = StreamChatThemeData(
       primaryIconTheme: theme.primaryIconTheme,
-      channelTheme: defaultTheme.channelTheme,
-      ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
-        replies: defaultTheme.ownMessageTheme.replies.copyWith(
-          color: theme.accentColor,
-        ),
-        messageLinks: TextStyle(
-          color: theme.accentColor,
-        ),
+      ownMessageTheme: MessageTheme(
+        replies: TextStyle(color: theme.accentColor),
+        messageLinks: TextStyle(color: theme.accentColor),
       ),
-      otherMessageTheme: defaultTheme.otherMessageTheme.copyWith(
-        replies: defaultTheme.otherMessageTheme.replies.copyWith(
-          color: theme.accentColor,
-        ),
-        messageLinks: TextStyle(
-          color: theme.accentColor,
-        ),
+      otherMessageTheme: MessageTheme(
+        replies: TextStyle(color: theme.accentColor),
+        messageLinks: TextStyle(color: theme.accentColor),
       ),
     );
+    return defaultTheme.merge(customizedTheme) ?? customizedTheme;
   }
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
@@ -126,87 +117,38 @@ class StreamChatThemeData {
     List<ReactionIcon> reactionIcons,
   }) =>
       StreamChatThemeData(
-        textTheme: this.textTheme?.copyWith(
-              title: textTheme?.title,
-              body: textTheme?.body,
-              bodyBold: textTheme?.bodyBold,
-              captionBold: textTheme?.captionBold,
-              footnote: textTheme?.footnote,
-              footnoteBold: textTheme?.footnoteBold,
-              headline: textTheme?.headline,
-              headlineBold: textTheme?.headlineBold,
-            ),
-        colorTheme: this.colorTheme?.copyWith(
-              black: colorTheme?.black,
-              grey: colorTheme?.grey,
-              greyGainsboro: colorTheme?.greyGainsboro,
-              greyWhisper: colorTheme?.greyWhisper,
-              whiteSmoke: colorTheme?.whiteSmoke,
-              whiteSnow: colorTheme?.whiteSnow,
-              white: colorTheme?.white,
-              blueAlice: colorTheme?.blueAlice,
-            ),
+        textTheme: textTheme ?? this.textTheme,
+        colorTheme: colorTheme ?? this.colorTheme,
         primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-        channelPreviewTheme: this.channelPreviewTheme?.copyWith(
-              title: channelPreviewTheme.title,
-              subtitle: channelPreviewTheme.subtitle,
-              lastMessageAt: channelPreviewTheme.lastMessageAt,
-              avatarTheme: channelPreviewTheme.avatarTheme,
-            ),
-        channelTheme: channelTheme?.copyWith(
-              channelHeaderTheme: channelTheme.channelHeaderTheme ??
-                  this.channelTheme.channelHeaderTheme,
-              messageInputButtonIconTheme:
-                  channelTheme.messageInputButtonIconTheme ??
-                      this.channelTheme.messageInputButtonIconTheme,
-              messageInputButtonTheme: channelTheme.messageInputButtonTheme ??
-                  this.channelTheme.messageInputButtonTheme,
-              inputBackground: channelTheme.inputBackground ??
-                  this.channelTheme.inputBackground,
-            ) ??
-            this.channelTheme,
-        ownMessageTheme: ownMessageTheme?.copyWith(
-              messageText: ownMessageTheme?.messageText ??
-                  this.ownMessageTheme.messageText,
-              messageAuthor: ownMessageTheme?.messageAuthor ??
-                  this.ownMessageTheme.messageAuthor,
-              messageLinks: ownMessageTheme?.messageLinks ??
-                  this.ownMessageTheme.messageLinks,
-              createdAt:
-                  ownMessageTheme?.createdAt ?? this.ownMessageTheme.createdAt,
-              replies: ownMessageTheme?.replies ?? this.ownMessageTheme.replies,
-              messageBackgroundColor: ownMessageTheme?.messageBackgroundColor ??
-                  this.ownMessageTheme.messageBackgroundColor,
-              avatarTheme: ownMessageTheme?.avatarTheme ??
-                  this.ownMessageTheme.avatarTheme,
-              messageBorderColor: ownMessageTheme?.messageBorderColor ??
-                  this.ownMessageTheme.messageBorderColor,
-            ) ??
-            this.ownMessageTheme,
-        otherMessageTheme: otherMessageTheme?.copyWith(
-              messageText: otherMessageTheme?.messageText ??
-                  this.otherMessageTheme.messageText,
-              messageAuthor: otherMessageTheme?.messageAuthor ??
-                  this.otherMessageTheme.messageAuthor,
-              messageLinks: otherMessageTheme?.messageLinks ??
-                  this.otherMessageTheme.messageLinks,
-              createdAt: otherMessageTheme?.createdAt ??
-                  this.otherMessageTheme.createdAt,
-              replies:
-                  otherMessageTheme?.replies ?? this.otherMessageTheme.replies,
-              messageBackgroundColor:
-                  otherMessageTheme?.messageBackgroundColor ??
-                      this.otherMessageTheme.messageBackgroundColor,
-              messageBorderColor: otherMessageTheme?.messageBorderColor ??
-                  this.otherMessageTheme.messageBorderColor,
-              avatarTheme: otherMessageTheme?.avatarTheme ??
-                  this.otherMessageTheme.avatarTheme,
-            ) ??
-            this.otherMessageTheme,
+        channelPreviewTheme: channelPreviewTheme ?? this.channelPreviewTheme,
+        channelTheme: channelTheme ?? this.channelTheme,
+        ownMessageTheme: ownMessageTheme ?? this.ownMessageTheme,
+        otherMessageTheme: otherMessageTheme ?? this.otherMessageTheme,
         reactionIcons: reactionIcons ?? this.reactionIcons,
       );
+
+  StreamChatThemeData merge(StreamChatThemeData other) {
+    if (other == null) return this;
+    return copyWith(
+      textTheme: textTheme?.merge(other.textTheme) ?? other.textTheme,
+      colorTheme: colorTheme?.merge(other.colorTheme) ?? other.colorTheme,
+      primaryIconTheme: other.primaryIconTheme,
+      defaultChannelImage: other.defaultChannelImage,
+      defaultUserImage: other.defaultUserImage,
+      channelPreviewTheme:
+          channelPreviewTheme?.merge(other.channelPreviewTheme) ??
+              other.channelPreviewTheme,
+      channelTheme:
+          channelTheme?.merge(other.channelTheme) ?? other.channelTheme,
+      ownMessageTheme: ownMessageTheme?.merge(other.ownMessageTheme) ??
+          other.ownMessageTheme,
+      otherMessageTheme: otherMessageTheme?.merge(other.otherMessageTheme) ??
+          other.otherMessageTheme,
+      reactionIcons: other.reactionIcons,
+    );
+  }
 
   /// Get the default Stream Chat theme
   static StreamChatThemeData getDefaultTheme(ThemeData theme) {
@@ -483,6 +425,22 @@ class TextTheme {
             captionBold: captionBold ?? this.captionBold,
           );
   }
+
+  TextTheme merge(TextTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      body: body?.merge(other.body) ?? other.body,
+      title: title?.merge(other.title) ?? other.title,
+      headlineBold:
+          headlineBold?.merge(other.headlineBold) ?? other.headlineBold,
+      headline: headline?.merge(other.headline) ?? other.headline,
+      bodyBold: bodyBold?.merge(other.bodyBold) ?? other.bodyBold,
+      footnoteBold:
+          footnoteBold?.merge(other.footnoteBold) ?? other.footnoteBold,
+      footnote: footnote?.merge(other.footnote) ?? other.footnote,
+      captionBold: captionBold?.merge(other.captionBold) ?? other.captionBold,
+    );
+  }
 }
 
 enum ColorThemeType {
@@ -502,6 +460,7 @@ class ColorTheme {
   final Color accentBlue;
   final Color accentRed;
   final Color accentGreen;
+  final Color yellow;
 
   ColorTheme.light({
     this.black = const Color(0xff000000),
@@ -515,6 +474,7 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
+    this.yellow = const Color(0Xfffbf4dd),
   });
 
   ColorTheme.dark({
@@ -529,6 +489,7 @@ class ColorTheme {
     this.accentBlue = const Color(0xff005FFF),
     this.accentRed = const Color(0xffFF3742),
     this.accentGreen = const Color(0xff20E070),
+    this.yellow = const Color(0xff302d22),
   });
 
   ColorTheme copyWith({
@@ -544,6 +505,7 @@ class ColorTheme {
     Color accentBlue,
     Color accentRed,
     Color accentGreen,
+    Color yellow,
   }) {
     return type == ColorThemeType.light
         ? ColorTheme.light(
@@ -558,6 +520,7 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
+            yellow: yellow ?? this.yellow,
           )
         : ColorTheme.dark(
             black: black ?? this.black,
@@ -571,7 +534,26 @@ class ColorTheme {
             accentBlue: accentBlue ?? this.accentBlue,
             accentRed: accentRed ?? this.accentRed,
             accentGreen: accentGreen ?? this.accentGreen,
+            yellow: yellow ?? this.yellow,
           );
+  }
+
+  ColorTheme merge(ColorTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      black: other.black,
+      grey: other.grey,
+      greyGainsboro: other.greyGainsboro,
+      greyWhisper: other.greyWhisper,
+      whiteSmoke: other.whiteSmoke,
+      whiteSnow: other.whiteSnow,
+      white: other.white,
+      blueAlice: other.blueAlice,
+      accentBlue: other.accentBlue,
+      accentRed: other.accentRed,
+      accentGreen: other.accentGreen,
+      yellow: other.yellow,
+    );
   }
 }
 
@@ -604,20 +586,26 @@ class ChannelTheme {
     Color inputBackground,
   }) =>
       ChannelTheme(
-        channelHeaderTheme: channelHeaderTheme?.copyWith(
-              title: channelHeaderTheme?.title ?? this.channelHeaderTheme.title,
-              lastMessageAt: channelHeaderTheme?.lastMessageAt ??
-                  this.channelHeaderTheme.lastMessageAt,
-              avatarTheme: channelHeaderTheme?.avatarTheme ??
-                  this.channelHeaderTheme.avatarTheme,
-              color: channelHeaderTheme?.color ?? this.channelHeaderTheme.color,
-            ) ??
-            this.channelHeaderTheme,
+        channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
         messageInputButtonIconTheme:
             messageInputButtonIconTheme ?? this.messageInputButtonIconTheme,
         messageInputButtonTheme:
             messageInputButtonTheme ?? this.messageInputButtonTheme,
+        inputBackground: inputBackground ?? this.inputBackground,
       );
+
+  ChannelTheme merge(ChannelTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      channelHeaderTheme: channelHeaderTheme?.merge(other.channelHeaderTheme) ??
+          other.channelHeaderTheme,
+      messageInputButtonIconTheme: messageInputButtonIconTheme
+              ?.merge(other.messageInputButtonIconTheme) ??
+          other.messageInputButtonIconTheme,
+      messageInputButtonTheme: other.messageInputButtonTheme,
+      inputBackground: other.inputBackground,
+    );
+  }
 }
 
 class AvatarTheme {
@@ -637,6 +625,14 @@ class AvatarTheme {
         constraints: constraints ?? this.constraints,
         borderRadius: borderRadius ?? this.borderRadius,
       );
+
+  AvatarTheme merge(AvatarTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      constraints: other.constraints,
+      borderRadius: other.borderRadius,
+    );
+  }
 }
 
 class MessageTheme {
@@ -690,6 +686,24 @@ class MessageTheme {
             reactionsBackgroundColor ?? this.reactionsBackgroundColor,
         reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
       );
+
+  MessageTheme merge(MessageTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      messageText: messageText?.merge(other.messageText) ?? other.messageText,
+      messageAuthor:
+          messageAuthor?.merge(other.messageAuthor) ?? other.messageAuthor,
+      messageLinks:
+          messageLinks?.merge(other.messageLinks) ?? other.messageLinks,
+      createdAt: createdAt?.merge(other.createdAt) ?? other.createdAt,
+      replies: replies?.merge(other.replies) ?? other.replies,
+      messageBackgroundColor: other.messageBackgroundColor,
+      messageBorderColor: other.messageBorderColor,
+      avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
+      reactionsBackgroundColor: other.reactionsBackgroundColor,
+      reactionsBorderColor: other.reactionsBorderColor,
+    );
+  }
 }
 
 class ChannelPreviewTheme {
@@ -721,6 +735,18 @@ class ChannelPreviewTheme {
         avatarTheme: avatarTheme ?? this.avatarTheme,
         unreadCounterColor: unreadCounterColor ?? this.unreadCounterColor,
       );
+
+  ChannelPreviewTheme merge(ChannelPreviewTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      title: title?.merge(other.title) ?? other.title,
+      subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
+      lastMessageAt:
+          lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
+      avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
+      unreadCounterColor: other.unreadCounterColor,
+    );
+  }
 }
 
 class ChannelHeaderTheme {
@@ -748,4 +774,15 @@ class ChannelHeaderTheme {
         avatarTheme: avatarTheme ?? this.avatarTheme,
         color: color ?? this.color,
       );
+
+  ChannelHeaderTheme merge(ChannelHeaderTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      title: title?.merge(other.title) ?? other.title,
+      lastMessageAt:
+          lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
+      avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
+      color: other.color,
+    );
+  }
 }
