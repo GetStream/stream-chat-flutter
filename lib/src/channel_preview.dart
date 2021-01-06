@@ -221,8 +221,8 @@ class ChannelPreview extends StatelessWidget {
                 return '[GIF]';
               }
               return e == lastMessage.attachments.last
-                  ? e.title
-                  : '${e.title}, ';
+                  ? (e.title ?? 'File')
+                  : '${e.title ?? 'File'}, ';
             }).where((e) => e != null),
             lastMessage.text ?? '',
           ];
