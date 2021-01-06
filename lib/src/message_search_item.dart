@@ -123,36 +123,25 @@ class MessageSearchItem extends StatelessWidget {
       text = parts.join(' ');
     }
 
-    return RichText(
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      text: _getDisplayText(
+    return Text.rich(
+      _getDisplayText(
         text,
         message.mentionedUsers,
         message.attachments,
         StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-              fontStyle: (message.isSystem || message.isDeleted)
-                  ? FontStyle.italic
-                  : FontStyle.normal,
-            ),
+          fontStyle: (message.isSystem || message.isDeleted)
+              ? FontStyle.italic
+              : FontStyle.normal,
+        ),
         StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-              fontStyle: (message.isSystem || message.isDeleted)
-                  ? FontStyle.italic
-                  : FontStyle.normal,
-              fontWeight: FontWeight.bold,
-            ),
+          fontStyle: (message.isSystem || message.isDeleted)
+              ? FontStyle.italic
+              : FontStyle.normal,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-    );
-
-    return Text(
-      text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-            fontStyle: (message.isSystem || message.isDeleted)
-                ? FontStyle.italic
-                : FontStyle.normal,
-          ),
     );
   }
 

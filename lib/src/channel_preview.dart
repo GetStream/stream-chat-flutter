@@ -230,10 +230,8 @@ class ChannelPreview extends StatelessWidget {
           text = parts.join(' ');
         }
 
-        return RichText(
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          text: _getDisplayText(
+        return Text.rich(
+          _getDisplayText(
             text,
             lastMessage.mentionedUsers,
             lastMessage.attachments,
@@ -255,6 +253,8 @@ class ChannelPreview extends StatelessWidget {
                     : FontStyle.normal,
                 fontWeight: FontWeight.bold),
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         );
       },
     );
