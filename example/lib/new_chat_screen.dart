@@ -157,8 +157,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         decoration: BoxDecoration(
                           color: StreamChatTheme.of(context)
                               .colorTheme
-                              .black
-                              .withOpacity(0.05),
+                              .greyGainsboro,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.only(left: 24),
@@ -166,15 +165,19 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
                           child: Text(
                             user.name,
+                            maxLines: 1,
                             style: TextStyle(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .black),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
+                            ),
                           ),
                         ),
                       ),
-                      Opacity(
-                        opacity: .8,
+                      Container(
+                        foregroundDecoration: BoxDecoration(
+                          color: StreamChatTheme.of(context).colorTheme.overlay,
+                          shape: BoxShape.circle,
+                        ),
                         child: UserAvatar(
                           showOnlineStatus: false,
                           user: user,
@@ -184,11 +187,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        child: StreamSvgIcon.close(
-                          color: StreamChatTheme.of(context).colorTheme.white,
-                        ),
-                      ),
+                      StreamSvgIcon.close(),
                     ],
                   ),
                 );
