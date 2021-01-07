@@ -42,10 +42,18 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
-      when(channelState.lastMessage).thenReturn(Message(
-        text: 'hello',
-        user: User(id: 'other-user'),
-      ));
+      when(channelState.messages).thenReturn([
+        Message(
+          text: 'hello',
+          user: User(id: 'other-user'),
+        )
+      ]);
+      when(channelState.messagesStream).thenAnswer((i) => Stream.value([
+            Message(
+              text: 'hello',
+              user: User(id: 'other-user'),
+            )
+          ]));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
