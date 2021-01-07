@@ -22,9 +22,9 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
-import 'extension.dart';
 
 import '../stream_chat_flutter.dart';
+import 'extension.dart';
 import 'quoted_message_widget.dart';
 import 'stream_channel.dart';
 
@@ -477,9 +477,7 @@ class MessageInputState extends State<MessageInput> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   StreamSvgIcon.lightning(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .white,
+                                                            color: Colors.white,
                                     size: 16.0,
                                   ),
                                   Text(
@@ -488,9 +486,8 @@ class MessageInputState extends State<MessageInput> {
                                         .textTheme
                                         .footnote
                                         .copyWith(
-                                            color: StreamChatTheme.of(context)
-                                                .colorTheme
-                                                .white),
+                                          color: Colors.white,
+                                        ),
                                   ),
                                 ],
                               ),
