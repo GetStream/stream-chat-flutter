@@ -134,9 +134,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   Widget _separatorBuilder(BuildContext context, int index) {
     return Container(
       height: 1,
-      color: Theme.of(context).brightness == Brightness.dark
-          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
-          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
+      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
     );
   }
 
