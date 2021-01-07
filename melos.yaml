@@ -1,0 +1,59 @@
+name: stream_chat_dart
+
+versioning:
+  mode: independent
+
+packages:
+  - packages/**
+
+scripts:
+
+  #  - Requires `pub global activate tuneup`.
+  analyze: >
+    melos exec -c 1 --fail-fast -- \
+      pub global run tuneup check
+
+  format: pub global run flutter_plugin_tools format
+
+
+  build:examples:ios: >
+    melos exec -c 1 --scope="*example*" --fail-fast -- \
+      flutter build ios --no-codesign
+
+
+  build:examples:android: >
+    melos exec -c 1 --scope="*example*" --fail-fast -- \
+      flutter build apk
+
+  # Build any plugin example apps that have MacOS support.
+  # - Requires `flutter config --enable-macos-desktop` enabled.
+  # - Requires `flutter channel master && flutter upgrade`.
+  build:examples:macos: >
+    melos exec -c 1 --scope="*example*" --dir-exists=macos --fail-fast -- \
+      flutter build macos
+
+
+  test: >
+    melos exec -c 1 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
+      flutter test
+
+  test:web: >
+    melos exec -c 1 --fail-fast --dir-exists=test --scope="*web*" -- \
+      flutter test --platform=chrome
+
+
+  lint:pub: >
+    melos exec -c 5 --fail-fast --no-private --ignore="*example*" -- \
+      pub publish --dry-run
+
+
+  postclean: >
+    melos exec -- \
+      rm -rf ./build ./android/.gradle ./ios/.symlinks ./ios/Pods ./android/.idea ./.idea ./.dart-tool/build
+
+dev_dependencies:
+  pedantic: 1.9.2
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5 <2.0.0"
