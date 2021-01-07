@@ -276,11 +276,15 @@ class UserMentionPage extends StatelessWidget {
     final user = StreamChat.of(context).user;
     return MessageSearchBloc(
       child: MessageSearchListView(
-        messageQuery: '@${user.name}',
         filters: {
           'members': {
-            r'$in': [user.id]
-          }
+            r'$in': [user.id],
+          },
+        },
+        messageFilters: {
+          'mentioned_users.id': {
+            r'$contains': user.id,
+          },
         },
         sortOptions: [
           SortOption(

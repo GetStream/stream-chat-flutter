@@ -51,10 +51,11 @@ class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
   const MessageSearchListView({
     Key key,
-    @required this.messageQuery,
-    @required this.filters,
+    this.messageQuery,
+    this.filters,
     this.sortOptions,
     this.paginationParams,
+    this.messageFilters,
     this.emptyBuilder,
     this.errorBuilder,
     this.separatorBuilder,
@@ -82,6 +83,11 @@ class MessageSearchListView extends StatefulWidget {
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
   final PaginationParams paginationParams;
+
+  /// The message query filters to use.
+  /// You can query on any of the custom fields you've defined on the [Channel].
+  /// You can also filter other built-in channel fields.
+  final Map<String, dynamic> messageFilters;
 
   /// Builder used to create a custom item preview
   final MessageSearchItemBuilder itemBuilder;
@@ -115,6 +121,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       sort: widget.sortOptions,
       query: widget.messageQuery,
       pagination: widget.paginationParams,
+      messageFilter: widget.messageFilters,
     );
   }
 
@@ -205,9 +212,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                     children: [
                       WidgetSpan(
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                            right: 2.0,
-                          ),
+                          padding: const EdgeInsets.only(right: 2.0),
                           child: Icon(Icons.error_outline),
                         ),
                       ),
@@ -217,18 +222,17 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   style: Theme.of(context).textTheme.headline6,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16.0,
-                  ),
+                  padding: const EdgeInsets.only(top: 16.0),
                   child: Text(message),
                 ),
-                FlatButton(
+                RaisedButton(
                   onPressed: () {
                     messageSearchBloc.search(
                       filter: widget.filters,
                       sort: widget.sortOptions,
                       query: widget.messageQuery,
                       pagination: widget.paginationParams,
+                      messageFilter: widget.messageFilters,
                     );
                   },
                   child: Text('Retry'),
@@ -281,13 +285,14 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
         Widget child;
         child = LazyLoadScrollView(
-          onEndOfPage: () => messageSearchBloc.search(
+          onEndOfPage: () => messageSearchBloc.loadMore(
             filter: widget.filters,
             sort: widget.sortOptions,
             pagination: widget.paginationParams.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
             query: widget.messageQuery,
+            messageFilter: widget.messageFilters,
           ),
           child: ListView.separated(
             physics: AlwaysScrollableScrollPhysics(),
@@ -344,13 +349,16 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
         widget.paginationParams?.toJson()?.toString() !=
             oldWidget.paginationParams?.toJson()?.toString() ||
-        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString()) {
+        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
+        widget.messageFilters?.toString() !=
+            oldWidget.messageFilters?.toString()) {
       final messageSearchBloc = MessageSearchBloc.of(context);
       messageSearchBloc.search(
         filter: widget.filters,
         sort: widget.sortOptions,
         query: widget.messageQuery,
         pagination: widget.paginationParams,
+        messageFilter: widget.messageFilters,
       );
     }
   }
