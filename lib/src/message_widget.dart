@@ -572,13 +572,16 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     return Padding(
       padding: EdgeInsets.only(left: leftPadding),
-      child: Row(
+      child: Flex(
+        direction: Axis.horizontal,
+        clipBehavior: Clip.none,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!deleted && (showThreadReplyIndicator || showInChannel))
             Container(
               margin: EdgeInsets.only(
-                  bottom: widget.messageTheme.replies.fontSize / 2),
+                bottom: widget.messageTheme.replies.fontSize / 2,
+              ),
               child: CustomPaint(
                 size: const Size(16, 32),
                 painter: _ThreadReplyPainter(
@@ -591,7 +594,12 @@ class _MessageWidgetState extends State<MessageWidget> {
             (child) => Transform(
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
               alignment: Alignment.center,
-              child: Container(height: 16, child: Center(child: child)),
+              child: Container(
+                height: 16,
+                child: Center(
+                  child: child,
+                ),
+              ),
             ),
           ),
         ].insertBetween(const SizedBox(width: 8.0)),

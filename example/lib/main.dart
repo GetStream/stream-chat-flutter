@@ -7,6 +7,7 @@ import 'package:example/group_info_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -55,13 +56,25 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return StreamChat(
           client: client,
-          child: child,
+          child: Builder(
+            builder: (context) => AnnotatedRegion<SystemUiOverlayStyle>(
+              child: child,
+              value: SystemUiOverlayStyle(
+                systemNavigationBarColor:
+                    StreamChatTheme.of(context).colorTheme.white,
+                systemNavigationBarIconBrightness:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Brightness.light
+                        : Brightness.dark,
+              ),
+            ),
+          ),
         );
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       onGenerateRoute: AppRoutes.generateRoute,
       initialRoute:
           client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,

@@ -243,7 +243,7 @@ class _MessageListViewState extends State<MessageListView> {
     return StreamBuilder<List<Message>>(
         stream: messagesStream?.map((messages) => messages
             ?.where((e) =>
-                !e.isDeleted ||
+                (!e.isDeleted && e.shadowed != true) ||
                 (e.isDeleted &&
                     e.user.id == streamChannel.channel.client.state.user.id))
             ?.toList()),
