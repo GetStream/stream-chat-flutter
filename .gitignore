@@ -47,3 +47,6 @@ build/
 /.fvm
 
 .melos_tool/
+/packages/flutter_widgets/example/ios/Flutter/.last_build_id
+/packages/dart_client/example/ios/Flutter/.last_build_id
+/packages/dart_client/example/ios/Runner.xcodeproj/project.pbxproj
