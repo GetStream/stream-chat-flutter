@@ -829,4 +829,52 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.giphyIcon({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'giphy_icon.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.imgur({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'imgur.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.volumeUp({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'volume-up.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.flag({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'flag.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }
