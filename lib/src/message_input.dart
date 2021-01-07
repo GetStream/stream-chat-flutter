@@ -1153,7 +1153,7 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
-                    constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                    constraints: BoxConstraints.loose(Size.fromHeight(240)),
                     decoration: BoxDecoration(
                       color: StreamChatTheme.of(context).colorTheme.white,
                     ),
@@ -1164,6 +1164,7 @@ class MessageInputState extends State<MessageInput> {
                           return ListView(
                             padding: const EdgeInsets.all(0),
                             shrinkWrap: true,
+                            itemExtent: 58.0,
                             children: snapshot.data
                                 .map((m) => ListTile(
                                       leading: UserAvatar(
@@ -1177,10 +1178,16 @@ class MessageInputState extends State<MessageInput> {
                                       ),
                                       title: Text(
                                         '${m.user.name}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
-                                      subtitle: Text('@${m.userId}'),
+                                      subtitle: Text(
+                                        '@${m.userId}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                       trailing: StreamSvgIcon.mentions(
                                         color: StreamChatTheme.of(context)
                                             .colorTheme
