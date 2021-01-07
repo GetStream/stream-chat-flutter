@@ -62,6 +62,7 @@ class MessageSearchListView extends StatefulWidget {
     this.itemBuilder,
     this.onItemTap,
     this.showResultCount = true,
+    this.pullToRefresh = true,
   }) : super(key: key);
 
   /// Message String to search on
@@ -106,6 +107,9 @@ class MessageSearchListView extends StatefulWidget {
 
   /// Set it to false to hide total results text
   final bool showResultCount;
+
+  /// Set it to false to disable the pull-to-refresh widget
+  final bool pullToRefresh;
 
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
@@ -281,7 +285,35 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           );
         }
 
-        Widget child;
+        Widget child = ListView.separated(
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+          separatorBuilder: (_, index) {
+            if (widget.separatorBuilder != null) {
+              return widget.separatorBuilder(context, index);
+            }
+            return _separatorBuilder(context, index);
+          },
+          itemBuilder: (context, index) {
+            if (index < items.length) {
+              return _listItemBuilder(context, items[index]);
+            }
+            return _buildQueryProgressIndicator(context, messageSearchBloc);
+          },
+        );
+        if (widget.pullToRefresh) {
+          child = RefreshIndicator(
+            onRefresh: () async => messageSearchBloc.search(
+              filter: widget.filters,
+              sort: widget.sortOptions,
+              query: widget.messageQuery,
+              pagination: widget.paginationParams,
+              messageFilter: widget.messageFilters,
+            ),
+            child: child,
+          );
+        }
+
         child = LazyLoadScrollView(
           onEndOfPage: () => messageSearchBloc.loadMore(
             filter: widget.filters,
@@ -292,22 +324,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             query: widget.messageQuery,
             messageFilter: widget.messageFilters,
           ),
-          child: ListView.separated(
-            physics: AlwaysScrollableScrollPhysics(),
-            itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-            separatorBuilder: (_, index) {
-              if (widget.separatorBuilder != null) {
-                return widget.separatorBuilder(context, index);
-              }
-              return _separatorBuilder(context, index);
-            },
-            itemBuilder: (context, index) {
-              if (index < items.length) {
-                return _listItemBuilder(context, items[index]);
-              }
-              return _buildQueryProgressIndicator(context, messageSearchBloc);
-            },
-          ),
+          child: child,
         );
 
         if (widget.showResultCount) {

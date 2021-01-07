@@ -60,7 +60,6 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     String query,
     PaginationParams pagination,
   }) async {
-    if (messageResponses?.isNotEmpty == true) return;
     _messageResponses.add(null);
     try {
       final messages = await _search(

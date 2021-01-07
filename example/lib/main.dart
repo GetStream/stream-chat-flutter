@@ -425,6 +425,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                 direction: SortOption.ASC,
                               ),
                             ],
+                            pullToRefresh: false,
                             paginationParams: PaginationParams(limit: 20),
                             emptyBuilder: (_, query) {
                               return LayoutBuilder(
