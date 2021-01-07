@@ -1132,12 +1132,13 @@ class MessageInputState extends State<MessageInput> {
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
 
-    return OverlayEntry(builder: (context) {
-      return Positioned(
-        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-        left: 0,
-        right: 0,
-        child: TweenAnimationBuilder<double>(
+    return OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+          left: 0,
+          right: 0,
+          child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),
             duration: Duration(milliseconds: 300),
             curve: Curves.easeInOutExpo,
@@ -1153,70 +1154,141 @@ class MessageInputState extends State<MessageInput> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Container(
-                    constraints: BoxConstraints.loose(Size.fromHeight(400)),
+                    constraints: BoxConstraints.loose(Size.fromHeight(240)),
                     decoration: BoxDecoration(
                       color: StreamChatTheme.of(context).colorTheme.white,
                     ),
                     child: FutureBuilder<List<Member>>(
-                        future: queryMembers ?? Future.value(members),
-                        initialData: members,
-                        builder: (context, snapshot) {
-                          return ListView(
-                            padding: const EdgeInsets.all(0),
-                            shrinkWrap: true,
-                            children: snapshot.data
-                                .map((m) => ListTile(
-                                      leading: UserAvatar(
-                                        constraints: BoxConstraints.tight(
-                                          Size(
-                                            40,
-                                            40,
-                                          ),
+                      future: queryMembers ?? Future.value(members),
+                      initialData: members,
+                      builder: (context, snapshot) {
+                        return ListView(
+                          padding: const EdgeInsets.all(0),
+                          shrinkWrap: true,
+                          children: [
+                            SizedBox(
+                              height: 8.0,
+                            ),
+                            ...snapshot.data.map(
+                              (m) {
+                                return Material(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .white,
+                                  child: InkWell(
+                                    onTap: () {
+                                      _mentionedUsers.add(m.user);
+
+                                      splits[splits.length - 1] = m.user.name;
+                                      final rejoin = splits.join('@');
+
+                                      textEditingController.value =
+                                          TextEditingValue(
+                                        text: rejoin +
+                                            textEditingController.text
+                                                .substring(textEditingController
+                                                    .selection.start),
+                                        selection: TextSelection.collapsed(
+                                          offset: rejoin.length,
                                         ),
-                                        user: m.user,
-                                      ),
-                                      title: Text(
-                                        '${m.user.name}',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      subtitle: Text('@${m.userId}'),
-                                      trailing: StreamSvgIcon.mentions(
-                                        color: StreamChatTheme.of(context)
-                                            .colorTheme
-                                            .accentBlue,
-                                      ),
-                                      onTap: () {
-                                        _mentionedUsers.add(m.user);
-
-                                        splits[splits.length - 1] = m.user.name;
-                                        final rejoin = splits.join('@');
-
-                                        textEditingController.value =
-                                            TextEditingValue(
-                                          text: rejoin +
-                                              textEditingController.text
-                                                  .substring(
-                                                      textEditingController
-                                                          .selection.start),
-                                          selection: TextSelection.collapsed(
-                                            offset: rejoin.length,
+                                      );
+                                      _debounce.cancel();
+                                      _mentionsOverlay?.remove();
+                                      _mentionsOverlay = null;
+                                    },
+                                    child: Container(
+                                      height: 56.0,
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: 16.0,
                                           ),
-                                        );
-                                        _debounce.cancel();
-                                        _mentionsOverlay?.remove();
-                                        _mentionsOverlay = null;
-                                      },
-                                    ))
-                                .toList(),
-                          );
-                        }),
+                                          UserAvatar(
+                                            constraints: BoxConstraints.tight(
+                                              Size(
+                                                40,
+                                                40,
+                                              ),
+                                            ),
+                                            user: m.user,
+                                          ),
+                                          SizedBox(
+                                            width: 8.0,
+                                          ),
+                                          Expanded(
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    '${m.user.name}',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: StreamChatTheme.of(
+                                                            context)
+                                                        .textTheme
+                                                        .bodyBold,
+                                                  ),
+                                                  SizedBox(
+                                                    height: 2.0,
+                                                  ),
+                                                  Text(
+                                                    '@${m.userId}',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: StreamChatTheme.of(
+                                                            context)
+                                                        .textTheme
+                                                        .footnoteBold
+                                                        .copyWith(
+                                                            color: StreamChatTheme
+                                                                    .of(context)
+                                                                .colorTheme
+                                                                .grey),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 18.0, left: 8.0),
+                                            child: StreamSvgIcon.mentions(
+                                              color: StreamChatTheme.of(context)
+                                                  .colorTheme
+                                                  .accentBlue,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ).toList(),
+                            SizedBox(
+                              height: 8.0,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               );
-            }),
-      );
-    });
+            },
+          ),
+        );
+      },
+    );
   }
 
   OverlayEntry _buildEmojiOverlay() {
