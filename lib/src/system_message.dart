@@ -4,11 +4,16 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// It shows a date divider depending on the date difference
 class SystemMessage extends StatelessWidget {
+  /// This message
   final Message message;
+
+  /// The function called when tapping on the message when the message is not failed
+  final void Function(Message) onMessageTap;
 
   const SystemMessage({
     Key key,
     @required this.message,
+    this.onMessageTap,
   }) : super(key: key);
 
   @override
@@ -44,57 +49,68 @@ class SystemMessage extends StatelessWidget {
       dayInfo = createdAt.format('dd/MM/yyyy').toUpperCase();
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        divider,
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                message.text,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .color
-                      .withOpacity(.5),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text.rich(
-                TextSpan(
-                  children: [
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        if (onMessageTap != null) {
+          onMessageTap(message);
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            divider,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    message.text,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .color
+                          .withOpacity(.5),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text.rich(
                     TextSpan(
-                      text: dayInfo,
+                      children: [
+                        TextSpan(
+                          text: dayInfo,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(text: ' AT'),
+                        TextSpan(text: ' $hourInfo'),
+                      ],
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
-                    TextSpan(text: ' AT'),
-                    TextSpan(text: ' $hourInfo'),
-                  ],
-                  style: TextStyle(
-                    fontWeight: FontWeight.normal,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Theme.of(context)
+                          .textTheme
+                          .headline6
+                          .color
+                          .withOpacity(.5),
+                    ),
                   ),
-                ),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Theme.of(context)
-                      .textTheme
-                      .headline6
-                      .color
-                      .withOpacity(.5),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+            divider,
+          ],
         ),
-        divider,
-      ],
+      ),
     );
   }
 }
