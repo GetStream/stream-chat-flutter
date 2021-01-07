@@ -673,7 +673,7 @@ class MessageInputState extends State<MessageInput> {
                           if (commands.isNotEmpty)
                             Padding(
                               padding:
-                                  const EdgeInsets.only(left: 8.0, top: 8.0),
+                                  const EdgeInsets.only(left: 0.0, top: 8.0),
                               child: Row(
                                 children: [
                                   Padding(
@@ -698,31 +698,51 @@ class MessageInputState extends State<MessageInput> {
                                 ],
                               ),
                             ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
                           ...commands
                               .map(
-                                (c) => ListTile(
-                                  leading: c.name == 'giphy'
-                                      ? _buildGiphyIcon()
-                                      : null,
-                                  title: Text.rich(
-                                    TextSpan(
-                                      text: '${c.name.capitalize()}',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                (c) => InkWell(
+                                  onTap: () {
+                                    _setCommand(c);
+                                  },
+                                  child: Container(
+                                    height: 40.0,
+                                    child: Row(
                                       children: [
-                                        TextSpan(
-                                          text: ' /${c.name} ${c.args}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w300,
+                                        SizedBox(
+                                          width: 16.0,
+                                        ),
+                                        _buildCommandIcon(c.name),
+                                        SizedBox(
+                                          width: 8.0,
+                                        ),
+                                        Text.rich(
+                                          TextSpan(
+                                            text: '${c.name.capitalize()}',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                            children: [
+                                              TextSpan(
+                                                text: '   /${c.name} ${c.args}',
+                                                style:
+                                                    StreamChatTheme.of(context)
+                                                        .textTheme
+                                                        .body
+                                                        .copyWith(
+                                                          color: StreamChatTheme
+                                                                  .of(context)
+                                                              .colorTheme
+                                                              .grey,
+                                                        ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  //subtitle: Text(c.description),
-                                  onTap: () {
-                                    _setCommand(c);
-                                  },
                                 ),
                               )
                               .toList(),
@@ -1083,28 +1103,87 @@ class MessageInputState extends State<MessageInput> {
     }
   }
 
-  CircleAvatar _buildGiphyIcon() {
-    if (kIsWeb) {
-      return CircleAvatar(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.black,
-        child: Image.asset(
-          'images/giphy_icon.png',
-          package: 'stream_chat_flutter',
-          width: 24.0,
-          height: 24.0,
-        ),
-        radius: 12,
-      );
-    } else {
-      return CircleAvatar(
-        child: SvgPicture.asset(
-          'svgs/giphy_icon.svg',
-          package: 'stream_chat_flutter',
-          width: 24.0,
-          height: 24.0,
-        ),
-        radius: 12,
-      );
+  Widget _buildCommandIcon(String iconType) {
+    switch (iconType) {
+      case 'giphy':
+        return CircleAvatar(
+          child: StreamSvgIcon.giphyIcon(
+            size: 24.0,
+          ),
+          radius: 12,
+        );
+        break;
+      case 'ban':
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: StreamSvgIcon.Icon_user_delete(
+            size: 16.0,
+            color: Colors.white,
+          ),
+          radius: 12,
+        );
+        break;
+      case 'flag':
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: StreamSvgIcon.flag(
+            size: 14.0,
+            color: Colors.white,
+          ),
+          radius: 12,
+        );
+        break;
+      case 'imgur':
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: ClipOval(
+            child: StreamSvgIcon.imgur(
+              size: 24.0,
+            ),
+          ),
+          radius: 12,
+        );
+        break;
+      case 'mute':
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: StreamSvgIcon.mute(
+            size: 16.0,
+            color: Colors.white,
+          ),
+          radius: 12,
+        );
+        break;
+      case 'unban':
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: StreamSvgIcon.userAdd(
+            size: 16.0,
+            color: Colors.white,
+          ),
+          radius: 12,
+        );
+        break;
+      case 'unmute':
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: StreamSvgIcon.volumeUp(
+            size: 16.0,
+            color: Colors.white,
+          ),
+          radius: 12,
+        );
+        break;
+      default:
+        return CircleAvatar(
+          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          child: StreamSvgIcon.lightning(
+            size: 16.0,
+            color: Colors.white,
+          ),
+          radius: 12,
+        );
+        break;
     }
   }
 
