@@ -477,7 +477,7 @@ class MessageInputState extends State<MessageInput> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   StreamSvgIcon.lightning(
-                                                            color: Colors.white,
+                                    color: Colors.white,
                                     size: 16.0,
                                   ),
                                   Text(
