@@ -9,6 +9,12 @@ Stream allows developers to rapidly deploy scalable feeds and chat messaging wit
 ## Structure
 Stream Chat Dart is a monorepo built using [Melos](https://docs.page/invertase/melos). Individual packages can be found in the `packages` directory while configuration and top level commands can be found in `melos.yaml`. 
 
+To get started, run `bootstrap` after cloning the project. 
+
+```shell
+melos bootstrap
+```
+
 ## Available Commands 
 ### Analyze
 > Requires `tuneup` to be activated globally. Please see https://pub.dev/packages/tuneup
