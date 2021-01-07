@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      moor_generator:
+        options:
+          generate_connect_constructor: true
+      json_serializable:
+        options:
+          explicit_to_json: true
+          field_rename: snake
+          any_map: true
