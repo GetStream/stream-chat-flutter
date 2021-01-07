@@ -10,9 +10,9 @@ class StreamSvgIcon extends StatelessWidget {
 
   const StreamSvgIcon({
     this.assetName,
-    this.width,
-    this.height,
     this.color,
+    this.width = 24,
+    this.height = 24,
   });
 
   @override
@@ -194,6 +194,30 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
+  factory StreamSvgIcon.checkAll({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_check_all.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.checkSend({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_check_send.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
   factory StreamSvgIcon.penWrite({
     double size,
     Color color,
@@ -320,6 +344,18 @@ class StreamSvgIcon extends StatelessWidget {
   }) {
     return StreamSvgIcon(
       assetName: 'Icon_Thread_Reply.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.reply({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_curve_line_left_up_big.svg',
       color: color,
       width: size,
       height: size,
@@ -752,6 +788,42 @@ class StreamSvgIcon extends StatelessWidget {
   }) {
     return StreamSvgIcon(
       assetName: 'Icon_user_delete.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.error({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_error.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.circle_up({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_circle_up.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_user_settings({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'Icon_user_settings.svg',
       color: color,
       width: size,
       height: size,

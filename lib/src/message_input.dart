@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
@@ -21,8 +22,10 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
+import 'extension.dart';
 
 import '../stream_chat_flutter.dart';
+import 'quoted_message_widget.dart';
 import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(PlatformFile, Channel);
@@ -107,6 +110,8 @@ class MessageInput extends StatefulWidget {
     this.actionsLocation = ActionsLocation.left,
     this.attachmentThumbnailBuilders,
     this.focusNode,
+    this.quotedMessage,
+    this.onQuotedMessageCleared,
   }) : super(key: key);
 
   /// Message to edit
@@ -155,6 +160,12 @@ class MessageInput extends StatefulWidget {
   /// The focus node associated to the TextField
   final FocusNode focusNode;
 
+  ///
+  final Message quotedMessage;
+
+  ///
+  final VoidCallback onQuotedMessageCleared;
+
   @override
   MessageInputState createState() => MessageInputState();
 
@@ -166,7 +177,7 @@ class MessageInput extends StatefulWidget {
 
     if (messageInputState == null) {
       throw Exception(
-          'You must have a MessageInput widget as anchestor of your widget tree');
+          'You must have a MessageInput widget as ancestor of your widget tree');
     }
 
     return messageInputState;
@@ -196,9 +207,11 @@ class MessageInputState extends State<MessageInput> {
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
 
+  bool get _hasQuotedMessage => widget.quotedMessage != null;
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    Widget child = SafeArea(
       child: GestureDetector(
         onPanUpdate: (details) {
           if (details.delta.dy > 0) {
@@ -213,6 +226,32 @@ class MessageInputState extends State<MessageInput> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (_hasQuotedMessage)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamSvgIcon.reply(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
+                      ),
+                    ),
+                    Text(
+                      'Reply to Message',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.close_small(),
+                      onPressed: widget.onQuotedMessageCleared,
+                    ),
+                  ],
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: _buildTextField(context),
@@ -227,6 +266,14 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
     );
+    if (widget.editMessage == null) {
+      child = Material(
+        color: StreamChatTheme.of(context).colorTheme.white,
+        elevation: 8,
+        child: child,
+      );
+    }
+    return child;
   }
 
   Flex _buildTextField(BuildContext context) {
@@ -263,7 +310,10 @@ class MessageInputState extends State<MessageInput> {
               border: _sendAsDm
                   ? null
                   : Border.all(
-                      color: Colors.black.withOpacity(.5),
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .black
+                          .withOpacity(.5),
                       width: 2,
                     ),
               borderRadius: BorderRadius.circular(3),
@@ -272,8 +322,8 @@ class MessageInputState extends State<MessageInput> {
               child: Material(
                 borderRadius: BorderRadius.circular(3),
                 color: _sendAsDm
-                    ? StreamChatTheme.of(context).accentColor
-                    : Colors.white,
+                    ? StreamChatTheme.of(context).colorTheme.accentBlue
+                    : StreamChatTheme.of(context).colorTheme.white,
                 child: InkWell(
                   onTap: () {
                     setState(() {
@@ -288,7 +338,7 @@ class MessageInputState extends State<MessageInput> {
                         : CrossFadeState.showSecond,
                     firstChild: StreamSvgIcon.check(
                       size: 16.0,
-                      color: Colors.white,
+                      color: StreamChatTheme.of(context).colorTheme.white,
                     ),
                     secondChild: SizedBox(
                       height: 16,
@@ -325,17 +375,23 @@ class MessageInputState extends State<MessageInput> {
     return AnimatedCrossFade(
       crossFadeState:
           _actionsShrunk ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      firstChild: InkWell(
-        onTap: () {
-          setState(() {
-            _actionsShrunk = false;
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
-          child: StreamSvgIcon.emptyCircleLeft(
-            color: StreamChatTheme.of(context).accentColor,
+      firstChild: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: IconButton(
+          onPressed: () {
+            setState(() {
+              _actionsShrunk = false;
+            });
+          },
+          icon: StreamSvgIcon.emptyCircleLeft(
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
           ),
+          padding: const EdgeInsets.all(0),
+          constraints: BoxConstraints.tightFor(
+            height: 24,
+            width: 24,
+          ),
+          splashRadius: 24,
         ),
       ),
       secondChild: Row(
@@ -361,13 +417,15 @@ class MessageInputState extends State<MessageInput> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24.0),
             border: Border.all(
-              color: Colors.grey,
+              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
             ),
           ),
           padding: _attachments.isEmpty ? null : EdgeInsets.all(6.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildReplyToMessage(),
               _buildAttachments(),
               LimitedBox(
                 maxHeight: widget.maxHeight,
@@ -408,23 +466,31 @@ class MessageInputState extends State<MessageInput> {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Chip(
-                              backgroundColor:
-                                  StreamChatTheme.of(context).accentColor,
+                              backgroundColor: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                               padding: EdgeInsets.zero,
                               labelPadding:
-                                  EdgeInsets.symmetric(horizontal: 9.0),
+                                  EdgeInsets.symmetric(horizontal: 8.0),
                               label: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   StreamSvgIcon.lightning(
-                                    color: Colors.white,
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .white,
                                     size: 16.0,
                                   ),
                                   Text(
-                                    _chosenCommand?.name?.toUpperCase() ?? "",
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 12.0),
+                                    _chosenCommand?.name?.toUpperCase() ?? '',
+                                    style: StreamChatTheme.of(context)
+                                        .textTheme
+                                        .footnote
+                                        .copyWith(
+                                            color: StreamChatTheme.of(context)
+                                                .colorTheme
+                                                .white),
                                   ),
                                 ],
                               ),
@@ -432,23 +498,14 @@ class MessageInputState extends State<MessageInput> {
                           )
                         : null,
                     suffixIcon: _commandEnabled
-                        ? InkWell(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: StreamSvgIcon.close_small(),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                _commandEnabled = false;
-                              });
+                        ? IconButton(
+                            icon: StreamSvgIcon.close_small(),
+                            splashRadius: 24,
+                            onPressed: () {
+                              setState(() => _commandEnabled = false);
                             },
                           )
                         : null,
-                    suffixIconConstraints: BoxConstraints(
-                      maxHeight: 24.0,
-                      maxWidth: 40.0,
-                    ),
                   ),
                   textCapitalization: TextCapitalization.sentences,
                 ),
@@ -602,12 +659,12 @@ class MessageInputState extends State<MessageInput> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    color: StreamChatTheme.of(context).primaryColor,
+                    color: StreamChatTheme.of(context).colorTheme.white,
                     clipBehavior: Clip.antiAlias,
                     child: Container(
                       constraints: BoxConstraints.loose(Size.fromHeight(400)),
                       decoration: BoxDecoration(
-                          color: StreamChatTheme.of(context).primaryColor,
+                          color: StreamChatTheme.of(context).colorTheme.white,
                           borderRadius: BorderRadius.circular(8.0)),
                       child: ListView(
                         padding: const EdgeInsets.all(0),
@@ -625,13 +682,17 @@ class MessageInputState extends State<MessageInput> {
                                     ),
                                     child: StreamSvgIcon.lightning(
                                       color: StreamChatTheme.of(context)
-                                          .accentColor,
+                                          .colorTheme
+                                          .accentBlue,
                                     ),
                                   ),
                                   Text(
                                     'Instant Commands',
                                     style: TextStyle(
-                                      color: Colors.black.withOpacity(.5),
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .black
+                                          .withOpacity(.5),
                                     ),
                                   )
                                 ],
@@ -657,15 +718,6 @@ class MessageInputState extends State<MessageInput> {
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  trailing: CircleAvatar(
-                                    backgroundColor:
-                                        StreamChatTheme.of(context).accentColor,
-                                    child: StreamSvgIcon.lightning(
-                                      color: Colors.white,
-                                      size: 12.5,
-                                    ),
-                                    maxRadius: 12,
                                   ),
                                   //subtitle: Text(c.description),
                                   onTap: () {
@@ -693,27 +745,36 @@ class MessageInputState extends State<MessageInput> {
       switch (index) {
         case 0:
           return _attachments.isEmpty
-              ? StreamChatTheme.of(context).accentColor
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
               : (!_attachmentContainsFile
-                  ? StreamChatTheme.of(context).accentColor
-                  : Colors.black.withOpacity(0.2));
+                  ? StreamChatTheme.of(context).colorTheme.accentBlue
+                  : StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.2));
           break;
         case 1:
           return _attachmentContainsFile
-              ? StreamChatTheme.of(context).accentColor
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
               : (_attachments.isEmpty
-                  ? Colors.black.withOpacity(0.5)
-                  : Colors.black.withOpacity(0.2));
+                  ? StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5)
+                  : StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.2));
           break;
         case 2:
           return _attachmentContainsFile && _attachments.isNotEmpty
-              ? Colors.black.withOpacity(0.2)
-              : Colors.black.withOpacity(0.5);
+              ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
+              : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
           break;
         case 3:
           return _attachmentContainsFile && _attachments.isNotEmpty
-              ? Colors.black.withOpacity(0.2)
-              : Colors.black.withOpacity(0.5);
+              ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
+              : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
           break;
       }
     }
@@ -722,7 +783,7 @@ class MessageInputState extends State<MessageInput> {
       duration: _animateContainer ? Duration(milliseconds: 300) : Duration.zero,
       height: _openFilePickerSection ? _filePickerSize : 0,
       child: Material(
-        color: Color(0xFFF2F2F2),
+        color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
             Row(
@@ -789,7 +850,7 @@ class MessageInputState extends State<MessageInput> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16.0),
                     topRight: Radius.circular(16.0),
@@ -804,7 +865,8 @@ class MessageInputState extends State<MessageInput> {
                         width: 40.0,
                         height: 4.0,
                         decoration: BoxDecoration(
-                          color: Color(0xFFF2F2F2),
+                          color:
+                              StreamChatTheme.of(context).colorTheme.whiteSmoke,
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                       ),
@@ -817,7 +879,7 @@ class MessageInputState extends State<MessageInput> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: StreamChatTheme.of(context).colorTheme.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: _buildPickerSection(),
@@ -852,11 +914,12 @@ class MessageInputState extends State<MessageInput> {
                     },
                     child: Container(
                       constraints: BoxConstraints.expand(),
-                      color: Color(0xfff2f2f2),
+                      color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       child: Text(
                         'Add more files',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context).accentColor,
+                          color:
+                              StreamChatTheme.of(context).colorTheme.accentBlue,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -885,7 +948,7 @@ class MessageInputState extends State<MessageInput> {
                   PhotoManager.openSetting();
                 },
                 child: Container(
-                  color: Color(0xFFF2F2F2),
+                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -894,16 +957,20 @@ class MessageInputState extends State<MessageInput> {
                         'svgs/icon_picture_empty_state.svg',
                         package: 'stream_chat_flutter',
                         height: 140,
-                        color: StreamChatTheme.of(context).accentColor,
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
                       ),
                       Center(
                         child: Text(
                           'Allow access to your gallery',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: StreamChatTheme.of(context).accentColor,
-                          ),
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .bodyBold
+                              .copyWith(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .accentBlue,
+                              ),
                         ),
                       ),
                     ],
@@ -1019,7 +1086,7 @@ class MessageInputState extends State<MessageInput> {
   CircleAvatar _buildGiphyIcon() {
     if (kIsWeb) {
       return CircleAvatar(
-        backgroundColor: Colors.black,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.black,
         child: Image.asset(
           'images/giphy_icon.png',
           package: 'stream_chat_flutter',
@@ -1080,7 +1147,7 @@ class MessageInputState extends State<MessageInput> {
                 child: Card(
                   margin: EdgeInsets.all(8.0),
                   elevation: 2.0,
-                  color: StreamChatTheme.of(context).primaryColor,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -1088,7 +1155,7 @@ class MessageInputState extends State<MessageInput> {
                   child: Container(
                     constraints: BoxConstraints.loose(Size.fromHeight(400)),
                     decoration: BoxDecoration(
-                      color: StreamChatTheme.of(context).primaryColor,
+                      color: StreamChatTheme.of(context).colorTheme.white,
                     ),
                     child: FutureBuilder<List<Member>>(
                         future: queryMembers ?? Future.value(members),
@@ -1116,7 +1183,8 @@ class MessageInputState extends State<MessageInput> {
                                       subtitle: Text('@${m.userId}'),
                                       trailing: StreamSvgIcon.mentions(
                                         color: StreamChatTheme.of(context)
-                                            .accentColor,
+                                            .colorTheme
+                                            .accentBlue,
                                       ),
                                       onTap: () {
                                         _mentionedUsers.add(m.user);
@@ -1181,7 +1249,7 @@ class MessageInputState extends State<MessageInput> {
         child: Card(
           margin: EdgeInsets.all(8.0),
           elevation: 2.0,
-          color: StreamChatTheme.of(context).primaryColor,
+          color: StreamChatTheme.of(context).colorTheme.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -1196,7 +1264,7 @@ class MessageInputState extends State<MessageInput> {
                   offset: Offset(0, -4),
                 ),
               ],
-              color: StreamChatTheme.of(context).primaryColor,
+              color: StreamChatTheme.of(context).colorTheme.white,
             ),
             child: ListView.builder(
                 padding: const EdgeInsets.all(0),
@@ -1212,14 +1280,19 @@ class MessageInputState extends State<MessageInput> {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: StreamSvgIcon.smile(
-                              color: StreamChatTheme.of(context).accentColor,
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                             ),
                           ),
                           Flexible(
                             child: Text(
                               'Emoji matching "$query"',
                               style: TextStyle(
-                                color: Colors.black.withOpacity(.5),
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .black
+                                    .withOpacity(.5),
                               ),
                             ),
                           )
@@ -1280,6 +1353,25 @@ class MessageInputState extends State<MessageInput> {
     _commandsOverlay = null;
   }
 
+  Widget _buildReplyToMessage() {
+    if (!_hasQuotedMessage) {
+      return Offstage();
+    }
+    final containsUrl = widget.quotedMessage.attachments
+            ?.any((element) => element.ogScrapeUrl != null) ==
+        true;
+    return Transform(
+      transform: Matrix4.rotationY(pi),
+      alignment: Alignment.center,
+      child: QuotedMessageWidget(
+        reverse: true,
+        showBorder: !containsUrl,
+        message: widget.quotedMessage,
+        messageTheme: StreamChatTheme.of(context).otherMessageTheme,
+      ),
+    );
+  }
+
   Widget _buildAttachments() {
     return _attachments.isEmpty
         ? Container()
@@ -1313,10 +1405,15 @@ class MessageInputState extends State<MessageInput> {
                                   child: InkWell(
                                     child: CircleAvatar(
                                       backgroundColor:
-                                          Colors.black.withOpacity(0.2),
+                                          StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .black
+                                              .withOpacity(0.6),
                                       maxRadius: 12.0,
                                       child: StreamSvgIcon.close(
-                                        color: Colors.white,
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .white,
                                       ),
                                     ),
                                     onTap: () {
@@ -1401,11 +1498,11 @@ class MessageInputState extends State<MessageInput> {
             _attachments.remove(attachment);
           });
         },
-        fillColor: Colors.black.withOpacity(.5),
+        fillColor: StreamChatTheme.of(context).colorTheme.black.withOpacity(.5),
         child: Center(
           child: StreamSvgIcon.close(
             size: 24,
-            color: Colors.white,
+            color: StreamChatTheme.of(context).colorTheme.white,
           ),
         ),
       ),
@@ -1488,55 +1585,62 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton() {
-    return InkWell(
-      child: Padding(
-        padding:
-            const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
-        child: StreamSvgIcon.lightning(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: IconButton(
+        icon: StreamSvgIcon.lightning(
           color: _commandsOverlay != null
-              ? StreamChatTheme.of(context).accentColor
-              : Color(0xFF000000).withAlpha(128),
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
+              : StreamChatTheme.of(context).colorTheme.grey,
         ),
-      ),
-      onTap: () async {
-        if (_openFilePickerSection) {
-          setState(() {
-            _animateContainer = false;
-            _openFilePickerSection = false;
-            _filePickerSize = _kMinMediaPickerSize;
-          });
-          await Future.delayed(Duration(milliseconds: 300));
-        }
+        padding: const EdgeInsets.all(0),
+        constraints: BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
+        ),
+        splashRadius: 24,
+        onPressed: () async {
+          if (_openFilePickerSection) {
+            setState(() {
+              _animateContainer = false;
+              _openFilePickerSection = false;
+              _filePickerSize = _kMinMediaPickerSize;
+            });
+            await Future.delayed(Duration(milliseconds: 300));
+          }
 
-        if (_commandsOverlay == null) {
-          setState(() {
-            _commandsOverlay = _buildCommandsOverlayEntry();
-            Overlay.of(context).insert(_commandsOverlay);
-          });
-        } else {
-          setState(() {
-            _commandsOverlay?.remove();
-            _commandsOverlay = null;
-          });
-        }
-      },
+          if (_commandsOverlay == null) {
+            setState(() {
+              _commandsOverlay = _buildCommandsOverlayEntry();
+              Overlay.of(context).insert(_commandsOverlay);
+            });
+          } else {
+            setState(() {
+              _commandsOverlay?.remove();
+              _commandsOverlay = null;
+            });
+          }
+        },
+      ),
     );
   }
 
   Widget _buildAttachmentButton() {
-    var padding = widget.editMessage == null ? 4.0 : 8.0;
-    return Center(
-      child: InkWell(
-        child: Padding(
-          padding:
-              EdgeInsets.only(left: 8.0, right: padding, top: 8.0, bottom: 8.0),
-          child: StreamSvgIcon.attach(
-            color: _openFilePickerSection
-                ? StreamChatTheme.of(context).accentColor
-                : Color(0xFF000000).withAlpha(128),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: IconButton(
+        icon: StreamSvgIcon.attach(
+          color: _openFilePickerSection
+              ? StreamChatTheme.of(context).colorTheme.accentBlue
+              : StreamChatTheme.of(context).colorTheme.grey,
         ),
-        onTap: () async {
+        padding: const EdgeInsets.all(0),
+        constraints: BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
+        ),
+        splashRadius: 24,
+        onPressed: () async {
           _emojiOverlay?.remove();
           _emojiOverlay = null;
           _commandsOverlay?.remove();
@@ -1854,36 +1958,29 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildIdleSendButton(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
-      child: Center(
-          child: InkWell(
-        onTap: () {
-          sendMessage();
-        },
-        child: StreamSvgIcon(
-          assetName: _getIdleSendIcon(),
-          color: Colors.grey,
-          height: 24.0,
-          width: 24.0,
-        ),
-      )),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: StreamSvgIcon(
+        assetName: _getIdleSendIcon(),
+        color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+      ),
     );
   }
 
   Widget _buildSendButton(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0) + EdgeInsets.only(bottom: 3.0),
-        child: InkWell(
-          onTap: () {
-            sendMessage();
-          },
-          child: StreamSvgIcon(
-            assetName: _getSendIcon(),
-            color: StreamChatTheme.of(context).accentColor,
-            height: 24.0,
-            width: 24.0,
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: IconButton(
+        onPressed: sendMessage,
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.all(0),
+        splashRadius: 24,
+        constraints: BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
+        ),
+        icon: StreamSvgIcon(
+          assetName: _getSendIcon(),
+          color: StreamChatTheme.of(context).colorTheme.accentBlue,
         ),
       ),
     );
@@ -1922,6 +2019,9 @@ class MessageInputState extends State<MessageInput> {
 
     textEditingController.clear();
     _attachments.clear();
+    if (widget.onQuotedMessageCleared != null) {
+      widget.onQuotedMessageCleared();
+    }
 
     setState(() {
       _messageIsPresent = false;
@@ -1953,6 +2053,12 @@ class MessageInputState extends State<MessageInput> {
       );
     }
 
+    if (widget.quotedMessage != null) {
+      message = message.copyWith(
+        quotedMessageId: widget.quotedMessage.id,
+      );
+    }
+
     if (widget.preMessageSending != null) {
       message = await widget.preMessageSending(message);
     }
@@ -1976,10 +2082,6 @@ class MessageInputState extends State<MessageInput> {
     return sendingFuture.then((resp) {
       if (widget.onMessageSent != null) {
         widget.onMessageSent(resp.message);
-      } else {
-        if (widget.editMessage != null) {
-          Navigator.pop(context);
-        }
       }
     });
   }
@@ -1995,7 +2097,6 @@ class MessageInputState extends State<MessageInput> {
   @override
   void initState() {
     super.initState();
-
     _focusNode = widget.focusNode ?? FocusNode();
 
     _emojiNames = Emoji.all().map((e) => e.name);
@@ -2071,12 +2172,6 @@ class _SendingAttachment {
     this.uploaded = false,
     this.id,
   });
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
-  }
 }
 
 /// Represents a 2-tuple, or pair.

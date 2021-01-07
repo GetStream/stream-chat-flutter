@@ -6,8 +6,11 @@ import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/image_footer.dart';
 import 'package:stream_chat_flutter/src/image_header.dart';
 import 'package:video_player/video_player.dart';
+import 'stream_channel.dart';
 
 import '../stream_chat_flutter.dart';
+
+typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
 /// A full screen image widget
 class FullScreenMedia extends StatefulWidget {
@@ -18,6 +21,7 @@ class FullScreenMedia extends StatefulWidget {
   final int startIndex;
   final String userName;
   final DateTime sentAt;
+  final ShowMessageCallback onShowMessage;
 
   /// Instantiate a new FullScreenImage
   const FullScreenMedia({
@@ -27,6 +31,7 @@ class FullScreenMedia extends StatefulWidget {
     this.startIndex = 0,
     this.userName = '',
     this.sentAt,
+    this.onShowMessage,
   }) : super(key: key);
 
   @override
@@ -167,6 +172,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                   message: widget.message,
                   urls: widget.mediaAttachments,
                   currentIndex: _currentPage,
+                  onShowMessage: () {
+                    widget.onShowMessage(
+                        widget.message, StreamChannel.of(context).channel);
+                  },
                 ),
                 ImageFooter(
                   currentPage: _currentPage,

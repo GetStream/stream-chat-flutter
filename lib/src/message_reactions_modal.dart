@@ -40,27 +40,35 @@ class MessageReactionsModal extends StatelessWidget {
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
+    var messageTextLength = message.text.length;
+    if (message.quotedMessage != null) {
+      var quotedMessageLength = message.quotedMessage.text.length + 40;
+      if (message.quotedMessage.attachments?.isNotEmpty == true) {
+        quotedMessageLength += 40;
+      }
+      if (quotedMessageLength > messageTextLength) {
+        messageTextLength = quotedMessageLength;
+      }
+    }
     final roughSentenceSize =
-        message.text.length * messageTheme.messageText.fontSize * 1.2;
+        messageTextLength * messageTheme.messageText.fontSize * 1.2;
     final divFactor = message.attachments?.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        Navigator.pop(context);
-      },
+      onTap: () => Navigator.maybePop(context),
       child: Stack(
         children: [
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(
-                sigmaX: 10.8731,
-                sigmaY: 10.8731,
+                sigmaX: 10,
+                sigmaY: 10,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.1),
+                color: StreamChatTheme.of(context).colorTheme.overlay,
               ),
             ),
           ),
@@ -110,14 +118,16 @@ class MessageReactionsModal extends StatelessWidget {
                                 translateUserAvatar: false,
                                 showSendingIndicator: DisplayWidget.gone,
                                 shape: messageShape,
-                                showReactionPickerIndicator: true,
+                                showInChannelIndicator: false,
+                                showReactionPickerIndicator: showReactions &&
+                                    (message.status ==
+                                            MessageSendingStatus.SENT ||
+                                        message.status == null),
                               ),
                             ),
                           );
                         }),
-                    SizedBox(
-                      height: 16,
-                    ),
+                    SizedBox(height: 8),
                     if (message.latestReactions?.isNotEmpty == true)
                       _buildReactionCard(context),
                   ],
@@ -137,6 +147,7 @@ class MessageReactionsModal extends StatelessWidget {
         horizontal: 8.0,
       ),
       child: Card(
+        color: StreamChatTheme.of(context).colorTheme.white,
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

@@ -43,3 +43,6 @@ export 'src/message_search_bloc.dart';
 export 'src/message_search_item.dart';
 export 'src/message_search_list_view.dart';
 export 'src/unread_indicator.dart';
+export 'src/option_list_tile.dart';
+export 'src/channel_file_display_screen.dart';
+export 'src/channel_media_display_screen.dart';

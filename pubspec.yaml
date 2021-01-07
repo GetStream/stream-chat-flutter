@@ -24,11 +24,11 @@ dependencies:
   url_launcher: ^5.4.11
   emojis: ^0.9.3
   video_player: ^1.0.0
-  chewie: ^0.10.4
+  chewie: ^0.12.1
   file_picker: ^2.0.12
   image_picker: ^0.6.7+2
-  flutter_keyboard_visibility: ^3.3.0
-  stream_chat: ^0.2.20
+  flutter_keyboard_visibility: ^4.0.2
+  stream_chat: ^0.2.23
   mime: ^0.9.6+3
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5

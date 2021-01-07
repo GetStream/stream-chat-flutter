@@ -7,7 +7,6 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
 import 'channel_unread_indicator.dart';
-import 'chat_info_screen.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -50,6 +49,9 @@ class ChannelPreview extends StatelessWidget {
           return Opacity(
             opacity: snapshot.data ? 0.5 : 1,
             child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+              ),
               onTap: () {
                 if (onTap != null) {
                   onTap(channel);
@@ -61,29 +63,7 @@ class ChannelPreview extends StatelessWidget {
                 }
               },
               leading: ChannelImage(
-                onTap: onImageTap ??
-                    () {
-                      if (channel.memberCount == 2 && channel.isDistinct) {
-                        final currentUser = StreamChat.of(context).user;
-                        final otherUser = channel.state.members.firstWhere(
-                          (element) => element.user.id != currentUser.id,
-                          orElse: () => null,
-                        );
-                        if (otherUser != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StreamChannel(
-                                channel: channel,
-                                child: ChatInfoScreen(
-                                  user: otherUser.user,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    },
+                onTap: onImageTap,
               ),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -122,12 +102,18 @@ class ChannelPreview extends StatelessWidget {
                           padding: const EdgeInsets.only(right: 4.0),
                           child: SendingIndicator(
                             message: channel.state.lastMessage,
-                            allRead: channel.state.read
-                                    .where((element) => element.lastRead
+                            size: StreamChatTheme.of(context)
+                                .channelPreviewTheme
+                                .indicatorIconSize,
+                            isMessageRead: channel.state.read
+                                    ?.where((element) =>
+                                        element.user.id !=
+                                        channel.client.state.user.id)
+                                    ?.where((element) => element.lastRead
                                         .isAfter(channel
                                             .state.lastMessage.createdAt))
-                                    .length ==
-                                (channel.memberCount ?? 0),
+                                    ?.isNotEmpty ==
+                                true,
                           ),
                         );
                       }
@@ -155,12 +141,18 @@ class ChannelPreview extends StatelessWidget {
         String stringDate;
         final now = DateTime.now();
 
-        if (now.year != lastMessageAt.year ||
-            now.month != lastMessageAt.month ||
-            now.day != lastMessageAt.day) {
-          stringDate = Jiffy(lastMessageAt.toLocal()).format('dd/MM/yyyy');
-        } else {
+        var startOfDay = DateTime(now.year, now.month, now.day);
+
+        if (lastMessageAt.millisecondsSinceEpoch >=
+            startOfDay.millisecondsSinceEpoch) {
           stringDate = Jiffy(lastMessageAt.toLocal()).format('HH:mm');
+        } else if (lastMessageAt.millisecondsSinceEpoch >=
+            startOfDay.subtract(Duration(days: 1)).millisecondsSinceEpoch) {
+          stringDate = 'Yesterday';
+        } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
+          stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
+        } else {
+          stringDate = Jiffy(lastMessageAt.toLocal()).format('dd/MM/yyyy');
         }
 
         return Text(
@@ -227,7 +219,9 @@ class ChannelPreview extends StatelessWidget {
               } else if (e.type == 'giphy') {
                 return '[GIF]';
               }
-              return null;
+              return e == lastMessage.attachments.last
+                  ? (e.title ?? 'File')
+                  : '${e.title ?? 'File'} , ';
             }).where((e) => e != null),
             lastMessage.text ?? '',
           ];
@@ -235,22 +229,69 @@ class ChannelPreview extends StatelessWidget {
           text = parts.join(' ');
         }
 
-        return Text(
-          text,
+        return Text.rich(
+          _getDisplayText(
+            text,
+            lastMessage.mentionedUsers,
+            lastMessage.attachments,
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                color: StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .subtitle
+                    .color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal),
+            StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+                color: StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .subtitle
+                    .color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                fontWeight: FontWeight.bold),
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style:
-              StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .channelPreviewTheme
-                        .subtitle
-                        .color,
-                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                        ? FontStyle.italic
-                        : FontStyle.normal,
-                  ),
         );
       },
     );
+  }
+
+  TextSpan _getDisplayText(
+      String text,
+      List<User> mentions,
+      List<Attachment> attachments,
+      TextStyle normalTextStyle,
+      TextStyle mentionsTextStyle) {
+    var textList = text.split(' ');
+    List<TextSpan> resList = [];
+    for (var e in textList) {
+      if (mentions != null &&
+          mentions.isNotEmpty &&
+          mentions.any((element) => '@${element.name}' == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: mentionsTextStyle,
+        ));
+      } else if (attachments != null &&
+          attachments.isNotEmpty &&
+          attachments
+              .where((e) => e.title != null)
+              .any((element) => element.title == e)) {
+        resList.add(TextSpan(
+          text: '$e ',
+          style: normalTextStyle.copyWith(fontStyle: FontStyle.italic),
+        ));
+      } else {
+        resList.add(TextSpan(
+          text: e == textList.last ? '$e' : '$e ',
+          style: normalTextStyle,
+        ));
+      }
+    }
+
+    return TextSpan(children: resList);
   }
 }

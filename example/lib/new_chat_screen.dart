@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'chips_input_text_field.dart';
 import 'main.dart';
-import 'new_group_chat_screen.dart';
 import 'routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -36,8 +35,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
   Timer _debounce;
 
   bool _showUserList = true;
-
-  bool _channelExisted = false;
 
   void _userNameListener() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
@@ -122,17 +119,18 @@ class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(252, 252, 252, 1),
+      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: AppBar(
+        brightness: Theme.of(context).brightness,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
         leading: const StreamBackButton(),
         title: Text(
           'New Chat',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-          ),
+          style: StreamChatTheme.of(context)
+              .textTheme
+              .headlineBold
+              .copyWith(color: StreamChatTheme.of(context).colorTheme.black),
         ),
         centerTitle: true,
       ),
@@ -157,7 +155,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.05),
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .greyGainsboro,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.only(left: 24),
@@ -165,12 +165,19 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
                           child: Text(
                             user.name,
-                            style: TextStyle(color: Colors.black),
+                            maxLines: 1,
+                            style: TextStyle(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
+                            ),
                           ),
                         ),
                       ),
-                      Opacity(
-                        opacity: .8,
+                      Container(
+                        foregroundDecoration: BoxDecoration(
+                          color: StreamChatTheme.of(context).colorTheme.overlay,
+                          shape: BoxShape.circle,
+                        ),
                         child: UserAvatar(
                           showOnlineStatus: false,
                           user: user,
@@ -180,11 +187,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        child: StreamSvgIcon.close(
-                          color: Colors.white,
-                        ),
-                      ),
+                      StreamSvgIcon.close(),
                     ],
                   ),
                 );
@@ -212,7 +215,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         StreamNeumorphicButton(
                           child: Center(
                             child: StreamSvgIcon.contacts(
-                              color: Color(0xFF006CFF),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
                               size: 24,
                             ),
                           ),
@@ -220,10 +225,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         SizedBox(width: 8),
                         Text(
                           'Create a Group',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: StreamChatTheme.of(context).textTheme.bodyBold,
                         ),
                       ],
                     ),
@@ -234,15 +236,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               Container(
                 width: double.maxFinite,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.02),
-                      Colors.white.withOpacity(0.05),
-                    ],
-                    stops: [0, 1],
-                  ),
+                  gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -250,13 +244,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     horizontal: 8,
                   ),
                   child: Text(
-                    _isSearchActive
-                        ? "Matches for \"$_userNameQuery\""
-                        : 'On the platform',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                  ),
+                      _isSearchActive
+                          ? "Matches for \"$_userNameQuery\""
+                          : 'On the platform',
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .footnote
+                          .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5))),
                 ),
               ),
             Expanded(
@@ -316,7 +314,17 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                             ),
                                           ),
                                           Text(
-                                              'No user matches these keywords...'),
+                                            'No user matches these keywords...',
+                                            style: StreamChatTheme.of(context)
+                                                .textTheme
+                                                .footnote
+                                                .copyWith(
+                                                    color: StreamChatTheme.of(
+                                                            context)
+                                                        .colorTheme
+                                                        .black
+                                                        .withOpacity(.5)),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -340,7 +348,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             'No chats here yet...',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.black.withOpacity(.5),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(.5),
                             ),
                           ),
                         );

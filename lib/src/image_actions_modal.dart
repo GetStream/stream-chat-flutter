@@ -1,12 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import '../stream_chat_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../stream_chat_flutter.dart';
 
 class ImageActionsModal extends StatelessWidget {
   final Message message;
@@ -14,35 +15,22 @@ class ImageActionsModal extends StatelessWidget {
   final String sentAt;
   final List<Attachment> urls;
   final currentIndex;
+  final VoidCallback onShowMessage;
 
   ImageActionsModal(
-      {this.message, this.userName, this.sentAt, this.urls, this.currentIndex});
+      {this.message,
+      this.userName,
+      this.sentAt,
+      this.urls,
+      this.currentIndex,
+      this.onShowMessage});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Stack(
-        children: [
-          Positioned.fill(
-              child: Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.8),
-                Colors.transparent,
-              ],
-              stops: [0.0, 0.4],
-            )),
-          )),
-          _buildPage(context),
-        ],
-      ),
+      onTap: () => Navigator.maybePop(context),
+      child: _buildPage(context),
     );
   }
 
@@ -50,48 +38,14 @@ class ImageActionsModal extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 40.0,
-                ),
-              ),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      userName,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    sentAt,
-                    style: StreamChatTheme.of(context)
-                        .channelPreviewTheme
-                        .subtitle
-                        .copyWith(color: Colors.white.withOpacity(0.5)),
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: StreamSvgIcon.close(
-                  size: 24.0,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+          SizedBox(
+            height: kToolbarHeight,
+            child: IconButton(
+              icon: StreamSvgIcon.close(),
+              onPressed: () => Navigator.maybePop(context),
+            ),
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -104,10 +58,10 @@ class ImageActionsModal extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  color: Color(0xffe5e5e5),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: ListTile.divideTiles(
+                      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
                       context: context,
                       tiles: [
                         _buildButton(
@@ -115,7 +69,8 @@ class ImageActionsModal extends StatelessWidget {
                             'Reply',
                             StreamSvgIcon.Icon_curve_line_left_up(
                               size: 24.0,
-                              color: Colors.black.withOpacity(0.5),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey,
                             ),
                             () {}),
                         _buildButton(
@@ -123,17 +78,17 @@ class ImageActionsModal extends StatelessWidget {
                             'Show in Chat',
                             StreamSvgIcon.eye(
                               size: 24.0,
-                              color: Colors.black,
-                            ), () {
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        }),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.black,
+                            ),
+                            onShowMessage),
                         _buildButton(
                             context,
                             'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                             StreamSvgIcon.Icon_save(
                               size: 24.0,
-                              color: Colors.black.withOpacity(0.5),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey,
                             ), () async {
                           var url = urls[currentIndex].imageUrl ??
                               urls[currentIndex].assetUrl ??
@@ -153,7 +108,9 @@ class ImageActionsModal extends StatelessWidget {
                             'Delete',
                             StreamSvgIcon.delete(
                               size: 24.0,
-                              color: Color(0xffFF3742),
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentRed,
                             ),
                             () {
                               Navigator.pop(context);
@@ -163,7 +120,9 @@ class ImageActionsModal extends StatelessWidget {
                                     StreamChannel.of(context).channel.cid,
                                   );
                             },
-                            color: Color(0xffFF3742),
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentRed,
                           ),
                       ],
                     ).toList(),
@@ -182,10 +141,11 @@ class ImageActionsModal extends StatelessWidget {
       {Color color}) {
     var titleStyle = TextStyle(
       fontSize: 14.5,
-      color: Colors.black,
+      color: StreamChatTheme.of(context).colorTheme.black,
     );
 
     return Material(
+      color: StreamChatTheme.of(context).colorTheme.white,
       child: InkWell(
         onTap: onTap,
         child: ListTile(

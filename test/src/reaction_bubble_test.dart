@@ -31,7 +31,7 @@ void main() {
   );
 
   testWidgets(
-    'it should show a thumb up',
+    'it should show a like',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -50,7 +50,7 @@ void main() {
               child: ReactionBubble(
                 reactions: [
                   Reaction(
-                    type: 'thumbs_up',
+                    type: 'like',
                     user: User(id: 'test'),
                   ),
                 ],
@@ -86,7 +86,7 @@ void main() {
               child: ReactionBubble(
                 reactions: [
                   Reaction(
-                    type: 'thumbs_up',
+                    type: 'like',
                     user: User(id: 'test'),
                   ),
                   Reaction(

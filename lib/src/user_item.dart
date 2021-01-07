@@ -73,25 +73,25 @@ class UserItem extends StatelessWidget {
         ),
       ),
       trailing: selected
-          ? CircleAvatar(
-              child: StreamSvgIcon.check(
-                size: 20,
-                color: Colors.white,
-              ),
-              radius: 10,
+          ? StreamSvgIcon.checkSend(
+              color: StreamChatTheme.of(context).colorTheme.accentBlue,
             )
           : null,
       title: Text(
         user.name,
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: StreamChatTheme.of(context).textTheme.bodyBold,
       ),
       subtitle: showLastOnline ? _buildLastActive(context) : null,
     );
   }
 
   Widget _buildLastActive(context) {
-    return user.online == true
-        ? Text('Online')
-        : Text('Last online ${Jiffy(user.lastActive).fromNow()}');
+    return Text(
+      user.online == true
+          ? 'Online'
+          : 'Last online ${Jiffy(user.lastActive).fromNow()}',
+      style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+          color: StreamChatTheme.of(context).colorTheme.black.withOpacity(.5)),
+    );
   }
 }

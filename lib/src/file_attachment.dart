@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
+
 import 'media_utils.dart';
 
 enum FileAttachmentType { local, online }
@@ -61,13 +62,13 @@ class _FileAttachmentState extends State<FileAttachment> {
       child: Container(
         width: widget.size?.width ?? 100,
         height: 56.0,
-        margin: widget.trailing != null ? EdgeInsets.only(top: 4.0) : null,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: StreamChatTheme.of(context).colorTheme.white,
           borderRadius:
               widget.trailing != null ? BorderRadius.circular(16.0) : null,
           border: widget.trailing != null
-              ? Border.fromBorderSide(BorderSide(color: Color(0xFFE6E6E6)))
+              ? Border.fromBorderSide(BorderSide(
+                  color: StreamChatTheme.of(context).colorTheme.greyWhisper))
               : null,
         ),
         child: Row(
@@ -88,10 +89,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                 children: [
                   Text(
                     widget.attachment?.title ?? 'File',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                    ),
+                    style: StreamChatTheme.of(context).textTheme.bodyBold,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -99,11 +97,12 @@ class _FileAttachmentState extends State<FileAttachment> {
                     height: 3.0,
                   ),
                   Text(
-                    '${_getSizeText(widget.attachment.extraData['file_size'])}',
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(0.5),
-                      fontSize: 14.0,
-                    ),
+                    '${getSizeText(widget.attachment.extraData['file_size'])}',
+                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(0.5)),
                   ),
                 ],
               ),
@@ -113,7 +112,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                 widget.trailing ??
                     IconButton(
                       icon: StreamSvgIcon.cloud_download(
-                        color: Colors.black,
+                        color: StreamChatTheme.of(context).colorTheme.black,
                       ),
                       onPressed: () {
                         launchURL(context, widget.attachment.assetUrl);
@@ -123,37 +122,6 @@ class _FileAttachmentState extends State<FileAttachment> {
             ),
           ],
         ),
-
-        // ListTile(
-        //   dense: true,
-        //   leading: Container(
-        //     child: _getFileTypeImage(attachment.extraData['mime_type']),
-        //     height: 40.0,
-        //     width: 33.33,
-        //   ),
-        //   title: Text(
-        //     attachment?.title ?? 'File',
-        //     style: TextStyle(
-        //       fontWeight: FontWeight.bold,
-        //     ),
-        //     maxLines: 3,
-        //   ),
-        //   subtitle: Text(
-        //     '${attachment.extraData['file_size'] ?? 'N/A'} bytes',
-        //     style: TextStyle(
-        //       color: Colors.black.withOpacity(0.5),
-        //     ),
-        //   ),
-        //   trailing: trailing ??
-        //       IconButton(
-        //         icon: StreamSvgIcon.cloud_download(
-        //           color: Colors.black,
-        //         ),
-        //         onPressed: () {
-        //           launchURL(context, attachment.assetUrl);
-        //         },
-        //       ),
-        // ),
       ),
     );
   }
@@ -179,7 +147,8 @@ class _FileAttachmentState extends State<FileAttachment> {
                   width: 20.0,
                   height: 20.0,
                   child: CircularProgressIndicator(
-                    backgroundColor: StreamChatTheme.of(context).accentColor,
+                    backgroundColor:
+                        StreamChatTheme.of(context).colorTheme.accentBlue,
                   ),
                 ),
               );
@@ -226,76 +195,6 @@ class _FileAttachmentState extends State<FileAttachment> {
           break;
       }
     }
-
-    switch (widget.attachment.extraData['mime_type']) {
-      case '7z':
-        return StreamSvgIcon.filetype_7z();
-        break;
-      case 'csv':
-        return StreamSvgIcon.filetype_csv();
-        break;
-      case 'doc':
-        return StreamSvgIcon.filetype_doc();
-        break;
-      case 'docx':
-        return StreamSvgIcon.filetype_docx();
-        break;
-      case 'html':
-        return StreamSvgIcon.filetype_html();
-        break;
-      case 'md':
-        return StreamSvgIcon.filetype_md();
-        break;
-      case 'odt':
-        return StreamSvgIcon.filetype_odt();
-        break;
-      case 'pdf':
-        return StreamSvgIcon.filetype_pdf();
-        break;
-      case 'ppt':
-        return StreamSvgIcon.filetype_ppt();
-        break;
-      case 'pptx':
-        return StreamSvgIcon.filetype_pptx();
-        break;
-      case 'rar':
-        return StreamSvgIcon.filetype_rar();
-        break;
-      case 'rtf':
-        return StreamSvgIcon.filetype_rtf();
-        break;
-      case 'tar':
-        return StreamSvgIcon.filetype_tar();
-        break;
-      case 'txt':
-        return StreamSvgIcon.filetype_txt();
-        break;
-      case 'xls':
-        return StreamSvgIcon.filetype_xls();
-        break;
-      case 'xlsx':
-        return StreamSvgIcon.filetype_xlsx();
-        break;
-      case 'zip':
-        return StreamSvgIcon.filetype_zip();
-        break;
-      default:
-        return StreamSvgIcon.filetype_Generic();
-        break;
-    }
-  }
-
-  String _getSizeText(int bytes) {
-    if (bytes == null) {
-      return 'Size N/A';
-    }
-
-    if (bytes <= 1000) {
-      return '${bytes} bytes';
-    } else if (bytes <= 100000) {
-      return '${(bytes / 1000).toStringAsFixed(2)} KB';
-    } else {
-      return '${(bytes / 1000000).toStringAsFixed(2)} MB';
-    }
+    return getFileTypeImage(widget.attachment.extraData['mime_type']);
   }
 }

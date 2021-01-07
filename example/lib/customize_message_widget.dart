@@ -127,7 +127,6 @@ class ChannelPage extends StatelessWidget {
       showTimestamp: !details.isNextUser,
       showUsername: !details.isNextUser,
       showReactions: false,
-      showReplyIndicator: false,
     );
   }
 }

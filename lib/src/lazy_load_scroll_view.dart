@@ -31,7 +31,7 @@ class LazyLoadScrollView extends StatefulWidget {
   final bool isLoading;
 
   /// Initiates a LazyLoadScrollView widget
-  LazyLoadScrollView({
+  const LazyLoadScrollView({
     Key key,
     @required this.child,
     this.onStartOfPage,

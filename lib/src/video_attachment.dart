@@ -14,6 +14,7 @@ class VideoAttachment extends StatefulWidget {
   final MessageTheme messageTheme;
   final Size size;
   final Message message;
+  final ShowMessageCallback onShowMessage;
 
   VideoAttachment({
     Key key,
@@ -21,6 +22,7 @@ class VideoAttachment extends StatefulWidget {
     @required this.messageTheme,
     this.message,
     this.size,
+    this.onShowMessage,
   }) : super(key: key);
 
   @override
@@ -95,6 +97,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
                 userName: widget.message.user.name,
                 sentAt: widget.message.createdAt,
                 message: widget.message,
+                onShowMessage: widget.onShowMessage,
               ),
             ),
           ),

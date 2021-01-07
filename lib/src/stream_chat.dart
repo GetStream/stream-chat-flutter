@@ -76,8 +76,9 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
           return Theme(
             data: materialTheme.copyWith(
               primaryIconTheme: streamTheme.primaryIconTheme,
-              accentColor: streamTheme.accentColor,
-              scaffoldBackgroundColor: streamTheme.backgroundColor,
+              accentColor: streamTheme.colorTheme.accentBlue,
+              scaffoldBackgroundColor: streamTheme.colorTheme.white,
+              buttonTheme: streamTheme.buttonTheme,
             ),
             child: widget.child,
           );
@@ -91,81 +92,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
     StreamChatThemeData themeData,
   ) {
     final defaultTheme = StreamChatThemeData.getDefaultTheme(Theme.of(context));
-    final theme = defaultTheme.copyWith(
-      primaryColor: themeData?.primaryColor,
-      defaultChannelImage: themeData?.defaultChannelImage,
-      primaryIconTheme: themeData?.primaryIconTheme,
-      defaultUserImage: themeData?.defaultUserImage,
-      backgroundColor: themeData?.backgroundColor,
-      channelTheme: defaultTheme.channelTheme.copyWith(
-        channelHeaderTheme:
-            defaultTheme.channelTheme.channelHeaderTheme.copyWith(
-          color: themeData?.channelTheme?.channelHeaderTheme?.color,
-          lastMessageAt:
-              themeData?.channelTheme?.channelHeaderTheme?.lastMessageAt,
-          title: themeData?.channelTheme?.channelHeaderTheme?.title,
-          avatarTheme: defaultTheme.channelPreviewTheme.avatarTheme.copyWith(
-            constraints: themeData
-                ?.channelTheme?.channelHeaderTheme?.avatarTheme?.constraints,
-            borderRadius: themeData
-                ?.channelTheme?.channelHeaderTheme?.avatarTheme?.borderRadius,
-          ),
-        ),
-        inputBackground: themeData?.channelTheme?.inputBackground,
-        messageInputButtonIconTheme:
-            themeData?.channelTheme?.messageInputButtonIconTheme,
-        inputGradient: themeData?.channelTheme?.inputGradient,
-        messageInputButtonTheme:
-            themeData?.channelTheme?.messageInputButtonTheme,
-      ),
-      ownMessageTheme: defaultTheme.ownMessageTheme.copyWith(
-        replies: themeData?.ownMessageTheme?.replies,
-        createdAt: themeData?.ownMessageTheme?.createdAt,
-        messageText: themeData?.ownMessageTheme?.messageText,
-        messageBackgroundColor:
-            themeData?.ownMessageTheme?.messageBackgroundColor,
-        messageAuthor: themeData?.ownMessageTheme?.messageAuthor,
-        messageLinks: themeData?.ownMessageTheme?.messageLinks,
-        avatarTheme: defaultTheme.ownMessageTheme.avatarTheme.copyWith(
-          constraints: themeData?.ownMessageTheme?.avatarTheme?.constraints,
-          borderRadius: themeData?.ownMessageTheme?.avatarTheme?.borderRadius,
-        ),
-        reactionsBorderColor: themeData?.ownMessageTheme?.reactionsBorderColor,
-        reactionsBackgroundColor:
-            themeData?.ownMessageTheme?.reactionsBackgroundColor,
-      ),
-      otherMessageTheme: defaultTheme.otherMessageTheme.copyWith(
-        replies: themeData?.otherMessageTheme?.replies,
-        createdAt: themeData?.otherMessageTheme?.createdAt,
-        messageText: themeData?.otherMessageTheme?.messageText,
-        messageBackgroundColor:
-            themeData?.otherMessageTheme?.messageBackgroundColor,
-        messageAuthor: themeData?.otherMessageTheme?.messageAuthor,
-        messageLinks: themeData?.otherMessageTheme?.messageLinks,
-        avatarTheme: defaultTheme.otherMessageTheme.avatarTheme.copyWith(
-          constraints: themeData?.otherMessageTheme?.avatarTheme?.constraints,
-          borderRadius: themeData?.otherMessageTheme?.avatarTheme?.borderRadius,
-        ),
-        reactionsBorderColor:
-            themeData?.otherMessageTheme?.reactionsBorderColor,
-        reactionsBackgroundColor:
-            themeData?.otherMessageTheme?.reactionsBackgroundColor,
-      ),
-      accentColor: themeData?.accentColor,
-      secondaryColor: themeData?.secondaryColor,
-      channelPreviewTheme: defaultTheme.channelPreviewTheme.copyWith(
-        avatarTheme: defaultTheme.channelPreviewTheme.avatarTheme.copyWith(
-          constraints: themeData?.channelPreviewTheme?.avatarTheme?.constraints,
-          borderRadius:
-              themeData?.channelPreviewTheme?.avatarTheme?.borderRadius,
-        ),
-        title: themeData?.channelPreviewTheme?.title,
-        lastMessageAt: themeData?.channelPreviewTheme?.lastMessageAt,
-        subtitle: themeData?.channelPreviewTheme?.subtitle,
-        unreadCounterColor: themeData?.channelPreviewTheme?.unreadCounterColor,
-      ),
-    );
-    return theme;
+    return defaultTheme.merge(themeData) ?? themeData;
   }
 
   /// The current user

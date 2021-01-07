@@ -16,7 +16,7 @@ class UserAvatar extends StatelessWidget {
     this.borderRadius,
     this.onlineIndicatorAlignment = Alignment.topRight,
     this.selected = false,
-    this.selectionColor = const Color(0xFF006CFF),
+    this.selectionColor,
     this.selectionThickness = 4,
   }) : super(key: key);
 
@@ -47,7 +47,7 @@ class UserAvatar extends StatelessWidget {
         constraints: constraints ??
             streamChatTheme.ownMessageTheme.avatarTheme.constraints,
         decoration: BoxDecoration(
-          color: streamChatTheme.accentColor,
+          color: streamChatTheme.colorTheme.accentBlue,
         ),
         child: hasImage
             ? CachedNetworkImage(
@@ -61,13 +61,17 @@ class UserAvatar extends StatelessWidget {
             : streamChatTheme.defaultUserImage(context, user),
       ),
     );
+
     if (selected) {
       avatar = ClipRRect(
         borderRadius: (borderRadius ??
                 streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
             BorderRadius.circular(selectionThickness),
         child: Container(
-          color: selectionColor,
+          constraints: constraints ??
+              streamChatTheme.ownMessageTheme.avatarTheme.constraints,
+          color: selectionColor ??
+              StreamChatTheme.of(context).colorTheme.accentBlue,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,
@@ -96,10 +100,10 @@ class UserAvatar extends StatelessWidget {
                         ),
                     child: Material(
                       shape: CircleBorder(),
-                      color: Color(0xff20E070),
+                      color: streamChatTheme.colorTheme.accentGreen,
                     ),
                   ),
-                  color: Colors.white,
+                  color: StreamChatTheme.of(context).colorTheme.white,
                 ),
               ),
             ),

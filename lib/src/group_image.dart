@@ -9,21 +9,33 @@ class GroupImage extends StatelessWidget {
     @required this.images,
     this.constraints,
     this.onTap,
+    this.borderRadius,
+    this.selected = false,
+    this.selectionColor,
+    this.selectionThickness = 4,
   }) : super(key: key);
 
   final List<String> images;
   final BoxConstraints constraints;
   final VoidCallback onTap;
+  final bool selected;
+  final BorderRadius borderRadius;
+  final Color selectionColor;
+  final double selectionThickness;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    var avatar;
+    final streamChatTheme = StreamChatTheme.of(context);
+
+    avatar = GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: StreamChatTheme.of(context)
-            .ownMessageTheme
-            .avatarTheme
-            .borderRadius,
+        borderRadius: borderRadius ??
+            StreamChatTheme.of(context)
+                .ownMessageTheme
+                .avatarTheme
+                .borderRadius,
         child: Container(
           constraints: constraints ??
               StreamChatTheme.of(context)
@@ -31,7 +43,7 @@ class GroupImage extends StatelessWidget {
                   .avatarTheme
                   .constraints,
           decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).accentColor,
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
           ),
           child: Flex(
             direction: Axis.vertical,
@@ -91,5 +103,25 @@ class GroupImage extends StatelessWidget {
         ),
       ),
     );
+
+    if (selected) {
+      avatar = ClipRRect(
+        borderRadius: (borderRadius ??
+                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
+            BorderRadius.circular(selectionThickness),
+        child: Container(
+          color: selectionColor ??
+              StreamChatTheme.of(context).colorTheme.accentBlue,
+          height: 64.0,
+          width: 64.0,
+          child: Padding(
+            padding: EdgeInsets.all(selectionThickness),
+            child: avatar,
+          ),
+        ),
+      );
+    }
+
+    return avatar;
   }
 }

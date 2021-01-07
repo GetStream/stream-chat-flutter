@@ -13,6 +13,9 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
+  /// Callback to call when pressing the show message button.
+  final VoidCallback onShowMessage;
+
   /// Callback to call when the header is tapped.
   final VoidCallback onTitleTap;
 
@@ -35,6 +38,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
     this.currentIndex,
     this.showBackButton = true,
     this.onBackPressed,
+    this.onShowMessage,
     this.onTitleTap,
     this.onImageTap,
     this.userName = '',
@@ -50,7 +54,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: showBackButton
           ? IconButton(
               icon: StreamSvgIcon.close(
-                color: Colors.black,
+                color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
               onPressed: onBackPressed,
@@ -61,7 +65,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: <Widget>[
         IconButton(
           icon: StreamSvgIcon.Icon_menu_point_v(
-            color: Colors.black,
+            color: StreamChatTheme.of(context).colorTheme.black,
           ),
           onPressed: () {
             _showMessageActionModalBottomSheet(context);
@@ -81,11 +85,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
             children: <Widget>[
               Text(
                 userName,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
+                style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
               Text(
                 sentAt,
@@ -106,6 +106,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
     showDialog(
         context: context,
+        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
         builder: (context) {
           return StreamChannel(
             channel: channel,
@@ -115,6 +116,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
               message: message,
               urls: urls,
               currentIndex: currentIndex,
+              onShowMessage: onShowMessage,
             ),
           );
         });

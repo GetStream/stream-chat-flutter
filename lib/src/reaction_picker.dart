@@ -89,7 +89,9 @@ class _ReactionPickerState extends State<ReactionPicker>
                               height: animations[index].value * 24.0,
                               width: animations[index].value * 24.0,
                               color: ownReactionIndex != -1
-                                  ? StreamChatTheme.of(context).accentColor
+                                  ? StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .accentBlue
                                   : Theme.of(context)
                                       .iconTheme
                                       .color
@@ -134,11 +136,11 @@ class _ReactionPickerState extends State<ReactionPicker>
 
   /// Add a reaction to the message
   void sendReaction(BuildContext context, String reactionType) {
-    StreamChannel.of(context)
-        .channel
-        .sendReaction(widget.message, reactionType, extraData: {
-      'enforce_unique': true,
-    });
+    StreamChannel.of(context).channel.sendReaction(
+          widget.message,
+          reactionType,
+          enforceUnique: true,
+        );
     pop();
   }
 
