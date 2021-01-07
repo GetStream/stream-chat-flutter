@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/channels_bloc.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
-import 'dart:ui' as ui;
 
 import '../stream_chat_flutter.dart';
 import 'channel_bottom_sheet.dart';

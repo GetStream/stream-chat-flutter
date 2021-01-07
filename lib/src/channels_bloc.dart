@@ -14,11 +14,19 @@ class ChannelsBloc extends StatefulWidget {
   /// Set this to true to prevent channels to be brought to the top of the list when a new message arrives
   final bool lockChannelsOrder;
 
+  /// Comparator used to sort the channels when a message.new event is received
+  final Comparator<Channel> channelsComparator;
+
+  /// Function used to evaluate if a channel should be added to the list when a message.new event is received
+  final bool Function(Event) shouldAddChannel;
+
   /// Instantiate a new ChannelsBloc
   const ChannelsBloc({
     Key key,
     this.child,
     this.lockChannelsOrder = false,
+    this.channelsComparator,
+    this.shouldAddChannel,
   }) : super(key: key);
 
   @override
@@ -85,23 +93,21 @@ class ChannelsBlocState extends State<ChannelsBloc>
           paginationParams.offset == null ||
           paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
-      await client
-          .queryChannels(
+      final _channels = await client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
         onlyOffline: onlyOffline,
-      )
-          .then((channels) {
-        if (clear) {
-          _channelsController.add(channels);
-        } else {
-          final l = oldChannels + channels;
-          _channelsController.add(l);
-        }
-        _queryChannelsLoadingController.sink.add(false);
-      });
+      );
+
+      if (clear) {
+        _channelsController.add(_channels);
+      } else {
+        final l = oldChannels + _channels;
+        _channelsController.add(l);
+      }
+      _queryChannelsLoadingController.sink.add(false);
     } catch (err, stackTrace) {
       print(err);
       print(stackTrace);
@@ -126,7 +132,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
             final channel = newChannels.removeAt(index);
             newChannels.insert(0, channel);
           }
-        } else {
+        } else if (widget.shouldAddChannel != null &&
+            widget.shouldAddChannel(e)) {
           final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
           if (hiddenIndex > -1) {
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
@@ -137,6 +144,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
               newChannels.insert(0, client.state.channels[e.cid]);
             }
           }
+        }
+
+        if (widget.channelsComparator != null) {
+          newChannels.sort(widget.channelsComparator);
         }
         _channelsController.add(newChannels);
       }));
