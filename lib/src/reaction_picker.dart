@@ -58,62 +58,65 @@ class _ReactionPickerState extends State<ReactionPicker>
           return Transform.scale(
             scale: val,
             child: Material(
-              color: widget.messageTheme.reactionsBackgroundColor,
+              color: StreamChatTheme.of(context).colorTheme.white,
               clipBehavior: Clip.hardEdge,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: reactionIcons.map((reactionIcon) {
-                  final ownReactionIndex = widget.message.ownReactions
-                          ?.indexWhere((reaction) =>
-                              reaction.type == reactionIcon.type) ??
-                      -1;
-                  var index = reactionIcons.indexOf(reactionIcon);
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: reactionIcons.map((reactionIcon) {
+                    final ownReactionIndex = widget.message.ownReactions
+                            ?.indexWhere((reaction) =>
+                                reaction.type == reactionIcon.type) ??
+                        -1;
+                    var index = reactionIcons.indexOf(reactionIcon);
 
-                  return IconButton(
-                    iconSize: 24,
-                    icon: AnimatedBuilder(
-                        animation: animations[index],
-                        builder: (context, val) {
-                          return Transform(
-                            transform: Matrix4.identity()
-                              ..scale(animations[index].value,
-                                  animations[index].value)
-                              ..rotateZ(1.0 - animations[index].value),
-                            child: StreamSvgIcon(
-                              assetName: reactionIcon.assetName,
-                              height: animations[index].value * 24.0,
-                              width: animations[index].value * 24.0,
-                              color: ownReactionIndex != -1
-                                  ? StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .accentBlue
-                                  : Theme.of(context)
-                                      .iconTheme
-                                      .color
-                                      .withOpacity(.5),
-                            ),
+                    return IconButton(
+                      iconSize: 24,
+                      icon: AnimatedBuilder(
+                          animation: animations[index],
+                          builder: (context, val) {
+                            return Transform(
+                              transform: Matrix4.identity()
+                                ..scale(animations[index].value,
+                                    animations[index].value)
+                                ..rotateZ(1.0 - animations[index].value),
+                              child: StreamSvgIcon(
+                                assetName: reactionIcon.assetName,
+                                height: animations[index].value * 24.0,
+                                width: animations[index].value * 24.0,
+                                color: ownReactionIndex != -1
+                                    ? StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .accentBlue
+                                    : Theme.of(context)
+                                        .iconTheme
+                                        .color
+                                        .withOpacity(.5),
+                              ),
+                            );
+                          }),
+                      onPressed: () {
+                        if (ownReactionIndex != -1) {
+                          removeReaction(
+                            context,
+                            widget.message.ownReactions[ownReactionIndex],
                           );
-                        }),
-                    onPressed: () {
-                      if (ownReactionIndex != -1) {
-                        removeReaction(
-                          context,
-                          widget.message.ownReactions[ownReactionIndex],
-                        );
-                      } else {
-                        sendReaction(
-                          context,
-                          reactionIcon.type,
-                        );
-                      }
-                    },
-                  );
-                }).toList(),
+                        } else {
+                          sendReaction(
+                            context,
+                            reactionIcon.type,
+                          );
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ),
           );

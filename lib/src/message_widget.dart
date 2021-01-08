@@ -423,10 +423,12 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   widget.reverse ? pi : 0),
                                               child: CustomPaint(
                                                 painter: ReactionBubblePainter(
-                                                  widget.messageTheme
-                                                      .reactionsBackgroundColor,
-                                                  widget.messageTheme
-                                                      .reactionsBorderColor,
+                                                  StreamChatTheme.of(context)
+                                                      .colorTheme
+                                                      .white,
+                                                  StreamChatTheme.of(context)
+                                                      .colorTheme
+                                                      .white,
                                                 ),
                                               ),
                                             ),
@@ -492,18 +494,16 @@ class _MessageWidgetState extends State<MessageWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             StreamSvgIcon.eye(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+              color: StreamChatTheme.of(context).colorTheme.grey,
               size: 16.0,
             ),
             SizedBox(width: 8.0),
             Text(
               'Only visible to you',
-              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.5)),
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .footnote
+                  .copyWith(color: StreamChatTheme.of(context).colorTheme.grey),
             ),
           ],
         ),
@@ -754,9 +754,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       side: widget.attachmentBorderSide ??
           widget.borderSide ??
           BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? StreamChatTheme.of(context).colorTheme.white.withAlpha(24)
-                : StreamChatTheme.of(context).colorTheme.black.withAlpha(24),
+            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           ),
       borderRadius: widget.attachmentBorderRadiusGeometry ??
           widget.borderRadiusGeometry ??
