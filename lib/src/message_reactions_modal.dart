@@ -127,7 +127,6 @@ class MessageReactionsModal extends StatelessWidget {
                             ),
                           );
                         }),
-                    SizedBox(height: 8),
                     if (message.latestReactions?.isNotEmpty == true)
                       _buildReactionCard(context),
                   ],
@@ -152,27 +151,21 @@ class MessageReactionsModal extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
                 'Message Reactions',
-                style: Theme.of(context).textTheme.headline6,
+                style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 18,
-                    right: 18,
-                    bottom: 26,
-                  ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
                   child: Wrap(
                     spacing: 16,
-                    runSpacing: 22,
+                    runSpacing: 16,
                     alignment: WrapAlignment.start,
                     children: message.latestReactions
                         .map((e) => _buildReaction(
@@ -184,8 +177,8 @@ class MessageReactionsModal extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -245,9 +238,10 @@ class MessageReactionsModal extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
                   Text(
                     reaction.user.name,
-                    style: Theme.of(context).textTheme.subtitle2,
+                    style: StreamChatTheme.of(context).textTheme.footnoteBold,
                     textAlign: TextAlign.center,
                   ),
                 ],
