@@ -342,12 +342,11 @@ class _MessageListViewState extends State<MessageListView> {
                     if (i == messages.length + 1) return Offstage();
                     if (i == 0) return SizedBox(height: 30);
                     final message = messages[i];
-                    final nextMessage = i > 0 ? messages[i - 1] : null;
-                    if (nextMessage != null &&
-                        !Jiffy(message.createdAt.toLocal()).isSame(
-                          nextMessage.createdAt.toLocal(),
-                          Units.DAY,
-                        )) {
+                    final nextMessage = messages[i - 1];
+                    if (!Jiffy(message.createdAt.toLocal()).isSame(
+                      nextMessage.createdAt.toLocal(),
+                      Units.DAY,
+                    )) {
                       final divider = widget.dateDividerBuilder != null
                           ? widget.dateDividerBuilder(
                               nextMessage.createdAt.toLocal(),
@@ -360,15 +359,14 @@ class _MessageListViewState extends State<MessageListView> {
                         child: divider,
                       );
                     }
-                    num timeDiff = 0;
-                    if (nextMessage != null) {
-                      timeDiff = Jiffy(nextMessage.createdAt.toLocal()).diff(
-                        message.createdAt.toLocal(),
-                        Units.MINUTE,
-                      );
-                    }
-                    final isNextUserSame = (i - 1 >= 0) &&
-                        message.user.id == messages[i - 1]?.user?.id;
+                    final timeDiff =
+                        Jiffy(nextMessage.createdAt.toLocal()).diff(
+                      message.createdAt.toLocal(),
+                      Units.MINUTE,
+                    );
+
+                    final isNextUserSame =
+                        message.user.id == nextMessage.user?.id;
                     final isThread = message.replyCount > 0;
                     if (timeDiff >= 1 || !isNextUserSame || isThread) {
                       return SizedBox(height: 8);
