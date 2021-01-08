@@ -974,9 +974,22 @@ class MessageInputState extends State<MessageInput> {
                         'svgs/icon_picture_empty_state.svg',
                         package: 'stream_chat_flutter',
                         height: 140,
-                        color:
-                            StreamChatTheme.of(context).colorTheme.accentBlue,
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
                       ),
+                      Text(
+                        'Please enable access to your photos \nand videos so you can share them with friends.',
+                        style: StreamChatTheme.of(context)
+                            .textTheme
+                            .body
+                            .copyWith(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .grey),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 6.0),
                       Center(
                         child: Text(
                           'Allow access to your gallery',
