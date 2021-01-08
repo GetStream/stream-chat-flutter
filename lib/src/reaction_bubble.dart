@@ -134,16 +134,11 @@ class ReactionBubble extends StatelessWidget {
         borderColor,
       ),
     );
-
-    if (!flipTail) {
-      return tail;
-    } else {
-      return Transform(
-        transform: Matrix4.rotationY(pi),
-        alignment: Alignment.center,
-        child: tail,
-      );
-    }
+    return Transform(
+      transform: Matrix4.rotationY(flipTail ? 0 : pi),
+      alignment: Alignment.center,
+      child: tail,
+    );
   }
 }
 
