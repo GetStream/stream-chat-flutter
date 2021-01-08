@@ -142,7 +142,9 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 
         for (var item in snapshot.data) {
           item.message.attachments
-              .where((e) => e.type == 'image' || e.type == 'video')
+              .where((e) =>
+                  (e.type == 'image' || e.type == 'video') &&
+                  e.ogScrapeUrl == null)
               .forEach((e) {
             VideoPlayerController controller;
             if (e.type == 'video') {
