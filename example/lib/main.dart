@@ -286,8 +286,75 @@ class _HomePageState extends State<HomePage> {
 class UserMentionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('On Pause Right Now!'),
+    final user = StreamChat.of(context).user;
+    return MessageSearchBloc(
+      child: MessageSearchListView(
+        filters: {
+          'members': {
+            r'$in': [user.id],
+          },
+        },
+        messageFilters: {
+          'mentioned_users.id': {
+            r'$contains': user.id,
+          },
+        },
+        sortOptions: [
+          SortOption(
+            'created_at',
+            direction: SortOption.ASC,
+          ),
+        ],
+        paginationParams: PaginationParams(limit: 20),
+        showResultCount: false,
+        emptyBuilder: (_, __) {
+          return LayoutBuilder(
+            builder: (context, viewportConstraints) {
+              return SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: viewportConstraints.maxHeight,
+                  ),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: StreamSvgIcon.mentions(
+                            size: 96,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text('No mentions exist yet...'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        onItemTap: (messageResponse) async {
+          final client = StreamChat.of(context).client;
+          final message = messageResponse.message;
+          final channel = client.channel(
+            messageResponse.channel.type,
+            id: messageResponse.channel.id,
+          );
+          if (channel.state == null) {
+            await channel.watch();
+          }
+          Navigator.pushNamed(
+            context,
+            Routes.CHANNEL_PAGE,
+            arguments: ChannelPageArgs(
+              channel: channel,
+              initialMessage: message,
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -371,7 +438,39 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                 direction: SortOption.ASC,
                               ),
                             ],
+                            pullToRefresh: false,
                             paginationParams: PaginationParams(limit: 20),
+                            emptyBuilder: (_, query) {
+                              return LayoutBuilder(
+                                builder: (context, viewportConstraints) {
+                                  return SingleChildScrollView(
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight:
+                                            viewportConstraints.maxHeight,
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(24),
+                                              child: StreamSvgIcon.search(
+                                                size: 96,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              'No results for \"$query\"...',
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                             onItemTap: (messageResponse) async {
                               final client = StreamChat.of(context).client;
                               final message = messageResponse.message;
