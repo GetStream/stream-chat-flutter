@@ -227,16 +227,19 @@ class MessageReactionsModal extends StatelessWidget {
                       ),
                       Positioned(
                         child: Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: reverse
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                           child: ReactionBubble(
                             reactions: [reaction],
+                            flipTail: !reverse,
                             borderColor: messageTheme.reactionsBorderColor,
                             backgroundColor:
                                 messageTheme.reactionsBackgroundColor,
                             highlightOwnReactions: false,
                           ),
                         ),
-                        bottom: 4,
+                        bottom: 6,
                         left: isCurrentUser ? 0 : null,
                         right: isCurrentUser ? 0 : null,
                       ),
