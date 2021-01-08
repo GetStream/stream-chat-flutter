@@ -111,7 +111,7 @@ class QuotedMessageWidget extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 6, right: 4, left: 8),
+        padding: const EdgeInsets.only(top: 8, right: 4, left: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
