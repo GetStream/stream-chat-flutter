@@ -690,6 +690,12 @@ class _ChannelPageState extends State<ChannelPage> {
                         horizontal: 8,
                         vertical: 4,
                       ),
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .footnote
+                          .copyWith(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey),
                     ),
                   ),
                 ),

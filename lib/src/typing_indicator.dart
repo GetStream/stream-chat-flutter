@@ -54,7 +54,7 @@ class TypingIndicator extends StatelessWidget {
                           height: 4,
                         ),
                         Text(
-                          '  ${snapshot.data.map((u) => u.name).join(',')} ${snapshot.data.length == 1 ? 'is' : 'are'} typing',
+                          '  ${snapshot.data[0].name}${snapshot.data.length == 1 ? '' : ' and ${snapshot.data.length - 1} more'} ${snapshot.data.length == 1 ? 'is' : 'are'} typing',
                           maxLines: 1,
                           style: style,
                         ),
