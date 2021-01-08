@@ -34,10 +34,10 @@ class UrlAttachment extends StatelessWidget {
               margin: EdgeInsets.symmetric(horizontal: 8.0),
               child: Stack(
                 children: [
-                  Center(
-                    child: CachedNetworkImage(
-                      imageUrl: urlAttachment.imageUrl,
-                    ),
+                  CachedNetworkImage(
+                    width: double.infinity,
+                    imageUrl: urlAttachment.imageUrl,
+                    fit: BoxFit.cover,
                   ),
                   Positioned(
                     left: 0.0,

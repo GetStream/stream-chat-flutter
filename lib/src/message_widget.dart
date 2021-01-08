@@ -842,6 +842,8 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   void onLongPress(BuildContext context) {
+    print(
+        'widget.message.attachment[0].toJson(): ${widget.message.attachments[0].imageUrl}');
     if (widget.message.isEphemeral ||
         widget.message.status == MessageSendingStatus.SENDING) {
       return;
