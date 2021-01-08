@@ -278,7 +278,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   Widget build(BuildContext context) {
     final avatarWidth = widget.messageTheme.avatarTheme.constraints.maxWidth;
     var leftPadding =
-        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 4.5;
+        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     final isOnlyEmoji =
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
@@ -330,7 +330,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                   child: PortalEntry(
                                     portal: Container(
                                       transform:
-                                          Matrix4.translationValues(-16, 2, 0),
+                                          Matrix4.translationValues(-12, 0, 0),
                                       child: _buildReactionIndicator(context),
                                       constraints:
                                           BoxConstraints(maxWidth: 22 * 6.0),
@@ -372,6 +372,14 @@ class _MessageWidgetState extends State<MessageWidget> {
                                               : Card(
                                                   clipBehavior: Clip.antiAlias,
                                                   elevation: 0.0,
+                                                  margin: EdgeInsets.symmetric(
+                                                    horizontal:
+                                                        widget.showUserAvatar ==
+                                                                DisplayWidget
+                                                                    .gone
+                                                            ? 0
+                                                            : 4.0,
+                                                  ),
                                                   shape: widget.shape ??
                                                       RoundedRectangleBorder(
                                                         side: isOnlyEmoji &&

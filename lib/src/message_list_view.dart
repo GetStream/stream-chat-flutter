@@ -324,7 +324,7 @@ class _MessageListViewState extends State<MessageListView> {
                 onInBetweenOfPage: () {
                   _inBetweenList = true;
                 },
-                child: ScrollablePositionedList.builder(
+                child: ScrollablePositionedList.separated(
                   key: ValueKey(initialIndex + initialAlignment),
                   itemPositionsListener: _itemPositionListener,
                   addAutomaticKeepAlives: true,
@@ -336,6 +336,45 @@ class _MessageListViewState extends State<MessageListView> {
                   itemCount: messages.length +
                       2 +
                       (widget.parentMessage != null ? 1 : 0),
+                  separatorBuilder: (context, i) {
+                    if (i == messages.length) return Offstage();
+                    if (i == messages.length + 2) return Offstage();
+                    if (i == messages.length + 1) return Offstage();
+                    if (i == 0) return SizedBox(height: 30);
+                    final message = messages[i];
+                    final nextMessage = i > 0 ? messages[i - 1] : null;
+                    if (nextMessage != null &&
+                        !Jiffy(message.createdAt.toLocal()).isSame(
+                          nextMessage.createdAt.toLocal(),
+                          Units.DAY,
+                        )) {
+                      final divider = widget.dateDividerBuilder != null
+                          ? widget.dateDividerBuilder(
+                              nextMessage.createdAt.toLocal(),
+                            )
+                          : DateDivider(
+                              dateTime: nextMessage.createdAt.toLocal(),
+                            );
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        child: divider,
+                      );
+                    }
+                    num timeDiff = 0;
+                    if (nextMessage != null) {
+                      timeDiff = Jiffy(nextMessage.createdAt.toLocal()).diff(
+                        message.createdAt.toLocal(),
+                        Units.MINUTE,
+                      );
+                    }
+                    final isNextUserSame = (i - 1 >= 0) &&
+                        message.user.id == messages[i - 1]?.user?.id;
+                    final isThread = message.replyCount > 0;
+                    if (timeDiff >= 1 || !isNextUserSame || isThread) {
+                      return SizedBox(height: 8);
+                    }
+                    return SizedBox(height: 2);
+                  },
                   itemBuilder: (context, i) {
                     if (i == messages.length + 2) {
                       if (widget.parentMessageBuilder != null) {
@@ -383,7 +422,6 @@ class _MessageListViewState extends State<MessageListView> {
                       );
                     }
                     final message = messages[i - 1];
-                    final nextMessage = (i - 1) > 0 ? messages[i - 2] : null;
 
                     Widget messageWidget;
 
@@ -419,27 +457,6 @@ class _MessageListViewState extends State<MessageListView> {
                         messageWidget = buildMessage(message, messages, i);
                       }
                     }
-
-                    if (nextMessage != null &&
-                        !Jiffy(message.createdAt.toLocal()).isSame(
-                            nextMessage.createdAt.toLocal(), Units.DAY)) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          messageWidget,
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: widget.dateDividerBuilder != null
-                                ? widget.dateDividerBuilder(
-                                    nextMessage.createdAt.toLocal())
-                                : DateDivider(
-                                    dateTime: nextMessage.createdAt.toLocal(),
-                                  ),
-                          ),
-                        ],
-                      );
-                    }
-
                     return messageWidget;
                   },
                 ),
@@ -740,8 +757,17 @@ class _MessageListViewState extends State<MessageListView> {
 
     final userId = StreamChat.of(context).user.id;
     final isMyMessage = message.user.id == userId;
-    final isNextUser =
-        index - 2 >= 0 && message.user.id == messages[index - 2]?.user?.id;
+    final nextMessage = index - 2 >= 0 ? messages[index - 2] : null;
+    final isNextUserSame =
+        nextMessage != null && message.user.id == nextMessage.user.id;
+
+    num timeDiff = 0;
+    if (nextMessage != null) {
+      timeDiff = Jiffy(nextMessage.createdAt.toLocal()).diff(
+        message.createdAt.toLocal(),
+        Units.MINUTE,
+      );
+    }
 
     final channel = streamChannel.channel;
     final readList = channel.state?.read
@@ -769,12 +795,7 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
-      padding: EdgeInsets.only(
-        left: 8.0,
-        right: 8.0,
-        bottom: index == 0 ? 30 : (isNextUser ? 2 : 7),
-        top: 3,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       onQuotedMessageTap: (quotedMessageId) async {
         final scrollToIndex = () {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
@@ -797,12 +818,13 @@ class _MessageListViewState extends State<MessageListView> {
       },
       showInChannelIndicator: widget.parentMessage == null,
       showThreadReplyIndicator: widget.parentMessage == null,
-      showUsername: !isMyMessage && !isNextUser,
-      showSendingIndicator: isMyMessage &&
-              (index == 0 || message.status != MessageSendingStatus.SENT)
-          ? DisplayWidget.show
-          : DisplayWidget.hide,
-      showTimestamp: !isNextUser || readList?.isNotEmpty == true,
+      showUsername: !isMyMessage && (timeDiff >= 1 || !isNextUserSame),
+      showSendingIndicator:
+          isMyMessage && (index == 0 || timeDiff >= 1 || !isNextUserSame)
+              ? DisplayWidget.show
+              : DisplayWidget.hide,
+      showTimestamp:
+          !isNextUserSame || readList?.isNotEmpty == true || timeDiff >= 1,
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
@@ -810,20 +832,23 @@ class _MessageListViewState extends State<MessageListView> {
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
-        bottomLeft: Radius.circular(!isNextUser ? 0 : attachmentBorderRadius),
+        bottomLeft: Radius.circular(
+            timeDiff >= 1 || !isNextUserSame ? 0 : attachmentBorderRadius),
         topRight: Radius.circular(attachmentBorderRadius),
         bottomRight: Radius.circular(attachmentBorderRadius),
       ),
       attachmentPadding: const EdgeInsets.all(2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
+        bottomLeft: Radius.circular(timeDiff >= 1 || !isNextUserSame ? 0 : 16),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
       showUserAvatar: isMyMessage
           ? DisplayWidget.gone
-          : (isNextUser ? DisplayWidget.hide : DisplayWidget.show),
+          : (timeDiff >= 1 || !isNextUserSame
+              ? DisplayWidget.show
+              : DisplayWidget.hide),
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
