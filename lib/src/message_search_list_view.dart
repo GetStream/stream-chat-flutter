@@ -51,16 +51,18 @@ class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
   const MessageSearchListView({
     Key key,
-    @required this.messageQuery,
-    @required this.filters,
+    this.messageQuery,
+    this.filters,
     this.sortOptions,
     this.paginationParams,
+    this.messageFilters,
     this.emptyBuilder,
     this.errorBuilder,
     this.separatorBuilder,
     this.itemBuilder,
     this.onItemTap,
     this.showResultCount = true,
+    this.pullToRefresh = true,
   }) : super(key: key);
 
   /// Message String to search on
@@ -83,6 +85,11 @@ class MessageSearchListView extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams paginationParams;
 
+  /// The message query filters to use.
+  /// You can query on any of the custom fields you've defined on the [Channel].
+  /// You can also filter other built-in channel fields.
+  final Map<String, dynamic> messageFilters;
+
   /// Builder used to create a custom item preview
   final MessageSearchItemBuilder itemBuilder;
 
@@ -101,6 +108,9 @@ class MessageSearchListView extends StatefulWidget {
   /// Set it to false to hide total results text
   final bool showResultCount;
 
+  /// Set it to false to disable the pull-to-refresh widget
+  final bool pullToRefresh;
+
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
 }
@@ -115,6 +125,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       sort: widget.sortOptions,
       query: widget.messageQuery,
       pagination: widget.paginationParams,
+      messageFilter: widget.messageFilters,
     );
   }
 
@@ -127,9 +138,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   Widget _separatorBuilder(BuildContext context, int index) {
     return Container(
       height: 1,
-      color: Theme.of(context).brightness == Brightness.dark
-          ? StreamChatTheme.of(context).colorTheme.white.withOpacity(0.1)
-          : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.1),
+      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
     );
   }
 
@@ -205,9 +214,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                     children: [
                       WidgetSpan(
                         child: Padding(
-                          padding: const EdgeInsets.only(
-                            right: 2.0,
-                          ),
+                          padding: const EdgeInsets.only(right: 2.0),
                           child: Icon(Icons.error_outline),
                         ),
                       ),
@@ -217,18 +224,17 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   style: Theme.of(context).textTheme.headline6,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16.0,
-                  ),
+                  padding: const EdgeInsets.only(top: 16.0),
                   child: Text(message),
                 ),
-                FlatButton(
+                RaisedButton(
                   onPressed: () {
                     messageSearchBloc.search(
                       filter: widget.filters,
                       sort: widget.sortOptions,
                       query: widget.messageQuery,
                       pagination: widget.paginationParams,
+                      messageFilter: widget.messageFilters,
                     );
                   },
                   child: Text('Retry'),
@@ -279,32 +285,46 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           );
         }
 
-        Widget child;
+        Widget child = ListView.separated(
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+          separatorBuilder: (_, index) {
+            if (widget.separatorBuilder != null) {
+              return widget.separatorBuilder(context, index);
+            }
+            return _separatorBuilder(context, index);
+          },
+          itemBuilder: (context, index) {
+            if (index < items.length) {
+              return _listItemBuilder(context, items[index]);
+            }
+            return _buildQueryProgressIndicator(context, messageSearchBloc);
+          },
+        );
+        if (widget.pullToRefresh) {
+          child = RefreshIndicator(
+            onRefresh: () async => messageSearchBloc.search(
+              filter: widget.filters,
+              sort: widget.sortOptions,
+              query: widget.messageQuery,
+              pagination: widget.paginationParams,
+              messageFilter: widget.messageFilters,
+            ),
+            child: child,
+          );
+        }
+
         child = LazyLoadScrollView(
-          onEndOfPage: () => messageSearchBloc.search(
+          onEndOfPage: () => messageSearchBloc.loadMore(
             filter: widget.filters,
             sort: widget.sortOptions,
             pagination: widget.paginationParams.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
             query: widget.messageQuery,
+            messageFilter: widget.messageFilters,
           ),
-          child: ListView.separated(
-            physics: AlwaysScrollableScrollPhysics(),
-            itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-            separatorBuilder: (_, index) {
-              if (widget.separatorBuilder != null) {
-                return widget.separatorBuilder(context, index);
-              }
-              return _separatorBuilder(context, index);
-            },
-            itemBuilder: (context, index) {
-              if (index < items.length) {
-                return _listItemBuilder(context, items[index]);
-              }
-              return _buildQueryProgressIndicator(context, messageSearchBloc);
-            },
-          ),
+          child: child,
         );
 
         if (widget.showResultCount) {
@@ -344,13 +364,16 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
         widget.paginationParams?.toJson()?.toString() !=
             oldWidget.paginationParams?.toJson()?.toString() ||
-        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString()) {
+        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
+        widget.messageFilters?.toString() !=
+            oldWidget.messageFilters?.toString()) {
       final messageSearchBloc = MessageSearchBloc.of(context);
       messageSearchBloc.search(
         filter: widget.filters,
         sort: widget.sortOptions,
         query: widget.messageQuery,
         pagination: widget.paginationParams,
+        messageFilter: widget.messageFilters,
       );
     }
   }
