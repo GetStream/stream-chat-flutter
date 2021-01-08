@@ -759,6 +759,11 @@ class _MessageListViewState extends State<MessageListView> {
     final isThreadMessage =
         widget.parentMessage != null || message?.showInChannel == true;
 
+    final hasFileAttachment =
+        message.attachments.any((it) => it.type == 'file');
+
+    final attachmentBorderRadius = hasFileAttachment ? 12.0 : 14.0;
+
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
@@ -804,10 +809,10 @@ class _MessageListViewState extends State<MessageListView> {
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(!isNextUser ? 0 : 16),
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
+        topLeft: Radius.circular(attachmentBorderRadius),
+        bottomLeft: Radius.circular(!isNextUser ? 0 : attachmentBorderRadius),
+        topRight: Radius.circular(attachmentBorderRadius),
+        bottomRight: Radius.circular(attachmentBorderRadius),
       ),
       attachmentPadding: const EdgeInsets.all(2),
       borderRadiusGeometry: BorderRadius.only(
