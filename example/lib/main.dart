@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       onGenerateRoute: AppRoutes.generateRoute,
       initialRoute:
           client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
@@ -323,10 +323,21 @@ class UserMentionPage extends StatelessWidget {
                           padding: const EdgeInsets.all(24),
                           child: StreamSvgIcon.mentions(
                             size: 96,
-                            color: Colors.grey,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .greyGainsboro,
                           ),
                         ),
-                        Text('No mentions exist yet...'),
+                        Text(
+                          'No mentions exist yet...',
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .body
+                              .copyWith(
+                                color:
+                                    StreamChatTheme.of(context).colorTheme.grey,
+                              ),
+                        ),
                       ],
                     ),
                   ),
