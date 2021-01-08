@@ -800,6 +800,7 @@ class _MessageListViewState extends State<MessageListView> {
       showTimestamp: !isNextUser || readList?.isNotEmpty == true,
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
+      showFlagButton: !isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,

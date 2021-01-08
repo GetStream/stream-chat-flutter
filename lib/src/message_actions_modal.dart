@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +14,7 @@ import 'message_widget.dart';
 import 'stream_chat.dart';
 import 'stream_chat_theme.dart';
 
-class MessageActionsModal extends StatelessWidget {
+class MessageActionsModal extends StatefulWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
   final void Function(Message) onThreadReplyTap;
   final void Function(Message) onReplyTap;
@@ -26,6 +27,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool showResendMessage;
   final bool showReply;
   final bool showThreadReply;
+  final bool showFlagButton;
   final bool reverse;
   final ShapeBorder messageShape;
   final DisplayWidget showUserAvatar;
@@ -43,6 +45,7 @@ class MessageActionsModal extends StatelessWidget {
     this.showReply = true,
     this.showResendMessage = true,
     this.showThreadReply = true,
+    this.showFlagButton = true,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -50,15 +53,30 @@ class MessageActionsModal extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _MessageActionsModalState createState() => _MessageActionsModalState();
+}
+
+class _MessageActionsModalState extends State<MessageActionsModal> {
+  bool showConfirmFlagModal = false;
+
+  @override
   Widget build(BuildContext context) {
+    if (showConfirmFlagModal) {
+      return _showFlagDialog();
+    } else {
+      return _showMessageOptionsModal();
+    }
+  }
+
+  Widget _showMessageOptionsModal() {
     final size = MediaQuery.of(context).size;
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
-    var messageTextLength = message.text.length;
-    if (message.quotedMessage != null) {
-      var quotedMessageLength = message.quotedMessage.text.length + 40;
-      if (message.quotedMessage.attachments?.isNotEmpty == true) {
+    var messageTextLength = widget.message.text.length;
+    if (widget.message.quotedMessage != null) {
+      var quotedMessageLength = widget.message.quotedMessage.text.length + 40;
+      if (widget.message.quotedMessage.attachments?.isNotEmpty == true) {
         quotedMessageLength += 40;
       }
       if (quotedMessageLength > messageTextLength) {
@@ -66,8 +84,8 @@ class MessageActionsModal extends StatelessWidget {
       }
     }
     final roughSentenceSize =
-        messageTextLength * messageTheme.messageText.fontSize * 1.2;
-    final divFactor = message.attachments?.isNotEmpty == true
+        messageTextLength * widget.messageTheme.messageText.fontSize * 1.2;
+    final divFactor = widget.message.attachments?.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
@@ -95,18 +113,18 @@ class MessageActionsModal extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    if (showReactions &&
-                        (message.status == MessageSendingStatus.SENT ||
-                            message.status == null))
+                    if (widget.showReactions &&
+                        (widget.message.status == MessageSendingStatus.SENT ||
+                            widget.message.status == null))
                       Align(
                         alignment: Alignment(
-                            user.id == message.user.id
+                            user.id == widget.message.user.id
                                 ? (divFactor > 1.0 ? 0.0 : (1.0 - divFactor))
                                 : (divFactor > 1.0 ? 0.0 : -(1.0 - divFactor)),
                             0.0),
                         child: ReactionPicker(
-                          message: message,
-                          messageTheme: messageTheme,
+                          message: widget.message,
+                          messageTheme: widget.messageTheme,
                         ),
                       ),
                     TweenAnimationBuilder<double>(
@@ -118,27 +136,28 @@ class MessageActionsModal extends StatelessWidget {
                             child: IgnorePointer(
                               child: MessageWidget(
                                 key: Key('MessageWidget'),
-                                reverse: reverse,
-                                message: message.copyWith(
-                                  text: message.text.length > 200
-                                      ? '${message.text.substring(0, 200)}...'
-                                      : message.text,
+                                reverse: widget.reverse,
+                                message: widget.message.copyWith(
+                                  text: widget.message.text.length > 200
+                                      ? '${widget.message.text.substring(0, 200)}...'
+                                      : widget.message.text,
                                 ),
-                                messageTheme: messageTheme,
+                                messageTheme: widget.messageTheme,
                                 showReactions: false,
                                 showUsername: false,
                                 showThreadReplyIndicator: false,
                                 showReplyIndicator: false,
-                                showUserAvatar: showUserAvatar,
+                                showUserAvatar: widget.showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
-                                showReactionPickerIndicator: showReactions &&
-                                    (message.status ==
-                                            MessageSendingStatus.SENT ||
-                                        message.status == null),
+                                showReactionPickerIndicator:
+                                    widget.showReactions &&
+                                        (widget.message.status ==
+                                                MessageSendingStatus.SENT ||
+                                            widget.message.status == null),
                                 showInChannelIndicator: false,
                                 showSendingIndicator: DisplayWidget.gone,
-                                shape: messageShape,
+                                shape: widget.messageShape,
                               ),
                             ),
                           );
@@ -172,26 +191,28 @@ class MessageActionsModal extends StatelessWidget {
                                   children: ListTile.divideTiles(
                                     context: context,
                                     tiles: [
-                                      if (showReply &&
-                                          (message.status ==
+                                      if (widget.showReply &&
+                                          (widget.message.status ==
                                                   MessageSendingStatus.SENT ||
-                                              message.status == null) &&
-                                          message.parentId == null)
+                                              widget.message.status == null) &&
+                                          widget.message.parentId == null)
                                         _buildReplyButton(context),
-                                      if (showThreadReply &&
-                                          (message.status ==
+                                      if (widget.showThreadReply &&
+                                          (widget.message.status ==
                                                   MessageSendingStatus.SENT ||
-                                              message.status == null) &&
-                                          message.parentId == null)
+                                              widget.message.status == null) &&
+                                          widget.message.parentId == null)
                                         _buildThreadReplyButton(context),
-                                      if (showResendMessage)
+                                      if (widget.showResendMessage)
                                         _buildResendMessage(context),
-                                      if (showEditMessage)
+                                      if (widget.showEditMessage)
                                         _buildEditMessage(context),
-                                      if (showDeleteMessage)
+                                      if (widget.showDeleteMessage)
                                         _buildDeleteButton(context),
-                                      if (showCopyMessage)
+                                      if (widget.showCopyMessage)
                                         _buildCopyButton(context),
+                                      if (widget.showCopyMessage)
+                                        _buildFlagButton(context),
                                     ],
                                   ).toList(),
                                 ),
@@ -200,6 +221,150 @@ class MessageActionsModal extends StatelessWidget {
                           );
                         })
                   ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _showFlagDialog() {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => Navigator.maybePop(context),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 10,
+                sigmaY: 10,
+              ),
+              child: Container(
+                color: StreamChatTheme.of(context).colorTheme.overlay,
+              ),
+            ),
+          ),
+          Center(
+            child: Opacity(
+              opacity: 0.9,
+              child: Material(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  width: 270.0,
+                  height: 156.0,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 19.0,
+                      ),
+                      Text(
+                        'Flag Message',
+                        style: StreamChatTheme.of(context)
+                            .textTheme
+                            .bodyBold
+                            .copyWith(fontSize: 17.0),
+                      ),
+                      SizedBox(
+                        height: 4.0,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Do you want to send a copy of this \nmessage to a moderator for further \ninvestigation?',
+                          style: TextStyle(fontSize: 13.5),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 21.0,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: InkWell(
+                                child: Container(
+                                  height: 44.0,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Cancel',
+                                    style: StreamChatTheme.of(context)
+                                        .textTheme
+                                        .body
+                                        .copyWith(
+                                            fontSize: 17.0,
+                                            color: StreamChatTheme.of(context)
+                                                .colorTheme
+                                                .accentBlue),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.symmetric(
+                                      horizontal: BorderSide(
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .grey),
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    showConfirmFlagModal = false;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: InkWell(
+                                child: Container(
+                                  height: 44.0,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Flag',
+                                    style: StreamChatTheme.of(context)
+                                        .textTheme
+                                        .body
+                                        .copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17.0,
+                                            color: StreamChatTheme.of(context)
+                                                .colorTheme
+                                                .accentBlue),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.fromBorderSide(
+                                      BorderSide(
+                                          color: StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .grey),
+                                    ),
+                                  ),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    showConfirmFlagModal = false;
+                                  });
+                                  final client = StreamChat.of(context).client;
+                                  client.flagMessage(widget.message.id);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -220,15 +385,34 @@ class MessageActionsModal extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
-        if (onReplyTap != null) {
-          onReplyTap(message);
+        if (widget.onReplyTap != null) {
+          widget.onReplyTap(widget.message);
         }
       },
     );
   }
 
+  Widget _buildFlagButton(BuildContext context) {
+    return ListTile(
+      title: Text(
+        'Flag',
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      leading: StreamSvgIcon.flag(
+        color: StreamChatTheme.of(context).primaryIconTheme.color,
+        size: 24.0,
+      ),
+      onTap: () {
+        setState(() {
+          showConfirmFlagModal = true;
+        });
+      },
+    );
+  }
+
   Widget _buildDeleteButton(BuildContext context) {
-    final isDeleteFailed = message.status == MessageSendingStatus.FAILED_DELETE;
+    final isDeleteFailed =
+        widget.message.status == MessageSendingStatus.FAILED_DELETE;
     return ListTile(
       title: Text(
         isDeleteFailed ? 'Retry deleting message' : 'Delete message',
@@ -241,7 +425,7 @@ class MessageActionsModal extends StatelessWidget {
       onTap: () {
         Navigator.pop(context);
         StreamChat.of(context).client.deleteMessage(
-              message,
+              widget.message,
               StreamChannel.of(context).channel.cid,
             );
       },
@@ -258,7 +442,7 @@ class MessageActionsModal extends StatelessWidget {
         color: StreamChatTheme.of(context).primaryIconTheme.color,
       ),
       onTap: () async {
-        await Clipboard.setData(ClipboardData(text: message.text));
+        await Clipboard.setData(ClipboardData(text: widget.message.text));
         Navigator.pop(context);
       },
     );
@@ -281,7 +465,8 @@ class MessageActionsModal extends StatelessWidget {
   }
 
   Widget _buildResendMessage(BuildContext context) {
-    final isUpdateFailed = message.status == MessageSendingStatus.FAILED_UPDATE;
+    final isUpdateFailed =
+        widget.message.status == MessageSendingStatus.FAILED_UPDATE;
     return ListTile(
       title: Text(
         isUpdateFailed ? 'Resend edited message' : 'Resend',
@@ -295,9 +480,9 @@ class MessageActionsModal extends StatelessWidget {
         final client = StreamChat.of(context).client;
         final channel = StreamChannel.of(context).channel;
         if (isUpdateFailed) {
-          client.updateMessage(message, channel.cid);
+          client.updateMessage(widget.message, channel.cid);
         } else {
-          channel.sendMessage(message);
+          channel.sendMessage(widget.message);
         }
       },
     );
@@ -354,10 +539,10 @@ class MessageActionsModal extends StatelessWidget {
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                child: editMessageInputBuilder != null
-                    ? editMessageInputBuilder(context, message)
+                child: widget.editMessageInputBuilder != null
+                    ? widget.editMessageInputBuilder(context, widget.message)
                     : MessageInput(
-                        editMessage: message,
+                        editMessage: widget.message,
                         preMessageSending: (m) {
                           FocusScope.of(context).unfocus();
                           Navigator.pop(context);
@@ -383,8 +568,8 @@ class MessageActionsModal extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
-        if (onThreadReplyTap != null) {
-          onThreadReplyTap(message);
+        if (widget.onThreadReplyTap != null) {
+          widget.onThreadReplyTap(widget.message);
         }
       },
     );

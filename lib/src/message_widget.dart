@@ -133,6 +133,7 @@ class MessageWidget extends StatefulWidget {
   final bool showTimestamp;
   final bool showDeleteMessage;
   final bool showEditMessage;
+  final bool showFlagButton;
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
   /// Center user avatar with bottom of the message
@@ -168,6 +169,7 @@ class MessageWidget extends StatefulWidget {
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
+    this.showFlagButton = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -718,6 +720,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   widget.onReplyTap != null,
               showThreadReply:
                   widget.showThreadReplyIndicator && widget.onThreadTap != null,
+              showFlagButton: widget.showFlagButton,
             ),
           );
         });
