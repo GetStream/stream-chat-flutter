@@ -169,12 +169,18 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildMembers(List<Member> members) {
-    int groupMemberListLength;
+    final groupMembers = members
+      ..sort((prev, curr) {
+        if (curr.role == 'owner') return 1;
+        return 0;
+      });
+
+    int groupMembersLength;
 
     if (listExpanded) {
-      groupMemberListLength = members.length;
+      groupMembersLength = groupMembers.length;
     } else {
-      groupMemberListLength = members.length > 6 ? 6 : members.length;
+      groupMembersLength = groupMembers.length > 6 ? 6 : groupMembers.length;
     }
 
     return Column(
@@ -182,15 +188,15 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: groupMemberListLength,
-          itemBuilder: (context, position) {
+          itemCount: groupMembersLength,
+          itemBuilder: (context, index) {
+            final member = groupMembers[index];
             return Material(
               child: InkWell(
                 onTap: () {
-                  var userMember = members.firstWhere(
+                  var userMember = groupMembers.firstWhere(
                       (e) => e.user.id == StreamChat.of(context).user.id);
-                  _showUserInfoModal(
-                      members[position].user, userMember.role == 'owner');
+                  _showUserInfoModal(member.user, userMember.role == 'owner');
                 },
                 child: Container(
                   height: 65.0,
@@ -202,7 +208,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8.0, vertical: 12.0),
                             child: UserAvatar(
-                              user: members[position].user,
+                              user: member.user,
                               constraints: BoxConstraints(
                                   maxHeight: 40.0, maxWidth: 40.0),
                             ),
@@ -213,14 +219,14 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  members[position].user.name,
+                                  member.user.name,
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(
                                   height: 1.0,
                                 ),
                                 Text(
-                                  _getLastSeen(members[position].user),
+                                  _getLastSeen(member.user),
                                   style: TextStyle(
                                       color: StreamChatTheme.of(context)
                                           .colorTheme
@@ -233,7 +239,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              members[position].role == 'owner' ? 'Owner' : '',
+                              member.role == 'owner' ? 'Owner' : '',
                               style: TextStyle(
                                   color: StreamChatTheme.of(context)
                                       .colorTheme
@@ -257,7 +263,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           },
         ),
-        if (groupMemberListLength != members.length)
+        if (groupMembersLength != groupMembers.length)
           InkWell(
             onTap: () {
               setState(() {
@@ -287,7 +293,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  '${members.length - groupMemberListLength} more',
+                                  '${members.length - groupMembersLength} more',
                                   style: TextStyle(
                                       color: StreamChatTheme.of(context)
                                           .colorTheme
