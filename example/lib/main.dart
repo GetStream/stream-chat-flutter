@@ -185,128 +185,131 @@ class _HomePageState extends State<HomePage> {
 
   Drawer _buildDrawer(BuildContext context, User user) {
     return Drawer(
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).viewPadding.top + 8,
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  bottom: 20.0,
-                  left: 8,
-                ),
-                child: Row(
-                  children: [
-                    UserAvatar(
-                      user: user,
-                      showOnlineStatus: false,
-                      constraints: BoxConstraints.tight(Size.fromRadius(20)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+      child: Container(
+        color: StreamChatTheme.of(context).colorTheme.white,
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).viewPadding.top + 8,
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 20.0,
+                    left: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      UserAvatar(
+                        user: user,
+                        showOnlineStatus: false,
+                        constraints: BoxConstraints.tight(Size.fromRadius(20)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Text(
+                          user.name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                leading: StreamSvgIcon.penWrite(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(.5),
-                ),
-                onTap: () {
-                  Navigator.popAndPushNamed(
-                    context,
-                    Routes.NEW_CHAT,
-                  );
-                },
-                title: Text(
-                  'New direct message',
-                  style: TextStyle(
-                    fontSize: 14.5,
+                    ],
                   ),
                 ),
-              ),
-              ListTile(
-                leading: StreamSvgIcon.contacts(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(.5),
-                ),
-                onTap: () {
-                  Navigator.popAndPushNamed(
-                    context,
-                    Routes.NEW_GROUP_CHAT,
-                  );
-                },
-                title: Text(
-                  'New group',
-                  style: TextStyle(
-                    fontSize: 14.5,
+                ListTile(
+                  leading: StreamSvgIcon.penWrite(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5),
+                  ),
+                  onTap: () {
+                    Navigator.popAndPushNamed(
+                      context,
+                      Routes.NEW_CHAT,
+                    );
+                  },
+                  title: Text(
+                    'New direct message',
+                    style: TextStyle(
+                      fontSize: 14.5,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.bottomCenter,
-                  child: ListTile(
-                    onTap: () async {
-                      Navigator.pop(context);
-
-                      final secureStorage = FlutterSecureStorage();
-                      await secureStorage.deleteAll();
-
-                      StreamChat.of(context).client.disconnect(
-                            clearUser: true,
-                          );
-
-                      await Navigator.pushReplacementNamed(
-                        context,
-                        Routes.CHOOSE_USER,
-                      );
-                    },
-                    leading: StreamSvgIcon.user(
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(.5),
+                ListTile(
+                  leading: StreamSvgIcon.contacts(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5),
+                  ),
+                  onTap: () {
+                    Navigator.popAndPushNamed(
+                      context,
+                      Routes.NEW_GROUP_CHAT,
+                    );
+                  },
+                  title: Text(
+                    'New group',
+                    style: TextStyle(
+                      fontSize: 14.5,
                     ),
-                    title: Text(
-                      'Sign out',
-                      style: TextStyle(
-                        fontSize: 14.5,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: StreamSvgIcon.Icon_moon(
-                        size: 24,
-                      ),
-                      color: StreamChatTheme.of(context).colorTheme.grey,
-                      onPressed: () async {
-                        final sp = await StreamingSharedPreferences.instance;
-                        sp.setInt(
-                          'theme',
-                          Theme.of(context).brightness == Brightness.dark
-                              ? 1
-                              : -1,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.bottomCenter,
+                    child: ListTile(
+                      onTap: () async {
+                        Navigator.pop(context);
+
+                        final secureStorage = FlutterSecureStorage();
+                        await secureStorage.deleteAll();
+
+                        StreamChat.of(context).client.disconnect(
+                              clearUser: true,
+                            );
+
+                        await Navigator.pushReplacementNamed(
+                          context,
+                          Routes.CHOOSE_USER,
                         );
                       },
+                      leading: StreamSvgIcon.user(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withOpacity(.5),
+                      ),
+                      title: Text(
+                        'Sign out',
+                        style: TextStyle(
+                          fontSize: 14.5,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: StreamSvgIcon.Icon_moon(
+                          size: 24,
+                        ),
+                        color: StreamChatTheme.of(context).colorTheme.grey,
+                        onPressed: () async {
+                          final sp = await StreamingSharedPreferences.instance;
+                          sp.setInt(
+                            'theme',
+                            Theme.of(context).brightness == Brightness.dark
+                                ? 1
+                                : -1,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

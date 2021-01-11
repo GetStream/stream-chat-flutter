@@ -285,9 +285,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     var leftPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
-    final isOnlyEmoji =
-        widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
-
     final hasFiles =
         widget.message.attachments?.any((element) => element.type == 'file') ==
             true;
@@ -942,9 +939,16 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
+  final _emojis = Emoji.all();
   bool get isOnlyEmoji =>
       widget.message.text.characters.isNotEmpty &&
-      widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
+      widget.message.text.trim().characters.every((c) =>
+          _emojis.firstWhere(
+            (Emoji emoji) => emoji.char.contains(c),
+            orElse: () => null,
+          ) !=
+          null) &&
+      widget.message.text.characters.length < 4;
 
   Color _getBackgroundColor() {
     if (hasQuotedMessage) {
