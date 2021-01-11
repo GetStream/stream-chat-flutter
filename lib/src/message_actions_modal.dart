@@ -123,7 +123,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Column(
-                  crossAxisAlignment: reverse
+                  crossAxisAlignment: widget.reverse
                       ? CrossAxisAlignment.end
                       : CrossAxisAlignment.start,
                   children: <Widget>[
@@ -185,13 +185,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             transform: Matrix4.identity()
                               ..scale(val)
                               ..rotateZ(-1.0 + val),
-                            alignment: reverse
+                            alignment: widget.reverse
                                 ? Alignment.topRight
                                 : Alignment.topLeft,
                             child: Padding(
                               padding: EdgeInsets.only(
-                                right: reverse ? 16 : 0,
-                                left: reverse ? 0 : 48,
+                                right: widget.reverse ? 16 : 0,
+                                left: widget.reverse ? 0 : 48,
                               ),
                               child: SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.75,
@@ -212,27 +212,29 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           .greyWhisper,
                                       context: context,
                                       tiles: [
-                                        if (showReply &&
-                                            (message.status ==
+                                        if (widget.showReply &&
+                                            (widget.message.status ==
                                                     MessageSendingStatus.SENT ||
-                                                message.status == null) &&
-                                            message.parentId == null)
+                                                widget.message.status ==
+                                                    null) &&
+                                            widget.message.parentId == null)
                                           _buildReplyButton(context),
-                                        if (showThreadReply &&
-                                            (message.status ==
+                                        if (widget.showThreadReply &&
+                                            (widget.message.status ==
                                                     MessageSendingStatus.SENT ||
-                                                message.status == null) &&
-                                            message.parentId == null)
+                                                widget.message.status ==
+                                                    null) &&
+                                            widget.message.parentId == null)
                                           _buildThreadReplyButton(context),
-                                        if (showResendMessage)
+                                        if (widget.showResendMessage)
                                           _buildResendMessage(context),
-                                        if (showEditMessage)
+                                        if (widget.showEditMessage)
                                           _buildEditMessage(context),
-                                        if (showCopyMessage)
+                                        if (widget.showCopyMessage)
                                           _buildCopyButton(context),
                                         if (widget.showFlagButton)
                                           _buildFlagButton(context),
-                                        if (showDeleteMessage)
+                                        if (widget.showDeleteMessage)
                                           _buildDeleteButton(context),
                                       ],
                                     ).toList(),
@@ -570,13 +572,19 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildFlagButton(BuildContext context) {
     return ListTile(
-      title: Text(
-        'Flag',
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      leading: StreamSvgIcon.flag(
-        color: StreamChatTheme.of(context).primaryIconTheme.color,
-        size: 24.0,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.flag(
+            color: StreamChatTheme.of(context).primaryIconTheme.color,
+            size: 23.0,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Flag',
+            style: StreamChatTheme.of(context).textTheme.headline,
+          ),
+        ],
       ),
       onTap: () {
         setState(() {
