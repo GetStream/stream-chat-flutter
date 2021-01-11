@@ -268,8 +268,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   scale: value,
                   child: Center(
                     child: Opacity(
-                      opacity: 0.9,
+                      opacity: 0.8,
                       child: Material(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .whiteSnow
+                            .withOpacity(0.8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
@@ -332,12 +336,14 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
+                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
                                                       .grey
                                                       .withOpacity(0.8)),
                                               right: BorderSide(
+                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
@@ -376,6 +382,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
+                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
@@ -438,8 +445,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   scale: value,
                   child: Center(
                     child: Opacity(
-                      opacity: 0.9,
+                      opacity: 0.8,
                       child: Material(
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .whiteSnow
+                            .withOpacity(0.8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
@@ -503,6 +514,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
+                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
