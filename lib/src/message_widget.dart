@@ -686,6 +686,9 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   void _showMessageActionModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
+    final isMyMessage =
+        widget.message.user.id == StreamChat.of(context).user.id;
+
     showDialog(
         context: context,
         barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
@@ -720,7 +723,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   widget.onReplyTap != null,
               showThreadReply:
                   widget.showThreadReplyIndicator && widget.onThreadTap != null,
-              showFlagButton: widget.showFlagButton,
+              showFlagButton: widget.showFlagButton && !isMyMessage,
             ),
           );
         });
