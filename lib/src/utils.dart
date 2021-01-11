@@ -70,7 +70,11 @@ Future<bool> showConfirmationDialog(
                     style: StreamChatTheme.of(context)
                         .textTheme
                         .bodyBold
-                        .copyWith(color: Colors.black.withOpacity(0.5)),
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(0.5)),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop(false);
