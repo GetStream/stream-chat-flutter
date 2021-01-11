@@ -403,7 +403,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                     child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
-                                                              .start,
+                                                              .end,
                                                       mainAxisSize:
                                                           MainAxisSize.min,
                                                       children: <Widget>[
