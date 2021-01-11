@@ -187,7 +187,6 @@ class MessageListView extends StatefulWidget {
 
 class _MessageListViewState extends State<MessageListView> {
   ItemScrollController _scrollController;
-  bool _bottomWasVisible = false;
   Function _onThreadTap;
   bool _showScrollToBottom = false;
   ItemPositionsListener _itemPositionListener;
@@ -692,14 +691,13 @@ class _MessageListViewState extends State<MessageListView> {
       key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
-        if (isVisible && !_bottomWasVisible) {
+        if (isVisible) {
           final channel = streamChannel.channel;
           if (_upToDate &&
               channel.config?.readEvents == true &&
               channel.state.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
-          _bottomWasVisible = !isVisible;
         }
         if (mounted) {
           setState(() => _showScrollToBottom = !isVisible);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'back_button.dart';
 import 'channel_name.dart';
@@ -81,6 +82,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       elevation: 1,
       leading: showBackButton
           ? StreamBackButton(
+              cid: StreamChannel.of(context).channel.cid,
               onPressed: onBackPressed,
               showUnreads: true,
             )
