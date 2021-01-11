@@ -116,7 +116,7 @@ class _ImageFooterState extends State<ImageFooter> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: StreamSvgIcon.icon_SHARE(
+                icon: StreamSvgIcon.Icon_SHARE(
                   size: 24.0,
                   color: StreamChatTheme.of(context).colorTheme.black,
                 ),

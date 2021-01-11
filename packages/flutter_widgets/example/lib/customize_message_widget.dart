@@ -120,7 +120,7 @@ class ChannelPage extends StatelessWidget {
         top: !details.isLastUser ? Radius.circular(16) : Radius.zero,
         bottom: !details.isNextUser ? Radius.circular(16) : Radius.zero,
       ),
-      showSendingIndicator: DisplayWidget.gone,
+      showSendingIndicator: false,
       reverse: false,
       showUserAvatar:
           details.isNextUser ? DisplayWidget.hide : DisplayWidget.show,

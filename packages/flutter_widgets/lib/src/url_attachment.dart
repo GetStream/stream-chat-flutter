@@ -25,10 +25,6 @@ class UrlAttachment extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (urlAttachment.imageUrl != null)
-            SizedBox(
-              height: 16.0,
-            ),
-          if (urlAttachment.imageUrl != null)
             Container(
               clipBehavior: Clip.antiAliasWithSaveLayer,
               margin: EdgeInsets.symmetric(horizontal: 8.0),

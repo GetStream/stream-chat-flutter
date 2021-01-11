@@ -470,7 +470,19 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.icon_SHARE({
+  factory StreamSvgIcon.Icon_moon({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'icon_moon.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
+
+  factory StreamSvgIcon.Icon_SHARE({
     double size,
     Color color,
   }) {

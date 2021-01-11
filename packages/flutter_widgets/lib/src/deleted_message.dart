@@ -63,10 +63,7 @@ class DeletedMessage extends StatelessWidget {
               'Message deleted',
               style: messageTheme.messageText.copyWith(
                 fontStyle: FontStyle.italic,
-                color: (Theme.of(context).brightness == Brightness.dark
-                        ? StreamChatTheme.of(context).colorTheme.white
-                        : StreamChatTheme.of(context).colorTheme.black)
-                    .withOpacity(.5),
+                color: messageTheme.createdAt.color,
               ),
             ),
           ),

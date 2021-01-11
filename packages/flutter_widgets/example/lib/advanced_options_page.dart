@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:example/routes/app_routes.dart';
+import 'package:example/routes/routes.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'choose_user_page.dart';
-import 'main.dart';
 import 'notifications_service.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
@@ -312,17 +315,57 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              return MaterialApp(
-                                theme: ThemeData.light(),
-                                darkTheme: ThemeData.dark(),
-                                themeMode: ThemeMode.system,
-                                builder: (context, widget) {
-                                  return StreamChat(
-                                    child: widget,
-                                    client: client,
+                              return FutureBuilder<StreamingSharedPreferences>(
+                                future: StreamingSharedPreferences.instance,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return SizedBox();
+                                  }
+                                  return PreferenceBuilder<int>(
+                                    preference: snapshot.data.getInt(
+                                      'theme',
+                                      defaultValue: 0,
+                                    ),
+                                    builder: (context, snapshot) => MaterialApp(
+                                      builder: (context, child) {
+                                        return StreamChat(
+                                          client: client,
+                                          child: Builder(
+                                            builder: (context) =>
+                                                AnnotatedRegion<
+                                                    SystemUiOverlayStyle>(
+                                              child: child,
+                                              value: SystemUiOverlayStyle(
+                                                systemNavigationBarColor:
+                                                    StreamChatTheme.of(context)
+                                                        .colorTheme
+                                                        .white,
+                                                systemNavigationBarIconBrightness:
+                                                    Theme.of(context)
+                                                                .brightness ==
+                                                            Brightness.dark
+                                                        ? Brightness.light
+                                                        : Brightness.dark,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      debugShowCheckedModeBanner: false,
+                                      theme: ThemeData.light(),
+                                      darkTheme: ThemeData.dark(),
+                                      themeMode: {
+                                        -1: ThemeMode.dark,
+                                        0: ThemeMode.system,
+                                        1: ThemeMode.light,
+                                      }[snapshot],
+                                      onGenerateRoute: AppRoutes.generateRoute,
+                                      initialRoute: client.state.user == null
+                                          ? Routes.CHOOSE_USER
+                                          : Routes.HOME,
+                                    ),
                                   );
                                 },
-                                home: ChannelListPage(),
                               );
                             },
                           ),

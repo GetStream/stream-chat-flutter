@@ -42,10 +42,10 @@ void main() {
 
       await tester.pump(Duration(milliseconds: 1000));
       expect(find.byKey(Key('MessageWidget')), findsOneWidget);
-      expect(find.text('Thread reply'), findsOneWidget);
-      expect(find.text('Edit message'), findsOneWidget);
-      expect(find.text('Delete message'), findsOneWidget);
-      expect(find.text('Copy message'), findsOneWidget);
+      expect(find.text('Thread Reply'), findsOneWidget);
+      expect(find.text('Edit Message'), findsOneWidget);
+      expect(find.text('Delete Message'), findsOneWidget);
+      expect(find.text('Copy Message'), findsOneWidget);
     },
   );
   testWidgets(
@@ -70,8 +70,8 @@ void main() {
                 showEditMessage: false,
                 showCopyMessage: false,
                 showDeleteMessage: false,
-                showReply: false,
-                showThreadReply: false,
+                showReplyMessage: false,
+                showThreadReplyMessage: false,
                 message: Message(
                   text: 'test',
                   user: User(

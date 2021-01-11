@@ -9,10 +9,14 @@ class StreamBackButton extends StatelessWidget {
     Key key,
     this.onPressed,
     this.showUnreads = false,
+    this.cid,
   }) : super(key: key);
 
   final VoidCallback onPressed;
   final bool showUnreads;
+
+  /// Channel cid used to retrieve unread count
+  final String cid;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +49,9 @@ class StreamBackButton extends StatelessWidget {
           Positioned(
             top: 7,
             right: 7,
-            child: UnreadIndicator(),
+            child: UnreadIndicator(
+              cid: cid,
+            ),
           ),
       ],
     );
