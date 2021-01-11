@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,12 +13,6 @@ import 'message_input.dart';
 import 'message_widget.dart';
 import 'stream_chat.dart';
 import 'stream_chat_theme.dart';
-
-enum ActionsModalState {
-  modal,
-  confirmDialog,
-  dismissMessage,
-}
 
 class MessageActionsModal extends StatefulWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -149,7 +142,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 showUsername: false,
                                 showThreadReplyIndicator: false,
                                 showReplyMessage: false,
-                                showUserAvatar: showUserAvatar,
+                                showUserAvatar: widget.showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
                                 showReactionPickerIndicator:
@@ -158,7 +151,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                                 MessageSendingStatus.SENT ||
                                             widget.message.status == null),
                                 showInChannelIndicator: false,
-                                showSendingIndicator: DisplayWidget.gone,
+                                showSendingIndicator: false,
                                 shape: widget.messageShape,
                               ),
                             ),
