@@ -877,4 +877,16 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.icon_flag({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'icon_flag.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }

@@ -575,9 +575,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       dense: true,
       title: Row(
         children: [
-          StreamSvgIcon.flag(
+          StreamSvgIcon.icon_flag(
             color: StreamChatTheme.of(context).primaryIconTheme.color,
-            size: 23.0,
           ),
           const SizedBox(width: 16),
           Text(
