@@ -106,9 +106,6 @@ class MessageWidget extends StatefulWidget {
   /// If true the widget will show the thread reply indicator
   final bool showThreadReplyIndicator;
 
-  /// If true the widget will show the reply indicator
-  final bool showReplyIndicator;
-
   /// If true the widget will show the show in channel indicator
   final bool showInChannelIndicator;
 
@@ -121,9 +118,6 @@ class MessageWidget extends StatefulWidget {
   /// Used in [MessageReactionsModal] and [MessageActionsModal]
   final bool showReactionPickerIndicator;
 
-  /// If true the widget will show the resendMessage indicator
-  final bool showResendMessage;
-
   final List<Read> readList;
 
   final ShowMessageCallback onShowMessage;
@@ -131,8 +125,14 @@ class MessageWidget extends StatefulWidget {
   /// If true show the users username next to the timestamp of the message
   final bool showUsername;
   final bool showTimestamp;
-  final bool showDeleteMessage;
+
+  final bool showReplyMessage;
+  final bool showThreadReplyMessage;
   final bool showEditMessage;
+  final bool showCopyMessage;
+  final bool showDeleteMessage;
+  final bool showResendMessage;
+
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
   /// Center user avatar with bottom of the message
@@ -160,7 +160,6 @@ class MessageWidget extends StatefulWidget {
     this.showSendingIndicator = true,
     this.showThreadReplyIndicator = true,
     this.showInChannelIndicator = true,
-    this.showReplyIndicator = true,
     this.onReplyTap,
     this.onThreadTap,
     this.showUsername = true,
@@ -168,6 +167,10 @@ class MessageWidget extends StatefulWidget {
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
+    this.showReplyMessage = true,
+    this.showThreadReplyMessage = true,
+    this.showResendMessage = true,
+    this.showCopyMessage = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -175,7 +178,6 @@ class MessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
-    this.showResendMessage = true,
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -243,6 +245,8 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   bool get showSendingIndicator => widget.showSendingIndicator;
 
+  bool get isDeleted => widget.message.isDeleted;
+
   bool get showUsername => widget.showUsername;
 
   bool get showTimeStamp => widget.showTimestamp;
@@ -271,7 +275,9 @@ class _MessageWidgetState extends State<MessageWidget> {
       showThreadReplyIndicator ||
       showUsername ||
       showTimeStamp ||
-      showInChannel;
+      showInChannel ||
+      showSendingIndicator ||
+      isDeleted;
 
   @override
   Widget build(BuildContext context) {
@@ -482,12 +488,12 @@ class _MessageWidgetState extends State<MessageWidget> {
   Widget _buildQuotedMessage() {
     final isMyMessage =
         widget.message.user.id == StreamChat.of(context).user.id;
+    final onTap = widget.message?.quotedMessage?.isDeleted != true &&
+            widget.onQuotedMessageTap != null
+        ? () => widget.onQuotedMessageTap(widget.message.quotedMessageId)
+        : null;
     return QuotedMessageWidget(
-      onTap: () {
-        if (widget.onQuotedMessageTap != null) {
-          widget.onQuotedMessageTap(widget.message.quotedMessageId);
-        }
-      },
+      onTap: onTap,
       message: widget.message.quotedMessage,
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).otherMessageTheme
@@ -497,7 +503,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget get _bottomRow {
-    if (widget.message.isDeleted) {
+    if (isDeleted) {
       return Transform(
         transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         alignment: Alignment.center,
@@ -701,14 +707,15 @@ class _MessageWidgetState extends State<MessageWidget> {
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
               reverse: widget.reverse,
-              showDeleteMessage: widget.showDeleteMessage,
+              showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onReplyTap: widget.onReplyTap,
               onThreadReplyTap: widget.onThreadTap,
               showResendMessage:
                   widget.showResendMessage && (isSendFailed || isUpdateFailed),
-              showCopyMessage: !isFailedState &&
+              showCopyMessage: widget.showCopyMessage &&
+                  !isFailedState &&
                   widget.message.text?.trim()?.isNotEmpty == true,
               showEditMessage: widget.showEditMessage &&
                   !isDeleteFailed &&
@@ -716,11 +723,12 @@ class _MessageWidgetState extends State<MessageWidget> {
                           ?.any((element) => element.type == 'giphy') !=
                       true,
               showReactions: widget.showReactions,
-              showReply: widget.showReplyIndicator &&
+              showReplyMessage: widget.showReplyMessage &&
                   !isFailedState &&
                   widget.onReplyTap != null,
-              showThreadReply:
-                  widget.showThreadReplyIndicator && widget.onThreadTap != null,
+              showThreadReplyMessage: widget.showThreadReplyMessage &&
+                  !isFailedState &&
+                  widget.onThreadTap != null,
             ),
           );
         });

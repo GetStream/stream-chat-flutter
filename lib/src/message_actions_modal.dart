@@ -24,8 +24,8 @@ class MessageActionsModal extends StatelessWidget {
   final bool showCopyMessage;
   final bool showEditMessage;
   final bool showResendMessage;
-  final bool showReply;
-  final bool showThreadReply;
+  final bool showReplyMessage;
+  final bool showThreadReplyMessage;
   final bool reverse;
   final ShapeBorder messageShape;
   final DisplayWidget showUserAvatar;
@@ -40,9 +40,9 @@ class MessageActionsModal extends StatelessWidget {
     this.onReplyTap,
     this.onThreadReplyTap,
     this.showCopyMessage = true,
-    this.showReply = true,
+    this.showReplyMessage = true,
     this.showResendMessage = true,
-    this.showThreadReply = true,
+    this.showThreadReplyMessage = true,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -129,7 +129,7 @@ class MessageActionsModal extends StatelessWidget {
                                 showReactions: false,
                                 showUsername: false,
                                 showThreadReplyIndicator: false,
-                                showReplyIndicator: false,
+                                showReplyMessage: false,
                                 showUserAvatar: showUserAvatar,
                                 showTimestamp: false,
                                 translateUserAvatar: false,
@@ -180,13 +180,13 @@ class MessageActionsModal extends StatelessWidget {
                                           .greyWhisper,
                                       context: context,
                                       tiles: [
-                                        if (showReply &&
+                                        if (showReplyMessage &&
                                             (message.status ==
                                                     MessageSendingStatus.SENT ||
                                                 message.status == null) &&
                                             message.parentId == null)
                                           _buildReplyButton(context),
-                                        if (showThreadReply &&
+                                        if (showThreadReplyMessage &&
                                             (message.status ==
                                                     MessageSendingStatus.SENT ||
                                                 message.status == null) &&

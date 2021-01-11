@@ -369,7 +369,11 @@ class _MessageListViewState extends State<MessageListView> {
                     final isNextUserSame =
                         message.user.id == nextMessage.user?.id;
                     final isThread = message.replyCount > 0;
-                    if (timeDiff >= 1 || !isNextUserSame || isThread) {
+                    final isDeleted = message.isDeleted;
+                    if (timeDiff >= 1 ||
+                        !isNextUserSame ||
+                        isThread ||
+                        isDeleted) {
                       return SizedBox(height: 8);
                     }
                     return SizedBox(height: 2);
@@ -713,7 +717,12 @@ class _MessageListViewState extends State<MessageListView> {
     return MessageWidget(
       showThreadReplyIndicator: false,
       showInChannelIndicator: false,
-      showReplyIndicator: false,
+      showReplyMessage: false,
+      showResendMessage: false,
+      showThreadReplyMessage: false,
+      showCopyMessage: false,
+      showDeleteMessage: false,
+      showEditMessage: false,
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
@@ -725,8 +734,6 @@ class _MessageListViewState extends State<MessageListView> {
       ),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap,
-      showEditMessage: false,
-      showDeleteMessage: false,
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(2),
@@ -845,6 +852,7 @@ class _MessageListViewState extends State<MessageListView> {
       },
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
+      showThreadReplyMessage: !isThreadMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
@@ -870,7 +878,7 @@ class _MessageListViewState extends State<MessageListView> {
       onShowMessage: widget.onShowMessage,
     );
 
-    if (!isThreadMessage) {
+    if (!message.isDeleted && !message.isSystem && !message.isEphemeral) {
       child = Swipeable(
         onSwipeEnd: () => widget.onMessageSwiped(message),
         backgroundIcon: StreamSvgIcon.reply(

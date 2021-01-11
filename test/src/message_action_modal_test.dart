@@ -70,8 +70,8 @@ void main() {
                 showEditMessage: false,
                 showCopyMessage: false,
                 showDeleteMessage: false,
-                showReply: false,
-                showThreadReply: false,
+                showReplyMessage: false,
+                showThreadReplyMessage: false,
                 message: Message(
                   text: 'test',
                   user: User(
