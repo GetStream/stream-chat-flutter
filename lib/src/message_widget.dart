@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:emojis/emoji.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -936,16 +935,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  final _emojis = Emoji.all();
-  bool get isOnlyEmoji =>
-      widget.message.text.characters.isNotEmpty &&
-      widget.message.text.trim().characters.every((c) =>
-          _emojis.firstWhere(
-            (Emoji emoji) => emoji.char.contains(c),
-            orElse: () => null,
-          ) !=
-          null) &&
-      widget.message.text.characters.length < 4;
+  bool get isOnlyEmoji => textIsOnlyEmoji(widget.message.text);
 
   Color _getBackgroundColor() {
     if (hasQuotedMessage) {

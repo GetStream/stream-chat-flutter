@@ -1,18 +1,17 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:video_player/video_player.dart';
 
 import 'attachment_error.dart';
+import 'extension.dart';
 import 'image_attachment.dart';
 import 'message_text.dart';
 import 'stream_chat_theme.dart';
 import 'user_avatar.dart';
 import 'utils.dart';
-import 'extension.dart';
 
 typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
   BuildContext,
@@ -126,8 +125,7 @@ class QuotedMessageWidget extends StatelessWidget {
   }
 
   Widget _buildMessage(BuildContext context) {
-    final isOnlyEmoji =
-        message.text.characters.every((c) => Emoji.byChar(c) != null);
+    final isOnlyEmoji = textIsOnlyEmoji(message.text);
     var msg = _hasAttachments && !_containsText
         ? message.copyWith(text: message.attachments.last?.title ?? '')
         : message;
