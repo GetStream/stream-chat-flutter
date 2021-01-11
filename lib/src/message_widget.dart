@@ -449,7 +449,11 @@ class _MessageWidgetState extends State<MessageWidget> {
                             if (showBottomRow) SizedBox(height: 20.0),
                           ],
                         ),
-                        if (showBottomRow) _buildBottomRow(leftPadding),
+                        if (showBottomRow)
+                          Padding(
+                            padding: EdgeInsets.only(left: leftPadding),
+                            child: _bottomRow,
+                          ),
                         if (isFailedState)
                           Positioned(
                             left: widget.reverse ? -3 : null,
@@ -492,28 +496,27 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Widget _buildBottomRow(double leftPadding) {
+  Widget get _bottomRow {
     if (widget.message.isDeleted) {
-      return Padding(
-        padding: EdgeInsets.only(left: leftPadding),
-        child: Transform(
-          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              StreamSvgIcon.eye(
-                color: StreamChatTheme.of(context).colorTheme.grey,
-                size: 16.0,
-              ),
-              SizedBox(width: 8.0),
-              Text(
-                'Only visible to you',
-                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                    color: StreamChatTheme.of(context).colorTheme.grey),
-              ),
-            ],
-          ),
+      return Transform(
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            StreamSvgIcon.eye(
+              color: StreamChatTheme.of(context).colorTheme.grey,
+              size: 16.0,
+            ),
+            SizedBox(width: 8.0),
+            Text(
+              'Only visible to you',
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .footnote
+                  .copyWith(color: StreamChatTheme.of(context).colorTheme.grey),
+            ),
+          ],
         ),
       );
     }
@@ -573,40 +576,37 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     if (widget.reverse) children = children.reversed.toList();
 
-    return Padding(
-      padding: EdgeInsets.only(left: leftPadding),
-      child: Flex(
-        direction: Axis.horizontal,
-        clipBehavior: Clip.none,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (showThreadReplyIndicator || showInChannel)
-            Container(
-              margin: EdgeInsets.only(
-                bottom: widget.messageTheme.replies.fontSize / 2,
-              ),
-              child: CustomPaint(
-                size: const Size(16, 32),
-                painter: _ThreadReplyPainter(
-                  context: context,
-                  color: widget.messageTheme.messageBorderColor,
-                ),
-              ),
+    return Flex(
+      direction: Axis.horizontal,
+      clipBehavior: Clip.none,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (showThreadReplyIndicator || showInChannel)
+          Container(
+            margin: EdgeInsets.only(
+              bottom: widget.messageTheme.replies.fontSize / 2,
             ),
-          ...children.map(
-            (child) => Transform(
-              transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-              alignment: Alignment.center,
-              child: Container(
-                height: 16,
-                child: Center(
-                  child: child,
-                ),
+            child: CustomPaint(
+              size: const Size(16, 32),
+              painter: _ThreadReplyPainter(
+                context: context,
+                color: widget.messageTheme.messageBorderColor,
               ),
             ),
           ),
-        ].insertBetween(const SizedBox(width: 8.0)),
-      ),
+        ...children.map(
+          (child) => Transform(
+            transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+            alignment: Alignment.center,
+            child: Container(
+              height: 16,
+              child: Center(
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ].insertBetween(const SizedBox(width: 8.0)),
     );
   }
 
