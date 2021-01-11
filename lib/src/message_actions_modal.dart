@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -122,8 +123,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: reverse
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
                   children: <Widget>[
                     if (widget.showReactions &&
                         (widget.message.status == MessageSendingStatus.SENT ||
@@ -174,7 +176,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             ),
                           );
                         }),
-                    SizedBox(height: 8),
                     TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
                         duration: Duration(milliseconds: 300),
@@ -184,49 +185,58 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             transform: Matrix4.identity()
                               ..scale(val)
                               ..rotateZ(-1.0 + val),
-                            alignment: Alignment.topRight,
+                            alignment: reverse
+                                ? Alignment.topRight
+                                : Alignment.topLeft,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 48.0,
+                              padding: EdgeInsets.only(
+                                right: reverse ? 16 : 0,
+                                left: reverse ? 0 : 48,
                               ),
-                              child: Material(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .whiteSnow,
-                                clipBehavior: Clip.hardEdge,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: ListTile.divideTiles(
-                                    context: context,
-                                    tiles: [
-                                      if (widget.showReply &&
-                                          (widget.message.status ==
-                                                  MessageSendingStatus.SENT ||
-                                              widget.message.status == null) &&
-                                          widget.message.parentId == null)
-                                        _buildReplyButton(context),
-                                      if (widget.showThreadReply &&
-                                          (widget.message.status ==
-                                                  MessageSendingStatus.SENT ||
-                                              widget.message.status == null) &&
-                                          widget.message.parentId == null)
-                                        _buildThreadReplyButton(context),
-                                      if (widget.showResendMessage)
-                                        _buildResendMessage(context),
-                                      if (widget.showEditMessage)
-                                        _buildEditMessage(context),
-                                      if (widget.showDeleteMessage)
-                                        _buildDeleteButton(context),
-                                      if (widget.showCopyMessage)
-                                        _buildCopyButton(context),
-                                      if (widget.showFlagButton)
-                                        _buildFlagButton(context),
-                                    ],
-                                  ).toList(),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.75,
+                                child: Material(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .whiteSnow,
+                                  clipBehavior: Clip.hardEdge,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: ListTile.divideTiles(
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .greyWhisper,
+                                      context: context,
+                                      tiles: [
+                                        if (showReply &&
+                                            (message.status ==
+                                                    MessageSendingStatus.SENT ||
+                                                message.status == null) &&
+                                            message.parentId == null)
+                                          _buildReplyButton(context),
+                                        if (showThreadReply &&
+                                            (message.status ==
+                                                    MessageSendingStatus.SENT ||
+                                                message.status == null) &&
+                                            message.parentId == null)
+                                          _buildThreadReplyButton(context),
+                                        if (showResendMessage)
+                                          _buildResendMessage(context),
+                                        if (showEditMessage)
+                                          _buildEditMessage(context),
+                                        if (showCopyMessage)
+                                          _buildCopyButton(context),
+                                        if (widget.showFlagButton)
+                                          _buildFlagButton(context),
+                                        if (showDeleteMessage)
+                                          _buildDeleteButton(context),
+                                      ],
+                                    ).toList(),
+                                  ),
                                 ),
                               ),
                             ),
@@ -268,12 +278,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   scale: value,
                   child: Center(
                     child: Opacity(
-                      opacity: 0.8,
+                      opacity: 0.9,
                       child: Material(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .whiteSnow
-                            .withOpacity(0.8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
@@ -336,14 +342,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
-                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
                                                       .grey
                                                       .withOpacity(0.8)),
                                               right: BorderSide(
-                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
@@ -382,7 +386,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
-                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
@@ -445,12 +448,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   scale: value,
                   child: Center(
                     child: Opacity(
-                      opacity: 0.8,
+                      opacity: 0.9,
                       child: Material(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .whiteSnow
-                            .withOpacity(0.8),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
@@ -514,7 +513,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                           decoration: BoxDecoration(
                                             border: Border(
                                               top: BorderSide(
-                                                  width: 0.5,
                                                   color: StreamChatTheme.of(
                                                           context)
                                                       .colorTheme
@@ -548,12 +546,18 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildReplyButton(BuildContext context) {
     return ListTile(
-      title: Text(
-        'Reply',
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      leading: StreamSvgIcon.reply(
-        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.reply(
+            color: StreamChatTheme.of(context).primaryIconTheme.color,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Reply',
+            style: StreamChatTheme.of(context).textTheme.headline,
+          ),
+        ],
       ),
       onTap: () {
         Navigator.pop(context);
@@ -586,13 +590,21 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final isDeleteFailed =
         widget.message.status == MessageSendingStatus.FAILED_DELETE;
     return ListTile(
-      title: Text(
-        isDeleteFailed ? 'Retry deleting message' : 'Delete message',
-        style:
-            Theme.of(context).textTheme.headline6.copyWith(color: Colors.red),
-      ),
-      leading: StreamSvgIcon.delete(
-        color: Colors.red,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.delete(
+            color: Colors.red,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            isDeleteFailed ? 'Retry Deleting Message' : 'Delete Message',
+            style: StreamChatTheme.of(context)
+                .textTheme
+                .headline
+                .copyWith(color: Colors.red),
+          ),
+        ],
       ),
       onTap: () {
         Navigator.pop(context);
@@ -606,12 +618,19 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildCopyButton(BuildContext context) {
     return ListTile(
-      title: Text(
-        'Copy message',
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      leading: StreamSvgIcon.copy(
-        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.copy(
+            size: 24,
+            color: StreamChatTheme.of(context).primaryIconTheme.color,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Copy Message',
+            style: StreamChatTheme.of(context).textTheme.headline,
+          ),
+        ],
       ),
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.message.text));
@@ -622,12 +641,18 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildEditMessage(BuildContext context) {
     return ListTile(
-      title: Text(
-        'Edit message',
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      leading: StreamSvgIcon.edit(
-        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.edit(
+            color: StreamChatTheme.of(context).primaryIconTheme.color,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Edit Message',
+            style: StreamChatTheme.of(context).textTheme.headline,
+          ),
+        ],
       ),
       onTap: () async {
         Navigator.pop(context);
@@ -640,12 +665,18 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final isUpdateFailed =
         widget.message.status == MessageSendingStatus.FAILED_UPDATE;
     return ListTile(
-      title: Text(
-        isUpdateFailed ? 'Resend edited message' : 'Resend',
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      leading: StreamSvgIcon.circle_up(
-        color: StreamChatTheme.of(context).colorTheme.accentBlue,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.circle_up(
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            isUpdateFailed ? 'Resend Edited Message' : 'Resend',
+            style: StreamChatTheme.of(context).textTheme.headline,
+          ),
+        ],
       ),
       onTap: () {
         Navigator.pop(context);
@@ -731,12 +762,18 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildThreadReplyButton(BuildContext context) {
     return ListTile(
-      title: Text(
-        'Thread reply',
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      leading: StreamSvgIcon.thread(
-        color: StreamChatTheme.of(context).primaryIconTheme.color,
+      dense: true,
+      title: Row(
+        children: [
+          StreamSvgIcon.thread(
+            color: StreamChatTheme.of(context).primaryIconTheme.color,
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Thread Reply',
+            style: StreamChatTheme.of(context).textTheme.headline,
+          ),
+        ],
       ),
       onTap: () {
         Navigator.pop(context);
