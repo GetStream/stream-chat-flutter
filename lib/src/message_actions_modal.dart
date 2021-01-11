@@ -313,10 +313,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 FlatButton(
                   child: Text(
                     'OK',
-                    style: TextStyle(
-                        color:
-                            StreamChatTheme.of(context).colorTheme.accentBlue,
-                        fontWeight: FontWeight.w400),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -375,10 +378,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 FlatButton(
                   child: Text(
                     'OK',
-                    style: TextStyle(
-                        color:
-                            StreamChatTheme.of(context).colorTheme.accentBlue,
-                        fontWeight: FontWeight.w400),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();

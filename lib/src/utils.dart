@@ -67,12 +67,10 @@ Future<bool> showConfirmationDialog(
                 FlatButton(
                   child: Text(
                     cancelText,
-                    style: TextStyle(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .black
-                            .withOpacity(0.5),
-                        fontWeight: FontWeight.w400),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(color: Colors.black.withOpacity(0.5)),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop(false);
@@ -81,8 +79,13 @@ Future<bool> showConfirmationDialog(
                 FlatButton(
                   child: Text(
                     okText,
-                    style: TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.w400),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentRed),
                   ),
                   onPressed: () {
                     Navigator.pop(context, true);
