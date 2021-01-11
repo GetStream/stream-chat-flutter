@@ -220,6 +220,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool get _upToDate => streamChannel.channel.state.isUpToDate;
 
+  bool get _isThreadConversation => widget.parentMessage != null;
+
   bool _topPaginationActive = false;
   bool _bottomPaginationActive = false;
 
@@ -234,7 +236,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) {
-    final messagesStream = widget.parentMessage != null
+    final messagesStream = _isThreadConversation
         ? streamChannel.channel.state.threadsStream
             .where((threads) => threads.containsKey(widget.parentMessage.id))
             .map((threads) => threads[widget.parentMessage.id])
@@ -333,9 +335,8 @@ class _MessageListViewState extends State<MessageListView> {
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: true,
-                  itemCount: messages.length +
-                      2 +
-                      (widget.parentMessage != null ? 1 : 0),
+                  itemCount:
+                      messages.length + 2 + (_isThreadConversation ? 1 : 0),
                   separatorBuilder: (context, i) {
                     if (i == messages.length) return Offstage();
                     if (i == messages.length + 2) return Offstage();
@@ -497,7 +498,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   Future<void> _paginateData(
       StreamChannelState channel, QueryDirection direction) {
-    if (widget.parentMessage == null) {
+    if (!_isThreadConversation) {
       return channel.queryMessages(direction: direction);
     } else {
       return channel.getReplies(widget.parentMessage.id);
@@ -722,7 +723,7 @@ class _MessageListViewState extends State<MessageListView> {
         right: 8.0,
         bottom: 16.0,
       ),
-      showSendingIndicator: DisplayWidget.hide,
+      showSendingIndicator: false,
       onThreadTap: _onThreadTap,
       showEditMessage: false,
       showDeleteMessage: false,
@@ -768,25 +769,47 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     final channel = streamChannel.channel;
-    final readList = channel.state?.read
-            ?.where((element) => element.user.id != userId)
-            ?.where((read) =>
-                (read.lastRead.isAfter(message.createdAt) ||
-                    read.lastRead.isAtSameMomentAs(message.createdAt)) &&
-                (index == 0 ||
-                    read.lastRead.isBefore(messages[index - 1].createdAt)))
-            ?.toList() ??
+    final readList = channel.state?.read?.where((read) {
+          if (read.user.id == userId) return false;
+          return (read.lastRead.isAfter(message.createdAt) ||
+                  read.lastRead.isAtSameMomentAs(message.createdAt)) &&
+              (index == 0 ||
+                  read.lastRead.isBefore(messages[index - 1].createdAt));
+        })?.toList() ??
         [];
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
-
-    final isThreadMessage =
-        widget.parentMessage != null || message?.showInChannel == true;
-
     final hasFileAttachment =
         message.attachments.any((it) => it.type == 'file');
 
+    final isThreadMessage =
+        message?.parentId != null && message?.showInChannel == true;
+
+    final hasReplies = message.replyCount > 0;
+
     final attachmentBorderRadius = hasFileAttachment ? 12.0 : 14.0;
+
+    final showTimeStamp = message.createdAt != null &&
+        (!isThreadMessage || _isThreadConversation) &&
+        !hasReplies &&
+        (timeDiff >= 1 || !isNextUserSame);
+
+    final showUsername = !isMyMessage &&
+        (!isThreadMessage || _isThreadConversation) &&
+        !hasReplies &&
+        (timeDiff >= 1 || !isNextUserSame);
+
+    final showUserAvatar = isMyMessage
+        ? DisplayWidget.gone
+        : (timeDiff >= 1 || !isNextUserSame)
+            ? DisplayWidget.show
+            : DisplayWidget.hide;
+
+    final showSendingIndicator =
+        isMyMessage && (index == 0 || timeDiff >= 1 || !isNextUserSame);
+
+    bool showInChannelIndicator = !_isThreadConversation && isThreadMessage;
+    bool showThreadReplyIndicator = !_isThreadConversation && hasReplies;
 
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
@@ -794,6 +817,12 @@ class _MessageListViewState extends State<MessageListView> {
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      showInChannelIndicator: showInChannelIndicator,
+      showThreadReplyIndicator: showThreadReplyIndicator,
+      showUsername: showUsername,
+      showTimestamp: showTimeStamp,
+      showSendingIndicator: showSendingIndicator,
+      showUserAvatar: showUserAvatar,
       onQuotedMessageTap: (quotedMessageId) async {
         final scrollToIndex = () {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
@@ -814,15 +843,6 @@ class _MessageListViewState extends State<MessageListView> {
           });
         }
       },
-      showInChannelIndicator: widget.parentMessage == null,
-      showThreadReplyIndicator: widget.parentMessage == null,
-      showUsername: !isMyMessage && (timeDiff >= 1 || !isNextUserSame),
-      showSendingIndicator:
-          isMyMessage && (index == 0 || timeDiff >= 1 || !isNextUserSame)
-              ? DisplayWidget.show
-              : DisplayWidget.hide,
-      showTimestamp:
-          !isNextUserSame || readList?.isNotEmpty == true || timeDiff >= 1,
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       borderSide: isMyMessage ? BorderSide.none : null,
@@ -842,11 +862,6 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
-      showUserAvatar: isMyMessage
-          ? DisplayWidget.gone
-          : (timeDiff >= 1 || !isNextUserSame
-              ? DisplayWidget.show
-              : DisplayWidget.hide),
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
@@ -918,7 +933,7 @@ class _MessageListViewState extends State<MessageListView> {
       }
     });
 
-    if (widget.parentMessage != null) {
+    if (_isThreadConversation) {
       streamChannel.getReplies(widget.parentMessage.id);
     }
 

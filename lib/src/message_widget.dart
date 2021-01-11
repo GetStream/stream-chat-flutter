@@ -96,7 +96,7 @@ class MessageWidget extends StatefulWidget {
   final DisplayWidget showUserAvatar;
 
   /// It controls the display behaviour of the sending indicator
-  final DisplayWidget showSendingIndicator;
+  final bool showSendingIndicator;
 
   /// If true the widget will show the reactions
   final bool showReactions;
@@ -157,7 +157,7 @@ class MessageWidget extends StatefulWidget {
     this.onMentionTap,
     this.showReactionPickerIndicator = false,
     this.showUserAvatar = DisplayWidget.show,
-    this.showSendingIndicator = DisplayWidget.show,
+    this.showSendingIndicator = true,
     this.showThreadReplyIndicator = true,
     this.showInChannelIndicator = true,
     this.showReplyIndicator = true,
@@ -239,18 +239,17 @@ class MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<MessageWidget> {
-  bool get showThreadReplyIndicator =>
-      widget.showThreadReplyIndicator && widget.message.replyCount > 0;
+  bool get showThreadReplyIndicator => widget.showThreadReplyIndicator;
+
+  bool get showSendingIndicator => widget.showSendingIndicator;
 
   bool get showUsername => widget.showUsername;
 
-  bool get showTimeStamp =>
-      widget.message.createdAt != null && widget.showTimestamp;
+  bool get showTimeStamp => widget.showTimestamp;
 
   bool get isMessageRead => widget.readList?.isNotEmpty == true;
 
-  bool get showInChannel =>
-      widget.showInChannelIndicator && widget.message?.showInChannel == true;
+  bool get showInChannel => widget.showInChannelIndicator;
 
   bool get hasQuotedMessage => widget.message?.quotedMessage != null;
 
@@ -494,88 +493,84 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Widget _buildBottomRow(double leftPadding) {
-    final deleted = widget.message.isDeleted;
-    var children = <Widget>[];
-    if (deleted) {
-      children.add(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            StreamSvgIcon.eye(
-              color: StreamChatTheme.of(context).colorTheme.grey,
-              size: 16.0,
-            ),
-            SizedBox(width: 8.0),
-            Text(
-              'Only visible to you',
-              style: StreamChatTheme.of(context)
-                  .textTheme
-                  .footnote
-                  .copyWith(color: StreamChatTheme.of(context).colorTheme.grey),
-            ),
-          ],
+    if (widget.message.isDeleted) {
+      return Padding(
+        padding: EdgeInsets.only(left: leftPadding),
+        child: Transform(
+          transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StreamSvgIcon.eye(
+                color: StreamChatTheme.of(context).colorTheme.grey,
+                size: 16.0,
+              ),
+              SizedBox(width: 8.0),
+              Text(
+                'Only visible to you',
+                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                    color: StreamChatTheme.of(context).colorTheme.grey),
+              ),
+            ],
+          ),
         ),
       );
-    } else if (showInChannel) {
-      final onThreadTap = () async {
-        try {
+    }
+
+    var children = <Widget>[];
+
+    final threadParticipants = widget.message.threadParticipants;
+    final showThreadParticipants = threadParticipants?.isNotEmpty == true;
+    final replyCount = widget.message.replyCount;
+
+    var msg = 'Thread Reply';
+    if (showThreadReplyIndicator && replyCount > 1) {
+      msg = '$replyCount Thread Replies';
+    }
+
+    final onThreadTap = () async {
+      try {
+        var message = widget.message;
+        if (showInChannel) {
           final channel = StreamChannel.of(context);
-          final message = await channel.getMessage(widget.message.parentId);
-          return widget.onThreadTap(message);
-        } catch (e, stk) {
-          print(e);
-          print(stk);
-          return null;
+          message = await channel.getMessage(widget.message.parentId);
         }
-      };
-      children.add(
+        return widget.onThreadTap(message);
+      } catch (e, stk) {
+        print(e);
+        print(stk);
+        return null;
+      }
+    };
+
+    children.addAll([
+      if (showSendingIndicator) _buildSendingIndicator(),
+      if (showInChannel || showThreadReplyIndicator) ...[
+        if (showThreadParticipants)
+          SizedBox.fromSize(
+            size: Size((threadParticipants.length * 8.0) + 10, 16),
+            child: _buildThreadParticipantsIndicator(),
+          ),
         InkWell(
           onTap: widget.onThreadTap != null ? onThreadTap : null,
-          child: Text('Thread Reply', style: widget.messageTheme?.replies),
+          child: Text(msg, style: widget.messageTheme?.replies),
         ),
-      );
-    } else {
-      final showSendingIndicator =
-          widget.showSendingIndicator == DisplayWidget.show;
-      final threadParticipants = widget.message.threadParticipants;
-      final showThreadParticipants = threadParticipants?.isNotEmpty == true;
-      final replyCount = widget.message.replyCount;
-      final msg = replyCount != 0
-          ? '$replyCount ${replyCount > 1 ? 'Thread Replies' : 'Thread Reply'}'
-          : 'Thread Reply';
+      ],
+      if (showUsername)
+        Text(
+          widget.message.user.name,
+          style: widget.messageTheme.replies.copyWith(
+            color: widget.messageTheme.createdAt.color,
+          ),
+        ),
+      if (showTimeStamp)
+        Text(
+          Jiffy(widget.message.createdAt.toLocal()).jm,
+          style: widget.messageTheme.createdAt,
+        ),
+    ]);
 
-      final onThreadTap = () async {
-        var message = widget.message;
-        return widget.onThreadTap(message);
-      };
-
-      children.addAll([
-        if (showSendingIndicator) _buildSendingIndicator(),
-        if (showThreadReplyIndicator) ...[
-          if (showThreadParticipants)
-            SizedBox.fromSize(
-              size: Size((threadParticipants.length * 8.0) + 10, 16),
-              child: _buildThreadParticipantsIndicator(),
-            ),
-          InkWell(
-            onTap: widget.onThreadTap != null ? onThreadTap : null,
-            child: Text(msg, style: widget.messageTheme?.replies),
-          ),
-        ],
-        if (showUsername)
-          Text(
-            widget.message.user.name,
-            style: widget.messageTheme.replies.copyWith(
-              color: widget.messageTheme.createdAt.color,
-            ),
-          ),
-        if (showTimeStamp)
-          Text(
-            Jiffy(widget.message.createdAt.toLocal()).jm,
-            style: widget.messageTheme.createdAt,
-          ),
-      ]);
-    }
     if (widget.reverse) children = children.reversed.toList();
 
     return Padding(
@@ -585,7 +580,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         clipBehavior: Clip.none,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!deleted && (showThreadReplyIndicator || showInChannel))
+          if (showThreadReplyIndicator || showInChannel)
             Container(
               margin: EdgeInsets.only(
                 bottom: widget.messageTheme.replies.fontSize / 2,

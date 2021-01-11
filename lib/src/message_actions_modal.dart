@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -139,7 +138,7 @@ class MessageActionsModal extends StatelessWidget {
                                             MessageSendingStatus.SENT ||
                                         message.status == null),
                                 showInChannelIndicator: false,
-                                showSendingIndicator: DisplayWidget.gone,
+                                showSendingIndicator: false,
                                 shape: messageShape,
                               ),
                             ),
