@@ -5,14 +5,22 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class UnreadIndicator extends StatelessWidget {
   const UnreadIndicator({
     Key key,
+    this.cid,
   }) : super(key: key);
+
+  /// Channel cid used to retrieve unread count
+  final String cid;
 
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
     return StreamBuilder<int>(
-      stream: client.state.totalUnreadCountStream,
-      initialData: client.state.totalUnreadCount,
+      stream: cid != null
+          ? client.state.channels[cid].state.unreadCountStream
+          : client.state.totalUnreadCountStream,
+      initialData: cid != null
+          ? client.state.channels[cid].state.unreadCount
+          : client.state.totalUnreadCount,
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == 0) {
           return SizedBox();

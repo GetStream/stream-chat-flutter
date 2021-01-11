@@ -1,10 +1,10 @@
+import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'stream_svg_icon.dart';
-
 import '../stream_chat_flutter.dart';
+import 'stream_svg_icon.dart';
 
 Future<void> launchURL(BuildContext context, String url) async {
   if (await canLaunch(url)) {
@@ -288,4 +288,17 @@ StreamSvgIcon getFileTypeImage(String type) {
       return StreamSvgIcon.filetype_Generic();
       break;
   }
+}
+
+final _emojis = Emoji.all();
+
+bool textIsOnlyEmoji(String text) {
+  return text.trim().characters.isNotEmpty &&
+      text.trim().characters.every((c) =>
+          _emojis.firstWhere(
+            (Emoji emoji) => emoji.char.contains(c),
+            orElse: () => null,
+          ) !=
+          null) &&
+      text.characters.length < 4;
 }
