@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'notifications_service.dart';
 import 'routes/app_routes.dart';
@@ -52,32 +53,50 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      builder: (context, child) {
-        return StreamChat(
-          client: client,
-          child: Builder(
-            builder: (context) => AnnotatedRegion<SystemUiOverlayStyle>(
-              child: child,
-              value: SystemUiOverlayStyle(
-                systemNavigationBarColor:
-                    StreamChatTheme.of(context).colorTheme.white,
-                systemNavigationBarIconBrightness:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Brightness.light
-                        : Brightness.dark,
-              ),
-            ),
+    return FutureBuilder<StreamingSharedPreferences>(
+      future: StreamingSharedPreferences.instance,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return SizedBox();
+        }
+        return PreferenceBuilder<int>(
+          preference: snapshot.data.getInt(
+            'theme',
+            defaultValue: 0,
+          ),
+          builder: (context, snapshot) => MaterialApp(
+            builder: (context, child) {
+              return StreamChat(
+                client: client,
+                child: Builder(
+                  builder: (context) => AnnotatedRegion<SystemUiOverlayStyle>(
+                    child: child,
+                    value: SystemUiOverlayStyle(
+                      systemNavigationBarColor:
+                          StreamChatTheme.of(context).colorTheme.white,
+                      systemNavigationBarIconBrightness:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Brightness.light
+                              : Brightness.dark,
+                    ),
+                  ),
+                ),
+              );
+            },
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: {
+              -1: ThemeMode.dark,
+              0: ThemeMode.system,
+              1: ThemeMode.light,
+            }[snapshot],
+            onGenerateRoute: AppRoutes.generateRoute,
+            initialRoute:
+                client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
           ),
         );
       },
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
-      onGenerateRoute: AppRoutes.generateRoute,
-      initialRoute:
-          client.state.user == null ? Routes.CHOOSE_USER : Routes.HOME,
     );
   }
 }
@@ -268,6 +287,21 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontSize: 14.5,
                       ),
+                    ),
+                    trailing: IconButton(
+                      icon: StreamSvgIcon.Icon_moon(
+                        size: 24,
+                      ),
+                      color: StreamChatTheme.of(context).colorTheme.grey,
+                      onPressed: () async {
+                        final sp = await StreamingSharedPreferences.instance;
+                        sp.setInt(
+                          'theme',
+                          Theme.of(context).brightness == Brightness.dark
+                              ? 1
+                              : -1,
+                        );
+                      },
                     ),
                   ),
                 ),
