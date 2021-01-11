@@ -278,7 +278,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   Widget build(BuildContext context) {
     final avatarWidth = widget.messageTheme.avatarTheme.constraints.maxWidth;
     var leftPadding =
-        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 4.5;
+        widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     final isOnlyEmoji =
         widget.message.text.characters.every((c) => Emoji.byChar(c) != null);
@@ -330,7 +330,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                   child: PortalEntry(
                                     portal: Container(
                                       transform:
-                                          Matrix4.translationValues(-16, 2, 0),
+                                          Matrix4.translationValues(-12, 0, 0),
                                       child: _buildReactionIndicator(context),
                                       constraints:
                                           BoxConstraints(maxWidth: 22 * 6.0),
@@ -372,6 +372,14 @@ class _MessageWidgetState extends State<MessageWidget> {
                                               : Card(
                                                   clipBehavior: Clip.antiAlias,
                                                   elevation: 0.0,
+                                                  margin: EdgeInsets.symmetric(
+                                                    horizontal:
+                                                        widget.showUserAvatar ==
+                                                                DisplayWidget
+                                                                    .gone
+                                                            ? 0
+                                                            : 4.0,
+                                                  ),
                                                   shape: widget.shape ??
                                                       RoundedRectangleBorder(
                                                         side: isOnlyEmoji &&
@@ -395,7 +403,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                     child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
-                                                              .start,
+                                                              .end,
                                                       mainAxisSize:
                                                           MainAxisSize.min,
                                                       children: <Widget>[
@@ -423,10 +431,12 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   widget.reverse ? pi : 0),
                                               child: CustomPaint(
                                                 painter: ReactionBubblePainter(
-                                                  widget.messageTheme
-                                                      .reactionsBackgroundColor,
-                                                  widget.messageTheme
-                                                      .reactionsBorderColor,
+                                                  StreamChatTheme.of(context)
+                                                      .colorTheme
+                                                      .white,
+                                                  StreamChatTheme.of(context)
+                                                      .colorTheme
+                                                      .white,
                                                 ),
                                               ),
                                             ),
@@ -492,18 +502,16 @@ class _MessageWidgetState extends State<MessageWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             StreamSvgIcon.eye(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+              color: StreamChatTheme.of(context).colorTheme.grey,
               size: 16.0,
             ),
             SizedBox(width: 8.0),
             Text(
               'Only visible to you',
-              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                  color: StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.5)),
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .footnote
+                  .copyWith(color: StreamChatTheme.of(context).colorTheme.grey),
             ),
           ],
         ),
@@ -754,9 +762,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       side: widget.attachmentBorderSide ??
           widget.borderSide ??
           BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? StreamChatTheme.of(context).colorTheme.white.withAlpha(24)
-                : StreamChatTheme.of(context).colorTheme.black.withAlpha(24),
+            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
           ),
       borderRadius: widget.attachmentBorderRadiusGeometry ??
           widget.borderRadiusGeometry ??

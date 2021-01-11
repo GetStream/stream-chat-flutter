@@ -228,19 +228,9 @@ class StreamChatThemeData {
         inputBackground: colorTheme.white.withAlpha(12),
       ),
       ownMessageTheme: MessageTheme(
-        messageText: TextStyle(
-          fontSize: 14.5,
-          color: colorTheme.black,
-        ),
-        createdAt: TextStyle(
-          color: colorTheme.black.withOpacity(.5),
-          fontSize: 12,
-        ),
-        replies: TextStyle(
-          color: accentColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
+        messageText: textTheme.body,
+        createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
+        replies: textTheme.footnoteBold.copyWith(color: accentColor),
         messageBackgroundColor: colorTheme.greyGainsboro,
         reactionsBackgroundColor: colorTheme.white,
         reactionsBorderColor: colorTheme.greyWhisper,
@@ -259,19 +249,9 @@ class StreamChatThemeData {
       otherMessageTheme: MessageTheme(
         reactionsBackgroundColor: colorTheme.greyGainsboro,
         reactionsBorderColor: colorTheme.white,
-        messageText: TextStyle(
-          fontSize: 14.5,
-          color: colorTheme.black,
-        ),
-        createdAt: TextStyle(
-          color: colorTheme.black.withOpacity(.5),
-          fontSize: 12,
-        ),
-        replies: TextStyle(
-          color: accentColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
+        messageText: textTheme.body,
+        createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
+        replies: textTheme.footnoteBold.copyWith(color: accentColor),
         messageLinks: TextStyle(
           color: accentColor,
         ),
