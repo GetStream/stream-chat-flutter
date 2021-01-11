@@ -256,8 +256,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       } catch (err) {
         _showErrorAlert();
       }
-    } else {
-      Navigator.pop(context);
     }
   }
 
