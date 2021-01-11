@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -9,6 +8,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_channel.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/utils.dart';
 
 import 'message_input.dart';
 import 'message_widget.dart';
@@ -64,21 +64,9 @@ class MessageActionsModal extends StatefulWidget {
 }
 
 class _MessageActionsModalState extends State<MessageActionsModal> {
-  ActionsModalState state = ActionsModalState.modal;
-
   @override
   Widget build(BuildContext context) {
-    switch (state) {
-      case ActionsModalState.modal:
-        return _showMessageOptionsModal();
-        break;
-      case ActionsModalState.confirmDialog:
-        return _showFlagDialog();
-        break;
-      case ActionsModalState.dismissMessage:
-        return _showDismissAlert();
-        break;
-    }
+    return _showMessageOptionsModal();
   }
 
   Widget _showMessageOptionsModal() {
@@ -254,296 +242,154 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _showFlagDialog() {
-    return TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        builder: (context, value, _) {
-          return GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => Navigator.maybePop(context),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(
-                      sigmaX: 10,
-                      sigmaY: 10,
-                    ),
-                    child: Container(
-                      color: StreamChatTheme.of(context).colorTheme.overlay,
-                    ),
-                  ),
-                ),
-                Transform.scale(
-                  scale: value,
-                  child: Center(
-                    child: Opacity(
-                      opacity: 0.9,
-                      child: Material(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Container(
-                          width: 270.0,
-                          height: 156.0,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                height: 19.0,
-                              ),
-                              Text(
-                                'Flag Message',
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .bodyBold
-                                    .copyWith(fontSize: 17.0),
-                              ),
-                              SizedBox(
-                                height: 4.0,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
-                                child: Text(
-                                  'Do you want to send a copy of this \nmessage to a moderator for further \ninvestigation?',
-                                  style: TextStyle(fontSize: 13.5),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 21.0,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Expanded(
-                                    child: Center(
-                                      child: InkWell(
-                                        child: Container(
-                                          height: 44.0,
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            'Cancel',
-                                            style: StreamChatTheme.of(context)
-                                                .textTheme
-                                                .body
-                                                .copyWith(
-                                                    fontSize: 17.0,
-                                                    color: StreamChatTheme.of(
-                                                            context)
-                                                        .colorTheme
-                                                        .accentBlue),
-                                          ),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              top: BorderSide(
-                                                  color: StreamChatTheme.of(
-                                                          context)
-                                                      .colorTheme
-                                                      .grey
-                                                      .withOpacity(0.8)),
-                                              right: BorderSide(
-                                                  color: StreamChatTheme.of(
-                                                          context)
-                                                      .colorTheme
-                                                      .grey
-                                                      .withOpacity(0.8)),
-                                            ),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            state = ActionsModalState.modal;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Center(
-                                      child: InkWell(
-                                        child: Container(
-                                          height: 44.0,
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            'Flag',
-                                            style: StreamChatTheme.of(context)
-                                                .textTheme
-                                                .body
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 17.0,
-                                                    color: StreamChatTheme.of(
-                                                            context)
-                                                        .colorTheme
-                                                        .accentBlue),
-                                          ),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              top: BorderSide(
-                                                  color: StreamChatTheme.of(
-                                                          context)
-                                                      .colorTheme
-                                                      .grey
-                                                      .withOpacity(0.8)),
-                                            ),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            state = ActionsModalState
-                                                .dismissMessage;
-                                          });
-                                          final client =
-                                              StreamChat.of(context).client;
-                                          client.flagMessage(widget.message.id);
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
+  void _showFlagDialog() async {
+    final client = StreamChat.of(context).client;
+
+    var answer = await showConfirmationDialog(context,
+        title: 'Flag Message',
+        icon: StreamSvgIcon.flag(
+          color: StreamChatTheme.of(context).colorTheme.accentRed,
+          size: 24.0,
+        ),
+        question:
+            'Do you want to send a copy of this message to a\nmoderator for further investigation?',
+        okText: 'FLAG',
+        cancelText: 'CANCEL');
+
+    if (answer) {
+      try {
+        await client.flagMessage(widget.message.id);
+        _showDismissAlert();
+      } catch (err) {
+        _showErrorAlert();
+      }
+    } else {
+      Navigator.pop(context);
+    }
   }
 
-  Widget _showDismissAlert() {
-    return TweenAnimationBuilder<double>(
-        key: GlobalKey(),
-        tween: Tween(begin: 0.0, end: 1.0),
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        builder: (context, value, _) {
-          return GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => Navigator.maybePop(context),
-            child: Stack(
+  void _showDismissAlert() {
+    showModalBottomSheet(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.0),
+        topRight: Radius.circular(16.0),
+      )),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26.0,
+            ),
+            StreamSvgIcon.flag(
+              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              size: 24.0,
+            ),
+            SizedBox(
+              height: 26.0,
+            ),
+            Text(
+              'Message flagged',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+            Text('The message has been reported to a moderator.'),
+            SizedBox(
+              height: 36.0,
+            ),
+            Container(
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              height: 1.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(
-                      sigmaX: 10,
-                      sigmaY: 10,
-                    ),
-                    child: Container(
-                      color: StreamChatTheme.of(context).colorTheme.overlay,
-                    ),
+                FlatButton(
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
+                        fontWeight: FontWeight.w400),
                   ),
-                ),
-                Transform.scale(
-                  scale: value,
-                  child: Center(
-                    child: Opacity(
-                      opacity: 0.9,
-                      child: Material(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Container(
-                          width: 270.0,
-                          height: 156.0,
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                height: 19.0,
-                              ),
-                              Text(
-                                'Message Flagged',
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .bodyBold
-                                    .copyWith(fontSize: 17.0),
-                              ),
-                              SizedBox(
-                                height: 4.0,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
-                                child: Text(
-                                  'This message has been reported to a\nmoderator.',
-                                  style: TextStyle(fontSize: 13.5),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 21.0,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Expanded(
-                                    child: Center(
-                                      child: InkWell(
-                                        child: Container(
-                                          height: 44.0,
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            'Dismiss',
-                                            style: StreamChatTheme.of(context)
-                                                .textTheme
-                                                .body
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 17.0,
-                                                    color: StreamChatTheme.of(
-                                                            context)
-                                                        .colorTheme
-                                                        .accentBlue),
-                                          ),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              top: BorderSide(
-                                                  color: StreamChatTheme.of(
-                                                          context)
-                                                      .colorTheme
-                                                      .grey
-                                                      .withOpacity(0.8)),
-                                            ),
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          setState(() {
-                                            state = ActionsModalState.modal;
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
               ],
             ),
-          );
-        });
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorAlert() {
+    showModalBottomSheet(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.0),
+        topRight: Radius.circular(16.0),
+      )),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26.0,
+            ),
+            StreamSvgIcon.error(
+              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              size: 24.0,
+            ),
+            SizedBox(
+              height: 26.0,
+            ),
+            Text(
+              'Something went wrong',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+            Text('The operation couldn\'t be completed.'),
+            SizedBox(
+              height: 36.0,
+            ),
+            Container(
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              height: 1.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FlatButton(
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                        color:
+                            StreamChatTheme.of(context).colorTheme.accentBlue,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildReplyButton(BuildContext context) {
@@ -586,9 +432,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ],
       ),
       onTap: () {
-        setState(() {
-          state = ActionsModalState.confirmDialog;
-        });
+        _showFlagDialog();
       },
     );
   }
