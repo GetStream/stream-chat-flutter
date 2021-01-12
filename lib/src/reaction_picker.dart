@@ -78,57 +78,63 @@ class _ReactionPickerState extends State<ReactionPicker>
                             -1;
                         var index = reactionIcons.indexOf(reactionIcon);
 
-                        return RawMaterialButton(
-                          elevation: 0,
-                          padding: const EdgeInsets.all(0),
-                          clipBehavior: Clip.none,
-                          shape: ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                        return ConstrainedBox(
                           constraints: BoxConstraints.tightFor(
                             height: 24,
                             width: 24,
                           ),
-                          child: AnimatedBuilder(
-                              animation: animations[index],
-                              builder: (context, val) {
-                                return Transform.scale(
-                                  alignment: Alignment.center,
-                                  scale: animations[index].value,
-                                  child: StreamSvgIcon(
-                                    assetName: reactionIcon.assetName,
-                                    height: max(
-                                      0,
-                                      animations[index].value * 24.0,
+                          child: RawMaterialButton(
+                            elevation: 0,
+                            padding: const EdgeInsets.all(0),
+                            clipBehavior: Clip.none,
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            constraints: BoxConstraints.tightFor(
+                              height: 24,
+                              width: 24,
+                            ),
+                            child: AnimatedBuilder(
+                                animation: animations[index],
+                                builder: (context, val) {
+                                  return Transform.scale(
+                                    alignment: Alignment.center,
+                                    scale: animations[index].value,
+                                    child: StreamSvgIcon(
+                                      assetName: reactionIcon.assetName,
+                                      height: max(
+                                        0,
+                                        animations[index].value * 24.0,
+                                      ),
+                                      width: max(
+                                        0,
+                                        animations[index].value * 24.0,
+                                      ),
+                                      color: ownReactionIndex != -1
+                                          ? StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .accentBlue
+                                          : Theme.of(context)
+                                              .iconTheme
+                                              .color
+                                              .withOpacity(.5),
                                     ),
-                                    width: max(
-                                      0,
-                                      animations[index].value * 24.0,
-                                    ),
-                                    color: ownReactionIndex != -1
-                                        ? StreamChatTheme.of(context)
-                                            .colorTheme
-                                            .accentBlue
-                                        : Theme.of(context)
-                                            .iconTheme
-                                            .color
-                                            .withOpacity(.5),
-                                  ),
+                                  );
+                                }),
+                            onPressed: () {
+                              if (ownReactionIndex != -1) {
+                                removeReaction(
+                                  context,
+                                  widget.message.ownReactions[ownReactionIndex],
                                 );
-                              }),
-                          onPressed: () {
-                            if (ownReactionIndex != -1) {
-                              removeReaction(
-                                context,
-                                widget.message.ownReactions[ownReactionIndex],
-                              );
-                            } else {
-                              sendReaction(
-                                context,
-                                reactionIcon.type,
-                              );
-                            }
-                          },
+                              } else {
+                                sendReaction(
+                                  context,
+                                  reactionIcon.type,
+                                );
+                              }
+                            },
+                          ),
                         );
                       })
                       .insertBetween(SizedBox(
