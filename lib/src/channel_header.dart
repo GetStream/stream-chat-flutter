@@ -69,6 +69,8 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// If true the typing indicator will be rendered if a user is typing
   final bool showTypingIndicator;
 
+  final bool showConnectionStateTile;
+
   /// Creates a channel header
   ChannelHeader({
     Key key,
@@ -77,6 +79,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onTitleTap,
     this.showTypingIndicator = true,
     this.onImageTap,
+    this.showConnectionStateTile = false,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -97,7 +100,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             showStatus = false;
             break;
           case ConnectionStatus.connecting:
-            statusString = 'Connecting';
+            statusString = 'Reconnecting...';
             break;
           case ConnectionStatus.disconnected:
             statusString = 'Disconnected';
@@ -105,7 +108,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         return InfoTile(
-          showMessage: showStatus,
+          showMessage: showConnectionStateTile ? showStatus : false,
           message: statusString,
           child: AppBar(
             brightness: Theme.of(context).brightness,

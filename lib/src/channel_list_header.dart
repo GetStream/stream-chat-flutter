@@ -54,6 +54,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.titleBuilder,
     this.onUserAvatarTap,
     this.onNewChatButtonTap,
+    this.showConnectionStateTile = false,
   }) : super(key: key);
 
   /// Pass this if you don't have a [Client] in your widget tree.
@@ -68,6 +69,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// Callback to call when pressing the new chat button.
   final VoidCallback onNewChatButtonTap;
+
+  final bool showConnectionStateTile;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +88,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             showStatus = false;
             break;
           case ConnectionStatus.connecting:
-            statusString = 'Connecting';
+            statusString = 'Reconnecting...';
             break;
           case ConnectionStatus.disconnected:
             statusString = 'Disconnected';
@@ -93,7 +96,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         return InfoTile(
-          showMessage: showStatus,
+          showMessage: showConnectionStateTile ? showStatus : false,
           message: statusString,
           child: AppBar(
             brightness: Theme.of(context).brightness,

@@ -7,6 +7,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -124,6 +125,7 @@ class MessageListView extends StatefulWidget {
     this.highlightInitialMessage = false,
     this.messageHighlightColor,
     this.onShowMessage,
+    this.showConnectionStateTile = false,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -180,6 +182,8 @@ class MessageListView extends StatefulWidget {
   final Color messageHighlightColor;
 
   final ShowMessageCallback onShowMessage;
+
+  final bool showConnectionStateTile;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -297,172 +301,205 @@ class _MessageListViewState extends State<MessageListView> {
           }
 
           _messageListLength = newMessagesListLength;
+          final _client = StreamChat.of(context).client;
 
           return Stack(
             alignment: Alignment.center,
             children: [
-              LazyLoadScrollView(
-                onStartOfPage: () async {
-                  _inBetweenList = false;
-                  if (!_upToDate) {
-                    _topPaginationActive = false;
-                    _bottomPaginationActive = true;
-                    return _paginateData(
-                      streamChannel,
-                      QueryDirection.bottom,
-                    );
-                  }
-                },
-                onEndOfPage: () async {
-                  _inBetweenList = false;
-                  _topPaginationActive = true;
-                  _bottomPaginationActive = false;
-                  return _paginateData(
-                    streamChannel,
-                    QueryDirection.top,
-                  );
-                },
-                onInBetweenOfPage: () {
-                  _inBetweenList = true;
-                },
-                child: ScrollablePositionedList.separated(
-                  key: ValueKey(initialIndex + initialAlignment),
-                  itemPositionsListener: _itemPositionListener,
-                  addAutomaticKeepAlives: true,
-                  initialScrollIndex: initialIndex ?? 0,
-                  initialAlignment: initialAlignment ?? 0,
-                  physics: widget.scrollPhysics,
-                  itemScrollController: _scrollController,
-                  reverse: true,
-                  itemCount:
-                      messages.length + 2 + (_isThreadConversation ? 1 : 0),
-                  separatorBuilder: (context, i) {
-                    if (i == messages.length) return Offstage();
-                    if (i == messages.length + 2) return Offstage();
-                    if (i == messages.length + 1) return Offstage();
-                    if (i == 0) return SizedBox(height: 30);
-                    final message = messages[i];
-                    final nextMessage = messages[i - 1];
-                    if (!Jiffy(message.createdAt.toLocal()).isSame(
-                      nextMessage.createdAt.toLocal(),
-                      Units.DAY,
-                    )) {
-                      final divider = widget.dateDividerBuilder != null
-                          ? widget.dateDividerBuilder(
-                              nextMessage.createdAt.toLocal(),
-                            )
-                          : DateDivider(
-                              dateTime: nextMessage.createdAt.toLocal(),
+              ValueListenableBuilder<ConnectionStatus>(
+                  valueListenable: _client.wsConnectionStatus,
+                  builder: (context, status, _) {
+                    String statusString = '';
+                    bool showStatus = true;
+
+                    switch (status) {
+                      case ConnectionStatus.connected:
+                        statusString = 'Connected';
+                        showStatus = false;
+                        break;
+                      case ConnectionStatus.connecting:
+                        statusString = 'Reconnecting...';
+                        break;
+                      case ConnectionStatus.disconnected:
+                        statusString = 'Disconnected';
+                        break;
+                    }
+
+                    return InfoTile(
+                      showMessage:
+                          widget.showConnectionStateTile ? showStatus : false,
+                      tileAnchor: Alignment.topCenter,
+                      childAnchor: Alignment.topCenter,
+                      message: statusString,
+                      child: LazyLoadScrollView(
+                        onStartOfPage: () async {
+                          _inBetweenList = false;
+                          if (!_upToDate) {
+                            _topPaginationActive = false;
+                            _bottomPaginationActive = true;
+                            return _paginateData(
+                              streamChannel,
+                              QueryDirection.bottom,
                             );
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
-                        child: divider,
-                      );
-                    }
-                    final timeDiff =
-                        Jiffy(nextMessage.createdAt.toLocal()).diff(
-                      message.createdAt.toLocal(),
-                      Units.MINUTE,
-                    );
+                          }
+                        },
+                        onEndOfPage: () async {
+                          _inBetweenList = false;
+                          _topPaginationActive = true;
+                          _bottomPaginationActive = false;
+                          return _paginateData(
+                            streamChannel,
+                            QueryDirection.top,
+                          );
+                        },
+                        onInBetweenOfPage: () {
+                          _inBetweenList = true;
+                        },
+                        child: ScrollablePositionedList.separated(
+                          key: ValueKey(initialIndex + initialAlignment),
+                          itemPositionsListener: _itemPositionListener,
+                          addAutomaticKeepAlives: true,
+                          initialScrollIndex: initialIndex ?? 0,
+                          initialAlignment: initialAlignment ?? 0,
+                          physics: widget.scrollPhysics,
+                          itemScrollController: _scrollController,
+                          reverse: true,
+                          itemCount: messages.length +
+                              2 +
+                              (_isThreadConversation ? 1 : 0),
+                          separatorBuilder: (context, i) {
+                            if (i == messages.length) return Offstage();
+                            if (i == messages.length + 2) return Offstage();
+                            if (i == messages.length + 1) return Offstage();
+                            if (i == 0) return SizedBox(height: 30);
+                            final message = messages[i];
+                            final nextMessage = messages[i - 1];
+                            if (!Jiffy(message.createdAt.toLocal()).isSame(
+                              nextMessage.createdAt.toLocal(),
+                              Units.DAY,
+                            )) {
+                              final divider = widget.dateDividerBuilder != null
+                                  ? widget.dateDividerBuilder(
+                                      nextMessage.createdAt.toLocal(),
+                                    )
+                                  : DateDivider(
+                                      dateTime: nextMessage.createdAt.toLocal(),
+                                    );
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12.0),
+                                child: divider,
+                              );
+                            }
+                            final timeDiff =
+                                Jiffy(nextMessage.createdAt.toLocal()).diff(
+                              message.createdAt.toLocal(),
+                              Units.MINUTE,
+                            );
 
-                    final isNextUserSame =
-                        message.user.id == nextMessage.user?.id;
-                    final isThread = message.replyCount > 0;
-                    final isDeleted = message.isDeleted;
-                    if (timeDiff >= 1 ||
-                        !isNextUserSame ||
-                        isThread ||
-                        isDeleted) {
-                      return SizedBox(height: 8);
-                    }
-                    return SizedBox(height: 2);
-                  },
-                  itemBuilder: (context, i) {
-                    if (i == messages.length + 2) {
-                      if (widget.parentMessageBuilder != null) {
-                        return widget.parentMessageBuilder(
-                          context,
-                          widget.parentMessage,
-                        );
-                      } else {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            buildParentMessage(widget.parentMessage),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .bgGradient,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
-                                  textAlign: TextAlign.center,
-                                  style: StreamChatTheme.of(context)
-                                      .channelTheme
-                                      .channelHeaderTheme
-                                      .lastMessageAt,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                    }
-                    if (i == messages.length + 1) {
-                      return _buildLoadingIndicator(
-                        streamChannel,
-                        QueryDirection.top,
-                      );
-                    }
-                    if (i == 0) {
-                      return _buildLoadingIndicator(
-                        streamChannel,
-                        QueryDirection.bottom,
-                      );
-                    }
-                    final message = messages[i - 1];
+                            final isNextUserSame =
+                                message.user.id == nextMessage.user?.id;
+                            final isThread = message.replyCount > 0;
+                            final isDeleted = message.isDeleted;
+                            if (timeDiff >= 1 ||
+                                !isNextUserSame ||
+                                isThread ||
+                                isDeleted) {
+                              return SizedBox(height: 8);
+                            }
+                            return SizedBox(height: 2);
+                          },
+                          itemBuilder: (context, i) {
+                            if (i == messages.length + 2) {
+                              if (widget.parentMessageBuilder != null) {
+                                return widget.parentMessageBuilder(
+                                  context,
+                                  widget.parentMessage,
+                                );
+                              } else {
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: <Widget>[
+                                    buildParentMessage(widget.parentMessage),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        gradient: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .bgGradient,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
+                                          textAlign: TextAlign.center,
+                                          style: StreamChatTheme.of(context)
+                                              .channelTheme
+                                              .channelHeaderTheme
+                                              .lastMessageAt,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                            }
+                            if (i == messages.length + 1) {
+                              return _buildLoadingIndicator(
+                                streamChannel,
+                                QueryDirection.top,
+                              );
+                            }
+                            if (i == 0) {
+                              return _buildLoadingIndicator(
+                                streamChannel,
+                                QueryDirection.bottom,
+                              );
+                            }
+                            final message = messages[i - 1];
 
-                    Widget messageWidget;
+                            Widget messageWidget;
 
-                    if (i == 1) {
-                      messageWidget = _buildBottomMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel,
-                      );
-                    } else if (i == messages.length - 1) {
-                      messageWidget = _buildTopMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel,
-                      );
-                    } else {
-                      if (widget.messageBuilder != null) {
-                        messageWidget = Builder(
-                          key: ValueKey<String>('MESSAGE-${message.id}'),
-                          builder: (context) => widget.messageBuilder(
-                              context,
-                              MessageDetails(
+                            if (i == 1) {
+                              messageWidget = _buildBottomMessage(
                                 context,
                                 message,
                                 messages,
-                                i,
-                              ),
-                              messages),
-                        );
-                      } else {
-                        messageWidget = buildMessage(message, messages, i);
-                      }
-                    }
-                    return messageWidget;
-                  },
-                ),
-              ),
+                                streamChannel,
+                              );
+                            } else if (i == messages.length - 1) {
+                              messageWidget = _buildTopMessage(
+                                context,
+                                message,
+                                messages,
+                                streamChannel,
+                              );
+                            } else {
+                              if (widget.messageBuilder != null) {
+                                messageWidget = Builder(
+                                  key:
+                                      ValueKey<String>('MESSAGE-${message.id}'),
+                                  builder: (context) => widget.messageBuilder(
+                                      context,
+                                      MessageDetails(
+                                        context,
+                                        message,
+                                        messages,
+                                        i,
+                                      ),
+                                      messages),
+                                );
+                              } else {
+                                messageWidget =
+                                    buildMessage(message, messages, i);
+                              }
+                            }
+                            return messageWidget;
+                          },
+                        ),
+                      ),
+                    );
+                  }),
               if (widget.showScrollToBottom) _buildScrollToBottom(),
               Positioned(
                 top: 20.0,
