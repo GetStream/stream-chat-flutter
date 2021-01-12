@@ -125,7 +125,7 @@ class QuotedMessageWidget extends StatelessWidget {
   }
 
   Widget _buildMessage(BuildContext context) {
-    final isOnlyEmoji = textIsOnlyEmoji(message.text);
+    final isOnlyEmoji = message.text.isOnlyEmoji;
     var msg = _hasAttachments && !_containsText
         ? message.copyWith(text: message.attachments.last?.title ?? '')
         : message;

@@ -17,6 +17,7 @@ import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
 import 'stream_channel.dart';
 import 'swipeable.dart';
+import 'extension.dart';
 
 typedef MessageBuilder = Widget Function(
   BuildContext,
@@ -708,7 +709,7 @@ class _MessageListViewState extends State<MessageListView> {
     Message message,
   ) {
     final isMyMessage = message.user.id == StreamChat.of(context).user.id;
-    final isOnlyEmoji = textIsOnlyEmoji(message.text);
+    final isOnlyEmoji = message.text.isOnlyEmoji;
 
     return MessageWidget(
       showThreadReplyIndicator: false,
@@ -808,7 +809,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
-    final isOnlyEmoji = textIsOnlyEmoji(message.text);
+    final isOnlyEmoji = message.text.isOnlyEmoji;
 
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),

@@ -938,7 +938,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  bool get isOnlyEmoji => textIsOnlyEmoji(widget.message.text);
+  bool get isOnlyEmoji => widget.message.text.isOnlyEmoji;
 
   Color _getBackgroundColor() {
     if (hasQuotedMessage) {
