@@ -45,6 +45,7 @@ class GiphyAttachment extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Card(
+          color: StreamChatTheme.of(context).colorTheme.white,
           elevation: 2,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
@@ -160,6 +161,7 @@ class GiphyAttachment extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Card(
+                          color: Colors.white,
                           elevation: 2,
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
@@ -187,6 +189,7 @@ class GiphyAttachment extends StatelessWidget {
                           ),
                         ),
                         Card(
+                          color: Colors.white,
                           elevation: 2,
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
