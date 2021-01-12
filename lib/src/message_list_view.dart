@@ -338,9 +338,28 @@ class _MessageListViewState extends State<MessageListView> {
                       messages.length + 2 + (_isThreadConversation ? 1 : 0),
                   separatorBuilder: (context, i) {
                     if (i == messages.length) return Offstage();
-                    if (i == messages.length + 2) return Offstage();
-                    if (i == messages.length + 1) return Offstage();
                     if (i == 0) return SizedBox(height: 30);
+                    if (i == messages.length + 1) {
+                      final replyCount = widget.parentMessage.replyCount;
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient:
+                              StreamChatTheme.of(context).colorTheme.bgGradient,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
+                            textAlign: TextAlign.center,
+                            style: StreamChatTheme.of(context)
+                                .channelTheme
+                                .channelHeaderTheme
+                                .lastMessageAt,
+                          ),
+                        ),
+                      );
+                    }
+
                     final message = messages[i];
                     final nextMessage = messages[i - 1];
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
@@ -385,30 +404,7 @@ class _MessageListViewState extends State<MessageListView> {
                           widget.parentMessage,
                         );
                       } else {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            buildParentMessage(widget.parentMessage),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .bgGradient,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
-                                  textAlign: TextAlign.center,
-                                  style: StreamChatTheme.of(context)
-                                      .channelTheme
-                                      .channelHeaderTheme
-                                      .lastMessageAt,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
+                        return buildParentMessage(widget.parentMessage);
                       }
                     }
                     if (i == messages.length + 1) {
@@ -602,37 +598,38 @@ class _MessageListViewState extends State<MessageListView> {
         ? streamChannel.queryTopMessages
         : streamChannel.queryBottomMessages;
     return StreamBuilder<bool>(
-        key: Key('LOADING-INDICATOR'),
-        stream: stream,
-        initialData: false,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .accentRed
-                  .withOpacity(.2),
-              child: Center(
-                child: Text('Error loading messages'),
-              ),
-            );
-          }
-          if (!snapshot.data) {
-            if (direction == QueryDirection.top) {
-              return Container(
-                height: 52,
-                width: double.infinity,
-              );
-            }
-            return Offstage();
-          }
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const CircularProgressIndicator(),
+      key: Key('LOADING-INDICATOR'),
+      stream: stream,
+      initialData: false,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Container(
+            color: StreamChatTheme.of(context)
+                .colorTheme
+                .accentRed
+                .withOpacity(.2),
+            child: Center(
+              child: Text('Error loading messages'),
             ),
           );
-        });
+        }
+        if (!snapshot.data) {
+          if (!_isThreadConversation && direction == QueryDirection.top) {
+            return Container(
+              height: 52,
+              width: double.infinity,
+            );
+          }
+          return Offstage();
+        }
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: const CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildTopMessage(
