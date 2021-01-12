@@ -923,7 +923,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         ? widget.messageTheme.copyWith(
                             messageText:
                                 widget.messageTheme.messageText.copyWith(
-                            fontSize: 40,
+                            fontSize: 42,
                           ))
                         : widget.messageTheme,
                   ),

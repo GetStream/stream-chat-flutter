@@ -145,9 +145,12 @@ class QuotedMessageWidget extends StatelessWidget {
               messageTheme: isOnlyEmoji && _containsText
                   ? messageTheme.copyWith(
                       messageText: messageTheme.messageText.copyWith(
-                      fontSize: 24,
+                      fontSize: 32,
                     ))
-                  : messageTheme,
+                  : messageTheme.copyWith(
+                      messageText: messageTheme.messageText.copyWith(
+                      fontSize: 12,
+                    )),
             ),
           ),
         ),
