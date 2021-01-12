@@ -8,14 +8,17 @@ class InfoTile extends StatelessWidget {
   final bool showMessage;
   final Alignment tileAnchor;
   final Alignment childAnchor;
+  final TextStyle textStyle;
+  final Color backgroundColor;
 
-  InfoTile({
-    this.message,
-    this.child,
-    this.showMessage,
-    this.tileAnchor,
-    this.childAnchor,
-  });
+  InfoTile(
+      {this.message,
+      this.child,
+      this.showMessage,
+      this.tileAnchor,
+      this.childAnchor,
+      this.textStyle,
+      this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +28,15 @@ class InfoTile extends StatelessWidget {
       childAnchor: childAnchor ?? Alignment.bottomCenter,
       portal: Container(
         height: 25.0,
-        color: StreamChatTheme.of(context).colorTheme.grey.withOpacity(0.9),
+        color: backgroundColor ??
+            StreamChatTheme.of(context).colorTheme.grey.withOpacity(0.9),
         child: Center(
           child: Text(
             message,
-            style: StreamChatTheme.of(context).textTheme.body.copyWith(
-                  color: Colors.white,
-                ),
+            style: textStyle ??
+                StreamChatTheme.of(context).textTheme.body.copyWith(
+                      color: Colors.white,
+                    ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
