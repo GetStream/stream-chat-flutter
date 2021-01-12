@@ -732,7 +732,7 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
-      borderSide: isMyMessage && !isOnlyEmoji ? BorderSide.none : null,
+      borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
@@ -811,11 +811,13 @@ class _MessageListViewState extends State<MessageListView> {
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
     final isOnlyEmoji = message.text.isOnlyEmoji;
 
+    final showMessageBorder =
+        showThreadReplyIndicator || showInChannelIndicator;
     final borderSide = isMyMessage
-        ? !(showThreadReplyIndicator || showInChannelIndicator)
+        ? !showMessageBorder
             ? BorderSide.none
             : null
-        : isOnlyEmoji
+        : isOnlyEmoji && !showMessageBorder
             ? BorderSide.none
             : null;
 
