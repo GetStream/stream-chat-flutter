@@ -109,17 +109,14 @@ class QuotedMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, right: 4, left: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(child: _buildMessage(context)),
-            SizedBox(width: 4),
-            _buildUserAvatar(),
-          ],
-        ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(child: _buildMessage(context)),
+          SizedBox(width: 8),
+          _buildUserAvatar(),
+        ],
       ),
     );
   }
@@ -247,16 +244,13 @@ class QuotedMessageWidget extends StatelessWidget {
     return Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: UserAvatar(
-          user: message.user,
-          constraints: BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          showOnlineStatus: false,
+      child: UserAvatar(
+        user: message.user,
+        constraints: BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
         ),
+        showOnlineStatus: false,
       ),
     );
   }

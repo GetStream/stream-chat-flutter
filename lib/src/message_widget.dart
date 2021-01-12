@@ -272,6 +272,12 @@ class _MessageWidgetState extends State<MessageWidget> {
       widget.message.attachments?.any((element) => element.type == 'giphy') ==
       true;
 
+  bool get hasNonUrlAttachments =>
+      widget.message.attachments
+          ?.where((it) => it.ogScrapeUrl == null)
+          ?.isNotEmpty ==
+      true;
+
   bool get showBottomRow =>
       showThreadReplyIndicator ||
       showUsername ||
@@ -409,8 +415,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                       children: <Widget>[
                                                         if (hasQuotedMessage)
                                                           _buildQuotedMessage(),
-                                                        ..._parseAttachments(
-                                                            context),
+                                                        if (hasNonUrlAttachments)
+                                                          ..._parseAttachments(
+                                                              context),
                                                         if (widget.message.text
                                                                 .trim()
                                                                 .isNotEmpty &&
@@ -487,13 +494,21 @@ class _MessageWidgetState extends State<MessageWidget> {
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap(widget.message.quotedMessageId)
         : null;
-    return QuotedMessageWidget(
-      onTap: onTap,
-      message: widget.message.quotedMessage,
-      messageTheme: isMyMessage
-          ? StreamChatTheme.of(context).otherMessageTheme
-          : StreamChatTheme.of(context).ownMessageTheme,
-      reverse: widget.reverse,
+    return Padding(
+      padding: EdgeInsets.only(
+        right: 8,
+        left: 8,
+        top: 8,
+        bottom: hasNonUrlAttachments ? 8 : 0,
+      ),
+      child: QuotedMessageWidget(
+        onTap: onTap,
+        message: widget.message.quotedMessage,
+        messageTheme: isMyMessage
+            ? StreamChatTheme.of(context).otherMessageTheme
+            : StreamChatTheme.of(context).ownMessageTheme,
+        reverse: widget.reverse,
+      ),
     );
   }
 
