@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -36,13 +38,10 @@ class _ReactionPickerState extends State<ReactionPicker>
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {
         animations.add(
-          EzAnimation.sequence(
-            [
-              SequenceItem(0.0, 1.4),
-              SequenceItem(1.4, 1.0),
-            ],
+          EzAnimation.tween(
+            Tween(begin: 0.0, end: 1.0),
             Duration(milliseconds: 500),
-            vsync: this,
+            curve: Curves.easeInOutBack,
           ),
         );
       });
@@ -52,7 +51,7 @@ class _ReactionPickerState extends State<ReactionPicker>
 
     return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
-        curve: Curves.easeInOutExpo,
+        curve: Curves.easeInOutBack,
         duration: Duration(milliseconds: 500),
         builder: (context, val, wid) {
           return Transform.scale(
@@ -81,15 +80,18 @@ class _ReactionPickerState extends State<ReactionPicker>
                       icon: AnimatedBuilder(
                           animation: animations[index],
                           builder: (context, val) {
-                            return Transform(
-                              transform: Matrix4.identity()
-                                ..scale(animations[index].value,
-                                    animations[index].value)
-                                ..rotateZ(1.0 - animations[index].value),
+                            return Transform.scale(
+                              scale: animations[index].value,
                               child: StreamSvgIcon(
                                 assetName: reactionIcon.assetName,
-                                height: animations[index].value * 24.0,
-                                width: animations[index].value * 24.0,
+                                height: max(
+                                  0,
+                                  animations[index].value * 24.0,
+                                ),
+                                width: max(
+                                  0,
+                                  animations[index].value * 24.0,
+                                ),
                                 color: ownReactionIndex != -1
                                     ? StreamChatTheme.of(context)
                                         .colorTheme
