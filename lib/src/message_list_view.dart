@@ -708,6 +708,7 @@ class _MessageListViewState extends State<MessageListView> {
     Message message,
   ) {
     final isMyMessage = message.user.id == StreamChat.of(context).user.id;
+    final isOnlyEmoji = textIsOnlyEmoji(message.text);
 
     return MessageWidget(
       showThreadReplyIndicator: false,
@@ -721,12 +722,7 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
-      padding: EdgeInsets.only(
-        top: 8.0,
-        left: 8.0,
-        right: 8.0,
-        bottom: 16.0,
-      ),
+      padding: const EdgeInsets.all(8.0),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap,
       borderRadiusGeometry: BorderRadius.only(
@@ -735,7 +731,7 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
-      borderSide: isMyMessage ? BorderSide.none : null,
+      borderSide: isMyMessage && !isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
@@ -810,8 +806,9 @@ class _MessageListViewState extends State<MessageListView> {
     final showSendingIndicator =
         isMyMessage && (index == 0 || timeDiff >= 1 || !isNextUserSame);
 
-    bool showInChannelIndicator = !_isThreadConversation && isThreadMessage;
-    bool showThreadReplyIndicator = !_isThreadConversation && hasReplies;
+    final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
+    final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
+    final isOnlyEmoji = textIsOnlyEmoji(message.text);
 
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
@@ -848,7 +845,7 @@ class _MessageListViewState extends State<MessageListView> {
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       showThreadReplyMessage: !isThreadMessage,
-      borderSide: isMyMessage ? BorderSide.none : null,
+      borderSide: isMyMessage && !isOnlyEmoji ? BorderSide.none : null,
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
