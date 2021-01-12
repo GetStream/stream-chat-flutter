@@ -383,11 +383,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   ),
                                                   shape: widget.shape ??
                                                       RoundedRectangleBorder(
-                                                        side: isOnlyEmoji &&
-                                                                !(showThreadReplyIndicator ||
-                                                                    showInChannel)
-                                                            ? BorderSide.none
-                                                            : widget.borderSide ??
+                                                        side:
+                                                            widget.borderSide ??
                                                                 BorderSide(
                                                                   color: widget
                                                                       .messageTheme

@@ -811,6 +811,14 @@ class _MessageListViewState extends State<MessageListView> {
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
     final isOnlyEmoji = message.text.isOnlyEmoji;
 
+    final borderSide = isMyMessage
+        ? !(showThreadReplyIndicator || showInChannelIndicator)
+            ? BorderSide.none
+            : null
+        : isOnlyEmoji
+            ? BorderSide.none
+            : null;
+
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
@@ -846,7 +854,7 @@ class _MessageListViewState extends State<MessageListView> {
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       showThreadReplyMessage: !isThreadMessage,
-      borderSide: isMyMessage && !isOnlyEmoji ? BorderSide.none : null,
+      borderSide: borderSide,
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
