@@ -235,9 +235,7 @@ class QuotedMessageWidget extends StatelessWidget {
 
   ShapeBorder _getDefaultShape(BuildContext context) {
     return RoundedRectangleBorder(
-      side: BorderSide(
-        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-      ),
+      side: BorderSide(width: 0.0, color: Colors.transparent),
       borderRadius: BorderRadius.circular(8),
     );
   }
