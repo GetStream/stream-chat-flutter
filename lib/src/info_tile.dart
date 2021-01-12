@@ -6,15 +6,23 @@ class InfoTile extends StatelessWidget {
   final String message;
   final Widget child;
   final bool showMessage;
+  final Alignment tileAnchor;
+  final Alignment childAnchor;
 
-  InfoTile({this.message, this.child, this.showMessage});
+  InfoTile({
+    this.message,
+    this.child,
+    this.showMessage,
+    this.tileAnchor,
+    this.childAnchor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return PortalEntry(
       visible: showMessage,
-      portalAnchor: Alignment.topCenter,
-      childAnchor: Alignment.bottomCenter,
+      portalAnchor: tileAnchor ?? Alignment.topCenter,
+      childAnchor: childAnchor ?? Alignment.bottomCenter,
       portal: Container(
         height: 25.0,
         color: StreamChatTheme.of(context).colorTheme.grey,
