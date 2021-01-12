@@ -3,6 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
+import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 import '../stream_chat_flutter.dart';
@@ -82,54 +83,84 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    return AppBar(
-      brightness: Theme.of(context).brightness,
-      elevation: 1,
-      leading: showBackButton
-          ? StreamBackButton(
-              onPressed: onBackPressed,
-              showUnreads: true,
-            )
-          : SizedBox(),
-      backgroundColor:
-          StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-      actions: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 10.0),
-          child: Center(
-            child: ChannelImage(
-              onTap: onImageTap,
-            ),
-          ),
-        ),
-      ],
-      centerTitle: true,
-      title: InkWell(
-        onTap: onTitleTap,
-        child: Container(
-          height: preferredSize.height,
-          width: preferredSize.width,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ChannelName(
-                textStyle: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .title,
-              ),
-              SizedBox(height: 2),
-              ChannelInfo(
-                showTypingIndicator: showTypingIndicator,
-                channel: channel,
-                textStyle:
-                    StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+    final _client = StreamChat.of(context).client;
+
+    return ValueListenableBuilder<ConnectionStatus>(
+      valueListenable: _client.wsConnectionStatus,
+      builder: (context, status, _) {
+        String statusString = '';
+        bool showStatus = true;
+
+        switch (status) {
+          case ConnectionStatus.connected:
+            statusString = 'Connected';
+            showStatus = false;
+            break;
+          case ConnectionStatus.connecting:
+            statusString = 'Connecting';
+            break;
+          case ConnectionStatus.disconnected:
+            statusString = 'Disconnected';
+            break;
+        }
+
+        return InfoTile(
+          showMessage: showStatus,
+          message: statusString,
+          child: AppBar(
+            brightness: Theme.of(context).brightness,
+            elevation: 1,
+            leading: showBackButton
+                ? StreamBackButton(
+                    onPressed: onBackPressed,
+                    showUnreads: true,
+                  )
+                : SizedBox(),
+            backgroundColor: StreamChatTheme.of(context)
+                .channelTheme
+                .channelHeaderTheme
+                .color,
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Center(
+                  child: ChannelImage(
+                    onTap: onImageTap,
+                  ),
+                ),
               ),
             ],
+            centerTitle: true,
+            title: InkWell(
+              onTap: onTitleTap,
+              child: Container(
+                height: preferredSize.height,
+                width: preferredSize.width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    ChannelName(
+                      textStyle: StreamChatTheme.of(context)
+                          .channelTheme
+                          .channelHeaderTheme
+                          .title,
+                    ),
+                    SizedBox(height: 2),
+                    ChannelInfo(
+                      showTypingIndicator: showTypingIndicator,
+                      channel: channel,
+                      textStyle: StreamChatTheme.of(context)
+                          .channelPreviewTheme
+                          .subtitle,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

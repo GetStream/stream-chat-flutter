@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -67,22 +68,24 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final theme = _getTheme(context, widget.streamChatThemeData);
-    return StreamChatTheme(
-      data: theme,
-      child: Builder(
-        builder: (context) {
-          final materialTheme = Theme.of(context);
-          final streamTheme = StreamChatTheme.of(context);
-          return Theme(
-            data: materialTheme.copyWith(
-              primaryIconTheme: streamTheme.primaryIconTheme,
-              accentColor: streamTheme.colorTheme.accentBlue,
-              scaffoldBackgroundColor: streamTheme.colorTheme.white,
-              buttonTheme: streamTheme.buttonTheme,
-            ),
-            child: widget.child,
-          );
-        },
+    return Portal(
+      child: StreamChatTheme(
+        data: theme,
+        child: Builder(
+          builder: (context) {
+            final materialTheme = Theme.of(context);
+            final streamTheme = StreamChatTheme.of(context);
+            return Theme(
+              data: materialTheme.copyWith(
+                primaryIconTheme: streamTheme.primaryIconTheme,
+                accentColor: streamTheme.colorTheme.accentBlue,
+                scaffoldBackgroundColor: streamTheme.colorTheme.white,
+                buttonTheme: streamTheme.buttonTheme,
+              ),
+              child: widget.child,
+            );
+          },
+        ),
       ),
     );
   }
