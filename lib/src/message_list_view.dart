@@ -857,14 +857,21 @@ class _MessageListViewState extends State<MessageListView> {
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
         bottomLeft: Radius.circular(
-            timeDiff >= 1 || !isNextUserSame ? 0 : attachmentBorderRadius),
+          (timeDiff >= 1 || !isNextUserSame) && !hasReplies && !isThreadMessage
+              ? 0
+              : attachmentBorderRadius,
+        ),
         topRight: Radius.circular(attachmentBorderRadius),
         bottomRight: Radius.circular(attachmentBorderRadius),
       ),
       attachmentPadding: const EdgeInsets.all(2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(timeDiff >= 1 || !isNextUserSame ? 0 : 16),
+        bottomLeft: Radius.circular(
+          (timeDiff >= 1 || !isNextUserSame) && !hasReplies && !isThreadMessage
+              ? 0
+              : 16,
+        ),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
