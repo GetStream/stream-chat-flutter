@@ -17,6 +17,7 @@ import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
 import 'stream_channel.dart';
 import 'swipeable.dart';
+import 'extension.dart';
 
 typedef MessageBuilder = Widget Function(
   BuildContext,
@@ -338,9 +339,28 @@ class _MessageListViewState extends State<MessageListView> {
                       messages.length + 2 + (_isThreadConversation ? 1 : 0),
                   separatorBuilder: (context, i) {
                     if (i == messages.length) return Offstage();
-                    if (i == messages.length + 2) return Offstage();
-                    if (i == messages.length + 1) return Offstage();
                     if (i == 0) return SizedBox(height: 30);
+                    if (i == messages.length + 1) {
+                      final replyCount = widget.parentMessage.replyCount;
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient:
+                              StreamChatTheme.of(context).colorTheme.bgGradient,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
+                            textAlign: TextAlign.center,
+                            style: StreamChatTheme.of(context)
+                                .channelTheme
+                                .channelHeaderTheme
+                                .lastMessageAt,
+                          ),
+                        ),
+                      );
+                    }
+
                     final message = messages[i];
                     final nextMessage = messages[i - 1];
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
@@ -385,30 +405,7 @@ class _MessageListViewState extends State<MessageListView> {
                           widget.parentMessage,
                         );
                       } else {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            buildParentMessage(widget.parentMessage),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .bgGradient,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  '${widget.parentMessage.replyCount} ${widget.parentMessage.replyCount == 1 ? 'Reply' : 'Replies'}',
-                                  textAlign: TextAlign.center,
-                                  style: StreamChatTheme.of(context)
-                                      .channelTheme
-                                      .channelHeaderTheme
-                                      .lastMessageAt,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
+                        return buildParentMessage(widget.parentMessage);
                       }
                     }
                     if (i == messages.length + 1) {
@@ -602,37 +599,38 @@ class _MessageListViewState extends State<MessageListView> {
         ? streamChannel.queryTopMessages
         : streamChannel.queryBottomMessages;
     return StreamBuilder<bool>(
-        key: Key('LOADING-INDICATOR'),
-        stream: stream,
-        initialData: false,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .accentRed
-                  .withOpacity(.2),
-              child: Center(
-                child: Text('Error loading messages'),
-              ),
-            );
-          }
-          if (!snapshot.data) {
-            if (direction == QueryDirection.top) {
-              return Container(
-                height: 52,
-                width: double.infinity,
-              );
-            }
-            return Offstage();
-          }
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const CircularProgressIndicator(),
+      key: Key('LOADING-INDICATOR'),
+      stream: stream,
+      initialData: false,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Container(
+            color: StreamChatTheme.of(context)
+                .colorTheme
+                .accentRed
+                .withOpacity(.2),
+            child: Center(
+              child: Text('Error loading messages'),
             ),
           );
-        });
+        }
+        if (!snapshot.data) {
+          if (!_isThreadConversation && direction == QueryDirection.top) {
+            return Container(
+              height: 52,
+              width: double.infinity,
+            );
+          }
+          return Offstage();
+        }
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: const CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildTopMessage(
@@ -711,6 +709,7 @@ class _MessageListViewState extends State<MessageListView> {
     Message message,
   ) {
     final isMyMessage = message.user.id == StreamChat.of(context).user.id;
+    final isOnlyEmoji = message.text.isOnlyEmoji;
 
     return MessageWidget(
       showThreadReplyIndicator: false,
@@ -724,12 +723,7 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
-      padding: EdgeInsets.only(
-        top: 8.0,
-        left: 8.0,
-        right: 8.0,
-        bottom: 16.0,
-      ),
+      padding: const EdgeInsets.all(8.0),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap,
       borderRadiusGeometry: BorderRadius.only(
@@ -738,7 +732,7 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
-      borderSide: isMyMessage ? BorderSide.none : null,
+      borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
@@ -813,8 +807,19 @@ class _MessageListViewState extends State<MessageListView> {
     final showSendingIndicator =
         isMyMessage && (index == 0 || timeDiff >= 1 || !isNextUserSame);
 
-    bool showInChannelIndicator = !_isThreadConversation && isThreadMessage;
-    bool showThreadReplyIndicator = !_isThreadConversation && hasReplies;
+    final showInChannelIndicator = !_isThreadConversation && isThreadMessage;
+    final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
+    final isOnlyEmoji = message.text.isOnlyEmoji;
+
+    final showMessageBorder =
+        showThreadReplyIndicator || showInChannelIndicator;
+    final borderSide = isMyMessage
+        ? !showMessageBorder
+            ? BorderSide.none
+            : null
+        : isOnlyEmoji && !showMessageBorder
+            ? BorderSide.none
+            : null;
 
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
@@ -852,20 +857,27 @@ class _MessageListViewState extends State<MessageListView> {
       showDeleteMessage: isMyMessage,
       showThreadReplyMessage: !isThreadMessage,
       showFlagButton: !isMyMessage,
-      borderSide: isMyMessage ? BorderSide.none : null,
+      borderSide: borderSide,
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
         bottomLeft: Radius.circular(
-            timeDiff >= 1 || !isNextUserSame ? 0 : attachmentBorderRadius),
+          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
+              ? 0
+              : attachmentBorderRadius,
+        ),
         topRight: Radius.circular(attachmentBorderRadius),
         bottomRight: Radius.circular(attachmentBorderRadius),
       ),
       attachmentPadding: const EdgeInsets.all(2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(timeDiff >= 1 || !isNextUserSame ? 0 : 16),
+        bottomLeft: Radius.circular(
+          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
+              ? 0
+              : 16,
+        ),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
