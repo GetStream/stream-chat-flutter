@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -254,6 +255,34 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         await client.flagMessage(widget.message.id);
         _showDismissAlert();
       } catch (err) {
+        if (json.decode(err?.body ?? {})['code'] == 4) {
+          _showDismissAlert();
+        } else {
+          _showErrorAlert();
+        }
+      }
+    }
+  }
+
+  void _showDeleteDialog() async {
+    var answer = await showConfirmationDialog(context,
+        title: 'Delete message',
+        icon: StreamSvgIcon.flag(
+          color: StreamChatTheme.of(context).colorTheme.accentRed,
+          size: 24.0,
+        ),
+        question: 'Are you sure you want to permanently delete this\nmessage?',
+        okText: 'DELETE',
+        cancelText: 'CANCEL');
+
+    if (answer) {
+      try {
+        Navigator.pop(context);
+        StreamChat.of(context).client.deleteMessage(
+              widget.message,
+              StreamChannel.of(context).channel.cid,
+            );
+      } catch (err) {
         _showErrorAlert();
       }
     }
@@ -455,11 +484,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ],
       ),
       onTap: () {
-        Navigator.pop(context);
-        StreamChat.of(context).client.deleteMessage(
-              widget.message,
-              StreamChannel.of(context).channel.cid,
-            );
+        _showDeleteDialog();
       },
     );
   }
