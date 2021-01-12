@@ -851,7 +851,7 @@ class _MessageListViewState extends State<MessageListView> {
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
         bottomLeft: Radius.circular(
-          (timeDiff >= 1 || !isNextUserSame) && !hasReplies && !isThreadMessage
+          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
               ? 0
               : attachmentBorderRadius,
         ),
@@ -862,7 +862,7 @@ class _MessageListViewState extends State<MessageListView> {
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(
-          (timeDiff >= 1 || !isNextUserSame) && !hasReplies && !isThreadMessage
+          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
               ? 0
               : 16,
         ),
