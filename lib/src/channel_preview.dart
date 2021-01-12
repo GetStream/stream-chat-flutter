@@ -96,12 +96,16 @@ class ChannelPreview extends StatelessWidget {
                   Flexible(child: _buildSubtitle(context)),
                   Builder(
                     builder: (context) {
-                      if (channel.state.lastMessage?.user?.id ==
+                      final lastMessage = channel.state.messages.lastWhere(
+                        (m) => !m.isDeleted && m.shadowed != true,
+                        orElse: () => null,
+                      );
+                      if (lastMessage?.user?.id ==
                           StreamChat.of(context).user.id) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 4.0),
                           child: SendingIndicator(
-                            message: channel.state.lastMessage,
+                            message: lastMessage,
                             size: StreamChatTheme.of(context)
                                 .channelPreviewTheme
                                 .indicatorIconSize,
@@ -110,8 +114,7 @@ class ChannelPreview extends StatelessWidget {
                                         element.user.id !=
                                         channel.client.state.user.id)
                                     ?.where((element) => element.lastRead
-                                        .isAfter(channel
-                                            .state.lastMessage.createdAt))
+                                        .isAfter(lastMessage.createdAt))
                                     ?.isNotEmpty ==
                                 true,
                           ),
@@ -201,16 +204,15 @@ class ChannelPreview extends StatelessWidget {
       stream: channel.state.messagesStream,
       initialData: channel.state.messages,
       builder: (context, snapshot) {
-        final lastMessage = snapshot.data
-            ?.lastWhere((m) => m.shadowed != true, orElse: () => null);
+        final lastMessage = snapshot.data?.lastWhere(
+            (m) => m.shadowed != true && !m.isDeleted,
+            orElse: () => null);
         if (lastMessage == null) {
           return SizedBox();
         }
 
         var text = lastMessage.text;
-        if (lastMessage.isDeleted) {
-          text = 'This message was deleted.';
-        } else if (lastMessage.attachments != null) {
+        if (lastMessage.attachments != null) {
           final parts = <String>[
             ...lastMessage.attachments.map((e) {
               if (e.type == 'image') {
