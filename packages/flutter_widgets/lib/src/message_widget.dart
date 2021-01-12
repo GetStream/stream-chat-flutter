@@ -132,6 +132,7 @@ class MessageWidget extends StatefulWidget {
   final bool showDeleteMessage;
   final bool showResendMessage;
 
+  final bool showFlagButton;
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
   /// Center user avatar with bottom of the message
@@ -170,6 +171,7 @@ class MessageWidget extends StatefulWidget {
     this.showThreadReplyMessage = true,
     this.showResendMessage = true,
     this.showCopyMessage = true,
+    this.showFlagButton = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -689,6 +691,7 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   void _showMessageActionModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
+
     showDialog(
         context: context,
         barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
@@ -725,6 +728,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               showThreadReplyMessage: widget.showThreadReplyMessage &&
                   !isFailedState &&
                   widget.onThreadTap != null,
+              showFlagButton: widget.showFlagButton,
             ),
           );
         });
