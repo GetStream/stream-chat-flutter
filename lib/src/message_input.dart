@@ -203,6 +203,8 @@ class MessageInputState extends State<MessageInput> {
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
   double _filePickerSize = _kMinMediaPickerSize;
+  KeyboardVisibilityController _keyboardVisibilityController =
+      KeyboardVisibilityController();
 
   /// The editing controller passed to the input TextField
   TextEditingController textEditingController;
@@ -2249,7 +2251,8 @@ class MessageInputState extends State<MessageInput> {
     _emojiNames = Emoji.all().map((e) => e.name);
 
     if (!kIsWeb) {
-      _keyboardListener = KeyboardVisibility.onChange.listen((visible) {
+      _keyboardListener =
+          _keyboardVisibilityController.onChange.listen((visible) {
         if (_focusNode.hasFocus) {
           _onChanged(context, textEditingController.text);
         }
