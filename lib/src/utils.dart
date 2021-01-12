@@ -37,27 +37,21 @@ Future<bool> showConfirmationDialog(
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: 26.0,
-            ),
+            SizedBox(height: 26.0),
             if (icon != null) icon,
-            SizedBox(
-              height: 26.0,
-            ),
+            SizedBox(height: 26.0),
             Text(
               title,
               style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
-            SizedBox(
-              height: 7.0,
+            SizedBox(height: 7.0),
+            Text(
+              question,
+              textAlign: TextAlign.center,
             ),
-            Text(question),
-            SizedBox(
-              height: 36.0,
-            ),
+            SizedBox(height: 36.0),
             Container(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
               height: 1.0,
             ),
             Row(

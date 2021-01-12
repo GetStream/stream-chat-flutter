@@ -1525,11 +1525,14 @@ class MessageInputState extends State<MessageInput> {
     return Transform(
       transform: Matrix4.rotationY(pi),
       alignment: Alignment.center,
-      child: QuotedMessageWidget(
-        reverse: true,
-        showBorder: !containsUrl,
-        message: widget.quotedMessage,
-        messageTheme: StreamChatTheme.of(context).otherMessageTheme,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+        child: QuotedMessageWidget(
+          reverse: true,
+          showBorder: !containsUrl,
+          message: widget.quotedMessage,
+          messageTheme: StreamChatTheme.of(context).otherMessageTheme,
+        ),
       ),
     );
   }

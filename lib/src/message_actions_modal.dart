@@ -164,7 +164,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           ),
                           Padding(
                             padding: EdgeInsets.only(
-                              right: widget.reverse ? 16 : 0,
+                              right: widget.reverse ? 8 : 0,
                               left: widget.reverse ? 0 : 48,
                             ),
                             child: SizedBox(
@@ -448,9 +448,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           ),
         ],
       ),
-      onTap: () {
-        _showFlagDialog();
-      },
+      onTap: () => _showFlagDialog(),
     );
   }
 
