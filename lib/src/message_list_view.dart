@@ -856,6 +856,7 @@ class _MessageListViewState extends State<MessageListView> {
       showEditMessage: isMyMessage,
       showDeleteMessage: isMyMessage,
       showThreadReplyMessage: !isThreadMessage,
+      showFlagButton: !isMyMessage,
       borderSide: borderSide,
       onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
