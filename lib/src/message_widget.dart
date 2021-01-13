@@ -431,7 +431,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                         ),
                                         if (widget.showReactionPickerIndicator)
                                           Positioned(
-                                            right: 0,
+                                            right: 4,
                                             top: -8,
                                             child: Transform(
                                               transform: Matrix4.rotationY(
