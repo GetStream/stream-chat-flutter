@@ -278,6 +278,9 @@ class _MessageWidgetState extends State<MessageWidget> {
           ?.isNotEmpty ==
       true;
 
+  bool get hasUrlAttachments =>
+      widget.message.attachments?.any((it) => it.ogScrapeUrl != null) == true;
+
   bool get showBottomRow =>
       showThreadReplyIndicator ||
       showUsername ||
@@ -586,12 +589,15 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     if (widget.reverse) children = children.reversed.toList();
 
+    final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
+        (showThreadReplyIndicator || showInChannel);
+
     return Flex(
       direction: Axis.horizontal,
       clipBehavior: Clip.none,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (showThreadReplyIndicator || showInChannel)
+        if (showThreadTail)
           Container(
             margin: EdgeInsets.only(
               bottom: widget.messageTheme.replies.fontSize / 2,
@@ -938,11 +944,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         : widget.messageTheme,
                   ),
           ),
-          if (widget.message.attachments
-                      ?.any((element) => element.ogScrapeUrl != null) ==
-                  true &&
-              !hasQuotedMessage)
-            _buildUrlAttachment(),
+          if (hasUrlAttachments && !hasQuotedMessage) _buildUrlAttachment(),
         ],
       ),
     );
@@ -955,9 +957,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       return widget.messageTheme.messageBackgroundColor;
     }
 
-    if (widget.message.attachments
-            ?.any((element) => element.ogScrapeUrl != null) ==
-        true) {
+    if (hasUrlAttachments) {
       return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
 
