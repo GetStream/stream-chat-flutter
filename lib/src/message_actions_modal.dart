@@ -90,6 +90,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOutBack,
       builder: (context, val, snapshot) {
+        final hasFileAttachment =
+            widget.message.attachments?.any((it) => it.type == 'file') == true;
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => Navigator.maybePop(context),
@@ -111,7 +113,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 child: Center(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
                         crossAxisAlignment: widget.reverse
                             ? CrossAxisAlignment.end
@@ -136,6 +138,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 messageTheme: widget.messageTheme,
                               ),
                             ),
+                          SizedBox(height: 8),
                           IgnorePointer(
                             child: MessageWidget(
                               key: Key('MessageWidget'),
@@ -151,8 +154,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               showThreadReplyIndicator: false,
                               showReplyMessage: false,
                               showUserAvatar: widget.showUserAvatar,
+                              attachmentPadding: EdgeInsets.all(
+                                hasFileAttachment ? 4 : 2,
+                              ),
                               showTimestamp: false,
                               translateUserAvatar: false,
+                              padding: const EdgeInsets.all(0),
                               textPadding: EdgeInsets.symmetric(
                                 vertical: 8.0,
                                 horizontal:
@@ -168,10 +175,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               shape: widget.messageShape,
                             ),
                           ),
+                          SizedBox(height: 8),
                           Padding(
                             padding: EdgeInsets.only(
-                              right: widget.reverse ? 8 : 0,
-                              left: widget.reverse ? 0 : 48,
+                              left: widget.reverse ? 0 : 40,
                             ),
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.75,

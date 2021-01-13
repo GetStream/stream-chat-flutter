@@ -783,7 +783,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
     final hasFileAttachment =
-        message.attachments.any((it) => it.type == 'file');
+        message.attachments?.any((it) => it.type == 'file') == true;
 
     final isThreadMessage =
         message?.parentId != null && message?.showInChannel == true;

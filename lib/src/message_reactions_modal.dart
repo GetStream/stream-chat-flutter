@@ -62,6 +62,8 @@ class MessageReactionsModal extends StatelessWidget {
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOutBack,
       builder: (context, val, snapshot) {
+        final hasFileAttachment =
+            message.attachments?.any((it) => it.type == 'file') == true;
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => Navigator.maybePop(context),
@@ -83,7 +85,7 @@ class MessageReactionsModal extends StatelessWidget {
                 child: Center(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,6 +108,7 @@ class MessageReactionsModal extends StatelessWidget {
                                 messageTheme: messageTheme,
                               ),
                             ),
+                          const SizedBox(height: 8),
                           IgnorePointer(
                             child: MessageWidget(
                               key: Key('MessageWidget'),
@@ -124,6 +127,10 @@ class MessageReactionsModal extends StatelessWidget {
                               translateUserAvatar: false,
                               showSendingIndicator: false,
                               shape: messageShape,
+                              padding: const EdgeInsets.all(0),
+                              attachmentPadding: EdgeInsets.all(
+                                hasFileAttachment ? 4 : 2,
+                              ),
                               showInChannelIndicator: false,
                               textPadding: EdgeInsets.symmetric(
                                 vertical: 8.0,
@@ -135,8 +142,10 @@ class MessageReactionsModal extends StatelessWidget {
                                       message.status == null),
                             ),
                           ),
-                          if (message.latestReactions?.isNotEmpty == true)
+                          if (message.latestReactions?.isNotEmpty == true) ...[
+                            const SizedBox(height: 8),
                             _buildReactionCard(context),
+                          ]
                         ],
                       ),
                     ),
@@ -150,47 +159,42 @@ class MessageReactionsModal extends StatelessWidget {
     );
   }
 
-  Padding _buildReactionCard(BuildContext context) {
+  Widget _buildReactionCard(BuildContext context) {
     final currentUser = StreamChat.of(context).user;
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
+    return Card(
+      color: StreamChatTheme.of(context).colorTheme.white,
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Card(
-        color: StreamChatTheme.of(context).colorTheme.white,
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Message Reactions',
-                style: StreamChatTheme.of(context).textTheme.headlineBold,
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    alignment: WrapAlignment.start,
-                    children: message.latestReactions
-                        .map((e) => _buildReaction(
-                              e,
-                              currentUser,
-                              context,
-                            ))
-                        .toList(),
-                  ),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Message Reactions',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.start,
+                  children: message.latestReactions
+                      .map((e) => _buildReaction(
+                            e,
+                            currentUser,
+                            context,
+                          ))
+                      .toList(),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
