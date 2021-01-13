@@ -232,6 +232,7 @@ class MessageReactionsModal extends StatelessWidget {
                     flipTail: !reverse,
                     borderColor: messageTheme.reactionsBorderColor,
                     backgroundColor: messageTheme.reactionsBackgroundColor,
+                    maskColor: messageTheme.reactionsMaskColor,
                     highlightOwnReactions: false,
                   ),
                 ),

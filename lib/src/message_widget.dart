@@ -447,6 +447,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   StreamChatTheme.of(context)
                                                       .colorTheme
                                                       .white,
+                                                  StreamChatTheme.of(context)
+                                                      .colorTheme
+                                                      .white,
                                                 ),
                                               ),
                                             ),
@@ -694,6 +697,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                 flipTail: widget.reverse,
                 backgroundColor: widget.messageTheme.reactionsBackgroundColor,
                 borderColor: widget.messageTheme.reactionsBorderColor,
+                maskColor: widget.messageTheme.reactionsMaskColor,
                 reactions: reactionsList,
               ),
             )
