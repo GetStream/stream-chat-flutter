@@ -811,15 +811,11 @@ class _MessageListViewState extends State<MessageListView> {
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
     final isOnlyEmoji = message.text.isOnlyEmoji;
 
-    final showMessageBorder =
-        showThreadReplyIndicator || showInChannelIndicator;
-    final borderSide = isMyMessage
-        ? !showMessageBorder
-            ? BorderSide.none
-            : null
-        : isOnlyEmoji && !showMessageBorder
-            ? BorderSide.none
-            : null;
+    final hasUrlAttachment =
+        message.attachments?.any((it) => it.ogScrapeUrl != null) == true;
+
+    final borderSide =
+        isOnlyEmoji || hasUrlAttachment || isMyMessage ? BorderSide.none : null;
 
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
