@@ -123,23 +123,28 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 onPressed: _isGroupNameEmpty
                     ? null
                     : () async {
-                        final groupName = _groupNameController.text;
-                        final client = StreamChat.of(context).client;
-                        final channel = client
-                            .channel('messaging', id: Uuid().v4(), extraData: {
-                          'members': [
-                            client.state.user.id,
-                            ..._selectedUsers.map((e) => e.id),
-                          ],
-                          'name': groupName,
-                        });
-                        await channel.watch();
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          Routes.CHANNEL_PAGE,
-                          ModalRoute.withName(Routes.HOME),
-                          arguments: ChannelPageArgs(channel: channel),
-                        );
+                        try {
+                          final groupName = _groupNameController.text;
+                          final client = StreamChat.of(context).client;
+                          final channel = client.channel('messaging',
+                              id: Uuid().v4(),
+                              extraData: {
+                                'members': [
+                                  client.state.user.id,
+                                  ..._selectedUsers.map((e) => e.id),
+                                ],
+                                'name': groupName,
+                              });
+                          await channel.watch();
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            Routes.CHANNEL_PAGE,
+                            ModalRoute.withName(Routes.HOME),
+                            arguments: ChannelPageArgs(channel: channel),
+                          );
+                        } catch (err) {
+                          _showErrorAlert();
+                        }
                       },
               ),
             ),
@@ -225,6 +230,71 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showErrorAlert() {
+    showModalBottomSheet(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.0),
+        topRight: Radius.circular(16.0),
+      )),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26.0,
+            ),
+            StreamSvgIcon.error(
+              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              size: 24.0,
+            ),
+            SizedBox(
+              height: 26.0,
+            ),
+            Text(
+              'Something went wrong',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+            Text('The operation couldn\'t be completed.'),
+            SizedBox(
+              height: 36.0,
+            ),
+            Container(
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              height: 1.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FlatButton(
+                  child: Text(
+                    'OK',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
