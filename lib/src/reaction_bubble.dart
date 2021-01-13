@@ -16,7 +16,7 @@ class ReactionBubble extends StatelessWidget {
     this.reverse = false,
     this.flipTail = false,
     this.highlightOwnReactions = true,
-    this.tailCirclesSpace = 0,
+    this.tailCirclesSpacing = 0,
   }) : super(key: key);
 
   final List<Reaction> reactions;
@@ -26,7 +26,7 @@ class ReactionBubble extends StatelessWidget {
   final bool reverse;
   final bool flipTail;
   final bool highlightOwnReactions;
-  final double tailCirclesSpace;
+  final double tailCirclesSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class ReactionBubble extends StatelessWidget {
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: maskColor,
-                borderRadius: BorderRadius.all(Radius.circular(14)),
+                borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -148,7 +148,7 @@ class ReactionBubble extends StatelessWidget {
         backgroundColor,
         borderColor,
         maskColor,
-        tailCirclesSpace: tailCirclesSpace,
+        tailCirclesSpace: tailCirclesSpacing,
       ),
     );
     return Transform(

@@ -217,6 +217,7 @@ class MessageReactionsModal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
+            overflow: Overflow.visible,
             children: [
               UserAvatar(
                 onTap: onUserAvatarTap,
@@ -224,6 +225,10 @@ class MessageReactionsModal extends StatelessWidget {
                 constraints: BoxConstraints.tightFor(
                   height: 64,
                   width: 64,
+                ),
+                onlineIndicatorConstraints: BoxConstraints.tightFor(
+                  height: 12,
+                  width: 12,
                 ),
                 borderRadius: BorderRadius.circular(32),
               ),
@@ -236,13 +241,14 @@ class MessageReactionsModal extends StatelessWidget {
                     flipTail: !reverse,
                     borderColor: messageTheme.reactionsBorderColor,
                     backgroundColor: messageTheme.reactionsBackgroundColor,
-                    maskColor: messageTheme.reactionsMaskColor,
+                    maskColor: StreamChatTheme.of(context).colorTheme.white,
+                    tailCirclesSpacing: 1,
                     highlightOwnReactions: false,
                   ),
                 ),
                 bottom: 6,
-                left: isCurrentUser ? 0 : null,
-                right: isCurrentUser ? 0 : null,
+                left: isCurrentUser ? -3 : null,
+                right: isCurrentUser ? -3 : null,
               ),
             ],
           ),
