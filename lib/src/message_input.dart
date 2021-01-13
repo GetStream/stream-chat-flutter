@@ -1527,14 +1527,12 @@ class MessageInputState extends State<MessageInput> {
     return Transform(
       transform: Matrix4.rotationY(pi),
       alignment: Alignment.center,
-      child: Padding(
+      child: QuotedMessageWidget(
+        reverse: true,
+        showBorder: !containsUrl,
+        message: widget.quotedMessage,
+        messageTheme: StreamChatTheme.of(context).otherMessageTheme,
         padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-        child: QuotedMessageWidget(
-          reverse: true,
-          showBorder: !containsUrl,
-          message: widget.quotedMessage,
-          messageTheme: StreamChatTheme.of(context).otherMessageTheme,
-        ),
       ),
     );
   }
@@ -1544,17 +1542,17 @@ class MessageInputState extends State<MessageInput> {
     return Column(
       children: [
         if (_attachments.any((e) => e.attachment?.type == 'file'))
-          LimitedBox(
-            maxHeight: 136.0,
-            child: ListView(
-              reverse: true,
-              shrinkWrap: true,
-              children: _attachments.reversed
-                  .where((e) => e.attachment?.type == 'file')
-                  .map(
-                    (e) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: ClipRRect(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: LimitedBox(
+              maxHeight: 136.0,
+              child: ListView(
+                reverse: true,
+                shrinkWrap: true,
+                children: _attachments.reversed
+                    .where((e) => e.attachment?.type == 'file')
+                    .map<Widget>(
+                      (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         clipBehavior: Clip.antiAlias,
                         child: FileAttachment(
@@ -1580,31 +1578,28 @@ class MessageInputState extends State<MessageInput> {
                                       .white,
                                 ),
                               ),
-                              onTap: () {
-                                setState(() {
-                                  _attachments.remove(e);
-                                });
-                              },
+                              onTap: () =>
+                                  setState(() => _attachments.remove(e)),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .insertBetween(const SizedBox(width: 8)),
+              ),
             ),
           ),
         if (_attachments.any((e) => e.attachment?.type != 'file'))
-          LimitedBox(
-            maxHeight: 104.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: _attachments
-                  .where((e) => e.attachment?.type != 'file')
-                  .map(
-                    (attachment) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: LimitedBox(
+              maxHeight: 104.0,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: _attachments
+                    .where((e) => e.attachment?.type != 'file')
+                    .map<Widget>(
+                      (attachment) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         clipBehavior: Clip.antiAlias,
                         child: Stack(
@@ -1631,9 +1626,9 @@ class MessageInputState extends State<MessageInput> {
                           ],
                         ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    )
+                    .insertBetween(const SizedBox(width: 8)),
+              ),
             ),
           ),
       ],

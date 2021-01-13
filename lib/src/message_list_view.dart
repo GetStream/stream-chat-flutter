@@ -770,6 +770,10 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
+      textPadding: EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: isOnlyEmoji ? 0 : 16.0,
+      ),
       borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
@@ -817,7 +821,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final allRead = readList.length >= (channel.memberCount ?? 0) - 1;
     final hasFileAttachment =
-        message.attachments.any((it) => it.type == 'file');
+        message.attachments?.any((it) => it.type == 'file') == true;
 
     final isThreadMessage =
         message?.parentId != null && message?.showInChannel == true;
@@ -849,13 +853,11 @@ class _MessageListViewState extends State<MessageListView> {
     final showThreadReplyIndicator = !_isThreadConversation && hasReplies;
     final isOnlyEmoji = message.text.isOnlyEmoji;
 
-    final showMessageBorder =
-        showThreadReplyIndicator || showInChannelIndicator;
-    final borderSide = isMyMessage
-        ? !showMessageBorder
-            ? BorderSide.none
-            : null
-        : isOnlyEmoji && !showMessageBorder
+    final hasUrlAttachment =
+        message.attachments?.any((it) => it.ogScrapeUrl != null) == true;
+
+    final borderSide =
+        isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)
             ? BorderSide.none
             : null;
 
@@ -901,14 +903,15 @@ class _MessageListViewState extends State<MessageListView> {
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
         bottomLeft: Radius.circular(
-          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
+          (timeDiff >= 1 || !isNextUserSame) &&
+                  !(hasReplies || isThreadMessage || hasFileAttachment)
               ? 0
               : attachmentBorderRadius,
         ),
         topRight: Radius.circular(attachmentBorderRadius),
         bottomRight: Radius.circular(attachmentBorderRadius),
       ),
-      attachmentPadding: const EdgeInsets.all(2),
+      attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(
@@ -918,6 +921,10 @@ class _MessageListViewState extends State<MessageListView> {
         ),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
+      ),
+      textPadding: EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme
