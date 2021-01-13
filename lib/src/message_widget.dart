@@ -565,7 +565,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
           SizedBox.fromSize(
-            size: Size((threadParticipants.length * 8.0) + 10, 16),
+            size: Size((threadParticipants.length * 8.0) + 8, 16),
             child: _buildThreadParticipantsIndicator(),
           ),
         InkWell(
@@ -587,7 +587,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         ),
     ]);
 
-    if (widget.reverse) children = children.reversed.toList();
+    // if (widget.reverse) children = children.reversed.toList();
 
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
@@ -648,18 +648,20 @@ class _MessageWidgetState extends State<MessageWidget> {
     var padding = 0.0;
     return Stack(
       children: widget.message.threadParticipants.map((user) {
-        padding += 10.0;
+        padding += 8.0;
         return Positioned(
-          left: padding - 10,
+          right: padding - 8,
           bottom: 0,
           top: 0,
-          child: Material(
-            color: Colors.white,
-            clipBehavior: Clip.antiAlias,
-            shape: CircleBorder(),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: StreamChatTheme.of(context).colorTheme.white,
+            ),
+            padding: const EdgeInsets.all(1),
             child: UserAvatar(
               user: user,
-              constraints: BoxConstraints.loose(Size.fromRadius(8)),
+              constraints: BoxConstraints.loose(Size.fromRadius(7)),
               showOnlineStatus: false,
             ),
           ),
