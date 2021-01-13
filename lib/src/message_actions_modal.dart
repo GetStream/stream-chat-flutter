@@ -14,6 +14,7 @@ import 'message_input.dart';
 import 'message_widget.dart';
 import 'stream_chat.dart';
 import 'stream_chat_theme.dart';
+import 'extension.dart';
 
 class MessageActionsModal extends StatefulWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -152,6 +153,11 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               showUserAvatar: widget.showUserAvatar,
                               showTimestamp: false,
                               translateUserAvatar: false,
+                              textPadding: EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal:
+                                    widget.message.text.isOnlyEmoji ? 0 : 16.0,
+                              ),
                               showReactionPickerIndicator:
                                   widget.showReactions &&
                                       (widget.message.status ==

@@ -732,6 +732,10 @@ class _MessageListViewState extends State<MessageListView> {
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
+      textPadding: EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: isOnlyEmoji ? 0 : 16.0,
+      ),
       borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
@@ -879,6 +883,10 @@ class _MessageListViewState extends State<MessageListView> {
         ),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
+      ),
+      textPadding: EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage
           ? StreamChatTheme.of(context).ownMessageTheme

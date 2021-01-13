@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 
 import 'message_widget.dart';
 import 'stream_chat_theme.dart';
+import 'extension.dart';
 
 class MessageReactionsModal extends StatelessWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -124,6 +125,10 @@ class MessageReactionsModal extends StatelessWidget {
                               showSendingIndicator: false,
                               shape: messageShape,
                               showInChannelIndicator: false,
+                              textPadding: EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal: message.text.isOnlyEmoji ? 0 : 16.0,
+                              ),
                               showReactionPickerIndicator: showReactions &&
                                   (message.status ==
                                           MessageSendingStatus.SENT ||
