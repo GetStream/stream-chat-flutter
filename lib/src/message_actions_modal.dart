@@ -186,36 +186,37 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
-                                  children: ListTile.divideTiles(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .greyWhisper,
-                                    context: context,
-                                    tiles: [
-                                      if (widget.showReplyMessage &&
-                                          (widget.message.status ==
-                                                  MessageSendingStatus.SENT ||
-                                              widget.message.status == null) &&
-                                          widget.message.parentId == null)
-                                        _buildReplyButton(context),
-                                      if (widget.showThreadReplyMessage &&
-                                          (widget.message.status ==
-                                                  MessageSendingStatus.SENT ||
-                                              widget.message.status == null) &&
-                                          widget.message.parentId == null)
-                                        _buildThreadReplyButton(context),
-                                      if (widget.showResendMessage)
-                                        _buildResendMessage(context),
-                                      if (widget.showEditMessage)
-                                        _buildEditMessage(context),
-                                      if (widget.showCopyMessage)
-                                        _buildCopyButton(context),
-                                      if (widget.showFlagButton)
-                                        _buildFlagButton(context),
-                                      if (widget.showDeleteMessage)
-                                        _buildDeleteButton(context),
-                                    ],
-                                  ).toList(),
+                                  children: [
+                                    if (widget.showReplyMessage &&
+                                        (widget.message.status ==
+                                                MessageSendingStatus.SENT ||
+                                            widget.message.status == null) &&
+                                        widget.message.parentId == null)
+                                      _buildReplyButton(context),
+                                    if (widget.showThreadReplyMessage &&
+                                        (widget.message.status ==
+                                                MessageSendingStatus.SENT ||
+                                            widget.message.status == null) &&
+                                        widget.message.parentId == null)
+                                      _buildThreadReplyButton(context),
+                                    if (widget.showResendMessage)
+                                      _buildResendMessage(context),
+                                    if (widget.showEditMessage)
+                                      _buildEditMessage(context),
+                                    if (widget.showCopyMessage)
+                                      _buildCopyButton(context),
+                                    if (widget.showFlagButton)
+                                      _buildFlagButton(context),
+                                    if (widget.showDeleteMessage)
+                                      _buildDeleteButton(context),
+                                  ].insertBetween(
+                                    Container(
+                                      height: 1,
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .greyWhisper,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -416,136 +417,131 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   }
 
   Widget _buildReplyButton(BuildContext context) {
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.reply(
-            color: StreamChatTheme.of(context).primaryIconTheme.color,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            'Reply',
-            style: StreamChatTheme.of(context).textTheme.headline,
-          ),
-        ],
-      ),
+    return InkWell(
       onTap: () {
         Navigator.pop(context);
         if (widget.onReplyTap != null) {
           widget.onReplyTap(widget.message);
         }
       },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.reply(
+              color: StreamChatTheme.of(context).primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Reply',
+              style: StreamChatTheme.of(context).textTheme.body,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildFlagButton(BuildContext context) {
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.icon_flag(
-            color: StreamChatTheme.of(context).primaryIconTheme.color,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            'Flag',
-            style: StreamChatTheme.of(context).textTheme.headline,
-          ),
-        ],
-      ),
+    return InkWell(
       onTap: () => _showFlagDialog(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.icon_flag(
+              color: StreamChatTheme.of(context).primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Flag',
+              style: StreamChatTheme.of(context).textTheme.body,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildDeleteButton(BuildContext context) {
     final isDeleteFailed =
         widget.message.status == MessageSendingStatus.FAILED_DELETE;
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.delete(
-            color: Colors.red,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            isDeleteFailed ? 'Retry Deleting Message' : 'Delete Message',
-            style: StreamChatTheme.of(context)
-                .textTheme
-                .headline
-                .copyWith(color: Colors.red),
-          ),
-        ],
+    return InkWell(
+      onTap: () => _showDeleteDialog(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.delete(
+              color: Colors.red,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              isDeleteFailed ? 'Retry Deleting Message' : 'Delete Message',
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .body
+                  .copyWith(color: Colors.red),
+            ),
+          ],
+        ),
       ),
-      onTap: () {
-        _showDeleteDialog();
-      },
     );
   }
 
   Widget _buildCopyButton(BuildContext context) {
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.copy(
-            size: 24,
-            color: StreamChatTheme.of(context).primaryIconTheme.color,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            'Copy Message',
-            style: StreamChatTheme.of(context).textTheme.headline,
-          ),
-        ],
-      ),
+    return InkWell(
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.message.text));
         Navigator.pop(context);
       },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.copy(
+              size: 24,
+              color: StreamChatTheme.of(context).primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Copy Message',
+              style: StreamChatTheme.of(context).textTheme.body,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildEditMessage(BuildContext context) {
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.edit(
-            color: StreamChatTheme.of(context).primaryIconTheme.color,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            'Edit Message',
-            style: StreamChatTheme.of(context).textTheme.headline,
-          ),
-        ],
-      ),
+    return InkWell(
       onTap: () async {
         Navigator.pop(context);
         _showEditBottomSheet(context);
       },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.edit(
+              color: StreamChatTheme.of(context).primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Edit Message',
+              style: StreamChatTheme.of(context).textTheme.body,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildResendMessage(BuildContext context) {
     final isUpdateFailed =
         widget.message.status == MessageSendingStatus.FAILED_UPDATE;
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.circle_up(
-            color: StreamChatTheme.of(context).colorTheme.accentBlue,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            isUpdateFailed ? 'Resend Edited Message' : 'Resend',
-            style: StreamChatTheme.of(context).textTheme.headline,
-          ),
-        ],
-      ),
+    return InkWell(
       onTap: () {
         Navigator.pop(context);
         final client = StreamChat.of(context).client;
@@ -556,6 +552,21 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           channel.sendMessage(widget.message);
         }
       },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.circle_up(
+              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              isUpdateFailed ? 'Resend Edited Message' : 'Resend',
+              style: StreamChatTheme.of(context).textTheme.body,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -629,26 +640,28 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   }
 
   Widget _buildThreadReplyButton(BuildContext context) {
-    return ListTile(
-      dense: true,
-      title: Row(
-        children: [
-          StreamSvgIcon.thread(
-            color: StreamChatTheme.of(context).primaryIconTheme.color,
-          ),
-          const SizedBox(width: 16),
-          Text(
-            'Thread Reply',
-            style: StreamChatTheme.of(context).textTheme.headline,
-          ),
-        ],
-      ),
+    return InkWell(
       onTap: () {
         Navigator.pop(context);
         if (widget.onThreadReplyTap != null) {
           widget.onThreadReplyTap(widget.message);
         }
       },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.thread(
+              color: StreamChatTheme.of(context).primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Thread Reply',
+              style: StreamChatTheme.of(context).textTheme.body,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
