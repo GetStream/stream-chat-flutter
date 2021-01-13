@@ -72,6 +72,7 @@ class _FileAttachmentState extends State<FileAttachment> {
               : null,
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               child: _getFileTypeImage(),
@@ -79,9 +80,7 @@ class _FileAttachmentState extends State<FileAttachment> {
               width: 33.33,
               margin: EdgeInsets.all(8.0),
             ),
-            SizedBox(
-              width: 6.0,
-            ),
+            SizedBox(width: 8.0),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -93,32 +92,36 @@ class _FileAttachmentState extends State<FileAttachment> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(
-                    height: 3.0,
-                  ),
+                  SizedBox(height: 3.0),
                   Text(
                     '${getSizeText(widget.attachment.extraData['file_size'])}',
-                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .black
-                            .withOpacity(0.5)),
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnote
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(0.5)),
                   ),
                 ],
               ),
             ),
-            Column(
-              children: [
-                widget.trailing ??
-                    IconButton(
-                      icon: StreamSvgIcon.cloud_download(
-                        color: StreamChatTheme.of(context).colorTheme.black,
-                      ),
-                      onPressed: () {
-                        launchURL(context, widget.attachment.assetUrl);
-                      },
+            SizedBox(width: 8.0),
+            Material(
+              type: MaterialType.transparency,
+              child: widget.trailing ??
+                  IconButton(
+                    icon: StreamSvgIcon.cloud_download(
+                      color: StreamChatTheme.of(context).colorTheme.black,
                     ),
-              ],
+                    padding: const EdgeInsets.all(8),
+                    visualDensity: VisualDensity.compact,
+                    splashRadius: 16,
+                    onPressed: () {
+                      launchURL(context, widget.attachment.assetUrl);
+                    },
+                  ),
             ),
           ],
         ),
