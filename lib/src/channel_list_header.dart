@@ -6,6 +6,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'info_tile.dart';
 import 'stream_chat.dart';
 
 typedef _TitleBuilder = Widget Function(
@@ -53,6 +54,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.titleBuilder,
     this.onUserAvatarTap,
     this.onNewChatButtonTap,
+    this.showConnectionStateTile = false,
   }) : super(key: key);
 
   /// Pass this if you don't have a [Client] in your widget tree.
@@ -68,77 +70,107 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Callback to call when pressing the new chat button.
   final VoidCallback onNewChatButtonTap;
 
+  final bool showConnectionStateTile;
+
   @override
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
     final user = _client.state.user;
-    return AppBar(
-      brightness: Theme.of(context).brightness,
-      elevation: 1,
-      backgroundColor:
-          StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-      centerTitle: true,
-      leading: Center(
-        child: UserAvatar(
-          user: user,
-          showOnlineStatus: false,
-          onTap: onUserAvatarTap ?? (_) => Scaffold.of(context).openDrawer(),
-          borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
-        ),
-      ),
-      actions: [
-        StreamNeumorphicButton(
-          child: IconButton(
-            icon: ValueListenableBuilder<ConnectionStatus>(
-              valueListenable: _client.wsConnectionStatus,
-              builder: (context, status, child) {
-                var color;
+    return ValueListenableBuilder<ConnectionStatus>(
+      valueListenable: _client.wsConnectionStatus,
+      builder: (context, status, child) {
+        String statusString = '';
+        bool showStatus = true;
+
+        switch (status) {
+          case ConnectionStatus.connected:
+            statusString = 'Connected';
+            showStatus = false;
+            break;
+          case ConnectionStatus.connecting:
+            statusString = 'Reconnecting...';
+            break;
+          case ConnectionStatus.disconnected:
+            statusString = 'Disconnected';
+            break;
+        }
+
+        return InfoTile(
+          showMessage: showConnectionStateTile ? showStatus : false,
+          message: statusString,
+          child: AppBar(
+            brightness: Theme.of(context).brightness,
+            elevation: 1,
+            backgroundColor: StreamChatTheme.of(context)
+                .channelTheme
+                .channelHeaderTheme
+                .color,
+            centerTitle: true,
+            leading: Center(
+              child: UserAvatar(
+                user: user,
+                showOnlineStatus: false,
+                onTap:
+                    onUserAvatarTap ?? (_) => Scaffold.of(context).openDrawer(),
+                borderRadius: BorderRadius.circular(20),
+                constraints: BoxConstraints.tightFor(
+                  height: 40,
+                  width: 40,
+                ),
+              ),
+            ),
+            actions: [
+              StreamNeumorphicButton(
+                child: IconButton(
+                  icon: ValueListenableBuilder<ConnectionStatus>(
+                    valueListenable: _client.wsConnectionStatus,
+                    builder: (context, status, child) {
+                      var color;
+                      switch (status) {
+                        case ConnectionStatus.connected:
+                          color =
+                              StreamChatTheme.of(context).colorTheme.accentBlue;
+                          break;
+                        case ConnectionStatus.connecting:
+                          color = Colors.grey;
+                          break;
+                        case ConnectionStatus.disconnected:
+                          color = Colors.grey;
+                          break;
+                      }
+                      return SvgPicture.asset(
+                        'svgs/icon_pen_write.svg',
+                        package: 'stream_chat_flutter',
+                        width: 24.0,
+                        height: 24.0,
+                        color: color,
+                      );
+                    },
+                  ),
+                  onPressed: onNewChatButtonTap,
+                ),
+              )
+            ],
+            title: Builder(
+              builder: (context) {
+                if (titleBuilder != null) {
+                  return titleBuilder(context, status, _client);
+                }
                 switch (status) {
                   case ConnectionStatus.connected:
-                    color = StreamChatTheme.of(context).colorTheme.accentBlue;
-                    break;
+                    return _buildConnectedTitleState(context);
                   case ConnectionStatus.connecting:
-                    color = Colors.grey;
-                    break;
+                    return _buildConnectingTitleState(context);
                   case ConnectionStatus.disconnected:
-                    color = Colors.grey;
-                    break;
+                    return _buildDisconnectedTitleState(context, _client);
+                  default:
+                    return Offstage();
                 }
-                return SvgPicture.asset(
-                  'svgs/icon_pen_write.svg',
-                  package: 'stream_chat_flutter',
-                  width: 24.0,
-                  height: 24.0,
-                  color: color,
-                );
               },
             ),
-            onPressed: onNewChatButtonTap,
           ),
-        )
-      ],
-      title: ValueListenableBuilder<ConnectionStatus>(
-        valueListenable: _client.wsConnectionStatus,
-        builder: (context, status, child) {
-          if (titleBuilder != null) {
-            return titleBuilder(context, status, _client);
-          }
-          switch (status) {
-            case ConnectionStatus.connected:
-              return _buildConnectedTitleState(context);
-            case ConnectionStatus.connecting:
-              return _buildConnectingTitleState(context);
-            case ConnectionStatus.disconnected:
-              return _buildDisconnectedTitleState(context, _client);
-            default:
-              return Offstage();
-          }
-        },
-      ),
+        );
+      },
     );
   }
 

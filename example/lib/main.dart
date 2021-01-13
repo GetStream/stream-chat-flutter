@@ -763,7 +763,7 @@ class _ChannelPageState extends State<ChannelPage> {
   }
 }
 
-class ThreadPage extends StatelessWidget {
+class ThreadPage extends StatefulWidget {
   final Message parent;
   final int initialScrollIndex;
   final double initialAlignment;
@@ -776,24 +776,53 @@ class ThreadPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _ThreadPageState createState() => _ThreadPageState();
+}
+
+class _ThreadPageState extends State<ThreadPage> {
+  Message _quotedMessage;
+  FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _reply(Message message) {
+    setState(() => _quotedMessage = message);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: ThreadHeader(
-        parent: parent,
+        parent: widget.parent,
       ),
       body: Column(
         children: <Widget>[
           Expanded(
             child: MessageListView(
-              parentMessage: parent,
-              initialScrollIndex: initialScrollIndex,
-              initialAlignment: initialAlignment,
+              parentMessage: widget.parent,
+              initialScrollIndex: widget.initialScrollIndex,
+              initialAlignment: widget.initialAlignment,
+              onMessageSwiped: _reply,
+              onReplyTap: _reply,
             ),
           ),
-          if (parent.type != 'deleted')
+          if (widget.parent.type != 'deleted')
             MessageInput(
-              parentMessage: parent,
+              parentMessage: widget.parent,
+              focusNode: _focusNode,
+              quotedMessage: _quotedMessage,
+              onQuotedMessageCleared: () {
+                setState(() => _quotedMessage = null);
+                _focusNode.unfocus();
+              },
             ),
         ],
       ),
