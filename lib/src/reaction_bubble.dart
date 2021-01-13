@@ -16,6 +16,7 @@ class ReactionBubble extends StatelessWidget {
     this.reverse = false,
     this.flipTail = false,
     this.highlightOwnReactions = true,
+    this.tailCirclesSpace = 0,
   }) : super(key: key);
 
   final List<Reaction> reactions;
@@ -25,6 +26,7 @@ class ReactionBubble extends StatelessWidget {
   final bool reverse;
   final bool flipTail;
   final bool highlightOwnReactions;
+  final double tailCirclesSpace;
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +148,7 @@ class ReactionBubble extends StatelessWidget {
         backgroundColor,
         borderColor,
         maskColor,
+        tailCirclesSpace: tailCirclesSpace,
       ),
     );
     return Transform(
@@ -160,12 +163,14 @@ class ReactionBubblePainter extends CustomPainter {
   final Color color;
   final Color borderColor;
   final Color maskColor;
+  final double tailCirclesSpace;
 
   ReactionBubblePainter(
     this.color,
     this.borderColor,
-    this.maskColor,
-  );
+    this.maskColor, {
+    this.tailCirclesSpace = 0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -190,7 +195,7 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path();
     path.addOval(
       Rect.fromCircle(
-        center: Offset(4, 3),
+        center: Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
         radius: 4,
       ),
     );
@@ -206,7 +211,7 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path();
     path.addOval(
       Rect.fromCircle(
-        center: Offset(4, 3),
+        center: Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
         radius: 2,
       ),
     );
@@ -220,7 +225,7 @@ class ReactionBubblePainter extends CustomPainter {
 
     final path = Path();
     path.addOval(Rect.fromCircle(
-      center: Offset(4, 3),
+      center: Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
       radius: 2,
     ));
     canvas.drawPath(path, paint);

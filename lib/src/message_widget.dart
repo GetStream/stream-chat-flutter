@@ -444,12 +444,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   StreamChatTheme.of(context)
                                                       .colorTheme
                                                       .white,
-                                                  StreamChatTheme.of(context)
-                                                      .colorTheme
-                                                      .white,
-                                                  StreamChatTheme.of(context)
-                                                      .colorTheme
-                                                      .white,
+                                                  Colors.transparent,
+                                                  Colors.transparent,
+                                                  tailCirclesSpace: 1,
                                                 ),
                                               ),
                                             ),
