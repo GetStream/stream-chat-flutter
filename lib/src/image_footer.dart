@@ -218,12 +218,14 @@ class _ImageFooterState extends State<ImageFooter> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context, position) {
+                  Widget media;
+
                   if (widget.mediaAttachments[position].type == 'video') {
                     var controllerPackage = widget.videoPackages[
                         videoAttachments
                             .indexOf(widget.mediaAttachments[position])];
 
-                    return InkWell(
+                    media = InkWell(
                       onTap: () {
                         widget.mediaSelectedCallBack(position);
                       },
@@ -235,7 +237,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       ),
                     );
                   } else {
-                    return InkWell(
+                    media = InkWell(
                       onTap: () {
                         widget.mediaSelectedCallBack(position);
                       },
@@ -254,6 +256,28 @@ class _ImageFooterState extends State<ImageFooter> {
                       ),
                     );
                   }
+
+                  return Stack(
+                    children: [
+                      media,
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: UserAvatar(
+                            user: widget.message.user,
+                            constraints: BoxConstraints.tight(
+                              Size(
+                                24,
+                                24,
+                              ),
+                            ),
+                            showOnlineStatus: false,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
                 },
                 itemCount: widget.mediaAttachments.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
