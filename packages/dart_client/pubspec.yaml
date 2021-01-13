@@ -22,7 +22,7 @@ dependencies:
   moor: ^3.4.0
   path_provider: ^1.6.24
   path: ^1.7.0
-  rxdart: ^0.25.0
+  rxdart: ^0.24.1
   collection: ^1.14.13
   sqlite3_flutter_libs: ^0.3.0
 
