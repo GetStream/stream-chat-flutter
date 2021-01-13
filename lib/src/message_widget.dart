@@ -561,7 +561,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     };
 
     children.addAll([
-      if (showSendingIndicator) _buildSendingIndicator(),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
           SizedBox.fromSize(
@@ -585,9 +584,8 @@ class _MessageWidgetState extends State<MessageWidget> {
           Jiffy(widget.message.createdAt.toLocal()).jm,
           style: widget.messageTheme.createdAt,
         ),
+      if (showSendingIndicator) _buildSendingIndicator(),
     ]);
-
-    // if (widget.reverse) children = children.reversed.toList();
 
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
