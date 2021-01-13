@@ -150,85 +150,116 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             ),
           ],
         ),
-        body: Column(
-          children: [
-            Container(
-              width: double.maxFinite,
-              decoration: BoxDecoration(
-                gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 8,
-                ),
-                child: Text(
-                  '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
-                  style: TextStyle(
-                    color: StreamChatTheme.of(context).colorTheme.grey,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onPanDown: (_) => FocusScope.of(context).unfocus(),
-                child: ListView.separated(
-                  itemCount: _selectedUsers.length + 1,
-                  separatorBuilder: (_, __) => Container(
-                    height: 1,
-                    color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-                  ),
-                  itemBuilder: (_, index) {
-                    if (index == _selectedUsers.length) {
-                      return Container(
-                        height: 1,
-                        color:
-                            StreamChatTheme.of(context).colorTheme.greyWhisper,
-                      );
-                    }
-                    final user = _selectedUsers[index];
-                    return ListTile(
-                      key: ObjectKey(user),
-                      leading: UserAvatar(
-                        user: user,
-                        constraints: BoxConstraints.tightFor(
-                          width: 40,
-                          height: 40,
+        body: ValueListenableBuilder<ConnectionStatus>(
+            valueListenable: StreamChat.of(context).client.wsConnectionStatus,
+            builder: (context, status, _) {
+              String statusString = '';
+              bool showStatus = true;
+
+              switch (status) {
+                case ConnectionStatus.connected:
+                  statusString = 'Connected';
+                  showStatus = false;
+                  break;
+                case ConnectionStatus.connecting:
+                  statusString = 'Reconnecting...';
+                  break;
+                case ConnectionStatus.disconnected:
+                  statusString = 'Disconnected';
+                  break;
+              }
+              return InfoTile(
+                showMessage: showStatus,
+                tileAnchor: Alignment.topCenter,
+                childAnchor: Alignment.topCenter,
+                message: statusString,
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.maxFinite,
+                      decoration: BoxDecoration(
+                        gradient:
+                            StreamChatTheme.of(context).colorTheme.bgGradient,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 8,
+                        ),
+                        child: Text(
+                          '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
+                          style: TextStyle(
+                            color: StreamChatTheme.of(context).colorTheme.grey,
+                          ),
                         ),
                       ),
-                      title: Text(
-                        user.name,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(
-                          Icons.clear_rounded,
-                          color: StreamChatTheme.of(context).colorTheme.black,
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onPanDown: (_) => FocusScope.of(context).unfocus(),
+                        child: ListView.separated(
+                          itemCount: _selectedUsers.length + 1,
+                          separatorBuilder: (_, __) => Container(
+                            height: 1,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .greyWhisper,
+                          ),
+                          itemBuilder: (_, index) {
+                            if (index == _selectedUsers.length) {
+                              return Container(
+                                height: 1,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .greyWhisper,
+                              );
+                            }
+                            final user = _selectedUsers[index];
+                            return ListTile(
+                              key: ObjectKey(user),
+                              leading: UserAvatar(
+                                user: user,
+                                constraints: BoxConstraints.tightFor(
+                                  width: 40,
+                                  height: 40,
+                                ),
+                              ),
+                              title: Text(
+                                user.name,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              trailing: IconButton(
+                                icon: Icon(
+                                  Icons.clear_rounded,
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .black,
+                                ),
+                                padding: const EdgeInsets.all(0),
+                                splashRadius: 24,
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedUsers.remove(user);
+                                  });
+                                  if (_selectedUsers.isEmpty) {
+                                    Navigator.pop(context, _selectedUsers);
+                                  }
+                                },
+                              ),
+                            );
+                          },
                         ),
-                        padding: const EdgeInsets.all(0),
-                        splashRadius: 24,
-                        onPressed: () {
-                          setState(() {
-                            _selectedUsers.remove(user);
-                          });
-                          if (_selectedUsers.isEmpty) {
-                            Navigator.pop(context, _selectedUsers);
-                          }
-                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ],
-        ),
+              );
+            }),
       ),
     );
   }
