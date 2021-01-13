@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
 
 import '../stream_chat_flutter.dart';
@@ -63,6 +64,7 @@ class MessageSearchListView extends StatefulWidget {
     this.onItemTap,
     this.showResultCount = true,
     this.pullToRefresh = true,
+    this.showErrorTile = false,
   }) : super(key: key);
 
   /// Message String to search on
@@ -110,6 +112,8 @@ class MessageSearchListView extends StatefulWidget {
 
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
+
+  final bool showErrorTile;
 
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
@@ -205,41 +209,47 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               message = 'Check your connection and retry';
             }
           }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      WidgetSpan(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 2.0),
-                          child: Icon(Icons.error_outline),
+          return InfoTile(
+            showMessage: widget.showErrorTile,
+            tileAnchor: Alignment.topCenter,
+            childAnchor: Alignment.topCenter,
+            message: 'An error occurred.',
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        WidgetSpan(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 2.0),
+                            child: Icon(Icons.error_outline),
+                          ),
                         ),
-                      ),
-                      TextSpan(text: 'Error loading messages'),
-                    ],
+                        TextSpan(text: 'Error loading messages'),
+                      ],
+                    ),
+                    style: Theme.of(context).textTheme.headline6,
                   ),
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(message),
-                ),
-                RaisedButton(
-                  onPressed: () {
-                    messageSearchBloc.search(
-                      filter: widget.filters,
-                      sort: widget.sortOptions,
-                      query: widget.messageQuery,
-                      pagination: widget.paginationParams,
-                      messageFilter: widget.messageFilters,
-                    );
-                  },
-                  child: Text('Retry'),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Text(message),
+                  ),
+                  RaisedButton(
+                    onPressed: () {
+                      messageSearchBloc.search(
+                        filter: widget.filters,
+                        sort: widget.sortOptions,
+                        query: widget.messageQuery,
+                        pagination: widget.paginationParams,
+                        messageFilter: widget.messageFilters,
+                      );
+                    },
+                    child: Text('Retry'),
+                  ),
+                ],
+              ),
             ),
           );
         }

@@ -46,3 +46,4 @@ export 'src/unread_indicator.dart';
 export 'src/option_list_tile.dart';
 export 'src/channel_file_display_screen.dart';
 export 'src/channel_media_display_screen.dart';
+export 'src/info_tile.dart';

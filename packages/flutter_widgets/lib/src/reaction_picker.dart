@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 
 import '../stream_chat_flutter.dart';
+import 'extension.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/reaction_picker.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/reaction_picker_paint.png)
@@ -36,13 +39,10 @@ class _ReactionPickerState extends State<ReactionPicker>
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {
         animations.add(
-          EzAnimation.sequence(
-            [
-              SequenceItem(0.0, 1.4),
-              SequenceItem(1.4, 1.0),
-            ],
+          EzAnimation.tween(
+            Tween(begin: 0.0, end: 1.0),
             Duration(milliseconds: 500),
-            vsync: this,
+            curve: Curves.easeInOutBack,
           ),
         );
       });
@@ -52,70 +52,95 @@ class _ReactionPickerState extends State<ReactionPicker>
 
     return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
-        curve: Curves.easeInOutExpo,
+        curve: Curves.easeInOutBack,
         duration: Duration(milliseconds: 500),
         builder: (context, val, wid) {
           return Transform.scale(
             scale: val,
             child: Material(
+              borderRadius: BorderRadius.circular(24),
               color: StreamChatTheme.of(context).colorTheme.white,
               clipBehavior: Clip.hardEdge,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
-                  children: reactionIcons.map((reactionIcon) {
-                    final ownReactionIndex = widget.message.ownReactions
-                            ?.indexWhere((reaction) =>
-                                reaction.type == reactionIcon.type) ??
-                        -1;
-                    var index = reactionIcons.indexOf(reactionIcon);
+                  children: reactionIcons
+                      .map<Widget>((reactionIcon) {
+                        final ownReactionIndex = widget.message.ownReactions
+                                ?.indexWhere((reaction) =>
+                                    reaction.type == reactionIcon.type) ??
+                            -1;
+                        var index = reactionIcons.indexOf(reactionIcon);
 
-                    return IconButton(
-                      iconSize: 24,
-                      icon: AnimatedBuilder(
-                          animation: animations[index],
-                          builder: (context, val) {
-                            return Transform(
-                              transform: Matrix4.identity()
-                                ..scale(animations[index].value,
-                                    animations[index].value)
-                                ..rotateZ(1.0 - animations[index].value),
-                              child: StreamSvgIcon(
-                                assetName: reactionIcon.assetName,
-                                height: animations[index].value * 24.0,
-                                width: animations[index].value * 24.0,
-                                color: ownReactionIndex != -1
-                                    ? StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .accentBlue
-                                    : Theme.of(context)
-                                        .iconTheme
-                                        .color
-                                        .withOpacity(.5),
-                              ),
-                            );
-                          }),
-                      onPressed: () {
-                        if (ownReactionIndex != -1) {
-                          removeReaction(
-                            context,
-                            widget.message.ownReactions[ownReactionIndex],
-                          );
-                        } else {
-                          sendReaction(
-                            context,
-                            reactionIcon.type,
-                          );
-                        }
-                      },
-                    );
-                  }).toList(),
+                        return ConstrainedBox(
+                          constraints: BoxConstraints.tightFor(
+                            height: 24,
+                            width: 24,
+                          ),
+                          child: RawMaterialButton(
+                            elevation: 0,
+                            padding: const EdgeInsets.all(0),
+                            clipBehavior: Clip.none,
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            constraints: BoxConstraints.tightFor(
+                              height: 24,
+                              width: 24,
+                            ),
+                            child: AnimatedBuilder(
+                                animation: animations[index],
+                                builder: (context, val) {
+                                  return Transform.scale(
+                                    alignment: Alignment.center,
+                                    scale: animations[index].value,
+                                    child: StreamSvgIcon(
+                                      assetName: reactionIcon.assetName,
+                                      height: max(
+                                        0,
+                                        animations[index].value * 24.0,
+                                      ),
+                                      width: max(
+                                        0,
+                                        animations[index].value * 24.0,
+                                      ),
+                                      color: ownReactionIndex != -1
+                                          ? StreamChatTheme.of(context)
+                                              .colorTheme
+                                              .accentBlue
+                                          : Theme.of(context)
+                                              .iconTheme
+                                              .color
+                                              .withOpacity(.5),
+                                    ),
+                                  );
+                                }),
+                            onPressed: () {
+                              if (ownReactionIndex != -1) {
+                                removeReaction(
+                                  context,
+                                  widget.message.ownReactions[ownReactionIndex],
+                                );
+                              } else {
+                                sendReaction(
+                                  context,
+                                  reactionIcon.type,
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      })
+                      .insertBetween(SizedBox(
+                        width: 16,
+                      ))
+                      .toList(),
                 ),
               ),
             ),

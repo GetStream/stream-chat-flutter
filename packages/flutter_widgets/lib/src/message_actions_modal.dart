@@ -84,155 +84,146 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.maybePop(context),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: 10,
-                sigmaY: 10,
-              ),
-              child: Container(
-                color: StreamChatTheme.of(context).colorTheme.overlay,
-              ),
-            ),
-          ),
-          Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Column(
-                  crossAxisAlignment: widget.reverse
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: <Widget>[
-                    if (widget.showReactions &&
-                        (widget.message.status == MessageSendingStatus.SENT ||
-                            widget.message.status == null))
-                      Align(
-                        alignment: Alignment(
-                            user.id == widget.message.user.id
-                                ? (divFactor > 1.0 ? 0.0 : (1.0 - divFactor))
-                                : (divFactor > 1.0 ? 0.0 : -(1.0 - divFactor)),
-                            0.0),
-                        child: ReactionPicker(
-                          message: widget.message,
-                          messageTheme: widget.messageTheme,
-                        ),
-                      ),
-                    TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: Duration(milliseconds: 300),
-                        builder: (context, val, snapshot) {
-                          return Transform.scale(
-                            scale: val,
-                            child: IgnorePointer(
-                              child: MessageWidget(
-                                key: Key('MessageWidget'),
-                                reverse: widget.reverse,
-                                message: widget.message.copyWith(
-                                  text: widget.message.text.length > 200
-                                      ? '${widget.message.text.substring(0, 200)}...'
-                                      : widget.message.text,
-                                ),
-                                messageTheme: widget.messageTheme,
-                                showReactions: false,
-                                showUsername: false,
-                                showThreadReplyIndicator: false,
-                                showReplyMessage: false,
-                                showUserAvatar: widget.showUserAvatar,
-                                showTimestamp: false,
-                                translateUserAvatar: false,
-                                showReactionPickerIndicator:
-                                    widget.showReactions &&
-                                        (widget.message.status ==
-                                                MessageSendingStatus.SENT ||
-                                            widget.message.status == null),
-                                showInChannelIndicator: false,
-                                showSendingIndicator: false,
-                                shape: widget.messageShape,
-                              ),
-                            ),
-                          );
-                        }),
-                    TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        builder: (context, val, wid) {
-                          return Transform(
-                            transform: Matrix4.identity()
-                              ..scale(val)
-                              ..rotateZ(-1.0 + val),
-                            alignment: widget.reverse
-                                ? Alignment.topRight
-                                : Alignment.topLeft,
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                right: widget.reverse ? 16 : 0,
-                                left: widget.reverse ? 0 : 48,
-                              ),
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.75,
-                                child: Material(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .whiteSnow,
-                                  clipBehavior: Clip.hardEdge,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: ListTile.divideTiles(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .greyWhisper,
-                                      context: context,
-                                      tiles: [
-                                        if (widget.showReplyMessage &&
-                                            (widget.message.status ==
-                                                    MessageSendingStatus.SENT ||
-                                                widget.message.status ==
-                                                    null) &&
-                                            widget.message.parentId == null)
-                                          _buildReplyButton(context),
-                                        if (widget.showThreadReplyMessage &&
-                                            (widget.message.status ==
-                                                    MessageSendingStatus.SENT ||
-                                                widget.message.status ==
-                                                    null) &&
-                                            widget.message.parentId == null)
-                                          _buildThreadReplyButton(context),
-                                        if (widget.showResendMessage)
-                                          _buildResendMessage(context),
-                                        if (widget.showEditMessage)
-                                          _buildEditMessage(context),
-                                        if (widget.showCopyMessage)
-                                          _buildCopyButton(context),
-                                        if (widget.showFlagButton)
-                                          _buildFlagButton(context),
-                                        if (widget.showDeleteMessage)
-                                          _buildDeleteButton(context),
-                                      ],
-                                    ).toList(),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        })
-                  ],
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOutBack,
+      builder: (context, val, snapshot) {
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () => Navigator.maybePop(context),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: 10,
+                    sigmaY: 10,
+                  ),
+                  child: Container(
+                    color: StreamChatTheme.of(context).colorTheme.overlay,
+                  ),
                 ),
               ),
-            ),
+              Transform.scale(
+                scale: val,
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: widget.reverse
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: <Widget>[
+                          if (widget.showReactions &&
+                              (widget.message.status ==
+                                      MessageSendingStatus.SENT ||
+                                  widget.message.status == null))
+                            Align(
+                              alignment: Alignment(
+                                  user.id == widget.message.user.id
+                                      ? (divFactor > 1.0
+                                          ? 0.0
+                                          : (1.0 - divFactor))
+                                      : (divFactor > 1.0
+                                          ? 0.0
+                                          : -(1.0 - divFactor)),
+                                  0.0),
+                              child: ReactionPicker(
+                                message: widget.message,
+                                messageTheme: widget.messageTheme,
+                              ),
+                            ),
+                          IgnorePointer(
+                            child: MessageWidget(
+                              key: Key('MessageWidget'),
+                              reverse: widget.reverse,
+                              message: widget.message.copyWith(
+                                text: widget.message.text.length > 200
+                                    ? '${widget.message.text.substring(0, 200)}...'
+                                    : widget.message.text,
+                              ),
+                              messageTheme: widget.messageTheme,
+                              showReactions: false,
+                              showUsername: false,
+                              showThreadReplyIndicator: false,
+                              showReplyMessage: false,
+                              showUserAvatar: widget.showUserAvatar,
+                              showTimestamp: false,
+                              translateUserAvatar: false,
+                              showReactionPickerIndicator:
+                                  widget.showReactions &&
+                                      (widget.message.status ==
+                                              MessageSendingStatus.SENT ||
+                                          widget.message.status == null),
+                              showInChannelIndicator: false,
+                              showSendingIndicator: false,
+                              shape: widget.messageShape,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: widget.reverse ? 8 : 0,
+                              left: widget.reverse ? 0 : 48,
+                            ),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.75,
+                              child: Material(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .whiteSnow,
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: ListTile.divideTiles(
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .greyWhisper,
+                                    context: context,
+                                    tiles: [
+                                      if (widget.showReplyMessage &&
+                                          (widget.message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              widget.message.status == null) &&
+                                          widget.message.parentId == null)
+                                        _buildReplyButton(context),
+                                      if (widget.showThreadReplyMessage &&
+                                          (widget.message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              widget.message.status == null) &&
+                                          widget.message.parentId == null)
+                                        _buildThreadReplyButton(context),
+                                      if (widget.showResendMessage)
+                                        _buildResendMessage(context),
+                                      if (widget.showEditMessage)
+                                        _buildEditMessage(context),
+                                      if (widget.showCopyMessage)
+                                        _buildCopyButton(context),
+                                      if (widget.showFlagButton)
+                                        _buildFlagButton(context),
+                                      if (widget.showDeleteMessage)
+                                        _buildDeleteButton(context),
+                                    ],
+                                  ).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -457,9 +448,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           ),
         ],
       ),
-      onTap: () {
-        _showFlagDialog();
-      },
+      onTap: () => _showFlagDialog(),
     );
   }
 

@@ -109,23 +109,20 @@ class QuotedMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, right: 4, left: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(child: _buildMessage(context)),
-            SizedBox(width: 4),
-            _buildUserAvatar(),
-          ],
-        ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(child: _buildMessage(context)),
+          SizedBox(width: 8),
+          _buildUserAvatar(),
+        ],
       ),
     );
   }
 
   Widget _buildMessage(BuildContext context) {
-    final isOnlyEmoji = textIsOnlyEmoji(message.text);
+    final isOnlyEmoji = message.text.isOnlyEmoji;
     var msg = _hasAttachments && !_containsText
         ? message.copyWith(text: message.attachments.last?.title ?? '')
         : message;
@@ -145,9 +142,12 @@ class QuotedMessageWidget extends StatelessWidget {
               messageTheme: isOnlyEmoji && _containsText
                   ? messageTheme.copyWith(
                       messageText: messageTheme.messageText.copyWith(
-                      fontSize: 24,
+                      fontSize: 32,
                     ))
-                  : messageTheme,
+                  : messageTheme.copyWith(
+                      messageText: messageTheme.messageText.copyWith(
+                      fontSize: 12,
+                    )),
             ),
           ),
         ),
@@ -235,9 +235,7 @@ class QuotedMessageWidget extends StatelessWidget {
 
   ShapeBorder _getDefaultShape(BuildContext context) {
     return RoundedRectangleBorder(
-      side: BorderSide(
-        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-      ),
+      side: BorderSide(width: 0.0, color: Colors.transparent),
       borderRadius: BorderRadius.circular(8),
     );
   }
@@ -246,16 +244,13 @@ class QuotedMessageWidget extends StatelessWidget {
     return Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: UserAvatar(
-          user: message.user,
-          constraints: BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          showOnlineStatus: false,
+      child: UserAvatar(
+        user: message.user,
+        constraints: BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
         ),
+        showOnlineStatus: false,
       ),
     );
   }

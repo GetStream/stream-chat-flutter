@@ -1,4 +1,3 @@
-import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,27 +37,21 @@ Future<bool> showConfirmationDialog(
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              height: 26.0,
-            ),
+            SizedBox(height: 26.0),
             if (icon != null) icon,
-            SizedBox(
-              height: 26.0,
-            ),
+            SizedBox(height: 26.0),
             Text(
               title,
               style: StreamChatTheme.of(context).textTheme.headlineBold,
             ),
-            SizedBox(
-              height: 7.0,
+            SizedBox(height: 7.0),
+            Text(
+              question,
+              textAlign: TextAlign.center,
             ),
-            Text(question),
-            SizedBox(
-              height: 36.0,
-            ),
+            SizedBox(height: 36.0),
             Container(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
               height: 1.0,
             ),
             Row(
@@ -292,17 +285,4 @@ StreamSvgIcon getFileTypeImage(String type) {
       return StreamSvgIcon.filetype_Generic();
       break;
   }
-}
-
-final _emojis = Emoji.all();
-
-bool textIsOnlyEmoji(String text) {
-  return text.trim().characters.isNotEmpty &&
-      text.trim().characters.every((c) =>
-          _emojis.firstWhere(
-            (Emoji emoji) => emoji.char.contains(c),
-            orElse: () => null,
-          ) !=
-          null) &&
-      text.characters.length < 4;
 }
