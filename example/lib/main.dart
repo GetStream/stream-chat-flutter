@@ -623,8 +623,8 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   void initState() {
-    super.initState();
     _focusNode = FocusNode();
+    super.initState();
   }
 
   @override
@@ -635,7 +635,9 @@ class _ChannelPageState extends State<ChannelPage> {
 
   void _reply(Message message) {
     setState(() => _quotedMessage = message);
-    _focusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _focusNode.requestFocus();
+    });
   }
 
   @override
@@ -752,6 +754,7 @@ class _ChannelPageState extends State<ChannelPage> {
             quotedMessage: _quotedMessage,
             onQuotedMessageCleared: () {
               setState(() => _quotedMessage = null);
+              _focusNode.unfocus();
             },
           ),
         ],

@@ -137,20 +137,21 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
               centerTitle: true,
               actions: [
-                StreamNeumorphicButton(
-                  child: InkWell(
-                    onTap: () {
-                      _buildAddUserModal(context);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: StreamSvgIcon.userAdd(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .accentBlue),
+                if (!channel.channel.isDistinct)
+                  StreamNeumorphicButton(
+                    child: InkWell(
+                      onTap: () {
+                        _buildAddUserModal(context);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: StreamSvgIcon.userAdd(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             body: ListView(

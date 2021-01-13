@@ -132,6 +132,7 @@ class MessageWidget extends StatefulWidget {
   final bool showDeleteMessage;
   final bool showResendMessage;
 
+  final bool showFlagButton;
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
   /// Center user avatar with bottom of the message
@@ -170,6 +171,7 @@ class MessageWidget extends StatefulWidget {
     this.showThreadReplyMessage = true,
     this.showResendMessage = true,
     this.showCopyMessage = true,
+    this.showFlagButton = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -268,6 +270,12 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   bool get isGiphy =>
       widget.message.attachments?.any((element) => element.type == 'giphy') ==
+      true;
+
+  bool get hasNonUrlAttachments =>
+      widget.message.attachments
+          ?.where((it) => it.ogScrapeUrl == null)
+          ?.isNotEmpty ==
       true;
 
   bool get showBottomRow =>
@@ -383,11 +391,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   ),
                                                   shape: widget.shape ??
                                                       RoundedRectangleBorder(
-                                                        side: isOnlyEmoji &&
-                                                                !(showThreadReplyIndicator ||
-                                                                    showInChannel)
-                                                            ? BorderSide.none
-                                                            : widget.borderSide ??
+                                                        side:
+                                                            widget.borderSide ??
                                                                 BorderSide(
                                                                   color: widget
                                                                       .messageTheme
@@ -410,8 +415,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                       children: <Widget>[
                                                         if (hasQuotedMessage)
                                                           _buildQuotedMessage(),
-                                                        ..._parseAttachments(
-                                                            context),
+                                                        if (hasNonUrlAttachments)
+                                                          ..._parseAttachments(
+                                                              context),
                                                         if (widget.message.text
                                                                 .trim()
                                                                 .isNotEmpty &&
@@ -426,7 +432,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                         if (widget.showReactionPickerIndicator)
                                           Positioned(
                                             right: 0,
-                                            top: -6,
+                                            top: -8,
                                             child: Transform(
                                               transform: Matrix4.rotationY(
                                                   widget.reverse ? pi : 0),
@@ -488,13 +494,21 @@ class _MessageWidgetState extends State<MessageWidget> {
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap(widget.message.quotedMessageId)
         : null;
-    return QuotedMessageWidget(
-      onTap: onTap,
-      message: widget.message.quotedMessage,
-      messageTheme: isMyMessage
-          ? StreamChatTheme.of(context).otherMessageTheme
-          : StreamChatTheme.of(context).ownMessageTheme,
-      reverse: widget.reverse,
+    return Padding(
+      padding: EdgeInsets.only(
+        right: 8,
+        left: 8,
+        top: 8,
+        bottom: hasNonUrlAttachments ? 8 : 0,
+      ),
+      child: QuotedMessageWidget(
+        onTap: onTap,
+        message: widget.message.quotedMessage,
+        messageTheme: isMyMessage
+            ? StreamChatTheme.of(context).otherMessageTheme
+            : StreamChatTheme.of(context).ownMessageTheme,
+        reverse: widget.reverse,
+      ),
     );
   }
 
@@ -689,6 +703,7 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   void _showMessageActionModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
+
     showDialog(
         context: context,
         barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
@@ -725,6 +740,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               showThreadReplyMessage: widget.showThreadReplyMessage &&
                   !isFailedState &&
                   widget.onThreadTap != null,
+              showFlagButton: widget.showFlagButton,
             ),
           );
         });
@@ -923,7 +939,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         ? widget.messageTheme.copyWith(
                             messageText:
                                 widget.messageTheme.messageText.copyWith(
-                            fontSize: 40,
+                            fontSize: 42,
                           ))
                         : widget.messageTheme,
                   ),
@@ -938,7 +954,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  bool get isOnlyEmoji => textIsOnlyEmoji(widget.message.text);
+  bool get isOnlyEmoji => widget.message.text.isOnlyEmoji;
 
   Color _getBackgroundColor() {
     if (hasQuotedMessage) {
