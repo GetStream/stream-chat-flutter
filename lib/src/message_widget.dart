@@ -494,21 +494,15 @@ class _MessageWidgetState extends State<MessageWidget> {
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap(widget.message.quotedMessageId)
         : null;
-    return Padding(
+    return QuotedMessageWidget(
+      onTap: onTap,
+      message: widget.message.quotedMessage,
+      messageTheme: isMyMessage
+          ? StreamChatTheme.of(context).otherMessageTheme
+          : StreamChatTheme.of(context).ownMessageTheme,
+      reverse: widget.reverse,
       padding: EdgeInsets.only(
-        right: 8,
-        left: 8,
-        top: 8,
-        bottom: hasNonUrlAttachments ? 8 : 0,
-      ),
-      child: QuotedMessageWidget(
-        onTap: onTap,
-        message: widget.message.quotedMessage,
-        messageTheme: isMyMessage
-            ? StreamChatTheme.of(context).otherMessageTheme
-            : StreamChatTheme.of(context).ownMessageTheme,
-        reverse: widget.reverse,
-      ),
+          right: 8, left: 8, top: 8, bottom: hasNonUrlAttachments ? 8 : 0),
     );
   }
 
