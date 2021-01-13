@@ -815,7 +815,9 @@ class _MessageListViewState extends State<MessageListView> {
         message.attachments?.any((it) => it.ogScrapeUrl != null) == true;
 
     final borderSide =
-        isOnlyEmoji || hasUrlAttachment || isMyMessage ? BorderSide.none : null;
+        isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)
+            ? BorderSide.none
+            : null;
 
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
@@ -859,14 +861,15 @@ class _MessageListViewState extends State<MessageListView> {
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
         bottomLeft: Radius.circular(
-          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
+          (timeDiff >= 1 || !isNextUserSame) &&
+                  !(hasReplies || isThreadMessage || hasFileAttachment)
               ? 0
               : attachmentBorderRadius,
         ),
         topRight: Radius.circular(attachmentBorderRadius),
         bottomRight: Radius.circular(attachmentBorderRadius),
       ),
-      attachmentPadding: const EdgeInsets.all(2),
+      attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(

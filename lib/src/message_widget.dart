@@ -419,7 +419,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                         if (hasQuotedMessage)
                                                           _buildQuotedMessage(),
                                                         if (hasNonUrlAttachments)
-                                                          ..._parseAttachments(
+                                                          _parseAttachments(
                                                               context),
                                                         if (widget.message.text
                                                                 .trim()
@@ -777,7 +777,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       side: widget.attachmentBorderSide ??
           widget.borderSide ??
           BorderSide(
-            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
           ),
       borderRadius: widget.attachmentBorderRadiusGeometry ??
           widget.borderRadiusGeometry ??
@@ -785,7 +785,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  List<Widget> _parseAttachments(BuildContext context) {
+  Widget _parseAttachments(BuildContext context) {
     final images = widget.message.attachments
             ?.where((element) =>
                 element.type == 'image' && element.ogScrapeUrl == null)
@@ -793,8 +793,9 @@ class _MessageWidgetState extends State<MessageWidget> {
         [];
 
     if (images.length > 1) {
-      return [
-        wrapAttachmentWidget(
+      return Padding(
+        padding: widget.attachmentPadding,
+        child: wrapAttachmentWidget(
           context,
           Material(
             color: widget.messageTheme.messageBackgroundColor,
@@ -809,30 +810,36 @@ class _MessageWidgetState extends State<MessageWidget> {
             ),
           ),
         ),
-      ];
+      );
     }
 
-    return widget.message.attachments
-            ?.where((element) => element.ogScrapeUrl == null)
-            ?.map((attachment) {
-          final attachmentBuilder = widget.attachmentBuilders[attachment.type];
+    return Padding(
+      padding: widget.attachmentPadding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: widget.message.attachments
+                ?.where((element) => element.ogScrapeUrl == null)
+                ?.map((attachment) {
+              final attachmentBuilder =
+                  widget.attachmentBuilders[attachment.type];
 
-          if (attachmentBuilder == null) {
-            return SizedBox();
-          }
-
-          final attachmentWidget = attachmentBuilder(
-            context,
-            widget.message,
-            attachment,
-          );
-          return wrapAttachmentWidget(
-            context,
-            attachmentWidget,
-            attachment: attachment,
-          );
-        })?.toList() ??
-        [];
+              if (attachmentBuilder == null) return SizedBox();
+              final attachmentWidget = attachmentBuilder(
+                context,
+                widget.message,
+                attachment,
+              );
+              return wrapAttachmentWidget(
+                context,
+                attachmentWidget,
+                attachment: attachment,
+              );
+            })?.insertBetween(SizedBox(
+              height: widget.attachmentPadding.vertical / 2,
+            )) ??
+            [],
+      ),
+    );
   }
 
   Widget wrapAttachmentWidget(
@@ -843,21 +850,13 @@ class _MessageWidgetState extends State<MessageWidget> {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
     return Material(
-      color: _getBackgroundColor(),
       clipBehavior: Clip.antiAlias,
       shape: attachmentShape,
-      child: Padding(
-        padding: widget.attachmentPadding,
-        child: Material(
-          clipBehavior: Clip.hardEdge,
-          shape: attachmentShape,
-          type: MaterialType.transparency,
-          child: Transform(
-            transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-            alignment: Alignment.center,
-            child: attachmentWidget,
-          ),
-        ),
+      type: MaterialType.transparency,
+      child: Transform(
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: attachmentWidget,
       ),
     );
   }

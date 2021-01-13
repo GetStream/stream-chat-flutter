@@ -62,15 +62,7 @@ class _FileAttachmentState extends State<FileAttachment> {
       child: Container(
         width: widget.size?.width ?? 100,
         height: 56.0,
-        decoration: BoxDecoration(
-          color: StreamChatTheme.of(context).colorTheme.white,
-          borderRadius:
-              widget.trailing != null ? BorderRadius.circular(16.0) : null,
-          border: widget.trailing != null
-              ? Border.fromBorderSide(BorderSide(
-                  color: StreamChatTheme.of(context).colorTheme.greyWhisper))
-              : null,
-        ),
+        color: StreamChatTheme.of(context).colorTheme.white,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
