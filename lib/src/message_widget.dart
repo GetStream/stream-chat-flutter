@@ -434,8 +434,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                                         ),
                                         if (widget.showReactionPickerIndicator)
                                           Positioned(
-                                            right: widget.reverse ? -6 : 6,
-                                            top: -6,
+                                            right: 4,
+                                            top: -8,
                                             child: Transform(
                                               transform: Matrix4.rotationY(
                                                   widget.reverse ? pi : 0),
