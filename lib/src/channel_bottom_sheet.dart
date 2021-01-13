@@ -74,7 +74,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   ),
                   borderRadius: BorderRadius.circular(32.0),
                   onlineIndicatorConstraints:
-                      BoxConstraints.tight(Size(16.0, 16.0)),
+                      BoxConstraints.tight(Size(12.0, 12.0)),
                 ),
                 SizedBox(
                   height: 6.0,
@@ -110,6 +110,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                             maxWidth: 64.0,
                           ),
                           borderRadius: BorderRadius.circular(32.0),
+                          onlineIndicatorConstraints:
+                              BoxConstraints.tight(Size(12.0, 12.0)),
                         ),
                         SizedBox(
                           height: 6.0,

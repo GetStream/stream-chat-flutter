@@ -92,18 +92,18 @@ class UserAvatar extends StatelessWidget {
                 child: Material(
                   type: MaterialType.circle,
                   child: Container(
-                    padding: const EdgeInsets.all(2.0),
+                    margin: const EdgeInsets.all(2.0),
                     constraints: onlineIndicatorConstraints ??
                         BoxConstraints.tightFor(
-                          width: 12,
-                          height: 12,
+                          width: 8,
+                          height: 8,
                         ),
                     child: Material(
                       shape: CircleBorder(),
                       color: streamChatTheme.colorTheme.accentGreen,
                     ),
                   ),
-                  color: StreamChatTheme.of(context).colorTheme.white,
+                  color: streamChatTheme.colorTheme.white,
                 ),
               ),
             ),
