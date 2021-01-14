@@ -1,3 +1,12 @@
+## 0.2.23+3
+
+- Remove + notation from userAgent
+- Fix optimistic update for totalUnreadCount
+
+## 0.2.23+2
+
+- Do not throw an error when calling queryChannels without an active connection if the offline storage is enabled
+
 ## 0.2.23+1
 
 - Throw an error when calling queryChannels without an active connection

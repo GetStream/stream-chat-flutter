@@ -565,8 +565,15 @@ class Client {
         await _connectCompleter.future;
       }
       if (wsConnectionStatus.value != ConnectionStatus.connected) {
-        throw Exception(
-            'You cannot use queryChannels without an active connection. Call setUser to connect the client.');
+        final errorMessage =
+            'You cannot use queryChannels without an active connection. Please call setUser to connect the client.';
+        if (persistenceEnabled) {
+          logger.warning(
+              '$errorMessage\nTrying to retrieve channels from the offline storage.');
+          onlyOffline = true;
+        } else {
+          throw Exception(errorMessage);
+        }
       }
     }
 
@@ -843,7 +850,8 @@ class Client {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get _userAgent => 'stream-chat-dart-client-$PACKAGE_VERSION';
+  String get _userAgent =>
+      'stream-chat-dart-client-${PACKAGE_VERSION.split('+')[0]}';
 
   Map<String, String> get _commonQueryParams => {
         'user_id': state.user?.id,
@@ -1279,6 +1287,11 @@ class ClientState {
     _listenChannelHidden();
 
     _listenUserUpdated();
+  }
+
+  /// Used internally for optimistic update of unread count
+  set totalUnreadCount(int unreadCount) {
+    _totalUnreadCountController?.add(unreadCount ?? 0);
   }
 
   void _listenChannelHidden() {
