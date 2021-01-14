@@ -234,6 +234,7 @@ class StreamChatThemeData {
         messageBackgroundColor: colorTheme.greyGainsboro,
         reactionsBackgroundColor: colorTheme.white,
         reactionsBorderColor: colorTheme.greyWhisper,
+        reactionsMaskColor: colorTheme.whiteSnow,
         messageBorderColor: colorTheme.greyGainsboro,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
@@ -249,6 +250,7 @@ class StreamChatThemeData {
       otherMessageTheme: MessageTheme(
         reactionsBackgroundColor: colorTheme.greyGainsboro,
         reactionsBorderColor: colorTheme.white,
+        reactionsMaskColor: colorTheme.whiteSnow,
         messageText: textTheme.body,
         createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
         replies: textTheme.footnoteBold.copyWith(color: accentColor),
@@ -489,9 +491,9 @@ class ColorTheme {
       stops: [0, 1],
     ),
     this.borderTop = const Effect(
-        sigmaX: 0, sigmaY: -1, color: Color(0xff141924), blur: 0.0),
+        sigmaX: 0, sigmaY: -1, color: Color(0xff000000), blur: 0.0),
     this.borderBottom =
-        const Effect(sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0),
+        const Effect(sigmaX: 0, sigmaY: 1, color: Color(0xff000000), blur: 0.0),
     this.shadowIconButton = const Effect(
         sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
     this.modalShadow = const Effect(
@@ -710,6 +712,7 @@ class MessageTheme {
   final Color messageBorderColor;
   final Color reactionsBackgroundColor;
   final Color reactionsBorderColor;
+  final Color reactionsMaskColor;
   final AvatarTheme avatarTheme;
 
   const MessageTheme({
@@ -721,6 +724,7 @@ class MessageTheme {
     this.messageBorderColor,
     this.reactionsBackgroundColor,
     this.reactionsBorderColor,
+    this.reactionsMaskColor,
     this.avatarTheme,
     this.createdAt,
   });
@@ -736,6 +740,7 @@ class MessageTheme {
     AvatarTheme avatarTheme,
     Color reactionsBackgroundColor,
     Color reactionsBorderColor,
+    Color reactionsMaskColor,
   }) =>
       MessageTheme(
         messageText: messageText ?? this.messageText,
@@ -750,6 +755,7 @@ class MessageTheme {
         reactionsBackgroundColor:
             reactionsBackgroundColor ?? this.reactionsBackgroundColor,
         reactionsBorderColor: reactionsBorderColor ?? this.reactionsBorderColor,
+        reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
       );
 
   MessageTheme merge(MessageTheme other) {
@@ -767,6 +773,7 @@ class MessageTheme {
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       reactionsBackgroundColor: other.reactionsBackgroundColor,
       reactionsBorderColor: other.reactionsBorderColor,
+      reactionsMaskColor: other.reactionsMaskColor,
     );
   }
 }

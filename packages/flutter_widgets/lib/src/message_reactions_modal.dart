@@ -9,6 +9,7 @@ import 'package:stream_chat_flutter/src/user_avatar.dart';
 
 import 'message_widget.dart';
 import 'stream_chat_theme.dart';
+import 'extension.dart';
 
 class MessageReactionsModal extends StatelessWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -61,6 +62,8 @@ class MessageReactionsModal extends StatelessWidget {
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOutBack,
       builder: (context, val, snapshot) {
+        final hasFileAttachment =
+            message.attachments?.any((it) => it.type == 'file') == true;
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => Navigator.maybePop(context),
@@ -82,7 +85,7 @@ class MessageReactionsModal extends StatelessWidget {
                 child: Center(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -105,6 +108,7 @@ class MessageReactionsModal extends StatelessWidget {
                                 messageTheme: messageTheme,
                               ),
                             ),
+                          const SizedBox(height: 8),
                           IgnorePointer(
                             child: MessageWidget(
                               key: Key('MessageWidget'),
@@ -123,15 +127,25 @@ class MessageReactionsModal extends StatelessWidget {
                               translateUserAvatar: false,
                               showSendingIndicator: false,
                               shape: messageShape,
+                              padding: const EdgeInsets.all(0),
+                              attachmentPadding: EdgeInsets.all(
+                                hasFileAttachment ? 4 : 2,
+                              ),
                               showInChannelIndicator: false,
+                              textPadding: EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal: message.text.isOnlyEmoji ? 0 : 16.0,
+                              ),
                               showReactionPickerIndicator: showReactions &&
                                   (message.status ==
                                           MessageSendingStatus.SENT ||
                                       message.status == null),
                             ),
                           ),
-                          if (message.latestReactions?.isNotEmpty == true)
+                          if (message.latestReactions?.isNotEmpty == true) ...[
+                            const SizedBox(height: 8),
                             _buildReactionCard(context),
+                          ]
                         ],
                       ),
                     ),
@@ -145,47 +159,42 @@ class MessageReactionsModal extends StatelessWidget {
     );
   }
 
-  Padding _buildReactionCard(BuildContext context) {
+  Widget _buildReactionCard(BuildContext context) {
     final currentUser = StreamChat.of(context).user;
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
+    return Card(
+      color: StreamChatTheme.of(context).colorTheme.white,
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Card(
-        color: StreamChatTheme.of(context).colorTheme.white,
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Message Reactions',
-                style: StreamChatTheme.of(context).textTheme.headlineBold,
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    alignment: WrapAlignment.start,
-                    children: message.latestReactions
-                        .map((e) => _buildReaction(
-                              e,
-                              currentUser,
-                              context,
-                            ))
-                        .toList(),
-                  ),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Message Reactions',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.start,
+                  children: message.latestReactions
+                      .map((e) => _buildReaction(
+                            e,
+                            currentUser,
+                            context,
+                          ))
+                      .toList(),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -208,6 +217,7 @@ class MessageReactionsModal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
+            overflow: Overflow.visible,
             children: [
               UserAvatar(
                 onTap: onUserAvatarTap,
@@ -215,6 +225,10 @@ class MessageReactionsModal extends StatelessWidget {
                 constraints: BoxConstraints.tightFor(
                   height: 64,
                   width: 64,
+                ),
+                onlineIndicatorConstraints: BoxConstraints.tightFor(
+                  height: 12,
+                  width: 12,
                 ),
                 borderRadius: BorderRadius.circular(32),
               ),
@@ -227,12 +241,14 @@ class MessageReactionsModal extends StatelessWidget {
                     flipTail: !reverse,
                     borderColor: messageTheme.reactionsBorderColor,
                     backgroundColor: messageTheme.reactionsBackgroundColor,
+                    maskColor: StreamChatTheme.of(context).colorTheme.white,
+                    tailCirclesSpacing: 1,
                     highlightOwnReactions: false,
                   ),
                 ),
                 bottom: 6,
-                left: isCurrentUser ? 0 : null,
-                right: isCurrentUser ? 0 : null,
+                left: isCurrentUser ? -3 : null,
+                right: isCurrentUser ? -3 : null,
               ),
             ],
           ),

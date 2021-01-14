@@ -278,6 +278,9 @@ class _MessageWidgetState extends State<MessageWidget> {
           ?.isNotEmpty ==
       true;
 
+  bool get hasUrlAttachments =>
+      widget.message.attachments?.any((it) => it.ogScrapeUrl != null) == true;
+
   bool get showBottomRow =>
       showThreadReplyIndicator ||
       showUsername ||
@@ -416,7 +419,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                         if (hasQuotedMessage)
                                                           _buildQuotedMessage(),
                                                         if (hasNonUrlAttachments)
-                                                          ..._parseAttachments(
+                                                          _parseAttachments(
                                                               context),
                                                         if (widget.message.text
                                                                 .trim()
@@ -431,7 +434,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                                         ),
                                         if (widget.showReactionPickerIndicator)
                                           Positioned(
-                                            right: 0,
+                                            right: 4,
                                             top: -8,
                                             child: Transform(
                                               transform: Matrix4.rotationY(
@@ -441,9 +444,9 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   StreamChatTheme.of(context)
                                                       .colorTheme
                                                       .white,
-                                                  StreamChatTheme.of(context)
-                                                      .colorTheme
-                                                      .white,
+                                                  Colors.transparent,
+                                                  Colors.transparent,
+                                                  tailCirclesSpace: 1,
                                                 ),
                                               ),
                                             ),
@@ -494,21 +497,15 @@ class _MessageWidgetState extends State<MessageWidget> {
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap(widget.message.quotedMessageId)
         : null;
-    return Padding(
+    return QuotedMessageWidget(
+      onTap: onTap,
+      message: widget.message.quotedMessage,
+      messageTheme: isMyMessage
+          ? StreamChatTheme.of(context).otherMessageTheme
+          : StreamChatTheme.of(context).ownMessageTheme,
+      reverse: widget.reverse,
       padding: EdgeInsets.only(
-        right: 8,
-        left: 8,
-        top: 8,
-        bottom: hasNonUrlAttachments ? 8 : 0,
-      ),
-      child: QuotedMessageWidget(
-        onTap: onTap,
-        message: widget.message.quotedMessage,
-        messageTheme: isMyMessage
-            ? StreamChatTheme.of(context).otherMessageTheme
-            : StreamChatTheme.of(context).ownMessageTheme,
-        reverse: widget.reverse,
-      ),
+          right: 8, left: 8, top: 8, bottom: hasNonUrlAttachments ? 8 : 0),
     );
   }
 
@@ -564,11 +561,10 @@ class _MessageWidgetState extends State<MessageWidget> {
     };
 
     children.addAll([
-      if (showSendingIndicator) _buildSendingIndicator(),
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
           SizedBox.fromSize(
-            size: Size((threadParticipants.length * 8.0) + 10, 16),
+            size: Size((threadParticipants.length * 8.0) + 8, 16),
             child: _buildThreadParticipantsIndicator(),
           ),
         InkWell(
@@ -588,16 +584,18 @@ class _MessageWidgetState extends State<MessageWidget> {
           Jiffy(widget.message.createdAt.toLocal()).jm,
           style: widget.messageTheme.createdAt,
         ),
+      if (showSendingIndicator) _buildSendingIndicator(),
     ]);
 
-    if (widget.reverse) children = children.reversed.toList();
+    final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
+        (showThreadReplyIndicator || showInChannel);
 
     return Flex(
       direction: Axis.horizontal,
       clipBehavior: Clip.none,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (showThreadReplyIndicator || showInChannel)
+        if (showThreadTail)
           Container(
             margin: EdgeInsets.only(
               bottom: widget.messageTheme.replies.fontSize / 2,
@@ -648,18 +646,20 @@ class _MessageWidgetState extends State<MessageWidget> {
     var padding = 0.0;
     return Stack(
       children: widget.message.threadParticipants.map((user) {
-        padding += 10.0;
+        padding += 8.0;
         return Positioned(
-          left: padding - 10,
+          right: padding - 8,
           bottom: 0,
           top: 0,
-          child: Material(
-            color: Colors.white,
-            clipBehavior: Clip.antiAlias,
-            shape: CircleBorder(),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: StreamChatTheme.of(context).colorTheme.white,
+            ),
+            padding: const EdgeInsets.all(1),
             child: UserAvatar(
               user: user,
-              constraints: BoxConstraints.loose(Size.fromRadius(8)),
+              constraints: BoxConstraints.loose(Size.fromRadius(7)),
               showOnlineStatus: false,
             ),
           ),
@@ -694,6 +694,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                 flipTail: widget.reverse,
                 backgroundColor: widget.messageTheme.reactionsBackgroundColor,
                 borderColor: widget.messageTheme.reactionsBorderColor,
+                maskColor: widget.messageTheme.reactionsMaskColor,
                 reactions: reactionsList,
               ),
             )
@@ -777,7 +778,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       side: widget.attachmentBorderSide ??
           widget.borderSide ??
           BorderSide(
-            color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
           ),
       borderRadius: widget.attachmentBorderRadiusGeometry ??
           widget.borderRadiusGeometry ??
@@ -785,7 +786,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  List<Widget> _parseAttachments(BuildContext context) {
+  Widget _parseAttachments(BuildContext context) {
     final images = widget.message.attachments
             ?.where((element) =>
                 element.type == 'image' && element.ogScrapeUrl == null)
@@ -793,8 +794,9 @@ class _MessageWidgetState extends State<MessageWidget> {
         [];
 
     if (images.length > 1) {
-      return [
-        wrapAttachmentWidget(
+      return Padding(
+        padding: widget.attachmentPadding,
+        child: wrapAttachmentWidget(
           context,
           Material(
             color: widget.messageTheme.messageBackgroundColor,
@@ -809,30 +811,36 @@ class _MessageWidgetState extends State<MessageWidget> {
             ),
           ),
         ),
-      ];
+      );
     }
 
-    return widget.message.attachments
-            ?.where((element) => element.ogScrapeUrl == null)
-            ?.map((attachment) {
-          final attachmentBuilder = widget.attachmentBuilders[attachment.type];
+    return Padding(
+      padding: widget.attachmentPadding,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: widget.message.attachments
+                ?.where((element) => element.ogScrapeUrl == null)
+                ?.map((attachment) {
+              final attachmentBuilder =
+                  widget.attachmentBuilders[attachment.type];
 
-          if (attachmentBuilder == null) {
-            return SizedBox();
-          }
-
-          final attachmentWidget = attachmentBuilder(
-            context,
-            widget.message,
-            attachment,
-          );
-          return wrapAttachmentWidget(
-            context,
-            attachmentWidget,
-            attachment: attachment,
-          );
-        })?.toList() ??
-        [];
+              if (attachmentBuilder == null) return SizedBox();
+              final attachmentWidget = attachmentBuilder(
+                context,
+                widget.message,
+                attachment,
+              );
+              return wrapAttachmentWidget(
+                context,
+                attachmentWidget,
+                attachment: attachment,
+              );
+            })?.insertBetween(SizedBox(
+              height: widget.attachmentPadding.vertical / 2,
+            )) ??
+            [],
+      ),
+    );
   }
 
   Widget wrapAttachmentWidget(
@@ -843,21 +851,13 @@ class _MessageWidgetState extends State<MessageWidget> {
     final attachmentShape =
         widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
     return Material(
-      color: _getBackgroundColor(),
       clipBehavior: Clip.antiAlias,
       shape: attachmentShape,
-      child: Padding(
-        padding: widget.attachmentPadding,
-        child: Material(
-          clipBehavior: Clip.hardEdge,
-          shape: attachmentShape,
-          type: MaterialType.transparency,
-          child: Transform(
-            transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-            alignment: Alignment.center,
-            child: attachmentWidget,
-          ),
-        ),
+      type: MaterialType.transparency,
+      child: Transform(
+        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: attachmentWidget,
       ),
     );
   }
@@ -944,11 +944,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                         : widget.messageTheme,
                   ),
           ),
-          if (widget.message.attachments
-                      ?.any((element) => element.ogScrapeUrl != null) ==
-                  true &&
-              !hasQuotedMessage)
-            _buildUrlAttachment(),
+          if (hasUrlAttachments && !hasQuotedMessage) _buildUrlAttachment(),
         ],
       ),
     );
@@ -961,9 +957,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       return widget.messageTheme.messageBackgroundColor;
     }
 
-    if (widget.message.attachments
-            ?.any((element) => element.ogScrapeUrl != null) ==
-        true) {
+    if (hasUrlAttachments) {
       return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
 

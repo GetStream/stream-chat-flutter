@@ -28,8 +28,8 @@ dependencies:
   file_picker: ^2.1.5
   image_picker: ^0.6.7+17
   flutter_keyboard_visibility: ^4.0.2
-  stream_chat: ^0.2.23+2
   mime: ^0.9.7
+  stream_chat: ^0.2.23+3
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4

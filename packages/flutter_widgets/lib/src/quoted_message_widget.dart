@@ -83,6 +83,8 @@ class QuotedMessageWidget extends StatelessWidget {
   final Map<String, QuotedMessageAttachmentThumbnailBuilder>
       attachmentThumbnailBuilders;
 
+  final EdgeInsetsGeometry padding;
+
   final GestureTapCallback onTap;
 
   ///
@@ -94,6 +96,7 @@ class QuotedMessageWidget extends StatelessWidget {
     this.showBorder = false,
     this.textLimit = 170,
     this.attachmentThumbnailBuilders,
+    this.padding = const EdgeInsets.all(8),
     this.onTap,
   }) : super(key: key);
 
@@ -107,16 +110,19 @@ class QuotedMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(child: _buildMessage(context)),
-          SizedBox(width: 8),
-          _buildUserAvatar(),
-        ],
+    return Padding(
+      padding: padding,
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: _buildMessage(context)),
+            SizedBox(width: 8),
+            _buildUserAvatar(),
+          ],
+        ),
       ),
     );
   }
