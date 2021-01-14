@@ -156,7 +156,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
         }
 
         return LazyLoadScrollView(
-          onEndOfPage: () => messageSearchBloc.search(
+          onEndOfPage: () => messageSearchBloc.loadMore(
             filter: {
               'cid': {
                 r'$in': ['messaging:${StreamChannel.of(context).channel.id}']
