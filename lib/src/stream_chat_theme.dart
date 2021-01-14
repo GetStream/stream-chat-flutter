@@ -492,8 +492,8 @@ class ColorTheme {
     ),
     this.borderTop = const Effect(
         sigmaX: 0, sigmaY: -1, color: Color(0xff000000), blur: 0.0),
-    this.borderBottom =
-        const Effect(sigmaX: 0, sigmaY: 1, color: Color(0xff000000), blur: 0.0),
+    this.borderBottom = const Effect(
+        sigmaX: 0, sigmaY: 1, color: Color(0xff000000), blur: 0.0, alpha: 0.08),
     this.shadowIconButton = const Effect(
         sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
     this.modalShadow = const Effect(
@@ -514,8 +514,8 @@ class ColorTheme {
     this.accentGreen = const Color(0xff20E070),
     this.borderTop = const Effect(
         sigmaX: 0, sigmaY: -1, color: Color(0xff141924), blur: 0.0),
-    this.borderBottom =
-        const Effect(sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0),
+    this.borderBottom = const Effect(
+        sigmaX: 0, sigmaY: 1, color: Color(0xff141924), blur: 0.0, alpha: 1.0),
     this.shadowIconButton = const Effect(
         sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
     this.modalShadow = const Effect(
