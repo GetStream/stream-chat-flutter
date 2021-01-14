@@ -262,16 +262,28 @@ class _ImageFooterState extends State<ImageFooter> {
                       media,
                       Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Align(
-                          alignment: Alignment.topLeft,
+                        child: Container(
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .white
+                                .withOpacity(0.6),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 8.0,
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .black
+                                    .withOpacity(0.3),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(1),
                           child: UserAvatar(
                             user: widget.message.user,
-                            constraints: BoxConstraints.tight(
-                              Size(
-                                24,
-                                24,
-                              ),
-                            ),
+                            constraints: BoxConstraints.tight(Size(24, 24)),
                             showOnlineStatus: false,
                           ),
                         ),
