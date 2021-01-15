@@ -115,7 +115,7 @@ class _HomePageState extends State<HomePage> {
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             StreamSvgIcon.message(
               color: _isSelected(0)
@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
       ),
       BottomNavigationBarItem(
         icon: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             StreamSvgIcon.mentions(
               color: _isSelected(1)

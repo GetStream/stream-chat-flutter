@@ -160,8 +160,6 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
           ),
           child: ListView.builder(
             itemBuilder: (context, position) {
-              var channel = StreamChannel.of(context).channel;
-
               return Padding(
                 padding: const EdgeInsets.all(1.0),
                 child: Padding(

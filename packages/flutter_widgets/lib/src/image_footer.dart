@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
@@ -9,8 +7,6 @@ import 'package:dio/dio.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -58,15 +54,16 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ImageFooterState extends State<ImageFooter> {
+  //ignore:unused_field
   bool _userSearchMode = false;
   TextEditingController _searchController;
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _messageFocusNode = FocusNode();
 
+  //ignore:unused_field
   String _channelNameQuery;
 
   final List<Channel> _selectedChannels = [];
-  bool _loading = false;
 
   Timer _debounce;
 
@@ -311,95 +308,6 @@ class _ImageFooterState extends State<ImageFooter> {
     );
   }
 
-  Widget _buildShareTextInputSection(modalSetState) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: BottomAppBar(
-        child: Container(
-          height: 40.0,
-          margin: const EdgeInsets.symmetric(
-            vertical: 8,
-            horizontal: 8,
-          ),
-          child: _loading
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        focusNode: _messageFocusNode,
-                        onChanged: (val) {
-                          modalSetState(() {});
-                        },
-                        onTap: () {
-                          modalSetState(() {});
-                          setState(() {});
-                        },
-                        decoration: InputDecoration(
-                          prefixText: '     ',
-                          hintText: 'Add a comment',
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24.0),
-                            borderSide: BorderSide(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .black
-                                  .withOpacity(0.16),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                              borderSide: BorderSide(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .black
-                                    .withOpacity(0.16),
-                              )),
-                          contentPadding: const EdgeInsets.all(0),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    IconTheme(
-                      data: StreamChatTheme.of(context)
-                          .channelTheme
-                          .messageInputButtonIconTheme,
-                      child: IconButton(
-                        onPressed: () async {
-                          modalSetState(() => _loading = true);
-                          await sendMessage();
-                          modalSetState(() => _loading = false);
-                        },
-                        splashRadius: 24,
-                        visualDensity: VisualDensity.compact,
-                        constraints: BoxConstraints.tightFor(
-                          height: 24,
-                          width: 24,
-                        ),
-                        padding: EdgeInsets.zero,
-                        icon: Transform.rotate(
-                          angle: -pi / 2,
-                          child: StreamSvgIcon.Icon_send_message(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentBlue,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-        ),
-      ),
-    );
-  }
-
   /// Sends the current message
   Future sendMessage() async {
     var text = _messageController.text.trim();
@@ -419,25 +327,6 @@ class _ImageFooterState extends State<ImageFooter> {
 
     _selectedChannels.clear();
     Navigator.pop(context);
-  }
-
-  Future<void> _saveImage(String url) async {
-    var response = await Dio()
-        .get(url, options: Options(responseType: ResponseType.bytes));
-    final result = await ImageGallerySaver.saveImage(
-        Uint8List.fromList(response.data),
-        quality: 60,
-        name: "${DateTime.now().millisecondsSinceEpoch}");
-    return result;
-  }
-
-  Future<void> _saveVideo(String url) async {
-    var appDocDir = await getTemporaryDirectory();
-    var savePath =
-        appDocDir.path + "/${DateTime.now().millisecondsSinceEpoch}.mp4";
-    await Dio().download(url, savePath);
-    final result = await ImageGallerySaver.saveFile(savePath);
-    print(result);
   }
 }
 

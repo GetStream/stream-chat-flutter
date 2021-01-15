@@ -79,6 +79,9 @@ class AppRoutes {
             builder: (_) {
               return GroupInfoScreen();
             });
+      // Default case, should not reach here.
+      default:
+        return null;
     }
   }
 }

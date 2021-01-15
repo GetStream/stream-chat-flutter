@@ -798,6 +798,8 @@ class MessageInputState extends State<MessageInput> {
               ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
               : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
           break;
+        default:
+          return Colors.black;
       }
     }
 
@@ -1014,6 +1016,8 @@ class MessageInputState extends State<MessageInput> {
               );
             });
         break;
+      default:
+        return SizedBox();
     }
   }
 
@@ -1038,6 +1042,7 @@ class MessageInputState extends State<MessageInput> {
           final mediaInfo = await CompressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
+            // ignore: deprecated_member_use
             Scaffold.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -1058,6 +1063,7 @@ class MessageInputState extends State<MessageInput> {
             path: mediaInfo.path,
           );
         } else {
+          // ignore: deprecated_member_use
           Scaffold.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -1110,6 +1116,7 @@ class MessageInputState extends State<MessageInput> {
       });
       print(e);
       print(s);
+      // ignore: deprecated_member_use
       Scaffold.of(context).showSnackBar(
         SnackBar(
           content: Text('Error adding the attachment: $e'),
@@ -2013,6 +2020,7 @@ class MessageInputState extends State<MessageInput> {
           attachment.file = file;
         });
       } else {
+        // ignore: deprecated_member_use
         Scaffold.of(context).showSnackBar(
           SnackBar(
             content: Text(

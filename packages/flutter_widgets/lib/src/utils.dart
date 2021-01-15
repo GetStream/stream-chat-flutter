@@ -9,7 +9,7 @@ Future<void> launchURL(BuildContext context, String url) async {
   if (await canLaunch(url)) {
     await launch(url);
   } else {
-    Scaffold.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Cannot launch the url'),
       ),

@@ -220,7 +220,7 @@ class MessageReactionsModal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
-            overflow: Overflow.visible,
+            clipBehavior: Clip.none,
             children: [
               UserAvatar(
                 onTap: onUserAvatarTap,

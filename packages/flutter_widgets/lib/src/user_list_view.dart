@@ -524,6 +524,7 @@ abstract class ListItem {
       final user = (this as ListUserItem).user;
       return 'USER-${user.id}';
     }
+    return null;
   }
 
   Widget when({
@@ -536,6 +537,7 @@ abstract class ListItem {
     if (this is ListUserItem) {
       return userItem((this as ListUserItem).user);
     }
+    return SizedBox();
   }
 }
 
