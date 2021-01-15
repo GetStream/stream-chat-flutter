@@ -15,12 +15,14 @@ extension StringExtension on String {
     final characters = this.trim().characters;
     if (characters.isEmpty) return false;
     if (characters.length > 3) return false;
+    final regExp = RegExp('[0-9]');
     return characters.every((c) {
-      return _emojis.firstWhere(
-            (Emoji emoji) => emoji.char.contains(c),
-            orElse: () => null,
-          ) !=
-          null;
+      return !regExp.hasMatch(c) &&
+          _emojis.firstWhere(
+                (Emoji emoji) => emoji.char.contains(c),
+                orElse: () => null,
+              ) !=
+              null;
     });
   }
 }
