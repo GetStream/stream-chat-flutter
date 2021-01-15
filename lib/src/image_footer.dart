@@ -174,117 +174,138 @@ class _ImageFooterState extends State<ImageFooter> {
     showModalBottomSheet(
       context: context,
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: const BorderRadius.only(
+          topLeft: const Radius.circular(16.0),
+          topRight: const Radius.circular(16.0),
+        ),
       ),
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: StreamChatTheme.of(context).colorTheme.white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(16.0),
-                    topLeft: Radius.circular(16.0),
-                  )),
-              child: Stack(
+        final crossAxisCount = 3;
+        final noOfRowToShowInitially =
+            widget.mediaAttachments.length > crossAxisCount ? 2 : 1;
+        final size = MediaQuery.of(context).size;
+        final initialChildSize =
+            48 + (size.width * noOfRowToShowInitially) / crossAxisCount;
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: initialChildSize / size.height,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Photos',
-                        style:
-                            StreamChatTheme.of(context).textTheme.headlineBold,
+                  Stack(
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'Photos',
+                            style: StreamChatTheme.of(context)
+                                .textTheme
+                                .headlineBold,
+                          ),
+                        ),
                       ),
-                    ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          icon: StreamSvgIcon.close(
+                            color: StreamChatTheme.of(context).colorTheme.black,
+                          ),
+                          onPressed: () => Navigator.maybePop(context),
+                        ),
+                      ),
+                    ],
                   ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      icon: StreamSvgIcon.close(
-                        color: StreamChatTheme.of(context).colorTheme.black,
+                  Flexible(
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: widget.mediaAttachments.length,
+                      padding: const EdgeInsets.all(1),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 2.0,
+                        crossAxisSpacing: 2.0,
                       ),
-                      onPressed: () => Navigator.maybePop(context),
+                      itemBuilder: (context, index) {
+                        Widget media;
+                        final attachment = widget.mediaAttachments[index];
+
+                        if (attachment.type == 'video') {
+                          var controllerPackage = widget.videoPackages[
+                              videoAttachments.indexOf(attachment)];
+
+                          media = InkWell(
+                            onTap: () => widget.mediaSelectedCallBack(index),
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: Chewie(
+                                controller: controllerPackage.chewieController,
+                              ),
+                            ),
+                          );
+                        } else {
+                          media = InkWell(
+                            onTap: () => widget.mediaSelectedCallBack(index),
+                            child: AspectRatio(
+                              child: CachedNetworkImage(
+                                imageUrl: attachment.imageUrl ??
+                                    attachment.assetUrl ??
+                                    attachment.thumbUrl,
+                                fit: BoxFit.cover,
+                              ),
+                              aspectRatio: 1.0,
+                            ),
+                          );
+                        }
+
+                        return Stack(
+                          children: [
+                            media,
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Container(
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .white
+                                      .withOpacity(0.6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 8.0,
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .black
+                                          .withOpacity(0.3),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(1),
+                                child: UserAvatar(
+                                  user: widget.message.user,
+                                  constraints:
+                                      BoxConstraints.tight(Size(24, 24)),
+                                  showOnlineStatus: false,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
-            ),
-            Container(
-              color: StreamChatTheme.of(context).colorTheme.white,
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, position) {
-                  Widget media;
-
-                  if (widget.mediaAttachments[position].type == 'video') {
-                    var controllerPackage = widget.videoPackages[
-                        videoAttachments
-                            .indexOf(widget.mediaAttachments[position])];
-
-                    media = InkWell(
-                      onTap: () {
-                        widget.mediaSelectedCallBack(position);
-                      },
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Chewie(
-                          controller: controllerPackage.chewieController,
-                        ),
-                      ),
-                    );
-                  } else {
-                    media = InkWell(
-                      onTap: () {
-                        widget.mediaSelectedCallBack(position);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: AspectRatio(
-                          child: CachedNetworkImage(
-                            imageUrl: widget
-                                    .mediaAttachments[position].imageUrl ??
-                                widget.mediaAttachments[position].assetUrl ??
-                                widget.mediaAttachments[position].thumbUrl,
-                            fit: BoxFit.cover,
-                          ),
-                          aspectRatio: 1.0,
-                        ),
-                      ),
-                    );
-                  }
-
-                  return Stack(
-                    children: [
-                      media,
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: UserAvatar(
-                            user: widget.message.user,
-                            constraints: BoxConstraints.tight(
-                              Size(
-                                24,
-                                24,
-                              ),
-                            ),
-                            showOnlineStatus: false,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-                itemCount: widget.mediaAttachments.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3),
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );

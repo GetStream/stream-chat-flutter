@@ -457,133 +457,132 @@ class _ChannelListPageState extends State<ChannelListPage> {
       },
       child: ChannelsBloc(
         child: MessageSearchBloc(
-          child: Column(
-            children: [
-              SearchTextField(
-                controller: _controller,
-                showCloseButton: _isSearchActive,
-              ),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onPanDown: (_) => FocusScope.of(context).unfocus(),
-                    child: _isSearchActive
-                        ? MessageSearchListView(
-                            messageQuery: _channelQuery,
-                            filters: {
-                              'members': {
-                                r'$in': [user.id]
-                              }
-                            },
-                            sortOptions: [
-                              SortOption(
-                                'created_at',
-                                direction: SortOption.ASC,
-                              ),
-                            ],
-                            pullToRefresh: false,
-                            paginationParams: PaginationParams(limit: 20),
-                            emptyBuilder: (_, query) {
-                              return LayoutBuilder(
-                                builder: (context, viewportConstraints) {
-                                  return SingleChildScrollView(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        minHeight:
-                                            viewportConstraints.maxHeight,
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(24),
-                                              child: StreamSvgIcon.search(
-                                                size: 96,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text(
-                                              'No results for \"$query\"...',
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            onItemTap: (messageResponse) async {
-                              final client = StreamChat.of(context).client;
-                              final message = messageResponse.message;
-                              final channel = client.channel(
-                                messageResponse.channel.type,
-                                id: messageResponse.channel.id,
-                              );
-                              if (channel.state == null) {
-                                await channel.watch();
-                              }
-                              Navigator.pushNamed(
-                                context,
-                                Routes.CHANNEL_PAGE,
-                                arguments: ChannelPageArgs(
-                                  channel: channel,
-                                  initialMessage: message,
-                                ),
-                              );
-                            },
-                          )
-                        : ChannelListView(
-                            onStartChatPressed: () {
-                              Navigator.pushNamed(context, Routes.NEW_CHAT);
-                            },
-                            swipeToAction: true,
-                            filter: {
-                              'members': {
-                                r'$in': [user.id],
-                              },
-                            },
-                            options: {
-                              'presence': true,
-                            },
-                            pagination: PaginationParams(
-                              limit: 20,
-                            ),
-                            channelWidget: ChannelPage(),
-                            onViewInfoTap: (channel) {
-                              if (channel.memberCount == 2 &&
-                                  channel.isDistinct) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => StreamChannel(
-                                      channel: channel,
-                                      child: ChatInfoScreen(
-                                        user: channel.state.members.first.user,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => StreamChannel(
-                                      channel: channel,
-                                      child: GroupInfoScreen(),
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                  ),
+          child: NestedScrollView(
+            floatHeaderSlivers: true,
+            headerSliverBuilder: (_, __) => [
+              SliverToBoxAdapter(
+                child: SearchTextField(
+                  controller: _controller,
+                  showCloseButton: _isSearchActive,
                 ),
               ),
             ],
+            body: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanDown: (_) => FocusScope.of(context).unfocus(),
+                child: _isSearchActive
+                    ? MessageSearchListView(
+                        messageQuery: _channelQuery,
+                        filters: {
+                          'members': {
+                            r'$in': [user.id]
+                          }
+                        },
+                        sortOptions: [
+                          SortOption(
+                            'created_at',
+                            direction: SortOption.ASC,
+                          ),
+                        ],
+                        pullToRefresh: false,
+                        paginationParams: PaginationParams(limit: 20),
+                        emptyBuilder: (_, query) {
+                          return LayoutBuilder(
+                            builder: (context, viewportConstraints) {
+                              return SingleChildScrollView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: viewportConstraints.maxHeight,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(24),
+                                          child: StreamSvgIcon.search(
+                                            size: 96,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        Text(
+                                          'No results for \"$query\"...',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        onItemTap: (messageResponse) async {
+                          final client = StreamChat.of(context).client;
+                          final message = messageResponse.message;
+                          final channel = client.channel(
+                            messageResponse.channel.type,
+                            id: messageResponse.channel.id,
+                          );
+                          if (channel.state == null) {
+                            await channel.watch();
+                          }
+                          Navigator.pushNamed(
+                            context,
+                            Routes.CHANNEL_PAGE,
+                            arguments: ChannelPageArgs(
+                              channel: channel,
+                              initialMessage: message,
+                            ),
+                          );
+                        },
+                      )
+                    : ChannelListView(
+                        onStartChatPressed: () {
+                          Navigator.pushNamed(context, Routes.NEW_CHAT);
+                        },
+                        swipeToAction: true,
+                        filter: {
+                          'members': {
+                            r'$in': [user.id],
+                          },
+                        },
+                        options: {
+                          'presence': true,
+                        },
+                        pagination: PaginationParams(
+                          limit: 20,
+                        ),
+                        channelWidget: ChannelPage(),
+                        onViewInfoTap: (channel) {
+                          if (channel.memberCount == 2 && channel.isDistinct) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StreamChannel(
+                                  channel: channel,
+                                  child: ChatInfoScreen(
+                                    user: channel.state.members.first.user,
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StreamChannel(
+                                  channel: channel,
+                                  child: GroupInfoScreen(),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+              ),
+            ),
           ),
         ),
       ),
