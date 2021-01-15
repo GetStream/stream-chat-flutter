@@ -185,7 +185,7 @@ class _ImageFooterState extends State<ImageFooter> {
       builder: (context) {
         final crossAxisCount = 3;
         final noOfRowToShowInitially =
-            widget.mediaAttachments.length > 3 ? 2 : 1;
+            widget.mediaAttachments.length > crossAxisCount ? 2 : 1;
         final size = MediaQuery.of(context).size;
         final initialChildSize =
             48 + (size.width * noOfRowToShowInitially) / crossAxisCount;
