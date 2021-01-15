@@ -56,8 +56,8 @@ jobs:
           flutter pub get
       - name: Decode google-services.json
         env:
-          FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
-        run: echo $FIREBASE_SECRET > ./example/android/app/google-services.json
+          ANDROID_GOOGLE_SERVICES: ${{ secrets.ANDROID_GOOGLE_SERVICES }}
+        run: echo $ANDROID_GOOGLE_SERVICES > ./example/android/app/google-services.json
       - name: Build
         run: |
           cd example
