@@ -922,7 +922,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       );
 
   Widget _buildTextBubble() {
-    if (widget.message.text.trim().isNotEmpty) return Offstage();
+    if (widget.message.text.trim().isEmpty) return Offstage();
     return Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
