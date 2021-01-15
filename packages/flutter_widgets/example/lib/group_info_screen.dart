@@ -612,7 +612,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 body: UsersBloc(
                   child: Column(
                     children: [
-                      _buildTextInputSection(modalSetState),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildTextInputSection(modalSetState),
+                      ),
                       Expanded(
                         child: UserListView(
                           selectedUsers: {},
@@ -690,66 +693,57 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Widget _buildTextInputSection(modalSetState) {
+    final theme = StreamChatTheme.of(context);
     return Column(
       children: [
-        SizedBox(
-          height: 16.0,
-        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SizedBox(
-              width: 16.0,
-            ),
             Expanded(
-              child: TextField(
-                controller: _searchController,
-                cursorColor: StreamChatTheme.of(context).colorTheme.black,
-                autofocus: true,
-                decoration: InputDecoration(
-                  isDense: true,
-                  prefixIconConstraints: BoxConstraints.tight(Size(36.0, 44.0)),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 2.0, horizontal: 6.0),
-                    child: StreamSvgIcon.search(
-                      color: StreamChatTheme.of(context).colorTheme.black,
+              child: Container(
+                height: 36,
+                child: TextField(
+                  controller: _searchController,
+                  cursorColor: theme.colorTheme.black,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: theme.textTheme.body.copyWith(
+                      color: theme.colorTheme.grey,
                     ),
+                    prefixIconConstraints: BoxConstraints.tight(Size(40, 24)),
+                    prefixIcon: StreamSvgIcon.search(
+                      color: theme.colorTheme.black,
+                      size: 24,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24.0),
+                      borderSide: BorderSide(
+                        color: theme.colorTheme.greyWhisper,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                        borderSide: BorderSide(
+                          color: theme.colorTheme.greyWhisper,
+                        )),
+                    contentPadding: const EdgeInsets.all(0),
                   ),
-                  hintText: 'Search',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .black
-                            .withOpacity(0.08)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                    borderSide: BorderSide(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .black
-                            .withOpacity(0.08)),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
               ),
             ),
-            SizedBox(
-              width: 8.0,
-            ),
+            SizedBox(width: 16.0),
             IconButton(
               icon: StreamSvgIcon.close_small(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(0.5),
+                color: theme.colorTheme.grey,
               ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              constraints: BoxConstraints.tightFor(
+                height: 24,
+                width: 24,
+              ),
+              padding: EdgeInsets.zero,
+              splashRadius: 24,
+              onPressed: () => Navigator.pop(context),
             )
           ],
         ),

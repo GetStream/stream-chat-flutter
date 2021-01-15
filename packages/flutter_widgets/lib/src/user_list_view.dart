@@ -416,6 +416,10 @@ class _UserListViewState extends State<UserListView>
                           height: 64,
                           width: 64,
                         ),
+                        onlineIndicatorConstraints: BoxConstraints.tightFor(
+                          height: 12,
+                          width: 12,
+                        ),
                         onTap: (user) =>
                             widget.onUserTap(user, widget.userWidget),
                         onLongPress: widget.onUserLongPress,

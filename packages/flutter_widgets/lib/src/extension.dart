@@ -15,13 +15,7 @@ extension StringExtension on String {
     final characters = this.trim().characters;
     if (characters.isEmpty) return false;
     if (characters.length > 3) return false;
-    return characters.every((c) {
-      return _emojis.firstWhere(
-            (Emoji emoji) => emoji.char.contains(c),
-            orElse: () => null,
-          ) !=
-          null;
-    });
+    return characters.every((c) => _emojis.map((e) => e.char).contains(c));
   }
 }
 
