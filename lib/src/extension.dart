@@ -3,6 +3,9 @@ import 'package:characters/characters.dart';
 
 final _emojis = Emoji.all();
 
+//https://pub.dev/documentation/quiver/latest/quiver.strings/isDigit.html
+bool isDigit(int rune) => rune ^ 0x30 <= 9;
+
 extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1)}";
@@ -15,14 +18,14 @@ extension StringExtension on String {
     final characters = this.trim().characters;
     if (characters.isEmpty) return false;
     if (characters.length > 3) return false;
-    final regExp = RegExp('[0-9]');
+    final containsDigits = characters.any((c) => isDigit(c.runes.first));
+    if (containsDigits) return false;
     return characters.every((c) {
-      return !regExp.hasMatch(c) &&
-          _emojis.firstWhere(
-                (Emoji emoji) => emoji.char.contains(c),
-                orElse: () => null,
-              ) !=
-              null;
+      return _emojis.firstWhere(
+            (Emoji emoji) => emoji.char.contains(c),
+            orElse: () => null,
+          ) !=
+          null;
     });
   }
 }
