@@ -470,7 +470,7 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        unawaited (queryChannels(filter: {
+        unawaited(queryChannels(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
