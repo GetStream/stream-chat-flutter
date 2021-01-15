@@ -295,10 +295,6 @@ class _MessageWidgetState extends State<MessageWidget> {
     var leftPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
-    final hasFiles =
-        widget.message.attachments?.any((element) => element.type == 'file') ==
-            true;
-
     return Material(
       type: MaterialType.transparency,
       child: Portal(
@@ -406,29 +402,19 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                             BorderRadius.zero,
                                                       ),
                                                   color: _getBackgroundColor(),
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(
-                                                        hasFiles ? 2.0 : 0.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: <Widget>[
-                                                        if (hasQuotedMessage)
-                                                          _buildQuotedMessage(),
-                                                        if (hasNonUrlAttachments)
-                                                          _parseAttachments(
-                                                              context),
-                                                        if (widget.message.text
-                                                                .trim()
-                                                                .isNotEmpty &&
-                                                            !isGiphy)
-                                                          _buildTextBubble(
-                                                              context),
-                                                      ],
-                                                    ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: <Widget>[
+                                                      if (hasQuotedMessage)
+                                                        _buildQuotedMessage(),
+                                                      if (hasNonUrlAttachments)
+                                                        _parseAttachments(),
+                                                      if (!isGiphy)
+                                                        _buildTextBubble(),
+                                                    ],
                                                   ),
                                                 ),
                                         ),
@@ -718,6 +704,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                       : DisplayWidget.show,
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
+              attachmentShape:
+                  widget.attachmentShape ?? _getDefaultAttachmentShape(context),
               reverse: widget.reverse,
               showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
               message: widget.message,
@@ -763,6 +751,8 @@ class _MessageWidgetState extends State<MessageWidget> {
               onUserAvatarTap: widget.onUserAvatarTap,
               messageTheme: widget.messageTheme,
               messageShape: widget.shape ?? _getDefaultShape(context),
+              attachmentShape:
+                  widget.attachmentShape ?? _getDefaultAttachmentShape(context),
               reverse: widget.reverse,
               message: widget.message,
               editMessageInputBuilder: widget.editMessageInputBuilder,
@@ -773,20 +763,31 @@ class _MessageWidgetState extends State<MessageWidget> {
         });
   }
 
-  ShapeBorder _getDefaultShape(BuildContext context) {
+  ShapeBorder _getDefaultAttachmentShape(BuildContext context) {
+    final hasFiles =
+        widget.message.attachments?.any((it) => it.type == 'file') == true;
     return RoundedRectangleBorder(
-      side: widget.attachmentBorderSide ??
-          widget.borderSide ??
-          BorderSide(
-            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-          ),
-      borderRadius: widget.attachmentBorderRadiusGeometry ??
-          widget.borderRadiusGeometry ??
-          BorderRadius.zero,
+      side: hasFiles
+          ? widget.attachmentBorderSide ??
+              BorderSide(
+                color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+              )
+          : BorderSide.none,
+      borderRadius: widget.attachmentBorderRadiusGeometry ?? BorderRadius.zero,
     );
   }
 
-  Widget _parseAttachments(BuildContext context) {
+  ShapeBorder _getDefaultShape(BuildContext context) {
+    return RoundedRectangleBorder(
+      side: widget.borderSide ??
+          BorderSide(
+            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+          ),
+      borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
+    );
+  }
+
+  Widget _parseAttachments() {
     final images = widget.message.attachments
             ?.where((element) =>
                 element.type == 'image' && element.ogScrapeUrl == null)
@@ -849,7 +850,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     Attachment attachment,
   }) {
     final attachmentShape =
-        widget.attachmentShape ?? widget.shape ?? _getDefaultShape(context);
+        widget.attachmentShape ?? _getDefaultAttachmentShape(context);
     return Material(
       clipBehavior: Clip.antiAlias,
       shape: attachmentShape,
@@ -920,7 +921,8 @@ class _MessageWidgetState extends State<MessageWidget> {
         ),
       );
 
-  Widget _buildTextBubble(BuildContext context) {
+  Widget _buildTextBubble() {
+    if (widget.message.text.trim().isNotEmpty) return Offstage();
     return Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,

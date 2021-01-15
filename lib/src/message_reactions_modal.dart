@@ -20,6 +20,7 @@ class MessageReactionsModal extends StatelessWidget {
   final bool showReactions;
   final DisplayWidget showUserAvatar;
   final ShapeBorder messageShape;
+  final ShapeBorder attachmentShape;
   final void Function(User) onUserAvatarTap;
 
   const MessageReactionsModal({
@@ -30,6 +31,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.onThreadTap,
     this.editMessageInputBuilder,
     this.messageShape,
+    this.attachmentShape,
     this.reverse = false,
     this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
@@ -127,6 +129,7 @@ class MessageReactionsModal extends StatelessWidget {
                               translateUserAvatar: false,
                               showSendingIndicator: false,
                               shape: messageShape,
+                              attachmentShape: attachmentShape,
                               padding: const EdgeInsets.all(0),
                               attachmentPadding: EdgeInsets.all(
                                 hasFileAttachment ? 4 : 2,

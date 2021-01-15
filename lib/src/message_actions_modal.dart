@@ -32,6 +32,7 @@ class MessageActionsModal extends StatefulWidget {
   final bool showFlagButton;
   final bool reverse;
   final ShapeBorder messageShape;
+  final ShapeBorder attachmentShape;
   final DisplayWidget showUserAvatar;
 
   const MessageActionsModal({
@@ -51,6 +52,7 @@ class MessageActionsModal extends StatefulWidget {
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
+    this.attachmentShape,
     this.reverse = false,
   }) : super(key: key);
 
@@ -173,6 +175,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               showInChannelIndicator: false,
                               showSendingIndicator: false,
                               shape: widget.messageShape,
+                              attachmentShape: widget.attachmentShape,
                             ),
                           ),
                           SizedBox(height: 8),
