@@ -729,17 +729,11 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   Widget _separatorBuilder(context, i) {
-    var effect = StreamChatTheme.of(context).colorTheme.borderTop;
+    var effect = StreamChatTheme.of(context).colorTheme.borderBottom;
 
-    return BackdropFilter(
-      filter: ui.ImageFilter.blur(
-        sigmaX: effect.sigmaX,
-        sigmaY: effect.sigmaY,
-      ),
-      child: Container(
-        height: 1,
-        color: effect.color.withOpacity(0.08),
-      ),
+    return Container(
+      height: 1,
+      color: effect.color.withOpacity(effect.alpha ?? 1.0),
     );
   }
 
