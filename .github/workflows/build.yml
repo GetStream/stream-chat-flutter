@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Decode google-services.json
         env:
-        FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
         run: echo $FIREBASE_SECRET > example/android/app/google-services.json
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
