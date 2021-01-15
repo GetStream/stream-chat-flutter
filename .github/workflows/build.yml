@@ -63,9 +63,10 @@ jobs:
           cd example
           flutter build apk
       - name: Deploy
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.3.2
         with:
           appId: ${{secrets.FIREBASE_ANDROID_APPID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: stream-testers
-          file: example/build/app/outputs/apk/release/app-release.apk
+          debug: true
+          file: ./example/build/app/outputs/apk/release/app-release.apk
