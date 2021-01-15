@@ -522,7 +522,7 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     var children = <Widget>[];
 
-    final threadParticipants = widget.message.threadParticipants;
+    final threadParticipants = widget.message?.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
     final replyCount = widget.message.replyCount;
 
@@ -551,7 +551,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         if (showThreadParticipants)
           SizedBox.fromSize(
             size: Size((threadParticipants.length * 8.0) + 8, 16),
-            child: _buildThreadParticipantsIndicator(),
+            child: _buildThreadParticipantsIndicator(threadParticipants),
           ),
         InkWell(
           onTap: widget.onThreadTap != null ? onThreadTap : null,
@@ -628,10 +628,10 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
-  Widget _buildThreadParticipantsIndicator() {
+  Widget _buildThreadParticipantsIndicator(Iterable<User> threadParticipants) {
     var padding = 0.0;
     return Stack(
-      children: widget.message.threadParticipants.map((user) {
+      children: threadParticipants.map((user) {
         padding += 8.0;
         return Positioned(
           right: padding - 8,
