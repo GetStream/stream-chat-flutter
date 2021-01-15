@@ -464,7 +464,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             ),
             const SizedBox(width: 16),
             Text(
-              'Flag',
+              'Flag Message',
               style: StreamChatTheme.of(context).textTheme.body,
             ),
           ],
