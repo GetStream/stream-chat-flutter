@@ -8,11 +8,14 @@ on:
   release:
     types:
       - created
+defaults:
+  run:
+    working-directory: packages/flutter_widgets
 
 jobs:
   build_and_deploy_ios:
-      runs-on: [macos-latest]
-      steps:
+    runs-on: [macos-latest]
+    steps:
       - uses: actions/checkout@v2
       - name: Install RubyGems
         run: |
@@ -50,14 +53,19 @@ jobs:
       - run: |
           cd example
           flutter pub get
+      - name: Decode google-services.json
+        env:
+          ANDROID_GOOGLE_SERVICES: ${{ secrets.ANDROID_GOOGLE_SERVICES }}
+        run: echo $ANDROID_GOOGLE_SERVICES > ./example/android/app/google-services.json
       - name: Build
         run: |
           cd example
           flutter build apk
       - name: Deploy
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.3.2
         with:
           appId: ${{secrets.FIREBASE_ANDROID_APPID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: stream-testers
-          file: example/build/app/outputs/apk/release/app-release.apk
+          debug: true
+          file: packages/flutter_widgets/example/build/app/outputs/apk/release/app-release.apk
