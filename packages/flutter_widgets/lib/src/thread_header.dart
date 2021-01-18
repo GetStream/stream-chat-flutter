@@ -79,6 +79,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      brightness: Theme.of(context).brightness,
       elevation: 1,
       leading: showBackButton
           ? StreamBackButton(
