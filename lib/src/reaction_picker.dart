@@ -40,7 +40,8 @@ class ReactionPicker extends StatelessWidget {
           final totalScore = message.latestReactions
               .where((r) => r.type == reactionType)
               .map((r) => r.score)
-              .reduce((tot, s) => tot + s);
+              .fold(0, (tot, s) => tot + s);
+
           return Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
