@@ -55,6 +55,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onUserAvatarTap,
     this.onNewChatButtonTap,
     this.showConnectionStateTile = false,
+    this.preNavigationCallback,
   }) : super(key: key);
 
   /// Pass this if you don't have a [Client] in your widget tree.
@@ -71,6 +72,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onNewChatButtonTap;
 
   final bool showConnectionStateTile;
+
+  final VoidCallback preNavigationCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +113,13 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
               child: UserAvatar(
                 user: user,
                 showOnlineStatus: false,
-                onTap:
-                    onUserAvatarTap ?? (_) => Scaffold.of(context).openDrawer(),
+                onTap: onUserAvatarTap ??
+                    (_) {
+                      if (preNavigationCallback != null) {
+                        preNavigationCallback();
+                      }
+                      Scaffold.of(context).openDrawer();
+                    },
                 borderRadius: BorderRadius.circular(20),
                 constraints: BoxConstraints.tightFor(
                   height: 40,
