@@ -1,6 +1,6 @@
 name: example
 description: A new Flutter project.
-version: 1.1.2
+version: 1.1.2+1
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -8,7 +8,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stream_chat_flutter: 0.2.13+1
+  stream_chat_flutter: 
+    path: ../
   flutter_apns: ^1.4.1
   flutter_local_notifications: ^2.0.2
   flutter_svg: ^0.19.1
