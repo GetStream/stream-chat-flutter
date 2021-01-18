@@ -31,8 +31,11 @@ class ReactionPicker extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: reactionToEmoji.keys.map((reactionType) {
-          final ownReactionIndex = message.latestReactions
-                  ?.indexWhere((reaction) => reaction.type == reactionType) ??
+          var user = StreamChat.of(context).user;
+          final ownReactionIndex = message.latestReactions?.indexWhere(
+                  (reaction) =>
+                      reaction.type == reactionType &&
+                      reaction.userId == user.id) ??
               -1;
           return Column(
             mainAxisSize: MainAxisSize.min,
