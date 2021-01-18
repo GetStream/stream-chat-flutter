@@ -35,6 +35,7 @@ Future<bool> showConfirmationDialog(
         topRight: Radius.circular(16.0),
       )),
       builder: (context) {
+        final effect = StreamChatTheme.of(context).colorTheme.borderTop;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -52,8 +53,8 @@ Future<bool> showConfirmationDialog(
             ),
             SizedBox(height: 36.0),
             Container(
-              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-              height: 1.0,
+              color: effect.color.withOpacity(effect.alpha ?? 1),
+              height: 1,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

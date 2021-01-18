@@ -491,7 +491,11 @@ class ColorTheme {
       stops: [0, 1],
     ),
     this.borderTop = const Effect(
-        sigmaX: 0, sigmaY: -1, color: Color(0xff000000), blur: 0.0),
+        sigmaX: 0,
+        sigmaY: -1,
+        color: Color(0xff000000),
+        blur: 0.0,
+        alpha: 0.08),
     this.borderBottom = const Effect(
         sigmaX: 0, sigmaY: 1, color: Color(0xff000000), blur: 0.0, alpha: 0.08),
     this.shadowIconButton = const Effect(
