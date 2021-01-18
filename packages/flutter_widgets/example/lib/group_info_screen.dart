@@ -907,8 +907,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     );
   }
 
-  void _showRemoveUserModal(User user) {}
-
   Widget _buildConnectedTitleState(User user) {
     var alternativeWidget;
 

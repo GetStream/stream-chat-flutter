@@ -9,6 +9,7 @@ Future<void> launchURL(BuildContext context, String url) async {
   if (await canLaunch(url)) {
     await launch(url);
   } else {
+    // ignore: deprecated_member_use
     Scaffold.of(context).showSnackBar(
       SnackBar(
         content: Text('Cannot launch the url'),
@@ -34,6 +35,7 @@ Future<bool> showConfirmationDialog(
         topRight: Radius.circular(16.0),
       )),
       builder: (context) {
+        final effect = StreamChatTheme.of(context).colorTheme.borderTop;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -51,8 +53,8 @@ Future<bool> showConfirmationDialog(
             ),
             SizedBox(height: 36.0),
             Container(
-              color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-              height: 1.0,
+              color: effect.color.withOpacity(effect.alpha ?? 1),
+              height: 1,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

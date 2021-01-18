@@ -1,3 +1,4 @@
+//ignore_for_file: public_member_api_docs
 import 'dart:io';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/src/db/offline_storage.dart';
 
 class SharedDB {
-  static constructDatabase(dbName) async {
+  static Future<VmDatabase> constructDatabase(dbName) async {
     final dir = await getApplicationDocumentsDirectory();
     final path = join(dir.path, dbName);
     final file = File(path);

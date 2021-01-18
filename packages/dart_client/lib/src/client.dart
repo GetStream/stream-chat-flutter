@@ -13,6 +13,7 @@ import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
+import 'package:pedantic/pedantic.dart' show unawaited;
 
 import 'api/channel.dart';
 import 'api/connection_status.dart';
@@ -25,8 +26,15 @@ import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
 
+/// Handler function used for logging records. Function requires a single [LogRecord]
+/// as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
+
+/// Used for decoding [Map] data to a generic type `T`.
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
+
+/// A function which can be used to request a Stream Chat API token from your
+/// own backend server. Function requires a single [userId].
 typedef TokenProvider = Future<String> Function(String userId);
 
 /// The key used to save the userId to sharedPreferences
@@ -462,7 +470,7 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        queryChannels(filter: {
+        unawaited(queryChannels(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
@@ -474,7 +482,7 @@ class Client {
               online: true,
             ));
           },
-        );
+        ));
       } else {
         _synced = false;
       }
@@ -712,7 +720,7 @@ class Client {
     }
   }
 
-  _parseError(DioError error) {
+  dynamic _parseError(DioError error) {
     if (error.type == DioErrorType.RESPONSE) {
       final apiError =
           ApiError(error.response?.data, error.response?.statusCode);

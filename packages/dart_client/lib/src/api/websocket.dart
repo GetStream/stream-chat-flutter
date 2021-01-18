@@ -14,7 +14,11 @@ import 'web_socket_channel_stub.dart'
     if (dart.library.html) 'web_socket_channel_html.dart'
     if (dart.library.io) 'web_socket_channel_io.dart';
 
+/// Typedef which exposes an [Event] as the only parameter.
 typedef EventHandler = void Function(Event);
+
+/// Typedef used for connecting to a websocket. Method returns a  [WebSocketChannel]
+/// and accepts a connection [url] and an optional [Iterable] of `protocols`.
 typedef ConnectWebSocket = WebSocketChannel Function(String url,
     {Iterable<String> protocols});
 
@@ -236,7 +240,9 @@ class WebSocket {
 
     try {
       await connect();
-    } catch (e) {}
+    } catch (e) {
+      logger.log(Level.SEVERE, e.toString());
+    }
     await Future.delayed(
       Duration(seconds: min(_retryAttempt * 5, 25)),
       () {
