@@ -37,6 +37,10 @@ class ReactionPicker extends StatelessWidget {
                       reaction.type == reactionType &&
                       reaction.userId == user.id) ??
               -1;
+          final totalScore = message.latestReactions
+              .where((r) => r.type == reactionType)
+              .map((r) => r.score)
+              .reduce((tot, s) => tot + s);
           return Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -58,12 +62,11 @@ class ReactionPicker extends StatelessWidget {
                   }
                 },
               ),
-              ownReactionIndex != -1
+              totalScore > 0
                   ? Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),
                       child: Text(
-                        message.latestReactions[ownReactionIndex].score
-                            .toString(),
+                        totalScore.toString(),
                         style: TextStyle(color: Colors.white),
                       ),
                     )
