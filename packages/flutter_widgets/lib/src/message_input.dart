@@ -1029,7 +1029,11 @@ class MessageInputState extends State<MessageInput> {
       setState(() {
         _attachments.add(attachment);
       });
-      final mediaFile = await medium.originFile;
+
+      final mediaFile = await medium.originFile.timeout(
+        Duration(seconds: 5),
+        onTimeout: () => medium.originFile,
+      );
 
       var file = PlatformFile(
         path: mediaFile.path,
