@@ -1039,15 +1039,9 @@ class MessageInputState extends State<MessageInput> {
           final mediaInfo = await CompressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
-            // ignore: deprecated_member_use
-            Scaffold.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
-                ),
-              ),
+            _showErrorAlert(
+              'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
             );
-
             setState(() {
               _attachments.remove(attachment);
             });
@@ -1060,13 +1054,8 @@ class MessageInputState extends State<MessageInput> {
             path: mediaInfo.path,
           );
         } else {
-          // ignore: deprecated_member_use
-          Scaffold.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'The file is too large to upload. The file size limit is 20MB',
-              ),
-            ),
+          _showErrorAlert(
+            'The file is too large to upload. The file size limit is 20MB.',
           );
         }
       }
@@ -2018,12 +2007,8 @@ class MessageInputState extends State<MessageInput> {
         });
       } else {
         // ignore: deprecated_member_use
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'The file is too large to upload. The file size limit is 20MB',
-            ),
-          ),
+        _showErrorAlert(
+          'The file is too large to upload. The file size limit is 20MB.',
         );
         setState(() {
           _attachments.remove(attachment);
@@ -2274,6 +2259,77 @@ class MessageInputState extends State<MessageInput> {
         _openFilePickerSection = false;
       }
     });
+  }
+
+  void _showErrorAlert(String description) {
+    showModalBottomSheet(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.0),
+        topRight: Radius.circular(16.0),
+      )),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26.0,
+            ),
+            StreamSvgIcon.error(
+              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              size: 24.0,
+            ),
+            SizedBox(
+              height: 26.0,
+            ),
+            Text(
+              'Something went wrong',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                description,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(
+              height: 36.0,
+            ),
+            Container(
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              height: 1.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FlatButton(
+                  child: Text(
+                    'OK',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _parseExistingMessage(Message message) {
