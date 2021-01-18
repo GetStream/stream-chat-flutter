@@ -80,7 +80,6 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
                 primaryIconTheme: streamTheme.primaryIconTheme,
                 accentColor: streamTheme.colorTheme.accentBlue,
                 scaffoldBackgroundColor: streamTheme.colorTheme.white,
-                buttonTheme: streamTheme.buttonTheme,
               ),
               child: widget.child,
             );
