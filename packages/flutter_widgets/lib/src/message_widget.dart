@@ -453,16 +453,10 @@ class _MessageWidgetState extends State<MessageWidget> {
                           ),
                         if (isFailedState)
                           Positioned(
-                            left: widget.reverse ? -3 : null,
+                            left: widget.reverse ? -9 : null,
                             right: widget.reverse ? null : -9,
-                            bottom: showBottomRow ? 20 : 0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: StreamSvgIcon.error(size: 20),
-                            ),
+                            bottom: showBottomRow ? 18 : -2,
+                            child: StreamSvgIcon.error(size: 20),
                           ),
                       ],
                     ),
