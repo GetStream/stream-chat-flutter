@@ -70,6 +70,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             );
           }
 
+          var userMember = snapshot.data
+              .firstWhere((e) => e.user.id == StreamChat.of(context).user.id);
+          var isOwner = userMember.role == 'owner';
+
           return Scaffold(
             backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
             appBar: AppBar(
@@ -161,7 +165,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   height: 8.0,
                   color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
                 ),
-                _buildNameTile(),
+                if (isOwner) _buildNameTile(),
                 _buildOptionListTiles(),
               ],
             ),

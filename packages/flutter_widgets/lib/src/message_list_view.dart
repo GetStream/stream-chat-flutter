@@ -956,7 +956,10 @@ class _MessageListViewState extends State<MessageListView> {
           end: colorTheme.white.withOpacity(0),
         ),
         duration: const Duration(seconds: 3),
-        child: child,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: child,
+        ),
         onEnd: () => initialMessageHighlightComplete = true,
         builder: (_, color, child) {
           return Container(

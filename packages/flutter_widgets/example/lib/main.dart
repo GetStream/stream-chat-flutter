@@ -156,6 +156,9 @@ class _HomePageState extends State<HomePage> {
         onNewChatButtonTap: () {
           Navigator.pushNamed(context, Routes.NEW_CHAT);
         },
+        preNavigationCallback: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
       ),
       drawer: _buildDrawer(context, user),
       drawerEdgeDragWidth: 50,
@@ -519,6 +522,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                           );
                         },
                         onItemTap: (messageResponse) async {
+                          FocusScope.of(context).requestFocus(FocusNode());
                           final client = StreamChat.of(context).client;
                           final message = messageResponse.message;
                           final channel = client.channel(
