@@ -1,3 +1,7 @@
+## 0.2.20+4
+
+- Fix channelPreview when the message list is empty
+
 ## 0.2.20+3
 
 - Fix reaction picker score indicator

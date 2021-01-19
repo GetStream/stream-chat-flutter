@@ -127,7 +127,7 @@ class ChannelListPage extends StatelessWidget {
               '\$in': [StreamChat.of(context).user.id],
             }
           },
-          sort: [SortOption('last_message_at')],
+          // sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
             limit: 20,
           ),
