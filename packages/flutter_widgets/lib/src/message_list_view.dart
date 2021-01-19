@@ -934,7 +934,10 @@ class _MessageListViewState extends State<MessageListView> {
 
     if (!message.isDeleted && !message.isSystem && !message.isEphemeral) {
       child = Swipeable(
-        onSwipeEnd: () => widget.onMessageSwiped(message),
+        onSwipeEnd: () {
+          FocusScope.of(context).unfocus();
+          widget.onMessageSwiped(message);
+        },
         backgroundIcon: StreamSvgIcon.reply(
           color: StreamChatTheme.of(context).colorTheme.accentBlue,
         ),
