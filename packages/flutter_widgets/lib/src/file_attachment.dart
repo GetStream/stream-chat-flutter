@@ -128,18 +128,20 @@ class _FileAttachmentState extends State<FileAttachment> {
           return Image.memory(
             widget.file.bytes,
             fit: BoxFit.cover,
+            errorBuilder: (_, obj, trace) {
+              return getFileTypeImage(widget.attachment.extraData['other']);
+            },
           );
           break;
         case FileAttachmentType.online:
-          if (widget.attachment.extraData['mime_type'] == 'svg') {
-            return getFileTypeImage(widget.attachment.extraData['other']);
-          }
-
           return CachedNetworkImage(
             imageUrl: widget.attachment.imageUrl ??
                 widget.attachment.assetUrl ??
                 widget.attachment.thumbUrl,
             fit: BoxFit.cover,
+            errorWidget: (_, obj, trace) {
+              return getFileTypeImage(widget.attachment.extraData['other']);
+            },
             progressIndicatorBuilder: (context, _, progress) {
               return Center(
                 child: Container(
