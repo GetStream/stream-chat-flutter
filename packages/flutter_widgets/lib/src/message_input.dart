@@ -462,15 +462,16 @@ class MessageInputState extends State<MessageInput> {
                     disabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent)),
                     contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
+                    prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
+                    suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
                     prefixIcon: _commandEnabled
                         ? Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               color: theme.colorTheme.accentBlue,
                             ),
-                            height: 24,
-                            margin: const EdgeInsets.all(8.0),
-                            padding: const EdgeInsets.only(right: 8, left: 4),
+                            margin: const EdgeInsets.only(right: 4, left: 8),
+                            alignment: Alignment.center,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
