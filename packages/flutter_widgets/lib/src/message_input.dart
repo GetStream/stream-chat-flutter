@@ -2203,6 +2203,8 @@ class MessageInputState extends State<MessageInput> {
       await streamChannel.reloadChannel();
     }
 
+    _mentionedUsers.clear();
+
     if (widget.editMessage == null ||
         widget.editMessage.status == MessageSendingStatus.FAILED) {
       sendingFuture = channel.sendMessage(message);
