@@ -131,6 +131,10 @@ class _FileAttachmentState extends State<FileAttachment> {
           );
           break;
         case FileAttachmentType.online:
+          if (widget.attachment.extraData['mime_type'] == 'svg') {
+            return getFileTypeImage(widget.attachment.extraData['other']);
+          }
+
           return CachedNetworkImage(
             imageUrl: widget.attachment.imageUrl ??
                 widget.attachment.assetUrl ??

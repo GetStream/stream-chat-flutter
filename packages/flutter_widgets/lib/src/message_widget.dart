@@ -926,7 +926,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: widget.textPadding,
+            padding: isOnlyEmoji ? EdgeInsets.zero : widget.textPadding,
             child: widget.textBuilder != null
                 ? widget.textBuilder(context, widget.message)
                 : MessageText(
