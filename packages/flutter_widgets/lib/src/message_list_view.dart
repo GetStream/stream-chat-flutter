@@ -813,9 +813,7 @@ class _MessageListViewState extends State<MessageListView> {
     final readList = channel.state?.read?.where((read) {
           if (read.user.id == userId) return false;
           return (read.lastRead.isAfter(message.createdAt) ||
-                  read.lastRead.isAtSameMomentAs(message.createdAt)) &&
-              (index == 0 ||
-                  read.lastRead.isBefore(messages[index - 1].createdAt));
+              read.lastRead.isAtSameMomentAs(message.createdAt));
         })?.toList() ??
         [];
 

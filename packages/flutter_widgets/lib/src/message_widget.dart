@@ -381,12 +381,14 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   clipBehavior: Clip.antiAlias,
                                                   elevation: 0.0,
                                                   margin: EdgeInsets.symmetric(
-                                                    horizontal:
-                                                        widget.showUserAvatar ==
+                                                    horizontal: (isFailedState
+                                                            ? 15.0
+                                                            : 0.0) +
+                                                        (widget.showUserAvatar ==
                                                                 DisplayWidget
                                                                     .gone
                                                             ? 0
-                                                            : 4.0,
+                                                            : 4.0),
                                                   ),
                                                   shape: widget.shape ??
                                                       RoundedRectangleBorder(
@@ -453,16 +455,10 @@ class _MessageWidgetState extends State<MessageWidget> {
                           ),
                         if (isFailedState)
                           Positioned(
-                            left: widget.reverse ? -3 : null,
-                            right: widget.reverse ? null : -9,
-                            bottom: showBottomRow ? 20 : 0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: StreamSvgIcon.error(size: 20),
-                            ),
+                            left: widget.reverse ? 0 : null,
+                            right: widget.reverse ? null : 0,
+                            bottom: showBottomRow ? 18 : -2,
+                            child: StreamSvgIcon.error(size: 20),
                           ),
                       ],
                     ),

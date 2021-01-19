@@ -61,6 +61,8 @@ class MessageActionsModal extends StatefulWidget {
 }
 
 class _MessageActionsModalState extends State<MessageActionsModal> {
+  bool _showActions = true;
+
   @override
   Widget build(BuildContext context) {
     return _showMessageOptionsModal();
@@ -87,160 +89,163 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOutBack,
-      builder: (context, val, snapshot) {
-        final hasFileAttachment =
-            widget.message.attachments?.any((it) => it.type == 'file') == true;
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => Navigator.maybePop(context),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 10,
-                    sigmaY: 10,
-                  ),
-                  child: Container(
-                    color: StreamChatTheme.of(context).colorTheme.overlay,
-                  ),
-                ),
+    final hasFileAttachment =
+        widget.message.attachments?.any((it) => it.type == 'file') == true;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => Navigator.maybePop(context),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 10,
+                sigmaY: 10,
               ),
-              Transform.scale(
-                scale: val,
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: widget.reverse
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: <Widget>[
-                          if (widget.showReactions &&
-                              (widget.message.status ==
-                                      MessageSendingStatus.SENT ||
-                                  widget.message.status == null))
-                            Align(
-                              alignment: Alignment(
-                                  user.id == widget.message.user.id
-                                      ? (divFactor > 1.0
-                                          ? 0.0
-                                          : (1.0 - divFactor))
-                                      : (divFactor > 1.0
-                                          ? 0.0
-                                          : -(1.0 - divFactor)),
-                                  0.0),
-                              child: ReactionPicker(
-                                message: widget.message,
-                                messageTheme: widget.messageTheme,
-                              ),
-                            ),
-                          SizedBox(height: 8),
-                          IgnorePointer(
-                            child: MessageWidget(
-                              key: Key('MessageWidget'),
-                              reverse: widget.reverse,
-                              message: widget.message.copyWith(
-                                text: widget.message.text.length > 200
-                                    ? '${widget.message.text.substring(0, 200)}...'
-                                    : widget.message.text,
-                              ),
-                              messageTheme: widget.messageTheme,
-                              showReactions: false,
-                              showUsername: false,
-                              showThreadReplyIndicator: false,
-                              showReplyMessage: false,
-                              showUserAvatar: widget.showUserAvatar,
-                              attachmentPadding: EdgeInsets.all(
-                                hasFileAttachment ? 4 : 2,
-                              ),
-                              showTimestamp: false,
-                              translateUserAvatar: false,
-                              padding: const EdgeInsets.all(0),
-                              textPadding: EdgeInsets.symmetric(
-                                vertical: 8.0,
-                                horizontal:
-                                    widget.message.text.isOnlyEmoji ? 0 : 16.0,
-                              ),
-                              showReactionPickerIndicator:
-                                  widget.showReactions &&
-                                      (widget.message.status ==
-                                              MessageSendingStatus.SENT ||
-                                          widget.message.status == null),
-                              showInChannelIndicator: false,
-                              showSendingIndicator: false,
-                              shape: widget.messageShape,
-                              attachmentShape: widget.attachmentShape,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: widget.reverse ? 0 : 40,
-                            ),
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.75,
-                              child: Material(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .whiteSnow,
-                                clipBehavior: Clip.hardEdge,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+              child: Container(
+                color: StreamChatTheme.of(context).colorTheme.overlay,
+              ),
+            ),
+          ),
+          if (_showActions)
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOutBack,
+              builder: (context, val, snapshot) {
+                return Transform.scale(
+                  scale: val,
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: widget.reverse
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: <Widget>[
+                            if (widget.showReactions &&
+                                (widget.message.status ==
+                                        MessageSendingStatus.SENT ||
+                                    widget.message.status == null))
+                              Align(
+                                alignment: Alignment(
+                                    user.id == widget.message.user.id
+                                        ? (divFactor > 1.0
+                                            ? 0.0
+                                            : (1.0 - divFactor))
+                                        : (divFactor > 1.0
+                                            ? 0.0
+                                            : -(1.0 - divFactor)),
+                                    0.0),
+                                child: ReactionPicker(
+                                  message: widget.message,
+                                  messageTheme: widget.messageTheme,
                                 ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    if (widget.showReplyMessage &&
+                              ),
+                            SizedBox(height: 8),
+                            IgnorePointer(
+                              child: MessageWidget(
+                                key: Key('MessageWidget'),
+                                reverse: widget.reverse,
+                                message: widget.message.copyWith(
+                                  text: widget.message.text.length > 200
+                                      ? '${widget.message.text.substring(0, 200)}...'
+                                      : widget.message.text,
+                                ),
+                                messageTheme: widget.messageTheme,
+                                showReactions: false,
+                                showUsername: false,
+                                showThreadReplyIndicator: false,
+                                showReplyMessage: false,
+                                showUserAvatar: widget.showUserAvatar,
+                                attachmentPadding: EdgeInsets.all(
+                                  hasFileAttachment ? 4 : 2,
+                                ),
+                                showTimestamp: false,
+                                translateUserAvatar: false,
+                                padding: const EdgeInsets.all(0),
+                                textPadding: EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: widget.message.text.isOnlyEmoji
+                                      ? 0
+                                      : 16.0,
+                                ),
+                                showReactionPickerIndicator:
+                                    widget.showReactions &&
                                         (widget.message.status ==
                                                 MessageSendingStatus.SENT ||
-                                            widget.message.status == null) &&
-                                        widget.message.parentId == null)
-                                      _buildReplyButton(context),
-                                    if (widget.showThreadReplyMessage &&
-                                        (widget.message.status ==
-                                                MessageSendingStatus.SENT ||
-                                            widget.message.status == null) &&
-                                        widget.message.parentId == null)
-                                      _buildThreadReplyButton(context),
-                                    if (widget.showResendMessage)
-                                      _buildResendMessage(context),
-                                    if (widget.showEditMessage)
-                                      _buildEditMessage(context),
-                                    if (widget.showCopyMessage)
-                                      _buildCopyButton(context),
-                                    if (widget.showFlagButton)
-                                      _buildFlagButton(context),
-                                    if (widget.showDeleteMessage)
-                                      _buildDeleteButton(context),
-                                  ].insertBetween(
-                                    Container(
-                                      height: 1,
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .greyWhisper,
+                                            widget.message.status == null),
+                                showInChannelIndicator: false,
+                                showSendingIndicator: false,
+                                shape: widget.messageShape,
+                                attachmentShape: widget.attachmentShape,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: widget.reverse ? 0 : 40,
+                              ),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.75,
+                                child: Material(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .whiteSnow,
+                                  clipBehavior: Clip.hardEdge,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      if (widget.showReplyMessage &&
+                                          (widget.message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              widget.message.status == null) &&
+                                          widget.message.parentId == null)
+                                        _buildReplyButton(context),
+                                      if (widget.showThreadReplyMessage &&
+                                          (widget.message.status ==
+                                                  MessageSendingStatus.SENT ||
+                                              widget.message.status == null) &&
+                                          widget.message.parentId == null)
+                                        _buildThreadReplyButton(context),
+                                      if (widget.showResendMessage)
+                                        _buildResendMessage(context),
+                                      if (widget.showEditMessage)
+                                        _buildEditMessage(context),
+                                      if (widget.showCopyMessage)
+                                        _buildCopyButton(context),
+                                      if (widget.showFlagButton)
+                                        _buildFlagButton(context),
+                                      if (widget.showDeleteMessage)
+                                        _buildDeleteButton(context),
+                                    ].insertBetween(
+                                      Container(
+                                        height: 1,
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .greyWhisper,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 
@@ -273,6 +278,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   }
 
   void _showDeleteDialog() async {
+    setState(() {
+      _showActions = false;
+    });
     var answer = await showConfirmationDialog(context,
         title: 'Delete message',
         icon: StreamSvgIcon.flag(
@@ -293,6 +301,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       } catch (err) {
         _showErrorAlert();
       }
+    } else {
+      setState(() {
+        _showActions = true;
+      });
     }
   }
 
