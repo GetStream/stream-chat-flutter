@@ -447,7 +447,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.reply(
@@ -468,7 +468,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     return InkWell(
       onTap: () => _showFlagDialog(),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.icon_flag(
@@ -491,7 +491,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     return InkWell(
       onTap: () => _showDeleteDialog(),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.delete(
@@ -518,7 +518,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         Navigator.pop(context);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.copy(
@@ -543,7 +543,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         _showEditBottomSheet(context);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.edit(
@@ -575,7 +575,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.circle_up(
@@ -670,7 +670,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
             StreamSvgIcon.thread(
