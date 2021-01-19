@@ -14,6 +14,8 @@ class ChannelBottomSheet extends StatefulWidget {
 }
 
 class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
+  bool _showActions = true;
+
   @override
   Widget build(BuildContext context) {
     var channel = StreamChannel.of(context).channel;
@@ -33,157 +35,177 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
           topRight: Radius.circular(16.0),
         ),
       ),
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          SizedBox(
-            height: 24.0,
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ChannelName(
-                textStyle: StreamChatTheme.of(context).textTheme.headlineBold,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 5.0,
-          ),
-          Center(
-            child: ChannelInfo(
-              showTypingIndicator: false,
-              channel: StreamChannel.of(context).channel,
-              textStyle:
-                  StreamChatTheme.of(context).channelPreviewTheme.subtitle,
-            ),
-          ),
-          SizedBox(
-            height: 17.0,
-          ),
-          if (channel.isDistinct && channel.memberCount == 2)
-            Column(
+      child: !_showActions
+          ? SizedBox()
+          : ListView(
+              shrinkWrap: true,
               children: [
-                UserAvatar(
-                  user: members
-                      .firstWhere((e) => e.user.id != userAsMember.user.id)
-                      .user,
-                  constraints: BoxConstraints(
-                    maxHeight: 64.0,
-                    maxWidth: 64.0,
+                SizedBox(
+                  height: 24.0,
+                ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: ChannelName(
+                      textStyle:
+                          StreamChatTheme.of(context).textTheme.headlineBold,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(32.0),
-                  onlineIndicatorConstraints:
-                      BoxConstraints.tight(Size(12.0, 12.0)),
                 ),
                 SizedBox(
-                  height: 6.0,
+                  height: 5.0,
                 ),
-                Text(
-                  members
-                      .firstWhere((e) => e.user.id != userAsMember.user.id)
-                      .user
-                      .name,
-                  style: StreamChatTheme.of(context).textTheme.footnoteBold,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Center(
+                  child: ChannelInfo(
+                    showTypingIndicator: false,
+                    channel: StreamChannel.of(context).channel,
+                    textStyle: StreamChatTheme.of(context)
+                        .channelPreviewTheme
+                        .subtitle,
+                  ),
+                ),
+                SizedBox(
+                  height: 17.0,
+                ),
+                if (channel.isDistinct && channel.memberCount == 2)
+                  Column(
+                    children: [
+                      UserAvatar(
+                        user: members
+                            .firstWhere(
+                                (e) => e.user.id != userAsMember.user.id)
+                            .user,
+                        constraints: BoxConstraints(
+                          maxHeight: 64.0,
+                          maxWidth: 64.0,
+                        ),
+                        borderRadius: BorderRadius.circular(32.0),
+                        onlineIndicatorConstraints:
+                            BoxConstraints.tight(Size(12.0, 12.0)),
+                      ),
+                      SizedBox(
+                        height: 6.0,
+                      ),
+                      Text(
+                        members
+                            .firstWhere(
+                                (e) => e.user.id != userAsMember.user.id)
+                            .user
+                            .name,
+                        style:
+                            StreamChatTheme.of(context).textTheme.footnoteBold,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                if (!(channel.isDistinct && channel.memberCount == 2))
+                  Container(
+                    height: 94.0,
+                    alignment: Alignment.center,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: members.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Column(
+                            children: [
+                              UserAvatar(
+                                user: members[index].user,
+                                constraints: BoxConstraints(
+                                  maxHeight: 64.0,
+                                  maxWidth: 64.0,
+                                ),
+                                borderRadius: BorderRadius.circular(32.0),
+                                onlineIndicatorConstraints:
+                                    BoxConstraints.tight(Size(12.0, 12.0)),
+                              ),
+                              SizedBox(
+                                height: 6.0,
+                              ),
+                              Text(
+                                members[index].user.name,
+                                style: StreamChatTheme.of(context)
+                                    .textTheme
+                                    .footnoteBold,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                SizedBox(
+                  height: 24.0,
+                ),
+                OptionListTile(
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: StreamSvgIcon.user(
+                      color: StreamChatTheme.of(context).colorTheme.grey,
+                    ),
+                  ),
+                  title: 'View Info',
+                  onTap: widget.onViewInfoTap,
+                ),
+                if (!channel.isDistinct)
+                  OptionListTile(
+                    leading: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: StreamSvgIcon.userRemove(
+                        color: StreamChatTheme.of(context).colorTheme.grey,
+                      ),
+                    ),
+                    title: 'Leave Group',
+                    onTap: () async {
+                      setState(() {
+                        _showActions = false;
+                      });
+                      await _showLeaveDialog();
+                      setState(() {
+                        _showActions = true;
+                      });
+                    },
+                  ),
+                if (isOwner)
+                  OptionListTile(
+                    leading: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: StreamSvgIcon.delete(
+                        color: StreamChatTheme.of(context).colorTheme.accentRed,
+                      ),
+                    ),
+                    title: 'Delete Conversation',
+                    titleColor:
+                        StreamChatTheme.of(context).colorTheme.accentRed,
+                    onTap: () async {
+                      setState(() {
+                        _showActions = false;
+                      });
+                      await _showDeleteDialog();
+                      setState(() {
+                        _showActions = true;
+                      });
+                    },
+                  ),
+                OptionListTile(
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: StreamSvgIcon.close_small(
+                      color: StreamChatTheme.of(context).colorTheme.grey,
+                    ),
+                  ),
+                  title: 'Cancel',
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
                 ),
               ],
             ),
-          if (!(channel.isDistinct && channel.memberCount == 2))
-            Container(
-              height: 94.0,
-              alignment: Alignment.center,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: members.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      children: [
-                        UserAvatar(
-                          user: members[index].user,
-                          constraints: BoxConstraints(
-                            maxHeight: 64.0,
-                            maxWidth: 64.0,
-                          ),
-                          borderRadius: BorderRadius.circular(32.0),
-                          onlineIndicatorConstraints:
-                              BoxConstraints.tight(Size(12.0, 12.0)),
-                        ),
-                        SizedBox(
-                          height: 6.0,
-                        ),
-                        Text(
-                          members[index].user.name,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .footnoteBold,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          SizedBox(
-            height: 24.0,
-          ),
-          OptionListTile(
-            leading: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: StreamSvgIcon.user(
-                color: StreamChatTheme.of(context).colorTheme.grey,
-              ),
-            ),
-            title: 'View Info',
-            onTap: widget.onViewInfoTap,
-          ),
-          if (!channel.isDistinct)
-            OptionListTile(
-              leading: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: StreamSvgIcon.userRemove(
-                  color: StreamChatTheme.of(context).colorTheme.grey,
-                ),
-              ),
-              title: 'Leave Group',
-              onTap: () async {
-                _showLeaveDialog();
-              },
-            ),
-          if (isOwner)
-            OptionListTile(
-              leading: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: StreamSvgIcon.delete(
-                  color: StreamChatTheme.of(context).colorTheme.accentRed,
-                ),
-              ),
-              title: 'Delete Conversation',
-              titleColor: StreamChatTheme.of(context).colorTheme.accentRed,
-              onTap: () async {
-                _showDeleteDialog();
-              },
-            ),
-          OptionListTile(
-            leading: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: StreamSvgIcon.close_small(
-                color: StreamChatTheme.of(context).colorTheme.grey,
-              ),
-            ),
-            title: 'Cancel',
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
     );
   }
 
