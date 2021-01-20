@@ -60,7 +60,9 @@ class ImageActionsModal extends StatelessWidget {
                       size: 24.0,
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
-                    () {},
+                    () {
+                      Navigator.pop(context, ReturnActionType.reply);
+                    },
                   ),
                   _buildButton(
                     context,

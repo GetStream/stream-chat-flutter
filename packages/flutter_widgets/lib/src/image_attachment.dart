@@ -14,6 +14,7 @@ class ImageAttachment extends StatelessWidget {
   final Size size;
   final bool showTitle;
   final ShowMessageCallback onShowMessage;
+  final ValueChanged<ReturnActionType> onReturnAction;
 
   const ImageAttachment({
     Key key,
@@ -23,6 +24,7 @@ class ImageAttachment extends StatelessWidget {
     this.messageTheme,
     this.showTitle = true,
     this.onShowMessage,
+    this.onReturnAction,
   }) : super(key: key);
 
   @override
@@ -42,8 +44,8 @@ class ImageAttachment extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    var result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) {
@@ -64,6 +66,10 @@ class ImageAttachment extends StatelessWidget {
                         },
                       ),
                     );
+
+                    if (result != null) {
+                      onReturnAction(result);
+                    }
                   },
                   child: CachedNetworkImage(
                     height: size?.height,

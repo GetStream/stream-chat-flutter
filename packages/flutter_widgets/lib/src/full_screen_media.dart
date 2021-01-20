@@ -10,6 +10,8 @@ import 'stream_channel.dart';
 
 import '../stream_chat_flutter.dart';
 
+enum ReturnActionType { none, reply }
+
 typedef ShowMessageCallback = void Function(Message message, Channel channel);
 
 /// A full screen image widget
