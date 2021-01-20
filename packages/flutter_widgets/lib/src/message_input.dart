@@ -1998,7 +1998,7 @@ class MessageInputState extends State<MessageInput> {
       _attachments.add(attachment);
     });
 
-    if (file.size > _kMaxAttachmentSize) {
+    if (file.size / 1024 > _kMaxAttachmentSize) {
       if (attachmentType == 'video') {
         final mediaInfo = await CompressVideoService.compressVideo(file.path);
         file = PlatformFile(
