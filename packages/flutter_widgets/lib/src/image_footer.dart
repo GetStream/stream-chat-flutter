@@ -189,6 +189,7 @@ class _ImageFooterState extends State<ImageFooter> {
         return DraggableScrollableSheet(
           expand: false,
           initialChildSize: initialChildSize / size.height,
+          minChildSize: initialChildSize / size.height,
           builder: (context, scrollController) {
             return SingleChildScrollView(
               controller: scrollController,
