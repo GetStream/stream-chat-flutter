@@ -68,27 +68,7 @@ class GiphyAttachment extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: GestureDetector(
                       onTap: () async {
-                        var res = await Navigator.push(context,
-                            MaterialPageRoute(builder: (_) {
-                          final channel = StreamChannel.of(context).channel;
-
-                          return StreamChannel(
-                            channel: channel,
-                            child: FullScreenMedia(
-                              mediaAttachments: [
-                                attachment,
-                              ],
-                              userName: message.user.name,
-                              sentAt: message.createdAt,
-                              message: message,
-                              onShowMessage: onShowMessage,
-                            ),
-                          );
-                        }));
-
-                        if (res != null) {
-                          onReturnAction(res);
-                        }
+                        _onImageTap(context);
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.only(
@@ -322,6 +302,31 @@ class GiphyAttachment extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _onImageTap(BuildContext context) async {
+    var res = await Navigator.push(context, MaterialPageRoute(
+      builder: (_) {
+        final channel = StreamChannel.of(context).channel;
+
+        return StreamChannel(
+          channel: channel,
+          child: FullScreenMedia(
+            mediaAttachments: [
+              attachment,
+            ],
+            userName: message.user.name,
+            sentAt: message.createdAt,
+            message: message,
+            onShowMessage: onShowMessage,
+          ),
+        );
+      },
+    ));
+
+    if (res != null) {
+      onReturnAction(res);
+    }
   }
 
   Widget _buildSentAttachment(context) {
