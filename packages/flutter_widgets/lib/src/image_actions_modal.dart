@@ -83,12 +83,12 @@ class ImageActionsModal extends StatelessWidget {
                           urls[currentIndex].assetUrl ??
                           urls[currentIndex].thumbUrl;
 
+                      Navigator.pop(context);
+
                       if (urls[currentIndex].type == 'video') {
                         await _saveVideo(url);
-                        Navigator.pop(context);
                       } else {
                         await _saveImage(url);
-                        Navigator.pop(context);
                       }
                     },
                   ),
