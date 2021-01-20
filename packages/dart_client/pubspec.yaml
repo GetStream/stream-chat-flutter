@@ -6,7 +6,7 @@ repository: https://github.com/GetStream/stream-chat-dart
 issue_tracker: https://github.com/GetStream/stream-chat-dart/issues
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
