@@ -272,10 +272,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                 clipBehavior: Clip.antiAlias,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .white
-                                      .withOpacity(0.6),
+                                  color: Colors.white.withOpacity(0.6),
                                   boxShadow: [
                                     BoxShadow(
                                       blurRadius: 8.0,
@@ -286,7 +283,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                     ),
                                   ],
                                 ),
-                                padding: const EdgeInsets.all(1),
+                                padding: const EdgeInsets.all(2),
                                 child: UserAvatar(
                                   user: widget.message.user,
                                   constraints:

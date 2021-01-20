@@ -101,24 +101,29 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   final Size preferredSize;
 
-  void _showMessageActionModalBottomSheet(BuildContext context) {
+  void _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
 
-    showDialog(
-        context: context,
-        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
-        builder: (context) {
-          return StreamChannel(
-            channel: channel,
-            child: ImageActionsModal(
-              userName: userName,
-              sentAt: sentAt,
-              message: message,
-              urls: urls,
-              currentIndex: currentIndex,
-              onShowMessage: onShowMessage,
-            ),
-          );
-        });
+    var result = await showDialog(
+      context: context,
+      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+      builder: (context) {
+        return StreamChannel(
+          channel: channel,
+          child: ImageActionsModal(
+            userName: userName,
+            sentAt: sentAt,
+            message: message,
+            urls: urls,
+            currentIndex: currentIndex,
+            onShowMessage: onShowMessage,
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      Navigator.pop(context, result);
+    }
   }
 }

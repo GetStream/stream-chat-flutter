@@ -382,7 +382,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               constraints: BoxConstraints.tightFor(
-                width: 28,
+                width: 24,
                 height: 12,
               ),
               child: Material(
@@ -393,6 +393,10 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             color: StreamChatTheme.of(context).colorTheme.white,
           ),
         alternativeWidget,
+        if (widget.user.online)
+          SizedBox(
+            width: 24.0,
+          ),
       ],
     );
   }

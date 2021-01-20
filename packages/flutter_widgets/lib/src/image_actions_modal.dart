@@ -60,7 +60,9 @@ class ImageActionsModal extends StatelessWidget {
                       size: 24.0,
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
-                    () {},
+                    () {
+                      Navigator.pop(context, ReturnActionType.reply);
+                    },
                   ),
                   _buildButton(
                     context,
@@ -83,12 +85,12 @@ class ImageActionsModal extends StatelessWidget {
                           urls[currentIndex].assetUrl ??
                           urls[currentIndex].thumbUrl;
 
+                      Navigator.pop(context);
+
                       if (urls[currentIndex].type == 'video') {
                         await _saveVideo(url);
-                        Navigator.pop(context);
                       } else {
                         await _saveImage(url);
-                        Navigator.pop(context);
                       }
                     },
                   ),

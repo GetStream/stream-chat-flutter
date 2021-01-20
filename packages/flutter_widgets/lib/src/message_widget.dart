@@ -120,6 +120,7 @@ class MessageWidget extends StatefulWidget {
   final List<Read> readList;
 
   final ShowMessageCallback onShowMessage;
+  final ValueChanged<ReturnActionType> onReturnAction;
 
   /// If true show the users username next to the timestamp of the message
   final bool showUsername;
@@ -178,6 +179,7 @@ class MessageWidget extends StatefulWidget {
     this.onShowMessage,
     this.editMessageInputBuilder,
     this.textBuilder,
+    this.onReturnAction,
     Map<String, AttachmentBuilder> customAttachmentBuilders,
     this.readList,
     this.padding,
@@ -199,6 +201,7 @@ class MessageWidget extends StatefulWidget {
                 MediaQuery.of(context).size.height * 0.3,
               ),
               onShowMessage: onShowMessage,
+              onReturnAction: onReturnAction,
             );
           },
           'video': (context, message, attachment) {
@@ -211,6 +214,7 @@ class MessageWidget extends StatefulWidget {
               ),
               message: message,
               onShowMessage: onShowMessage,
+              onReturnAction: onReturnAction,
             );
           },
           'giphy': (context, message, attachment) {
@@ -223,6 +227,7 @@ class MessageWidget extends StatefulWidget {
                 MediaQuery.of(context).size.height * 0.3,
               ),
               onShowMessage: onShowMessage,
+              onReturnAction: onReturnAction,
             );
           },
           'file': (context, message, attachment) {

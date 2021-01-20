@@ -13,6 +13,7 @@ class GiphyAttachment extends StatelessWidget {
   final Message message;
   final Size size;
   final ShowMessageCallback onShowMessage;
+  final ValueChanged<ReturnActionType> onReturnAction;
 
   const GiphyAttachment({
     Key key,
@@ -21,6 +22,7 @@ class GiphyAttachment extends StatelessWidget {
     this.message,
     this.size,
     this.onShowMessage,
+    this.onReturnAction,
   }) : super(key: key);
 
   @override
@@ -65,23 +67,8 @@ class GiphyAttachment extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          final channel = StreamChannel.of(context).channel;
-
-                          return StreamChannel(
-                            channel: channel,
-                            child: FullScreenMedia(
-                              mediaAttachments: [
-                                attachment,
-                              ],
-                              userName: message.user.name,
-                              sentAt: message.createdAt,
-                              message: message,
-                              onShowMessage: onShowMessage,
-                            ),
-                          );
-                        }));
+                      onTap: () async {
+                        _onImageTap(context);
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.only(
@@ -317,11 +304,37 @@ class GiphyAttachment extends StatelessWidget {
     );
   }
 
+  void _onImageTap(BuildContext context) async {
+    var res = await Navigator.push(context, MaterialPageRoute(
+      builder: (_) {
+        final channel = StreamChannel.of(context).channel;
+
+        return StreamChannel(
+          channel: channel,
+          child: FullScreenMedia(
+            mediaAttachments: [
+              attachment,
+            ],
+            userName: message.user.name,
+            sentAt: message.createdAt,
+            message: message,
+            onShowMessage: onShowMessage,
+          ),
+        );
+      },
+    ));
+
+    if (res != null) {
+      onReturnAction(res);
+    }
+  }
+
   Widget _buildSentAttachment(context) {
     return Container(
       child: GestureDetector(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) {
+        onTap: () async {
+          var res =
+              await Navigator.push(context, MaterialPageRoute(builder: (_) {
             var channel = StreamChannel.of(context).channel;
 
             return StreamChannel(
@@ -337,6 +350,10 @@ class GiphyAttachment extends StatelessWidget {
               ),
             );
           }));
+
+          if (res != null) {
+            onReturnAction(res);
+          }
         },
         child: Stack(
           children: [

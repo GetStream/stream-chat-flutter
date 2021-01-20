@@ -15,6 +15,7 @@ class VideoAttachment extends StatefulWidget {
   final Size size;
   final Message message;
   final ShowMessageCallback onShowMessage;
+  final ValueChanged<ReturnActionType> onReturnAction;
 
   VideoAttachment({
     Key key,
@@ -23,6 +24,7 @@ class VideoAttachment extends StatefulWidget {
     this.message,
     this.size,
     this.onShowMessage,
+    this.onReturnAction,
   }) : super(key: key);
 
   @override
@@ -84,10 +86,10 @@ class _VideoAttachmentState extends State<VideoAttachment> {
         });
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         final channel = StreamChannel.of(context).channel;
 
-        Navigator.push(
+        var res = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => StreamChannel(
@@ -102,6 +104,10 @@ class _VideoAttachmentState extends State<VideoAttachment> {
             ),
           ),
         );
+
+        if (res != null) {
+          widget.onReturnAction(res);
+        }
       },
       child: Container(
         height: widget.size?.height,

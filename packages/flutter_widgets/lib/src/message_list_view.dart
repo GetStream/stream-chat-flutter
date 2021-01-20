@@ -780,6 +780,16 @@ class _MessageListViewState extends State<MessageListView> {
           ? StreamChatTheme.of(context).ownMessageTheme
           : StreamChatTheme.of(context).otherMessageTheme,
       onShowMessage: widget.onShowMessage,
+      onReturnAction: (action) {
+        switch (action) {
+          case ReturnActionType.none:
+            break;
+          case ReturnActionType.reply:
+            FocusScope.of(context).unfocus();
+            widget.onMessageSwiped(message);
+            break;
+        }
+      },
     );
   }
 
@@ -930,6 +940,16 @@ class _MessageListViewState extends State<MessageListView> {
       readList: readList,
       allRead: allRead,
       onShowMessage: widget.onShowMessage,
+      onReturnAction: (action) {
+        switch (action) {
+          case ReturnActionType.none:
+            break;
+          case ReturnActionType.reply:
+            FocusScope.of(context).unfocus();
+            widget.onMessageSwiped(message);
+            break;
+        }
+      },
     );
 
     if (!message.isDeleted && !message.isSystem && !message.isEphemeral) {
