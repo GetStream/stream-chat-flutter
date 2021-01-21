@@ -9,6 +9,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  stream_chat: ^0.2.23+3
   flutter:
     sdk: flutter
 
