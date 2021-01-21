@@ -1,4 +1,4 @@
-package io.getstream.stream_chat_dart_example.stream_chat_dart_example
+package com.example.example
 
 import io.flutter.embedding.android.FlutterActivity
 
