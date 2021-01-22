@@ -80,6 +80,17 @@ class ChannelListPage extends StatelessWidget {
     final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
 
     return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => StreamChannel(
+              child: ChannelPage(),
+              channel: channel,
+            ),
+          ),
+        );
+      },
       leading: ChannelImage(
         channel: channel,
       ),
