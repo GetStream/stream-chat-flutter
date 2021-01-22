@@ -1,3 +1,8 @@
+## 0.2.24
+
+- Create enum for push providers
+- Add merge helper functions in `Message` and `ChannelModel` for easier data manipulation
+
 ## 0.2.23+3
 
 - Remove + notation from userAgent
