@@ -254,7 +254,7 @@ class Message {
   /// Returns a new [Message] that is a combination of this message and the given
   /// [other] message.
   Message merge(Message other) {
-    if (other == null) return null;
+    if (other == null) return this;
     return copyWith(
       id: other.id,
       text: other.text,

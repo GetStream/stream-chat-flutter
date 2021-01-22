@@ -146,7 +146,7 @@ class ChannelModel {
   /// Returns a new [ChannelModel] that is a combination of this channelModel and the given
   /// [other] channelModel.
   ChannelModel merge(ChannelModel other) {
-    if (other == null) return null;
+    if (other == null) return this;
     return copyWith(
       id: other.id,
       type: other.type,
