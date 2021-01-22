@@ -46,6 +46,26 @@ const String KEY_TOKEN = 'KEY_TOKEN';
 /// The key used to save the apiKey to sharedPreferences
 const String KEY_API_KEY = 'KEY_API_KEY';
 
+/// Provider used to send push notifications.
+enum PushProvider {
+  /// Send notifications using Google's Firebase Cloud Messaging
+  firebase,
+
+  /// Send notifications using Apple's Push Notification service
+  apn
+}
+
+extension on PushProvider {
+  /// Returns the string notion for [PushProvider].
+  String get name {
+    if (this == PushProvider.apn) {
+      return 'apn';
+    } else {
+      return 'firebase';
+    }
+  }
+}
+
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
 /// This library can be used on any Dart project and on both mobile and web apps with Flutter.
@@ -1002,10 +1022,10 @@ class Client {
   }
 
   /// Add a device for Push Notifications.
-  Future<EmptyResponse> addDevice(String id, String pushProvider) async {
+  Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) async {
     final response = await post('/devices', data: {
       'id': id,
-      'push_provider': pushProvider,
+      'push_provider': pushProvider.name,
     });
     return decode<EmptyResponse>(response.data, EmptyResponse.fromJson);
   }
