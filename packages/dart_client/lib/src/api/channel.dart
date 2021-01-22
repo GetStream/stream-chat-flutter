@@ -183,7 +183,7 @@ class Channel {
       user: _client.state.user,
       id: messageId,
       quotedMessage: quotedMessage,
-      status: MessageSendingStatus.SENDING,
+      status: MessageSendingStatus.sending,
     );
 
     if (message.parentId != null && message.id == null) {
@@ -978,7 +978,7 @@ class ChannelClientState {
         <Message>[...messages, ...threads.values.expand((v) => v)]
             .where((message) =>
                 message.status != null &&
-                message.status != MessageSendingStatus.SENT &&
+                message.status != MessageSendingStatus.sent &&
                 message.createdAt.isBefore(DateTime.now().subtract(Duration(
                   seconds: 1,
                 ))))

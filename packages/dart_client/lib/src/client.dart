@@ -1198,7 +1198,7 @@ class Client {
     String cid,
   ]) async {
     message = message.copyWith(
-      status: MessageSendingStatus.UPDATING,
+      status: MessageSendingStatus.updating,
       updatedAt: message.updatedAt ?? DateTime.now(),
     );
 
@@ -1229,10 +1229,10 @@ class Client {
 
   /// Deletes the given message
   Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
-    if (message.status == MessageSendingStatus.FAILED) {
+    if (message.status == MessageSendingStatus.failed) {
       state.channels[cid].state.addMessage(message.copyWith(
         type: 'deleted',
-        status: MessageSendingStatus.SENT,
+        status: MessageSendingStatus.sent,
       ));
       return EmptyResponse();
     }
@@ -1240,7 +1240,7 @@ class Client {
     try {
       message = message.copyWith(
         type: 'deleted',
-        status: MessageSendingStatus.DELETING,
+        status: MessageSendingStatus.deleting,
         deletedAt: message.deletedAt ?? DateTime.now(),
       );
 
@@ -1252,7 +1252,7 @@ class Client {
 
       if (state?.channels != null) {
         state.channels[cid]?.state
-            ?.addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+            ?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
       }
 
       return decode(response.data, EmptyResponse.fromJson);

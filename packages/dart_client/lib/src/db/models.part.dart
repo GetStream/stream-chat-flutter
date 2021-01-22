@@ -216,19 +216,19 @@ class _MessageSendingStatusConverter
   MessageSendingStatus mapToDart(int fromDb) {
     switch (fromDb) {
       case 0:
-        return MessageSendingStatus.SENDING;
+        return MessageSendingStatus.sending;
       case 1:
-        return MessageSendingStatus.SENT;
+        return MessageSendingStatus.sent;
       case 2:
-        return MessageSendingStatus.FAILED;
+        return MessageSendingStatus.failed;
       case 3:
-        return MessageSendingStatus.UPDATING;
+        return MessageSendingStatus.updating;
       case 4:
-        return MessageSendingStatus.FAILED_UPDATE;
+        return MessageSendingStatus.failed_update;
       case 5:
-        return MessageSendingStatus.DELETING;
+        return MessageSendingStatus.deleting;
       case 6:
-        return MessageSendingStatus.FAILED_DELETE;
+        return MessageSendingStatus.failed_delete;
       default:
         return null;
     }
@@ -237,19 +237,19 @@ class _MessageSendingStatusConverter
   @override
   int mapToSql(MessageSendingStatus value) {
     switch (value) {
-      case MessageSendingStatus.SENDING:
+      case MessageSendingStatus.sending:
         return 0;
-      case MessageSendingStatus.SENT:
+      case MessageSendingStatus.sent:
         return 1;
-      case MessageSendingStatus.FAILED:
+      case MessageSendingStatus.failed:
         return 2;
-      case MessageSendingStatus.UPDATING:
+      case MessageSendingStatus.updating:
         return 3;
-      case MessageSendingStatus.FAILED_UPDATE:
+      case MessageSendingStatus.failed_update:
         return 4;
-      case MessageSendingStatus.DELETING:
+      case MessageSendingStatus.deleting:
         return 5;
-      case MessageSendingStatus.FAILED_DELETE:
+      case MessageSendingStatus.failed_delete:
         return 6;
       default:
         return null;

@@ -2211,7 +2211,7 @@ class MessageInputState extends State<MessageInput> {
     _mentionedUsers.clear();
 
     if (widget.editMessage == null ||
-        widget.editMessage.status == MessageSendingStatus.FAILED) {
+        widget.editMessage.status == MessageSendingStatus.failed) {
       sendingFuture = channel.sendMessage(message);
     } else {
       sendingFuture = StreamChat.of(context).client.updateMessage(

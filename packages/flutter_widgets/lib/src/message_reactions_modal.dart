@@ -93,7 +93,7 @@ class MessageReactionsModal extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           if (showReactions &&
-                              (message.status == MessageSendingStatus.SENT ||
+                              (message.status == MessageSendingStatus.sent ||
                                   message.status == null))
                             Align(
                               alignment: Alignment(
@@ -141,7 +141,7 @@ class MessageReactionsModal extends StatelessWidget {
                               ),
                               showReactionPickerIndicator: showReactions &&
                                   (message.status ==
-                                          MessageSendingStatus.SENT ||
+                                          MessageSendingStatus.sent ||
                                       message.status == null),
                             ),
                           ),

@@ -22,14 +22,14 @@ class SendingIndicator extends StatelessWidget {
         color: StreamChatTheme.of(context).colorTheme.accentBlue,
       );
     }
-    if (message.status == MessageSendingStatus.SENT || message.status == null) {
+    if (message.status == MessageSendingStatus.sent || message.status == null) {
       return StreamSvgIcon.check(
         size: size,
         color: IconTheme.of(context).color.withOpacity(0.5),
       );
     }
-    if (message.status == MessageSendingStatus.SENDING ||
-        message.status == MessageSendingStatus.UPDATING) {
+    if (message.status == MessageSendingStatus.sending ||
+        message.status == MessageSendingStatus.updating) {
       return Icon(
         Icons.access_time,
         size: size,

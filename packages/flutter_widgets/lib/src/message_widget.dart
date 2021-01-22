@@ -263,13 +263,13 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   bool get hasQuotedMessage => widget.message?.quotedMessage != null;
 
-  bool get isSendFailed => widget.message.status == MessageSendingStatus.FAILED;
+  bool get isSendFailed => widget.message.status == MessageSendingStatus.failed;
 
   bool get isUpdateFailed =>
-      widget.message.status == MessageSendingStatus.FAILED_UPDATE;
+      widget.message.status == MessageSendingStatus.failed_update;
 
   bool get isDeleteFailed =>
-      widget.message.status == MessageSendingStatus.FAILED_DELETE;
+      widget.message.status == MessageSendingStatus.failed_delete;
 
   bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
 
@@ -875,7 +875,7 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   void onLongPress(BuildContext context) {
     if (widget.message.isEphemeral ||
-        widget.message.status == MessageSendingStatus.SENDING) {
+        widget.message.status == MessageSendingStatus.sending) {
       return;
     }
 
@@ -986,11 +986,11 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   void retryMessage(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    if (widget.message.status == MessageSendingStatus.FAILED) {
+    if (widget.message.status == MessageSendingStatus.failed) {
       channel.sendMessage(widget.message);
       return;
     }
-    if (widget.message.status == MessageSendingStatus.FAILED_UPDATE) {
+    if (widget.message.status == MessageSendingStatus.failed_update) {
       StreamChat.of(context).client.updateMessage(
             widget.message,
             channel.cid,
@@ -998,7 +998,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       return;
     }
 
-    if (widget.message.status == MessageSendingStatus.FAILED_DELETE) {
+    if (widget.message.status == MessageSendingStatus.failed_delete) {
       StreamChat.of(context).client.deleteMessage(
             widget.message,
             channel.cid,
