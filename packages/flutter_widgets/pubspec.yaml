@@ -6,7 +6,7 @@ repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -29,7 +29,7 @@ dependencies:
   image_picker: ^0.6.7+17
   flutter_keyboard_visibility: ^4.0.2
   mime: ^0.9.7
-  stream_chat: ^0.2.23+3
+  stream_chat: ^0.2.24
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4

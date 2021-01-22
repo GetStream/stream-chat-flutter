@@ -56,7 +56,7 @@ void initNotifications(Client client) {
     if (connector.token.value != null) {
       client.addDevice(
         connector.token.value,
-        Platform.isAndroid ? 'firebase' : 'apn',
+        Platform.isAndroid ? PushProvider.firebase : PushProvider.apn,
       );
     }
   });

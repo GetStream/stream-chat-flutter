@@ -529,123 +529,97 @@ class _ChannelListViewState extends State<ChannelListView>
         };
       }
 
+      final backgroundColor = StreamChatTheme.of(context).colorTheme.whiteSmoke;
       return StreamChannel(
         key: ValueKey<String>('CHANNEL-${channel.id}'),
         channel: channel,
         child: Builder(
           builder: (context) {
-            Widget child;
-            if (widget.channelPreviewBuilder != null) {
-              child = Stack(
-                children: [
-                  widget.channelPreviewBuilder(
-                    context,
-                    channel,
-                  ),
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          onTap(channel, widget.channelWidget);
-                        },
-                        onLongPress: widget.onChannelLongPress != null
-                            ? () {
-                                widget.onChannelLongPress(channel);
-                              }
-                            : null,
+            return Slidable(
+              controller: _slideController,
+              enabled: widget.swipeToAction,
+              actionPane: SlidableBehindActionPane(),
+              actionExtentRatio: 0.12,
+              closeOnScroll: true,
+              secondaryActions: <Widget>[
+                IconSlideAction(
+                  color: backgroundColor,
+                  icon: Icons.more_horiz,
+                  onTap: () {
+                    showModalBottomSheet(
+                      clipBehavior: Clip.hardEdge,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(32),
+                          topRight: Radius.circular(32),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              final backgroundColor =
-                  StreamChatTheme.of(context).colorTheme.whiteSmoke;
-              child = Slidable(
-                controller: _slideController,
-                enabled: widget.swipeToAction,
-                actionPane: SlidableBehindActionPane(),
-                actionExtentRatio: 0.12,
-                closeOnScroll: true,
-                secondaryActions: <Widget>[
+                      context: context,
+                      builder: (context) {
+                        return StreamChannel(
+                          child: ChannelBottomSheet(
+                            onViewInfoTap: () {
+                              widget.onViewInfoTap(channel);
+                            },
+                          ),
+                          channel: channel,
+                        );
+                      },
+                    );
+                  },
+                ),
+                if ([
+                  'admin',
+                  'owner',
+                ].contains(channel.state.members
+                    .firstWhere((m) => m.userId == channel.client.state.user.id,
+                        orElse: () => null)
+                    ?.role))
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: Icons.more_horiz,
-                    onTap: () {
-                      showModalBottomSheet(
-                        clipBehavior: Clip.hardEdge,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(32),
-                            topRight: Radius.circular(32),
-                          ),
-                        ),
-                        context: context,
-                        builder: (context) {
-                          return StreamChannel(
-                            child: ChannelBottomSheet(
-                              onViewInfoTap: () {
-                                widget.onViewInfoTap(channel);
-                              },
-                            ),
-                            channel: channel,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  if ([
-                    'admin',
-                    'owner',
-                  ].contains(channel.state.members
-                      .firstWhere(
-                          (m) => m.userId == channel.client.state.user.id,
-                          orElse: () => null)
-                      ?.role))
-                    IconSlideAction(
-                      color: backgroundColor,
-                      iconWidget: StreamSvgIcon.delete(
-                        color: StreamChatTheme.of(context).colorTheme.accentRed,
-                      ),
-                      onTap: () async {
-                        final res = await showConfirmationDialog(
-                          context,
-                          title: 'Delete Conversation',
-                          okText: 'DELETE',
-                          question:
-                              'Are you sure you want to delete this conversation?',
-                          cancelText: 'CANCEL',
-                          icon: StreamSvgIcon.delete(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentRed,
-                          ),
-                        );
-                        if (res == true) {
-                          await channel.delete();
-                        }
-                      },
+                    iconWidget: StreamSvgIcon.delete(
+                      color: StreamChatTheme.of(context).colorTheme.accentRed,
                     ),
-                ],
-                child: Container(
-                  color: StreamChatTheme.of(context).colorTheme.whiteSnow,
-                  child: ChannelPreview(
-                    onLongPress: widget.onChannelLongPress,
-                    channel: channel,
-                    onImageTap: widget.onImageTap != null
-                        ? () {
-                            widget.onImageTap(channel);
-                          }
-                        : null,
-                    onTap: (channel) {
-                      onTap(channel, widget.channelWidget);
+                    onTap: () async {
+                      final res = await showConfirmationDialog(
+                        context,
+                        title: 'Delete Conversation',
+                        okText: 'DELETE',
+                        question:
+                            'Are you sure you want to delete this conversation?',
+                        cancelText: 'CANCEL',
+                        icon: StreamSvgIcon.delete(
+                          color:
+                              StreamChatTheme.of(context).colorTheme.accentRed,
+                        ),
+                      );
+                      if (res == true) {
+                        await channel.delete();
+                      }
                     },
                   ),
-                ),
-              );
-            }
-            return child;
+              ],
+              child: Container(
+                color: StreamChatTheme.of(context).colorTheme.whiteSnow,
+                child: widget.channelPreviewBuilder != null
+                    ? widget.channelPreviewBuilder(
+                        context,
+                        channel,
+                      )
+                    : ChannelPreview(
+                        onLongPress: widget.onChannelLongPress,
+                        channel: channel,
+                        onImageTap: widget.onImageTap != null
+                            ? () {
+                                widget.onImageTap(channel);
+                              }
+                            : null,
+                        onTap: (channel) {
+                          onTap(channel, widget.channelWidget);
+                        },
+                      ),
+              ),
+            );
           },
         ),
       );

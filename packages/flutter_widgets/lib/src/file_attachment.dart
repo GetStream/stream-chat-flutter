@@ -41,7 +41,7 @@ class _FileAttachmentState extends State<FileAttachment> {
   @override
   void initState() {
     super.initState();
-    if (MediaUtils.getMimeType(widget.attachment.title).type == 'video') {
+    if (MediaUtils.getMimeType(widget.attachment.title)?.type == 'video') {
       if (widget.attachmentType == FileAttachmentType.online) {
         _controller = VideoPlayerController.network(
           widget.attachment.assetUrl,
@@ -62,7 +62,13 @@ class _FileAttachmentState extends State<FileAttachment> {
       child: Container(
         width: widget.size?.width ?? 100,
         height: 56.0,
-        color: StreamChatTheme.of(context).colorTheme.white,
+        decoration: BoxDecoration(
+          color: StreamChatTheme.of(context).colorTheme.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+          ),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -122,7 +128,7 @@ class _FileAttachmentState extends State<FileAttachment> {
   }
 
   Widget _getFileTypeImage() {
-    if ((MediaUtils.getMimeType(widget.attachment.title).type == 'image')) {
+    if ((MediaUtils.getMimeType(widget.attachment.title)?.type == 'image')) {
       switch (widget.attachmentType) {
         case FileAttachmentType.local:
           return Image.memory(
@@ -159,7 +165,7 @@ class _FileAttachmentState extends State<FileAttachment> {
       }
     }
 
-    if ((MediaUtils.getMimeType(widget.attachment.title).type == 'video')) {
+    if ((MediaUtils.getMimeType(widget.attachment.title)?.type == 'video')) {
       switch (widget.attachmentType) {
         case FileAttachmentType.local:
           return FutureBuilder<File>(
