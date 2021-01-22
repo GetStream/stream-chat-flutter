@@ -266,13 +266,17 @@ void main() {
 
         when(mockDio.post<String>('/devices', data: {
           'id': 'test-id',
-          'push_provider': 'test',
+          'push_provider': 'firebase',
         })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.addDevice('test-id', PushProvider.firebase);
 
-        verify(mockDio.post<String>('/devices',
-            data: {'id': 'test-id', 'push_provider': 'test'})).called(1);
+        verify(
+          mockDio.post<String>(
+            '/devices',
+            data: {'id': 'test-id', 'push_provider': 'firebase'},
+          ),
+        ).called(1);
       });
 
       test('getDevices', () async {
