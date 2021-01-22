@@ -10,6 +10,7 @@ environment:
 
 dependencies:
   stream_chat: ^0.2.23+3
+  rxdart: ^0.24.1
   flutter:
     sdk: flutter
 
