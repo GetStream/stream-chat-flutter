@@ -58,7 +58,7 @@ class MessageListView extends StatefulWidget {
     this.messageListController,
   }) : super(key: key);
 
-  MessageListController messageListController;
+  final MessageListController messageListController;
 
   final Widget Function(BuildContext, List<Message>) messageListBuilder;
 

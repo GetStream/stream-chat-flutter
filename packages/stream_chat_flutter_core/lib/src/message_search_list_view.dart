@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
 /// Callback called when tapping on a user
