@@ -1,7 +1,12 @@
 library stream_chat_flutter_core;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/channel_list_view.dart';
+export 'src/channels_bloc.dart';
+export 'src/lazy_load_scroll_view.dart';
+export 'src/message_list_view.dart';
+export 'src/message_search_bloc.dart';
+export 'src/message_search_list_view.dart';
+export 'src/stream_channel.dart';
+export 'src/stream_chat.dart';
+export 'src/user_list_view.dart';
+export 'src/users_bloc.dart';
