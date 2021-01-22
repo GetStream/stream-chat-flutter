@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_chat_theme.dart';
 
 /// Widget used to provide information about the chat to the widget tree
 ///
@@ -29,13 +28,11 @@ import 'package:stream_chat_flutter_core/src/stream_chat_theme.dart';
 class StreamChat extends StatefulWidget {
   final Client client;
   final Widget child;
-  final StreamChatThemeData streamChatThemeData;
 
   StreamChat({
     Key key,
     @required this.client,
     @required this.child,
-    this.streamChatThemeData,
   }) : super(
           key: key,
         );
@@ -65,32 +62,7 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _getTheme(context, widget.streamChatThemeData);
-    return StreamChatTheme(
-      data: theme,
-      child: Builder(
-        builder: (context) {
-          final materialTheme = Theme.of(context);
-          final streamTheme = StreamChatTheme.of(context);
-          return Theme(
-            data: materialTheme.copyWith(
-              primaryIconTheme: streamTheme.primaryIconTheme,
-              accentColor: streamTheme.colorTheme.accentBlue,
-              scaffoldBackgroundColor: streamTheme.colorTheme.white,
-            ),
-            child: widget.child,
-          );
-        },
-      ),
-    );
-  }
-
-  StreamChatThemeData _getTheme(
-    BuildContext context,
-    StreamChatThemeData themeData,
-  ) {
-    final defaultTheme = StreamChatThemeData.getDefaultTheme(Theme.of(context));
-    return defaultTheme.merge(themeData) ?? themeData;
+    return widget.child;
   }
 
   /// The current user
@@ -103,13 +75,6 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // client.state?.totalUnreadCountStream?.listen((count) {
-    //   if (count > 0) {
-    //     FlutterAppBadger.updateBadgeCount(count);
-    //   } else {
-    //     FlutterAppBadger.removeBadge();
-    //   }
-    // });
   }
 
   StreamSubscription _newMessageSubscription;

@@ -8,14 +8,6 @@ import 'package:stream_chat_flutter_core/src/channels_bloc.dart';
 
 import 'stream_chat.dart';
 
-/// Callback called when tapping on a channel
-typedef ChannelTapCallback = void Function(Channel, Widget);
-
-/// Builder used to create a custom [ChannelPreview] from a [Channel]
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
-
-typedef ViewInfoCallback = void Function(Channel);
-
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
 ///
@@ -57,14 +49,15 @@ class ChannelListView extends StatefulWidget {
     this.options,
     this.sort,
     this.pagination,
-    this.separatorBuilder,
-    this.errorBuilder,
-    this.swipeToAction = false,
     this.pullToRefresh = true,
+    @required this.errorBuilder,
     @required this.emptyBuilder,
     @required this.loadingBuilder,
     @required this.listBuilder,
+    this.channelListController,
   }) : super(key: key);
+
+  final ChannelListController channelListController;
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
@@ -72,9 +65,6 @@ class ChannelListView extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   final Function(BuildContext, List<Channel>) listBuilder;
-
-  /// If true a default swipe to action behaviour will be added to this widget
-  final bool swipeToAction;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -102,9 +92,6 @@ class ChannelListView extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams pagination;
 
-  /// Builder used to create a custom item separator
-  final Function(BuildContext, int) separatorBuilder;
-
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
@@ -114,8 +101,6 @@ class ChannelListView extends StatefulWidget {
 
 class _ChannelListViewState extends State<ChannelListView>
     with WidgetsBindingObserver {
-  final ScrollController _scrollController = ScrollController();
-
   @override
   Widget build(BuildContext context) {
     final channelsBloc = ChannelsBloc.of(context);
@@ -162,10 +147,7 @@ class _ChannelListViewState extends State<ChannelListView>
           }
         }
 
-        return AnimatedSwitcher(
-          child: child,
-          duration: Duration(milliseconds: 500),
-        );
+        return child;
       },
     );
   }
@@ -186,19 +168,17 @@ class _ChannelListViewState extends State<ChannelListView>
     return widget.errorBuilder(snapshot.error);
   }
 
-  void _listenChannelPagination(ChannelsBlocState channelsProvider) {
-    if (_scrollController.position.maxScrollExtent ==
-            _scrollController.offset &&
-        _scrollController.offset != 0) {
-      channelsProvider.queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination.copyWith(
-          offset: channelsProvider.channels?.length ?? 0,
-        ),
-        options: widget.options,
-      );
-    }
+  void paginateData() {
+    final channelsBloc = ChannelsBloc.of(context);
+
+    channelsBloc.queryChannels(
+      filter: widget.filter,
+      sortOptions: widget.sort,
+      paginationParams: widget.pagination.copyWith(
+        offset: channelsBloc.channels?.length ?? 0,
+      ),
+      options: widget.options,
+    );
   }
 
   StreamSubscription _subscription;
@@ -217,14 +197,6 @@ class _ChannelListViewState extends State<ChannelListView>
       options: widget.options,
     );
 
-    _scrollController.addListener(() {
-      channelsBloc.queryChannelsLoading.first.then((loading) {
-        if (!loading) {
-          _listenChannelPagination(channelsBloc);
-        }
-      });
-    });
-
     final client = StreamChat.of(context).client;
 
     _subscription = client
@@ -242,6 +214,10 @@ class _ChannelListViewState extends State<ChannelListView>
         options: widget.options,
       );
     });
+
+    if (widget.channelListController != null) {
+      widget.channelListController.paginateData = paginateData;
+    }
   }
 
   @override
@@ -269,4 +245,9 @@ class _ChannelListViewState extends State<ChannelListView>
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+}
+
+/// Controller used for paginating data in [ChannelListView]
+class ChannelListController {
+  VoidCallback paginateData;
 }

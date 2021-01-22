@@ -2,15 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
-import 'package:stream_chat_flutter_core/src/stream_chat_theme.dart';
-
-/// Callback called when tapping on a user
-typedef UserTapCallback = void Function(User, Widget);
-
-/// Builder used to create a custom [ListUserItem] from a [User]
-typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 
 ///
 /// It shows the list of current users.
@@ -47,30 +39,29 @@ class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
   const UserListView({
     Key key,
-    this.errorBuilder,
-    this.emptyBuilder,
     this.filter,
     this.options,
     this.sort,
     this.pagination,
-    this.onUserTap,
-    this.onUserLongPress,
-    this.userWidget,
-    this.userItemBuilder,
-    this.separatorBuilder,
-    this.onImageTap,
-    this.selectedUsers,
     this.pullToRefresh = true,
     this.groupAlphabetically = false,
-    this.crossAxisCount = 1,
-  })  : assert(
-          crossAxisCount == 1 || groupAlphabetically == false,
-          'Cannot group alphabetically when crossAxisCount > 1',
-        ),
-        super(key: key);
+    @required this.errorBuilder,
+    @required this.emptyBuilder,
+    @required this.loadingBuilder,
+    @required this.listBuilder,
+    this.userListController,
+  }) : super(key: key);
+
+  final UserListController userListController;
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
+
+  /// The builder that will be used to build the list
+  final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
+
+  /// The builder that will be used for loading
+  final WidgetBuilder loadingBuilder;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -98,39 +89,13 @@ class UserListView extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams pagination;
 
-  /// Function called when tapping on a channel
-  /// By default it calls [Navigator.push] building a [MaterialPageRoute]
-  /// with the widget [userWidget] as child.
-  final UserTapCallback onUserTap;
-
-  /// Function called when long pressing on a channel
-  final Function(User) onUserLongPress;
-
-  /// Widget used when opening a channel
-  final Widget userWidget;
-
-  /// Builder used to create a custom user preview
-  final UserItemBuilder userItemBuilder;
-
-  /// Builder used to create a custom item separator
-  final Function(BuildContext, int) separatorBuilder;
-
-  /// The function called when the image is tapped
-  final Function(User) onImageTap;
-
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
-
-  /// Sets a blue trailing checkMark in [ListUserItem] for all the [selectedUsers]
-  final Set<User> selectedUsers;
 
   /// Set it to true to group users by their first character
   ///
   /// defaults to false
   final bool groupAlphabetically;
-
-  /// The number of children in the cross axis.
-  final int crossAxisCount;
 
   @override
   _UserListViewState createState() => _UserListViewState();
@@ -138,8 +103,6 @@ class UserListView extends StatefulWidget {
 
 class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
-  bool get _isListView => widget.crossAxisCount == 1;
-
   @override
   void initState() {
     super.initState();
@@ -150,6 +113,10 @@ class _UserListViewState extends State<UserListView>
       pagination: widget.pagination,
       options: widget.options,
     );
+
+    if (widget.userListController != null) {
+      widget.userListController.paginateData = paginateData;
+    }
   }
 
   @override
@@ -214,235 +181,36 @@ class _UserListViewState extends State<UserListView>
             print((snapshot.error as Error).stackTrace);
           }
 
-          if (widget.errorBuilder != null) {
-            return widget.errorBuilder(snapshot.error);
-          }
-
-          var message = snapshot.error.toString();
-          if (snapshot.error is DioError) {
-            final dioError = snapshot.error as DioError;
-            if (dioError.type == DioErrorType.RESPONSE) {
-              message = dioError.message;
-            } else {
-              message = 'Check your connection and retry';
-            }
-          }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      WidgetSpan(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            right: 2.0,
-                          ),
-                          child: Icon(Icons.error_outline),
-                        ),
-                      ),
-                      TextSpan(text: 'Error loading channels'),
-                    ],
-                  ),
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16.0,
-                  ),
-                  child: Text(message),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    usersBlocState.queryUsers(
-                      filter: widget.filter,
-                      sort: widget.sort,
-                      pagination: widget.pagination,
-                      options: widget.options,
-                    );
-                  },
-                  child: Text('Retry'),
-                ),
-              ],
-            ),
-          );
+          return widget.errorBuilder(snapshot.error);
         }
 
         if (!snapshot.hasData) {
-          return LayoutBuilder(
-            builder: (context, viewportConstraints) {
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              );
-            },
-          );
+          return widget.loadingBuilder(context);
         }
 
         final items = snapshot.data;
 
-        if (items.isEmpty && widget.emptyBuilder != null) {
+        if (items.isEmpty) {
           return widget.emptyBuilder(context);
         }
 
-        if (items.isEmpty && widget.emptyBuilder == null) {
-          return LayoutBuilder(
-            builder: (context, viewportConstraints) {
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: Text('There are no users currently'),
-                  ),
-                ),
-              );
-            },
-          );
+        if (items.isEmpty) {
+          return widget.emptyBuilder(context);
         }
 
-        final child = _isListView
-            ? ListView.separated(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-                separatorBuilder: (_, index) {
-                  if (widget.separatorBuilder != null) {
-                    return widget.separatorBuilder(context, index);
-                  }
-                  return _separatorBuilder(context, index);
-                },
-                itemBuilder: (context, index) {
-                  return _listItemBuilder(context, index, items);
-                },
-              )
-            : GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: widget.crossAxisCount,
-                ),
-                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-                physics: AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return _gridItemBuilder(context, index, items);
-                },
-              );
-
-        return LazyLoadScrollView(
-          onEndOfPage: () async {
-            return _listenUserPagination(usersBlocState);
-          },
-          child: child,
-        );
+        return widget.listBuilder(context, items);
       },
     );
   }
 
-  Widget _listItemBuilder(BuildContext context, int i, List<ListItem> items) {
-    final usersProvider = UsersBloc.of(context);
-    if (i < items.length) {
-      final item = items[i];
-      return item.when(
-        headerItem: (header) {
-          return Container(
-            key: ValueKey<String>('HEADER-$header'),
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.05),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-              child: Text(
-                header,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.5,
-                  color: StreamChatTheme.of(context).colorTheme.grey,
-                ),
-              ),
-            ),
-          );
-        },
-        userItem: (user) {
-          final selected = widget.selectedUsers?.contains(user) ?? false;
-          return Container(
-            key: ValueKey<String>('USER-${user.id}'),
-            child: widget.userItemBuilder(context, user, selected),
-          );
-        },
-      );
-    } else {
-      return _buildQueryProgressIndicator(context, usersProvider);
-    }
-  }
+  void paginateData() {
+    final usersBloc = UsersBloc.of(context);
 
-  Widget _gridItemBuilder(BuildContext context, int i, List<ListItem> items) {
-    final usersProvider = UsersBloc.of(context);
-    if (i < items.length) {
-      final item = items[i];
-      return item.when(
-        headerItem: (_) => Offstage(),
-        userItem: (user) {
-          final selected = widget.selectedUsers?.contains(user) ?? false;
-          return Container(
-            key: ValueKey<String>('USER-${user.id}'),
-            child: widget.userItemBuilder(context, user, selected),
-          );
-        },
-      );
-    } else {
-      return _buildQueryProgressIndicator(context, usersProvider);
-    }
-  }
-
-  Widget _buildQueryProgressIndicator(context, UsersBlocState usersProvider) {
-    return StreamBuilder<bool>(
-        stream: usersProvider.queryUsersLoading,
-        initialData: false,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .accentRed
-                  .withOpacity(.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: Text('Error loading users'),
-                ),
-              ),
-            );
-          }
-          return Container(
-            height: 100,
-            padding: EdgeInsets.all(32),
-            child: Center(
-              child: snapshot.data ? CircularProgressIndicator() : Container(),
-            ),
-          );
-        });
-  }
-
-  Widget _separatorBuilder(context, i) {
-    return Container(
-      height: 1,
-      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-    );
-  }
-
-  void _listenUserPagination(UsersBlocState usersProvider) {
-    usersProvider.queryUsers(
+    usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
       pagination: widget.pagination.copyWith(
-        offset: usersProvider.users?.length ?? 0,
+        offset: usersBloc.users?.length ?? 0,
       ),
       options: widget.options,
     );
@@ -504,4 +272,9 @@ class ListUserItem extends ListItem {
   final User user;
 
   ListUserItem(this.user);
+}
+
+/// Controller used for paginating data in [ChannelListView]
+class UserListController {
+  VoidCallback paginateData;
 }
