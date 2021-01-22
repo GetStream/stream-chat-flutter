@@ -1108,30 +1108,7 @@ class ChannelClientState {
 
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        newMessages[oldIndex] = newMessages[oldIndex].copyWith(
-          text: message.text,
-          type: message.type,
-          attachments: message.attachments,
-          mentionedUsers: message.mentionedUsers,
-          reactionCounts: message.reactionCounts,
-          reactionScores: message.reactionScores,
-          latestReactions: message.latestReactions,
-          ownReactions: message.ownReactions,
-          parentId: message.parentId,
-          quotedMessageId: message.quotedMessageId,
-          quotedMessage: message.quotedMessage,
-          replyCount: message.replyCount,
-          showInChannel: message.showInChannel,
-          command: message.command,
-          silent: message.silent,
-          createdAt: message.createdAt,
-          updatedAt: message.updatedAt,
-          deletedAt: message.deletedAt,
-          user: message.user,
-          status: message.status,
-          threadParticipants: message.threadParticipants,
-          extraData: message.extraData,
-        );
+        newMessages[oldIndex] = newMessages[oldIndex].merge(message);
       } else {
         newMessages.add(message);
       }
@@ -1395,20 +1372,7 @@ class ChannelClientState {
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
-      channel: _channelState.channel?.copyWith(
-        lastMessageAt: updatedState.channel?.lastMessageAt,
-        createdAt: updatedState.channel?.createdAt,
-        type: updatedState.channel?.type,
-        extraData: updatedState.channel?.extraData,
-        updatedAt: updatedState.channel?.updatedAt,
-        id: updatedState.channel?.id,
-        createdBy: updatedState.channel?.createdBy,
-        config: updatedState.channel?.config,
-        deletedAt: updatedState.channel?.deletedAt,
-        cid: updatedState.channel?.cid,
-        frozen: updatedState.channel?.frozen,
-        memberCount: updatedState.channel?.memberCount,
-      ),
+      channel: _channelState.channel?.merge(updatedState.channel),
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: newMembers,
