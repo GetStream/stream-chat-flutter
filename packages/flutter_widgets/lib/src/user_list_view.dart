@@ -140,209 +140,170 @@ class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 
-  @override
-  void initState() {
-    super.initState();
-    final usersBloc = UsersBloc.of(context);
-    usersBloc.queryUsers(
-      filter: widget.filter,
-      sort: widget.sort,
-      pagination: widget.pagination,
-      options: widget.options,
-    );
-  }
+  UserListController _userListController = UserListController();
 
   @override
   Widget build(BuildContext context) {
-    final usersBloc = UsersBloc.of(context);
-
-    if (!widget.pullToRefresh) {
-      return _buildListView(usersBloc);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        return usersBloc.queryUsers(
-          filter: widget.filter,
-          sort: widget.sort,
-          options: widget.options,
-          pagination: widget.pagination,
+    var child = UserListCore(
+      errorBuilder: (err) {
+        return _buildError(err);
+      },
+      emptyBuilder: (context) {
+        return _buildEmpty();
+      },
+      loadingBuilder: (context) {
+        return LayoutBuilder(
+          builder: (context, viewportConstraints) {
+            return SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          },
         );
       },
-      child: _buildListView(usersBloc),
+      listBuilder: (context, list) {
+        return _buildListView(list);
+      },
+      pagination: widget.pagination,
+      options: widget.options,
+      sort: widget.sort,
+      filter: widget.filter,
+      groupAlphabetically: widget.groupAlphabetically,
+      userListController: _userListController,
     );
+
+    if (!widget.pullToRefresh) {
+      return child;
+    } else {
+      return RefreshIndicator(
+        onRefresh: () async {
+          _userListController.loadData();
+        },
+        child: child,
+      );
+    }
   }
 
   bool get isListAlreadySorted =>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
-  Stream<List<ListItem>> _buildUserStream(
-    UsersBlocState usersBlocState,
-  ) {
-    return usersBlocState.usersStream.map(
-      (users) {
-        if (widget.groupAlphabetically) {
-          var temp = users;
-          if (!isListAlreadySorted) {
-            temp = users..sort((curr, next) => curr.name.compareTo(next.name));
-          }
-          final groupedUsers = <String, List<User>>{};
-          for (var e in temp) {
-            final alphabet = e.name[0]?.toUpperCase();
-            groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
-          }
-          final items = <ListItem>[];
-          for (var key in groupedUsers.keys) {
-            items.add(ListHeaderItem(key));
-            items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
-          }
-          return items;
-        }
-        return users.map((e) => ListUserItem(e)).toList();
-      },
+  Widget _buildError(Error error) {
+    print((error).stackTrace);
+
+    if (widget.errorBuilder != null) {
+      return widget.errorBuilder(error);
+    }
+
+    var message = error.toString();
+    if (error is DioError) {
+      final dioError = error as DioError;
+      if (dioError.type == DioErrorType.RESPONSE) {
+        message = dioError.message;
+      } else {
+        message = 'Check your connection and retry';
+      }
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text.rich(
+            TextSpan(
+              children: [
+                WidgetSpan(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      right: 2.0,
+                    ),
+                    child: Icon(Icons.error_outline),
+                  ),
+                ),
+                TextSpan(text: 'Error loading channels'),
+              ],
+            ),
+            style: Theme.of(context).textTheme.headline6,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 16.0,
+            ),
+            child: Text(message),
+          ),
+          FlatButton(
+            onPressed: () {
+              _userListController.loadData();
+            },
+            child: Text('Retry'),
+          ),
+        ],
+      ),
     );
   }
 
-  StreamBuilder<List<ListItem>> _buildListView(
-    UsersBlocState usersBlocState,
-  ) {
-    return StreamBuilder(
-      stream: _buildUserStream(usersBlocState),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          if (snapshot.error is Error) {
-            print((snapshot.error as Error).stackTrace);
-          }
+  Widget _buildEmpty() {
+    if (widget.emptyBuilder != null) {
+      return widget.emptyBuilder(context);
+    }
 
-          if (widget.errorBuilder != null) {
-            return widget.errorBuilder(snapshot.error);
-          }
-
-          var message = snapshot.error.toString();
-          if (snapshot.error is DioError) {
-            final dioError = snapshot.error as DioError;
-            if (dioError.type == DioErrorType.RESPONSE) {
-              message = dioError.message;
-            } else {
-              message = 'Check your connection and retry';
-            }
-          }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      WidgetSpan(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            right: 2.0,
-                          ),
-                          child: Icon(Icons.error_outline),
-                        ),
-                      ),
-                      TextSpan(text: 'Error loading channels'),
-                    ],
-                  ),
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16.0,
-                  ),
-                  child: Text(message),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    usersBlocState.queryUsers(
-                      filter: widget.filter,
-                      sort: widget.sort,
-                      pagination: widget.pagination,
-                      options: widget.options,
-                    );
-                  },
-                  child: Text('Retry'),
-                ),
-              ],
+    if (widget.emptyBuilder == null) {
+      return LayoutBuilder(
+        builder: (context, viewportConstraints) {
+          return SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: viewportConstraints.maxHeight,
+              ),
+              child: Center(
+                child: Text('There are no users currently'),
+              ),
             ),
           );
-        }
+        },
+      );
+    }
+  }
 
-        if (!snapshot.hasData) {
-          return LayoutBuilder(
-            builder: (context, viewportConstraints) {
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              );
+  Widget _buildListView(
+    List<ListItem> items,
+  ) {
+    final child = _isListView
+        ? ListView.separated(
+            physics: AlwaysScrollableScrollPhysics(),
+            itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+            separatorBuilder: (_, index) {
+              if (widget.separatorBuilder != null) {
+                return widget.separatorBuilder(context, index);
+              }
+              return _separatorBuilder(context, index);
+            },
+            itemBuilder: (context, index) {
+              return _listItemBuilder(context, index, items);
+            },
+          )
+        : GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: widget.crossAxisCount,
+            ),
+            itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+            physics: AlwaysScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              return _gridItemBuilder(context, index, items);
             },
           );
-        }
 
-        final items = snapshot.data;
-
-        if (items.isEmpty && widget.emptyBuilder != null) {
-          return widget.emptyBuilder(context);
-        }
-
-        if (items.isEmpty && widget.emptyBuilder == null) {
-          return LayoutBuilder(
-            builder: (context, viewportConstraints) {
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: Text('There are no users currently'),
-                  ),
-                ),
-              );
-            },
-          );
-        }
-
-        final child = _isListView
-            ? ListView.separated(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-                separatorBuilder: (_, index) {
-                  if (widget.separatorBuilder != null) {
-                    return widget.separatorBuilder(context, index);
-                  }
-                  return _separatorBuilder(context, index);
-                },
-                itemBuilder: (context, index) {
-                  return _listItemBuilder(context, index, items);
-                },
-              )
-            : GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: widget.crossAxisCount,
-                ),
-                itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-                physics: AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return _gridItemBuilder(context, index, items);
-                },
-              );
-
-        return LazyLoadScrollView(
-          onEndOfPage: () async {
-            return _listenUserPagination(usersBlocState);
-          },
-          child: child,
-        );
+    return LazyLoadScrollView(
+      onEndOfPage: () async {
+        return _userListController.paginateData();
       },
+      child: child,
     );
   }
 
@@ -480,34 +441,5 @@ class _UserListViewState extends State<UserListView>
       height: 1,
       color: StreamChatTheme.of(context).colorTheme.greyWhisper,
     );
-  }
-
-  void _listenUserPagination(UsersBlocState usersProvider) {
-    usersProvider.queryUsers(
-      filter: widget.filter,
-      sort: widget.sort,
-      pagination: widget.pagination.copyWith(
-        offset: usersProvider.users?.length ?? 0,
-      ),
-      options: widget.options,
-    );
-  }
-
-  @override
-  void didUpdateWidget(UserListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
-        jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
-        widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString() ||
-        widget.options?.toString() != oldWidget.options?.toString()) {
-      final usersBloc = UsersBloc.of(context);
-      usersBloc.queryUsers(
-        filter: widget.filter,
-        sort: widget.sort,
-        pagination: widget.pagination,
-        options: widget.options,
-      );
-    }
   }
 }

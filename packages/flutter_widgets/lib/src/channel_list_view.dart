@@ -159,34 +159,36 @@ class _ChannelListViewState extends State<ChannelListView>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.pullToRefresh) {
-      _channelListController.loadData();
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        _channelListController.loadData();
+    var child = ChannelListCore(
+      channelListController: _channelListController,
+      listBuilder: (context, list) {
+        return _buildListView(list);
       },
-      child: ChannelListCore(
-        channelListController: _channelListController,
-        listBuilder: (context, list) {
-          return _buildListView(list);
-        },
-        emptyBuilder: (BuildContext context) {
-          return _buildEmptyWidget();
-        },
-        errorBuilder: (Error error) {
-          return _buildErrorWidget(context);
-        },
-        loadingBuilder: (BuildContext context) {
-          return _buildLoadingWidget();
-        },
-        pagination: widget.pagination,
-        options: widget.options,
-        sort: widget.sort,
-        filter: widget.filter,
-      ),
+      emptyBuilder: (BuildContext context) {
+        return _buildEmptyWidget();
+      },
+      errorBuilder: (Error error) {
+        return _buildErrorWidget(context);
+      },
+      loadingBuilder: (BuildContext context) {
+        return _buildLoadingWidget();
+      },
+      pagination: widget.pagination,
+      options: widget.options,
+      sort: widget.sort,
+      filter: widget.filter,
     );
+
+    if (!widget.pullToRefresh) {
+      return child;
+    } else {
+      return RefreshIndicator(
+        onRefresh: () async {
+          _channelListController.loadData();
+        },
+        child: child,
+      );
+    }
   }
 
   Widget _buildListView(

@@ -43,7 +43,6 @@ class UserListCore extends StatefulWidget {
     this.options,
     this.sort,
     this.pagination,
-    this.pullToRefresh = true,
     this.groupAlphabetically = false,
     @required this.errorBuilder,
     @required this.emptyBuilder,
@@ -89,9 +88,6 @@ class UserListCore extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams pagination;
 
-  /// Set it to false to disable the pull-to-refresh widget
-  final bool pullToRefresh;
-
   /// Set it to true to group users by their first character
   ///
   /// defaults to false
@@ -124,21 +120,7 @@ class _UserListCoreState extends State<UserListCore>
   Widget build(BuildContext context) {
     final usersBloc = UsersBloc.of(context);
 
-    if (!widget.pullToRefresh) {
-      return _buildListView(usersBloc);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        return usersBloc.queryUsers(
-          filter: widget.filter,
-          sort: widget.sort,
-          options: widget.options,
-          pagination: widget.pagination,
-        );
-      },
-      child: _buildListView(usersBloc),
-    );
+    return _buildListView(usersBloc);
   }
 
   bool get isListAlreadySorted =>
