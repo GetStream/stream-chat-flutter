@@ -109,6 +109,7 @@ class MessageListView extends StatefulWidget {
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.messageFilter,
+    this.loadingBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -119,6 +120,9 @@ class MessageListView extends StatefulWidget {
 
   /// Function used to build a custom thread widget
   final ThreadBuilder threadBuilder;
+
+  /// The builder used while loading.
+  final WidgetBuilder loadingBuilder;
 
   /// Filter applied to the message list before rendering
   final bool Function(Message) messageFilter;
@@ -308,6 +312,11 @@ class _MessageListViewState extends State<MessageListView> {
             if (!snapshot.data) {
               return Container();
             }
+
+            if (widget.loadingBuilder != null) {
+              return widget.loadingBuilder(context);
+            }
+
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
