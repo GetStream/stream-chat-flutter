@@ -108,6 +108,8 @@ class MessageListView extends StatefulWidget {
     this.onParentMessageTap,
     this.scrollPhysics = const AlwaysScrollableScrollPhysics(),
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.messageFilter,
+    this.loadingBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -118,6 +120,12 @@ class MessageListView extends StatefulWidget {
 
   /// Function used to build a custom thread widget
   final ThreadBuilder threadBuilder;
+
+  /// The builder used while loading.
+  final WidgetBuilder loadingBuilder;
+
+  /// Filter applied to the message list before rendering
+  final bool Function(Message) messageFilter;
 
   /// Function called when tapping on a thread
   /// By default it calls [Navigator.push] using the widget built using [threadBuilder]
@@ -304,6 +312,11 @@ class _MessageListViewState extends State<MessageListView> {
             if (!snapshot.data) {
               return Container();
             }
+
+            if (widget.loadingBuilder != null) {
+              return widget.loadingBuilder(context);
+            }
+
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -518,15 +531,20 @@ class _MessageListViewState extends State<MessageListView> {
           .map((threads) => threads[widget.parentMessage.id]);
     }
 
-    _streamListener = stream
-        .map((messages) =>
-            messages
-                ?.where((m) =>
-                    !(m.status == MessageSendingStatus.FAILED && m.isDeleted) &&
-                    m.shadowed != true)
-                ?.toList() ??
-            [])
-        .listen((newMessages) {
+    _streamListener = stream.map((messages) {
+      final filteredMessages = messages
+              ?.where((m) =>
+                  !(m.status == MessageSendingStatus.FAILED && m.isDeleted) &&
+                  m.shadowed != true)
+              ?.toList() ??
+          [];
+
+      if (widget.messageFilter != null) {
+        return messages.where(widget.messageFilter).toList();
+      }
+
+      return filteredMessages;
+    }).listen((newMessages) {
       newMessages = newMessages.reversed.toList();
       if (_messages.isEmpty ||
           newMessages.isEmpty ||
