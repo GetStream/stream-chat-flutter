@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/channels_bloc.dart';
 
-import 'stream_chat.dart';
+import 'stream_chat_core.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
@@ -36,14 +36,14 @@ import 'stream_chat.dart';
 /// ```
 ///
 ///
-/// Make sure to have a [StreamChat] ancestor in order to provide the information about the channels.
+/// Make sure to have a [StreamChatCore] ancestor in order to provide the information about the channels.
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class ChannelListView extends StatefulWidget {
+class ChannelListViewCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  ChannelListView({
+  ChannelListViewCore({
     Key key,
     this.filter,
     this.options,
@@ -96,10 +96,10 @@ class ChannelListView extends StatefulWidget {
   final bool pullToRefresh;
 
   @override
-  _ChannelListViewState createState() => _ChannelListViewState();
+  _ChannelListViewCoreState createState() => _ChannelListViewCoreState();
 }
 
-class _ChannelListViewState extends State<ChannelListView>
+class _ChannelListViewCoreState extends State<ChannelListViewCore>
     with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
@@ -197,7 +197,7 @@ class _ChannelListViewState extends State<ChannelListView>
       options: widget.options,
     );
 
-    final client = StreamChat.of(context).client;
+    final client = StreamChatCore.of(context).client;
 
     _subscription = client
         .on(
@@ -221,7 +221,7 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   @override
-  void didUpdateWidget(ChannelListView oldWidget) {
+  void didUpdateWidget(ChannelListViewCore oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
@@ -247,7 +247,7 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 }
 
-/// Controller used for paginating data in [ChannelListView]
+/// Controller used for paginating data in [ChannelListViewCore]
 class ChannelListController {
   VoidCallback paginateData;
 }

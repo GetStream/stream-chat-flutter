@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter_core/src/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 
 /// Widget dedicated to the management of a channel list with pagination
 class ChannelsBloc extends StatefulWidget {
@@ -79,7 +79,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
     Map<String, dynamic> options,
     bool onlyOffline = false,
   }) async {
-    final client = StreamChat.of(context).client;
+    final client = StreamChatCore.of(context).client;
 
     if (client.state?.user == null ||
         _queryChannelsLoadingController.value == true) {
@@ -120,7 +120,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   void initState() {
     super.initState();
 
-    final client = StreamChat.of(context).client;
+    final client = StreamChatCore.of(context).client;
 
     if (!widget.lockChannelsOrder) {
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {

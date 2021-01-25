@@ -24,12 +24,12 @@ import 'package:stream_chat/stream_chat.dart';
 ///   }
 /// }
 ///
-/// Use [StreamChat.of] to get the current [StreamChatState] instance.
-class StreamChat extends StatefulWidget {
+/// Use [StreamChatCore.of] to get the current [StreamChatCoreState] instance.
+class StreamChatCore extends StatefulWidget {
   final Client client;
   final Widget child;
 
-  StreamChat({
+  StreamChatCore({
     Key key,
     @required this.client,
     @required this.child,
@@ -38,13 +38,13 @@ class StreamChat extends StatefulWidget {
         );
 
   @override
-  StreamChatState createState() => StreamChatState();
+  StreamChatCoreState createState() => StreamChatCoreState();
 
-  /// Use this method to get the current [StreamChatState] instance
-  static StreamChatState of(BuildContext context) {
-    StreamChatState streamChatState;
+  /// Use this method to get the current [StreamChatCoreState] instance
+  static StreamChatCoreState of(BuildContext context) {
+    StreamChatCoreState streamChatState;
 
-    streamChatState = context.findAncestorStateOfType<StreamChatState>();
+    streamChatState = context.findAncestorStateOfType<StreamChatCoreState>();
 
     if (streamChatState == null) {
       throw Exception(
@@ -56,7 +56,8 @@ class StreamChat extends StatefulWidget {
 }
 
 /// The current state of the StreamChat widget
-class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
+class StreamChatCoreState extends State<StreamChatCore>
+    with WidgetsBindingObserver {
   Client get client => widget.client;
   Timer _disconnectTimer;
 

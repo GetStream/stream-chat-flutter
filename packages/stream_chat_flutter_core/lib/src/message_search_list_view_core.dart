@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'lazy_load_scroll_view.dart';
 import 'message_search_bloc.dart';
 
 /// Callback called when tapping on a user
@@ -12,7 +11,7 @@ typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 typedef MessageSearchItemBuilder = Widget Function(
     BuildContext, GetMessageResponse);
 
-/// Builder used when [MessageSearchListView] is empty
+/// Builder used when [MessageSearchListViewCore] is empty
 typedef EmptyMessageSearchBuilder = Widget Function(
     BuildContext context, String searchQuery);
 
@@ -44,9 +43,9 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageSearchListView extends StatefulWidget {
+class MessageSearchListViewCore extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
-  const MessageSearchListView({
+  const MessageSearchListViewCore({
     Key key,
     this.messageQuery,
     this.filters,
@@ -98,10 +97,11 @@ class MessageSearchListView extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   @override
-  _MessageSearchListViewState createState() => _MessageSearchListViewState();
+  _MessageSearchListViewCoreState createState() =>
+      _MessageSearchListViewCoreState();
 }
 
-class _MessageSearchListViewState extends State<MessageSearchListView> {
+class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
   @override
   void initState() {
     super.initState();
@@ -167,7 +167,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   }
 
   @override
-  void didUpdateWidget(MessageSearchListView oldWidget) {
+  void didUpdateWidget(MessageSearchListViewCore oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.filters?.toString() != oldWidget.filters?.toString() ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||

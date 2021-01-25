@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'stream_chat.dart';
+import 'stream_chat_core.dart';
 
 /// Widget dedicated to the management of a users list with pagination
 class UsersBloc extends StatefulWidget {
@@ -56,7 +56,7 @@ class UsersBlocState extends State<UsersBloc>
     Map<String, dynamic> options,
     PaginationParams pagination,
   }) async {
-    final client = StreamChat.of(context).client;
+    final client = StreamChatCore.of(context).client;
 
     if (client.state?.user == null ||
         _queryUsersLoadingController.value == true) {
