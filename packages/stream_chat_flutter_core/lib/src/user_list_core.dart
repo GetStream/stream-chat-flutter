@@ -35,9 +35,9 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class UserListViewCore extends StatefulWidget {
+class UserListCore extends StatefulWidget {
   /// Instantiate a new UserListView
-  const UserListViewCore({
+  const UserListCore({
     Key key,
     this.filter,
     this.options,
@@ -98,10 +98,10 @@ class UserListViewCore extends StatefulWidget {
   final bool groupAlphabetically;
 
   @override
-  _UserListViewCoreState createState() => _UserListViewCoreState();
+  _UserListCoreState createState() => _UserListCoreState();
 }
 
-class _UserListViewCoreState extends State<UserListViewCore>
+class _UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
   @override
   void initState() {
@@ -229,7 +229,7 @@ class _UserListViewCoreState extends State<UserListViewCore>
   }
 
   @override
-  void didUpdateWidget(UserListViewCore oldWidget) {
+  void didUpdateWidget(UserListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||

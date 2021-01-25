@@ -45,9 +45,9 @@ import 'stream_channel.dart';
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageListViewCore extends StatefulWidget {
+class MessageListCore extends StatefulWidget {
   /// Instantiate a new MessageListView
-  MessageListViewCore({
+  MessageListCore({
     Key key,
     this.showScrollToBottom = true,
     this.parentMessage,
@@ -78,10 +78,10 @@ class MessageListViewCore extends StatefulWidget {
   final Widget Function(DateTime) dateDividerBuilder;
 
   @override
-  _MessageListViewCoreState createState() => _MessageListViewCoreState();
+  _MessageListCoreState createState() => _MessageListCoreState();
 }
 
-class _MessageListViewCoreState extends State<MessageListViewCore> {
+class _MessageListCoreState extends State<MessageListCore> {
   StreamChannelState streamChannel;
 
   bool get _upToDate => streamChannel.channel.state.isUpToDate;

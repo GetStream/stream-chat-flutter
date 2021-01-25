@@ -41,9 +41,9 @@ import 'stream_chat_core.dart';
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class ChannelListViewCore extends StatefulWidget {
+class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  ChannelListViewCore({
+  ChannelListCore({
     Key key,
     this.filter,
     this.options,
@@ -96,10 +96,10 @@ class ChannelListViewCore extends StatefulWidget {
   final bool pullToRefresh;
 
   @override
-  _ChannelListViewCoreState createState() => _ChannelListViewCoreState();
+  _ChannelListCoreState createState() => _ChannelListCoreState();
 }
 
-class _ChannelListViewCoreState extends State<ChannelListViewCore>
+class _ChannelListCoreState extends State<ChannelListCore>
     with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
@@ -233,7 +233,7 @@ class _ChannelListViewCoreState extends State<ChannelListViewCore>
   }
 
   @override
-  void didUpdateWidget(ChannelListViewCore oldWidget) {
+  void didUpdateWidget(ChannelListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
@@ -259,7 +259,7 @@ class _ChannelListViewCoreState extends State<ChannelListViewCore>
   }
 }
 
-/// Controller used for paginating data in [ChannelListViewCore]
+/// Controller used for paginating data in [ChannelListCore]
 class ChannelListController {
   VoidCallback loadData;
   VoidCallback paginateData;

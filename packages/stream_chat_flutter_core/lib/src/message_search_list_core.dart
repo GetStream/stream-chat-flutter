@@ -4,17 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'message_search_bloc.dart';
 
-/// Callback called when tapping on a user
-typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
-
-/// Builder used to create a custom [ListUserItem] from a [User]
-typedef MessageSearchItemBuilder = Widget Function(
-    BuildContext, GetMessageResponse);
-
-/// Builder used when [MessageSearchListViewCore] is empty
-typedef EmptyMessageSearchBuilder = Widget Function(
-    BuildContext context, String searchQuery);
-
 ///
 /// It shows the list of searched messages.
 ///
@@ -43,9 +32,9 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
-class MessageSearchListViewCore extends StatefulWidget {
+class MessageSearchListCore extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
-  const MessageSearchListViewCore({
+  const MessageSearchListCore({
     Key key,
     this.messageQuery,
     this.filters,
@@ -89,7 +78,7 @@ class MessageSearchListViewCore extends StatefulWidget {
   final Widget Function(List<GetMessageResponse>) childBuilder;
 
   /// The builder used when the channel list is empty.
-  final EmptyMessageSearchBuilder emptyBuilder;
+  final WidgetBuilder emptyBuilder;
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
@@ -97,11 +86,10 @@ class MessageSearchListViewCore extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   @override
-  _MessageSearchListViewCoreState createState() =>
-      _MessageSearchListViewCoreState();
+  _MessageSearchListCoreState createState() => _MessageSearchListCoreState();
 }
 
-class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
+class _MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void initState() {
     super.initState();
@@ -145,7 +133,7 @@ class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
         final items = snapshot.data;
 
         if (items.isEmpty) {
-          return widget.emptyBuilder(context, widget.messageQuery);
+          return widget.emptyBuilder(context);
         }
 
         return widget.childBuilder(snapshot.data);
@@ -180,7 +168,7 @@ class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
   }
 
   @override
-  void didUpdateWidget(MessageSearchListViewCore oldWidget) {
+  void didUpdateWidget(MessageSearchListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.filters?.toString() != oldWidget.filters?.toString() ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
