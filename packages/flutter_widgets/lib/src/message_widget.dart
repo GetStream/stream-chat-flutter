@@ -159,8 +159,8 @@ class MessageWidget extends StatefulWidget {
     this.showReactionPickerIndicator = false,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
-    this.showThreadReplyIndicator = true,
-    this.showInChannelIndicator = true,
+    this.showThreadReplyIndicator = false,
+    this.showInChannelIndicator = false,
     this.onReplyTap,
     this.onThreadTap,
     this.showUsername = true,
@@ -371,15 +371,24 @@ class _MessageWidgetState extends State<MessageWidget> {
                                                   alignment: Alignment.center,
                                                   transform: Matrix4.rotationY(
                                                       widget.reverse ? pi : 0),
-                                                  child: DeletedMessage(
-                                                    reverse: widget.reverse,
-                                                    borderRadiusGeometry: widget
-                                                        .borderRadiusGeometry,
-                                                    borderSide:
-                                                        widget.borderSide,
-                                                    shape: widget.shape,
-                                                    messageTheme:
-                                                        widget.messageTheme,
+                                                  child: Container(
+                                                    margin: EdgeInsets.symmetric(
+                                                        horizontal:
+                                                            widget.showUserAvatar ==
+                                                                    DisplayWidget
+                                                                        .gone
+                                                                ? 0
+                                                                : 4.0),
+                                                    child: DeletedMessage(
+                                                      reverse: widget.reverse,
+                                                      borderRadiusGeometry: widget
+                                                          .borderRadiusGeometry,
+                                                      borderSide:
+                                                          widget.borderSide,
+                                                      shape: widget.shape,
+                                                      messageTheme:
+                                                          widget.messageTheme,
+                                                    ),
                                                   ),
                                                 )
                                               : Card(

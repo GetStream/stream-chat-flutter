@@ -45,9 +45,6 @@ class StreamChatThemeData {
   /// The text themes used in the widgets
   final TextTheme textTheme;
 
-  /// The button themes used in the widgets
-  final ButtonThemeData buttonTheme;
-
   /// The text themes used in the widgets
   final ColorTheme colorTheme;
 
@@ -78,7 +75,6 @@ class StreamChatThemeData {
   /// Create a theme from scratch
   const StreamChatThemeData({
     this.textTheme,
-    this.buttonTheme,
     this.colorTheme,
     this.channelPreviewTheme,
     this.channelTheme,
@@ -93,24 +89,20 @@ class StreamChatThemeData {
   /// Create a theme from a Material [Theme]
   factory StreamChatThemeData.fromTheme(ThemeData theme) {
     final defaultTheme = getDefaultTheme(theme);
-    final customizedTheme = StreamChatThemeData(
-      primaryIconTheme: theme.primaryIconTheme,
-      ownMessageTheme: MessageTheme(
-        replies: TextStyle(color: theme.accentColor),
-        messageLinks: TextStyle(color: theme.accentColor),
+    final customizedTheme = StreamChatThemeData.fromColorAndTextTheme(
+      defaultTheme.colorTheme.copyWith(
+        accentBlue: theme.accentColor,
       ),
-      otherMessageTheme: MessageTheme(
-        replies: TextStyle(color: theme.accentColor),
-        messageLinks: TextStyle(color: theme.accentColor),
-      ),
-    );
+      defaultTheme.textTheme,
+    ).copyWith(
+        // primaryIconTheme: theme.primaryIconTheme,
+        );
     return defaultTheme.merge(customizedTheme) ?? customizedTheme;
   }
 
   /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
   StreamChatThemeData copyWith({
     TextTheme textTheme,
-    ButtonThemeData buttonTheme,
     ColorTheme colorTheme,
     ChannelPreviewTheme channelPreviewTheme,
     ChannelTheme channelTheme,
@@ -123,7 +115,6 @@ class StreamChatThemeData {
   }) =>
       StreamChatThemeData(
         textTheme: textTheme ?? this.textTheme,
-        buttonTheme: buttonTheme ?? this.buttonTheme,
         colorTheme: colorTheme ?? this.colorTheme,
         primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
@@ -139,7 +130,6 @@ class StreamChatThemeData {
     if (other == null) return this;
     return copyWith(
       textTheme: textTheme?.merge(other.textTheme) ?? other.textTheme,
-      buttonTheme: other.buttonTheme,
       colorTheme: colorTheme?.merge(other.colorTheme) ?? other.colorTheme,
       primaryIconTheme: other.primaryIconTheme,
       defaultChannelImage: other.defaultChannelImage,
@@ -157,26 +147,14 @@ class StreamChatThemeData {
     );
   }
 
-  /// Get the default Stream Chat theme
-  static StreamChatThemeData getDefaultTheme(ThemeData theme) {
-    final accentColor = Color(0xff006cff);
-    final isDark = theme.brightness == Brightness.dark;
-    final textTheme = isDark ? TextTheme.dark() : TextTheme.light();
-    final colorTheme = isDark ? ColorTheme.dark() : ColorTheme.light();
+  static StreamChatThemeData fromColorAndTextTheme(
+    ColorTheme colorTheme,
+    TextTheme textTheme,
+  ) {
+    final accentColor = colorTheme.accentBlue;
     return StreamChatThemeData(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      buttonTheme: ButtonThemeData(
-        height: 48.0,
-        buttonColor: isDark ? Color(0xffffffff) : Color(0xff006aff),
-        textTheme: ButtonTextTheme.accent,
-        colorScheme: theme.colorScheme.copyWith(
-          secondary: isDark ? Color(0xff005eff) : Color(0xffffffff),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(26),
-        ),
-      ),
       primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
       defaultChannelImage: (context, channel) => SizedBox(),
       defaultUserImage: (context, user) => Center(
@@ -204,7 +182,7 @@ class StreamChatThemeData {
           ),
           indicatorIconSize: 16.0),
       channelTheme: ChannelTheme(
-        messageInputButtonIconTheme: theme.iconTheme.copyWith(
+        messageInputButtonIconTheme: IconThemeData(
           color: accentColor,
         ),
         channelHeaderTheme: ChannelHeaderTheme(
@@ -289,6 +267,17 @@ class StreamChatThemeData {
           assetName: 'Icon_wut_reaction.svg',
         ),
       ],
+    );
+  }
+
+  /// Get the default Stream Chat theme
+  static StreamChatThemeData getDefaultTheme(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final textTheme = isDark ? TextTheme.dark() : TextTheme.light();
+    final colorTheme = isDark ? ColorTheme.dark() : ColorTheme.light();
+    return fromColorAndTextTheme(
+      colorTheme,
+      textTheme,
     );
   }
 }

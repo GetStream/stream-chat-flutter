@@ -222,8 +222,23 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                   ),
                   Spacer(),
                   RaisedButton(
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? StreamChatTheme.of(context).colorTheme.accentBlue
+                        : Colors.white,
                     elevation: 0,
-                    child: Text('Login', style: TextStyle(fontSize: 16)),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).brightness != Brightness.light
+                            ? StreamChatTheme.of(context).colorTheme.accentBlue
+                            : Colors.white,
+                      ),
+                    ),
                     onPressed: () async {
                       if (loading) {
                         return;

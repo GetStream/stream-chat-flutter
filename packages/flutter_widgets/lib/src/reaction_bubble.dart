@@ -67,7 +67,7 @@ class ReactionBubble extends StatelessWidget {
                       children: [
                         if (constraints.maxWidth < double.infinity)
                           ...reactions
-                              .take((constraints.maxWidth) ~/ 22)
+                              .take((constraints.maxWidth) ~/ 24)
                               .map((reaction) {
                             return _buildReaction(
                               reactionIcons,

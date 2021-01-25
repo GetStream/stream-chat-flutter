@@ -142,4 +142,25 @@ class ChannelModel {
         extraData: extraData ?? this.extraData,
         team: team ?? this.team,
       );
+
+  /// Returns a new [ChannelModel] that is a combination of this channelModel and the given
+  /// [other] channelModel.
+  ChannelModel merge(ChannelModel other) {
+    if (other == null) return this;
+    return copyWith(
+      id: other.id,
+      type: other.type,
+      cid: other.cid,
+      config: other.config,
+      createdBy: other.createdBy,
+      frozen: other.frozen,
+      lastMessageAt: other.lastMessageAt,
+      createdAt: other.createdAt,
+      updatedAt: other.updatedAt,
+      deletedAt: other.deletedAt,
+      memberCount: other.memberCount,
+      extraData: other.extraData,
+      team: other.team,
+    );
+  }
 }

@@ -41,11 +41,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeData = ThemeData(primarySwatch: Colors.green);
     final defaultTheme = StreamChatThemeData.fromTheme(themeData);
+    final colorTheme = defaultTheme.colorTheme;
     final customTheme = defaultTheme.merge(StreamChatThemeData(
       ownMessageTheme: MessageTheme(
-        messageBackgroundColor: StreamChatTheme.of(context).colorTheme.black,
+        messageBackgroundColor: colorTheme.black,
         messageText: TextStyle(
-          color: StreamChatTheme.of(context).colorTheme.white,
+          color: colorTheme.white,
         ),
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(8),

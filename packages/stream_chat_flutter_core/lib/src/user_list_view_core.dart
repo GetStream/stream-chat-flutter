@@ -154,12 +154,12 @@ class _UserListViewCoreState extends State<UserListViewCore>
             temp = users..sort((curr, next) => curr.name.compareTo(next.name));
           }
           final groupedUsers = <String, List<User>>{};
-          for (var e in temp) {
+          for (final e in temp) {
             final alphabet = e.name[0]?.toUpperCase();
             groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
           }
           final items = <ListItem>[];
-          for (var key in groupedUsers.keys) {
+          for (final key in groupedUsers.keys) {
             items.add(ListHeaderItem(key));
             items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
           }

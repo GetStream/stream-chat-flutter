@@ -97,7 +97,7 @@ class ChannelPage extends StatelessWidget {
     List<Message> messages,
   ) {
     final message = details.message;
-    final color = details.isMyMessage ? Colors.blueGrey : Colors.blue;
+    final color = details.isMyMessage ? Colors.red : Colors.blue;
     if (message.isSystem) {
       return SizedBox();
     }
@@ -110,7 +110,10 @@ class ChannelPage extends StatelessWidget {
         color: color,
         width: 2,
       ),
-      padding: const EdgeInsets.all(2),
+      padding: const EdgeInsets.symmetric(
+        vertical: 2,
+        horizontal: 4,
+      ),
       attachmentBorderSide: BorderSide(
         color: color,
         width: 2,
