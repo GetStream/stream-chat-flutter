@@ -51,7 +51,6 @@ class MessageListCore extends StatefulWidget {
     Key key,
     this.showScrollToBottom = true,
     this.parentMessage,
-    this.dateDividerBuilder,
     @required this.loadingBuilder,
     @required this.emptyBuilder,
     @required this.messageListBuilder,
@@ -73,9 +72,6 @@ class MessageListCore extends StatefulWidget {
 
   /// Parent message in case of a thread
   final Message parentMessage;
-
-  /// Builder used to render date dividers
-  final Widget Function(DateTime) dateDividerBuilder;
 
   @override
   _MessageListCoreState createState() => _MessageListCoreState();
@@ -128,7 +124,8 @@ class _MessageListCoreState extends State<MessageListCore> {
         });
   }
 
-  Future<void> paginateData(QueryDirection direction) {
+  Future<void> paginateData(
+      {QueryDirection direction = QueryDirection.bottom}) {
     if (!_isThreadConversation) {
       return streamChannel.queryMessages(direction: direction);
     } else {
@@ -162,5 +159,5 @@ class _MessageListCoreState extends State<MessageListCore> {
 
 /// Controller used for paginating data in [ChannelListView]
 class MessageListController {
-  Function(QueryDirection direction) paginateData;
+  Function({QueryDirection direction}) paginateData;
 }
