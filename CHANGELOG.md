@@ -1,3 +1,8 @@
+## 0.2.21
+
+- Add `loadingBuilder` in `MessageListView`
+- Add `messageFilter` property in `MessageListView`
+
 ## 0.2.20+4
 
 - Fix channelPreview when the message list is empty
