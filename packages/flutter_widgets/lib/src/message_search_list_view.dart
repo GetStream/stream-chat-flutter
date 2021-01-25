@@ -119,23 +119,115 @@ class MessageSearchListView extends StatefulWidget {
 }
 
 class _MessageSearchListViewState extends State<MessageSearchListView> {
-  @override
-  void initState() {
-    super.initState();
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    messageSearchBloc.search(
-      filter: widget.filters,
-      sort: widget.sortOptions,
-      query: widget.messageQuery,
-      pagination: widget.paginationParams,
-      messageFilter: widget.messageFilters,
-    );
-  }
+  MessageSearchListController _messageSearchListController =
+      MessageSearchListController();
 
   @override
   Widget build(BuildContext context) {
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    return _buildListView(messageSearchBloc);
+    return MessageSearchListCore(
+      filters: widget.filters,
+      sortOptions: widget.sortOptions,
+      messageQuery: widget.messageQuery,
+      paginationParams: widget.paginationParams,
+      messageFilters: widget.messageFilters,
+      messageSearchListController: _messageSearchListController,
+      emptyBuilder: (context) {
+        if (widget.emptyBuilder != null) {
+          return widget.emptyBuilder(context, widget.messageQuery);
+        }
+        return LayoutBuilder(
+          builder: (context, viewportConstraints) {
+            return SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
+                ),
+                child: Center(
+                  child: Text('There are no messages currently'),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      errorBuilder: (error) {
+        if (error is Error) {
+          print((error).stackTrace);
+        }
+
+        if (widget.errorBuilder != null) {
+          return widget.errorBuilder(error);
+        }
+
+        var message = error.toString();
+        if (error is DioError) {
+          final dioError = error as DioError;
+          if (dioError.type == DioErrorType.RESPONSE) {
+            message = dioError.message;
+          } else {
+            message = 'Check your connection and retry';
+          }
+        }
+        return InfoTile(
+          showMessage: widget.showErrorTile,
+          tileAnchor: Alignment.topCenter,
+          childAnchor: Alignment.topCenter,
+          message: 'An error occurred.',
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      WidgetSpan(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 2.0),
+                          child: Icon(Icons.error_outline),
+                        ),
+                      ),
+                      TextSpan(text: 'Error loading messages'),
+                    ],
+                  ),
+                  style: Theme.of(context).textTheme.headline6,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text(message),
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    _messageSearchListController.loadData();
+                  },
+                  child: Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loadingBuilder: (context) {
+        return LayoutBuilder(
+          builder: (context, viewportConstraints) {
+            return SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          },
+        );
+      },
+      childBuilder: (list) {
+        return _buildListView(list);
+      },
+    );
   }
 
   Widget _separatorBuilder(BuildContext context, int index) {
@@ -156,8 +248,9 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
   }
 
-  Widget _buildQueryProgressIndicator(
-      context, MessageSearchBlocState messageSearchBloc) {
+  Widget _buildQueryProgressIndicator(context) {
+    MessageSearchBlocState messageSearchBloc = MessageSearchBloc.of(context);
+
     return StreamBuilder<bool>(
         stream: messageSearchBloc.queryMessagesLoading,
         initialData: false,
@@ -186,204 +279,66 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
         });
   }
 
-  Widget _buildListView(MessageSearchBlocState messageSearchBloc) {
-    return StreamBuilder<List<GetMessageResponse>>(
-      stream: messageSearchBloc.messagesStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          if (snapshot.error is Error) {
-            print((snapshot.error as Error).stackTrace);
-          }
+  Widget _buildListView(List<GetMessageResponse> data) {
+    final items = data;
 
-          if (widget.errorBuilder != null) {
-            return widget.errorBuilder(snapshot.error);
-          }
-
-          var message = snapshot.error.toString();
-          if (snapshot.error is DioError) {
-            final dioError = snapshot.error as DioError;
-            if (dioError.type == DioErrorType.RESPONSE) {
-              message = dioError.message;
-            } else {
-              message = 'Check your connection and retry';
-            }
-          }
-          return InfoTile(
-            showMessage: widget.showErrorTile,
-            tileAnchor: Alignment.topCenter,
-            childAnchor: Alignment.topCenter,
-            message: 'An error occurred.',
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        WidgetSpan(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 2.0),
-                            child: Icon(Icons.error_outline),
-                          ),
-                        ),
-                        TextSpan(text: 'Error loading messages'),
-                      ],
-                    ),
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(message),
-                  ),
-                  RaisedButton(
-                    onPressed: () {
-                      messageSearchBloc.search(
-                        filter: widget.filters,
-                        sort: widget.sortOptions,
-                        query: widget.messageQuery,
-                        pagination: widget.paginationParams,
-                        messageFilter: widget.messageFilters,
-                      );
-                    },
-                    child: Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
+    Widget child = ListView.separated(
+      physics: AlwaysScrollableScrollPhysics(),
+      itemCount: items.isNotEmpty ? items.length + 1 : items.length,
+      separatorBuilder: (_, index) {
+        if (widget.separatorBuilder != null) {
+          return widget.separatorBuilder(context, index);
         }
-
-        if (!snapshot.hasData) {
-          return LayoutBuilder(
-            builder: (context, viewportConstraints) {
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              );
-            },
-          );
+        return _separatorBuilder(context, index);
+      },
+      itemBuilder: (context, index) {
+        if (index < items.length) {
+          return _listItemBuilder(context, items[index]);
         }
-
-        final items = snapshot.data;
-
-        if (items.isEmpty) {
-          if (widget.emptyBuilder != null) {
-            return widget.emptyBuilder(context, widget.messageQuery);
-          }
-          return LayoutBuilder(
-            builder: (context, viewportConstraints) {
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.maxHeight,
-                  ),
-                  child: Center(
-                    child: Text('There are no messages currently'),
-                  ),
-                ),
-              );
-            },
-          );
-        }
-
-        Widget child = ListView.separated(
-          physics: AlwaysScrollableScrollPhysics(),
-          itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-          separatorBuilder: (_, index) {
-            if (widget.separatorBuilder != null) {
-              return widget.separatorBuilder(context, index);
-            }
-            return _separatorBuilder(context, index);
-          },
-          itemBuilder: (context, index) {
-            if (index < items.length) {
-              return _listItemBuilder(context, items[index]);
-            }
-            return _buildQueryProgressIndicator(context, messageSearchBloc);
-          },
-        );
-        if (widget.pullToRefresh) {
-          child = RefreshIndicator(
-            onRefresh: () async => messageSearchBloc.search(
-              filter: widget.filters,
-              sort: widget.sortOptions,
-              query: widget.messageQuery,
-              pagination: widget.paginationParams,
-              messageFilter: widget.messageFilters,
-            ),
-            child: child,
-          );
-        }
-
-        child = LazyLoadScrollView(
-          onEndOfPage: () => messageSearchBloc.loadMore(
-            filter: widget.filters,
-            sort: widget.sortOptions,
-            pagination: widget.paginationParams.copyWith(
-              offset: messageSearchBloc.messageResponses?.length ?? 0,
-            ),
-            query: widget.messageQuery,
-            messageFilter: widget.messageFilters,
-          ),
-          child: child,
-        );
-
-        if (widget.showResultCount) {
-          child = Column(
-            children: [
-              Container(
-                width: double.maxFinite,
-                decoration: BoxDecoration(
-                  gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 8,
-                  ),
-                  child: Text(
-                    '${items.length} results',
-                    style: TextStyle(
-                      color: StreamChatTheme.of(context).colorTheme.grey,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(child: child),
-            ],
-          );
-        }
-        return child;
+        return _buildQueryProgressIndicator(context);
       },
     );
-  }
-
-  @override
-  void didUpdateWidget(MessageSearchListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.filters?.toString() != oldWidget.filters?.toString() ||
-        jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
-        widget.paginationParams?.toJson()?.toString() !=
-            oldWidget.paginationParams?.toJson()?.toString() ||
-        widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
-        widget.messageFilters?.toString() !=
-            oldWidget.messageFilters?.toString()) {
-      final messageSearchBloc = MessageSearchBloc.of(context);
-      messageSearchBloc.search(
-        filter: widget.filters,
-        sort: widget.sortOptions,
-        query: widget.messageQuery,
-        pagination: widget.paginationParams,
-        messageFilter: widget.messageFilters,
+    if (widget.pullToRefresh) {
+      child = RefreshIndicator(
+        onRefresh: () async {
+          _messageSearchListController.loadData();
+        },
+        child: child,
       );
     }
+
+    child = LazyLoadScrollView(
+      onEndOfPage: () async {
+        return _messageSearchListController.paginateData();
+      },
+      child: child,
+    );
+
+    if (widget.showResultCount) {
+      child = Column(
+        children: [
+          Container(
+            width: double.maxFinite,
+            decoration: BoxDecoration(
+              gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 8,
+              ),
+              child: Text(
+                '${items.length} results',
+                style: TextStyle(
+                  color: StreamChatTheme.of(context).colorTheme.grey,
+                ),
+              ),
+            ),
+          ),
+          Expanded(child: child),
+        ],
+      );
+    }
+    return child;
   }
 }
