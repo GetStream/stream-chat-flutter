@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
-import 'package:stream_chat_flutter/src/users_bloc.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'user_item.dart';
@@ -512,43 +510,4 @@ class _UserListViewState extends State<UserListView>
       );
     }
   }
-}
-
-abstract class ListItem {
-  String get key {
-    if (this is ListHeaderItem) {
-      final header = (this as ListHeaderItem).heading;
-      return 'HEADER-$header';
-    }
-    if (this is ListUserItem) {
-      final user = (this as ListUserItem).user;
-      return 'USER-${user.id}';
-    }
-    return null;
-  }
-
-  Widget when({
-    @required Widget Function(String heading) headerItem,
-    @required Widget Function(User user) userItem,
-  }) {
-    if (this is ListHeaderItem) {
-      return headerItem((this as ListHeaderItem).heading);
-    }
-    if (this is ListUserItem) {
-      return userItem((this as ListUserItem).user);
-    }
-    return SizedBox();
-  }
-}
-
-class ListHeaderItem extends ListItem {
-  final String heading;
-
-  ListHeaderItem(this.heading);
-}
-
-class ListUserItem extends ListItem {
-  final User user;
-
-  ListUserItem(this.user);
 }

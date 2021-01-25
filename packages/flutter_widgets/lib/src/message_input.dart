@@ -26,7 +26,6 @@ import 'package:video_compress/video_compress.dart';
 import '../stream_chat_flutter.dart';
 import 'extension.dart';
 import 'quoted_message_widget.dart';
-import 'stream_channel.dart';
 
 typedef FileUploader = Future<String> Function(PlatformFile, Channel);
 typedef AttachmentThumbnailBuilder = Widget Function(

@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import '../stream_chat_flutter.dart';
 import './channel_name.dart';
 import 'channel_image.dart';
-import 'stream_channel.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header_paint.png)

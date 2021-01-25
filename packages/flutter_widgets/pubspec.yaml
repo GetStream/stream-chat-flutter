@@ -11,6 +11,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # TODO: Change over to main dependency when deployed
+  stream_chat_flutter_core:
+    path: ../stream_chat_flutter_core
   flutter_app_badger: ^1.1.2
   photo_view: ^0.10.3
   rxdart: ^0.24.1
@@ -29,7 +32,6 @@ dependencies:
   image_picker: ^0.6.7+17
   flutter_keyboard_visibility: ^4.0.2
   mime: ^0.9.7
-  stream_chat: ^0.2.24
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4

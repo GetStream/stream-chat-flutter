@@ -8,7 +8,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
-import 'package:stream_chat_flutter/src/lazy_load_scroll_view.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
@@ -16,7 +15,6 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../stream_chat_flutter.dart';
 import 'date_divider.dart';
-import 'stream_channel.dart';
 import 'swipeable.dart';
 import 'extension.dart';
 

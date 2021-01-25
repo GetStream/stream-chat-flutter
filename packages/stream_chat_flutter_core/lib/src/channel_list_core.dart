@@ -49,7 +49,6 @@ class ChannelListCore extends StatefulWidget {
     this.options,
     this.sort,
     this.pagination,
-    this.pullToRefresh = true,
     @required this.errorBuilder,
     @required this.emptyBuilder,
     @required this.loadingBuilder,
@@ -92,9 +91,6 @@ class ChannelListCore extends StatefulWidget {
   /// message_limit: how many messages should be included to each channel
   final PaginationParams pagination;
 
-  /// Set it to false to disable the pull-to-refresh widget
-  final bool pullToRefresh;
-
   @override
   _ChannelListCoreState createState() => _ChannelListCoreState();
 }
@@ -105,21 +101,7 @@ class _ChannelListCoreState extends State<ChannelListCore>
   Widget build(BuildContext context) {
     final channelsBloc = ChannelsBloc.of(context);
 
-    if (!widget.pullToRefresh) {
-      return _buildListView(channelsBloc);
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        return channelsBloc.queryChannels(
-          filter: widget.filter,
-          sortOptions: widget.sort,
-          paginationParams: widget.pagination,
-          options: widget.options,
-        );
-      },
-      child: _buildListView(channelsBloc),
-    );
+    return _buildListView(channelsBloc);
   }
 
   StreamBuilder<List<Channel>> _buildListView(

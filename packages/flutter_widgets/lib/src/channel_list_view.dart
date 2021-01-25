@@ -5,16 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_flutter/src/channels_bloc.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_bottom_sheet.dart';
 import 'channel_preview.dart';
-import 'stream_channel.dart';
-import 'stream_chat.dart';
 
 /// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget);
@@ -158,168 +155,161 @@ class _ChannelListViewState extends State<ChannelListView>
     with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   final SlidableController _slideController = SlidableController();
+  final ChannelListController _channelListController = ChannelListController();
 
   @override
   Widget build(BuildContext context) {
-    final channelsBloc = ChannelsBloc.of(context);
-
     if (!widget.pullToRefresh) {
-      return _buildListView(channelsBloc);
+      _channelListController.loadData();
     }
 
     return RefreshIndicator(
       onRefresh: () async {
-        return channelsBloc.queryChannels(
-          filter: widget.filter,
-          sortOptions: widget.sort,
-          paginationParams: widget.pagination,
-          options: widget.options,
-        );
+        _channelListController.loadData();
       },
-      child: _buildListView(channelsBloc),
+      child: ChannelListCore(
+        channelListController: _channelListController,
+        listBuilder: (context, list) {
+          return _buildListView(list);
+        },
+        emptyBuilder: (BuildContext context) {
+          return _buildEmptyWidget();
+        },
+        errorBuilder: (Error error) {
+          return _buildErrorWidget(context);
+        },
+        loadingBuilder: (BuildContext context) {
+          return _buildLoadingWidget();
+        },
+        pagination: widget.pagination,
+        options: widget.options,
+        sort: widget.sort,
+        filter: widget.filter,
+      ),
     );
   }
 
-  StreamBuilder<List<Channel>> _buildListView(
-    ChannelsBlocState channelsBlocState,
+  Widget _buildListView(
+    List<Channel> channels,
   ) {
-    return StreamBuilder<List<Channel>>(
-      stream: channelsBlocState.channelsStream,
-      builder: (context, snapshot) {
-        var child;
-        if (snapshot.hasError) {
-          child = _buildErrorWidget(
-            snapshot,
-            context,
-            channelsBlocState,
-          );
-        } else if (!snapshot.hasData) {
-          child = _buildLoadingWidget();
-        } else {
-          final channels = snapshot.data;
+    var child;
 
-          if (channels.isEmpty && widget.emptyBuilder != null) {
-            child = widget.emptyBuilder(context);
-          }
-
-          if (channels.isEmpty && widget.emptyBuilder == null) {
-            child = LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: Stack(
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: viewportConstraints.maxHeight,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: StreamSvgIcon.message(
-                                size: 136,
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .greyGainsboro,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'Let’s start chatting!',
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .headline,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                                horizontal: 52,
-                              ),
-                              child: Text(
-                                'How about sending your first message to a friend?',
-                                textAlign: TextAlign.center,
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .body
-                                    .copyWith(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .grey,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (widget.onStartChatPressed != null)
-                        Positioned(
-                          right: 0,
-                          left: 0,
-                          bottom: 32,
-                          child: Center(
-                            child: FlatButton(
-                              onPressed: widget.onStartChatPressed,
-                              child: Text(
-                                'Start a chat',
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .bodyBold
-                                    .copyWith(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .accentBlue,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }
-
-          if (channels.isNotEmpty) {
-            if (widget.crossAxisCount > 1) {
-              child = GridView.builder(
-                padding: widget.padding,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: widget.crossAxisCount),
-                itemCount: channels.length,
-                physics: AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                itemBuilder: (context, index) {
-                  return _gridItemBuilder(context, index, channels);
-                },
-              );
-            } else {
-              child = ListView.separated(
-                padding: widget.padding,
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount:
-                    channels.isNotEmpty ? channels.length + 1 : channels.length,
-                separatorBuilder: (_, index) {
-                  if (widget.separatorBuilder != null) {
-                    return widget.separatorBuilder(context, index);
-                  }
-                  return _separatorBuilder(context, index);
-                },
-                itemBuilder: (context, index) {
-                  return _listItemBuilder(context, index, channels);
-                },
-              );
+    if (channels.isNotEmpty) {
+      if (widget.crossAxisCount > 1) {
+        child = GridView.builder(
+          padding: widget.padding,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: widget.crossAxisCount),
+          itemCount: channels.length,
+          physics: AlwaysScrollableScrollPhysics(),
+          controller: _scrollController,
+          itemBuilder: (context, index) {
+            return _gridItemBuilder(context, index, channels);
+          },
+        );
+      } else {
+        child = ListView.separated(
+          padding: widget.padding,
+          physics: AlwaysScrollableScrollPhysics(),
+          itemCount:
+              channels.isNotEmpty ? channels.length + 1 : channels.length,
+          separatorBuilder: (_, index) {
+            if (widget.separatorBuilder != null) {
+              return widget.separatorBuilder(context, index);
             }
-          }
-        }
+            return _separatorBuilder(context, index);
+          },
+          itemBuilder: (context, index) {
+            return _listItemBuilder(context, index, channels);
+          },
+        );
+      }
+    }
 
-        return AnimatedSwitcher(
-          child: child,
-          duration: Duration(milliseconds: 500),
+    return AnimatedSwitcher(
+      child: child,
+      duration: Duration(milliseconds: 500),
+    );
+  }
+
+  Widget _buildEmptyWidget() {
+    if (widget.emptyBuilder != null) {
+      return widget.emptyBuilder(context);
+    }
+
+    return LayoutBuilder(
+      builder: (context, viewportConstraints) {
+        return SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Stack(
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StreamSvgIcon.message(
+                        size: 136,
+                        color: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Let’s start chatting!',
+                        style: StreamChatTheme.of(context).textTheme.headline,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 52,
+                      ),
+                      child: Text(
+                        'How about sending your first message to a friend?',
+                        textAlign: TextAlign.center,
+                        style: StreamChatTheme.of(context)
+                            .textTheme
+                            .body
+                            .copyWith(
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (widget.onStartChatPressed != null)
+                Positioned(
+                  right: 0,
+                  left: 0,
+                  bottom: 32,
+                  child: Center(
+                    child: FlatButton(
+                      onPressed: widget.onStartChatPressed,
+                      child: Text(
+                        'Start a chat',
+                        style: StreamChatTheme.of(context)
+                            .textTheme
+                            .bodyBold
+                            .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -443,27 +433,8 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   Widget _buildErrorWidget(
-    AsyncSnapshot<List<Channel>> snapshot,
     BuildContext context,
-    ChannelsBlocState channelsBlocState,
   ) {
-    if (snapshot.error is Error) {
-      print((snapshot.error as Error).stackTrace);
-    }
-
-    if (widget.errorBuilder != null) {
-      return widget.errorBuilder(snapshot.error);
-    }
-
-    var message = snapshot.error.toString();
-    if (snapshot.error is DioError) {
-      final dioError = snapshot.error as DioError;
-      if (dioError.type == DioErrorType.RESPONSE) {
-        message = dioError.message;
-      } else {
-        message = 'Check your connection and retry';
-      }
-    }
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -484,20 +455,9 @@ class _ChannelListViewState extends State<ChannelListView>
             ),
             style: Theme.of(context).textTheme.headline6,
           ),
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 16.0,
-            ),
-            child: Text(message),
-          ),
           FlatButton(
             onPressed: () {
-              channelsBlocState.queryChannels(
-                filter: widget.filter,
-                sortOptions: widget.sort,
-                paginationParams: widget.pagination,
-                options: widget.options,
-              );
+              _channelListController.loadData();
             },
             child: Text('Retry'),
           ),
@@ -714,14 +674,7 @@ class _ChannelListViewState extends State<ChannelListView>
     if (_scrollController.position.maxScrollExtent ==
             _scrollController.offset &&
         _scrollController.offset != 0) {
-      channelsProvider.queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination.copyWith(
-          offset: channelsProvider.channels?.length ?? 0,
-        ),
-        options: widget.options,
-      );
+      _channelListController.paginateData();
     }
   }
 
@@ -759,12 +712,7 @@ class _ChannelListViewState extends State<ChannelListView>
       EventType.channelVisible,
     )
         .listen((event) {
-      channelsBloc.queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination,
-        options: widget.options,
-      );
+      _channelListController.loadData();
     });
   }
 
@@ -777,13 +725,7 @@ class _ChannelListViewState extends State<ChannelListView>
         widget.pagination?.toJson()?.toString() !=
             oldWidget.pagination?.toJson()?.toString() ||
         widget.options?.toString() != oldWidget.options?.toString()) {
-      final channelsBloc = ChannelsBloc.of(context);
-      channelsBloc.queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination,
-        options: widget.options,
-      );
+      _channelListController.loadData();
     }
   }
 
