@@ -1,0 +1,18 @@
+name: stream_chat_persistence
+description: A new Flutter package.
+version: 0.0.1
+author:
+homepage:
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  moor: ^3.4.0
+  stream_chat:
+    path: ../dart_client
+
+dev_dependencies:
+  test: ^1.15.7
+  build_runner: ^1.10.13
+  moor_generator: ^3.4.1

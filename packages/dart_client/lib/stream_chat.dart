@@ -2,7 +2,7 @@ library stream_chat;
 
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
-export 'package:logging/src/level.dart';
+export 'package:logging/logging.dart' show Logger, Level;
 
 export './src/api/channel.dart';
 export './src/api/connection_status.dart';
@@ -27,3 +27,5 @@ export './src/models/reaction.dart';
 export './src/models/read.dart';
 export './src/models/user.dart';
 export './src/notifications.dart';
+export './src/db/stream_chat_database.dart';
+export './src/utils/result.dart';
