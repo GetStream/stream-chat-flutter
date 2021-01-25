@@ -168,6 +168,17 @@ class _ChannelListViewCoreState extends State<ChannelListViewCore>
     return widget.errorBuilder(snapshot.error);
   }
 
+  void loadData() {
+    final channelsBloc = ChannelsBloc.of(context);
+
+    channelsBloc.queryChannels(
+      filter: widget.filter,
+      sortOptions: widget.sort,
+      paginationParams: widget.pagination,
+      options: widget.options,
+    );
+  }
+
   void paginateData() {
     final channelsBloc = ChannelsBloc.of(context);
 
@@ -216,6 +227,7 @@ class _ChannelListViewCoreState extends State<ChannelListViewCore>
     });
 
     if (widget.channelListController != null) {
+      widget.channelListController.loadData = loadData;
       widget.channelListController.paginateData = paginateData;
     }
   }
@@ -249,5 +261,6 @@ class _ChannelListViewCoreState extends State<ChannelListViewCore>
 
 /// Controller used for paginating data in [ChannelListViewCore]
 class ChannelListController {
+  VoidCallback loadData;
   VoidCallback paginateData;
 }

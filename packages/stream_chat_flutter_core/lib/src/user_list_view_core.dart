@@ -115,6 +115,7 @@ class _UserListViewCoreState extends State<UserListViewCore>
     );
 
     if (widget.userListController != null) {
+      widget.userListController.loadData = loadData;
       widget.userListController.paginateData = paginateData;
     }
   }
@@ -203,6 +204,17 @@ class _UserListViewCoreState extends State<UserListViewCore>
     );
   }
 
+  void loadData() {
+    final usersBloc = UsersBloc.of(context);
+
+    usersBloc.queryUsers(
+      filter: widget.filter,
+      sort: widget.sort,
+      pagination: widget.pagination,
+      options: widget.options,
+    );
+  }
+
   void paginateData() {
     final usersBloc = UsersBloc.of(context);
 
@@ -276,5 +288,6 @@ class ListUserItem extends ListItem {
 
 /// Controller used for paginating data in [ChannelListView]
 class UserListController {
+  VoidCallback loadData;
   VoidCallback paginateData;
 }

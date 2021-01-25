@@ -115,6 +115,7 @@ class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
     );
 
     if (widget.messageSearchListController != null) {
+      widget.messageSearchListController.loadData = loadData;
       widget.messageSearchListController.paginateData = paginateData;
     }
   }
@@ -149,6 +150,18 @@ class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
 
         return widget.childBuilder(snapshot.data);
       },
+    );
+  }
+
+  void loadData() {
+    final messageSearchBloc = MessageSearchBloc.of(context);
+
+    messageSearchBloc.search(
+      filter: widget.filters,
+      sort: widget.sortOptions,
+      query: widget.messageQuery,
+      pagination: widget.paginationParams,
+      messageFilter: widget.messageFilters,
     );
   }
 
@@ -190,5 +203,6 @@ class _MessageSearchListViewCoreState extends State<MessageSearchListViewCore> {
 
 /// Controller used for paginating data in [ChannelListView]
 class MessageSearchListController {
+  VoidCallback loadData;
   VoidCallback paginateData;
 }
