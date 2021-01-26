@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -252,23 +250,21 @@ class _UserListViewState extends State<UserListView>
       return widget.emptyBuilder(context);
     }
 
-    if (widget.emptyBuilder == null) {
-      return LayoutBuilder(
-        builder: (context, viewportConstraints) {
-          return SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: viewportConstraints.maxHeight,
-              ),
-              child: Center(
-                child: Text('There are no users currently'),
-              ),
+    return LayoutBuilder(
+      builder: (context, viewportConstraints) {
+        return SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: viewportConstraints.maxHeight,
             ),
-          );
-        },
-      );
-    }
+            child: Center(
+              child: Text('There are no users currently'),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildListView(
