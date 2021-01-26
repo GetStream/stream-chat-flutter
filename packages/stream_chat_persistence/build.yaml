@@ -4,3 +4,6 @@ targets:
       moor_generator:
         options:
           generate_connect_constructor: true
+          data_class_to_companions: false
+          apply_converters_on_variables: true
+          generate_values_in_copy_with: true
