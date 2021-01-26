@@ -5,9 +5,9 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 ///
 extension ConnectionEventX on ConnectionEventEntity {
   ///
-  Event toEvent({User user}) {
+  Event toEvent() {
     return Event(
-      me: user,
+      me: ownUser != null ? OwnUser.fromJson(ownUser) : null,
       totalUnreadCount: totalUnreadCount,
       unreadChannels: unreadChannels,
     );

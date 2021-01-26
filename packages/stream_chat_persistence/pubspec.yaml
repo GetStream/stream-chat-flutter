@@ -9,10 +9,13 @@ environment:
 
 dependencies:
   moor: ^3.4.0
+  path: ^1.7.0
+  path_provider: ^1.6.27
+  sqlite3_flutter_libs: ^0.3.0
   stream_chat:
     path: ../dart_client
 
 dev_dependencies:
   test: ^1.15.7
-  build_runner: ^1.10.13
+  build_runner: ^1.11.0
   moor_generator: ^3.4.1

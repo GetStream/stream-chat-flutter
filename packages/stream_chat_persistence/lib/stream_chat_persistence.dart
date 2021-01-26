@@ -1,3 +1,3 @@
 library stream_chat_persistence;
 
-export 'src/db/stream_chat_database_impl.dart';
+export 'src/stream_chat_persistence_impl.dart';

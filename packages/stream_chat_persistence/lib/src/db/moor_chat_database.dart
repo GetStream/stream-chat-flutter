@@ -4,6 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../entity/entity.dart';
 import '../dao/dao.dart';
+import '../converter/converter.dart';
 import 'shared/shared_db.dart';
 
 part 'moor_chat_database.g.dart';

@@ -16,12 +16,8 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Get the latest stored connection event
   Future<Event> get connectionEvent {
-    return select(connectionEvents).join([
-      leftOuterJoin(users, connectionEvents.ownUserId.equalsExp(users.id)),
-    ]).map((rows) {
-      final event = rows.readTable(connectionEvents);
-      final user = rows.readTable(users);
-      return event.toEvent(user: user?.toUser());
+    return select(connectionEvents).map((eventEntity) {
+      return eventEntity.toEvent();
     }).getSingle();
   }
 
@@ -40,7 +36,7 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
         lastEventAt: event.createdAt ?? connectionInfo?.lastEventAt,
         totalUnreadCount:
             event.totalUnreadCount ?? connectionInfo?.totalUnreadCount,
-        ownUserId: event.me?.id ?? connectionInfo?.ownUserId,
+        ownUser: event.me?.toJson() ?? connectionInfo?.ownUser,
         unreadChannels: event.unreadChannels ?? connectionInfo?.unreadChannels,
       ),
       mode: InsertMode.insertOrReplace,

@@ -1,12 +1,12 @@
 import 'package:stream_chat/stream_chat.dart';
 
-import 'moor_chat_database.dart';
-import 'shared/shared_db.dart';
+import 'db/moor_chat_database.dart';
+import 'db/shared/shared_db.dart';
 
 ///
-class StreamChatDatabaseImpl implements StreamChatDatabase {
+class StreamChatPersistenceImpl extends StreamChatPersistence {
   ///
-  StreamChatDatabaseImpl(
+  StreamChatPersistenceImpl(
     this._userId, {
     Logger logger,
   })  : _logger = logger,
@@ -75,7 +75,7 @@ class StreamChatDatabaseImpl implements StreamChatDatabase {
   }
 
   @override
-  Future<void> deleteChannelByCids(List<String> cids) {
+  Future<void> deleteChannels(List<String> cids) {
     return _db.channelDao.deleteChannelByCids(cids);
   }
 
@@ -105,15 +105,11 @@ class StreamChatDatabaseImpl implements StreamChatDatabase {
   @override
   Future<List<Message>> getMessagesByCid(
     String cid, {
-    int limit = 20,
-    String messageLessThan,
-    String messageGreaterThan,
+    PaginationParams messagePagination,
   }) {
     return _db.messageDao.getMessagesByCid(
       cid,
-      limit: limit,
-      messageLessThan: messageLessThan,
-      messageGreaterThan: messageGreaterThan,
+      messagePagination: messagePagination,
     );
   }
 

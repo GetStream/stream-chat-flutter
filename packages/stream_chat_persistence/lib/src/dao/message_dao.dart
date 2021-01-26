@@ -97,9 +97,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   ///
   Future<List<Message>> getMessagesByCid(
     String cid, {
-    int limit = 20,
-    String messageLessThan,
-    String messageGreaterThan,
+    PaginationParams messagePagination,
   }) async {
     final msgList = await Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -111,27 +109,30 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .map(_messageFromJoinRow)
         .get());
 
-    if (messageLessThan != null) {
-      final lessThanIndex = msgList.indexWhere((m) => m.id == messageLessThan);
+    if (messagePagination.lessThan != null) {
+      final lessThanIndex = msgList.indexWhere(
+        (m) => m.id == messagePagination.lessThan,
+      );
       if (lessThanIndex != -1) {
         msgList.removeRange(lessThanIndex, msgList.length);
       }
     }
-    if (messageGreaterThan != null) {
-      final greaterThanIndex =
-          msgList.indexWhere((m) => m.id == messageGreaterThan);
+    if (messagePagination.greaterThanOrEqual != null) {
+      final greaterThanIndex = msgList.indexWhere(
+        (m) => m.id == messagePagination.greaterThanOrEqual,
+      );
       if (greaterThanIndex != -1) {
         msgList.removeRange(0, greaterThanIndex);
       }
     }
-    if (limit != null) {
-      return msgList.take(limit).toList();
+    if (messagePagination.limit != null) {
+      return msgList.take(messagePagination.limit).toList();
     }
     return msgList;
   }
 
   ///
-  Future<int> updateMessages(String cid, List<Message> messageList) {
+  Future<void> updateMessages(String cid, List<Message> messageList) {
     return batch((batch) {
       batch.insertAll(
         messages,
