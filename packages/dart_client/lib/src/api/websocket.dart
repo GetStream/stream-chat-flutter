@@ -290,6 +290,9 @@ class WebSocket {
 
   /// Disconnects the WS and releases eventual resources
   Future<void> disconnect() {
+    if (_manuallyClosed) {
+      return Future.value();
+    }
     logger.info('disconnecting');
     _connectionCompleter = Completer();
     _cancelTimers();
