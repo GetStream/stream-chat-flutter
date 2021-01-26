@@ -1,3 +1,7 @@
+## 0.2.24+1
+
+- Stop ws reconnection after calling disconnect
+
 ## 0.2.24
 
 - Create enum for push providers

@@ -29,7 +29,7 @@ void main() async {
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
-    persistenceEnabled: false,
+    persistenceEnabled: true,
   );
 
   if (userId != null) {
