@@ -293,6 +293,7 @@ class WebSocket {
     logger.info('disconnecting');
     _connectionCompleter = Completer();
     _cancelTimers();
+    _reconnecting = false;
     _manuallyClosed = true;
     connectionStatus.value = ConnectionStatus.disconnected;
     connectionStatus.dispose();
