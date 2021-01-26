@@ -4,6 +4,7 @@ void main() {
   runApp(MyApp());
 }
 
+// ignore: public_member_api_docs
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -31,7 +32,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ignore: public_member_api_docs
 class MyHomePage extends StatefulWidget {
+  // ignore: public_member_api_docs
   MyHomePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -43,6 +46,7 @@ class MyHomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
+  // ignore: public_member_api_docs
   final String title;
 
   @override

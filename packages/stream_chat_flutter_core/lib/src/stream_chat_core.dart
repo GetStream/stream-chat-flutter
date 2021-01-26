@@ -26,9 +26,12 @@ import 'package:stream_chat/stream_chat.dart';
 ///
 /// Use [StreamChatCore.of] to get the current [StreamChatCoreState] instance.
 class StreamChatCore extends StatefulWidget {
+  // ignore: public_member_api_docs
   final Client client;
+  // ignore: public_member_api_docs
   final Widget child;
 
+  // ignore: public_member_api_docs
   StreamChatCore({
     Key key,
     @required this.client,
@@ -58,6 +61,7 @@ class StreamChatCore extends StatefulWidget {
 /// The current state of the StreamChat widget
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
+  // ignore: public_member_api_docs
   Client get client => widget.client;
   Timer _disconnectTimer;
 

@@ -261,6 +261,9 @@ class _ChannelListCoreState extends State<ChannelListCore>
 
 /// Controller used for paginating data in [ChannelListCore]
 class ChannelListController {
+  /// Call this function to reload data
   VoidCallback loadData;
+
+  /// Call this function to load further data
   VoidCallback paginateData;
 }

@@ -68,6 +68,7 @@ class MessageListCore extends StatefulWidget {
   /// Use [ChannelListController.paginateData] pagination.
   final MessageListController messageListController;
 
+  /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>) messageListBuilder;
 
   /// Function used to build a loading widget
@@ -168,5 +169,6 @@ class _MessageListCoreState extends State<MessageListCore> {
 
 /// Controller used for paginating data in [ChannelListView]
 class MessageListController {
+  /// Call this function to load further data
   Function({QueryDirection direction}) paginateData;
 }

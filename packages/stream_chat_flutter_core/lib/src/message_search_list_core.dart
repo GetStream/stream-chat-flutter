@@ -196,6 +196,9 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
 
 /// Controller used for paginating data in [ChannelListView]
 class MessageSearchListController {
+  /// Call this function to reload data
   VoidCallback loadData;
+
+  /// Call this function to load further data
   VoidCallback paginateData;
 }

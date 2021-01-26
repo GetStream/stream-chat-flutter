@@ -249,7 +249,9 @@ class _UserListCoreState extends State<UserListCore>
   }
 }
 
+// ignore: public_member_api_docs
 abstract class ListItem {
+  // ignore: public_member_api_docs
   String get key {
     if (this is ListHeaderItem) {
       final header = (this as ListHeaderItem).heading;
@@ -262,6 +264,7 @@ abstract class ListItem {
     return null;
   }
 
+  // ignore: public_member_api_docs
   Widget when({
     @required Widget Function(String heading) headerItem,
     @required Widget Function(User user) userItem,
@@ -276,20 +279,29 @@ abstract class ListItem {
   }
 }
 
+// ignore: public_member_api_docs
 class ListHeaderItem extends ListItem {
+  // ignore: public_member_api_docs
   final String heading;
 
+  // ignore: public_member_api_docs
   ListHeaderItem(this.heading);
 }
 
+// ignore: public_member_api_docs
 class ListUserItem extends ListItem {
+  // ignore: public_member_api_docs
   final User user;
 
+  // ignore: public_member_api_docs
   ListUserItem(this.user);
 }
 
 /// Controller used for paginating data in [ChannelListView]
 class UserListController {
+  /// Call this function to reload data
   VoidCallback loadData;
+
+  /// Call this function to load further data
   VoidCallback paginateData;
 }
