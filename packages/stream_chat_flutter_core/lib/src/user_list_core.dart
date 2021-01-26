@@ -5,14 +5,15 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 
 ///
-/// It shows the list of current users.
+/// [UserListCore] is a simplified class that allows fetching users while exposing UI builders.
+/// A [UserListController] is used to load and paginate data.
 ///
 /// ```dart
 /// class UsersListPage extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       body: UsersListView(
+///       body: UsersListCore(
 ///         filter: {
 ///           'members': {
 ///             '\$in': [StreamChat.of(context).user.id],
@@ -22,7 +23,24 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 ///         pagination: PaginationParams(
 ///           limit: 20,
 ///         ),
-///         channelWidget: ChannelPage(),
+///         errorBuilder: (err) {
+///           return Center(
+///             child: Text('An error has occured'),
+///           );
+///         },
+///         emptyBuilder: (context) {
+///           return Center(
+///             child: Text('Nothing here...'),
+///           );
+///         },
+///         emptyBuilder: (context) {
+///           return Center(
+///             child: CircularProgressIndicator(),
+///           );
+///         },
+///         listBuilder: (context, list) {
+///           return UsersPage(list);
+///         }
 ///       ),
 ///     );
 ///   }
@@ -51,6 +69,8 @@ class UserListCore extends StatefulWidget {
     this.userListController,
   }) : super(key: key);
 
+  /// A [UserListController] allows reloading and pagination.
+  /// Use [UserListController.loadData] and [UserListController.paginateData] respectively for reloading and pagination.
   final UserListController userListController;
 
   /// The builder that will be used in case of error

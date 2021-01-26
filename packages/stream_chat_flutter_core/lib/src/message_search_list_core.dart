@@ -5,14 +5,15 @@ import 'package:stream_chat/stream_chat.dart';
 import 'message_search_bloc.dart';
 
 ///
-/// It shows the list of searched messages.
+/// [MessageSearchListCore] is a simplified class that allows searching for messages across channels while exposing UI builders.
+/// A [MessageSearchListController] is used to load and paginate data.
 ///
 /// ```dart
 /// class MessageSearchPage extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       body: MessageSearchListView(
+///       body: MessageSearchListCore(
 ///               messageQuery: _channelQuery,
 ///               filters: {
 ///                 'members': {
@@ -48,6 +49,8 @@ class MessageSearchListCore extends StatefulWidget {
     this.messageSearchListController,
   }) : super(key: key);
 
+  /// A [MessageSearchListController] allows reloading and pagination.
+  /// Use [MessageSearchListController.loadData] and [MessageSearchListController.paginateData] respectively for reloading and pagination.
   final MessageSearchListController messageSearchListController;
 
   /// Message String to search on
@@ -75,6 +78,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Map<String, dynamic> messageFilters;
 
+  /// The builder that is used when the search messages are fetched
   final Widget Function(List<GetMessageResponse>) childBuilder;
 
   /// The builder used when the channel list is empty.
@@ -83,6 +87,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
 
+  /// The builder that will be used in case of loading
   final WidgetBuilder loadingBuilder;
 
   @override

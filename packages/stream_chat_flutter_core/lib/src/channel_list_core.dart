@@ -11,14 +11,15 @@ import 'stream_chat_core.dart';
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
 ///
-/// It shows the list of current channels.
+/// [ChannelListCore] is a simplified class that allows fetching a list of channels while exposing UI builders.
+/// A [ChannelListController] is used to reload and paginate data.
 ///
 /// ```dart
 /// class ChannelListPage extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       body: ChannelListView(
+///       body: ChannelListCore(
 ///         filter: {
 ///           'members': {
 ///             '\$in': [StreamChat.of(context).user.id],
@@ -28,7 +29,24 @@ import 'stream_chat_core.dart';
 ///         pagination: PaginationParams(
 ///           limit: 20,
 ///         ),
-///         channelWidget: ChannelPage(),
+///         errorBuilder: (err) {
+///           return Center(
+///             child: Text('An error has occured'),
+///           );
+///         },
+///         emptyBuilder: (context) {
+///           return Center(
+///             child: Text('Nothing here...'),
+///           );
+///         },
+///         emptyBuilder: (context) {
+///           return Center(
+///             child: CircularProgressIndicator(),
+///           );
+///         },
+///         listBuilder: (context, list) {
+///           return ChannelPage(list);
+///         }
 ///       ),
 ///     );
 ///   }
@@ -37,10 +55,6 @@ import 'stream_chat_core.dart';
 ///
 ///
 /// Make sure to have a [StreamChatCore] ancestor in order to provide the information about the channels.
-/// The widget uses a [ListView.custom] to render the list of channels.
-///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
-/// Modify it to change the widget appearance.
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
   ChannelListCore({
@@ -56,13 +70,17 @@ class ChannelListCore extends StatefulWidget {
     this.channelListController,
   }) : super(key: key);
 
+  /// A [ChannelListController] allows reloading and pagination.
+  /// Use [ChannelListController.loadData] and [ChannelListController.paginateData] respectively for reloading and pagination.
   final ChannelListController channelListController;
 
   /// The builder that will be used in case of error
   final Widget Function(Error error) errorBuilder;
 
+  /// The builder that will be used in case of loading
   final WidgetBuilder loadingBuilder;
 
+  /// The builder which is used when list of channels loads
   final Function(BuildContext, List<Channel>) listBuilder;
 
   /// The builder used when the channel list is empty.

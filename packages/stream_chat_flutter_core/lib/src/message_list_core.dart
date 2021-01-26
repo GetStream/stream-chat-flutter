@@ -8,7 +8,8 @@ import 'stream_channel.dart';
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview_paint.png)
 ///
-/// It shows the list of messages of the current channel.
+/// [MessageListCore] is a simplified class that allows fetching a list of messages while exposing UI builders.
+/// A [MessageListController] is used to paginate data.
 ///
 /// ```dart
 /// class ChannelPage extends StatelessWidget {
@@ -19,19 +20,25 @@ import 'stream_channel.dart';
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
-///       appBar: ChannelHeader(),
 ///       body: Column(
 ///         children: <Widget>[
 ///           Expanded(
-///             child: MessageListView(
-///               threadBuilder: (_, parentMessage) {
-///                 return ThreadPage(
-///                   parent: parentMessage,
-///                 );
-///               },
+///             child: MessageListCore(
+///         emptyBuilder: (context) {
+///           return Center(
+///             child: Text('Nothing here...'),
+///           );
+///         },
+///         emptyBuilder: (context) {
+///           return Center(
+///             child: CircularProgressIndicator(),
+///           );
+///         },
+///         messageListBuilder: (context, list) {
+///           return MessagesPage(list);
+///         }
 ///             ),
 ///           ),
-///           MessageInput(),
 ///         ],
 ///       ),
 ///     );
@@ -57,6 +64,8 @@ class MessageListCore extends StatefulWidget {
     this.messageListController,
   }) : super(key: key);
 
+  /// A [MessageListController] allows pagination.
+  /// Use [ChannelListController.paginateData] pagination.
   final MessageListController messageListController;
 
   final Widget Function(BuildContext, List<Message>) messageListBuilder;
