@@ -108,7 +108,9 @@ class WebSocket {
   WebSocketChannel _channel;
   Timer _healthCheck, _reconnectionMonitor;
   DateTime _lastEventAt;
-  bool _manuallyClosed = false, _connecting = false, _reconnecting = false;
+  bool _manuallyDisconnected = false,
+      _connecting = false,
+      _reconnecting = false;
 
   Event _decodeEvent(String source) {
     return Event.fromJson(json.decode(source));
@@ -118,7 +120,7 @@ class WebSocket {
 
   /// Connect the WS using the parameters passed in the constructor
   Future<Event> connect() {
-    _manuallyClosed = false;
+    _manuallyDisconnected = false;
 
     if (_connecting) {
       logger.severe('already connecting');
@@ -151,7 +153,7 @@ class WebSocket {
 
   void _onDone() {
     _connecting = false;
-    if (_manuallyClosed) {
+    if (_manuallyDisconnected) {
       return;
     }
 
@@ -289,11 +291,15 @@ class WebSocket {
   }
 
   /// Disconnects the WS and releases eventual resources
-  Future<void> disconnect() {
+  Future<void> disconnect() async {
+    if (_manuallyDisconnected) {
+      return;
+    }
     logger.info('disconnecting');
     _connectionCompleter = Completer();
     _cancelTimers();
-    _manuallyClosed = true;
+    _reconnecting = false;
+    _manuallyDisconnected = true;
     connectionStatus.value = ConnectionStatus.disconnected;
     connectionStatus.dispose();
     return _channel.sink.close();
