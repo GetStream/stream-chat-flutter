@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/api/responses.dart';
-import 'package:stream_chat/src/db/offline_storage.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 import 'client.dart';
 import 'models/own_user.dart';
@@ -23,14 +23,18 @@ class NotificationService {
         final sharedPreferences = await _getSharedPreferences();
         final userId = sharedPreferences.getString(KEY_USER_ID);
 
-        final offlineStorage = OfflineStorage(userId, Logger('💽'));
-        await offlineStorage.updateChannelState(
+        final chatPersistence = StreamChatPersistenceImpl(
+          userId,
+          logger: Logger('💽'),
+        );
+        await chatPersistence.connect();
+        await chatPersistence.updateChannelState(
           ChannelState(
             channel: channelModel,
             messages: [message],
           ),
         );
-        await offlineStorage.disconnect();
+        await chatPersistence.disconnect();
       } else {
         final channel = client.state.channels[channelModel.cid];
         channel.state.updateChannelState(
@@ -44,6 +48,7 @@ class NotificationService {
   }
 
   static SharedPreferences _sharedPreferences;
+
   static Future<SharedPreferences> _getSharedPreferences() async {
     _sharedPreferences ??= await SharedPreferences.getInstance();
     return _sharedPreferences;
@@ -74,17 +79,18 @@ class NotificationService {
     final sharedPreferences = await _getSharedPreferences();
     final userId = sharedPreferences.getString(KEY_USER_ID);
 
-    final offlineStorage = OfflineStorage(
+    final chatPersistence = StreamChatPersistenceImpl(
       userId,
-      Logger('💽'),
+      logger: Logger('💽'),
     );
+    await chatPersistence.connect();
 
-    await offlineStorage.updateChannelState(ChannelState(
+    await chatPersistence.updateChannelState(ChannelState(
       messages: [messageResponse.message],
       channel: messageResponse.channel,
     ));
 
-    await offlineStorage.disconnect();
+    await chatPersistence.disconnect();
   }
 
   /// Gets the message using the client and stores it in the offline storage

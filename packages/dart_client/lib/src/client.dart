@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -20,7 +21,7 @@ import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
-import 'db/offline_storage.dart';
+import 'db/stream_chat_persistence.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
@@ -110,7 +111,7 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  OfflineStorage _offlineStorage;
+  StreamChatPersistence _chatPersistence;
 
   /// If true chat data will persist on disk
   final bool persistenceEnabled;
@@ -131,7 +132,7 @@ class Client {
   final Duration backgroundKeepAlive;
 
   /// Client offline database
-  OfflineStorage get offlineStorage => _offlineStorage;
+  StreamChatPersistence get chatPersistence => _chatPersistence;
 
   /// This client state
   ClientState state;
@@ -344,7 +345,7 @@ class Client {
 
   /// Call this function to dispose the client
   void dispose() async {
-    await _offlineStorage?.disconnect();
+    await _chatPersistence?.disconnect();
     await _disconnect();
     httpClient.close();
     await _controller.close();
@@ -426,8 +427,8 @@ class Client {
 
     if (!event.isLocal) {
       if (_synced && event.createdAt != null) {
-        await _offlineStorage?.updateConnectionInfo(event);
-        await _offlineStorage?.updateLastSyncAt(event.createdAt);
+        await _chatPersistence?.updateConnectionInfo(event);
+        await _chatPersistence?.updateLastSyncAt(event.createdAt);
       }
     }
 
@@ -458,9 +459,12 @@ class Client {
 
     wsConnectionStatus.value = ConnectionStatus.connecting;
 
-    if (persistenceEnabled && _offlineStorage == null) {
-      _offlineStorage =
-          await connectDatabase(state.user, _detachedLogger('💽'));
+    if (persistenceEnabled && _chatPersistence == null) {
+      _chatPersistence = StreamChatPersistenceImpl(
+        state.user.id,
+        logger: _detachedLogger('💽'),
+      );
+      await _chatPersistence.connect();
     }
 
     _ws = WebSocket(
@@ -510,10 +514,10 @@ class Client {
 
     _ws.connectionStatus.addListener(_connectionStatusListener);
 
-    var event = await _offlineStorage?.getConnectionInfo();
+    var event = await _chatPersistence?.getConnectionInfo();
 
     await _ws.connect().then((e) async {
-      await _offlineStorage?.updateConnectionInfo(e);
+      await _chatPersistence?.updateConnectionInfo(e);
       event = e;
       await resync();
     }).catchError((err, stacktrace) {
@@ -528,14 +532,14 @@ class Client {
 
   /// Get the events missed while offline to sync the offline storage
   Future<void> resync([List<String> cids]) async {
-    final lastSyncAt = await offlineStorage?.getLastSyncAt();
+    final lastSyncAt = await chatPersistence?.getLastSyncAt();
 
     if (lastSyncAt == null) {
       _synced = true;
       return;
     }
 
-    cids ??= await offlineStorage?.getChannelCids();
+    cids ??= await chatPersistence?.getChannelCids();
 
     if (cids?.isEmpty == true) {
       return;
@@ -564,7 +568,7 @@ class Client {
         handleEvent(event);
       });
 
-      await _offlineStorage?.updateLastSyncAt(DateTime.now());
+      await _chatPersistence?.updateLastSyncAt(DateTime.now());
       _synced = true;
     } catch (error) {
       logger.severe('Error during resync $error');
@@ -710,7 +714,7 @@ class Client {
             channels.add(channel);
           } else {
             final newChannel = Channel.fromState(this, channelState);
-            await _offlineStorage
+            await _chatPersistence
                 ?.updateChannelState(newChannel.state.channelState);
             newChannel.state?.updateChannelState(channelState);
             newChannels[newChannel.cid] = newChannel;
@@ -721,7 +725,7 @@ class Client {
 
       state.channels = newChannels;
 
-      await _offlineStorage?.updateChannelQueries(
+      await _chatPersistence?.updateChannelQueries(
         filter,
         res.channels.map((c) => c.channel.cid).toList(),
         paginationParams?.offset == null || paginationParams.offset == 0,
@@ -756,7 +760,7 @@ class Client {
     @required List<SortOption> sort,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
   }) async {
-    final offlineChannels = await _offlineStorage?.getChannelStates(
+    final offlineChannels = await _chatPersistence?.getChannelStates(
           filter: filter,
           sort: sort,
           paginationParams: paginationParams,
@@ -771,7 +775,7 @@ class Client {
         return channel;
       } else {
         final newChannel = Channel.fromState(this, channelState);
-        _offlineStorage?.updateChannelState(newChannel.state.channelState);
+        _chatPersistence?.updateChannelState(newChannel.state.channelState);
         newChannels[newChannel.cid] = newChannel;
         return newChannel;
       }
@@ -925,17 +929,17 @@ class Client {
   }
 
   /// Closes the websocket connection and resets the client
-  /// If [flushOfflineStorage] is true the client deletes all offline user's data
+  /// If [flushChatPersistence] is true the client deletes all offline user's data
   /// If [clearUser] is true the client unsets the current user
   Future<void> disconnect({
-    bool flushOfflineStorage = false,
+    bool flushChatPersistence = false,
     bool clearUser = false,
   }) async {
     logger.info(
-        'Disconnecting flushOfflineStorage: $flushOfflineStorage; clearUser: $clearUser');
+        'Disconnecting flushOfflineStorage: $flushChatPersistence; clearUser: $clearUser');
 
-    await _offlineStorage?.disconnect(flush: flushOfflineStorage);
-    _offlineStorage = null;
+    await _chatPersistence?.disconnect(flush: flushChatPersistence);
+    _chatPersistence = null;
 
     if (clearUser == true) {
       state.dispose();
@@ -1324,7 +1328,7 @@ class ClientState {
 
   void _listenChannelHidden() {
     _subscriptions.add(_client.on(EventType.channelHidden).listen((event) {
-      _client._offlineStorage?.deleteChannels([event.cid]);
+      _client._chatPersistence?.deleteChannels([event.cid]);
       if (channels != null) {
         channels = channels..removeWhere((cid, ch) => cid == event.cid);
       }
@@ -1349,7 +1353,7 @@ class ClientState {
     )
         .listen((Event event) async {
       final eventChannel = event.channel;
-      await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
+      await _client._chatPersistence?.deleteChannels([eventChannel.cid]);
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
       }

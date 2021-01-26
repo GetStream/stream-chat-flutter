@@ -419,7 +419,7 @@ class Channel {
         }
       }
 
-      await _client.offlineStorage?.deleteMessages([messageId]);
+      await _client.chatPersistence?.deleteMessageById(messageId);
     }
 
     return res;
@@ -487,7 +487,7 @@ class Channel {
     PaginationParams options, {
     bool preferOffline = false,
   }) async {
-    final cachedReplies = await _client.offlineStorage?.getReplies(
+    final cachedReplies = await _client.chatPersistence?.getReplies(
       parentId,
       lessThan: options?.lessThan,
     );
@@ -603,11 +603,9 @@ class Channel {
     }
 
     if (preferOffline && cid != null) {
-      final updatedState = await _client.offlineStorage?.getChannel(
+      final updatedState = await _client.chatPersistence?.getChannelStateByCid(
         cid,
-        limit: messagesPagination?.limit,
-        messageLessThan: messagesPagination?.lessThan,
-        messageGreaterThan: messagesPagination?.greaterThan,
+        messagePagination: messagesPagination,
       );
       if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
@@ -732,7 +730,7 @@ class Channel {
 
     if (clearHistory == true) {
       state.truncate();
-      await _client.offlineStorage?.deleteChannelsMessages([_cid]);
+      await _client.chatPersistence?.deleteMessageByCid(_cid);
     }
 
     return _client.decode(response.data, EmptyResponse.fromJson);
@@ -871,7 +869,7 @@ class ChannelClientState {
 
     _computeInitialUnread();
 
-    _channel._client.offlineStorage
+    _channel._client.chatPersistence
         ?.getChannelThreads(_channel.cid)
         ?.then((threads) {
       _threads = threads;
@@ -949,8 +947,7 @@ class ChannelClientState {
         .on(EventType.channelTruncated, EventType.notificationChannelTruncated)
         .listen((event) async {
       final channel = event.channel;
-      await _channel._client.offlineStorage
-          ?.deleteChannelsMessages([channel.cid]);
+      await _channel._client.chatPersistence?.deleteMessageByCid(channel.cid);
       truncate();
     }));
   }
@@ -1404,7 +1401,7 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    _channel._client.offlineStorage?.updateChannelState(v);
+    _channel._client.chatPersistence?.updateChannelState(v);
   }
 
   /// The channel threads related to this channel
@@ -1417,9 +1414,9 @@ class ChannelClientState {
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> v) {
-    _channel._client.offlineStorage?.updateMessages(
-      v.values.expand((v) => v).toList(),
+    _channel._client.chatPersistence?.updateMessages(
       _channel.cid,
+      v.values.expand((v) => v).toList(),
     );
     _threadsController.add(v);
   }
