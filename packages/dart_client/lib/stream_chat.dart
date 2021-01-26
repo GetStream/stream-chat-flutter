@@ -28,4 +28,3 @@ export './src/models/read.dart';
 export './src/models/user.dart';
 export './src/notifications.dart';
 export './src/db/stream_chat_persistence.dart';
-export './src/utils/result.dart' hide Success, Error;

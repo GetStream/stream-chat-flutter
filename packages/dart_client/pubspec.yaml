@@ -18,11 +18,9 @@ dependencies:
   web_socket_channel: ^1.1.0
   uuid: ^2.2.2
   async: ^2.4.1
-  stream_channel: ^2.0.0
   rxdart: ^0.24.1
   collection: ^1.14.12
   pedantic: ^1.9.2
-  freezed: ^0.12.7
   stream_chat_persistence:
     path: ../stream_chat_persistence
 
