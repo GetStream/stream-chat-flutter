@@ -116,7 +116,7 @@ void main() {
         showInChannel: true,
         parentId: 'parentId',
         extraData: {'hey': 'test'},
-        status: MessageSendingStatus.SENT,
+        status: MessageSendingStatus.sent,
       );
 
       expect(
