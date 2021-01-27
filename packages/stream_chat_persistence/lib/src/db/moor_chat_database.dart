@@ -10,12 +10,12 @@ import 'shared/shared_db.dart';
 part 'moor_chat_database.g.dart';
 
 LazyDatabase _openConnection(
-  String dbName, {
+  String userId, {
   logStatements = false,
 }) {
   return LazyDatabase(() async {
     return await SharedDB.constructDatabase(
-      dbName,
+      userId,
       logStatements: logStatements,
     );
   });
@@ -44,18 +44,24 @@ LazyDatabase _openConnection(
 class MoorChatDatabase extends _$MoorChatDatabase {
   /// Instantiate a new database instance
   MoorChatDatabase(
-    String dbName, {
+    this._userId, {
     logStatements = false,
   }) : super(_openConnection(
-          dbName,
+          _userId,
           logStatements: logStatements,
         ));
 
   /// Instantiate a new database instance
   MoorChatDatabase.connect(
+    this._userId,
     this._isolate,
     DatabaseConnection connection,
   ) : super.connect(connection);
+
+  final String _userId;
+
+  /// User id to which the database is connected
+  String get userId => _userId;
 
   MoorIsolate _isolate;
 

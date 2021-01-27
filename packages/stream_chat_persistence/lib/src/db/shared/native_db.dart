@@ -12,9 +12,10 @@ import '../moor_chat_database.dart';
 
 class SharedDB {
   static Future<VmDatabase> constructDatabase(
-    String dbName, {
+    String userId, {
     bool logStatements = false,
   }) async {
+    final dbName = 'db_$userId';
     if (Platform.isIOS || Platform.isAndroid) {
       final dir = await getApplicationDocumentsDirectory();
       final path = join(dir.path, '$dbName.sqlite');
@@ -62,15 +63,16 @@ class SharedDB {
   }
 
   static Future<MoorChatDatabase> constructOfflineStorage(
-    String dbName, {
+    String userId, {
     bool logStatements = false,
   }) async {
+    final dbName = 'db_$userId';
     final isolate = await _createMoorIsolate(
       dbName,
       logStatements: logStatements,
     );
     final connection = await isolate.connect();
-    return MoorChatDatabase.connect(isolate, connection);
+    return MoorChatDatabase.connect(userId, isolate, connection);
   }
 }
 

@@ -42,7 +42,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> connect(String name) async {
+  Future<void> connect(String userId) async {
     if (_db != null) {
       throw Exception(
         'An instance of StreamChatDatabase is already connected.\n'
@@ -52,11 +52,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     switch (_connectionMode) {
       case ConnectionMode.regular:
         _logger.info('Connecting on a regular isolate');
-        _db = MoorChatDatabase(name);
+        _db = MoorChatDatabase(userId);
         return;
       case ConnectionMode.background:
         _logger.info('Connecting on background isolate');
-        _db = await SharedDB.constructOfflineStorage(name);
+        _db = await SharedDB.constructOfflineStorage(userId);
         return;
     }
   }

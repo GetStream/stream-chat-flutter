@@ -29,7 +29,7 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   ///
-  Future<List<Reaction>> getOwnReactions(
+  Future<List<Reaction>> getReactionsByUserId(
     String messageId,
     String userId,
   ) async {

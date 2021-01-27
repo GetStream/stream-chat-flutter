@@ -456,7 +456,7 @@ class Client {
     wsConnectionStatus.value = ConnectionStatus.connecting;
 
     if (persistenceEnabled) {
-      await chatPersistenceClient.connect('db_${state.user.id}');
+      await chatPersistenceClient.connect(state.user.id);
     }
 
     _ws = WebSocket(

@@ -36,9 +36,9 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     final userEntity = rows.readTable(users);
     final msgEntity = rows.readTable(messages);
     final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
-    final ownReactions = await _db.reactionDao.getOwnReactions(
+    final ownReactions = await _db.reactionDao.getReactionsByUserId(
       msgEntity.id,
-      userEntity.id,
+      _db.userId,
     );
     Message quotedMessage;
     if (msgEntity.quotedMessageId != null) {

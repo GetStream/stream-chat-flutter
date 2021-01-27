@@ -3,14 +3,14 @@
 
 class SharedDB {
   static constructDatabase(
-    String dbName, {
+    String userId, {
     bool logStatements = false,
   }) {
     throw 'Unsupported Platform';
   }
 
   static constructOfflineStorage(
-    String dbName, {
+    String userId, {
     bool logStatements = false,
   }) {
     throw 'Unsupported Platform';

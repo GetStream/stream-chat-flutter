@@ -11,7 +11,7 @@ import 'package:stream_chat/src/models/user.dart';
 ///
 abstract class ChatPersistenceClient {
   /// Creates a new connection to the client
-  Future<void> connect(String name);
+  Future<void> connect(String userId);
 
   /// Closes the client connection
   /// If [flush] is true, the data will also be deleted

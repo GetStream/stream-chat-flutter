@@ -6,16 +6,18 @@ import '../moor_chat_database.dart';
 
 class SharedDB {
   static constructDatabase(
-    String dbName, {
+    String userId, {
     bool logStatements = false,
   }) async {
+    final dbName = 'db_$userId';
     return WebDatabase(dbName, logStatements: logStatements);
   }
 
   static Future<MoorChatDatabase> constructOfflineStorage(
-    String dbName, {
+    String userId, {
     bool logStatements = false,
   }) async {
+    final dbName = 'db_$userId';
     return MoorChatDatabase(dbName, logStatements: logStatements);
   }
 }
