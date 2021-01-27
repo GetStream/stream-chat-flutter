@@ -320,12 +320,11 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           await client.disconnect();
                           return;
                         }
-
-                        Navigator.pop(context);
                         loading = false;
-                        await Navigator.pushReplacementNamed(
+                        await Navigator.pushNamedAndRemoveUntil(
                           context,
                           Routes.APP,
+                          ModalRoute.withName(Routes.APP),
                           arguments: client,
                         );
                       }
