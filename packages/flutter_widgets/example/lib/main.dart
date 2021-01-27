@@ -10,12 +10,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'notifications_service.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
 import 'search_text_field.dart';
+
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.background,
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,8 +35,7 @@ void main() async {
     logLevel: Level.INFO,
     showLocalNotification:
         (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
-    persistenceEnabled: true,
-  );
+  )..chatPersistenceClient = chatPersistentClient;
 
   if (userId != null) {
     final token = await secureStorage.read(key: kStreamToken);

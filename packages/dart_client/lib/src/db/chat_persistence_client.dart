@@ -9,15 +9,12 @@ import 'package:stream_chat/src/models/read.dart';
 import 'package:stream_chat/src/models/user.dart';
 
 ///
-abstract class StreamChatPersistence {
-  /// Creates a new connection to the database
-  Future<void> connect({
-    bool connectBackground = false,
-    bool logStatements = false,
-  });
+abstract class ChatPersistenceClient {
+  /// Creates a new connection to the client
+  Future<void> connect(String name);
 
-  /// Closes the database instance
-  /// If [flush] is true, the database data will be deleted
+  /// Closes the client connection
+  /// If [flush] is true, the data will also be deleted
   Future<void> disconnect({bool flush = false});
 
   /// Get stored replies by messageId

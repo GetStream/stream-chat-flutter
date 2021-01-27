@@ -1,12 +1,11 @@
 import 'dart:convert';
 
-import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/api/responses.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+import 'package:meta/meta.dart';
 
 import 'client.dart';
 import 'models/own_user.dart';
@@ -20,21 +19,13 @@ class NotificationService {
   ) async {
     if (message != null && client.persistenceEnabled) {
       if (client?.state?.channels == null) {
-        final sharedPreferences = await _getSharedPreferences();
-        final userId = sharedPreferences.getString(KEY_USER_ID);
-
-        final chatPersistence = StreamChatPersistenceImpl(
-          userId,
-          logger: Logger('💽'),
-        );
-        await chatPersistence.connect();
-        await chatPersistence.updateChannelState(
+        final chatPersistenceClient = client.chatPersistenceClient;
+        await chatPersistenceClient.updateChannelState(
           ChannelState(
             channel: channelModel,
             messages: [message],
           ),
         );
-        await chatPersistence.disconnect();
       } else {
         final channel = client.state.channels[channelModel.cid];
         channel.state.updateChannelState(
@@ -56,14 +47,11 @@ class NotificationService {
 
   /// Gets the message using the client without storing it in the offline storage
   /// It returns an object containing the information about the message and the channel
-  static Future<GetMessageResponse> getMessage(String messageId) async {
+  static Future<GetMessageResponse> _getMessage(String messageId) async {
     final sharedPreferences = await _getSharedPreferences();
     final apiKey = sharedPreferences.getString(KEY_API_KEY);
 
-    final client = Client(
-      apiKey,
-      persistenceEnabled: false,
-    );
+    final client = Client(apiKey);
     final userId = sharedPreferences.getString(KEY_USER_ID);
     final token = sharedPreferences.getString(KEY_TOKEN);
 
@@ -74,30 +62,16 @@ class NotificationService {
     return res;
   }
 
-  /// Stores the message in the offline storage
-  static Future<void> storeMessage(GetMessageResponse messageResponse) async {
-    final sharedPreferences = await _getSharedPreferences();
-    final userId = sharedPreferences.getString(KEY_USER_ID);
-
-    final chatPersistence = StreamChatPersistenceImpl(
-      userId,
-      logger: Logger('💽'),
-    );
-    await chatPersistence.connect();
-
-    await chatPersistence.updateChannelState(ChannelState(
-      messages: [messageResponse.message],
-      channel: messageResponse.channel,
-    ));
-
-    await chatPersistence.disconnect();
-  }
-
-  /// Gets the message using the client and stores it in the offline storage
+  /// Gets the message using the client and calls a [storeMessageHandler] callback
+  /// with the message if the user wants to save the message in db
+  ///
   /// It returns an object containing the information about the message and the channel
-  static Future<GetMessageResponse> getAndStoreMessage(String messageId) async {
-    final getMessageResponse = await getMessage(messageId);
-    await storeMessage(getMessageResponse);
+  static Future<GetMessageResponse> getAndStoreMessage({
+    @required String messageId,
+    @required Future<void> Function(GetMessageResponse) storeMessageHandler,
+  }) async {
+    final getMessageResponse = await _getMessage(messageId);
+    await storeMessageHandler(getMessageResponse);
     return getMessageResponse;
   }
 

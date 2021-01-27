@@ -419,7 +419,7 @@ class Channel {
         }
       }
 
-      await _client.chatPersistence?.deleteMessageById(messageId);
+      await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
 
     return res;
@@ -487,7 +487,7 @@ class Channel {
     PaginationParams options, {
     bool preferOffline = false,
   }) async {
-    final cachedReplies = await _client.chatPersistence?.getReplies(
+    final cachedReplies = await _client.chatPersistenceClient?.getReplies(
       parentId,
       lessThan: options?.lessThan,
     );
@@ -603,7 +603,8 @@ class Channel {
     }
 
     if (preferOffline && cid != null) {
-      final updatedState = await _client.chatPersistence?.getChannelStateByCid(
+      final updatedState =
+          await _client.chatPersistenceClient?.getChannelStateByCid(
         cid,
         messagePagination: messagesPagination,
       );
@@ -730,7 +731,7 @@ class Channel {
 
     if (clearHistory == true) {
       state.truncate();
-      await _client.chatPersistence?.deleteMessageByCid(_cid);
+      await _client.chatPersistenceClient?.deleteMessageByCid(_cid);
     }
 
     return _client.decode(response.data, EmptyResponse.fromJson);
@@ -869,7 +870,7 @@ class ChannelClientState {
 
     _computeInitialUnread();
 
-    _channel._client.chatPersistence
+    _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid)
         ?.then((threads) {
       _threads = threads;
@@ -947,7 +948,8 @@ class ChannelClientState {
         .on(EventType.channelTruncated, EventType.notificationChannelTruncated)
         .listen((event) async {
       final channel = event.channel;
-      await _channel._client.chatPersistence?.deleteMessageByCid(channel.cid);
+      await _channel._client.chatPersistenceClient
+          ?.deleteMessageByCid(channel.cid);
       truncate();
     }));
   }
@@ -1401,7 +1403,7 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    _channel._client.chatPersistence?.updateChannelState(v);
+    _channel._client.chatPersistenceClient?.updateChannelState(v);
   }
 
   /// The channel threads related to this channel
@@ -1414,7 +1416,7 @@ class ChannelClientState {
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> v) {
-    _channel._client.chatPersistence?.updateMessages(
+    _channel._client.chatPersistenceClient?.updateMessages(
       _channel.cid,
       v.values.expand((v) => v).toList(),
     );

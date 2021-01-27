@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:example/main.dart';
 import 'package:flutter_apns/flutter_apns.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
@@ -36,8 +37,17 @@ Future backgroundHandler(Map<String, dynamic> notification) async {
   print('new notification ${notification}');
   final messageId = notification['data']['id'];
 
-  final notificationData =
-      await NotificationService.getAndStoreMessage(messageId);
+  final notificationData = await NotificationService.getAndStoreMessage(
+    messageId: messageId,
+    storeMessageHandler: (messageResponse) {
+      return chatPersistentClient.updateChannelState(
+        ChannelState(
+          messages: [messageResponse.message],
+          channel: messageResponse.channel,
+        ),
+      );
+    },
+  );
 
   showLocalNotification(
     notificationData.message,

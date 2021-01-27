@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'choose_user_page.dart';
+import 'main.dart';
 import 'notifications_service.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
@@ -278,8 +280,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           showLocalNotification: (!kIsWeb && Platform.isAndroid)
                               ? showLocalNotification
                               : null,
-                          persistenceEnabled: true,
-                        );
+                        )..chatPersistenceClient = chatPersistentClient;
 
                         try {
                           await client.setUser(
@@ -320,72 +321,13 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           return;
                         }
 
-                        if (!kIsWeb) {
-                          initNotifications(client);
-                        }
-
                         Navigator.pop(context);
-                        Navigator.pop(context);
-                        await Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return FutureBuilder<StreamingSharedPreferences>(
-                                future: StreamingSharedPreferences.instance,
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return SizedBox();
-                                  }
-                                  return PreferenceBuilder<int>(
-                                    preference: snapshot.data.getInt(
-                                      'theme',
-                                      defaultValue: 0,
-                                    ),
-                                    builder: (context, snapshot) => MaterialApp(
-                                      builder: (context, child) {
-                                        return StreamChat(
-                                          client: client,
-                                          child: Builder(
-                                            builder: (context) =>
-                                                AnnotatedRegion<
-                                                    SystemUiOverlayStyle>(
-                                              child: child,
-                                              value: SystemUiOverlayStyle(
-                                                systemNavigationBarColor:
-                                                    StreamChatTheme.of(context)
-                                                        .colorTheme
-                                                        .white,
-                                                systemNavigationBarIconBrightness:
-                                                    Theme.of(context)
-                                                                .brightness ==
-                                                            Brightness.dark
-                                                        ? Brightness.light
-                                                        : Brightness.dark,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      debugShowCheckedModeBanner: false,
-                                      theme: ThemeData.light(),
-                                      darkTheme: ThemeData.dark(),
-                                      themeMode: {
-                                        -1: ThemeMode.dark,
-                                        0: ThemeMode.system,
-                                        1: ThemeMode.light,
-                                      }[snapshot],
-                                      onGenerateRoute: AppRoutes.generateRoute,
-                                      initialRoute: client.state.user == null
-                                          ? Routes.CHOOSE_USER
-                                          : Routes.HOME,
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        );
                         loading = false;
+                        await Navigator.pushReplacementNamed(
+                          context,
+                          Routes.APP,
+                          arguments: client,
+                        );
                       }
                     },
                   ),

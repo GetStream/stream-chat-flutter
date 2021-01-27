@@ -11,7 +11,7 @@ class SharedDB {
 
   static constructOfflineStorage(
     String dbName, {
-    logStatements = false,
+    bool logStatements = false,
   }) {
     throw 'Unsupported Platform';
   }

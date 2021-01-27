@@ -3,18 +3,30 @@ import 'package:stream_chat/stream_chat.dart';
 import 'db/moor_chat_database.dart';
 import 'db/shared/shared_db.dart';
 
-///
-class StreamChatPersistenceImpl extends StreamChatPersistence {
-  ///
-  StreamChatPersistenceImpl(
-    this._userId, {
-    Logger logger,
-  })  : _logger = logger,
-        assert(_userId != null);
+/// Various connection modes on which [StreamChatPersistenceClient] can work
+enum ConnectionMode {
+  /// Connects the [StreamChatPersistenceClient] on a regular/default isolate
+  regular,
 
-  final String _userId;
-  final Logger _logger;
+  /// Connects the [StreamChatPersistenceClient] on a background isolate
+  background,
+}
+
+///
+class StreamChatPersistenceClient extends ChatPersistenceClient {
+  ///
+  StreamChatPersistenceClient({
+    /// Connection mode on which the client will work
+    ConnectionMode connectionMode = ConnectionMode.regular,
+    Level logLevel = Level.WARNING,
+  })  : assert(connectionMode != null),
+        assert(logLevel != null),
+        _connectionMode = connectionMode,
+        _logger = Logger.detached('💽')..level = logLevel;
+
   MoorChatDatabase _db;
+  final Logger _logger;
+  final ConnectionMode _connectionMode;
 
   bool get _debugAssertConnected {
     assert(() {
@@ -30,27 +42,22 @@ class StreamChatPersistenceImpl extends StreamChatPersistence {
   }
 
   @override
-  Future<void> connect({
-    bool connectBackground = false,
-    bool logStatements = false,
-  }) async {
+  Future<void> connect(String name) async {
     if (_db != null) {
       throw Exception(
         'An instance of StreamChatDatabase is already connected.\n'
         'disconnect the previous instance before connecting again.',
       );
     }
-
-    final dbName = 'db_$_userId';
-    if (connectBackground) {
-      _logger?.info('Connecting on background isolate');
-      _db = await SharedDB.constructOfflineStorage(
-        dbName,
-        logStatements: logStatements,
-      );
-    } else {
-      _logger?.info('Connecting on a regular isolate');
-      _db = MoorChatDatabase(dbName, logStatements: logStatements);
+    switch (_connectionMode) {
+      case ConnectionMode.regular:
+        _logger.info('Connecting on a regular isolate');
+        _db = MoorChatDatabase(name);
+        return;
+      case ConnectionMode.background:
+        _logger.info('Connecting on background isolate');
+        _db = await SharedDB.constructOfflineStorage(name);
+        return;
     }
   }
 
@@ -202,9 +209,9 @@ class StreamChatPersistenceImpl extends StreamChatPersistence {
   @override
   Future<void> disconnect({bool flush = false}) async {
     if (_db != null) {
-      _logger?.info('Disconnecting');
+      _logger.info('Disconnecting');
       if (flush) {
-        _logger?.info('Flushing');
+        _logger.info('Flushing');
         await _db.batch((batch) {
           _db.allTables.forEach((table) {
             _db.delete(table).go();
