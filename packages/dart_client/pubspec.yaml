@@ -21,8 +21,6 @@ dependencies:
   rxdart: ^0.24.1
   collection: ^1.14.12
   pedantic: ^1.9.2
-  stream_chat_persistence:
-    path: ../stream_chat_persistence
 
 dev_dependencies:
   build_runner: ^1.10.0
