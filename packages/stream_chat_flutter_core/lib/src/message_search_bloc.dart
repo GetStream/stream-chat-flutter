@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'stream_chat.dart';
+import 'stream_chat_core.dart';
 
 /// Widget dedicated to the management of a message list with pagination
 class MessageSearchBloc extends StatefulWidget {
@@ -122,7 +122,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     String query,
     PaginationParams pagination,
   }) {
-    final client = StreamChat.of(context).client;
+    final client = StreamChatCore.of(context).client;
     return client.search(
       filter,
       sort,

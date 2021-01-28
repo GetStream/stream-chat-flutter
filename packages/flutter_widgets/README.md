@@ -60,13 +60,9 @@ If it seems related to the [flutter file picker plugin](https://github.com/migue
 
 ## Docs
 
-### Business logic components
-
-We provide 3 Widgets dedicated to business logic and state management:
-
-- [StreamChat](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat-class.html)
-- [StreamChannel](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannel-class.html)
-- [ChannelsBloc](https://pub.dev/documentation/stream_chat_flutter/0.2.0-alpha+2/stream_chat_flutter/ChannelsBloc-class.html)
+This package provides UI components required for integrating Stream Chat into your application.
+Alternatively, you may use the core package (stream_chat_flutter_core) which allows more customisation and provides business logic but no UI components.
+If you require the maximum amount of control over the API, please use the low level client package: stream_chat.
 
 ### UI Components
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../stream_chat_flutter.dart';

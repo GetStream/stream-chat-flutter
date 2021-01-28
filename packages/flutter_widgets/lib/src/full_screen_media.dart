@@ -6,7 +6,6 @@ import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/src/image_footer.dart';
 import 'package:stream_chat_flutter/src/image_header.dart';
 import 'package:video_player/video_player.dart';
-import 'stream_channel.dart';
 
 import '../stream_chat_flutter.dart';
 
