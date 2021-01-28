@@ -35,14 +35,19 @@ typedef StreamErrorBuilder = Widget Function(
 ///             child: Text('Nothing here...'),
 ///           );
 ///         },
-///         emptyBuilder: (context) {
+///         loadingBuilder: (context) {
 ///           return Center(
 ///             child: CircularProgressIndicator(),
 ///           );
 ///         },
 ///         messageListBuilder: (context, list) {
 ///           return MessagesPage(list);
-///         }
+///         },
+///         errorWidgetBuilder: (context, err) {
+///           return Center(
+///             child: Text('Error'),
+///           );
+///         },
 ///             ),
 ///           ),
 ///         ],
@@ -122,14 +127,14 @@ class _MessageListCoreState extends State<MessageListCore> {
         : streamChannel.channel.state?.messagesStream;
 
     return StreamBuilder<List<Message>>(
-        stream: messagesStream?.map((messages) => messages
-            ?.where((e) =>
-                (!e.isDeleted && e.shadowed != true) ||
-                (e.isDeleted &&
-                    e.user.id == streamChannel.channel.client.state.user.id))
-            ?.toList()),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+      stream: messagesStream?.map((messages) => messages
+          ?.where((e) =>
+              (!e.isDeleted && e.shadowed != true) ||
+              (e.isDeleted &&
+                  e.user.id == streamChannel.channel.client.state.user.id))
+          ?.toList()),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
           return widget.loadingBuilder(context);
         } else if (snapshot.hasError) {
           return widget.errorWidgetBuilder(context, snapshot.error);

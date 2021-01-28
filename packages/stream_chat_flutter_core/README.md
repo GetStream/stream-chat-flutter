@@ -27,7 +27,7 @@ It teaches you how to use this SDK and also shows how to make frequently require
 ## Example App
 
 This repo includes a fully functional example app with setup instructions.
-The example is available under the [example](https://github.com/GetStream/stream-chat-flutter/tree/master/example) folder.
+The example is available under the [example](https://github.com/GetStream/stream-chat-flutter-core/tree/master/example) folder.
 
 ## Add dependency
 Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_flutter.svg)](https://pub.dartlang.org/packages/stream_chat_flutter)
@@ -44,21 +44,42 @@ This package requires no custom setup on any platform since it does not depend o
 
 This package provides business logic to fetch common things required for integrating Stream Chat into your application.
 The core package allows more customisation and hence provides business logic but no UI components.
-Please use the stream_chat_flutter package for the full fledged suite of UI components.
+Please use the stream_chat_flutter package for the full fledged suite of UI components or stream_chat for the low-level client.
 
-### Business logic components
+The package primarily contains three types of classes:
 
-We provide widgets dedicated to business logic and state management:
+1) Business Logic Components
+2) Core Components
+3) Core Controllers
 
-- [StreamChatCore](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChat-class.html)
-- [StreamChannel](https://pub.dev/documentation/stream_chat_flutter/latest/stream_chat_flutter/StreamChannel-class.html)
-- [ChannelsBloc](https://pub.dev/documentation/stream_chat_flutter/0.2.0-alpha+2/stream_chat_flutter/ChannelsBloc-class.html)
-- [MessageSearchBloc]
-- [UsersBloc]
-- [ChannelListCore]
-- [MessageListCore]
-- [MessageSearchListCore]
-- [UserListCore]
+### Business Logic Components
+
+These components allow you to have the maximum and lower-level control of the queries being executed.
+The BLoCs we provide are:
+
+1) ChannelsBloc
+2) MessageSearchBloc
+3) UsersBloc
+
+### Core Components
+
+Core components usually are an easy way to fetch data associated with Stream Chat which are decoupled from UI and often expose UI builders.
+Data fetching can be controlled with the controllers of the respective core components.
+
+1) ChannelListCore (Fetch a list of channels)
+2) MessageListCore (Fetch a list of messages from a channel)
+3) MessageSearchListCore (Fetch a list of search messages)
+4) UserListCore (Fetch  a list of users)
+5) StreamChatCore (This is different from the other core components - it is a version of StreamChat decoupled from theme and initialisations.)
+
+### Core Controllers
+
+Core Controllers are supplied to respective CoreList widgets which allows reloading and pagination of data whenever needed.
+
+1) ChannelListController
+2) MessageListController
+3) MessageSearchListController
+4) ChannelListController
 
 ## Contributing
 
