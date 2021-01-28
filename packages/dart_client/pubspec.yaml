@@ -21,10 +21,10 @@ dependencies:
   rxdart: ^0.24.1
   collection: ^1.14.12
   pedantic: ^1.9.2
+  freezed: ^0.12.7
 
 dev_dependencies:
   build_runner: ^1.10.0
   json_serializable: ^3.3.0
-  flutter_test:
-    sdk: flutter
+  test: ^1.15.7
   mockito: ^4.1.1

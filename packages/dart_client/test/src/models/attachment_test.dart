@@ -2,7 +2,7 @@ import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/src/models/action.dart';
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/attachment', () {
