@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget to show the current list of typing users
 class TypingIndicator extends StatelessWidget {

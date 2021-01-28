@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'image_actions_modal.dart';
 
 class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
