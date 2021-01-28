@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
@@ -36,15 +35,6 @@ typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 /// A function which can be used to request a Stream Chat API token from your
 /// own backend server. Function requires a single [userId].
 typedef TokenProvider = Future<String> Function(String userId);
-
-/// The key used to save the userId to sharedPreferences
-const String KEY_USER_ID = 'KEY_USER_ID';
-
-/// The key used to save the token to sharedPreferences
-const String KEY_TOKEN = 'KEY_TOKEN';
-
-/// The key used to save the apiKey to sharedPreferences
-const String KEY_API_KEY = 'KEY_API_KEY';
 
 /// Provider used to send push notifications.
 enum PushProvider {
@@ -377,11 +367,6 @@ class Client {
     state.user = OwnUser.fromJson(user.toJson());
     this.token = token;
     _anonymous = false;
-
-    final sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.setString(KEY_USER_ID, user.id);
-    await sharedPreferences.setString(KEY_TOKEN, token);
-    await sharedPreferences.setString(KEY_API_KEY, apiKey);
 
     return connect().then((event) {
       _connectCompleter.complete(event);

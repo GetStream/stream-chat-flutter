@@ -26,5 +26,4 @@ export './src/models/own_user.dart';
 export './src/models/reaction.dart';
 export './src/models/read.dart';
 export './src/models/user.dart';
-export './src/notifications.dart';
 export './src/db/chat_persistence_client.dart';
