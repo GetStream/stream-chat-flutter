@@ -13,7 +13,7 @@ import 'package:http_parser/http_parser.dart' as httpParser;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/compress_video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
