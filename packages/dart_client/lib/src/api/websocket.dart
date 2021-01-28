@@ -105,6 +105,9 @@ class WebSocket {
   set _connectionStatus(ConnectionStatus status) =>
       _connectionStatusController.add(status);
 
+  /// The current connection status value
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
+
   /// This notifies of connection status changes
   Stream<ConnectionStatus> get connectionStatusStream =>
       _connectionStatusController.stream;
