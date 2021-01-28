@@ -55,7 +55,7 @@ class StreamExample extends StatelessWidget {
       home: HomeScreen(),
       builder: (context, child) => StreamChatCore(
         client: client,
-        child: ChannelsBloc(child: child),
+        child: child,
       ),
     );
   }
@@ -73,53 +73,58 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Channels'),
       ),
-      body: ChannelListCore(
-        emptyBuilder: (BuildContext context) {
-          return Center(
-            child: Text('Looks like you are not in any channels'),
-          );
-        },
-        loadingBuilder: (BuildContext context) {
-          return Center(
-            child: SizedBox(
-              height: 100.0,
-              width: 100.0,
-              child: CircularProgressIndicator(),
-            ),
-          );
-        },
-        errorBuilder: (Error error) {
-          return Center(
-            child:
-                Text('Oh no, something went wrong. Please check your config.'),
-          );
-        },
-        listBuilder: (BuildContext context, List<Channel> channels) =>
-            ListView.builder(
-          itemCount: channels.length,
-          itemBuilder: (BuildContext context, int index) {
-            final _item = channels[index];
-            return ListTile(
-              title: Text(_item.name),
-              subtitle: Text(_item.state.lastMessage.text),
-              onTap: () {
-                /// Display a list of messages when the user taps on an item.
-                /// We can use [StreamChannel] to wrap our [MessageScreen] screen
-                /// with the selected channel.
-                ///
-                /// This allows us to use a built-in inherited widget for accessing
-                /// our `channel` later on.
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => StreamChannel(
-                      channel: _item,
-                      child: MessageScreen(),
-                    ),
-                  ),
-                );
-              },
+      body: ChannelsBloc(
+        child: ChannelListCore(
+          emptyBuilder: (BuildContext context) {
+            return Center(
+              child: Text('Looks like you are not in any channels'),
             );
           },
+          loadingBuilder: (BuildContext context) {
+            return Center(
+              child: SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+          errorBuilder: (Error error) {
+            return Center(
+              child: Text(
+                  'Oh no, something went wrong. Please check your config.'),
+            );
+          },
+          listBuilder: (
+            BuildContext context,
+            List<Channel> channels,
+          ) =>
+              ListView.builder(
+            itemCount: channels.length,
+            itemBuilder: (BuildContext context, int index) {
+              final _item = channels[index];
+              return ListTile(
+                title: Text(_item.name),
+                subtitle: Text(_item.state.lastMessage.text),
+                onTap: () {
+                  /// Display a list of messages when the user taps on an item.
+                  /// We can use [StreamChannel] to wrap our [MessageScreen] screen
+                  /// with the selected channel.
+                  ///
+                  /// This allows us to use a built-in inherited widget for accessing
+                  /// our `channel` later on.
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => StreamChannel(
+                        channel: _item,
+                        child: MessageScreen(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -157,7 +162,7 @@ class _MessageScreenState extends State<MessageScreen> {
 
   void _updateList() {
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
+      0,
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
     );
@@ -179,7 +184,7 @@ class _MessageScreenState extends State<MessageScreen> {
               child: MessageListCore(
                 emptyBuilder: (BuildContext context) {
                   return Center(
-                    child: Text('Looks like you are not in any channels'),
+                    child: Text('Nothing here yet'),
                   );
                 },
                 loadingBuilder: (BuildContext context) {

@@ -142,6 +142,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _disconnectTimer?.cancel();
     super.dispose();
   }
 }
