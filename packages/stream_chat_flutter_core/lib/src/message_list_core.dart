@@ -11,9 +11,6 @@ import 'stream_channel.dart';
 typedef StreamErrorBuilder = Widget Function(
     BuildContext context, Object error);
 
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview_paint.png)
-///
 /// [MessageListCore] is a simplified class that allows fetching a list of messages while exposing UI builders.
 /// A [MessageListController] is used to paginate data.
 ///

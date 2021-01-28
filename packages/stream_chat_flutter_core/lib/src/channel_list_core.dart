@@ -8,9 +8,6 @@ import 'package:stream_chat_flutter_core/src/channels_bloc.dart';
 
 import 'stream_chat_core.dart';
 
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
-/// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
-///
 /// [ChannelListCore] is a simplified class that allows fetching a list of channels while exposing UI builders.
 /// A [ChannelListController] is used to reload and paginate data.
 ///
