@@ -5,6 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'stream_channel.dart';
 
+/// A signature for a callback which exposes an error and returns a function.
+/// This Callback can be used in cases where an API failure occurs and the widget
+/// is unable to render data.
+typedef StreamErrorBuilder = Widget Function(
+    BuildContext context, Object error);
+
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview_paint.png)
 ///
@@ -61,6 +67,7 @@ class MessageListCore extends StatefulWidget {
     @required this.loadingBuilder,
     @required this.emptyBuilder,
     @required this.messageListBuilder,
+    @required this.errorWidgetBuilder,
     this.messageListController,
   }) : super(key: key);
 
@@ -76,6 +83,11 @@ class MessageListCore extends StatefulWidget {
 
   /// Function used to build an empty widget
   final WidgetBuilder emptyBuilder;
+
+  /// Callback triggered when an error occurs while performing the given request.
+  /// This parameter can be used to display an error message to users in the event
+  /// of a connection failure.
+  final StreamErrorBuilder errorWidgetBuilder;
 
   /// If true will show a scroll to bottom message when there are new messages and the scroll offset is not zero
   final bool showScrollToBottom;
@@ -118,9 +130,10 @@ class _MessageListCoreState extends State<MessageListCore> {
             ?.toList()),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return widget.loadingBuilder(context);
-          }
-
+          return widget.loadingBuilder(context);
+        } else if (snapshot.hasError) {
+          return widget.errorWidgetBuilder(context, snapshot.error);
+        } else {
           final messageList = snapshot.data?.reversed?.toList() ?? [];
           if (messageList.isEmpty) {
             if (_upToDate) {
@@ -129,9 +142,10 @@ class _MessageListCoreState extends State<MessageListCore> {
           } else {
             messages = messageList;
           }
-
           return widget.messageListBuilder(context, messages);
-        });
+        }
+      },
+    );
   }
 
   Future<void> paginateData(
