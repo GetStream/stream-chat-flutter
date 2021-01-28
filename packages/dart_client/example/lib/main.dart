@@ -156,7 +156,7 @@ class _MessageViewState extends State<MessageView> {
   /// Convenience method for scrolling the list view when a new message is sent.
   void _updateList() {
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
+      0,
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
     );
