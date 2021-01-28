@@ -28,19 +28,31 @@ Future<void> main() async {
   );
 }
 
+/// Example application using Stream Chat core widgets.
+/// Stream Chat Core is a set of Flutter wrappers which provide basic functionality
+/// for building Flutter applications using Stream.
+/// If you'd prefer using pre-made UI widgets for your app, please see our other
+/// package, `stream_chat_flutter`.
 class StreamExample extends StatelessWidget {
+  /// Minimal example using Stream's core Flutter package.
+  /// If you'd prefer using pre-made UI widgets for your app, please see our other
+  /// package, `stream_chat_flutter`.
   const StreamExample({
     Key key,
     @required this.client,
   }) : super(key: key);
 
+  /// Instance of Stream Client.
+  /// Stream's [Client] can be used to connect to our servers and set the default
+  /// user for the application. Performing these actions trigger a websocket connection
+  /// allowing for real-time updates.
   final Client client;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Stream Chat Dart Example',
-      home: _HomeScreen(),
+      title: 'Stream Chat Core Example',
+      home: HomeScreen(),
       builder: (context, child) => StreamChatCore(
         client: client,
         child: ChannelsBloc(child: child),
@@ -49,7 +61,12 @@ class StreamExample extends StatelessWidget {
   }
 }
 
-class _HomeScreen extends StatelessWidget {
+/// Basic layout displaying a list of [Channel]s the user is a part of.
+/// This is implemented using [ChannelListCore].
+///
+/// [ChannelListCore] is a `builder` with callbacks for constructing UIs based
+/// on different scenarios.
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,15 +98,21 @@ class _HomeScreen extends StatelessWidget {
             ListView.builder(
           itemCount: channels.length,
           itemBuilder: (BuildContext context, int index) {
-            final item = channels[index];
+            final _item = channels[index];
             return ListTile(
-              title: Text(item.name),
-              subtitle: Text(item.state.lastMessage.text),
+              title: Text(_item.name),
+              subtitle: Text(_item.state.lastMessage.text),
               onTap: () {
+                /// Display a list of messages when the user taps on an item.
+                /// We can use [StreamChannel] to wrap our [MessageScreen] screen
+                /// with the selected channel.
+                ///
+                /// This allows us to use a built-in inherited widget for accessing
+                /// our `channel` later on.
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => StreamChannel(
-                      channel: item,
+                      channel: _item,
                       child: MessageScreen(),
                     ),
                   ),
@@ -103,6 +126,12 @@ class _HomeScreen extends StatelessWidget {
   }
 }
 
+/// A list of messages sent in the current channel.
+/// When a user taps on a channel in [HomeScreen], a navigator push [MessageScreen]
+/// to display the list of messages in the selected channel.
+///
+/// This is implemented using [MessageListCore], a convenience builder with
+/// callbacks for building UIs based on different api results.
 class MessageScreen extends StatefulWidget {
   @override
   _MessageScreenState createState() => _MessageScreenState();
@@ -136,108 +165,121 @@ class _MessageScreenState extends State<MessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /// To access the current channel, we can use the `.of()` method on [StreamChannel]
+    /// to fetch the closest instance.
+    final channel = StreamChannel.of(context).channel;
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: MessageListCore(
-              emptyBuilder: (BuildContext context) {
-                return Center(
-                  child: Text('Looks like you are not in any channels'),
-                );
-              },
-              loadingBuilder: (BuildContext context) {
-                return Center(
-                  child: SizedBox(
-                    height: 100.0,
-                    width: 100.0,
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              },
-              messageListBuilder:
-                  (BuildContext context, List<Message> messages) {
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: messages.length,
-                  reverse: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    final item = messages[index];
-                    final client = StreamChatCore.of(context).client;
-                    if (item.user.id == client.uid) {
-                      return Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(item.text),
-                        ),
-                      );
-                    } else {
-                      return Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(item.text),
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your message',
+      appBar: AppBar(
+        title: Text(channel.name),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: MessageListCore(
+                emptyBuilder: (BuildContext context) {
+                  return Center(
+                    child: Text('Looks like you are not in any channels'),
+                  );
+                },
+                loadingBuilder: (BuildContext context) {
+                  return Center(
+                    child: SizedBox(
+                      height: 100.0,
+                      width: 100.0,
+                      child: CircularProgressIndicator(),
                     ),
-                  ),
-                ),
-                Material(
-                  type: MaterialType.circle,
-                  color: Colors.blue,
-                  clipBehavior: Clip.hardEdge,
-                  child: InkWell(
-                    onTap: () async {
-                      if (_controller.value.text.isNotEmpty) {
-                        //TODO(Nash): Send Message
-                        // await widget.channel.sendMessage(
-                        //   Message(text: _controller.value.text),
-                        // );
-                        _controller.clear();
-                        _updateList();
+                  );
+                },
+                messageListBuilder: (
+                  BuildContext context,
+                  List<Message> messages,
+                ) {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messages.length,
+                    reverse: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      final item = messages[index];
+                      final client = StreamChatCore.of(context).client;
+                      if (item.user.id == client.uid) {
+                        return Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(item.text),
+                          ),
+                        );
+                      } else {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(item.text),
+                          ),
+                        );
                       }
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
-                        ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your message',
                       ),
                     ),
                   ),
-                )
-              ],
-            ),
-          )
-        ],
+                  Material(
+                    type: MaterialType.circle,
+                    color: Colors.blue,
+                    clipBehavior: Clip.hardEdge,
+                    child: InkWell(
+                      onTap: () async {
+                        if (_controller.value.text.isNotEmpty) {
+                          await channel.sendMessage(
+                            Message(text: _controller.value.text),
+                          );
+                          _controller.clear();
+                          _updateList();
+                        }
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(
+                          child: Icon(
+                            Icons.send,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 }
 
+/// Extensions can be used to add functionality to the SDK. In the examples
+/// below, we add two simple extensions to the [Client] and [Channel].
 extension on Client {
+  /// Fetches the current user id.
   String get uid => state.user.id;
 }
 
 extension on Channel {
+  /// Fetches the name of the channel by accessing [extraData] or [cid].
   String get name {
     final _channelName = extraData['name'];
     if (_channelName != null) {
