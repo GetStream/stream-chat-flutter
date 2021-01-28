@@ -264,6 +264,18 @@ class _MessageListViewState extends State<MessageListView> {
       messageListController: _messageListController,
       parentMessage: widget.parentMessage,
       showScrollToBottom: widget.showScrollToBottom,
+      errorWidgetBuilder: (BuildContext context, Object error) {
+        return Center(
+          child: Text(
+            'Something went wrong',
+            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .black
+                    .withOpacity(.5)),
+          ),
+        );
+      },
     );
   }
 
