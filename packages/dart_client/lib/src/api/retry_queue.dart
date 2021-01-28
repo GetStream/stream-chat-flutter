@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/api/channel.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';

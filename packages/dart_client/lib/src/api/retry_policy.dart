@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
 

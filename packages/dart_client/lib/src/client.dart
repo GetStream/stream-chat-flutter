@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,8 +93,6 @@ class Client {
     this.backgroundKeepAlive = const Duration(minutes: 1),
     RetryPolicy retryPolicy,
   }) {
-    WidgetsFlutterBinding.ensureInitialized();
-
     _retryPolicy ??= RetryPolicy(
       retryTimeout: (Client client, int attempt, ApiError error) =>
           Duration(seconds: 1 * attempt),
@@ -180,7 +178,8 @@ class Client {
 
   static const _defaultBaseURL = 'chat-us-east-1.stream-io-api.com';
   static const _tokenExpiredErrorCode = 40;
-  VoidCallback _connectionStatusListener;
+  StreamSubscription<ConnectionStatus> _connectionStatusSubscription;
+  Future<void> Function(ConnectionStatus) _connectionStatusHandler;
 
   final BehaviorSubject<Event> _controller = BehaviorSubject<Event>();
 
@@ -188,10 +187,20 @@ class Client {
   /// Listen to this or use the [on] method to filter specific event types
   Stream<Event> get stream => _controller.stream;
 
+  final _wsConnectionStatusController =
+      BehaviorSubject.seeded(ConnectionStatus.disconnected);
+
+  set _wsConnectionStatus(ConnectionStatus status) =>
+      _wsConnectionStatusController.add(status);
+
+  /// The current status value of the websocket connection
+  ConnectionStatus get wsConnectionStatus =>
+      _wsConnectionStatusController.value;
+
   /// This notifies the connection status of the websocket connection.
   /// Listen to this to get notified when the websocket tries to reconnect.
-  final ValueNotifier<ConnectionStatus> wsConnectionStatus =
-      ValueNotifier(ConnectionStatus.disconnected);
+  Stream<ConnectionStatus> get wsConnectionStatusStream =>
+      _wsConnectionStatusController.stream;
 
   /// The current user token
   String token;
@@ -275,8 +284,6 @@ class Client {
         httpClient.lock();
         final userId = state.user.id;
 
-        _ws.connectionStatus.removeListener(_connectionStatusListener);
-
         await _disconnect();
 
         final newToken = await tokenProvider(userId);
@@ -345,8 +352,8 @@ class Client {
     await _disconnect();
     httpClient.close();
     await _controller.close();
-    state.channels.values.forEach((c) => c.dispose());
     state.dispose();
+    await _wsConnectionStatusController.close();
   }
 
   Map<String, String> get _httpHeaders => {
@@ -443,17 +450,17 @@ class Client {
   /// Connect the client websocket
   Future<Event> connect() async {
     logger.info('connecting');
-    if (wsConnectionStatus.value == ConnectionStatus.connecting) {
+    if (wsConnectionStatus == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
     }
 
-    if (wsConnectionStatus.value == ConnectionStatus.connected) {
+    if (wsConnectionStatus == ConnectionStatus.connected) {
       logger.warning('Already connected');
       throw Exception('Already connected');
     }
 
-    wsConnectionStatus.value = ConnectionStatus.connecting;
+    _wsConnectionStatus = ConnectionStatus.connecting;
 
     if (persistenceEnabled) {
       await chatPersistenceClient.connect(state.user.id);
@@ -476,15 +483,14 @@ class Client {
       logger: _detachedLogger('🔌'),
     );
 
-    _connectionStatusListener = () async {
-      final value = _ws.connectionStatus.value;
-      wsConnectionStatus.value = value;
+    _connectionStatusHandler = (ConnectionStatus status) async {
+      _wsConnectionStatus = status;
       handleEvent(Event(
         type: EventType.connectionChanged,
-        online: value == ConnectionStatus.connected,
+        online: status == ConnectionStatus.connected,
       ));
 
-      if (value == ConnectionStatus.connected &&
+      if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
         unawaited(queryChannels(filter: {
           'cid': {
@@ -504,7 +510,8 @@ class Client {
       }
     };
 
-    _ws.connectionStatus.addListener(_connectionStatusListener);
+    _connectionStatusSubscription =
+        _ws.connectionStatusStream.listen(_connectionStatusHandler);
 
     var event = await chatPersistenceClient?.getConnectionInfo();
 
@@ -588,7 +595,7 @@ class Client {
         logger.info('awaiting connection completer');
         await _connectCompleter.future;
       }
-      if (wsConnectionStatus.value != ConnectionStatus.connected) {
+      if (wsConnectionStatus != ConnectionStatus.connected) {
         final errorMessage =
             'You cannot use queryChannels without an active connection. Please call setUser to connect the client.';
         if (persistenceEnabled) {
@@ -946,6 +953,7 @@ class Client {
     logger.info('Client disconnecting');
 
     await _ws?.disconnect();
+    await _connectionStatusSubscription?.cancel();
   }
 
   /// Requests users with a given query.

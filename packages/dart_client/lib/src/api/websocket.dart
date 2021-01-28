@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../models/event.dart';
@@ -99,9 +99,15 @@ class WebSocket {
   /// The timeout that uses the reconnection monitor timer to consider the connection unhealthy
   final int reconnectionMonitorTimeout;
 
+  final _connectionStatusController =
+      BehaviorSubject.seeded(ConnectionStatus.disconnected);
+
+  set _connectionStatus(ConnectionStatus status) =>
+      _connectionStatusController.add(status);
+
   /// This notifies of connection status changes
-  final ValueNotifier<ConnectionStatus> connectionStatus =
-      ValueNotifier(ConnectionStatus.disconnected);
+  Stream<ConnectionStatus> get connectionStatusStream =>
+      _connectionStatusController.stream;
 
   String _path;
   int _retryAttempt = 1;
@@ -128,7 +134,7 @@ class WebSocket {
     }
 
     _connecting = true;
-    connectionStatus.value = ConnectionStatus.connecting;
+    _connectionStatus = ConnectionStatus.connecting;
 
     logger.info('connecting to $_path');
 
@@ -175,7 +181,7 @@ class WebSocket {
       _reconnecting = false;
       _lastEventAt = DateTime.now();
 
-      connectionStatus.value = ConnectionStatus.connected;
+      _connectionStatus = ConnectionStatus.connected;
       _retryAttempt = 1;
 
       if (!_connectionCompleter.isCompleted) {
@@ -199,7 +205,7 @@ class WebSocket {
     _connecting = false;
 
     if (!_reconnecting) {
-      connectionStatus.value = ConnectionStatus.disconnected;
+      _connectionStatus = ConnectionStatus.disconnected;
     }
 
     if (!_connectionCompleter.isCompleted) {
@@ -258,7 +264,7 @@ class WebSocket {
     logger.info('reconnect');
     if (!_reconnecting) {
       _reconnecting = true;
-      connectionStatus.value = ConnectionStatus.connecting;
+      _connectionStatus = ConnectionStatus.connecting;
     }
 
     _reconnectTimer();
@@ -300,8 +306,8 @@ class WebSocket {
     _cancelTimers();
     _reconnecting = false;
     _manuallyDisconnected = true;
-    connectionStatus.value = ConnectionStatus.disconnected;
-    connectionStatus.dispose();
+    _connectionStatus = ConnectionStatus.disconnected;
+    await _connectionStatusController.close();
     return _channel.sink.close();
   }
 }
