@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Widget used to provide information about the chat to the widget tree
 ///
@@ -61,9 +62,8 @@ class StreamChat extends StatefulWidget {
 }
 
 /// The current state of the StreamChat widget
-class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
+class StreamChatState extends State<StreamChat> {
   Client get client => widget.client;
-  Timer _disconnectTimer;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +81,10 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
                 accentColor: streamTheme.colorTheme.accentBlue,
                 scaffoldBackgroundColor: streamTheme.colorTheme.white,
               ),
-              child: widget.child,
+              child: StreamChatCore(
+                child: widget.child,
+                client: client,
+              ),
             );
           },
         ),
@@ -106,7 +109,6 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     client.state?.totalUnreadCountStream?.listen((count) {
       if (count > 0) {
         FlutterAppBadger.updateBadgeCount(count);
@@ -114,68 +116,5 @@ class StreamChatState extends State<StreamChat> with WidgetsBindingObserver {
         FlutterAppBadger.removeBadge();
       }
     });
-  }
-
-  StreamSubscription _newMessageSubscription;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (client.state?.user != null) {
-      if (state == AppLifecycleState.paused) {
-        if (client.showLocalNotification != null) {
-          _newMessageSubscription = client
-              .on(EventType.messageNew)
-              .where((e) => e.user?.id != user.id)
-              .where((e) => e.message.silent != true)
-              .where((e) => e.message.shadowed != true)
-              .listen((event) async {
-            final channel = client.channel(
-              event.channelType,
-              id: event.channelId,
-            );
-
-            client.showLocalNotification(
-              event.message,
-              ChannelModel(
-                id: channel.id,
-                createdAt: channel.createdAt,
-                extraData: channel.extraData,
-                type: channel.type,
-                memberCount: channel.memberCount,
-                frozen: channel.frozen,
-                cid: channel.cid,
-                deletedAt: channel.deletedAt,
-                config: channel.config,
-                createdBy: channel.createdBy,
-                updatedAt: channel.updatedAt,
-                lastMessageAt: channel.lastMessageAt,
-              ),
-            );
-          });
-          _disconnectTimer = Timer(client.backgroundKeepAlive, () {
-            client.disconnect();
-          });
-        } else {
-          client.disconnect();
-        }
-      } else if (state == AppLifecycleState.resumed) {
-        _newMessageSubscription?.cancel();
-        if (_disconnectTimer?.isActive == true) {
-          _disconnectTimer.cancel();
-        } else {
-          if (client.wsConnectionStatus.value ==
-              ConnectionStatus.disconnected) {
-            NotificationService.handleIosMessageQueue(client);
-            client.connect();
-          }
-        }
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 }

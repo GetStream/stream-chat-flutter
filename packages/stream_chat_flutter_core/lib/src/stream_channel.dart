@@ -4,12 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-enum QueryDirection { top, bottom }
+/// Specifies query direction for pagination
+enum QueryDirection {
+  /// Query earlier messages
+  top,
+
+  /// Query later messages
+  bottom,
+}
 
 /// Widget used to provide information about the channel to the widget tree
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
 class StreamChannel extends StatefulWidget {
+  // ignore: public_member_api_docs
   const StreamChannel({
     Key key,
     @required this.child,
@@ -20,8 +28,13 @@ class StreamChannel extends StatefulWidget {
         assert(channel != null),
         super(key: key);
 
+  // ignore: public_member_api_docs
   final Widget child;
+
+  /// [channel] specifies the channel with which child should be wrapped
   final Channel channel;
+
+  /// Shows a loading indicator
   final bool showLoading;
 
   /// If passed the channel will load from this particular message.
@@ -45,6 +58,7 @@ class StreamChannel extends StatefulWidget {
   StreamChannelState createState() => StreamChannelState();
 }
 
+// ignore: public_member_api_docs
 class StreamChannelState extends State<StreamChannel> {
   /// Current channel
   Channel get channel => widget.channel;

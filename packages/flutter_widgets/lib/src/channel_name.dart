@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../stream_chat_flutter.dart';
-import 'stream_channel.dart';
 
 /// It shows the current [Channel] name using a [Text] widget.
 ///

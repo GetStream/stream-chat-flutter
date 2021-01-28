@@ -1,3 +1,7 @@
+## 1.0.0-rc
+
+- Integrated new-ui, split package functionality,
+
 ## 0.2.20+2
 
 - Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message arrives
