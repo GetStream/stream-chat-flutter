@@ -1,5 +1,3 @@
-export 'package:stream_chat/stream_chat.dart';
-
 export 'src/back_button.dart';
 export 'src/channel_header.dart';
 export 'src/channel_image.dart';
