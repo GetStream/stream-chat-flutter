@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:moor/moor.dart';
 
-///
+/// Maps a [List] of type [T] into a [String] understood
+/// by the sqlite backend.
 class ListConverter<T> extends TypeConverter<List<T>, String> {
   @override
   List<T> mapToDart(fromDb) {

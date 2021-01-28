@@ -1,9 +1,12 @@
 import 'package:moor/moor.dart';
 
+/// Represents a [ChannelQueries] table in [MoorChatDatabase].
 @DataClassName('ChannelQueryEntity')
 class ChannelQueries extends Table {
+  /// The unique hash of this query
   TextColumn get queryHash => text()();
 
+  /// The channel cid of this query
   TextColumn get channelCid => text()();
 
   @override

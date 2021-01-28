@@ -7,11 +7,11 @@ import '../mapper/mapper.dart';
 
 part 'channel_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [Channels] table.
 @UseDao(tables: [Channels, Users])
 class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
     with _$ChannelDaoMixin {
-  ///
+  /// Creates a new channel dao instance
   ChannelDao(MoorChatDatabase db) : super(db);
 
   /// Get channel by cid
@@ -44,7 +44,7 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
         .get();
   }
 
-  ///
+  /// Updates all the channels using the new [channelList] data
   Future<void> updateChannels(List<ChannelModel> channelList) {
     return batch(
       (it) => it.insertAll(

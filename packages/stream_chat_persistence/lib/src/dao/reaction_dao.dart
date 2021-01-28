@@ -7,14 +7,15 @@ import '../mapper/mapper.dart';
 
 part 'reaction_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [Reactions] table.
 @UseDao(tables: [Reactions, Users])
 class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
     with _$ReactionDaoMixin {
-  ///
+  /// Creates a new reaction dao instance
   ReactionDao(MoorChatDatabase db) : super(db);
 
-  ///
+  /// Returns all the reactions of a particular message by matching
+  /// [reactions.messageId] with [messageId]
   Future<List<Reaction>> getReactions(String messageId) {
     return (select(reactions).join([
       leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
@@ -28,7 +29,10 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
     }).get();
   }
 
-  ///
+  /// Returns all the reactions of a particular message
+  /// added by a particular user by matching
+  /// [reactions.messageId] with [messageId] and
+  /// [reactions.userId] with [userId]
   Future<List<Reaction>> getReactionsByUserId(
     String messageId,
     String userId,
@@ -37,7 +41,7 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
     return reactions.where((it) => it.userId == userId).toList();
   }
 
-  ///
+  /// Updates the reactions data with the new [reactionList] data
   Future<void> updateReactions(List<Reaction> reactionList) {
     return batch((it) {
       it.insertAll(

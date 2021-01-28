@@ -9,11 +9,11 @@ import '../mapper/mapper.dart';
 
 part 'member_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [Members] table.
 @UseDao(tables: [Members, Users])
 class MemberDao extends DatabaseAccessor<MoorChatDatabase>
     with _$MemberDaoMixin {
-  ///
+  /// Creates a new member dao instance
   MemberDao(MoorChatDatabase db) : super(db);
 
   /// Get all members where [members.channelCid] matches [cid]
@@ -30,7 +30,7 @@ class MemberDao extends DatabaseAccessor<MoorChatDatabase>
     }).get();
   }
 
-  ///
+  /// Updates all the members using the new [memberList] data
   Future<void> updateMembers(String cid, List<Member> memberList) async {
     return batch(
       (it) => it.insertAll(

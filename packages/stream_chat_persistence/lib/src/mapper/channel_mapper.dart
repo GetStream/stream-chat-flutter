@@ -1,9 +1,9 @@
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
-///
+/// Useful mapping functions for [ChannelEntity]
 extension ChannelEntityX on ChannelEntity {
-  ///
+  /// Maps a [ChannelEntity] into [ChannelModel]
   ChannelModel toChannelModel({User createdBy}) {
     final config = ChannelConfig.fromJson(this.config ?? {});
     return ChannelModel(
@@ -22,7 +22,7 @@ extension ChannelEntityX on ChannelEntity {
     );
   }
 
-  ///
+  /// Maps a [ChannelEntity] into [ChannelState]
   ChannelState toChannelState({
     User createdBy,
     List<Member> members,
@@ -38,9 +38,9 @@ extension ChannelEntityX on ChannelEntity {
   }
 }
 
-///
+/// Useful mapping functions for [ChannelModel]
 extension ChannelModelX on ChannelModel {
-  ///
+  /// Maps a [ChannelModel] into [ChannelEntity]
   ChannelEntity toEntity() {
     return ChannelEntity(
       id: id,

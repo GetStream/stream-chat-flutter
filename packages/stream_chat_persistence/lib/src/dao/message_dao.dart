@@ -7,11 +7,11 @@ import '../mapper/mapper.dart';
 
 part 'message_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [Messages] table.
 @UseDao(tables: [Messages, Users])
 class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     with _$MessageDaoMixin {
-  ///
+  /// Creates a new message dao instance
   MessageDao(this._db) : super(_db);
 
   final MoorChatDatabase _db;
@@ -52,7 +52,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     );
   }
 
-  ///
+  /// Returns a single message by matching the [messages.id] with [id]
   Future<Message> getMessageById(String id) async {
     return await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -62,7 +62,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .getSingle();
   }
 
-  ///
+  /// Returns all the messages of a particular thread by matching
+  /// [messages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async {
     return Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -74,7 +75,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .get());
   }
 
-  ///
+  /// Returns all the messages of a particular thread by matching
+  /// [messages.parentId] with [parentId]
   Future<List<Message>> getThreadMessagesByParentId(
     String parentId, {
     String lessThan,
@@ -94,7 +96,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     return msgList;
   }
 
-  ///
+  /// Returns all the messages of a channel by matching
+  /// [messages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
     String cid, {
     PaginationParams messagePagination,
@@ -131,7 +134,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     return msgList;
   }
 
-  ///
+  /// Updates the message data of a particular channel with
+  /// the new [messageList] data
   Future<void> updateMessages(String cid, List<Message> messageList) {
     return batch((batch) {
       batch.insertAll(

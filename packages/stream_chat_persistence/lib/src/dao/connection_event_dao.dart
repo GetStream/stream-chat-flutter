@@ -7,11 +7,11 @@ import '../mapper/mapper.dart';
 
 part 'connection_event_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [ConnectionEvents] table.
 @UseDao(tables: [ConnectionEvents, Users])
 class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
     with _$ConnectionEventDaoMixin {
-  ///
+  /// Creates a new connection event dao instance
   ConnectionEventDao(MoorChatDatabase db) : super(db);
 
   /// Get the latest stored connection event

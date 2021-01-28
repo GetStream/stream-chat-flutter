@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
-///
+/// Useful mapping functions for [MessageEntity]
 extension MessageEntityX on MessageEntity {
-  ///
+  /// Maps a [MessageEntity] into [Message]
   Message toMessage({
     User user,
     List<Reaction> latestReactions,
@@ -41,9 +41,9 @@ extension MessageEntityX on MessageEntity {
   }
 }
 
-///
+/// Useful mapping functions for [Message]
 extension MessageX on Message {
-  ///
+  /// Maps a [Message] into [MessageEntity]
   MessageEntity toEntity({String cid}) {
     return MessageEntity(
       id: id,

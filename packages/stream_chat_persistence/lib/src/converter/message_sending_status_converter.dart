@@ -1,7 +1,8 @@
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-///
+/// Maps a [MessageSendingStatus] into a [int] understood
+/// by the sqlite backend.
 class MessageSendingStatusConverter
     extends TypeConverter<MessageSendingStatus, int> {
   @override

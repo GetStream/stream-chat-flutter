@@ -72,7 +72,7 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Reaction> ownReactions;
 
-  /// The ID of the parent message, if the message is a reply.
+  /// The ID of the parent message, if the message is a thread reply.
   final String parentId;
 
   /// A quoted reply message

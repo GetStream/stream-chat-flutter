@@ -21,7 +21,7 @@ LazyDatabase _openConnection(
   });
 }
 
-///
+/// A chat database implemented using moor
 @UseMoor(tables: [
   Channels,
   Messages,
@@ -42,7 +42,7 @@ LazyDatabase _openConnection(
   ConnectionEventDao,
 ])
 class MoorChatDatabase extends _$MoorChatDatabase {
-  /// Instantiate a new database instance
+  /// Creates a new moor chat database instance
   MoorChatDatabase(
     this._userId, {
     logStatements = false,

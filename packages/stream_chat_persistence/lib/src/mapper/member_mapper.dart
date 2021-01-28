@@ -1,10 +1,9 @@
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
-import 'user_mapper.dart';
 
-///
+/// Useful mapping functions for [MemberEntity]
 extension MemberEntityX on MemberEntity {
-  ///
+  /// Maps a [MemberEntity] into [Member]
   Member toMember({User user}) {
     return Member(
       user: user,
@@ -22,9 +21,9 @@ extension MemberEntityX on MemberEntity {
   }
 }
 
-///
+/// Useful mapping functions for [Member]
 extension MemberX on Member {
-  ///
+  /// Maps a [Member] into [MemberEntity]
   MemberEntity toEntity({String cid}) {
     return MemberEntity(
       userId: user?.id,

@@ -10,11 +10,11 @@ import '../mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [ChannelQueries] table.
 @UseDao(tables: [ChannelQueries, Channels, Users])
 class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     with _$ChannelQueryDaoMixin {
-  ///
+  /// Creates a new channel query dao instance
   ChannelQueryDao(this._db) : super(_db);
 
   final MoorChatDatabase _db;

@@ -12,9 +12,9 @@ enum ConnectionMode {
   background,
 }
 
-///
+/// A [MoorChatDatabase] based implementation of the [ChatPersistenceClient]
 class StreamChatPersistenceClient extends ChatPersistenceClient {
-  ///
+  /// Creates a new instance of the stream chat persistence client
   StreamChatPersistenceClient({
     /// Connection mode on which the client will work
     ConnectionMode connectionMode = ConnectionMode.regular,

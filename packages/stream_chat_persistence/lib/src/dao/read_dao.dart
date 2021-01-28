@@ -7,10 +7,10 @@ import '../mapper/mapper.dart';
 
 part 'read_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [Reads] table.
 @UseDao(tables: [Reads, Users])
 class ReadDao extends DatabaseAccessor<MoorChatDatabase> with _$ReadDaoMixin {
-  ///
+  /// Creates a new read dao instance
   ReadDao(MoorChatDatabase db) : super(db);
 
   /// Get all reads where [reads.channelCid] matches [cid]
@@ -29,7 +29,8 @@ class ReadDao extends DatabaseAccessor<MoorChatDatabase> with _$ReadDaoMixin {
     }).get();
   }
 
-  ///
+  /// Updates the read data of a particular channel with
+  /// the new [readList] data
   Future<void> updateReads(String cid, List<Read> readList) {
     return batch(
       (it) => it.insertAll(

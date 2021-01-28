@@ -6,13 +6,13 @@ import '../mapper/user_mapper.dart';
 
 part 'user_dao.g.dart';
 
-///
+/// The Data Access Object for operations in [Users] table.
 @UseDao(tables: [Users])
 class UserDao extends DatabaseAccessor<MoorChatDatabase> with _$UserDaoMixin {
-  ///
+  /// Creates a new user dao instance
   UserDao(MoorChatDatabase db) : super(db);
 
-  ///
+  /// Updates the users data with the new [userList] data
   Future<void> updateUsers(List<User> userList) {
     return batch(
       (it) => it.insertAll(

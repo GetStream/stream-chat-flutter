@@ -1,10 +1,9 @@
 import 'package:stream_chat/stream_chat.dart';
-import 'user_mapper.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
-///
+/// Useful mapping functions for [ConnectionEventEntity]
 extension ConnectionEventX on ConnectionEventEntity {
-  ///
+  /// Maps a [ConnectionEventEntity] into [Event]
   Event toEvent() {
     return Event(
       me: ownUser != null ? OwnUser.fromJson(ownUser) : null,

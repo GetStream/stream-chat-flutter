@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:moor/moor.dart';
 
-///
+/// Maps a [Map] of type [String], [T] into a [String] understood
+/// by the sqlite backend.
 class MapConverter<T> extends TypeConverter<Map<String, T>, String> {
   @override
   Map<String, T> mapToDart(fromDb) {
