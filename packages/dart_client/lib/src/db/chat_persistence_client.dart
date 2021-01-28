@@ -20,7 +20,7 @@ abstract class ChatPersistenceClient {
   /// Get stored replies by messageId
   Future<List<Message>> getReplies(
     String parentId, {
-    String lessThan,
+    PaginationParams options,
   });
 
   /// Get stored connection event

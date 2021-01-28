@@ -142,11 +142,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<Message>> getReplies(
     String parentId, {
-    String lessThan,
+    PaginationParams options,
   }) {
     return _db.messageDao.getThreadMessagesByParentId(
       parentId,
-      lessThan: lessThan,
+      options: options,
     );
   }
 

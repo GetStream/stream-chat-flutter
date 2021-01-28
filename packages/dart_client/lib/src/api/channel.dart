@@ -489,7 +489,7 @@ class Channel {
   }) async {
     final cachedReplies = await _client.chatPersistenceClient?.getReplies(
       parentId,
-      lessThan: options?.lessThan,
+      options: options,
     );
     if (cachedReplies != null && cachedReplies.isNotEmpty) {
       state?.updateThreadInfo(parentId, cachedReplies);

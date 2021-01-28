@@ -79,7 +79,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// [messages.parentId] with [parentId]
   Future<List<Message>> getThreadMessagesByParentId(
     String parentId, {
-    String lessThan,
+    PaginationParams options,
   }) async {
     final msgList = await Future.wait(await (select(messages).join([
       innerJoin(users, messages.userId.equalsExp(users.id)),
@@ -89,8 +89,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .map(_messageFromJoinRow)
         .get());
 
-    if (lessThan != null) {
-      final lessThanIndex = msgList.indexWhere((m) => m.id == lessThan);
+    if (options?.lessThan != null) {
+      final lessThanIndex = msgList.indexWhere((m) => m.id == options.lessThan);
       msgList.removeRange(lessThanIndex, msgList.length);
     }
     return msgList;
