@@ -277,9 +277,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         final client = Client(
                           apiKey,
                           logLevel: Level.INFO,
-                          showLocalNotification: (!kIsWeb && Platform.isAndroid)
-                              ? showLocalNotification
-                              : null,
                         )..chatPersistenceClient = chatPersistentClient;
 
                         try {

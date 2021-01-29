@@ -33,8 +33,6 @@ void main() async {
   final client = Client(
     apiKey ?? kDefaultStreamApiKey,
     logLevel: Level.INFO,
-    showLocalNotification:
-        (!kIsWeb && Platform.isAndroid) ? showLocalNotification : null,
   )..chatPersistenceClient = chatPersistentClient;
 
   if (userId != null) {
@@ -73,6 +71,7 @@ class MyApp extends StatelessWidget {
             builder: (context, child) {
               return StreamChat(
                 client: client,
+                onBackgroundEventReceived: showLocalNotification,
                 child: Builder(
                   builder: (context) => AnnotatedRegion<SystemUiOverlayStyle>(
                     child: child,

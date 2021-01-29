@@ -79,8 +79,6 @@ class Client {
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
-    this.showLocalNotification,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
     RetryPolicy retryPolicy,
   }) {
     _retryPolicy ??= RetryPolicy(
@@ -109,14 +107,6 @@ class Client {
 
   /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
-
-  /// Method used to show a local notification while the app is in background
-  /// Switching to another application will not disconnect the client immediately
-  /// So, use this method to show the notification when receiving a new message via events
-  final void Function(Message, ChannelModel) showLocalNotification;
-
-  /// The amount of time that will pass before disconnecting the client in the background
-  final Duration backgroundKeepAlive;
 
   /// This client state
   ClientState state;
