@@ -1,8 +1,9 @@
 name: stream_chat_persistence
-description: A new Flutter package.
-version: 0.0.1
-author:
-homepage:
+homepage: https://github.com/GetStream/stream-chat-flutter
+description: Official Stream Chat Persistence library. Build your own chat experience using Dart and Flutter.
+version: 1.0.0-rc
+repository: https://github.com/GetStream/stream-chat-flutter
+issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
