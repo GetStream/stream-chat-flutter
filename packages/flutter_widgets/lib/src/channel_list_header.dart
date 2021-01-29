@@ -6,6 +6,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'connection_status_builder.dart';
 import 'info_tile.dart';
 import 'stream_chat.dart';
 
@@ -79,9 +80,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final _client = client ?? StreamChat.of(context).client;
     final user = _client.state.user;
-    return ValueListenableBuilder<ConnectionStatus>(
-      valueListenable: _client.wsConnectionStatus,
-      builder: (context, status, child) {
+    return ConnectionStatusBuilder(
+      statusBuilder: (context, status) {
         String statusString = '';
         bool showStatus = true;
 
@@ -130,9 +130,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             actions: [
               StreamNeumorphicButton(
                 child: IconButton(
-                  icon: ValueListenableBuilder<ConnectionStatus>(
-                    valueListenable: _client.wsConnectionStatus,
-                    builder: (context, status, child) {
+                  icon: ConnectionStatusBuilder(
+                    statusBuilder: (context, status) {
                       var color;
                       switch (status) {
                         case ConnectionStatus.connected:
