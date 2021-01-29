@@ -47,25 +47,25 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 /// }
 /// ```
 ///
+/// [UsersBloc] must be the ancestor of this widget. This is necessary since
+/// [UserListCore] depends on functionality contained within [UsersBloc].
 ///
-/// Make sure to have a [UsersBloc] ancestor in order to provide the information about the users.
 /// The widget uses a [ListView.separated], [GridView.builder] to render the list, grid of channels.
-///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
-/// Modify it to change the widget appearance.
+/// The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and [errorBuilder] must all be supplied
+/// and not null.
 class UserListCore extends StatefulWidget {
-  /// Instantiate a new UserListView
+  /// Instantiate a new [UserListCore]
   const UserListCore({
     Key key,
+    @required this.errorBuilder,
+    @required this.emptyBuilder,
+    @required this.loadingBuilder,
+    @required this.listBuilder,
     this.filter,
     this.options,
     this.sort,
     this.pagination,
     this.groupAlphabetically = false,
-    @required this.errorBuilder,
-    @required this.emptyBuilder,
-    @required this.loadingBuilder,
-    @required this.listBuilder,
     this.userListController,
   }) : super(key: key);
 
@@ -138,9 +138,9 @@ class _UserListCoreState extends State<UserListCore>
 
   @override
   Widget build(BuildContext context) {
-    final usersBloc = UsersBloc.of(context);
+    final _usersBloc = UsersBloc.of(context);
 
-    return _buildListView(usersBloc);
+    return _buildListView(_usersBloc);
   }
 
   bool get isListAlreadySorted =>
@@ -207,9 +207,9 @@ class _UserListCoreState extends State<UserListCore>
   }
 
   void loadData() {
-    final usersBloc = UsersBloc.of(context);
+    final _usersBloc = UsersBloc.of(context);
 
-    usersBloc.queryUsers(
+    _usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
       pagination: widget.pagination,
@@ -218,13 +218,13 @@ class _UserListCoreState extends State<UserListCore>
   }
 
   void paginateData() {
-    final usersBloc = UsersBloc.of(context);
+    final _usersBloc = UsersBloc.of(context);
 
-    usersBloc.queryUsers(
+    _usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
       pagination: widget.pagination.copyWith(
-        offset: usersBloc.users?.length ?? 0,
+        offset: _usersBloc.users?.length ?? 0,
       ),
       options: widget.options,
     );
@@ -249,7 +249,9 @@ class _UserListCoreState extends State<UserListCore>
   }
 }
 
-// ignore: public_member_api_docs
+/// Represents an item in a the user stream list.
+/// Header items are prefixed with the key `HEADER` While users are prefixed with
+/// `USER`.
 abstract class ListItem {
   // ignore: public_member_api_docs
   String get key {

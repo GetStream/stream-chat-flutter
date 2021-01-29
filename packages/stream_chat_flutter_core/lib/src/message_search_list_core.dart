@@ -27,25 +27,22 @@ import 'message_search_bloc.dart';
 /// }
 /// ```
 ///
-///
 /// Make sure to have a [MessageSearchBloc] ancestor in order to provide the information about the messages.
 /// The widget uses a [ListView.separated] to render the list of messages.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
-/// Modify it to change the widget appearance.
 class MessageSearchListCore extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
   const MessageSearchListCore({
     Key key,
+    @required this.emptyBuilder,
+    @required this.errorBuilder,
+    @required this.loadingBuilder,
+    @required this.childBuilder,
     this.messageQuery,
     this.filters,
     this.sortOptions,
     this.paginationParams,
     this.messageFilters,
-    @required this.emptyBuilder,
-    @required this.errorBuilder,
-    @required this.loadingBuilder,
-    @required this.childBuilder,
     this.messageSearchListController,
   }) : super(key: key);
 

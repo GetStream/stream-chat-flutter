@@ -1,3 +1,7 @@
+## 0.2.24+2
+
+- Fix reconnection bug while using tokenProvider
+
 ## 0.2.24+1
 
 - Stop ws reconnection after calling disconnect
