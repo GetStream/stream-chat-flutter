@@ -11,8 +11,6 @@ import 'package:stream_chat/stream_chat.dart';
 ///
 /// Conversely, when app is resumed or restarted, a new connection is initiated.
 ///
-/// {@tool snippet}
-///
 /// ```dart
 /// class MyApp extends StatelessWidget {
 ///   final Client client;
@@ -32,7 +30,6 @@ import 'package:stream_chat/stream_chat.dart';
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 class StreamChatCore extends StatefulWidget {
   /// Instance of Stream Chat Client containing information about the current

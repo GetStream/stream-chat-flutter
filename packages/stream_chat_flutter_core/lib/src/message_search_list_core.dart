@@ -8,8 +8,6 @@ import 'message_search_bloc.dart';
 /// [MessageSearchListCore] is a simplified class that allows searching for messages across channels while exposing UI builders.
 /// A [MessageSearchListController] is used to load and paginate data.
 ///
-/// {@tool snippet}
-///
 /// ```dart
 /// class MessageSearchPage extends StatelessWidget {
 ///   @override
@@ -28,7 +26,6 @@ import 'message_search_bloc.dart';
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// Make sure to have a [MessageSearchBloc] ancestor in order to provide the information about the messages.
 /// The widget uses a [ListView.separated] to render the list of messages.

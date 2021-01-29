@@ -8,8 +8,6 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 /// [UserListCore] is a simplified class that allows fetching users while exposing UI builders.
 /// A [UserListController] is used to load and paginate data.
 ///
-/// {@tool snippet}
-///
 /// ```dart
 /// class UsersListPage extends StatelessWidget {
 ///   @override
@@ -48,7 +46,6 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// [UsersBloc] must be the ancestor of this widget. This is necessary since
 /// [UserListCore] depends on functionality contained within [UsersBloc].

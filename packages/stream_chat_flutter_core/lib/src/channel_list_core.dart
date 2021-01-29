@@ -11,7 +11,6 @@ import 'stream_chat_core.dart';
 /// [ChannelListCore] is a simplified class that allows fetching a list of channels while exposing UI builders.
 /// A [ChannelListController] is used to reload and paginate data.
 ///
-/// {@tool snippet}
 ///
 /// ```dart
 /// class ChannelListPage extends StatelessWidget {
@@ -51,7 +50,6 @@ import 'stream_chat_core.dart';
 ///   }
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// Make sure to have a [StreamChatCore] ancestor in order to provide the information about the channels.
 class ChannelListCore extends StatefulWidget {
