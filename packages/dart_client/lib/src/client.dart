@@ -278,8 +278,6 @@ class Client {
         httpClient.lock();
         final userId = state.user.id;
 
-        _ws.connectionStatus.removeListener(_connectionStatusListener);
-
         await _disconnect();
 
         final newToken = await tokenProvider(userId);
