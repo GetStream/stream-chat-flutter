@@ -4,7 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import 'stream_chat_core.dart';
 
-/// Widget dedicated to the management of a users list with pagination
+/// Widget dedicated to the management of a users list with pagination.
 class UsersBloc extends StatefulWidget {
   /// The widget child
   final Widget child;
@@ -49,7 +49,9 @@ class UsersBlocState extends State<UsersBloc>
   /// The stream notifying the state of queryUsers call
   Stream<bool> get queryUsersLoading => _queryUsersLoadingController.stream;
 
-  /// Calls [Client.queryUsers] updating [queryUsersLoading] stream
+  /// The Query Users method allows you to search for users and see if they are
+  /// online/offline.
+  /// [API Reference](https://getstream.io/chat/docs/flutter-dart/query_users/?language=dart)
   Future<void> queryUsers({
     Map<String, dynamic> filter,
     List<SortOption> sort,

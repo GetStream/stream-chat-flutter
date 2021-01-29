@@ -4,8 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// Widget used to provide information about the chat to the widget tree
+/// Widget used to provide information about the chat to the widget tree.
+/// This Widget is used to react to life cycle changes and system updates.
+/// When the app goes into the background, the websocket connection is kept alive
+/// for two minutes before being terminated.
 ///
+/// Conversely, when app is resumed or restarted, a new connection is initiated.
+///
+/// ```dart
 /// class MyApp extends StatelessWidget {
 ///   final Client client;
 ///
@@ -15,7 +21,7 @@ import 'package:stream_chat/stream_chat.dart';
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
 ///       home: Container(
-///         child: StreamChat(
+///         child: StreamChatCore(
 ///           client: client,
 ///           child: ChannelListPage(),
 ///         ),
@@ -23,22 +29,25 @@ import 'package:stream_chat/stream_chat.dart';
 ///     );
 ///   }
 /// }
+/// ```
 ///
-/// Use [StreamChatCore.of] to get the current [StreamChatCoreState] instance.
 class StreamChatCore extends StatefulWidget {
-  // ignore: public_member_api_docs
+  /// Instance of Stream Chat Client containing information about the current
+  /// application.
   final Client client;
-  // ignore: public_member_api_docs
+
+  /// Widget descendant.
   final Widget child;
 
-  // ignore: public_member_api_docs
+  /// Constructor used for creating a new instance of [StreamChatCore].
+  ///
+  /// [StreamChatCore] is a stateful widget which reacts to system events and updates
+  /// Stream's connection status accordingly.
   StreamChatCore({
     Key key,
     @required this.client,
     @required this.child,
-  }) : super(
-          key: key,
-        );
+  }) : super(key: key);
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -58,11 +67,12 @@ class StreamChatCore extends StatefulWidget {
   }
 }
 
-/// The current state of the StreamChat widget
+/// State class associated with [StreamChatCore].
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
-  // ignore: public_member_api_docs
+  /// Initialized client used throughout the application.
   Client get client => widget.client;
+
   Timer _disconnectTimer;
 
   @override
