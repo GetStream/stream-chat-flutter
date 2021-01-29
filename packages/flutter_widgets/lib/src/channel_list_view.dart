@@ -224,6 +224,7 @@ class _ChannelListViewState extends State<ChannelListView>
           itemBuilder: (context, index) {
             return _listItemBuilder(context, index, channels);
           },
+          controller: _scrollController,
         );
       }
     }
