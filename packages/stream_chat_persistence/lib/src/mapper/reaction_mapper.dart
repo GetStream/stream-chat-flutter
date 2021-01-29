@@ -19,6 +19,7 @@ extension ReactionEntityX on ReactionEntity {
 
 /// Useful mapping functions for [Reaction]
 extension ReactionX on Reaction {
+  /// Maps a [Reaction] into [ReactionEntity]
   ReactionEntity toEntity() {
     return ReactionEntity(
       extraData: extraData,
