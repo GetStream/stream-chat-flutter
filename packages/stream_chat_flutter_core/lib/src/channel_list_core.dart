@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/channels_bloc.dart';
+import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 import 'stream_chat_core.dart';
 
@@ -72,7 +73,7 @@ class ChannelListCore extends StatefulWidget {
   final ChannelListController channelListController;
 
   /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
+  final ErrorBuilder errorBuilder;
 
   /// The builder that will be used in case of loading
   final WidgetBuilder loadingBuilder;
@@ -162,7 +163,7 @@ class _ChannelListCoreState extends State<ChannelListCore>
       print((snapshot.error as Error).stackTrace);
     }
 
-    return widget.errorBuilder(snapshot.error);
+    return widget.errorBuilder(context, snapshot.error);
   }
 
   void loadData() {

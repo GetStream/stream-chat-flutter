@@ -167,7 +167,7 @@ class _ChannelListViewState extends State<ChannelListView>
       emptyBuilder: (BuildContext context) {
         return _buildEmptyWidget();
       },
-      errorBuilder: (Error error) {
+      errorBuilder: (BuildContext context, dynamic error) {
         return _buildErrorWidget(context);
       },
       loadingBuilder: (BuildContext context) {

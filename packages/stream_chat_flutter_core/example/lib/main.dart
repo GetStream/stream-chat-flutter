@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
               ),
             );
           },
-          errorBuilder: (Error error) {
+          errorBuilder: (BuildContext context, dynamic error) {
             return Center(
               child: Text(
                   'Oh no, something went wrong. Please check your config.'),

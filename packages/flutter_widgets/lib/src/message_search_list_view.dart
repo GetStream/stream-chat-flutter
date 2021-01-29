@@ -148,7 +148,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           },
         );
       },
-      errorBuilder: (error) {
+      errorBuilder: (BuildContext context, dynamic error) {
         if (error is Error) {
           print((error).stackTrace);
         }

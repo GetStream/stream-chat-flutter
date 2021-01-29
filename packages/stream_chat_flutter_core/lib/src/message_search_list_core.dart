@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/typedef.dart';
 import 'message_search_bloc.dart';
 
 ///
@@ -82,7 +83,7 @@ class MessageSearchListCore extends StatefulWidget {
   final WidgetBuilder emptyBuilder;
 
   /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
+  final ErrorBuilder errorBuilder;
 
   /// The builder that will be used in case of loading
   final WidgetBuilder loadingBuilder;
@@ -125,7 +126,7 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
             print((snapshot.error as Error).stackTrace);
           }
 
-          return widget.errorBuilder(snapshot.error);
+          return widget.errorBuilder(context, snapshot.error);
         }
 
         if (!snapshot.hasData) {
