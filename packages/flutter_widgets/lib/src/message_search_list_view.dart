@@ -148,7 +148,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           },
         );
       },
-      errorBuilder: (error) {
+      errorBuilder: (BuildContext context, dynamic error) {
         if (error is Error) {
           print((error).stackTrace);
         }
@@ -159,9 +159,8 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
         var message = error.toString();
         if (error is DioError) {
-          final dioError = error as DioError;
-          if (dioError.type == DioErrorType.RESPONSE) {
-            message = dioError.message;
+          if (error.type == DioErrorType.RESPONSE) {
+            message = error.message;
           } else {
             message = 'Check your connection and retry';
           }

@@ -3,13 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/typedef.dart';
 import 'stream_channel.dart';
-
-/// A signature for a callback which exposes an error and returns a function.
-/// This Callback can be used in cases where an API failure occurs and the widget
-/// is unable to render data.
-typedef StreamErrorBuilder = Widget Function(
-    BuildContext context, Object error);
 
 /// [MessageListCore] is a simplified class that allows fetching a list of messages while exposing UI builders.
 /// A [MessageListController] is used to paginate data.
@@ -89,7 +84,7 @@ class MessageListCore extends StatefulWidget {
   /// Callback triggered when an error occurs while performing the given request.
   /// This parameter can be used to display an error message to users in the event
   /// of a connection failure.
-  final StreamErrorBuilder errorWidgetBuilder;
+  final ErrorBuilder errorWidgetBuilder;
 
   /// If true will show a scroll to bottom message when there are new messages and the scroll offset is not zero
   final bool showScrollToBottom;
