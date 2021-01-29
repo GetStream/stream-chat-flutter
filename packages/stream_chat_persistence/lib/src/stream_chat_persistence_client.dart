@@ -28,19 +28,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   final Logger _logger;
   final ConnectionMode _connectionMode;
 
-  bool get _debugAssertConnected {
-    assert(() {
-      if (_db == null) {
-        throw Exception(
-          'A $runtimeType was used after being disconnected.\n'
-          'Once you have called disconnect() on a $runtimeType, it can no longer be used.',
-        );
-      }
-      return true;
-    }());
-    return true;
-  }
-
   @override
   Future<void> connect(String userId) async {
     if (_db != null) {
