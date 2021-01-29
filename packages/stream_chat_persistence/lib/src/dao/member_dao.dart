@@ -16,7 +16,7 @@ class MemberDao extends DatabaseAccessor<MoorChatDatabase>
   /// Creates a new member dao instance
   MemberDao(MoorChatDatabase db) : super(db);
 
-  /// Get all members where [members.channelCid] matches [cid]
+  /// Get all members where [Members.channelCid] matches [cid]
   Future<List<Member>> getMembersByCid(String cid) async {
     return (select(members).join([
       leftOuterJoin(users, members.userId.equalsExp(users.id)),
@@ -39,5 +39,15 @@ class MemberDao extends DatabaseAccessor<MoorChatDatabase>
         mode: InsertMode.insertOrReplace,
       ),
     );
+  }
+
+  /// Deletes all the members whose [Members.channelCid] is present in [cids]
+  Future<void> deleteMemberByCids(List<String> cids) async {
+    return batch((it) {
+      it.deleteWhere<Members, MemberEntity>(
+        members,
+        (m) => m.channelCid.isIn(cids),
+      );
+    });
   }
 }

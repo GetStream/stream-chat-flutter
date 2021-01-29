@@ -130,6 +130,12 @@ abstract class ChatPersistenceClient {
   Future<void> updateReactions(List<Reaction> reactions);
 
   ///
+  Future<void> deleteReactionsByMessageId(List<String> messageIds);
+
+  ///
+  Future<void> deleteMembersByCids(List<String> cids);
+
+  ///
   Future<void> updateChannelState(ChannelState channelState) {
     return updateChannelStates([channelState]);
   }
@@ -181,13 +187,26 @@ abstract class ChatPersistenceClient {
       return updateMembers(cid, members.toList(growable: false));
     }).toList(growable: false);
 
+    final deleteReactions = deleteReactionsByMessageId(channelStates
+        .expand((it) => it.messages)
+        .map((m) => m.id)
+        .toList(growable: false));
+
+    final deleteMembers = deleteMembersByCids(
+      channelStates.map((it) => it.channel.cid).toList(growable: false),
+    );
+
+    await Future.wait([
+      deleteReactions,
+      deleteMembers,
+    ]);
     await Future.wait([
       ...updateMessagesFuture,
       ...updateReadsFuture,
       ...updateMembersFuture,
+      updateUsers(users.toList(growable: false)),
       updateChannels(channels.toList(growable: false)),
       updateReactions(reactions.toList(growable: false)),
-      updateUsers(users.toList(growable: false)),
     ]);
   }
 }

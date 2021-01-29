@@ -194,6 +194,16 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deleteReactionsByMessageId(List<String> messageIds) {
+    return _db.reactionDao.deleteReactionsByMessageIds(messageIds);
+  }
+
+  @override
+  Future<void> deleteMembersByCids(List<String> cids) {
+    return _db.memberDao.deleteMemberByCids(cids);
+  }
+
+  @override
   Future<void> disconnect({bool flush = false}) async {
     if (_db != null) {
       _logger.info('Disconnecting');

@@ -13,7 +13,7 @@ class ReadDao extends DatabaseAccessor<MoorChatDatabase> with _$ReadDaoMixin {
   /// Creates a new read dao instance
   ReadDao(MoorChatDatabase db) : super(db);
 
-  /// Get all reads where [reads.channelCid] matches [cid]
+  /// Get all reads where [Reads.channelCid] matches [cid]
   Future<List<Read>> getReadsByCid(String cid) async {
     return (select(reads).join([
       leftOuterJoin(users, reads.userId.equalsExp(users.id)),

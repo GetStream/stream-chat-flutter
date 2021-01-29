@@ -15,7 +15,7 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
   ReactionDao(MoorChatDatabase db) : super(db);
 
   /// Returns all the reactions of a particular message by matching
-  /// [reactions.messageId] with [messageId]
+  /// [Reactions.messageId] with [messageId]
   Future<List<Reaction>> getReactions(String messageId) {
     return (select(reactions).join([
       leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
@@ -31,8 +31,8 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Returns all the reactions of a particular message
   /// added by a particular user by matching
-  /// [reactions.messageId] with [messageId] and
-  /// [reactions.userId] with [userId]
+  /// [Reactions.messageId] with [messageId] and
+  /// [Reactions.userId] with [userId]
   Future<List<Reaction>> getReactionsByUserId(
     String messageId,
     String userId,
@@ -48,6 +48,16 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
         reactions,
         reactionList.map((r) => r.toEntity()).toList(),
         mode: InsertMode.insertOrReplace,
+      );
+    });
+  }
+
+  /// Deletes all the reactions whose [Reactions.messageId] is present in [messageIds]
+  Future<void> deleteReactionsByMessageIds(List<String> messageIds) {
+    return batch((it) {
+      it.deleteWhere<Reactions, ReactionEntity>(
+        reactions,
+        (r) => r.messageId.isIn(messageIds),
       );
     });
   }

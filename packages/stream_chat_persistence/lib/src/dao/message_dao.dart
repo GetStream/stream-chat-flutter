@@ -16,7 +16,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
 
   final MoorChatDatabase _db;
 
-  /// Removes all the messages by matching [messages.id] in [messageIds]
+  /// Removes all the messages by matching [Messages.id] in [messageIds]
   ///
   /// This will automatically delete the following linked records
   /// 1. Message Reactions
@@ -24,7 +24,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     return (delete(messages)..where((tbl) => tbl.id.isIn(messageIds))).go();
   }
 
-  /// Removes all the messages by matching [messages.channelCid] in [cids]
+  /// Removes all the messages by matching [Messages.channelCid] in [cids]
   ///
   /// This will automatically delete the following linked records
   /// 1. Message Reactions
@@ -52,7 +52,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     );
   }
 
-  /// Returns a single message by matching the [messages.id] with [id]
+  /// Returns a single message by matching the [Messages.id] with [id]
   Future<Message> getMessageById(String id) async {
     return await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -63,7 +63,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Returns all the messages of a particular thread by matching
-  /// [messages.channelCid] with [cid]
+  /// [Messages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async {
     return Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -76,7 +76,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Returns all the messages of a particular thread by matching
-  /// [messages.parentId] with [parentId]
+  /// [Messages.parentId] with [parentId]
   Future<List<Message>> getThreadMessagesByParentId(
     String parentId, {
     PaginationParams options,
@@ -97,7 +97,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Returns all the messages of a channel by matching
-  /// [messages.channelCid] with [parentId]
+  /// [Messages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
     String cid, {
     PaginationParams messagePagination,
