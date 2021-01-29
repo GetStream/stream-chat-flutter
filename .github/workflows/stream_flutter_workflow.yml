@@ -71,7 +71,7 @@ jobs:
 
   test_dart:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v1
         with:
@@ -83,9 +83,7 @@ jobs:
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
       - name: 'Flutter Test'
-        run: |
-          melos exec -c 1 --no-flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-            flutter pub run test
+        run: cd packages/dart_client && flutter pub run test
 
   test_flutter:
     runs-on: ubuntu-latest
