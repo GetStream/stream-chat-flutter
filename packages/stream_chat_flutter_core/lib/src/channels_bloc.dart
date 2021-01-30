@@ -37,15 +37,6 @@ class ChannelsBloc extends StatefulWidget {
   /// Function used to evaluate if a channel should be added to the list when a message.new event is received
   final bool Function(Event) shouldAddChannel;
 
-  /// Instantiate a new ChannelsBloc
-  const ChannelsBloc({
-    Key key,
-    this.child,
-    this.lockChannelsOrder = false,
-    this.channelsComparator,
-    this.shouldAddChannel,
-  }) : super(key: key);
-
   @override
   ChannelsBlocState createState() => ChannelsBlocState();
 

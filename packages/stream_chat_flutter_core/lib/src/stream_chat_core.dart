@@ -32,13 +32,6 @@ import 'package:stream_chat/stream_chat.dart';
 /// ```
 ///
 class StreamChatCore extends StatefulWidget {
-  /// Instance of Stream Chat Client containing information about the current
-  /// application.
-  final Client client;
-
-  /// Widget descendant.
-  final Widget child;
-
   /// Constructor used for creating a new instance of [StreamChatCore].
   ///
   /// [StreamChatCore] is a stateful widget which reacts to system events and updates

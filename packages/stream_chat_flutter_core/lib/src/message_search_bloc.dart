@@ -12,9 +12,6 @@ import 'stream_chat_core.dart';
 ///
 // API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
 class MessageSearchBloc extends StatefulWidget {
-  /// The widget child
-  final Widget child;
-
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
     Key key,
