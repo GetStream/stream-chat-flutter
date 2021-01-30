@@ -49,6 +49,13 @@ class StreamChatCore extends StatefulWidget {
     @required this.child,
   }) : super(key: key);
 
+  /// Instance of Stream Chat Client containing information about the current
+  /// application.
+  final Client client;
+
+  /// Widget descendant.
+  final Widget child;
+
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
 

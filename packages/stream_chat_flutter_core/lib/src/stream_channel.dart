@@ -17,7 +17,8 @@ enum QueryDirection {
 ///
 /// Use [StreamChannel.of] to get the current [StreamChannelState] instance.
 class StreamChannel extends StatefulWidget {
-  // ignore: public_member_api_docs
+  /// Creates a new instance of [StreamChannel]. Both [child] and [client] must
+  /// be supplied and not null.
   const StreamChannel({
     Key key,
     @required this.child,

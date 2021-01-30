@@ -32,7 +32,12 @@ import 'message_search_bloc.dart';
 /// The widget uses a [ListView.separated] to render the list of messages.
 ///
 class MessageSearchListCore extends StatefulWidget {
-  /// Instantiate a new MessageSearchListView
+  /// Instantiate a new [MessageSearchListView].
+  /// The following parameters must be supplied and not null:
+  /// * [emptyBuilder]
+  /// * [errorBuilder]
+  /// * [loadingBuilder]
+  /// * [childBuilder]
   const MessageSearchListCore({
     Key key,
     @required this.emptyBuilder,
