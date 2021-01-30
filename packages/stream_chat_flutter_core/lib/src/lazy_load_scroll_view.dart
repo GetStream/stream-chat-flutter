@@ -45,7 +45,6 @@ class LazyLoadScrollView extends StatefulWidget {
   /// Used to determine if loading of new data has finished. You should use set this if you aren't using a [FutureBuilder] or [StreamBuilder].
   final bool isLoading;
 
-
   @override
   State<StatefulWidget> createState() => _LazyLoadScrollViewState();
 }
