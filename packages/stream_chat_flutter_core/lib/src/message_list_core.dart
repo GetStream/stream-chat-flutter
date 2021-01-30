@@ -54,17 +54,21 @@ import 'stream_channel.dart';
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
 class MessageListCore extends StatefulWidget {
-  /// Instantiate a new [MessageListView]
+  /// Instantiate a new [MessageListView].
   MessageListCore({
     Key key,
-    this.showScrollToBottom = true,
-    this.parentMessage,
     @required this.loadingBuilder,
     @required this.emptyBuilder,
     @required this.messageListBuilder,
     @required this.errorWidgetBuilder,
+    this.showScrollToBottom = true,
+    this.parentMessage,
     this.messageListController,
-  }) : super(key: key);
+  })  : assert(loadingBuilder != null),
+        assert(emptyBuilder != null),
+        assert(messageListBuilder != null),
+        assert(errorWidgetBuilder != null),
+        super(key: key);
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.

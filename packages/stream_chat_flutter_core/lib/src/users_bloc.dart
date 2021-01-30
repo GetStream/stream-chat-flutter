@@ -16,7 +16,8 @@ class UsersBloc extends StatefulWidget {
   const UsersBloc({
     Key key,
     @required this.child,
-  }) : super(key: key);
+  })  : assert(child != null),
+        super(key: key);
 
   /// The widget child
   final Widget child;

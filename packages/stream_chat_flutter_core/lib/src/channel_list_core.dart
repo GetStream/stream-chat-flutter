@@ -66,7 +66,11 @@ class ChannelListCore extends StatefulWidget {
     this.sort,
     this.pagination,
     this.channelListController,
-  }) : super(key: key);
+  })  : assert(errorBuilder != null),
+        assert(emptyBuilder != null),
+        assert(loadingBuilder != null),
+        assert(listBuilder != null),
+        super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and [ChannelListController.paginateData] respectively for reloading and pagination.

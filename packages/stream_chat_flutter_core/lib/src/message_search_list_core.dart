@@ -50,7 +50,11 @@ class MessageSearchListCore extends StatefulWidget {
     this.paginationParams,
     this.messageFilters,
     this.messageSearchListController,
-  }) : super(key: key);
+  })  : assert(emptyBuilder != null),
+        assert(errorBuilder != null),
+        assert(loadingBuilder != null),
+        assert(childBuilder != null),
+        super(key: key);
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and [MessageSearchListController.paginateData] respectively for reloading and pagination.
