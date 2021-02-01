@@ -8,7 +8,7 @@ import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/read.dart';
 import 'package:stream_chat/src/models/user.dart';
 
-///
+/// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
   /// Creates a new connection to the client
   Future<void> connect(String userId);
@@ -38,22 +38,25 @@ abstract class ChatPersistenceClient {
   /// Get the channel cids saved in the offline storage
   Future<List<String>> getChannelCids();
 
-  ///
+  /// Get stored [ChannelModel]s by providing channel [cid]
   Future<ChannelModel> getChannelByCid(String cid);
 
-  ///
+  /// Get stored channel [Member]s by providing channel [cid]
   Future<List<Member>> getMembersByCid(String cid);
 
-  ///
+  /// Get stored channel [Read]s by providing channel [cid]
   Future<List<Read>> getReadsByCid(String cid);
 
+  /// Get stored [Message]s by providing channel [cid]
   ///
+  /// Optionally, you can [messagePagination]
+  /// for filtering out messages
   Future<List<Message>> getMessagesByCid(
     String cid, {
     PaginationParams messagePagination,
   });
 
-  /// Get channel data by cid
+  /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
     String cid, {
     PaginationParams messagePagination,
@@ -73,14 +76,18 @@ abstract class ChatPersistenceClient {
     );
   }
 
-  /// Get list of channels by filter, sort and paginationParams
+  /// Get all the stored [ChannelState]s
+  ///
+  /// Optionally, pass [filter], [sort], [paginationParams]
+  /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
     List<SortOption> sort = const [],
     PaginationParams paginationParams,
   });
 
-  /// Update list of channel queries
+  /// Update list of channel queries.
+  ///
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
@@ -89,53 +96,57 @@ abstract class ChatPersistenceClient {
     bool clearQueryCache,
   );
 
-  /// Remove a message by message id
+  /// Remove a message by [messageId]
   Future<void> deleteMessageById(String messageId) {
     return deleteMessageByIds([messageId]);
   }
 
-  /// Remove a message by message ids
+  /// Remove a message by [messageIds]
   Future<void> deleteMessageByIds(List<String> messageIds);
 
-  /// Remove a message by channel cid
+  /// Remove a message by channel [cid]
   Future<void> deleteMessageByCid(String cid) {
     return deleteMessageByCids([cid]);
   }
 
-  /// Remove a message by message cids
+  /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
 
-  /// Remove a channel by cid
+  /// Remove a channel by [cid]
   Future<void> deleteChannels(List<String> cids);
 
-  /// Update messages data from a list
+  /// Updates the message data of a particular channel [cid] with
+  /// the new [messages] data
   Future<void> updateMessages(String cid, List<Message> messages);
 
-  /// Get the info about channel threads
+  /// Returns all the threads by parent message of a particular channel by
+  /// providing channel [cid]
   Future<Map<String, List<Message>>> getChannelThreads(String cid);
 
-  ///
+  /// Updates all the channels using the new [channels] data.
   Future<void> updateChannels(List<ChannelModel> channels);
 
-  ///
+  /// Updates all the members of a particular channle [cid]
+  /// with the new [members] data
   Future<void> updateMembers(String cid, List<Member> members);
 
-  ///
+  /// Updates the read data of a particular channel [cid] with
+  /// the new [reads] data
   Future<void> updateReads(String cid, List<Read> reads);
 
-  ///
+  /// Updates the users data with the new [users] data
   Future<void> updateUsers(List<User> users);
 
-  ///
+  /// Updates the reactions data with the new [reactions] data
   Future<void> updateReactions(List<Reaction> reactions);
 
-  ///
+  /// Deletes all the reactions by [messageIds]
   Future<void> deleteReactionsByMessageId(List<String> messageIds);
 
-  ///
+  /// Deletes all the members by channel [cids]
   Future<void> deleteMembersByCids(List<String> cids);
 
-  ///
+  /// Update the channel state data using [channelState]
   Future<void> updateChannelState(ChannelState channelState) {
     return updateChannelStates([channelState]);
   }
