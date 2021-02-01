@@ -20,3 +20,4 @@ dev_dependencies:
   test: ^1.15.7
   build_runner: ^1.11.0
   moor_generator: ^3.4.1
+  pedantic: ^1.9.2

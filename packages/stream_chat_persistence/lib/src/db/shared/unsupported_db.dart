@@ -1,15 +1,21 @@
-//ignore_for_file: public_member_api_docs
-//ignore_for_file: always_declare_return_types
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
+/// A Helper class to construct new instances of [MoorChatDatabase]
 class SharedDB {
-  static constructDatabase(
+  /// Returns a new instance of database.
+  ///
+  /// Generally used with [ConnectionMode.regular].
+  static dynamic constructDatabase(
     String userId, {
     bool logStatements = false,
   }) {
     throw 'Unsupported Platform';
   }
 
-  static constructOfflineStorage(
+  /// Return a new instance of moor chat database.
+  ///
+  /// Generally used with [ConnectionMode.background].
+  static dynamic constructMoorChatDatabase(
     String userId, {
     bool logStatements = false,
   }) {

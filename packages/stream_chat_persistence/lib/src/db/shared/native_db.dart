@@ -1,5 +1,3 @@
-//ignore_for_file: public_member_api_docs
-
 import 'dart:io';
 import 'dart:isolate';
 import 'package:moor/ffi.dart';
@@ -7,10 +5,18 @@ import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 import '../moor_chat_database.dart';
 
+/// A Helper class to construct new instances of [MoorChatDatabase] specifically
+/// for native platform applications
 class SharedDB {
+  /// Returns a new instance of [VmDatabase] created using [userId]
+  /// on a regular isolate.
+  ///
+  /// Generally used with [ConnectionMode.regular].
   static Future<VmDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
@@ -62,7 +68,11 @@ class SharedDB {
     return (await receivePort.first as MoorIsolate);
   }
 
-  static Future<MoorChatDatabase> constructOfflineStorage(
+  /// Returns a new instance of [MoorChatDatabase] using the factory constructor
+  /// [MoorChatDatabase.connect] created on a background isolate.
+  ///
+  /// Generally used with [ConnectionMode.background].
+  static Future<MoorChatDatabase> constructMoorChatDatabase(
     String userId, {
     bool logStatements = false,
   }) async {

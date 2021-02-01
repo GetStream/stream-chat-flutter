@@ -43,7 +43,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         return;
       case ConnectionMode.background:
         _logger.info('Connecting on background isolate');
-        _db = await SharedDB.constructOfflineStorage(userId);
+        _db = await SharedDB.constructMoorChatDatabase(userId);
         return;
     }
   }
