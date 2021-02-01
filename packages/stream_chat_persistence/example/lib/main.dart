@@ -7,6 +7,8 @@ Future<void> main() async {
   /// project dashboard.
   final client = StreamChatClient('b67pax5b2wdq');
 
+  WidgetsFlutterBinding.ensureInitialized();
+
   /// Set the chatPersistenceClient for offline support
   client.chatPersistenceClient = StreamChatPersistenceClient(
     logLevel: Level.INFO,

@@ -173,8 +173,10 @@ abstract class ChatPersistenceClient {
 
     final reactions = channelStates.expand((it) => it.messages).expand((it) {
       return [
-        ...it.ownReactions.where((r) => r.userId != null),
-        ...it.latestReactions.where((r) => r.userId != null)
+        if (it.ownReactions != null)
+          ...it.ownReactions.where((r) => r.userId != null),
+        if (it.latestReactions != null)
+          ...it.latestReactions.where((r) => r.userId != null)
       ];
     }).where((it) => it != null);
 
@@ -184,12 +186,14 @@ abstract class ChatPersistenceClient {
               ...cs.messages?.map((m) {
                 return [
                   m.user,
-                  ...m.latestReactions?.map((r) => r.user),
-                  ...m.ownReactions?.map((r) => r.user),
+                  if (m.latestReactions != null)
+                    ...m.latestReactions.map((r) => r.user),
+                  if (m.ownReactions != null)
+                    ...m.ownReactions.map((r) => r.user),
                 ];
               })?.expand((v) => v),
-              ...cs.read?.map((r) => r.user),
-              ...cs.members?.map((m) => m.user),
+              if (cs.read != null) ...cs.read.map((r) => r.user),
+              if (cs.members != null) ...cs.members.map((m) => m.user),
             ])
         .expand((it) => it)
         .where((it) => it != null);
@@ -202,7 +206,7 @@ abstract class ChatPersistenceClient {
 
     final updateReadsFuture = channelStates.map((it) {
       final cid = it.channel.cid;
-      final reads = it.read.where((it) => it != null);
+      final reads = it.read?.where((it) => it != null) ?? [];
       return updateReads(cid, reads.toList(growable: false));
     }).toList(growable: false);
 

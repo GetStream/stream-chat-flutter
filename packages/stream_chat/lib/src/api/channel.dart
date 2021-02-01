@@ -618,16 +618,26 @@ class Channel {
       }
     }
 
-    final response = await _client.post(path, data: payload);
-    final updatedState = _client.decode(response.data, ChannelState.fromJson);
+    try {
+      final response = await _client.post(path, data: payload);
+      final updatedState = _client.decode(response.data, ChannelState.fromJson);
 
-    if (_id == null) {
-      _id = updatedState.channel.id;
-      _cid = updatedState.channel.cid;
+      if (_id == null) {
+        _id = updatedState.channel.id;
+        _cid = updatedState.channel.cid;
+      }
+
+      state?.updateChannelState(updatedState);
+      return updatedState;
+    } catch (e) {
+      if (!_client.persistenceEnabled) {
+        rethrow;
+      }
+      return _client.chatPersistenceClient?.getChannelStateByCid(
+        cid,
+        messagePagination: messagesPagination,
+      );
     }
-
-    state?.updateChannelState(updatedState);
-    return updatedState;
   }
 
   /// Query channel members

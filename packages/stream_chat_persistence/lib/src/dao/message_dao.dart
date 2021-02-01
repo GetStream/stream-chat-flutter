@@ -3,6 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/messages.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
+
 import '../mapper/mapper.dart';
 
 part 'message_dao.g.dart';
@@ -136,7 +137,11 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Updates the message data of a particular channel with
   /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) {
+  Future<void> updateMessages(String cid, List<Message> messageList) async {
+    if (messageList == null) {
+      return;
+    }
+
     return batch((batch) {
       batch.insertAll(
         messages,
