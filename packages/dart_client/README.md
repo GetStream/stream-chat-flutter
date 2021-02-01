@@ -14,7 +14,7 @@ You can sign up for a Stream account at https://getstream.io/chat/
 
 ```yaml
 dependencies:
- stream_chat: ^0.2.0
+ stream_chat: ^1.0.0-beta
 ```
 
 You should then run `flutter packages get`
@@ -57,27 +57,34 @@ final client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFun
 
 ### Offline storage 
 
-By default the library saves information about channels and messages in a SQLite DB.
+To add data persistance you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
 
-Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
+```dart
+class CustomChatPersistentClient extends ChatPersistenceClient {
+...
+}
 
-## Flutter Web
-
-Due to Moor web (for offline storage) you need to include the sql.js library:
-
-```html
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script defer src="sql-wasm.js"></script>
-    <script defer src="main.dart.js" type="application/javascript"></script>
-</head>
-<body></body>
-</html>
+final client = Client(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = CustomChatPersistentClient();
 ```
 
-You can grab the latest version of sql-wasm.js and sql-wasm.wasm [here](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
+We provide an official persistent client in the (stream_chat_persistence)[https://pub.dev/packages/stream_chat_persistence] package.
+
+```dart
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.background,
+);
+
+final client = Client(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = chatPersistentClient;
+```
 
 ## Contributing
 
