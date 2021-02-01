@@ -13,7 +13,7 @@ dependencies:
   path: ^1.7.0
   path_provider: ^1.6.27
   sqlite3_flutter_libs: ^0.3.0
-  stream_chat: ^1.0.0-beta
+  stream_chat: ^1.0.1-beta
 
 dev_dependencies:
   test: ^1.15.7
