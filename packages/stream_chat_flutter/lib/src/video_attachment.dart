@@ -16,11 +16,13 @@ class VideoAttachment extends StatefulWidget {
   final Message message;
   final ShowMessageCallback onShowMessage;
   final ValueChanged<ReturnActionType> onReturnAction;
+  final VideoPackage videoPackage;
 
   VideoAttachment({
     Key key,
     @required this.attachment,
     @required this.messageTheme,
+    this.videoPackage,
     this.message,
     this.size,
     this.onShowMessage,
@@ -32,13 +34,21 @@ class VideoAttachment extends StatefulWidget {
 }
 
 class _VideoAttachmentState extends State<VideoAttachment> {
-  ChewieController _chewieController;
-  VideoPlayerController _videoPlayerController;
   bool initialized = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.videoPackage.onInit = () {
+      setState(() {
+        initialized = true;
+      });
+    };
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!initialized) {
+    if (!widget.videoPackage.initialised) {
       return Container(
         height: widget.size?.height ?? 100,
         width: widget.size?.width ?? 100,
@@ -47,43 +57,6 @@ class _VideoAttachmentState extends State<VideoAttachment> {
         ),
       );
     }
-    _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController,
-        autoInitialize: true,
-        showControls: false,
-        aspectRatio: _videoPlayerController.value.aspectRatio,
-        errorBuilder: (_, e) {
-          if (widget.attachment.thumbUrl != null) {
-            return Stack(
-              children: <Widget>[
-                Container(
-                  height: widget.size?.height,
-                  width: widget.size?.width,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: CachedNetworkImageProvider(
-                        widget.attachment.thumbUrl,
-                      ),
-                    ),
-                  ),
-                ),
-                if (widget.attachment.titleLink != null)
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () =>
-                          launchURL(context, widget.attachment.titleLink),
-                    ),
-                  ),
-              ],
-            );
-          }
-          return AttachmentError(
-            attachment: widget.attachment,
-            size: widget.size,
-          );
-        });
 
     return GestureDetector(
       onTap: () async {
@@ -123,7 +96,7 @@ class _VideoAttachmentState extends State<VideoAttachment> {
                 child: Stack(
                   children: <Widget>[
                     Chewie(
-                      controller: _chewieController,
+                      controller: widget.videoPackage.chewieController,
                     ),
                     Positioned.fill(
                       child: Center(
@@ -152,24 +125,5 @@ class _VideoAttachmentState extends State<VideoAttachment> {
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _videoPlayerController =
-        VideoPlayerController.network(widget.attachment.assetUrl);
-    _videoPlayerController.initialize().whenComplete(() {
-      setState(() {
-        initialized = true;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _videoPlayerController?.dispose();
-    _chewieController?.dispose();
-    super.dispose();
   }
 }

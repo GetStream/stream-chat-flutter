@@ -239,6 +239,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   MessageListController _messageListController = MessageListController();
 
+  Map<String, VideoPackage> videoPackages = {};
+
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
@@ -776,6 +778,7 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
+      videoPackages: videoPackages,
     );
   }
 
@@ -936,6 +939,7 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
+      videoPackages: videoPackages,
     );
 
     if (!message.isDeleted && !message.isSystem && !message.isEphemeral) {

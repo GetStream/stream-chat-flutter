@@ -61,9 +61,14 @@ class _FullScreenMediaState extends State<FullScreenMedia>
         .where((element) => element.type == 'video')
         .toList()
         .forEach((element) {
-      videoPackages.add(VideoPackage(context, element, () {
-        setState(() {});
-      }));
+      videoPackages.add(VideoPackage(
+        context,
+        element,
+        () {
+          setState(() {});
+        },
+        showControls: true,
+      ));
     });
   }
 
@@ -233,15 +238,18 @@ class VideoPackage {
   bool initialised = false;
   VoidCallback onInit;
   BuildContext context;
+  bool showControls;
 
   ///
-  VideoPackage(this.context, Attachment attachment, this.onInit) {
+  VideoPackage(this.context, Attachment attachment, this.onInit,
+      {this.showControls = false}) {
     _videoPlayerController = VideoPlayerController.network(attachment.assetUrl);
     _videoPlayerController.initialize().whenComplete(() {
       initialised = true;
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
-        autoInitialize: false,
+        autoInitialize: true,
+        showControls: showControls,
         aspectRatio: _videoPlayerController.value.aspectRatio,
       );
       onInit();
