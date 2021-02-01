@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'connection_status_builder.dart';
+
 class ChannelInfo extends StatelessWidget {
   final Channel channel;
 
@@ -25,9 +27,8 @@ class ChannelInfo extends StatelessWidget {
       stream: channel.state.membersStream,
       initialData: channel.state.members,
       builder: (context, snapshot) {
-        return ValueListenableBuilder(
-          valueListenable: client.wsConnectionStatus,
-          builder: (context, status, child) {
+        return ConnectionStatusBuilder(
+          statusBuilder: (context, status) {
             switch (status) {
               case ConnectionStatus.connected:
                 return _buildConnectedTitleState(context, snapshot.data);
@@ -110,7 +111,8 @@ class ChannelInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildDisconnectedTitleState(BuildContext context, Client client) {
+  Widget _buildDisconnectedTitleState(
+      BuildContext context, StreamChatClient client) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

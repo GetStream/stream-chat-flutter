@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../stream_chat_flutter.dart';
 import './channel_name.dart';
+import '../stream_chat_flutter.dart';
 import 'channel_image.dart';
+import 'connection_status_builder.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header_paint.png)
@@ -17,7 +18,7 @@ import 'channel_image.dart';
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///   final Channel channel;
 ///
 ///   MyApp(this.client, this.channel);
@@ -85,11 +86,9 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-    final _client = StreamChat.of(context).client;
 
-    return ValueListenableBuilder<ConnectionStatus>(
-      valueListenable: _client.wsConnectionStatus,
-      builder: (context, status, _) {
+    return ConnectionStatusBuilder(
+      statusBuilder: (context, status) {
         String statusString = '';
         bool showStatus = true;
 

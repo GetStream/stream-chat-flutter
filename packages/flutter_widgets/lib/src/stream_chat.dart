@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget used to provide information about the chat to the widget tree
 ///
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///
 ///   MyApp(this.client);
 ///
@@ -30,15 +30,25 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
 class StreamChat extends StatefulWidget {
-  final Client client;
+  final StreamChatClient client;
   final Widget child;
   final StreamChatThemeData streamChatThemeData;
+
+  /// The amount of time that will pass before disconnecting the client in the background
+  final Duration backgroundKeepAlive;
+
+  /// Handler called whenever the [client] receives a new [Event] while the app
+  /// is in background. Can be used to display various notifications depending
+  /// upon the [Event.type]
+  final EventHandler onBackgroundEventReceived;
 
   StreamChat({
     Key key,
     @required this.client,
     @required this.child,
     this.streamChatThemeData,
+    this.onBackgroundEventReceived,
+    this.backgroundKeepAlive = const Duration(minutes: 1),
   }) : super(
           key: key,
         );
@@ -63,7 +73,7 @@ class StreamChat extends StatefulWidget {
 
 /// The current state of the StreamChat widget
 class StreamChatState extends State<StreamChat> {
-  Client get client => widget.client;
+  StreamChatClient get client => widget.client;
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +92,10 @@ class StreamChatState extends State<StreamChat> {
                 scaffoldBackgroundColor: streamTheme.colorTheme.white,
               ),
               child: StreamChatCore(
-                child: widget.child,
                 client: client,
+                child: widget.child,
+                onBackgroundEventReceived: widget.onBackgroundEventReceived,
+                backgroundKeepAlive: widget.backgroundKeepAlive,
               ),
             );
           },

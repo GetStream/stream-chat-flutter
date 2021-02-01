@@ -1,5 +1,6 @@
 /// Define all the route names here
 class Routes {
+  static const String APP = '/app';
   static const String HOME = '/home';
   static const String CHOOSE_USER = '/choose_user';
   static const String ADVANCED_OPTIONS = '/advance_options';

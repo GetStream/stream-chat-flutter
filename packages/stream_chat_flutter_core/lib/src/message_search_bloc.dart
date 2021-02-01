@@ -59,7 +59,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   Stream<bool> get queryMessagesLoading =>
       _queryMessagesLoadingController.stream;
 
-  /// Calls [Client.search] updating [messageResponses] stream
+  /// Calls [StreamChatClient.search] updating [messageResponses] stream
   Future<void> search({
     Map<String, dynamic> filter,
     Map<String, dynamic> messageFilter,
@@ -82,7 +82,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     }
   }
 
-  /// Calls [Client.search] updating [queryMessagesLoading] stream
+  /// Calls [StreamChatClient.search] updating [queryMessagesLoading] stream
   Future<void> loadMore({
     Map<String, dynamic> filter,
     Map<String, dynamic> messageFilter,

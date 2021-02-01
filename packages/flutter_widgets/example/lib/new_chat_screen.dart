@@ -134,9 +134,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
         ),
         centerTitle: true,
       ),
-      body: ValueListenableBuilder<ConnectionStatus>(
-        valueListenable: StreamChat.of(context).client.wsConnectionStatus,
-        builder: (context, status, _) {
+      body: ConnectionStatusBuilder(
+        statusBuilder: (context, status) {
           String statusString = '';
           bool showStatus = true;
 

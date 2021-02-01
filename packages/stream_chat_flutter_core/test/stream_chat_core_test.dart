@@ -9,7 +9,7 @@ import 'package:mockito/mockito.dart';
 import 'mocks.dart';
 
 class MockShowLocalNotifications extends Mock {
-  void call(Message m, ChannelModel cm);
+  void call(Event event);
 }
 
 void main() {
@@ -97,14 +97,8 @@ void main() {
           ),
         );
         final showLocalNotificationMock = MockShowLocalNotifications().call;
-        when(client.showLocalNotification)
-            .thenReturn(showLocalNotificationMock);
-        when(client.backgroundKeepAlive).thenReturn(Duration(
-          seconds: 4,
-        ));
         final eventStreamController = StreamController<Event>();
-        when(client.on(EventType.messageNew))
-            .thenAnswer((_) => eventStreamController.stream);
+        when(client.on()).thenAnswer((_) => eventStreamController.stream);
 
         when(client.channel('test', id: 'testid')).thenReturn(channel);
 
@@ -113,6 +107,8 @@ void main() {
           StreamChatCore(
             key: scKey,
             client: client,
+            onBackgroundEventReceived: showLocalNotificationMock,
+            backgroundKeepAlive: const Duration(seconds: 4),
             child: Builder(
               builder: (context) {
                 return Container();
@@ -144,13 +140,8 @@ void main() {
         ),
       );
       final showLocalNotificationMock = MockShowLocalNotifications().call;
-      when(client.showLocalNotification).thenReturn(showLocalNotificationMock);
-      when(client.backgroundKeepAlive).thenReturn(Duration(
-        seconds: 4,
-      ));
       final eventStreamController = StreamController<Event>();
-      when(client.on(EventType.messageNew))
-          .thenAnswer((_) => eventStreamController.stream);
+      when(client.on()).thenAnswer((_) => eventStreamController.stream);
 
       when(client.channel('test', id: 'testid')).thenReturn(channel);
 
@@ -159,6 +150,8 @@ void main() {
         StreamChatCore(
           key: scKey,
           client: client,
+          onBackgroundEventReceived: showLocalNotificationMock,
+          backgroundKeepAlive: const Duration(seconds: 4),
           child: Builder(
             builder: (context) {
               return Container();
@@ -178,12 +171,9 @@ void main() {
       );
       eventStreamController.add(event);
 
-      await untilCalled(showLocalNotificationMock(any, any));
+      await untilCalled(showLocalNotificationMock(event));
 
-      verify(showLocalNotificationMock(
-        event.message,
-        any,
-      )).called(1);
+      verify(showLocalNotificationMock(event)).called(1);
     },
   );
 }

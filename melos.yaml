@@ -33,8 +33,12 @@ scripts:
       flutter build macos
 
 
-  test: >
-    melos exec -c 1 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
+  test:dart: >
+    melos exec -c 1 --fail-fast --no-flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
+      flutter pub run test
+
+  test:flutter: >
+    melos exec -c 1 --fail-fast --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
       flutter test
 
   test:web: >

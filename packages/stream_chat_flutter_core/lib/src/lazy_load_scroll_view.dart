@@ -16,7 +16,6 @@ class LazyLoadScrollView extends StatefulWidget {
     this.onPageScrollStart,
     this.onPageScrollEnd,
     this.onInBetweenOfPage,
-    this.isLoading = false,
     this.scrollOffset = 100,
   })  : assert(child != null),
         super(key: key);
@@ -41,9 +40,6 @@ class LazyLoadScrollView extends StatefulWidget {
 
   /// The offset to take into account when triggering [onEndOfPage]/[onStartOfPage] in pixels
   final double scrollOffset;
-
-  /// Used to determine if loading of new data has finished. You should use set this if you aren't using a [FutureBuilder] or [StreamBuilder].
-  final bool isLoading;
 
   @override
   State<StatefulWidget> createState() => _LazyLoadScrollViewState();

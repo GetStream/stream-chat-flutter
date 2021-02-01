@@ -17,7 +17,7 @@ class _BaseResponse {
   String duration;
 }
 
-/// Model response for [Client.resync] api call
+/// Model response for [StreamChatClient.resync] api call
 @JsonSerializable(createToJson: false)
 class SyncResponse extends _BaseResponse {
   /// The list of events
@@ -28,7 +28,7 @@ class SyncResponse extends _BaseResponse {
       _$SyncResponseFromJson(json);
 }
 
-/// Model response for [Client.queryChannels] api call
+/// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
 class QueryChannelsResponse extends _BaseResponse {
   /// List of channels state returned by the query
@@ -39,7 +39,7 @@ class QueryChannelsResponse extends _BaseResponse {
       _$QueryChannelsResponseFromJson(json);
 }
 
-/// Model response for [Client.queryChannels] api call
+/// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
 class TranslateMessageResponse extends _BaseResponse {
   /// List of channels state returned by the query
@@ -50,7 +50,7 @@ class TranslateMessageResponse extends _BaseResponse {
       _$TranslateMessageResponseFromJson(json);
 }
 
-/// Model response for [Client.queryChannels] api call
+/// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
 class QueryMembersResponse extends _BaseResponse {
   /// List of channels state returned by the query
@@ -61,7 +61,7 @@ class QueryMembersResponse extends _BaseResponse {
       _$QueryMembersResponseFromJson(json);
 }
 
-/// Model response for [Client.queryUsers] api call
+/// Model response for [StreamChatClient.queryUsers] api call
 @JsonSerializable(createToJson: false)
 class QueryUsersResponse extends _BaseResponse {
   /// List of users returned by the query
@@ -94,7 +94,7 @@ class QueryRepliesResponse extends _BaseResponse {
       _$QueryRepliesResponseFromJson(json);
 }
 
-/// Model response for [Client.getDevices] api call
+/// Model response for [StreamChatClient.getDevices] api call
 @JsonSerializable(createToJson: false)
 class ListDevicesResponse extends _BaseResponse {
   /// List of user devices
@@ -141,7 +141,7 @@ class SendReactionResponse extends _BaseResponse {
       _$SendReactionResponseFromJson(json);
 }
 
-/// Model response for [Client.setGuestUser] api call
+/// Model response for [StreamChatClient.setGuestUser] api call
 @JsonSerializable(createToJson: false)
 class SetGuestUserResponse extends _BaseResponse {
   /// Guest user access token
@@ -155,7 +155,7 @@ class SetGuestUserResponse extends _BaseResponse {
       _$SetGuestUserResponseFromJson(json);
 }
 
-/// Model response for [Client.updateUser] api call
+/// Model response for [StreamChatClient.updateUser] api call
 @JsonSerializable(createToJson: false)
 class UpdateUsersResponse extends _BaseResponse {
   /// Updated users
@@ -166,7 +166,7 @@ class UpdateUsersResponse extends _BaseResponse {
       _$UpdateUsersResponseFromJson(json);
 }
 
-/// Model response for [Client.updateMessage] api call
+/// Model response for [StreamChatClient.updateMessage] api call
 @JsonSerializable(createToJson: false)
 class UpdateMessageResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -188,7 +188,7 @@ class SendMessageResponse extends _BaseResponse {
       _$SendMessageResponseFromJson(json);
 }
 
-/// Model response for [Client.getMessage] api call
+/// Model response for [StreamChatClient.getMessage] api call
 @JsonSerializable(createToJson: false)
 class GetMessageResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -208,7 +208,7 @@ class GetMessageResponse extends _BaseResponse {
   }
 }
 
-/// Model response for [Client.search] api call
+/// Model response for [StreamChatClient.search] api call
 @JsonSerializable(createToJson: false)
 class SearchMessagesResponse extends _BaseResponse {
   /// List of messages returned by the api call

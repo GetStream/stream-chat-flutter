@@ -29,7 +29,7 @@ class Reaction {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String userId;
 
-  /// The score of the reaction (ie. number of reactions sent)
+  /// Reaction custom extraData
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 

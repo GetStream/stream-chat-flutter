@@ -3,24 +3,22 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
+import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
-import 'package:pedantic/pedantic.dart' show unawaited;
 
 import 'api/channel.dart';
 import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
-import 'db/offline_storage.dart';
+import 'db/chat_persistence_client.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
@@ -36,15 +34,6 @@ typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 /// A function which can be used to request a Stream Chat API token from your
 /// own backend server. Function requires a single [userId].
 typedef TokenProvider = Future<String> Function(String userId);
-
-/// The key used to save the userId to sharedPreferences
-const String KEY_USER_ID = 'KEY_USER_ID';
-
-/// The key used to save the token to sharedPreferences
-const String KEY_TOKEN = 'KEY_TOKEN';
-
-/// The key used to save the apiKey to sharedPreferences
-const String KEY_API_KEY = 'KEY_API_KEY';
 
 /// Provider used to send push notifications.
 enum PushProvider {
@@ -75,31 +64,27 @@ extension on PushProvider {
 /// websocket connection to Stream Chat servers.
 ///
 /// ```dart
-/// final client = Client("stream-chat-api-key");
+/// final client = StreamChatClient("stream-chat-api-key");
 /// ```
-class Client {
+class StreamChatClient {
   /// Create a client instance with default options.
   /// You should only create the client once and re-use it across your application.
-  Client(
+  StreamChatClient(
     this.apiKey, {
     this.tokenProvider,
     this.baseURL = _defaultBaseURL,
     this.logLevel = Level.WARNING,
     this.logHandlerFunction,
-    this.persistenceEnabled = true,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
-    this.showLocalNotification,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
     RetryPolicy retryPolicy,
   }) {
-    WidgetsFlutterBinding.ensureInitialized();
-
     _retryPolicy ??= RetryPolicy(
-      retryTimeout: (Client client, int attempt, ApiError error) =>
+      retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
           Duration(seconds: 1 * attempt),
-      shouldRetry: (Client client, int attempt, ApiError error) => attempt < 5,
+      shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
+          attempt < 5,
     );
 
     state = ClientState(this);
@@ -110,10 +95,11 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  OfflineStorage _offlineStorage;
+  /// Chat persistence client
+  ChatPersistenceClient chatPersistenceClient;
 
-  /// If true chat data will persist on disk
-  final bool persistenceEnabled;
+  /// Whether the chat persistence is available or not
+  bool get persistenceEnabled => chatPersistenceClient != null;
 
   RetryPolicy _retryPolicy;
 
@@ -122,25 +108,14 @@ class Client {
   /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
 
-  /// Method used to show a local notification while the app is in background
-  /// Switching to another application will not disconnect the client immediately
-  /// So, use this method to show the notification when receiving a new message via events
-  final void Function(Message, ChannelModel) showLocalNotification;
-
-  /// The amount of time that will pass before disconnecting the client in the background
-  final Duration backgroundKeepAlive;
-
-  /// Client offline database
-  OfflineStorage get offlineStorage => _offlineStorage;
-
   /// This client state
   ClientState state;
 
-  /// By default the Chat Client will write all messages with level Warn or Error to stdout.
+  /// By default the Chat client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
   ///
   /// ```dart
-  /// final client = Client("stream-chat-api-key", logLevel: Level.INFO);
+  /// final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
   /// ```
   final Level logLevel;
 
@@ -159,7 +134,7 @@ class Client {
   ///  // do something with the record (ie. send it to Sentry or Fabric)
   /// }
   ///
-  /// final client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+  /// final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
   ///```
   LogHandlerFunction logHandlerFunction;
 
@@ -183,7 +158,8 @@ class Client {
 
   static const _defaultBaseURL = 'chat-us-east-1.stream-io-api.com';
   static const _tokenExpiredErrorCode = 40;
-  VoidCallback _connectionStatusListener;
+  StreamSubscription<ConnectionStatus> _connectionStatusSubscription;
+  Future<void> Function(ConnectionStatus) _connectionStatusHandler;
 
   final BehaviorSubject<Event> _controller = BehaviorSubject<Event>();
 
@@ -191,10 +167,20 @@ class Client {
   /// Listen to this or use the [on] method to filter specific event types
   Stream<Event> get stream => _controller.stream;
 
+  final _wsConnectionStatusController =
+      BehaviorSubject.seeded(ConnectionStatus.disconnected);
+
+  set _wsConnectionStatus(ConnectionStatus status) =>
+      _wsConnectionStatusController.add(status);
+
+  /// The current status value of the websocket connection
+  ConnectionStatus get wsConnectionStatus =>
+      _wsConnectionStatusController.value;
+
   /// This notifies the connection status of the websocket connection.
   /// Listen to this to get notified when the websocket tries to reconnect.
-  final ValueNotifier<ConnectionStatus> wsConnectionStatus =
-      ValueNotifier(ConnectionStatus.disconnected);
+  Stream<ConnectionStatus> get wsConnectionStatusStream =>
+      _wsConnectionStatusController.stream;
 
   /// The current user token
   String token;
@@ -342,12 +328,12 @@ class Client {
 
   /// Call this function to dispose the client
   void dispose() async {
-    await _offlineStorage?.disconnect();
+    await chatPersistenceClient?.disconnect();
     await _disconnect();
     httpClient.close();
     await _controller.close();
-    state.channels.values.forEach((c) => c.dispose());
     state.dispose();
+    await _wsConnectionStatusController.close();
   }
 
   Map<String, String> get _httpHeaders => {
@@ -371,11 +357,6 @@ class Client {
     state.user = OwnUser.fromJson(user.toJson());
     this.token = token;
     _anonymous = false;
-
-    final sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.setString(KEY_USER_ID, user.id);
-    await sharedPreferences.setString(KEY_TOKEN, token);
-    await sharedPreferences.setString(KEY_API_KEY, apiKey);
 
     return connect().then((event) {
       _connectCompleter.complete(event);
@@ -424,8 +405,8 @@ class Client {
 
     if (!event.isLocal) {
       if (_synced && event.createdAt != null) {
-        await _offlineStorage?.updateConnectionInfo(event);
-        await _offlineStorage?.updateLastSyncAt(event.createdAt);
+        await chatPersistenceClient?.updateConnectionInfo(event);
+        await chatPersistenceClient?.updateLastSyncAt(event.createdAt);
       }
     }
 
@@ -444,21 +425,20 @@ class Client {
   /// Connect the client websocket
   Future<Event> connect() async {
     logger.info('connecting');
-    if (wsConnectionStatus.value == ConnectionStatus.connecting) {
+    if (wsConnectionStatus == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
     }
 
-    if (wsConnectionStatus.value == ConnectionStatus.connected) {
+    if (wsConnectionStatus == ConnectionStatus.connected) {
       logger.warning('Already connected');
       throw Exception('Already connected');
     }
 
-    wsConnectionStatus.value = ConnectionStatus.connecting;
+    _wsConnectionStatus = ConnectionStatus.connecting;
 
-    if (persistenceEnabled && _offlineStorage == null) {
-      _offlineStorage =
-          await connectDatabase(state.user, _detachedLogger('💽'));
+    if (persistenceEnabled) {
+      await chatPersistenceClient.connect(state.user.id);
     }
 
     _ws = WebSocket(
@@ -478,15 +458,16 @@ class Client {
       logger: _detachedLogger('🔌'),
     );
 
-    _connectionStatusListener = () async {
-      final value = _ws.connectionStatus.value;
-      wsConnectionStatus.value = value;
-      handleEvent(Event(
-        type: EventType.connectionChanged,
-        online: value == ConnectionStatus.connected,
-      ));
+    _connectionStatusHandler = (ConnectionStatus status) async {
+      _wsConnectionStatus = status;
+      handleEvent(
+        Event(
+          type: EventType.connectionChanged,
+          online: status == ConnectionStatus.connected,
+        ),
+      );
 
-      if (value == ConnectionStatus.connected &&
+      if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
         unawaited(queryChannels(filter: {
           'cid': {
@@ -506,12 +487,13 @@ class Client {
       }
     };
 
-    _ws.connectionStatus.addListener(_connectionStatusListener);
+    _connectionStatusSubscription =
+        _ws.connectionStatusStream.listen(_connectionStatusHandler);
 
-    var event = await _offlineStorage?.getConnectionInfo();
+    var event = await chatPersistenceClient?.getConnectionInfo();
 
     await _ws.connect().then((e) async {
-      await _offlineStorage?.updateConnectionInfo(e);
+      await chatPersistenceClient?.updateConnectionInfo(e);
       event = e;
       await resync();
     }).catchError((err, stacktrace) {
@@ -526,14 +508,14 @@ class Client {
 
   /// Get the events missed while offline to sync the offline storage
   Future<void> resync([List<String> cids]) async {
-    final lastSyncAt = await offlineStorage?.getLastSyncAt();
+    final lastSyncAt = await chatPersistenceClient?.getLastSyncAt();
 
     if (lastSyncAt == null) {
       _synced = true;
       return;
     }
 
-    cids ??= await offlineStorage?.getChannelCids();
+    cids ??= await chatPersistenceClient?.getChannelCids();
 
     if (cids?.isEmpty == true) {
       return;
@@ -562,7 +544,7 @@ class Client {
         handleEvent(event);
       });
 
-      await _offlineStorage?.updateLastSyncAt(DateTime.now());
+      await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
       _synced = true;
     } catch (error) {
       logger.severe('Error during resync $error');
@@ -590,7 +572,7 @@ class Client {
         logger.info('awaiting connection completer');
         await _connectCompleter.future;
       }
-      if (wsConnectionStatus.value != ConnectionStatus.connected) {
+      if (wsConnectionStatus != ConnectionStatus.connected) {
         final errorMessage =
             'You cannot use queryChannels without an active connection. Please call setUser to connect the client.';
         if (persistenceEnabled) {
@@ -708,7 +690,7 @@ class Client {
             channels.add(channel);
           } else {
             final newChannel = Channel.fromState(this, channelState);
-            await _offlineStorage
+            await chatPersistenceClient
                 ?.updateChannelState(newChannel.state.channelState);
             newChannel.state?.updateChannelState(channelState);
             newChannels[newChannel.cid] = newChannel;
@@ -719,7 +701,7 @@ class Client {
 
       state.channels = newChannels;
 
-      await _offlineStorage?.updateChannelQueries(
+      await chatPersistenceClient?.updateChannelQueries(
         filter,
         res.channels.map((c) => c.channel.cid).toList(),
         paginationParams?.offset == null || paginationParams.offset == 0,
@@ -754,7 +736,7 @@ class Client {
     @required List<SortOption> sort,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
   }) async {
-    final offlineChannels = await _offlineStorage?.getChannelStates(
+    final offlineChannels = await chatPersistenceClient?.getChannelStates(
           filter: filter,
           sort: sort,
           paginationParams: paginationParams,
@@ -769,7 +751,8 @@ class Client {
         return channel;
       } else {
         final newChannel = Channel.fromState(this, channelState);
-        _offlineStorage?.updateChannelState(newChannel.state.channelState);
+        chatPersistenceClient
+            ?.updateChannelState(newChannel.state.channelState);
         newChannels[newChannel.cid] = newChannel;
         return newChannel;
       }
@@ -923,17 +906,17 @@ class Client {
   }
 
   /// Closes the websocket connection and resets the client
-  /// If [flushOfflineStorage] is true the client deletes all offline user's data
+  /// If [flushChatPersistence] is true the client deletes all offline user's data
   /// If [clearUser] is true the client unsets the current user
   Future<void> disconnect({
-    bool flushOfflineStorage = false,
+    bool flushChatPersistence = false,
     bool clearUser = false,
   }) async {
     logger.info(
-        'Disconnecting flushOfflineStorage: $flushOfflineStorage; clearUser: $clearUser');
+        'Disconnecting flushOfflineStorage: $flushChatPersistence; clearUser: $clearUser');
 
-    await _offlineStorage?.disconnect(flush: flushOfflineStorage);
-    _offlineStorage = null;
+    await chatPersistenceClient?.disconnect(flush: flushChatPersistence);
+    chatPersistenceClient = null;
 
     if (clearUser == true) {
       state.dispose();
@@ -947,6 +930,7 @@ class Client {
     logger.info('Client disconnecting');
 
     await _ws?.disconnect();
+    await _connectionStatusSubscription?.cancel();
   }
 
   /// Requests users with a given query.
@@ -1196,7 +1180,7 @@ class Client {
     String cid,
   ]) async {
     message = message.copyWith(
-      status: MessageSendingStatus.UPDATING,
+      status: MessageSendingStatus.updating,
       updatedAt: message.updatedAt ?? DateTime.now(),
     );
 
@@ -1227,10 +1211,10 @@ class Client {
 
   /// Deletes the given message
   Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
-    if (message.status == MessageSendingStatus.FAILED) {
+    if (message.status == MessageSendingStatus.failed) {
       state.channels[cid].state.addMessage(message.copyWith(
         type: 'deleted',
-        status: MessageSendingStatus.SENT,
+        status: MessageSendingStatus.sent,
       ));
       return EmptyResponse();
     }
@@ -1238,7 +1222,7 @@ class Client {
     try {
       message = message.copyWith(
         type: 'deleted',
-        status: MessageSendingStatus.DELETING,
+        status: MessageSendingStatus.deleting,
         deletedAt: message.deletedAt ?? DateTime.now(),
       );
 
@@ -1250,7 +1234,7 @@ class Client {
 
       if (state?.channels != null) {
         state.channels[cid]?.state
-            ?.addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+            ?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
       }
 
       return decode(response.data, EmptyResponse.fromJson);
@@ -1322,7 +1306,7 @@ class ClientState {
 
   void _listenChannelHidden() {
     _subscriptions.add(_client.on(EventType.channelHidden).listen((event) {
-      _client._offlineStorage?.deleteChannels([event.cid]);
+      _client.chatPersistenceClient?.deleteChannels([event.cid]);
       if (channels != null) {
         channels = channels..removeWhere((cid, ch) => cid == event.cid);
       }
@@ -1347,14 +1331,14 @@ class ClientState {
     )
         .listen((Event event) async {
       final eventChannel = event.channel;
-      await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
+      await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
       }
     }));
   }
 
-  final Client _client;
+  final StreamChatClient _client;
 
   /// Update user information
   set user(OwnUser user) {

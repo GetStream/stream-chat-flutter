@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 Future<void> main() async {
-  /// Create a new instance of [Client] passing the apikey obtained from your
+  /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
   /// project dashboard.
-  final client = Client('b67pax5b2wdq');
+  final client = StreamChatClient('b67pax5b2wdq');
 
   /// Set the current user. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -43,10 +43,10 @@ class StreamExample extends StatelessWidget {
   }) : super(key: key);
 
   /// Instance of Stream Client.
-  /// Stream's [Client] can be used to connect to our servers and set the default
+  /// Stream's [StreamChatClient] can be used to connect to our servers and set the default
   /// user for the application. Performing these actions trigger a websocket connection
   /// allowing for real-time updates.
-  final Client client;
+  final StreamChatClient client;
 
   @override
   Widget build(BuildContext context) {
@@ -287,8 +287,8 @@ class _MessageScreenState extends State<MessageScreen> {
 }
 
 /// Extensions can be used to add functionality to the SDK. In the examples
-/// below, we add two simple extensions to the [Client] and [Channel].
-extension on Client {
+/// below, we add two simple extensions to the [StreamChatClient] and [Channel].
+extension on StreamChatClient {
   /// Fetches the current user id.
   String get uid => state.user.id;
 }

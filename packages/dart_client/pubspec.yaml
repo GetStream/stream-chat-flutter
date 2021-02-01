@@ -9,28 +9,18 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   json_annotation: ^3.0.1
-  shared_preferences: ^0.5.7+3
   logging: ^0.11.4
   dio: ^3.0.10
   web_socket_channel: ^1.1.0
   uuid: ^2.2.2
   async: ^2.4.1
-  stream_channel: ^2.0.0
-  moor: ^3.3.1
-  path_provider: ^1.6.10
-  path: ^1.6.4
   rxdart: ^0.24.1
   collection: ^1.14.12
-  sqlite3_flutter_libs: ^0.3.0
-  pedantic: ^1.9.2
 
 dev_dependencies:
   build_runner: ^1.10.0
   json_serializable: ^3.3.0
-  moor_generator: ^3.1.0
-  flutter_test:
-    sdk: flutter
+  test: ^1.15.7
   mockito: ^4.1.1
+  pedantic: ^1.9.2

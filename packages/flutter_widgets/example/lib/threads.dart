@@ -10,7 +10,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Now we can open threads and create new ones as well, if you long press a message you can tap on Reply and it will open the same [ThreadPage].
 void main() async {
-  final client = Client(
+  final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
@@ -24,7 +24,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Client client;
+  final StreamChatClient client;
 
   MyApp(this.client);
 

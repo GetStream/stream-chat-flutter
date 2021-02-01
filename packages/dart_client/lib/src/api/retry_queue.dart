@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat/src/api/channel.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
@@ -113,30 +112,30 @@ class RetryQueue {
   }
 
   void _sendFailedEvent(Message message) {
-    final newStatus = message.status == MessageSendingStatus.SENDING
-        ? MessageSendingStatus.FAILED
-        : (message.status == MessageSendingStatus.UPDATING
-            ? MessageSendingStatus.FAILED_UPDATE
-            : MessageSendingStatus.FAILED_DELETE);
+    final newStatus = message.status == MessageSendingStatus.sending
+        ? MessageSendingStatus.failed
+        : (message.status == MessageSendingStatus.updating
+            ? MessageSendingStatus.failed_update
+            : MessageSendingStatus.failed_delete);
     channel.state.addMessage(message.copyWith(
       status: newStatus,
     ));
   }
 
   Future<void> _sendMessage(Message message) async {
-    if (message.status == MessageSendingStatus.FAILED_UPDATE ||
-        message.status == MessageSendingStatus.UPDATING) {
+    if (message.status == MessageSendingStatus.failed_update ||
+        message.status == MessageSendingStatus.updating) {
       await channel.client.updateMessage(
         message,
         channel.cid,
       );
-    } else if (message.status == MessageSendingStatus.FAILED ||
-        message.status == MessageSendingStatus.SENDING) {
+    } else if (message.status == MessageSendingStatus.failed ||
+        message.status == MessageSendingStatus.sending) {
       await channel.sendMessage(
         message,
       );
-    } else if (message.status == MessageSendingStatus.FAILED_DELETE ||
-        message.status == MessageSendingStatus.DELETING) {
+    } else if (message.status == MessageSendingStatus.failed_delete ||
+        message.status == MessageSendingStatus.deleting) {
       await channel.client.deleteMessage(
         message,
         channel.cid,
@@ -152,15 +151,15 @@ class RetryQueue {
             messageList.indexWhere((m) => m.id == event.message.id);
         if (messageIndex == -1 &&
             [
-              MessageSendingStatus.FAILED_UPDATE,
-              MessageSendingStatus.FAILED,
-              MessageSendingStatus.FAILED_DELETE,
+              MessageSendingStatus.failed_update,
+              MessageSendingStatus.failed,
+              MessageSendingStatus.failed_delete,
             ].contains(event.message.status)) {
           logger?.info('add message from events');
           add([event.message]);
         } else if (messageIndex != -1 &&
             [
-              MessageSendingStatus.SENT,
+              MessageSendingStatus.sent,
               null,
             ].contains(event.message.status)) {
           _messageQueue.remove(messageList[messageIndex]);
@@ -184,16 +183,16 @@ class RetryQueue {
 
   static DateTime _getMessageDate(Message m1) {
     switch (m1.status) {
-      case MessageSendingStatus.FAILED_DELETE:
-      case MessageSendingStatus.DELETING:
+      case MessageSendingStatus.failed_delete:
+      case MessageSendingStatus.deleting:
         return m1.deletedAt;
 
-      case MessageSendingStatus.FAILED:
-      case MessageSendingStatus.SENDING:
+      case MessageSendingStatus.failed:
+      case MessageSendingStatus.sending:
         return m1.createdAt;
 
-      case MessageSendingStatus.FAILED_UPDATE:
-      case MessageSendingStatus.UPDATING:
+      case MessageSendingStatus.failed_update:
+      case MessageSendingStatus.updating:
         return m1.updatedAt;
       default:
         return null;

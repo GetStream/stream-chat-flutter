@@ -19,7 +19,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// In this case we are showing the list of channels the current user is a member and we order them based on the time they had a new message.
 /// [ChannelListView] handles pagination and updates automatically out of the box when new channels are created or when a new message is added to a channel.
 void main() async {
-  final client = Client(
+  final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
@@ -33,7 +33,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Client client;
+  final StreamChatClient client;
 
   MyApp(this.client);
 

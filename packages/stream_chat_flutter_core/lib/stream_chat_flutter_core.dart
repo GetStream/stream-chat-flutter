@@ -10,4 +10,5 @@ export 'src/stream_channel.dart';
 export 'src/stream_chat_core.dart';
 export 'src/user_list_core.dart';
 export 'src/users_bloc.dart';
+export 'src/typedef.dart';
 export 'package:stream_chat/stream_chat.dart';

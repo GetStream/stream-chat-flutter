@@ -14,7 +14,7 @@ You can sign up for a Stream account at https://getstream.io/chat/
 
 ```yaml
 dependencies:
- stream_chat: ^0.2.0
+ stream_chat: ^1.0.0-beta
 ```
 
 You should then run `flutter packages get`
@@ -28,7 +28,7 @@ There is a detailed Flutter example project in the `example` folder. You can dir
 First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the websocket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
 
 ```dart
-final client = Client("stream-chat-api-key");
+final client = StreamChatClient("stream-chat-api-key");
 ```
 
 ### Logging
@@ -40,7 +40,7 @@ By default the Chat Client will write all messages with level Warn or Error to s
 During development you might want to enable more logging information, you can change the default log level when constructing the client.
 
 ```dart 
-final client = Client("stream-chat-api-key", logLevel: Level.INFO);
+final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
 ```
 
 #### Custom Logger
@@ -52,32 +52,39 @@ myLogHandlerFunction = (LogRecord record) {
   // do something with the record (ie. send it to Sentry or Fabric)
 }
 
-final client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
 ```
 
 ### Offline storage 
 
-By default the library saves information about channels and messages in a SQLite DB.
+To add data persistance you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
 
-Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
+```dart
+class CustomChatPersistentClient extends ChatPersistenceClient {
+...
+}
 
-## Flutter Web
-
-Due to Moor web (for offline storage) you need to include the sql.js library:
-
-```html
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script defer src="sql-wasm.js"></script>
-    <script defer src="main.dart.js" type="application/javascript"></script>
-</head>
-<body></body>
-</html>
+final client = StreamChatClient(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = CustomChatPersistentClient();
 ```
 
-You can grab the latest version of sql-wasm.js and sql-wasm.wasm [here](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
+We provide an official persistent client in the (stream_chat_persistence)[https://pub.dev/packages/stream_chat_persistence] package.
+
+```dart
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.background,
+);
+
+final client = StreamChatClient(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = chatPersistentClient;
+```
 
 ## Contributing
 

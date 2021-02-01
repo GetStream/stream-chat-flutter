@@ -15,7 +15,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// you can use [StreamChat.of], [StreamChannel.of] and [StreamChatTheme.of] to use the API client directly
 /// or to retrieve outer scope needed such as messages from the [Channel.state].
 void main() async {
-  final client = Client(
+  final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
@@ -29,7 +29,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Client client;
+  final StreamChatClient client;
 
   MyApp(this.client);
 

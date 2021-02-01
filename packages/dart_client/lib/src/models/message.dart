@@ -10,25 +10,25 @@ part 'message.g.dart';
 /// Enum defining the status of a sending message
 enum MessageSendingStatus {
   /// Message is being sent
-  SENDING,
+  sending,
 
   /// Message is being updated
-  UPDATING,
+  updating,
 
   /// Message is being deleted
-  DELETING,
+  deleting,
 
   /// Message failed to send
-  FAILED,
+  failed,
 
   /// Message failed to updated
-  FAILED_UPDATE,
+  failed_update,
 
   /// Message failed to delete
-  FAILED_DELETE,
+  failed_delete,
 
   /// Message correctly sent
-  SENT,
+  sent,
 }
 
 /// The class that contains the information about a message
@@ -72,7 +72,7 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Reaction> ownReactions;
 
-  /// The ID of the parent message, if the message is a reply.
+  /// The ID of the parent message, if the message is a thread reply.
   final String parentId;
 
   /// A quoted reply message
@@ -186,7 +186,7 @@ class Message {
     this.user,
     this.extraData,
     this.deletedAt,
-    this.status = MessageSendingStatus.SENT,
+    this.status = MessageSendingStatus.sent,
   });
 
   /// Create a new instance from a json

@@ -160,8 +160,8 @@ class Channel {
       state?.channelStateStream?.map((cs) => cs.channel?.extraData);
 
   /// The main Stream chat client
-  Client get client => _client;
-  final Client _client;
+  StreamChatClient get client => _client;
+  final StreamChatClient _client;
 
   String get _channelURL => '/channels/$type/$id';
 
@@ -183,7 +183,7 @@ class Channel {
       user: _client.state.user,
       id: messageId,
       quotedMessage: quotedMessage,
-      status: MessageSendingStatus.SENDING,
+      status: MessageSendingStatus.sending,
     );
 
     if (message.parentId != null && message.id == null) {
@@ -419,7 +419,7 @@ class Channel {
         }
       }
 
-      await _client.offlineStorage?.deleteMessages([messageId]);
+      await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
 
     return res;
@@ -487,9 +487,9 @@ class Channel {
     PaginationParams options, {
     bool preferOffline = false,
   }) async {
-    final cachedReplies = await _client.offlineStorage?.getReplies(
+    final cachedReplies = await _client.chatPersistenceClient?.getReplies(
       parentId,
-      lessThan: options?.lessThan,
+      options: options,
     );
     if (cachedReplies != null && cachedReplies.isNotEmpty) {
       state?.updateThreadInfo(parentId, cachedReplies);
@@ -603,11 +603,10 @@ class Channel {
     }
 
     if (preferOffline && cid != null) {
-      final updatedState = await _client.offlineStorage?.getChannel(
+      final updatedState =
+          await _client.chatPersistenceClient?.getChannelStateByCid(
         cid,
-        limit: messagesPagination?.limit,
-        messageLessThan: messagesPagination?.lessThan,
-        messageGreaterThan: messagesPagination?.greaterThan,
+        messagePagination: messagesPagination,
       );
       if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
@@ -723,7 +722,7 @@ class Channel {
     });
   }
 
-  /// Hides the channel from [Client.queryChannels] for the user until a message is added
+  /// Hides the channel from [StreamChatClient.queryChannels] for the user until a message is added
   ///	If [clearHistory] is set to true - all messages will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();
@@ -732,7 +731,7 @@ class Channel {
 
     if (clearHistory == true) {
       state.truncate();
-      await _client.offlineStorage?.deleteChannelsMessages([_cid]);
+      await _client.chatPersistenceClient?.deleteMessageByCid(_cid);
     }
 
     return _client.decode(response.data, EmptyResponse.fromJson);
@@ -871,7 +870,7 @@ class ChannelClientState {
 
     _computeInitialUnread();
 
-    _channel._client.offlineStorage
+    _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid)
         ?.then((threads) {
       _threads = threads;
@@ -949,8 +948,8 @@ class ChannelClientState {
         .on(EventType.channelTruncated, EventType.notificationChannelTruncated)
         .listen((event) async {
       final channel = event.channel;
-      await _channel._client.offlineStorage
-          ?.deleteChannelsMessages([channel.cid]);
+      await _channel._client.chatPersistenceClient
+          ?.deleteMessageByCid(channel.cid);
       truncate();
     }));
   }
@@ -978,7 +977,7 @@ class ChannelClientState {
         <Message>[...messages, ...threads.values.expand((v) => v)]
             .where((message) =>
                 message.status != null &&
-                message.status != MessageSendingStatus.SENT &&
+                message.status != MessageSendingStatus.sent &&
                 message.createdAt.isBefore(DateTime.now().subtract(Duration(
                   seconds: 1,
                 ))))
@@ -1404,7 +1403,7 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    _channel._client.offlineStorage?.updateChannelState(v);
+    _channel._client.chatPersistenceClient?.updateChannelState(v);
   }
 
   /// The channel threads related to this channel
@@ -1417,9 +1416,9 @@ class ChannelClientState {
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> v) {
-    _channel._client.offlineStorage?.updateMessages(
-      v.values.expand((v) => v).toList(),
+    _channel._client.chatPersistenceClient?.updateMessages(
       _channel.cid,
+      v.values.expand((v) => v).toList(),
     );
     _threadsController.add(v);
   }

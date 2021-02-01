@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:stream_chat/src/api/web_socket_channel_stub.dart';
 
 void main() {

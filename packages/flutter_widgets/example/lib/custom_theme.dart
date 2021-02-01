@@ -19,7 +19,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// We also change the message color posted by the current user.
 /// You can perform these more granular style changes using [StreamChatTheme.copyWith].
 void main() async {
-  final client = Client(
+  final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
@@ -33,7 +33,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Client client;
+  final StreamChatClient client;
 
   MyApp(this.client);
 

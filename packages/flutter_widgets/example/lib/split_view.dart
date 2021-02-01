@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() async {
-  final client = Client(
+  final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
   );
@@ -16,7 +16,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Client client;
+  final StreamChatClient client;
 
   MyApp(this.client);
 

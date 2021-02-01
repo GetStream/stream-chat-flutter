@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat/src/api/connection_status.dart';
@@ -67,7 +67,7 @@ void main() {
       await ws.connect();
 
       verify(connectFunc(computedUrl)).called(1);
-      expect(ws.connectionStatus.value, ConnectionStatus.connected);
+      expect(ws.connectionStatus, ConnectionStatus.connected);
 
       await streamController.close();
       timer.cancel();

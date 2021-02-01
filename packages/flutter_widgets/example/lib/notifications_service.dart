@@ -1,11 +1,9 @@
-import 'dart:io';
-
-import 'package:flutter_apns/flutter_apns.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     hide Message;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-void showLocalNotification(Message message, ChannelModel channel) async {
+void showLocalNotification(Event event) async {
+  if (event.message == null) return;
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final initializationSettingsAndroid =
       AndroidInitializationSettings('launch_background');
@@ -16,9 +14,9 @@ void showLocalNotification(Message message, ChannelModel channel) async {
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   await flutterLocalNotificationsPlugin.show(
-    message.id.hashCode,
-    '${message.user.name} @ ${channel.name}',
-    message.text,
+    event.message.id.hashCode,
+    event.message.user.name,
+    event.message.text,
     NotificationDetails(
       android: AndroidNotificationDetails(
         'message channel',
@@ -30,34 +28,4 @@ void showLocalNotification(Message message, ChannelModel channel) async {
       iOS: IOSNotificationDetails(),
     ),
   );
-}
-
-Future backgroundHandler(Map<String, dynamic> notification) async {
-  print('new notification ${notification}');
-  final messageId = notification['data']['id'];
-
-  final notificationData =
-      await NotificationService.getAndStoreMessage(messageId);
-
-  showLocalNotification(
-    notificationData.message,
-    notificationData.channel,
-  );
-}
-
-void initNotifications(Client client) {
-  final connector = createPushConnector();
-  connector.configure(
-    onBackgroundMessage: backgroundHandler,
-  );
-
-  connector.requestNotificationPermissions();
-  connector.token.addListener(() {
-    if (connector.token.value != null) {
-      client.addDevice(
-        connector.token.value,
-        Platform.isAndroid ? PushProvider.firebase : PushProvider.apn,
-      );
-    }
-  });
 }

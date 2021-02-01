@@ -1,7 +1,7 @@
 # Official Flutter SDK for [Stream Chat](https://getstream.io/chat/)
 
 <p align="center">
-  <a href="https://getstream.io/tutorials/ios-chat/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" width="60%" /></a>
+  <a href="https://getstream.io/chat/flutter/tutorial/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" width="60%" /></a>
 </p>
 
 > The official Flutter components for Stream Chat, a service for
@@ -91,7 +91,7 @@ Out of the box, all chat widgets use their default styling, and there are two wa
   1. Initialize the `StreamChatTheme` from your existing `MaterialApp` style
   ```dart
   class MyApp extends StatelessWidget {
-    final Client client;
+    final StreamChatClient client;
 
     MyApp(this.client);
 
@@ -117,7 +117,7 @@ Out of the box, all chat widgets use their default styling, and there are two wa
   2. Construct a custom theme and provide all the customizations needed
   ```dart
   class MyApp extends StatelessWidget {
-    final Client client;
+    final StreamChatClient client;
 
     MyApp(this.client);
 

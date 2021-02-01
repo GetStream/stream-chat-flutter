@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
@@ -116,7 +116,7 @@ void main() {
         showInChannel: true,
         parentId: 'parentId',
         extraData: {'hey': 'test'},
-        status: MessageSendingStatus.SENT,
+        status: MessageSendingStatus.sent,
       );
 
       expect(

@@ -1,7 +1,7 @@
 import 'package:stream_chat/src/models/command.dart';
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/command', () {

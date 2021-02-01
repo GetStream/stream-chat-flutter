@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import 'typedef.dart';
+
 /// Widget used to provide information about the chat to the widget tree.
 /// This Widget is used to react to life cycle changes and system updates.
 /// When the app goes into the background, the websocket connection is kept alive
@@ -13,7 +15,7 @@ import 'package:stream_chat/stream_chat.dart';
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///
 ///   MyApp(this.client);
 ///
@@ -40,16 +42,26 @@ class StreamChatCore extends StatefulWidget {
     Key key,
     @required this.client,
     @required this.child,
+    this.onBackgroundEventReceived,
+    this.backgroundKeepAlive = const Duration(minutes: 1),
   })  : assert(client != null),
         assert(child != null),
         super(key: key);
 
   /// Instance of Stream Chat Client containing information about the current
   /// application.
-  final Client client;
+  final StreamChatClient client;
 
   /// Widget descendant.
   final Widget child;
+
+  /// The amount of time that will pass before disconnecting the client in the background
+  final Duration backgroundKeepAlive;
+
+  /// Handler called whenever the [client] receives a new [Event] while the app
+  /// is in background. Can be used to display various notifications depending
+  /// upon the [Event.type]
+  final EventHandler onBackgroundEventReceived;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -73,7 +85,7 @@ class StreamChatCore extends StatefulWidget {
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
   /// Initialized client used throughout the application.
-  Client get client => widget.client;
+  StreamChatClient get client => widget.client;
 
   Timer _disconnectTimer;
 
@@ -94,56 +106,28 @@ class StreamChatCoreState extends State<StreamChatCore>
     WidgetsBinding.instance.addObserver(this);
   }
 
-  StreamSubscription _newMessageSubscription;
+  StreamSubscription _eventSubscription;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (client.state?.user != null) {
       if (state == AppLifecycleState.paused) {
-        if (client.showLocalNotification != null) {
-          _newMessageSubscription = client
-              .on(EventType.messageNew)
-              .where((e) => e.user?.id != user.id)
-              .where((e) => e.message.silent != true)
-              .where((e) => e.message.shadowed != true)
-              .listen((event) async {
-            final channel = client.channel(
-              event.channelType,
-              id: event.channelId,
-            );
-
-            client.showLocalNotification(
-              event.message,
-              ChannelModel(
-                id: channel.id,
-                createdAt: channel.createdAt,
-                extraData: channel.extraData,
-                type: channel.type,
-                memberCount: channel.memberCount,
-                frozen: channel.frozen,
-                cid: channel.cid,
-                deletedAt: channel.deletedAt,
-                config: channel.config,
-                createdBy: channel.createdBy,
-                updatedAt: channel.updatedAt,
-                lastMessageAt: channel.lastMessageAt,
-              ),
-            );
-          });
-          _disconnectTimer = Timer(client.backgroundKeepAlive, () {
-            client.disconnect();
-          });
+        if (widget.onBackgroundEventReceived != null) {
+          _eventSubscription =
+              client.on().listen(widget.onBackgroundEventReceived);
+          _disconnectTimer = Timer(
+            widget.backgroundKeepAlive,
+            client.disconnect,
+          );
         } else {
           client.disconnect();
         }
       } else if (state == AppLifecycleState.resumed) {
-        _newMessageSubscription?.cancel();
+        _eventSubscription?.cancel();
         if (_disconnectTimer?.isActive == true) {
           _disconnectTimer.cancel();
         } else {
-          if (client.wsConnectionStatus.value ==
-              ConnectionStatus.disconnected) {
-            NotificationService.handleIosMessageQueue(client);
+          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
             client.connect();
           }
         }
@@ -154,6 +138,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
     super.dispose();
   }

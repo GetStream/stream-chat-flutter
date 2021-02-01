@@ -126,7 +126,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           children: <Widget>[
                             if (widget.showReactions &&
                                 (widget.message.status ==
-                                        MessageSendingStatus.SENT ||
+                                        MessageSendingStatus.sent ||
                                     widget.message.status == null))
                               Align(
                                 alignment: Alignment(
@@ -174,7 +174,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 showReactionPickerIndicator:
                                     widget.showReactions &&
                                         (widget.message.status ==
-                                                MessageSendingStatus.SENT ||
+                                                MessageSendingStatus.sent ||
                                             widget.message.status == null),
                                 showInChannelIndicator: false,
                                 showSendingIndicator: false,
@@ -203,13 +203,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                     children: [
                                       if (widget.showReplyMessage &&
                                           (widget.message.status ==
-                                                  MessageSendingStatus.SENT ||
+                                                  MessageSendingStatus.sent ||
                                               widget.message.status == null) &&
                                           widget.message.parentId == null)
                                         _buildReplyButton(context),
                                       if (widget.showThreadReplyMessage &&
                                           (widget.message.status ==
-                                                  MessageSendingStatus.SENT ||
+                                                  MessageSendingStatus.sent ||
                                               widget.message.status == null) &&
                                           widget.message.parentId == null)
                                         _buildThreadReplyButton(context),
@@ -486,7 +486,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildDeleteButton(BuildContext context) {
     final isDeleteFailed =
-        widget.message.status == MessageSendingStatus.FAILED_DELETE;
+        widget.message.status == MessageSendingStatus.failed_delete;
     return InkWell(
       onTap: () => _showDeleteDialog(),
       child: Padding(
@@ -561,7 +561,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildResendMessage(BuildContext context) {
     final isUpdateFailed =
-        widget.message.status == MessageSendingStatus.FAILED_UPDATE;
+        widget.message.status == MessageSendingStatus.failed_update;
     return InkWell(
       onTap: () {
         Navigator.pop(context);
