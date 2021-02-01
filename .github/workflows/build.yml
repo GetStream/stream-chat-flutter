@@ -10,7 +10,7 @@ on:
       - created
 defaults:
   run:
-    working-directory: packages/flutter_widgets
+    working-directory: packages/stream_chat_flutter
 
 jobs:
   build_and_deploy_ios:
@@ -68,4 +68,4 @@ jobs:
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: stream-testers
           debug: true
-          file: packages/flutter_widgets/example/build/app/outputs/apk/release/app-release.apk
+          file: packages/stream_chat_flutter/example/build/app/outputs/apk/release/app-release.apk
