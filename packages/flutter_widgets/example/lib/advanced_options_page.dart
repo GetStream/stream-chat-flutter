@@ -1,19 +1,12 @@
-import 'dart:io';
-
-import 'package:example/routes/app_routes.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/stream_version.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_persistence/stream_chat_persistence.dart';
-import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'choose_user_page.dart';
 import 'main.dart';
-import 'notifications_service.dart';
 
 class AdvancedOptionsPage extends StatefulWidget {
   @override
@@ -286,10 +279,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             }),
                             userToken,
                           );
-
-                          if (!kIsWeb) {
-                            initNotifications(client);
-                          }
 
                           final secureStorage = FlutterSecureStorage();
                           secureStorage.write(

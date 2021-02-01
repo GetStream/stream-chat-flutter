@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:example/chat_info_screen.dart';
 import 'package:example/choose_user_page.dart';
@@ -41,9 +40,6 @@ void main() async {
       User(id: userId),
       token,
     );
-    if (!kIsWeb) {
-      initNotifications(client);
-    }
   }
 
   runApp(MyApp(client));

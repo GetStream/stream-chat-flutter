@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
@@ -460,10 +459,12 @@ class Client {
 
     _connectionStatusHandler = (ConnectionStatus status) async {
       _wsConnectionStatus = status;
-      handleEvent(Event(
-        type: EventType.connectionChanged,
-        online: status == ConnectionStatus.connected,
-      ));
+      handleEvent(
+        Event(
+          type: EventType.connectionChanged,
+          online: status == ConnectionStatus.connected,
+        ),
+      );
 
       if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
