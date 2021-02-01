@@ -13,13 +13,13 @@ import 'package:http_parser/http_parser.dart' as httpParser;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/compress_video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
 
@@ -1040,7 +1040,7 @@ class MessageInputState extends State<MessageInput> {
 
       if (file.size > _kMaxAttachmentSize) {
         if (medium?.type == AssetType.video) {
-          final mediaInfo = await CompressVideoService.compressVideo(file.path);
+          final mediaInfo = await compressVideoService.compressVideo(file.path);
 
           if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
             _showErrorAlert(
@@ -1999,7 +1999,7 @@ class MessageInputState extends State<MessageInput> {
 
     if (file.size / 1024 > _kMaxAttachmentSize) {
       if (attachmentType == 'video') {
-        final mediaInfo = await CompressVideoService.compressVideo(file.path);
+        final mediaInfo = await compressVideoService.compressVideo(file.path);
         file = PlatformFile(
           name: mediaInfo.title,
           size: (mediaInfo.filesize / 1024).ceil(),
@@ -2424,5 +2424,12 @@ class Tuple2<T1, T2> {
 
   @override
   bool operator ==(Object other) =>
-      other is Tuple2 && other.item1 == item1 && other.item2 == item2;
+      identical(this, other) ||
+      other is Tuple2 &&
+          runtimeType == other.runtimeType &&
+          item1 == other.item1 &&
+          item2 == other.item2;
+
+  @override
+  int get hashCode => item1.hashCode ^ item2.hashCode;
 }

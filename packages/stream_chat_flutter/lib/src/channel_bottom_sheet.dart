@@ -209,7 +209,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     );
   }
 
-  void _showDeleteDialog() async {
+  Future<void> _showDeleteDialog() async {
     final res = await showConfirmationDialog(
       context,
       title: 'Delete Conversation',
@@ -227,7 +227,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     }
   }
 
-  void _showLeaveDialog() async {
+  Future<void> _showLeaveDialog() async {
     final res = await showConfirmationDialog(
       context,
       title: 'Leave conversation',
