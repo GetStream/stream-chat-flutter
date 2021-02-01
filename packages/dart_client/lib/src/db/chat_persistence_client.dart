@@ -153,17 +153,6 @@ abstract class ChatPersistenceClient {
 
   /// Update list of channel states
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {
-    final channels = channelStates.map((it) {
-      return it.channel;
-    }).where((it) => it != null);
-
-    final reactions = channelStates.expand((it) => it.messages).expand((it) {
-      return [
-        ...it.ownReactions.where((r) => r.userId != null),
-        ...it.latestReactions.where((r) => r.userId != null)
-      ];
-    }).where((it) => it != null);
-
     final deleteReactions = deleteReactionsByMessageId(channelStates
         .expand((it) => it.messages)
         .map((m) => m.id)
@@ -177,6 +166,17 @@ abstract class ChatPersistenceClient {
       deleteReactions,
       deleteMembers,
     ]);
+
+    final channels = channelStates.map((it) {
+      return it.channel;
+    }).where((it) => it != null);
+
+    final reactions = channelStates.expand((it) => it.messages).expand((it) {
+      return [
+        ...it.ownReactions.where((r) => r.userId != null),
+        ...it.latestReactions.where((r) => r.userId != null)
+      ];
+    }).where((it) => it != null);
 
     final users = channelStates
         .map((cs) => [
