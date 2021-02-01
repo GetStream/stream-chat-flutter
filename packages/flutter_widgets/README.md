@@ -91,7 +91,7 @@ Out of the box, all chat widgets use their default styling, and there are two wa
   1. Initialize the `StreamChatTheme` from your existing `MaterialApp` style
   ```dart
   class MyApp extends StatelessWidget {
-    final Client client;
+    final StreamChatClient client;
 
     MyApp(this.client);
 
@@ -117,7 +117,7 @@ Out of the box, all chat widgets use their default styling, and there are two wa
   2. Construct a custom theme and provide all the customizations needed
   ```dart
   class MyApp extends StatelessWidget {
-    final Client client;
+    final StreamChatClient client;
 
     MyApp(this.client);
 

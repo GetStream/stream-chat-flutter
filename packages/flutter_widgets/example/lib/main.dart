@@ -29,7 +29,7 @@ void main() async {
   final apiKey = await secureStorage.read(key: kStreamApiKey);
   final userId = await secureStorage.read(key: kStreamUserId);
 
-  final client = Client(
+  final client = StreamChatClient(
     apiKey ?? kDefaultStreamApiKey,
     logLevel: Level.INFO,
   )..chatPersistenceClient = chatPersistentClient;
@@ -46,7 +46,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Client client;
+  final StreamChatClient client;
 
   MyApp(this.client);
 

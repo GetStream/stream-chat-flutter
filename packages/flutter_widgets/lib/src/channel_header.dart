@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../stream_chat_flutter.dart';
 import './channel_name.dart';
+import '../stream_chat_flutter.dart';
 import 'channel_image.dart';
 import 'connection_status_builder.dart';
 
@@ -18,7 +18,7 @@ import 'connection_status_builder.dart';
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///   final Channel channel;
 ///
 ///   MyApp(this.client, this.channel);

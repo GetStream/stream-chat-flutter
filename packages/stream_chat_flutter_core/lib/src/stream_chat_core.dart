@@ -15,7 +15,7 @@ import 'typedef.dart';
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///
 ///   MyApp(this.client);
 ///
@@ -50,7 +50,7 @@ class StreamChatCore extends StatefulWidget {
 
   /// Instance of Stream Chat Client containing information about the current
   /// application.
-  final Client client;
+  final StreamChatClient client;
 
   /// Widget descendant.
   final Widget child;
@@ -85,7 +85,7 @@ class StreamChatCore extends StatefulWidget {
 class StreamChatCoreState extends State<StreamChatCore>
     with WidgetsBindingObserver {
   /// Initialized client used throughout the application.
-  Client get client => widget.client;
+  StreamChatClient get client => widget.client;
 
   Timer _disconnectTimer;
 

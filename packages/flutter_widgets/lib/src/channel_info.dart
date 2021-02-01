@@ -111,7 +111,8 @@ class ChannelInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildDisconnectedTitleState(BuildContext context, Client client) {
+  Widget _buildDisconnectedTitleState(
+      BuildContext context, StreamChatClient client) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

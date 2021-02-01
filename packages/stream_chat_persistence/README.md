@@ -36,7 +36,7 @@ final chatPersistentClient = StreamChatPersistenceClient(
 ```
 2. Pass the instance to the official Stream chat client.
 ```dart
-  final client = Client(
+  final client = StreamChatClient(
     apiKey ?? kDefaultStreamApiKey,
     logLevel: Level.INFO,
   )..chatPersistenceClient = chatPersistentClient;

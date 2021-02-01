@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 Future<void> main() async {
-  /// Create a new instance of [Client] passing the apikey obtained from your
+  /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
   /// project dashboard.
-  final client = Client('b67pax5b2wdq');
+  final client = StreamChatClient('b67pax5b2wdq');
 
   /// Set the current user. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -48,9 +48,9 @@ class StreamExample extends StatelessWidget {
     @required this.channel,
   }) : super(key: key);
 
-  /// Instance of [Client] we created earlier. This contains information about
+  /// Instance of [StreamChatClient] we created earlier. This contains information about
   /// our application and connection state.
-  final Client client;
+  final StreamChatClient client;
 
   /// The channel we'd like to observe and participate.
   final Channel channel;
@@ -242,7 +242,7 @@ class _MessageViewState extends State<MessageView> {
   }
 }
 
-/// Helper extension for quickly retrieving the current user id from a [Client].
-extension on Client {
+/// Helper extension for quickly retrieving the current user id from a [StreamChatClient].
+extension on StreamChatClient {
   String get uid => state.user.id;
 }

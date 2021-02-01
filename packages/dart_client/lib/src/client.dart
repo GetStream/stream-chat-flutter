@@ -3,15 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
+import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
-import 'package:pedantic/pedantic.dart' show unawaited;
 
 import 'api/channel.dart';
 import 'api/connection_status.dart';
@@ -64,12 +64,12 @@ extension on PushProvider {
 /// websocket connection to Stream Chat servers.
 ///
 /// ```dart
-/// final client = Client("stream-chat-api-key");
+/// final client = StreamChatClient("stream-chat-api-key");
 /// ```
-class Client {
+class StreamChatClient {
   /// Create a client instance with default options.
   /// You should only create the client once and re-use it across your application.
-  Client(
+  StreamChatClient(
     this.apiKey, {
     this.tokenProvider,
     this.baseURL = _defaultBaseURL,
@@ -81,9 +81,10 @@ class Client {
     RetryPolicy retryPolicy,
   }) {
     _retryPolicy ??= RetryPolicy(
-      retryTimeout: (Client client, int attempt, ApiError error) =>
+      retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
           Duration(seconds: 1 * attempt),
-      shouldRetry: (Client client, int attempt, ApiError error) => attempt < 5,
+      shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
+          attempt < 5,
     );
 
     state = ClientState(this);
@@ -94,7 +95,7 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  /// Client chat persistence client
+  /// Chat persistence client
   ChatPersistenceClient chatPersistenceClient;
 
   /// Whether the chat persistence is available or not
@@ -110,11 +111,11 @@ class Client {
   /// This client state
   ClientState state;
 
-  /// By default the Chat Client will write all messages with level Warn or Error to stdout.
+  /// By default the Chat client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
   ///
   /// ```dart
-  /// final client = Client("stream-chat-api-key", logLevel: Level.INFO);
+  /// final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
   /// ```
   final Level logLevel;
 
@@ -133,7 +134,7 @@ class Client {
   ///  // do something with the record (ie. send it to Sentry or Fabric)
   /// }
   ///
-  /// final client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+  /// final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
   ///```
   LogHandlerFunction logHandlerFunction;
 
@@ -1337,7 +1338,7 @@ class ClientState {
     }));
   }
 
-  final Client _client;
+  final StreamChatClient _client;
 
   /// Update user information
   set user(OwnUser user) {

@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'connection_status_builder.dart';
 import 'info_tile.dart';
@@ -13,15 +13,15 @@ import 'stream_chat.dart';
 typedef _TitleBuilder = Widget Function(
   BuildContext context,
   ConnectionStatus status,
-  Client client,
+  StreamChatClient client,
 );
 
 ///
-/// It shows the current [Client] status.
+/// It shows the current [StreamChatClient] status.
 ///
 /// ```dart
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///
 ///   MyApp(this.client);
 ///
@@ -42,8 +42,8 @@ typedef _TitleBuilder = Widget Function(
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
 ///
-/// The widget by default uses the inherited [Client] to fetch information about the status.
-/// However you can also pass your own [Client] if you don't have it in the widget tree.
+/// The widget by default uses the inherited [StreamChatClient] to fetch information about the status.
+/// However you can also pass your own [StreamChatClient] if you don't have it in the widget tree.
 ///
 /// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
@@ -59,8 +59,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.preNavigationCallback,
   }) : super(key: key);
 
-  /// Pass this if you don't have a [Client] in your widget tree.
-  final Client client;
+  /// Pass this if you don't have a [StreamChatClient] in your widget tree.
+  final StreamChatClient client;
 
   /// Use this to build your own title as per different [ConnectionStatus]
   final _TitleBuilder titleBuilder;
@@ -215,7 +215,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildDisconnectedTitleState(BuildContext context, Client client) {
+  Widget _buildDisconnectedTitleState(
+      BuildContext context, StreamChatClient client) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

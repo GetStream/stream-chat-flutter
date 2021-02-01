@@ -15,17 +15,18 @@ class RetryPolicy {
   int attempt = 0;
 
   /// This function evaluates if we should retry the failure
-  final bool Function(Client client, int attempt, ApiError apiError)
+  final bool Function(StreamChatClient client, int attempt, ApiError apiError)
       shouldRetry;
 
   /// In the case that we want to retry a failed request the retryTimeout method is called to determine the timeout
-  final Duration Function(Client client, int attempt, ApiError apiError)
-      retryTimeout;
+  final Duration Function(
+      StreamChatClient client, int attempt, ApiError apiError) retryTimeout;
 
   /// Creates a copy of [RetryPolicy] with specified attributes overridden.
   RetryPolicy copyWith({
-    bool Function(Client client, int attempt, ApiError apiError) shouldRetry,
-    Duration Function(Client client, int attempt, ApiError apiError)
+    bool Function(StreamChatClient client, int attempt, ApiError apiError)
+        shouldRetry,
+    Duration Function(StreamChatClient client, int attempt, ApiError apiError)
         retryTimeout,
     int attempt,
   }) =>

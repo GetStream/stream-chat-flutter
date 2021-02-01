@@ -160,8 +160,8 @@ class Channel {
       state?.channelStateStream?.map((cs) => cs.channel?.extraData);
 
   /// The main Stream chat client
-  Client get client => _client;
-  final Client _client;
+  StreamChatClient get client => _client;
+  final StreamChatClient _client;
 
   String get _channelURL => '/channels/$type/$id';
 
@@ -722,7 +722,7 @@ class Channel {
     });
   }
 
-  /// Hides the channel from [Client.queryChannels] for the user until a message is added
+  /// Hides the channel from [StreamChatClient.queryChannels] for the user until a message is added
   ///	If [clearHistory] is set to true - all messages will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();

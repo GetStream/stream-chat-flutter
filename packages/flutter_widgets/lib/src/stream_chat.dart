@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_portal/flutter_portal.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget used to provide information about the chat to the widget tree
 ///
 /// class MyApp extends StatelessWidget {
-///   final Client client;
+///   final StreamChatClient client;
 ///
 ///   MyApp(this.client);
 ///
@@ -30,7 +30,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
 class StreamChat extends StatefulWidget {
-  final Client client;
+  final StreamChatClient client;
   final Widget child;
   final StreamChatThemeData streamChatThemeData;
 
@@ -73,7 +73,7 @@ class StreamChat extends StatefulWidget {
 
 /// The current state of the StreamChat widget
 class StreamChatState extends State<StreamChat> {
-  Client get client => widget.client;
+  StreamChatClient get client => widget.client;
 
   @override
   Widget build(BuildContext context) {

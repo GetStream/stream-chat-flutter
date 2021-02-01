@@ -267,7 +267,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           ),
                         );
 
-                        final client = Client(
+                        final client = StreamChatClient(
                           apiKey,
                           logLevel: Level.INFO,
                         )..chatPersistenceClient = chatPersistentClient;

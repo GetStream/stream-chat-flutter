@@ -1,7 +1,7 @@
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-class MockClient extends Mock implements Client {}
+class MockClient extends Mock implements StreamChatClient {}
 
 class MockClientState extends Mock implements ClientState {}
 

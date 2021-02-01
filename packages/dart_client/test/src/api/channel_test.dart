@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:dio/native_imp.dart';
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
@@ -8,6 +7,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
+import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
 
@@ -22,7 +22,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -51,7 +51,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -83,7 +83,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -108,7 +108,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -149,7 +149,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -173,7 +173,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -198,7 +198,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -223,7 +223,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -247,7 +247,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -272,7 +272,7 @@ void main() {
       when(mockDio.options).thenReturn(BaseOptions());
       when(mockDio.interceptors).thenReturn(Interceptors());
 
-      final client = Client(
+      final client = StreamChatClient(
         'api-key',
         httpClient: mockDio,
         tokenProvider: (_) async => '',
@@ -306,7 +306,7 @@ void main() {
       when(mockDio.options).thenReturn(BaseOptions());
       when(mockDio.interceptors).thenReturn(Interceptors());
 
-      final client = Client(
+      final client = StreamChatClient(
         'api-key',
         httpClient: mockDio,
         tokenProvider: (_) async => '',
@@ -340,7 +340,7 @@ void main() {
       when(mockDio.options).thenReturn(BaseOptions());
       when(mockDio.interceptors).thenReturn(Interceptors());
 
-      final client = Client(
+      final client = StreamChatClient(
         'api-key',
         httpClient: mockDio,
         tokenProvider: (_) async => '',
@@ -375,7 +375,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -414,7 +414,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -448,7 +448,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -475,7 +475,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -501,7 +501,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -527,7 +527,7 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client(
+          final client = StreamChatClient(
             'api-key',
             httpClient: mockDio,
             tokenProvider: (_) async => '',
@@ -845,7 +845,7 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client(
+          final client = StreamChatClient(
             'api-key',
             httpClient: mockDio,
             tokenProvider: (_) async => '',
@@ -1159,7 +1159,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1474,7 +1474,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1789,7 +1789,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1815,7 +1815,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1842,7 +1842,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1863,7 +1863,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1885,7 +1885,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1910,7 +1910,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1935,7 +1935,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1961,7 +1961,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -1993,7 +1993,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -2024,7 +2024,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
@@ -2064,7 +2064,7 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client(
+        final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',

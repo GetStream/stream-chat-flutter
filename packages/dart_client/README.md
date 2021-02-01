@@ -28,7 +28,7 @@ There is a detailed Flutter example project in the `example` folder. You can dir
 First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the websocket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
 
 ```dart
-final client = Client("stream-chat-api-key");
+final client = StreamChatClient("stream-chat-api-key");
 ```
 
 ### Logging
@@ -40,7 +40,7 @@ By default the Chat Client will write all messages with level Warn or Error to s
 During development you might want to enable more logging information, you can change the default log level when constructing the client.
 
 ```dart 
-final client = Client("stream-chat-api-key", logLevel: Level.INFO);
+final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
 ```
 
 #### Custom Logger
@@ -52,7 +52,7 @@ myLogHandlerFunction = (LogRecord record) {
   // do something with the record (ie. send it to Sentry or Fabric)
 }
 
-final client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
 ```
 
 ### Offline storage 
@@ -64,7 +64,7 @@ class CustomChatPersistentClient extends ChatPersistenceClient {
 ...
 }
 
-final client = Client(
+final client = StreamChatClient(
   apiKey ?? kDefaultStreamApiKey,
   logLevel: Level.INFO,
 )..chatPersistenceClient = CustomChatPersistentClient();
@@ -80,7 +80,7 @@ final chatPersistentClient = StreamChatPersistenceClient(
   connectionMode: ConnectionMode.background,
 );
 
-final client = Client(
+final client = StreamChatClient(
   apiKey ?? kDefaultStreamApiKey,
   logLevel: Level.INFO,
 )..chatPersistenceClient = chatPersistentClient;
