@@ -1,4 +1,4 @@
-## 0.1.0-beta
+## 1.0.0-beta
 
 - 🛑 **BREAKING** Renamed `Client` to less generic `StreamChatClient`
 - 🛑 **BREAKING** Segregated the persistence layer into separate package (stream_chat_persistence)[https://pub.dev/packages/stream_chat_persistence]
