@@ -3,9 +3,24 @@ import 'package:flutter/widgets.dart';
 
 enum _LoadingStatus { LOADING, STABLE }
 
-/// A widget that wraps a [Widget] and will trigger [onEndOfPage]/[onStartOfPage] when it
-/// reaches the bottom/start of the list
+/// Wrapper around a [Scrollable] which triggers [onEndOfPage]/[onStartOfPage] the Scrollable
+/// reaches to the start or end of the view extent.
 class LazyLoadScrollView extends StatefulWidget {
+  /// Creates a new instance of [LazyLoadScrollView]. The parameter [child] must be
+  /// supplied and not null.
+  const LazyLoadScrollView({
+    Key key,
+    @required this.child,
+    this.onStartOfPage,
+    this.onEndOfPage,
+    this.onPageScrollStart,
+    this.onPageScrollEnd,
+    this.onInBetweenOfPage,
+    this.isLoading = false,
+    this.scrollOffset = 100,
+  })  : assert(child != null),
+        super(key: key);
+
   /// The [Widget] that this widget watches for changes on
   final Widget child;
 
@@ -27,22 +42,8 @@ class LazyLoadScrollView extends StatefulWidget {
   /// The offset to take into account when triggering [onEndOfPage]/[onStartOfPage] in pixels
   final double scrollOffset;
 
-  /// Used to determine if loading of new data has finished. You should use set this if you aren't using a FutureBuilder or StreamBuilder
+  /// Used to determine if loading of new data has finished. You should use set this if you aren't using a [FutureBuilder] or [StreamBuilder].
   final bool isLoading;
-
-  /// Initiates a LazyLoadScrollView widget
-  const LazyLoadScrollView({
-    Key key,
-    @required this.child,
-    this.onStartOfPage,
-    this.onEndOfPage,
-    this.onPageScrollStart,
-    this.onPageScrollEnd,
-    this.onInBetweenOfPage,
-    this.isLoading = false,
-    this.scrollOffset = 100,
-  })  : assert(child != null),
-        super(key: key);
 
   @override
   State<StatefulWidget> createState() => _LazyLoadScrollViewState();

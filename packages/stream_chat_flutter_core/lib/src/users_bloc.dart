@@ -5,15 +5,21 @@ import 'package:stream_chat/stream_chat.dart';
 import 'stream_chat_core.dart';
 
 /// Widget dedicated to the management of a users list with pagination.
+///
+/// [UsersBloc] can be access at anytime by using the static [of] method
+/// using Flutter's [BuildContext].
+///
+/// API docs: https://getstream.io/chat/docs/flutter-dart/init_and_users/
 class UsersBloc extends StatefulWidget {
-  /// The widget child
-  final Widget child;
-
-  /// Instantiate a new UsersBloc
+  /// Instantiate a new [UsersBloc]. The parameter [child] must be supplied and
+  /// not null.
   const UsersBloc({
     Key key,
     @required this.child,
   }) : super(key: key);
+
+  /// The widget child
+  final Widget child;
 
   @override
   UsersBlocState createState() => UsersBlocState();

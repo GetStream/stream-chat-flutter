@@ -3,10 +3,28 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/channel_list_core.dart';
 import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 
 /// Widget dedicated to the management of a channel list with pagination
+/// [ChannelsBloc] is used together with [ChannelListCore] to manage a list of
+/// [Channel]s with pagination, re-ordering, querying and other operations
+/// associated with [Channel]s.
+///
+/// [ChannelsBloc] can be access at anytime by using the static [of] method
+/// using Flutter's [BuildContext].
+///
+/// API docs: https://getstream.io/chat/docs/flutter-dart/query_channels/
 class ChannelsBloc extends StatefulWidget {
+  /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and not null.
+  const ChannelsBloc({
+    Key key,
+    @required this.child,
+    this.lockChannelsOrder = false,
+    this.channelsComparator,
+    this.shouldAddChannel,
+  }) : super(key: key);
+
   /// The widget child
   final Widget child;
 
@@ -18,15 +36,6 @@ class ChannelsBloc extends StatefulWidget {
 
   /// Function used to evaluate if a channel should be added to the list when a message.new event is received
   final bool Function(Event) shouldAddChannel;
-
-  /// Instantiate a new ChannelsBloc
-  const ChannelsBloc({
-    Key key,
-    this.child,
-    this.lockChannelsOrder = false,
-    this.channelsComparator,
-    this.shouldAddChannel,
-  }) : super(key: key);
 
   @override
   ChannelsBlocState createState() => ChannelsBlocState();
@@ -45,7 +54,7 @@ class ChannelsBloc extends StatefulWidget {
   }
 }
 
-/// The current state of the [ChannelsBloc]
+/// The current state of the [ChannelsBloc].
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
   @override

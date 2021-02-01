@@ -4,16 +4,22 @@ import 'package:stream_chat/stream_chat.dart';
 
 import 'stream_chat_core.dart';
 
-/// Widget dedicated to the management of a message list with pagination
+/// [MessageSearchBloc] is used to manage a list of messages with pagination.
+/// This class can be used to load messages, perform queries, etc.
+///
+/// [MessageSearchBloc] can be access at anytime by using the static [of] method
+/// using Flutter's [BuildContext].
+///
+// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
 class MessageSearchBloc extends StatefulWidget {
-  /// The widget child
-  final Widget child;
-
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
     Key key,
     @required this.child,
   }) : super(key: key);
+
+  /// The widget child
+  final Widget child;
 
   @override
   MessageSearchBlocState createState() => MessageSearchBlocState();
