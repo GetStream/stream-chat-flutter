@@ -1,3 +1,7 @@
+## 1.0.1-beta
+
+- Fixed pub analysis issues
+
 ## 1.0.0-beta
 
 - 🛑 **BREAKING** Renamed `Client` to less generic `StreamChatClient`
