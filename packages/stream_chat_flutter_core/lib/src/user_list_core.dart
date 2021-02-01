@@ -50,7 +50,6 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 /// [UsersBloc] must be the ancestor of this widget. This is necessary since
 /// [UserListCore] depends on functionality contained within [UsersBloc].
 ///
-/// The widget uses a [ListView.separated], [GridView.builder] to render the list, grid of channels.
 /// The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and [errorBuilder] must all be supplied
 /// and not null.
 class UserListCore extends StatefulWidget {
@@ -67,7 +66,11 @@ class UserListCore extends StatefulWidget {
     this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
-  }) : super(key: key);
+  })  : assert(errorBuilder != null),
+        assert(emptyBuilder != null),
+        assert(loadingBuilder != null),
+        assert(listBuilder != null),
+        super(key: key);
 
   /// A [UserListController] allows reloading and pagination.
   /// Use [UserListController.loadData] and [UserListController.paginateData] respectively for reloading and pagination.
