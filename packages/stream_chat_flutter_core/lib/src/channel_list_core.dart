@@ -66,7 +66,11 @@ class ChannelListCore extends StatefulWidget {
     this.sort,
     this.pagination,
     this.channelListController,
-  }) : super(key: key);
+  })  : assert(errorBuilder != null),
+        assert(emptyBuilder != null),
+        assert(loadingBuilder != null),
+        assert(listBuilder != null),
+        super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and [ChannelListController.paginateData] respectively for reloading and pagination.
@@ -257,11 +261,14 @@ class _ChannelListCoreState extends State<ChannelListCore>
   }
 }
 
-/// Controller used for paginating data in [ChannelListCore]
+/// Controller used for loading more data and controlling pagination in [ChannelListCore].
 class ChannelListController {
-  /// Call this function to reload data
+  /// This function calls Stream's servers to load a list of channels. If there is existing data,
+  /// calling this function causes a reload.
   VoidCallback loadData;
 
-  /// Call this function to load further data
+  /// This function is used to load another page of data. Note, [loadData] should be
+  /// used to populate the initial page of data. Calling [paginateData] performs a query
+  /// to load subsequent pages.
   VoidCallback paginateData;
 }

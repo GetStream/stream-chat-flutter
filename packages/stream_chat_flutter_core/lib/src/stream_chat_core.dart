@@ -34,6 +34,20 @@ typedef EventHandler = void Function(Event event);
 /// ```
 ///
 class StreamChatCore extends StatefulWidget {
+  /// Constructor used for creating a new instance of [StreamChatCore].
+  ///
+  /// [StreamChatCore] is a stateful widget which reacts to system events and updates
+  /// Stream's connection status accordingly.
+  StreamChatCore({
+    Key key,
+    @required this.client,
+    @required this.child,
+    this.onBackgroundEventReceived,
+    this.backgroundKeepAlive = const Duration(minutes: 1),
+  })  : assert(client != null),
+        assert(child != null),
+        super(key: key);
+
   /// Instance of Stream Chat Client containing information about the current
   /// application.
   final Client client;
@@ -48,18 +62,6 @@ class StreamChatCore extends StatefulWidget {
   /// is in background. Can be used to display various notifications depending
   /// upon the [Event.type]
   final EventHandler onBackgroundEventReceived;
-
-  /// Constructor used for creating a new instance of [StreamChatCore].
-  ///
-  /// [StreamChatCore] is a stateful widget which reacts to system events and updates
-  /// Stream's connection status accordingly.
-  StreamChatCore({
-    Key key,
-    @required this.client,
-    @required this.child,
-    this.onBackgroundEventReceived,
-    this.backgroundKeepAlive = const Duration(minutes: 1),
-  }) : super(key: key);
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();

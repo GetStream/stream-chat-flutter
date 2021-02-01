@@ -53,20 +53,22 @@ import 'stream_channel.dart';
 /// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channels.
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
-/// Modify it to change the widget appearance.
 class MessageListCore extends StatefulWidget {
-  /// Instantiate a new MessageListView
+  /// Instantiate a new [MessageListView].
   MessageListCore({
     Key key,
-    this.showScrollToBottom = true,
-    this.parentMessage,
     @required this.loadingBuilder,
     @required this.emptyBuilder,
     @required this.messageListBuilder,
     @required this.errorWidgetBuilder,
+    this.showScrollToBottom = true,
+    this.parentMessage,
     this.messageListController,
-  }) : super(key: key);
+  })  : assert(loadingBuilder != null),
+        assert(emptyBuilder != null),
+        assert(messageListBuilder != null),
+        assert(errorWidgetBuilder != null),
+        super(key: key);
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.
@@ -89,7 +91,8 @@ class MessageListCore extends StatefulWidget {
   /// If true will show a scroll to bottom message when there are new messages and the scroll offset is not zero
   final bool showScrollToBottom;
 
-  /// Parent message in case of a thread
+  /// If the current message belongs to a `thread`, this property represents the
+  /// first message or the parent of the conversation.
   final Message parentMessage;
 
   @override

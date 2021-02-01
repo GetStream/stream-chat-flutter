@@ -32,7 +32,12 @@ import 'message_search_bloc.dart';
 /// The widget uses a [ListView.separated] to render the list of messages.
 ///
 class MessageSearchListCore extends StatefulWidget {
-  /// Instantiate a new MessageSearchListView
+  /// Instantiate a new [MessageSearchListView].
+  /// The following parameters must be supplied and not null:
+  /// * [emptyBuilder]
+  /// * [errorBuilder]
+  /// * [loadingBuilder]
+  /// * [childBuilder]
   const MessageSearchListCore({
     Key key,
     @required this.emptyBuilder,
@@ -45,7 +50,11 @@ class MessageSearchListCore extends StatefulWidget {
     this.paginationParams,
     this.messageFilters,
     this.messageSearchListController,
-  }) : super(key: key);
+  })  : assert(emptyBuilder != null),
+        assert(errorBuilder != null),
+        assert(loadingBuilder != null),
+        assert(childBuilder != null),
+        super(key: key);
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and [MessageSearchListController.paginateData] respectively for reloading and pagination.
