@@ -112,7 +112,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .map(_messageFromJoinRow)
         .get());
 
-    if (messagePagination.lessThan != null) {
+    if (messagePagination?.lessThan != null) {
       final lessThanIndex = msgList.indexWhere(
         (m) => m.id == messagePagination.lessThan,
       );
@@ -120,7 +120,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         msgList.removeRange(lessThanIndex, msgList.length);
       }
     }
-    if (messagePagination.greaterThanOrEqual != null) {
+    if (messagePagination?.greaterThanOrEqual != null) {
       final greaterThanIndex = msgList.indexWhere(
         (m) => m.id == messagePagination.greaterThanOrEqual,
       );
@@ -128,7 +128,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         msgList.removeRange(0, greaterThanIndex);
       }
     }
-    if (messagePagination.limit != null) {
+    if (messagePagination?.limit != null) {
       return msgList.take(messagePagination.limit).toList();
     }
     return msgList;
