@@ -164,6 +164,20 @@ abstract class ChatPersistenceClient {
       ];
     }).where((it) => it != null);
 
+    final deleteReactions = deleteReactionsByMessageId(channelStates
+        .expand((it) => it.messages)
+        .map((m) => m.id)
+        .toList(growable: false));
+
+    final deleteMembers = deleteMembersByCids(
+      channelStates.map((it) => it.channel.cid).toList(growable: false),
+    );
+
+    await Future.wait([
+      deleteReactions,
+      deleteMembers,
+    ]);
+
     final users = channelStates
         .map((cs) => [
               cs.channel?.createdBy,
@@ -198,19 +212,6 @@ abstract class ChatPersistenceClient {
       return updateMembers(cid, members.toList(growable: false));
     }).toList(growable: false);
 
-    final deleteReactions = deleteReactionsByMessageId(channelStates
-        .expand((it) => it.messages)
-        .map((m) => m.id)
-        .toList(growable: false));
-
-    final deleteMembers = deleteMembersByCids(
-      channelStates.map((it) => it.channel.cid).toList(growable: false),
-    );
-
-    await Future.wait([
-      deleteReactions,
-      deleteMembers,
-    ]);
     await Future.wait([
       ...updateMessagesFuture,
       ...updateReadsFuture,
