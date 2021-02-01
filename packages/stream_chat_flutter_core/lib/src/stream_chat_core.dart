@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-typedef EventHandler = void Function(Event event);
+import 'typedef.dart';
 
 /// Widget used to provide information about the chat to the widget tree.
 /// This Widget is used to react to life cycle changes and system updates.
