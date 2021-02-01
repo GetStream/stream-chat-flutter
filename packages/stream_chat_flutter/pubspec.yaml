@@ -12,8 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   # TODO: Change over to main dependency when deployed
-  stream_chat_flutter_core:
-    path: ../stream_chat_flutter_core
+  stream_chat_flutter_core: ^1.0.0-beta
   flutter_app_badger: ^1.1.2
   photo_view: ^0.10.3
   rxdart: ^0.25.0
