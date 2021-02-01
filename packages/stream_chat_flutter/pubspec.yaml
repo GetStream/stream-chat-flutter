@@ -16,7 +16,7 @@ dependencies:
     path: ../stream_chat_flutter_core
   flutter_app_badger: ^1.1.2
   photo_view: ^0.10.3
-  rxdart: ^0.24.1
+  rxdart: ^0.25.0
   scrollable_positioned_list: ^0.1.8
   jiffy: ^3.0.1
   flutter_svg: ^0.19.1

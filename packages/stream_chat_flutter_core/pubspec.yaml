@@ -11,7 +11,7 @@ environment:
 
 dependencies:
   stream_chat:
-    path: ../dart_client
+    path: ../stream_chat
   flutter:
     sdk: flutter
 

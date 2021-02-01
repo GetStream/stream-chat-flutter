@@ -83,7 +83,7 @@ jobs:
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
       - name: 'Flutter Test'
-        run: cd packages/dart_client && flutter pub run test
+        run: cd packages/stream_chat && flutter pub run test
 
   test_flutter:
     runs-on: ubuntu-latest
