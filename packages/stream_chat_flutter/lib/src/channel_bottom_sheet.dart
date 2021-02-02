@@ -195,7 +195,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                 OptionListTile(
                   leading: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: StreamSvgIcon.close_small(
+                    child: StreamSvgIcon.closeSmall(
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
                   ),
