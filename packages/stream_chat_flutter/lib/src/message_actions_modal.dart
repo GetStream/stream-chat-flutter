@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -33,6 +34,7 @@ class MessageActionsModal extends StatefulWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final DisplayWidget showUserAvatar;
+  final Map<String, VideoPackage> videoPackages;
 
   const MessageActionsModal({
     Key key,
@@ -53,6 +55,7 @@ class MessageActionsModal extends StatefulWidget {
     this.messageShape,
     this.attachmentShape,
     this.reverse = false,
+    this.videoPackages,
   }) : super(key: key);
 
   @override
@@ -180,6 +183,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 showSendingIndicator: false,
                                 shape: widget.messageShape,
                                 attachmentShape: widget.attachmentShape,
+                                videoPackages: widget.videoPackages,
                               ),
                             ),
                             SizedBox(height: 8),

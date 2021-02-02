@@ -192,7 +192,7 @@ class MessageWidget extends StatefulWidget {
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
     this.onQuotedMessageTap,
-    this.videoPackages = const {},
+    this.videoPackages,
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
             return ImageAttachment(
@@ -743,6 +743,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   !isFailedState &&
                   widget.onThreadTap != null,
               showFlagButton: widget.showFlagButton,
+              videoPackages: widget.videoPackages,
             ),
           );
         });
@@ -771,6 +772,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
               showReactions: widget.showReactions,
+              videoPackages: widget.videoPackages,
             ),
           );
         });
