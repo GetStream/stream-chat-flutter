@@ -6,6 +6,19 @@
 - Extracted sample app into dedicated [repo](https://github.com/GetStream/flutter-samples)
 - Reimplemented existing widgets using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
 
+## 0.2.21
+
+- Add `loadingBuilder` in `MessageListView`
+- Add `messageFilter` property in `MessageListView`
+
+## 0.2.20+4
+
+- Fix channelPreview when the message list is empty
+
+## 0.2.20+3
+
+- Fix reaction picker score indicator
+
 ## 0.2.20+2
 
 - Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message arrives
