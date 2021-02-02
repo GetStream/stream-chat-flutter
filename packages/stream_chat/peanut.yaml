@@ -1,0 +1,3 @@
+# Configuration for https://pub.dev/packages/peanut
+directories:
+  - example/web
