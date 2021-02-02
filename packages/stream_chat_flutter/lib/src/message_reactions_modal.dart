@@ -257,7 +257,7 @@ class MessageReactionsModal extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            reaction.user.name,
+            reaction.user.name.split(' ')[0],
             style: StreamChatTheme.of(context).textTheme.footnoteBold,
             textAlign: TextAlign.center,
           ),
