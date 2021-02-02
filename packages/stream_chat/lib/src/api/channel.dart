@@ -274,28 +274,107 @@ class Channel {
     bool enforceUnique = false,
   }) async {
     final messageId = message.id;
+    final now = DateTime.now();
+    final user = _client.state.user;
+
+    final latestReactions = [...message.latestReactions];
+    final ownReactions = [...message.ownReactions];
+    if (enforceUnique) {
+      latestReactions.removeWhere((it) => it.userId == user.id);
+      ownReactions.removeWhere((it) => it.userId == user.id);
+    }
+
+    final newReaction = Reaction(
+      messageId: messageId,
+      createdAt: now,
+      type: type,
+      user: user,
+      score: 1,
+      extraData: extraData,
+    );
+
+    // Inserting at the 0th index as it's the latest reaction
+    latestReactions.insert(0, newReaction);
+    ownReactions.add(newReaction);
+
+    final newMessage = message.copyWith(
+      reactionCounts: {...message.reactionCounts}..update(type, (value) {
+          if (enforceUnique) return value;
+          return value + 1;
+        }, ifAbsent: () => 1),
+      reactionScores: {...message.reactionScores}..update(type, (value) {
+          if (enforceUnique) return value;
+          return value + 1;
+        }, ifAbsent: () => 1),
+      latestReactions: latestReactions,
+      ownReactions: ownReactions,
+    );
+
+    state?.addMessage(newMessage);
+
     final data = Map<String, dynamic>.from(extraData)
       ..addAll({
         'type': type,
       });
 
-    final res = await _client.post(
-      '/messages/$messageId/reaction',
-      data: {
-        'reaction': data,
-        'enforce_unique': enforceUnique,
-      },
-    );
-    return _client.decode(res.data, SendReactionResponse.fromJson);
+    try {
+      final res = await _client.post(
+        '/messages/$messageId/reaction',
+        data: {
+          'reaction': data,
+          'enforce_unique': enforceUnique,
+        },
+      );
+      final reactionResp =
+          _client.decode(res.data, SendReactionResponse.fromJson);
+      state?.addMessage(reactionResp.message);
+      return reactionResp;
+    } catch (error) {
+      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+        // Reset the message if the update fails
+        state?.addMessage(message);
+      }
+      rethrow;
+    }
   }
 
   /// Delete a reaction from this channel
-  Future<EmptyResponse> deleteReaction(Message message, Reaction reaction) {
+  Future<EmptyResponse> deleteReaction(
+      Message message, Reaction reaction) async {
     _checkInitialized();
 
-    return client
-        .delete('/messages/${message.id}/reaction/${reaction.type}')
-        .then((res) => _client.decode(res.data, EmptyResponse.fromJson));
+    final type = reaction.type;
+
+    final reactionCounts = {...message.reactionCounts}
+      ..update(type, (value) => value - 1);
+    final reactionScores = {...message.reactionScores}
+      ..update(type, (value) => value - 1);
+
+    final removeWhere = (Reaction r) =>
+        r.userId == reaction.userId &&
+        r.type == reaction.type &&
+        r.messageId == reaction.messageId;
+
+    final newMessage = message.copyWith(
+      reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
+      reactionScores: reactionScores..removeWhere((_, value) => value == 0),
+      latestReactions: [...message.latestReactions]..removeWhere(removeWhere),
+      ownReactions: [...message.ownReactions]..removeWhere(removeWhere),
+    );
+
+    state?.addMessage(newMessage);
+
+    try {
+      final res = await client
+          .delete('/messages/${message.id}/reaction/${reaction.type}');
+      return _client.decode(res.data, EmptyResponse.fromJson);
+    } catch (error) {
+      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+        // Reset the message if the update fails
+        state?.addMessage(message);
+      }
+      rethrow;
+    }
   }
 
   /// Edit the channel custom data
