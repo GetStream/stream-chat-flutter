@@ -396,6 +396,10 @@ void main() {
         await channelClient.sendReaction(
           Message(
             id: 'messageid',
+            reactionCounts: const <String, int>{},
+            reactionScores: const <String, int>{},
+            latestReactions: const <Reaction>[],
+            ownReactions: const <Reaction>[],
           ),
           reactionType,
         );
@@ -421,20 +425,17 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
-        await channelClient.watch();
-
         when(mockDio.delete<String>('/messages/messageid/reaction/test'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.deleteReaction(
-          Message(id: 'messageid'),
+          Message(
+            id: 'messageid',
+            reactionCounts: const <String, int>{},
+            reactionScores: const <String, int>{},
+            latestReactions: const <Reaction>[],
+            ownReactions: const <Reaction>[],
+          ),
           Reaction(type: 'test'),
         );
 

@@ -329,11 +329,9 @@ class Channel {
           _client.decode(res.data, SendReactionResponse.fromJson);
       state?.addMessage(reactionResp.message);
       return reactionResp;
-    } catch (error) {
-      if (error is DioError && error.type != DioErrorType.RESPONSE) {
-        // Reset the message if the update fails
-        state?.addMessage(message);
-      }
+    } catch (_) {
+      // Reset the message if the update fails
+      state?.addMessage(message);
       rethrow;
     }
   }
@@ -341,14 +339,16 @@ class Channel {
   /// Delete a reaction from this channel
   Future<EmptyResponse> deleteReaction(
       Message message, Reaction reaction) async {
-    _checkInitialized();
-
     final type = reaction.type;
 
-    final reactionCounts = {...message.reactionCounts}
-      ..update(type, (value) => value - 1);
-    final reactionScores = {...message.reactionScores}
-      ..update(type, (value) => value - 1);
+    final reactionCounts = {...message.reactionCounts};
+    if (reactionCounts.containsKey(type)) {
+      reactionCounts.update(type, (value) => value - 1);
+    }
+    final reactionScores = {...message.reactionScores};
+    if (reactionScores.containsKey(type)) {
+      reactionScores.update(type, (value) => value - 1);
+    }
 
     final removeWhere = (Reaction r) =>
         r.userId == reaction.userId &&
@@ -368,11 +368,9 @@ class Channel {
       final res = await client
           .delete('/messages/${message.id}/reaction/${reaction.type}');
       return _client.decode(res.data, EmptyResponse.fromJson);
-    } catch (error) {
-      if (error is DioError && error.type != DioErrorType.RESPONSE) {
-        // Reset the message if the update fails
-        state?.addMessage(message);
-      }
+    } catch (_) {
+      // Reset the message if the update fails
+      state?.addMessage(message);
       rethrow;
     }
   }
