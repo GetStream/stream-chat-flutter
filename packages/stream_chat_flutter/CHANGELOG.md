@@ -1,6 +1,10 @@
 ## 1.0.0-beta
 
-- Integrated new-ui, split package functionality,
+- **Refreshed widgets design**
+- Improved api documentation
+- Updated `stream_chat` dependency to `^1.0.0-beta`
+- Extracted sample app into dedicated [repo](https://github.com/GetStream/flutter-samples)
+- Reimplemented existing widgets using [stream_chat_flutter_core](https://pub.dev/packages/stream_chat_flutter_core)
 
 ## 0.2.20+2
 
