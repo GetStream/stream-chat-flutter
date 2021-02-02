@@ -1,12 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/full_screen_media.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:video_player/video_player.dart';
 
-import 'attachment_error.dart';
 import 'attachment_title.dart';
 
 class VideoAttachment extends StatefulWidget {

@@ -142,7 +142,7 @@ class MessageWidget extends StatefulWidget {
   /// Function called when quotedMessage is tapped
   final OnQuotedMessageTap onQuotedMessageTap;
 
-  Map<String, VideoPackage> videoPackages = {};
+  final Map<String, VideoPackage> videoPackages;
 
   ///
   MessageWidget({
@@ -192,7 +192,7 @@ class MessageWidget extends StatefulWidget {
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
     this.onQuotedMessageTap,
-    this.videoPackages,
+    this.videoPackages = const {},
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
             return ImageAttachment(
