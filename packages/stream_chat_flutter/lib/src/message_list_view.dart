@@ -1056,6 +1056,7 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel.reloadChannel();
     }
     _messageNewListener?.cancel();
+    videoPackages.values.forEach((e) => e.dispose());
     super.dispose();
   }
 }
