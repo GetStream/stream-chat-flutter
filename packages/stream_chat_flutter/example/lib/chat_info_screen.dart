@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'main.dart';
@@ -285,7 +284,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22.0),
-            child: StreamSvgIcon.Icon_group(
+            child: StreamSvgIcon.iconGroup(
               size: 24.0,
               color:
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),

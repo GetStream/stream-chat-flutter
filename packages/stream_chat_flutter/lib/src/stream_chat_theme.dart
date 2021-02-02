@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/channel_header.dart';
 import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
 class StreamChatTheme extends InheritedWidget {
@@ -476,7 +476,7 @@ class ColorTheme {
     this.bgGradient = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [const Color(0xfff7f7f7), const Color(0xfffcfcfc)],
+      colors: [Color(0xfff7f7f7), Color(0xfffcfcfc)],
       stops: [0, 1],
     ),
     this.borderTop = const Effect(
@@ -519,7 +519,10 @@ class ColorTheme {
     this.bgGradient = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [const Color(0xff101214), const Color(0xff070a0d)],
+      colors: [
+        Color(0xff101214),
+        Color(0xff070a0d),
+      ],
       stops: [0, 1],
     ),
   });

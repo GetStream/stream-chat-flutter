@@ -71,7 +71,7 @@ class SearchTextField extends StatelessWidget {
               color: Colors.transparent,
               child: IconButton(
                 padding: const EdgeInsets.all(0),
-                icon: StreamSvgIcon.close_small(
+                icon: StreamSvgIcon.closeSmall(
                   color: Colors.grey,
                 ),
                 splashRadius: 24,

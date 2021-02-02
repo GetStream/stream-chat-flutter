@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       trailing: IconButton(
-                        icon: StreamSvgIcon.Icon_moon(
+                        icon: StreamSvgIcon.iconMoon(
                           size: 24,
                         ),
                         color: StreamChatTheme.of(context).colorTheme.grey,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../stream_chat_flutter.dart';
 
@@ -116,7 +116,7 @@ class MessageSearchListView extends StatefulWidget {
 }
 
 class _MessageSearchListViewState extends State<MessageSearchListView> {
-  MessageSearchListController _messageSearchListController =
+  final MessageSearchListController _messageSearchListController =
       MessageSearchListController();
 
   @override
@@ -245,7 +245,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   }
 
   Widget _buildQueryProgressIndicator(context) {
-    MessageSearchBlocState messageSearchBloc = MessageSearchBloc.of(context);
+    final messageSearchBloc = MessageSearchBloc.of(context);
 
     return StreamBuilder<bool>(
         stream: messageSearchBloc.queryMessagesLoading,

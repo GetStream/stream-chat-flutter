@@ -221,7 +221,7 @@ String getSizeText(int bytes) {
   }
 
   if (bytes <= 1000) {
-    return '${bytes} bytes';
+    return '$bytes bytes';
   } else if (bytes <= 100000) {
     return '${(bytes / 1000).toStringAsFixed(2)} KB';
   } else {
@@ -233,58 +233,58 @@ String getSizeText(int bytes) {
 StreamSvgIcon getFileTypeImage(String type) {
   switch (type) {
     case '7z':
-      return StreamSvgIcon.filetype_7z();
+      return StreamSvgIcon.filetype7z();
       break;
     case 'csv':
-      return StreamSvgIcon.filetype_csv();
+      return StreamSvgIcon.filetypeCsv();
       break;
     case 'doc':
-      return StreamSvgIcon.filetype_doc();
+      return StreamSvgIcon.filetypeDoc();
       break;
     case 'docx':
-      return StreamSvgIcon.filetype_docx();
+      return StreamSvgIcon.filetypeDocx();
       break;
     case 'html':
-      return StreamSvgIcon.filetype_html();
+      return StreamSvgIcon.filetypeHtml();
       break;
     case 'md':
-      return StreamSvgIcon.filetype_md();
+      return StreamSvgIcon.filetypeMd();
       break;
     case 'odt':
-      return StreamSvgIcon.filetype_odt();
+      return StreamSvgIcon.filetypeOdt();
       break;
     case 'pdf':
-      return StreamSvgIcon.filetype_pdf();
+      return StreamSvgIcon.filetypePdf();
       break;
     case 'ppt':
-      return StreamSvgIcon.filetype_ppt();
+      return StreamSvgIcon.filetypePpt();
       break;
     case 'pptx':
-      return StreamSvgIcon.filetype_pptx();
+      return StreamSvgIcon.filetypePptx();
       break;
     case 'rar':
-      return StreamSvgIcon.filetype_rar();
+      return StreamSvgIcon.filetypeRar();
       break;
     case 'rtf':
-      return StreamSvgIcon.filetype_rtf();
+      return StreamSvgIcon.filetypeRtf();
       break;
     case 'tar':
-      return StreamSvgIcon.filetype_tar();
+      return StreamSvgIcon.filetypeTar();
       break;
     case 'txt':
-      return StreamSvgIcon.filetype_txt();
+      return StreamSvgIcon.filetypeTxt();
       break;
     case 'xls':
-      return StreamSvgIcon.filetype_xls();
+      return StreamSvgIcon.filetypeXls();
       break;
     case 'xlsx':
-      return StreamSvgIcon.filetype_xlsx();
+      return StreamSvgIcon.filetypeXlsx();
       break;
     case 'zip':
-      return StreamSvgIcon.filetype_zip();
+      return StreamSvgIcon.filetypeZip();
       break;
     default:
-      return StreamSvgIcon.filetype_Generic();
+      return StreamSvgIcon.filetypeGeneric();
       break;
   }
 }

@@ -377,7 +377,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   InkWell(
-                    child: StreamSvgIcon.close_small(),
+                    child: StreamSvgIcon.closeSmall(),
                     onTap: () {
                       setState(() {
                         _nameController.text =
@@ -739,7 +739,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
             ),
             SizedBox(width: 16.0),
             IconButton(
-              icon: StreamSvgIcon.close_small(
+              icon: StreamSvgIcon.closeSmall(
                 color: theme.colorTheme.grey,
               ),
               constraints: BoxConstraints.tightFor(
@@ -869,7 +869,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     isUserAdmin)
                   _buildModalListTile(
                       context,
-                      StreamSvgIcon.Icon_user_settings(
+                      StreamSvgIcon.iconUserSettings(
                         color: StreamChatTheme.of(context).colorTheme.grey,
                         size: 24.0,
                       ),
@@ -891,7 +891,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   }, color: StreamChatTheme.of(context).colorTheme.accentRed),
                 _buildModalListTile(
                     context,
-                    StreamSvgIcon.close_small(
+                    StreamSvgIcon.closeSmall(
                       color: StreamChatTheme.of(context).colorTheme.grey,
                       size: 24.0,
                     ),

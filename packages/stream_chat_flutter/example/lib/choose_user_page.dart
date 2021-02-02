@@ -213,7 +213,7 @@ class ChooseUserPage extends StatelessWidget {
                                       .grey,
                                 ),
                           ),
-                          trailing: StreamSvgIcon.arrow_right(
+                          trailing: StreamSvgIcon.arrowRight(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
                                 .accentBlue,
