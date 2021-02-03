@@ -6,18 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../stream_chat_flutter.dart';
 import 'connection_status_builder.dart';
 import 'date_divider.dart';
-import 'swipeable.dart';
 import 'extension.dart';
+import 'swipeable.dart';
 
 typedef MessageBuilder = Widget Function(
   BuildContext,
@@ -237,7 +237,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool _inBetweenList = false;
 
-  MessageListController _messageListController = MessageListController();
+  final MessageListController _messageListController = MessageListController();
 
   @override
   Widget build(BuildContext context) {
@@ -308,8 +308,8 @@ class _MessageListViewState extends State<MessageListView> {
       children: [
         ConnectionStatusBuilder(
           statusBuilder: (context, status) {
-            String statusString = '';
-            bool showStatus = true;
+            var statusString = '';
+            var showStatus = true;
             switch (status) {
               case ConnectionStatus.connected:
                 statusString = 'Connected';
@@ -878,7 +878,7 @@ class _MessageListViewState extends State<MessageListView> {
         if (messages.map((e) => e.id).contains(quotedMessageId)) {
           scrollToIndex();
         } else {
-          streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
+          await streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (messages.map((e) => e.id).contains(quotedMessageId)) {
                 scrollToIndex();

@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
 
@@ -110,7 +110,7 @@ class _FileAttachmentState extends State<FileAttachment> {
               type: MaterialType.transparency,
               child: widget.trailing ??
                   IconButton(
-                    icon: StreamSvgIcon.cloud_download(
+                    icon: StreamSvgIcon.cloudDownload(
                       color: StreamChatTheme.of(context).colorTheme.black,
                     ),
                     padding: const EdgeInsets.all(8),

@@ -7,9 +7,9 @@ import 'package:dio/dio.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   /// Callback to call when pressing the back button.
@@ -54,36 +54,17 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ImageFooterState extends State<ImageFooter> {
-  //ignore:unused_field
-  bool _userSearchMode = false;
   TextEditingController _searchController;
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _messageFocusNode = FocusNode();
 
-  //ignore:unused_field
-  String _channelNameQuery;
-
   final List<Channel> _selectedChannels = [];
 
-  Timer _debounce;
-
   Function modalSetStateCallback;
-
-  void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
-      if (mounted && modalSetStateCallback != null) {
-        modalSetStateCallback(() {
-          _channelNameQuery = _searchController.text;
-        });
-      }
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController()..addListener(_userNameListener);
     _messageFocusNode.addListener(() {
       setState(() {});
     });
@@ -92,7 +73,6 @@ class _ImageFooterState extends State<ImageFooter> {
   @override
   void dispose() {
     _searchController?.clear();
-    _searchController?.removeListener(_userNameListener);
     _searchController?.dispose();
     super.dispose();
   }
@@ -113,7 +93,7 @@ class _ImageFooterState extends State<ImageFooter> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: StreamSvgIcon.Icon_SHARE(
+                icon: StreamSvgIcon.iconShare(
                   size: 24.0,
                   color: StreamChatTheme.of(context).colorTheme.black,
                 ),
@@ -151,7 +131,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 ),
               ),
               IconButton(
-                icon: StreamSvgIcon.Icon_grid(
+                icon: StreamSvgIcon.iconGrid(
                   color: StreamChatTheme.of(context).colorTheme.black,
                 ),
                 onPressed: () => _showPhotosModal(context),
@@ -174,9 +154,9 @@ class _ImageFooterState extends State<ImageFooter> {
       backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: const BorderRadius.only(
-          topLeft: const Radius.circular(16.0),
-          topRight: const Radius.circular(16.0),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          topRight: Radius.circular(16.0),
         ),
       ),
       builder: (context) {

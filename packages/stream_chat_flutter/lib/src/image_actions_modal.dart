@@ -56,7 +56,7 @@ class ImageActionsModal extends StatelessWidget {
                   _buildButton(
                     context,
                     'Reply',
-                    StreamSvgIcon.Icon_curve_line_left_up(
+                    StreamSvgIcon.iconCurveLineLeftUp(
                       size: 24.0,
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
@@ -76,7 +76,7 @@ class ImageActionsModal extends StatelessWidget {
                   _buildButton(
                     context,
                     'Save ${urls[currentIndex].type == 'video' ? 'Video' : 'Image'}',
-                    StreamSvgIcon.Icon_save(
+                    StreamSvgIcon.iconSave(
                       size: 24.0,
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
@@ -167,14 +167,14 @@ class ImageActionsModal extends StatelessWidget {
     final result = await ImageGallerySaver.saveImage(
         Uint8List.fromList(response.data),
         quality: 60,
-        name: "${DateTime.now().millisecondsSinceEpoch}");
+        name: '${DateTime.now().millisecondsSinceEpoch}');
     return result;
   }
 
   Future<void> _saveVideo(String url) async {
     var appDocDir = await getTemporaryDirectory();
     var savePath =
-        appDocDir.path + "/${DateTime.now().millisecondsSinceEpoch}.mp4";
+        appDocDir.path + '/${DateTime.now().millisecondsSinceEpoch}.mp4';
     await Dio().download(url, savePath);
     final result = await ImageGallerySaver.saveFile(savePath);
     print(result);

@@ -82,8 +82,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
     final user = _client.state.user;
     return ConnectionStatusBuilder(
       statusBuilder: (context, status) {
-        String statusString = '';
-        bool showStatus = true;
+        var statusString = '';
+        var showStatus = true;
 
         switch (status) {
           case ConnectionStatus.connected:
