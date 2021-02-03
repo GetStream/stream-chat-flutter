@@ -86,7 +86,7 @@ void main() {
   testWidgets(
     'StreamChatCore should disconnect on background',
     (WidgetTester tester) async {
-      await fakeAsync((_async) {
+      fakeAsync((_async) {
         final client = MockClient();
         final clientState = MockClientState();
         final channel = MockChannel();
@@ -123,6 +123,7 @@ void main() {
         _async.elapse(Duration(seconds: 5));
 
         verify(client.disconnect()).called(1);
+        eventStreamController.close();
       });
     },
   );
@@ -174,6 +175,7 @@ void main() {
       await untilCalled(showLocalNotificationMock(event));
 
       verify(showLocalNotificationMock(event)).called(1);
+      eventStreamController.close();
     },
   );
 }

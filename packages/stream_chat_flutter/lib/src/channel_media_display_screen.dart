@@ -33,6 +33,8 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 }
 
 class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
+  Map<String, VideoPlayerController> controllerCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -147,8 +149,15 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
               .forEach((e) {
             VideoPlayerController controller;
             if (e.type == 'video') {
-              controller = VideoPlayerController.network(e.assetUrl);
-              controller.initialize();
+              var cachedController = controllerCache[e.assetUrl];
+
+              if (cachedController == null) {
+                controller = VideoPlayerController.network(e.assetUrl);
+                controller.initialize();
+                controllerCache[e.assetUrl] = controller;
+              } else {
+                controller = cachedController;
+              }
             }
             media.add(_AssetPackage(e, item.message, controller));
           });
@@ -220,6 +229,14 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
       },
       stream: messageSearchBloc.messagesStream,
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (var c in controllerCache.values) {
+      c.dispose();
+    }
   }
 }
 
