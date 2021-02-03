@@ -239,7 +239,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   final MessageListController _messageListController = MessageListController();
 
-  Map<String, VideoPackage> videoPackages = {};
+  final Map<String, VideoPackage> videoPackages = {};
 
   @override
   Widget build(BuildContext context) {
