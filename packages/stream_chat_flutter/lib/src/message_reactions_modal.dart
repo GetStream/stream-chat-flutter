@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
@@ -22,6 +23,7 @@ class MessageReactionsModal extends StatelessWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final void Function(User) onUserAvatarTap;
+  final Map<String, VideoPackage> videoPackages;
 
   const MessageReactionsModal({
     Key key,
@@ -35,6 +37,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.reverse = false,
     this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
+    this.videoPackages,
   }) : super(key: key);
 
   @override
@@ -143,6 +146,7 @@ class MessageReactionsModal extends StatelessWidget {
                                   (message.status ==
                                           MessageSendingStatus.sent ||
                                       message.status == null),
+                              videoPackages: videoPackages,
                             ),
                           ),
                           if (message.latestReactions?.isNotEmpty == true) ...[
@@ -257,7 +261,7 @@ class MessageReactionsModal extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            reaction.user.name,
+            reaction.user.name.split(' ')[0],
             style: StreamChatTheme.of(context).textTheme.footnoteBold,
             textAlign: TextAlign.center,
           ),

@@ -274,28 +274,111 @@ class Channel {
     bool enforceUnique = false,
   }) async {
     final messageId = message.id;
+    final now = DateTime.now();
+    final user = _client.state.user;
+
+    final latestReactions = [...message.latestReactions ?? <Reaction>[]];
+    if (enforceUnique) {
+      latestReactions.removeWhere((it) => it.userId == user.id);
+    }
+
+    final newReaction = Reaction(
+      messageId: messageId,
+      createdAt: now,
+      type: type,
+      user: user,
+      score: 1,
+      extraData: extraData,
+    );
+
+    // Inserting at the 0th index as it's the latest reaction
+    latestReactions.insert(0, newReaction);
+    final ownReactions = [...latestReactions]
+      ..removeWhere((it) => it.userId != user.id);
+
+    final newMessage = message.copyWith(
+      reactionCounts: {...message?.reactionCounts ?? <String, int>{}}
+        ..update(type, (value) {
+          if (enforceUnique) return value;
+          return value + 1;
+        }, ifAbsent: () => 1),
+      reactionScores: {...message.reactionScores ?? <String, int>{}}
+        ..update(type, (value) {
+          if (enforceUnique) return value;
+          return value + 1;
+        }, ifAbsent: () => 1),
+      latestReactions: latestReactions,
+      ownReactions: ownReactions,
+    );
+
+    state?.addMessage(newMessage);
+
     final data = Map<String, dynamic>.from(extraData)
       ..addAll({
         'type': type,
       });
 
-    final res = await _client.post(
-      '/messages/$messageId/reaction',
-      data: {
-        'reaction': data,
-        'enforce_unique': enforceUnique,
-      },
-    );
-    return _client.decode(res.data, SendReactionResponse.fromJson);
+    try {
+      final res = await _client.post(
+        '/messages/$messageId/reaction',
+        data: {
+          'reaction': data,
+          'enforce_unique': enforceUnique,
+        },
+      );
+      final reactionResp =
+          _client.decode(res.data, SendReactionResponse.fromJson);
+      return reactionResp;
+    } catch (_) {
+      // Reset the message if the update fails
+      state?.addMessage(message);
+      rethrow;
+    }
   }
 
   /// Delete a reaction from this channel
-  Future<EmptyResponse> deleteReaction(Message message, Reaction reaction) {
-    _checkInitialized();
+  Future<EmptyResponse> deleteReaction(
+      Message message, Reaction reaction) async {
+    final type = reaction.type;
+    final user = _client.state.user;
 
-    return client
-        .delete('/messages/${message.id}/reaction/${reaction.type}')
-        .then((res) => _client.decode(res.data, EmptyResponse.fromJson));
+    final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
+    if (reactionCounts.containsKey(type)) {
+      reactionCounts.update(type, (value) => value - 1);
+    }
+    final reactionScores = {...message.reactionScores ?? <String, int>{}};
+    if (reactionScores.containsKey(type)) {
+      reactionScores.update(type, (value) => value - 1);
+    }
+
+    final latestReactions = [...message.latestReactions ?? <Reaction>[]]
+      ..removeWhere((r) {
+        return r.userId == reaction.userId &&
+            r.type == reaction.type &&
+            r.messageId == reaction.messageId;
+      });
+
+    final ownReactions = [...latestReactions ?? <Reaction>[]]
+      ..removeWhere((it) => it.userId != user.id);
+
+    final newMessage = message.copyWith(
+      reactionCounts: reactionCounts..removeWhere((_, value) => value == 0),
+      reactionScores: reactionScores..removeWhere((_, value) => value == 0),
+      latestReactions: latestReactions,
+      ownReactions: ownReactions,
+    );
+
+    state?.addMessage(newMessage);
+
+    try {
+      final res = await client
+          .delete('/messages/${message.id}/reaction/${reaction.type}');
+      return _client.decode(res.data, EmptyResponse.fromJson);
+    } catch (_) {
+      // Reset the message if the update fails
+      state?.addMessage(message);
+      rethrow;
+    }
   }
 
   /// Edit the channel custom data
@@ -998,73 +1081,24 @@ class ChannelClientState {
 
   void _listenReactionDeleted() {
     _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
-      final reaction = event.reaction;
-      final message = event.message;
-      _removeMessageReaction(message, reaction);
-    }));
-  }
-
-  void _removeMessageReaction(Message message, Reaction reaction) {
-    if (message.parentId == null || message.showInChannel == true) {
-      _channelState = _channelState.copyWith(
-        messages: _channelState?.messages?.map((m) {
-          if (m.id == message.id) {
-            return _removeReactionFromMessage(m, reaction);
-          }
-          return m;
-        })?.toList(),
+      final userId = _channel.client.state.user.id;
+      final message = event.message.copyWith(
+        ownReactions: [...event.message.latestReactions]
+          ..removeWhere((it) => it.userId != userId),
       );
-    }
-
-    if (message.parentId != null) {
-      final newThreads = threads;
-      if (newThreads.containsKey(message.parentId)) {
-        newThreads[message.parentId] = newThreads[message.parentId].map((m) {
-          if (m.id == message.id) {
-            return _removeReactionFromMessage(m, reaction);
-          }
-          return m;
-        }).toList();
-        _threads = newThreads;
-      }
-    }
+      addMessage(message);
+    }));
   }
 
   void _listenReactions() {
-    _subscriptions.add(_channel
-        .on(
-      EventType.reactionNew,
-    )
-        .listen((event) {
-      final message = event.message;
-      _addMessageReaction(message, event.reaction);
-    }));
-  }
-
-  void _addMessageReaction(Message message, Reaction reaction) {
-    if (message.parentId == null || message.showInChannel == true) {
-      _channelState = _channelState.copyWith(
-        messages: _channelState.messages.map((m) {
-          if (message.id == m.id) {
-            return _addReactionToMessage(m, reaction);
-          }
-          return m;
-        }).toList(),
+    _subscriptions.add(_channel.on(EventType.reactionNew).listen((event) {
+      final userId = _channel.client.state.user.id;
+      final message = event.message.copyWith(
+        ownReactions: [...event.message.latestReactions]
+          ..removeWhere((it) => it.userId != userId),
       );
-    }
-
-    if (message.parentId != null) {
-      final newThreads = threads;
-      if (newThreads.containsKey(message.parentId)) {
-        newThreads[message.parentId] = newThreads[message.parentId].map((m) {
-          if (message.id == m.id) {
-            return _addReactionToMessage(m, reaction);
-          }
-          return m;
-        }).toList();
-        _threads = newThreads;
-      }
-    }
+      addMessage(message);
+    }));
   }
 
   void _listenMessageUpdated() {
@@ -1074,13 +1108,12 @@ class ChannelClientState {
       EventType.reactionUpdated,
     )
         .listen((event) {
-      final message = event.message;
-      addMessage(message.copyWith(
-        ownReactions: message.latestReactions
-            .where(
-                (element) => element.user?.id == _channel._client.state.user.id)
-            .toList(),
-      ));
+      final userId = _channel.client.state.user.id;
+      final message = event.message.copyWith(
+        ownReactions: [...event.message.latestReactions]
+          ..removeWhere((it) => it.userId != userId),
+      );
+      addMessage(message);
     }));
   }
 
@@ -1161,66 +1194,6 @@ class ChannelClientState {
         _channelState = _channelState.copyWith(read: readList);
       }
     }));
-  }
-
-  Message _addReactionToMessage(Message message, Reaction reaction) {
-    final newMessage = message.copyWith(
-      latestReactions: message.latestReactions..add(reaction),
-      reactionCounts: {
-        ...message.reactionCounts ?? {},
-        reaction.type: (message.reactionCounts == null
-                ? 0
-                : message.reactionCounts[reaction.type] ?? 0) +
-            1,
-      },
-      reactionScores: {
-        ...message.reactionScores ?? {},
-        reaction.type: (message.reactionScores == null
-                ? 0
-                : message.reactionScores[reaction.type] ?? 0) +
-            reaction.score,
-      },
-    );
-
-    if (reaction.user.id == _channel.client.state.user.id) {
-      return newMessage.copyWith(
-        ownReactions: message.ownReactions..add(reaction),
-      );
-    }
-
-    return newMessage;
-  }
-
-  Message _removeReactionFromMessage(Message message, Reaction reaction) {
-    final newMessage = message.copyWith(
-      latestReactions: message.latestReactions
-        ..removeWhere(
-            (r) => r.type == reaction.type && r.userId == reaction.userId),
-      reactionCounts: {
-        ...message.reactionCounts,
-        reaction.type: (message.reactionCounts[reaction.type] ?? 0) - 1,
-      },
-      reactionScores: {
-        ...message.reactionScores ?? {},
-        reaction.type: max(
-            (message.reactionScores == null
-                    ? 0
-                    : message.reactionScores[reaction.type] ?? 0) -
-                reaction.score,
-            0),
-      },
-    );
-
-    newMessage.reactionCounts.removeWhere((_, v) => v <= 0);
-
-    if (reaction.user.id == _channel.client.state.user.id) {
-      return newMessage.copyWith(
-        ownReactions: message.ownReactions
-          ..removeWhere((r) => r.type == reaction.type),
-      );
-    }
-
-    return newMessage;
   }
 
   /// Channel message list
