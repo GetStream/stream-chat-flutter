@@ -10,7 +10,7 @@ Future<void> main() async {
   /// a backend to generate a user token using our server SDK.
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
-  await client.setUser(
+  await client.connectUser(
     User(
       id: 'cool-shadow-7',
       extraData: {
