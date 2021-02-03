@@ -7,6 +7,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/src/models/own_user.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -379,7 +380,8 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-        );
+        )..state.user = OwnUser(id: 'test-id');
+
         final channelClient = client.channel('messaging', id: 'testid');
         final reactionType = 'test';
 
@@ -422,7 +424,8 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-        );
+        )..state.user = OwnUser(id: 'test-id');
+
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.delete<String>('/messages/messageid/reaction/test'))
