@@ -142,6 +142,7 @@ class MessageWidget extends StatefulWidget {
   /// Function called when quotedMessage is tapped
   final OnQuotedMessageTap onQuotedMessageTap;
 
+  /// The cache for the video controllers of attachments IDed as message ID + attachment index
   final Map<String, VideoPackage> videoPackages;
 
   ///
