@@ -328,7 +328,6 @@ class Channel {
       );
       final reactionResp =
           _client.decode(res.data, SendReactionResponse.fromJson);
-      state?.addMessage(reactionResp.message);
       return reactionResp;
     } catch (_) {
       // Reset the message if the update fails
