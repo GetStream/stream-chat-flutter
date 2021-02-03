@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'user_item.dart';
 
@@ -138,7 +138,7 @@ class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 
-  UserListController _userListController = UserListController();
+  final UserListController _userListController = UserListController();
 
   @override
   Widget build(BuildContext context) {

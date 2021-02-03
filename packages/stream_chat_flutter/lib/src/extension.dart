@@ -1,18 +1,20 @@
-import 'package:emojis/emoji.dart';
 import 'package:characters/characters.dart';
+import 'package:emojis/emoji.dart';
 
 final _emojis = Emoji.all();
 
+/// String extension
 extension StringExtension on String {
+  /// Returns the capitalized string
   String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
+    return '${this[0].toUpperCase()}${substring(1)}';
   }
 
   //  Emojis guidelines
   //  1 to 3 emojis: big size with no text bubble.
   //  4+ emojis or emojis+text: standard size with text bubble.
   bool get isOnlyEmoji {
-    final characters = this.trim().characters;
+    final characters = trim().characters;
     if (characters.isEmpty) return false;
     if (characters.length > 3) return false;
     return characters.every((c) => _emojis.map((e) => e.char).contains(c));

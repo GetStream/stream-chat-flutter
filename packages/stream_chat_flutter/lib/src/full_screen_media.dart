@@ -258,9 +258,9 @@ class VideoPackage {
     _videoPlayerController.addListener(errorListener);
   }
 
-  get videoPlayer => _videoPlayerController;
+  VideoPlayerController get videoPlayer => _videoPlayerController;
 
-  get chewieController => _chewieController;
+  ChewieController get chewieController => _chewieController;
 
   void dispose() {
     _videoPlayerController.dispose();

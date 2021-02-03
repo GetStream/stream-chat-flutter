@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http_parser/http_parser.dart' as httpParser;
+import 'package:http_parser/http_parser.dart' as http_parser;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -202,7 +202,7 @@ class MessageInputState extends State<MessageInput> {
   bool _openFilePickerSection = false;
   int _filePickerIndex = 0;
   double _filePickerSize = _kMinMediaPickerSize;
-  KeyboardVisibilityController _keyboardVisibilityController =
+  final KeyboardVisibilityController _keyboardVisibilityController =
       KeyboardVisibilityController();
 
   /// The editing controller passed to the input TextField
@@ -247,7 +247,7 @@ class MessageInputState extends State<MessageInput> {
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon.close_small(),
+                      icon: StreamSvgIcon.closeSmall(),
                       onPressed: widget.onQuotedMessageCleared,
                     ),
                   ],
@@ -493,7 +493,7 @@ class MessageInputState extends State<MessageInput> {
                         : null,
                     suffixIcon: _commandEnabled
                         ? IconButton(
-                            icon: StreamSvgIcon.close_small(),
+                            icon: StreamSvgIcon.closeSmall(),
                             splashRadius: 24,
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tightFor(
@@ -1128,7 +1128,7 @@ class MessageInputState extends State<MessageInput> {
       case 'ban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
-          child: StreamSvgIcon.Icon_user_delete(
+          child: StreamSvgIcon.iconUserDelete(
             size: 16.0,
             color: Colors.white,
           ),
@@ -1964,7 +1964,7 @@ class MessageInputState extends State<MessageInput> {
 
     final mimeType = _getMimeType(file.path.split('/').last);
 
-    Map<String, dynamic> extraDataMap = {};
+    var extraDataMap = <String, dynamic>{};
 
     if (camera) {
       if (mimeType.type == 'video' || mimeType.type == 'image') {
@@ -2074,13 +2074,13 @@ class MessageInputState extends State<MessageInput> {
     return res.file;
   }
 
-  httpParser.MediaType _getMimeType(String filename) {
-    httpParser.MediaType mimeType;
+  http_parser.MediaType _getMimeType(String filename) {
+    http_parser.MediaType mimeType;
     if (filename != null) {
       if (filename.toLowerCase().endsWith('heic')) {
-        mimeType = httpParser.MediaType.parse('image/heic');
+        mimeType = http_parser.MediaType.parse('image/heic');
       } else {
-        mimeType = httpParser.MediaType.parse(lookupMimeType(filename));
+        mimeType = http_parser.MediaType.parse(lookupMimeType(filename));
       }
     }
 
