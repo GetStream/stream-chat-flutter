@@ -8,7 +8,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'extension.dart';
 import 'message_input.dart';
