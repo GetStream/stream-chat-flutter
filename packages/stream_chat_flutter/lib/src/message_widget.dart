@@ -142,6 +142,9 @@ class MessageWidget extends StatefulWidget {
   /// Function called when quotedMessage is tapped
   final OnQuotedMessageTap onQuotedMessageTap;
 
+  /// The cache for the video controllers of attachments IDed as message ID + attachment index
+  final Map<String, VideoPackage> videoPackages;
+
   ///
   MessageWidget({
     Key key,
@@ -190,6 +193,7 @@ class MessageWidget extends StatefulWidget {
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
     this.onQuotedMessageTap,
+    this.videoPackages,
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
             return ImageAttachment(
@@ -740,6 +744,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   !isFailedState &&
                   widget.onThreadTap != null,
               showFlagButton: widget.showFlagButton,
+              videoPackages: widget.videoPackages,
             ),
           );
         });
@@ -768,6 +773,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
               showReactions: widget.showReactions,
+              videoPackages: widget.videoPackages,
             ),
           );
         });
@@ -832,6 +838,41 @@ class _MessageWidgetState extends State<MessageWidget> {
         children: widget.message.attachments
                 ?.where((element) => element.ogScrapeUrl == null)
                 ?.map((attachment) {
+              if (attachment.type == 'video') {
+                VideoPackage package;
+
+                if (widget.videoPackages == null) {
+                  package = VideoPackage(context, attachment, () {});
+                } else {
+                  package = widget?.videoPackages[
+                          '${widget.message.id}${widget.message.attachments.indexOf(attachment)}'] ??
+                      VideoPackage(context, attachment, () {});
+                }
+
+                if (widget.videoPackages != null) {
+                  widget.videoPackages[
+                          '${widget.message.id}${widget.message.attachments.indexOf(attachment)}'] =
+                      package;
+                }
+
+                return Transform(
+                  transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+                  alignment: Alignment.center,
+                  child: VideoAttachment(
+                    attachment: attachment,
+                    messageTheme: widget.messageTheme,
+                    size: Size(
+                      MediaQuery.of(context).size.width * 0.8,
+                      MediaQuery.of(context).size.height * 0.3,
+                    ),
+                    message: widget.message,
+                    onShowMessage: widget.onShowMessage,
+                    onReturnAction: widget.onReturnAction,
+                    videoPackage: package,
+                  ),
+                );
+              }
+
               final attachmentBuilder =
                   widget.attachmentBuilders[attachment.type];
 
