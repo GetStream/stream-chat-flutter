@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:synchronized/synchronized.dart';
 import 'package:video_compress/video_compress.dart';
 
@@ -16,5 +17,5 @@ class ICompressVideoService {
   }
 }
 
-ICompressVideoService get CompressVideoService =>
+ICompressVideoService get compressVideoService =>
     ICompressVideoService.instance;

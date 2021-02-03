@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
@@ -269,7 +269,7 @@ class ChannelPreview extends StatelessWidget {
       TextStyle normalTextStyle,
       TextStyle mentionsTextStyle) {
     var textList = text.split(' ');
-    List<TextSpan> resList = [];
+    var resList = <TextSpan>[];
     for (var e in textList) {
       if (mentions != null &&
           mentions.isNotEmpty &&
