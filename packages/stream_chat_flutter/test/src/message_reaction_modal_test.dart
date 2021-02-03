@@ -96,7 +96,7 @@ void main() {
           findsNWidgets(2));
       expect(find.byKey(Key('StreamSvgIcon-Icon_love_reaction.svg')),
           findsNWidgets(2));
-      expect(find.text(testUserId), findsNWidgets(2));
+      expect(find.text(testUserId.split(' ')[0]), findsNWidgets(2));
     },
   );
 }

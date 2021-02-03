@@ -49,10 +49,10 @@ class Reaction {
     this.createdAt,
     this.type,
     this.user,
-    this.userId,
+    String userId,
     this.score,
     this.extraData,
-  });
+  }) : userId = userId ?? user?.id;
 
   /// Create a new instance from a json
   factory Reaction.fromJson(Map<String, dynamic> json) {
@@ -64,5 +64,41 @@ class Reaction {
   Map<String, dynamic> toJson() {
     return Serialization.moveFromExtraDataToRoot(
         _$ReactionToJson(this), topLevelFields);
+  }
+
+  /// Creates a copy of [Reaction] with specified attributes overridden.
+  Reaction copyWith({
+    String messageId,
+    DateTime createdAt,
+    String type,
+    User user,
+    String userId,
+    int score,
+    Map<String, dynamic> extraData,
+  }) {
+    return Reaction(
+      messageId: messageId ?? this.messageId,
+      createdAt: createdAt ?? this.createdAt,
+      type: type ?? this.type,
+      user: user ?? this.user,
+      userId: userId ?? this.userId,
+      score: score ?? this.score,
+      extraData: extraData ?? this.extraData,
+    );
+  }
+
+  /// Returns a new [Reaction] that is a combination of this reaction and the given
+  /// [other] reaction.
+  Reaction merge(Reaction other) {
+    if (other == null) return this;
+    return copyWith(
+      messageId: other.messageId,
+      createdAt: other.createdAt,
+      type: other.type,
+      user: other.user,
+      userId: other.userId,
+      score: other.score,
+      extraData: other.extraData,
+    );
   }
 }

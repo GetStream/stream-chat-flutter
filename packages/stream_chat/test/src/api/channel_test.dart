@@ -7,6 +7,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/src/models/own_user.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -379,7 +380,8 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-        );
+        )..state.user = OwnUser(id: 'test-id');
+
         final channelClient = client.channel('messaging', id: 'testid');
         final reactionType = 'test';
 
@@ -396,6 +398,10 @@ void main() {
         await channelClient.sendReaction(
           Message(
             id: 'messageid',
+            reactionCounts: const <String, int>{},
+            reactionScores: const <String, int>{},
+            latestReactions: const <Reaction>[],
+            ownReactions: const <Reaction>[],
           ),
           reactionType,
         );
@@ -418,23 +424,21 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-        );
-        final channelClient = client.channel('messaging', id: 'testid');
+        )..state.user = OwnUser(id: 'test-id');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
-        await channelClient.watch();
+        final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.delete<String>('/messages/messageid/reaction/test'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.deleteReaction(
-          Message(id: 'messageid'),
+          Message(
+            id: 'messageid',
+            reactionCounts: const <String, int>{},
+            reactionScores: const <String, int>{},
+            latestReactions: const <Reaction>[],
+            ownReactions: const <Reaction>[],
+          ),
           Reaction(type: 'test'),
         );
 
