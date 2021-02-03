@@ -3499,7 +3499,8 @@ void main() {
     test('ConnectGuestUserResponse', () {
       const jsonExample =
           r'{"user":{"id":"guest-ac612aee-25fe-49fb-b1af-969e41f452a0-wild-breeze-7","role":"guest","created_at":"2020-02-03T10:19:01.538434Z","updated_at":"2020-02-03T10:19:01.539543Z","banned":false,"online":false},"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ3Vlc3QtYWM2MTJhZWUtMjVmZS00OWZiLWIxYWYtOTY5ZTQxZjQ1MmEwLXdpbGQtYnJlZXplLTcifQ.mmoFGu7oJjpFsp7nFN78UbIpO7gowbuIbyoppsuvbXA","duration":"4.66ms"}';
-      final response = ConnectGuestUserResponse.fromJson(json.decode(jsonExample));
+      final response =
+          ConnectGuestUserResponse.fromJson(json.decode(jsonExample));
       expect(response.user, isA<User>());
       expect(response.accessToken, isA<String>());
     });
