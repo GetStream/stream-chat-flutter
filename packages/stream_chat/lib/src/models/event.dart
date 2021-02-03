@@ -180,4 +180,11 @@ class EventChannel extends ChannelModel {
       topLevelFields,
     ));
   }
+
+  /// Serialize to json
+  @override
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+        _$EventChannelToJson(this),
+        topLevelFields,
+      );
 }

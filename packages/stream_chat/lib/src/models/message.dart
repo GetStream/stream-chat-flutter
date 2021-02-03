@@ -307,4 +307,11 @@ class TranslatedMessage extends Message {
       Serialization.moveToExtraDataFromRoot(json, topLevelFields),
     );
   }
+
+  /// Serialize to json
+  @override
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+        _$TranslatedMessageToJson(this),
+        topLevelFields,
+      );
 }

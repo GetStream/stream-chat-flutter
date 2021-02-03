@@ -158,7 +158,7 @@ class _MediaListViewState extends State<MediaListView> {
 
     final media = await assetList.getAssetListPaged(_currentPage, 50);
 
-    if (!media.isEmpty) {
+    if (media.isNotEmpty) {
       setState(() {
         _media.addAll(media);
       });

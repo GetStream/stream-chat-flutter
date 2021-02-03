@@ -8,12 +8,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+import 'extension.dart';
 import 'message_input.dart';
 import 'message_widget.dart';
 import 'stream_chat.dart';
 import 'stream_chat_theme.dart';
-import 'extension.dart';
 
 class MessageActionsModal extends StatefulWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -283,20 +284,22 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     setState(() {
       _showActions = false;
     });
-    var answer = await showConfirmationDialog(context,
-        title: 'Delete message',
-        icon: StreamSvgIcon.flag(
-          color: StreamChatTheme.of(context).colorTheme.accentRed,
-          size: 24.0,
-        ),
-        question: 'Are you sure you want to permanently delete this\nmessage?',
-        okText: 'DELETE',
-        cancelText: 'CANCEL');
+    var answer = await showConfirmationDialog(
+      context,
+      title: 'Delete message',
+      icon: StreamSvgIcon.flag(
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        size: 24.0,
+      ),
+      question: 'Are you sure you want to permanently delete this\nmessage?',
+      okText: 'DELETE',
+      cancelText: 'CANCEL',
+    );
 
     if (answer) {
       try {
         Navigator.pop(context);
-        StreamChat.of(context).client.deleteMessage(
+        await StreamChat.of(context).client.deleteMessage(
               widget.message,
               StreamChannel.of(context).channel.cid,
             );
@@ -473,7 +476,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
-            StreamSvgIcon.icon_flag(
+            StreamSvgIcon.iconFlag(
               color: StreamChatTheme.of(context).primaryIconTheme.color,
             ),
             const SizedBox(width: 16),
@@ -580,7 +583,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
         child: Row(
           children: [
-            StreamSvgIcon.circle_up(
+            StreamSvgIcon.circleUp(
               color: StreamChatTheme.of(context).colorTheme.accentBlue,
             ),
             const SizedBox(width: 16),
@@ -635,7 +638,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon.close_small(),
+                      icon: StreamSvgIcon.closeSmall(),
                       onPressed: Navigator.of(context).pop,
                     ),
                   ],

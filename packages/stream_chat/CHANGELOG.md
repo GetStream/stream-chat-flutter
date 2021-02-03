@@ -1,9 +1,13 @@
+## 1.0.1-beta
+
+- Fixed pub analysis issues
+
 ## 1.0.0-beta
 
 - 🛑 **BREAKING** Renamed `Client` to less generic `StreamChatClient`
-- 🛑 **BREAKING** Segregated the persistence layer into separate package (stream_chat_persistence)[https://pub.dev/packages/stream_chat_persistence]
-- 🛑 **BREAKING** Moved `Client.backgroundKeepAlive` to (core package)[https://pub.dev/packages/stream_chat_core]
-- 🛑 **BREAKING** Moved `Client.showLocalNotification` to (core package)[https://pub.dev/packages/stream_chat_core] and renamed it to `StreamChatCore.onBackgroundEventReceived`
+- 🛑 **BREAKING** Segregated the persistence layer into separate package [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence)
+- 🛑 **BREAKING** Moved `Client.backgroundKeepAlive` to [core package](https://pub.dev/packages/stream_chat_core)
+- 🛑 **BREAKING** Moved `Client.showLocalNotification` to [core package](https://pub.dev/packages/stream_chat_core) and renamed it to `StreamChatCore.onBackgroundEventReceived`
 - Removed `flutter` dependency. This is now a pure Dart package 🥳
 - Minor improvements and bugfixes
 

@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -62,7 +63,7 @@ class ChannelListPage extends StatelessWidget {
             }
           },
           channelPreviewBuilder: _channelPreviewBuilder,
-          sort: [SortOption('last_message_at')],
+          // sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
             limit: 20,
           ),
@@ -73,10 +74,12 @@ class ChannelListPage extends StatelessWidget {
   }
 
   Widget _channelPreviewBuilder(BuildContext context, Channel channel) {
-    final lastMessage = channel.state.messages.reversed
-        .firstWhere((message) => !message.isDeleted);
+    final lastMessage = channel.state.messages.reversed.firstWhere(
+      (message) => !message.isDeleted,
+      orElse: () => null,
+    );
 
-    final subtitle = (lastMessage == null ? "nothing yet" : lastMessage.text);
+    final subtitle = (lastMessage == null ? 'nothing yet' : lastMessage.text);
     final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
 
     return ListTile(

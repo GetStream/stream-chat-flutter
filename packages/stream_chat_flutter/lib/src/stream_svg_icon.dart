@@ -386,7 +386,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.cloud_download({
+  factory StreamSvgIcon.cloudDownload({
     double size,
     Color color,
   }) {
@@ -434,7 +434,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.arrow_right({
+  factory StreamSvgIcon.arrowRight({
     double size,
     Color color,
   }) {
@@ -446,7 +446,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.close_small({
+  factory StreamSvgIcon.closeSmall({
     double size,
     Color color,
   }) {
@@ -458,7 +458,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_curve_line_left_up({
+  factory StreamSvgIcon.iconCurveLineLeftUp({
     double size,
     Color color,
   }) {
@@ -470,7 +470,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_moon({
+  factory StreamSvgIcon.iconMoon({
     double size,
     Color color,
   }) {
@@ -482,7 +482,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_SHARE({
+  factory StreamSvgIcon.iconShare({
     double size,
     Color color,
   }) {
@@ -494,7 +494,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_grid({
+  factory StreamSvgIcon.iconGrid({
     double size,
     Color color,
   }) {
@@ -506,7 +506,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_send_message({
+  factory StreamSvgIcon.iconSendMessage({
     double size,
     Color color,
   }) {
@@ -518,7 +518,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_menu_point_v({
+  factory StreamSvgIcon.iconMenuPoint({
     double size,
     Color color,
   }) {
@@ -530,7 +530,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_save({
+  factory StreamSvgIcon.iconSave({
     double size,
     Color color,
   }) {
@@ -542,7 +542,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.share_arrow({
+  factory StreamSvgIcon.shareArrow({
     double size,
     Color color,
   }) {
@@ -554,7 +554,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_7z({
+  factory StreamSvgIcon.filetype7z({
     double size,
     Color color,
   }) {
@@ -566,7 +566,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_csv({
+  factory StreamSvgIcon.filetypeCsv({
     double size,
     Color color,
   }) {
@@ -578,7 +578,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_doc({
+  factory StreamSvgIcon.filetypeDoc({
     double size,
     Color color,
   }) {
@@ -590,7 +590,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_docx({
+  factory StreamSvgIcon.filetypeDocx({
     double size,
     Color color,
   }) {
@@ -602,7 +602,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_Generic({
+  factory StreamSvgIcon.filetypeGeneric({
     double size,
     Color color,
   }) {
@@ -614,7 +614,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_html({
+  factory StreamSvgIcon.filetypeHtml({
     double size,
     Color color,
   }) {
@@ -626,7 +626,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_md({
+  factory StreamSvgIcon.filetypeMd({
     double size,
     Color color,
   }) {
@@ -638,7 +638,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_odt({
+  factory StreamSvgIcon.filetypeOdt({
     double size,
     Color color,
   }) {
@@ -650,7 +650,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_pdf({
+  factory StreamSvgIcon.filetypePdf({
     double size,
     Color color,
   }) {
@@ -662,7 +662,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_ppt({
+  factory StreamSvgIcon.filetypePpt({
     double size,
     Color color,
   }) {
@@ -674,7 +674,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_pptx({
+  factory StreamSvgIcon.filetypePptx({
     double size,
     Color color,
   }) {
@@ -686,7 +686,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_rar({
+  factory StreamSvgIcon.filetypeRar({
     double size,
     Color color,
   }) {
@@ -698,7 +698,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_rtf({
+  factory StreamSvgIcon.filetypeRtf({
     double size,
     Color color,
   }) {
@@ -710,7 +710,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_tar({
+  factory StreamSvgIcon.filetypeTar({
     double size,
     Color color,
   }) {
@@ -722,7 +722,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_txt({
+  factory StreamSvgIcon.filetypeTxt({
     double size,
     Color color,
   }) {
@@ -734,7 +734,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_xls({
+  factory StreamSvgIcon.filetypeXls({
     double size,
     Color color,
   }) {
@@ -746,7 +746,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_xlsx({
+  factory StreamSvgIcon.filetypeXlsx({
     double size,
     Color color,
   }) {
@@ -758,7 +758,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.filetype_zip({
+  factory StreamSvgIcon.filetypeZip({
     double size,
     Color color,
   }) {
@@ -770,7 +770,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_group({
+  factory StreamSvgIcon.iconGroup({
     double size,
     Color color,
   }) {
@@ -782,7 +782,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_notification({
+  factory StreamSvgIcon.iconNotification({
     double size,
     Color color,
   }) {
@@ -794,7 +794,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_user_delete({
+  factory StreamSvgIcon.iconUserDelete({
     double size,
     Color color,
   }) {
@@ -818,7 +818,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.circle_up({
+  factory StreamSvgIcon.circleUp({
     double size,
     Color color,
   }) {
@@ -830,7 +830,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.Icon_user_settings({
+  factory StreamSvgIcon.iconUserSettings({
     double size,
     Color color,
   }) {
@@ -890,7 +890,7 @@ class StreamSvgIcon extends StatelessWidget {
     );
   }
 
-  factory StreamSvgIcon.icon_flag({
+  factory StreamSvgIcon.iconFlag({
     double size,
     Color color,
   }) {
