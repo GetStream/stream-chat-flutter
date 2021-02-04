@@ -123,8 +123,8 @@ SendReactionResponse _$SendReactionResponseFromJson(Map json) {
           ));
 }
 
-SetGuestUserResponse _$SetGuestUserResponseFromJson(Map json) {
-  return SetGuestUserResponse()
+ConnectGuestUserResponse _$ConnectGuestUserResponseFromJson(Map json) {
+  return ConnectGuestUserResponse()
     ..duration = json['duration'] as String
     ..accessToken = json['access_token'] as String
     ..user = json['user'] == null
