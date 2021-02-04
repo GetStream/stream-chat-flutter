@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stream_chat_flutter_core: ^1.0.2-beta
+  stream_chat_flutter_core: ^1.0.1-beta
   flutter_app_badger: ^1.1.2
   photo_view: ^0.10.3
   rxdart: ^0.25.0

@@ -1,6 +1,6 @@
 ## 1.0.1-beta
 
-- Update llc dependency
+- Update stream_chat_core dependency
 
 ## 1.0.0-beta
 
