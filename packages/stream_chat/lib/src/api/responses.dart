@@ -141,9 +141,9 @@ class SendReactionResponse extends _BaseResponse {
       _$SendReactionResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.setGuestUser] api call
+/// Model response for [StreamChatClient.connectGuestUser] api call
 @JsonSerializable(createToJson: false)
-class SetGuestUserResponse extends _BaseResponse {
+class ConnectGuestUserResponse extends _BaseResponse {
   /// Guest user access token
   String accessToken;
 
@@ -151,8 +151,8 @@ class SetGuestUserResponse extends _BaseResponse {
   User user;
 
   /// Create a new instance from a json
-  static SetGuestUserResponse fromJson(Map<String, dynamic> json) =>
-      _$SetGuestUserResponseFromJson(json);
+  static ConnectGuestUserResponse fromJson(Map<String, dynamic> json) =>
+      _$ConnectGuestUserResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.updateUser] api call

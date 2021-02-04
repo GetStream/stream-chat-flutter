@@ -146,7 +146,7 @@ class StreamChatClient {
 
   /// A function in which you send a request to your own backend to get a Stream Chat API token.
   /// The token will be the return value of the function.
-  /// It's used by the client to refresh the token once expired or to set the user without a predefined token using [setUserWithProvider].
+  /// It's used by the client to refresh the token once expired or to connect the user without a predefined token using [connectUserWithProvider].
   final TokenProvider tokenProvider;
 
   /// [Dio] httpClient
@@ -271,7 +271,7 @@ class StreamChatClient {
 
         httpClient.unlock();
 
-        await setUser(User(id: userId), newToken);
+        await connectUser(User(id: userId), newToken);
 
         try {
           return await httpClient.request(
@@ -344,7 +344,12 @@ class StreamChatClient {
 
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setUser(User user, String token) async {
+  @Deprecated('Use `connectUser` instead. Will be removed in Future releases')
+  Future<Event> setUser(User user, String token) => connectUser(user, token);
+
+  /// Connects the current user, this triggers a connection to the API.
+  /// It returns a [Future] that resolves when the connection is setup.
+  Future<Event> connectUser(User user, String token) async {
     if (_connectCompleter != null && !_connectCompleter.isCompleted) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
@@ -352,7 +357,7 @@ class StreamChatClient {
 
     _connectCompleter = Completer();
 
-    logger.info('set user');
+    logger.info('connect user');
     state.user = OwnUser.fromJson(user.toJson());
     this.token = token;
     _anonymous = false;
@@ -368,15 +373,21 @@ class StreamChatClient {
 
   /// Set the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<void> setUserWithProvider(User user) async {
+  @Deprecated(
+      'Use `connectUserWithProvider` instead. Will be removed in Future releases')
+  Future<Event> setUserWithProvider(User user) => connectUserWithProvider(user);
+
+  /// Connects the current user using the [tokenProvider] to fetch the token.
+  /// It returns a [Future] that resolves when the connection is setup.
+  Future<Event> connectUserWithProvider(User user) async {
     if (tokenProvider == null) {
       throw Exception('''
-      TokenProvider must be provided in the constructor in order to use `setUserWithProvider` method.
-      Use `setUser` providing a token.
+      TokenProvider must be provided in the constructor in order to use `connectUserWithProvider` method.
+      Use `connectUser` providing a token.
       ''');
     }
     final token = await tokenProvider(user.id);
-    return setUser(user, token);
+    return connectUser(user, token);
   }
 
   /// Stream of [Event] coming from websocket connection
@@ -573,7 +584,7 @@ class StreamChatClient {
       }
       if (wsConnectionStatus != ConnectionStatus.connected) {
         final errorMessage =
-            'You cannot use queryChannels without an active connection. Please call setUser to connect the client.';
+            'You cannot use queryChannels without an active connection. Please call `connectUser` to connect the client.';
         if (persistenceEnabled) {
           logger.warning(
               '$errorMessage\nTrying to retrieve channels from the offline storage.');
@@ -869,7 +880,13 @@ class StreamChatClient {
 
   /// Set the current user with an anonymous id, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setAnonymousUser() async {
+  @Deprecated(
+      'Use `connectAnonymousUser` instead. Will be removed in Future releases')
+  Future<Event> setAnonymousUser() => connectAnonymousUser();
+
+  /// Connects the current user with an anonymous id, this triggers a connection to the API.
+  /// It returns a [Future] that resolves when the connection is setup.
+  Future<Event> connectAnonymousUser() async {
     if (_connectCompleter != null && !_connectCompleter.isCompleted) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
@@ -892,13 +909,19 @@ class StreamChatClient {
 
   /// Set the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<void> setGuestUser(User user) async {
+  @Deprecated(
+      'Use `connectGuestUser` instead. Will be removed in Future releases')
+  Future<Event> setGuestUser(User user) => connectGuestUser(user);
+
+  /// Connects the current user as guest, this triggers a connection to the API.
+  /// It returns a [Future] that resolves when the connection is setup.
+  Future<Event> connectGuestUser(User user) async {
     _anonymous = true;
     final response = await post('/guest', data: {'user': user.toJson()})
-        .then((res) => decode<SetGuestUserResponse>(
-            res.data, SetGuestUserResponse.fromJson))
+        .then((res) => decode<ConnectGuestUserResponse>(
+            res.data, ConnectGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
-    return setUser(
+    return connectUser(
       response.user,
       response.accessToken,
     );

@@ -390,7 +390,7 @@ void main() {
     });
 
     group('user', () {
-      test('setUser should throw exception', () async {
+      test('connectUser should throw exception', () async {
         final mockDio = MockDio();
 
         when(mockDio.options).thenReturn(BaseOptions());
@@ -422,7 +422,7 @@ void main() {
           httpClient: mockDio,
         );
 
-        expect(() => client.setUserWithProvider(User(id: 'test-id')),
+        expect(() => client.connectUserWithProvider(User(id: 'test-id')),
             throwsA(isA<Exception>()));
       });
 
