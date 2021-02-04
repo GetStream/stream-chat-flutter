@@ -1,3 +1,8 @@
+## 1.0.2-beta
+
+- Deprecated `setUser`, `setGuestUser`, `setUserWithProvider` in favor of `connectUser`, `connectGuestUser`, `connectUserWithProvider`
+- Optimised reaction updates - i.e., Update first call Api later.
+
 ## 1.0.1-beta
 
 - Fixed pub analysis issues
