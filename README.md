@@ -34,7 +34,7 @@ A pure Dart package that can be used on any Dart project. It provides a low-leve
 This package provides a persistence client for fetching and saving chat data locally. Stream Chat Persistence uses Moor as a disk cache.
 
 ### [stream_chat_flutter_core](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core)
-This package provides business logic to fetch common things required for integrating Stream Chat into your application. The core package allows more customisation and hence provides business logic but no UI components.
+This package provides business logic to fetch common things required for integrating Stream Chat into your application. The `core` package allows more customisation and hence provides business logic but no UI components.
 
 ### [stream_chat_flutter](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter)
 This library includes both a low-level chat SDK and a set of reusable and customizable UI components.
