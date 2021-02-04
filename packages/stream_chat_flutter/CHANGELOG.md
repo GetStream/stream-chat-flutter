@@ -1,3 +1,7 @@
+## 1.0.1-beta
+
+- Update stream_chat_core dependency
+
 ## 1.0.0-beta
 
 - **Refreshed widgets design**
