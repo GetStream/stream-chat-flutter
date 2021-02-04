@@ -9,11 +9,11 @@ void main() async {
     logLevel: Level.INFO,
   );
 
-  /// Set the current user. In a production scenario, this should be done using
+  /// Set the current user and connect the websocket. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
-  await client.setUser(
+  await client.connectUser(
     User(id: 'super-band-9'),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
