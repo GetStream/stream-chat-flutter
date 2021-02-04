@@ -48,4 +48,4 @@ It teaches you how to use this SDK and also shows how to make frequently require
 
 Every package folder includes a fully functional example with setup instructions.
 
-We also provide a set of sample apps created using the Stream Flutter SDK at this location. https://github.com/GetStream/flutter-samples
+We also provide a set of sample apps created using the Stream Flutter SDK at [this location](https://github.com/GetStream/flutter-samples).
