@@ -7,7 +7,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// There are three important things to notice that are common to all Flutter application using StreamChat:
 ///
 /// 1. The Dart API [StreamChatClient] is initialized with your API Key
-/// 2. The current user is set by calling [StreamChatClient.setUser]
+/// 2. The current user is set by calling [StreamChatClient.connectUser]
 /// 3. The client is then passed to the top-level [StreamChat] widget
 ///    [StreamChat] is an inherited widget and must be the parent of all Chat related widgets.
 ///
@@ -18,7 +18,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// - We set up the Chat [StreamChatClient] with the API key
 ///
-/// - We set the the current user for Chat with [StreamChatClient.setUser] and a pre-generated user token
+/// - We set the the current user for Chat with [StreamChatClient.connectUser] and a pre-generated user token
 ///
 /// - We make [StreamChat] the root Widget of our application
 ///
@@ -31,7 +31,7 @@ void main() async {
     logLevel: Level.INFO,
   );
 
-  await client.setUser(
+  await client.connectUser(
     User(id: 'super-band-9'),
     'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoic3VwZXItYmFuZC05In0.0L6lGoeLwkz0aZRUcpZKsvaXtNEDHBcezVTZ0oPq40A',
   );
