@@ -18,6 +18,10 @@
 This package provides a persistence client for fetching and saving chat data locally.
 Stream Chat Persistence uses [Moor](https://github.com/simolus3/moor) as a disk cache.
 
+### Changelog
+
+Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_persistence/changelog) to see the latest changes in the package.
+
 ## Add dependency
 Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_persistence.svg)](https://pub.dartlang.org/packages/stream_chat_persistence)
 ```yaml

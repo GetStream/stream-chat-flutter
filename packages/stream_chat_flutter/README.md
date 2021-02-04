@@ -16,6 +16,11 @@
 - [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
 - [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 
+
+### Changelog
+
+Check out the [changelog on pub.dev](https://pub.dev/packages/stream_chat_flutter/changelog) to see the latest changes in the package.
+
 ## Flutter Chat Tutorial
 
 The best place to start is the [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/).
