@@ -1,6 +1,15 @@
-# Stream Chat Dart 
+# Official Flutter packages for [Stream Chat](https://getstream.io/chat/)
 
-![](https://camo.githubusercontent.com/f5f074f3e1cde523ae0d425347149e20f861024d1d8e19b22053294ad85c43c8/68747470733a2f2f692e696d6775722e636f6d2f4c344d6a3853322e706e67)
+![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/hotfix/readmes/images/sdk_hero_v4.png)
+
+[![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
+
+**Quick Links**
+
+- [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
+- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/)
+- [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 
 This repository contains code for our [Dart](https://dart.dev/) and [Flutter](https://flutter.dev/) chat clients.
 
@@ -15,45 +24,28 @@ To get started, run `bootstrap` after cloning the project.
 melos bootstrap
 ```
 
-## Available Commands 
-### Analyze
-> Requires `tuneup` to be activated globally. Please see https://pub.dev/packages/tuneup
-```shell
-melos run analyze
-```
+## Packages 
+We provide a variety of packages depending on the level of customization you want to achieve.
 
-### Pub Lint
-Runs pub publish with ``--dry-run``
-```shell
-melos run lint:pub
-```
+### [stream_chat](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat)
+A pure Dart package that can be used on any Dart project. It provides a low-level client to access the Stream Chat service.
 
-### Build iOS 
-Builds iOS examples without codesign 
-```shell
-melos run build:examples:ios
-```
+### [stream_chat_persistence](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_persistence)
+This package provides a persistence client for fetching and saving chat data locally. Stream Chat Persistence uses Moor as a disk cache.
 
-### Build APK
-Builds an Android APK for examples
-```shell
-melos run build:examples:android
-```
+### [stream_chat_flutter_core](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core)
+This package provides business logic to fetch common things required for integrating Stream Chat into your application. The `core` package allows more customisation and hence provides business logic but no UI components.
 
-### Build MACOS
-Builds MacOs for all examples
-```shell
-melos run build:examples:macos
-```
+### [stream_chat_flutter](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter)
+This library includes both a low-level chat SDK and a set of reusable and customizable UI components.
 
-### Test
-Runs `flutter test` on all packages
-```shell
-melos run test
-```
+## Flutter Chat Tutorial
 
-### Test Web
-Runs `flutter test --platform=chrome` on all packages
-```shell
-melos run test:web
-```
+The best place to start is the [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/).
+It teaches you how to use this SDK and also shows how to make frequently required changes.
+
+## Example Apps
+
+Every package folder includes a fully functional example with setup instructions.
+
+We also provide a set of sample apps created using the Stream Flutter SDK at [this location](https://github.com/GetStream/flutter-samples).
