@@ -1,6 +1,6 @@
 # Official Flutter packages for [Stream Chat](https://getstream.io/chat/)
 
-![](https://camo.githubusercontent.com/f5f074f3e1cde523ae0d425347149e20f861024d1d8e19b22053294ad85c43c8/68747470733a2f2f692e696d6775722e636f6d2f4c344d6a3853322e706e67)
+![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/hotfix/readmes/images/sdk_hero_v4.png)
 
 [![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)

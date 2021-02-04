@@ -1,8 +1,6 @@
 # Official Flutter SDK for [Stream Chat](https://getstream.io/chat/)
 
-<p align="center">
-  <a href="https://getstream.io/chat/flutter/tutorial/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" width="60%" /></a>
-</p>
+![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/hotfix/readmes/images/sdk_hero_v4.png)
 
 > The official Flutter components for Stream Chat, a service for
 > building chat applications.
@@ -11,7 +9,6 @@
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
 [![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
-<img align="right" src="https://getstream.imgix.net/images/ios-chat-tutorial/iphone_chat_art@1x.png?auto=format,enhance" width="50%" />
 
 **Quick Links**
 
