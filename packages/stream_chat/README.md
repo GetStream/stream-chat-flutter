@@ -1,20 +1,26 @@
-# Stream Chat Dart 
+# Official Dart Client for [Stream Chat](https://getstream.io/chat/)
+
+>The official Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
+
 [![Pub](https://img.shields.io/pub/v/stream_chat.svg)](https://pub.dartlang.org/packages/stream_chat)
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
-![CI](https://github.com/GetStream/stream-chat-dart/workflows/CI/badge.svg?branch=master)
-[![codecov](https://codecov.io/gh/GetStream/stream-chat-dart/branch/master/graph/badge.svg)](https://codecov.io/gh/GetStream/stream-chat-dart)
+[![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
 
-stream-chat-dart is the official Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
+**Quick Links**
 
-You can sign up for a Stream account at https://getstream.io/chat/
+- [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
+- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
+- [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 
 ## Getting started
 
 ### Add dependency
+Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat.svg)](https://pub.dartlang.org/packages/stream_chat)
 
 ```yaml
 dependencies:
- stream_chat: ^1.0.0-beta
+ stream_chat: ^latest-version
 ```
 
 You should then run `flutter packages get`
@@ -70,7 +76,7 @@ final client = StreamChatClient(
 )..chatPersistenceClient = CustomChatPersistentClient();
 ```
 
-We provide an official persistent client in the (stream_chat_persistence)[https://pub.dev/packages/stream_chat_persistence] package.
+We provide an official persistent client in the [stream_chat_persistence](https://pub.dev/packages/stream_chat_persistence) package.
 
 ```dart
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';

@@ -1,17 +1,19 @@
 # Official Chat Persistence Client for [Stream Chat](https://getstream.io/chat/)
 
-<p align="center">
-  <a href="https://getstream.io/chat/flutter/tutorial/"><img src="https://i.imgur.com/L4Mj8S2.png" alt="Flutter Chat" width="60%" /></a>
-</p>
-
 > The official Chat Persistence Client for Stream Chat, a service for
 > building chat applications.
 
 [![Pub](https://img.shields.io/pub/v/stream_chat_persistence.svg)](https://pub.dartlang.org/packages/stream_chat_persistence)
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
 [![Gitter](https://badges.gitter.im/GetStream/stream_chat_persistence.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-![CI](https://github.com/GetStream/stream-chat-flutter/workflows/CI/badge.svg?branch=master)
-<img align="right" src="https://getstream.imgix.net/images/ios-chat-tutorial/iphone_chat_art@1x.png?auto=format,enhance" width="50%" />
+![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
+
+
+**Quick Links**
+
+- [Register](https://getstream.io/chat/trial/) to get an API key for Stream Chat
+- [Flutter Chat Tutorial](https://getstream.io/chat/flutter/tutorial/) 
+- [Chat UI Kit](https://getstream.io/chat/ui-kit/)
 
 This package provides a persistence client for fetching and saving chat data locally.
 Stream Chat Persistence uses [Moor](https://github.com/simolus3/moor) as a disk cache.

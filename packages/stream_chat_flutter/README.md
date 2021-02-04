@@ -10,7 +10,7 @@
 [![Pub](https://img.shields.io/pub/v/stream_chat_flutter.svg)](https://pub.dartlang.org/packages/stream_chat_flutter)
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
 [![Gitter](https://badges.gitter.im/GetStream/stream-chat-flutter.svg)](https://gitter.im/GetStream/stream-chat-flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-![CI](https://github.com/GetStream/stream-chat-flutter/workflows/CI/badge.svg?branch=master)
+![CI](https://github.com/GetStream/stream-chat-flutter/workflows/stream_flutter_workflow/badge.svg?branch=master)
 <img align="right" src="https://getstream.imgix.net/images/ios-chat-tutorial/iphone_chat_art@1x.png?auto=format,enhance" width="50%" />
 
 **Quick Links**
@@ -61,8 +61,8 @@ If it seems related to the [flutter file picker plugin](https://github.com/migue
 ## Docs
 
 This package provides UI components required for integrating Stream Chat into your application.
-Alternatively, you may use the core package (stream_chat_flutter_core) which allows more customisation and provides business logic but no UI components.
-If you require the maximum amount of control over the API, please use the low level client package: stream_chat.
+Alternatively, you may use the core package [stream_chat_flutter_core](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat_flutter_core) which allows more customisation and provides business logic but no UI components.
+If you require the maximum amount of control over the API, please use the low level client package: [stream_chat](https://github.com/GetStream/stream-chat-flutter/tree/master/packages/stream_chat).
 
 ### UI Components
 
@@ -152,9 +152,34 @@ Out of the box, all chat widgets use their default styling, and there are two wa
   
 ### Offline storage 
 
-By default the library saves information about channels and messages in a SQLite DB.
+To add data persistance you can extend the class `ChatPersistenceClient` and pass an instance to the `StreamChatClient`.
 
-Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
+```dart
+class CustomChatPersistentClient extends ChatPersistenceClient {
+...
+}
+
+final client = StreamChatClient(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = CustomChatPersistentClient();
+```
+
+We provide an official persistent client in the (stream_chat_persistence)[https://pub.dev/packages/stream_chat_persistence] package.
+
+```dart
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.background,
+);
+
+final client = StreamChatClient(
+  apiKey ?? kDefaultStreamApiKey,
+  logLevel: Level.INFO,
+)..chatPersistenceClient = chatPersistentClient;
+```
 
 ## Contributing
 
