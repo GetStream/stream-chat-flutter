@@ -1,6 +1,6 @@
 # Official Flutter SDK for [Stream Chat](https://getstream.io/chat/)
 
-![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/hotfix/readmes/images/sdk_hero_v4.png)
+![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v4.png)
 
 > The official Flutter components for Stream Chat, a service for
 > building chat applications.
