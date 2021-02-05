@@ -223,19 +223,27 @@ class Channel {
   }
 
   /// Send a file to this channel
-  Future<SendFileResponse> sendFile(MultipartFile file) async {
+  Future<SendFileResponse> sendFile(
+    MultipartFile file, {
+    ProgressCallback onSendProgress,
+  }) async {
     final response = await _client.post(
       '$_channelURL/file',
       data: FormData.fromMap({'file': file}),
+      onSendProgress: onSendProgress,
     );
     return _client.decode(response.data, SendFileResponse.fromJson);
   }
 
   /// Send an image to this channel
-  Future<SendImageResponse> sendImage(MultipartFile file) async {
+  Future<SendImageResponse> sendImage(
+    MultipartFile file, {
+    ProgressCallback onSendProgress,
+  }) async {
     final response = await _client.post(
       '$_channelURL/image',
       data: FormData.fromMap({'file': file}),
+      onSendProgress: onSendProgress,
     );
     return _client.decode(response.data, SendImageResponse.fromJson);
   }

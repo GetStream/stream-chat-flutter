@@ -92,7 +92,7 @@ class _FileAttachmentState extends State<FileAttachment> {
                   ),
                   SizedBox(height: 3.0),
                   Text(
-                    '${getSizeText(widget.attachment.extraData['file_size'])}',
+                    '${filesize(widget.attachment.extraData['file_size'])}',
                     style: StreamChatTheme.of(context)
                         .textTheme
                         .footnote

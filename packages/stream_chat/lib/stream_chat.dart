@@ -2,6 +2,7 @@ library stream_chat;
 
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
+export 'package:dio/src/options.dart' show ProgressCallback;
 export 'package:logging/logging.dart' show Logger, Level;
 
 export './src/api/channel.dart';

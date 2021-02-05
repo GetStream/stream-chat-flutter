@@ -6,9 +6,10 @@ import 'package:video_compress/video_compress.dart';
 class ICompressVideoService {
   static final ICompressVideoService instance = ICompressVideoService._();
   final _lock = Lock();
+
   ICompressVideoService._();
 
-  Future<MediaInfo> compressVideo(String path) async {
+  Future<MediaInfo> compress(String path) async {
     return _lock.synchronized(() {
       return VideoCompress.compressVideo(
         path,

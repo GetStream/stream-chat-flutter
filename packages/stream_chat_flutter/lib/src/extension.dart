@@ -1,5 +1,7 @@
 import 'package:characters/characters.dart';
 import 'package:emojis/emoji.dart';
+import 'package:http_parser/http_parser.dart' as http_parser;
+import 'package:mime/mime.dart';
 
 final _emojis = Emoji.all();
 
@@ -10,14 +12,26 @@ extension StringExtension on String {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 
-  //  Emojis guidelines
-  //  1 to 3 emojis: big size with no text bubble.
-  //  4+ emojis or emojis+text: standard size with text bubble.
+  /// Returns whether the string contains only emoji's or not.
+  ///
+  ///  Emojis guidelines
+  ///  1 to 3 emojis: big size with no text bubble.
+  ///  4+ emojis or emojis+text: standard size with text bubble.
   bool get isOnlyEmoji {
     final characters = trim().characters;
     if (characters.isEmpty) return false;
     if (characters.length > 3) return false;
     return characters.every((c) => _emojis.map((e) => e.char).contains(c));
+  }
+
+  /// Returns the mime type from the passed file name.
+  http_parser.MediaType get mimeType {
+    if (this == null) return null;
+    if (toLowerCase().endsWith('heic')) {
+      return http_parser.MediaType.parse('image/heic');
+    } else {
+      return http_parser.MediaType.parse(lookupMimeType(this));
+    }
   }
 }
 

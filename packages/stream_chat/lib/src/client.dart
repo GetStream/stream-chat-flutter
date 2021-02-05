@@ -794,9 +794,14 @@ class StreamChatClient {
   Future<Response<String>> post(
     String path, {
     dynamic data,
+    ProgressCallback onSendProgress,
   }) async {
     try {
-      final response = await httpClient.post<String>(path, data: data);
+      final response = await httpClient.post<String>(
+        path,
+        data: data,
+        onSendProgress: onSendProgress,
+      );
       return response;
     } on DioError catch (error) {
       throw _parseError(error);
