@@ -1,3 +1,8 @@
+## 1.0.3-beta
+
+- Fixed issue with disconnecting after connecting without awaiting the connection result
+- Fixed bug that caused duplicated typing.stop events to be fired
+
 ## 1.0.2-beta
 
 - Deprecated `setUser`, `setGuestUser`, `setUserWithProvider` in favor of `connectUser`, `connectGuestUser`, `connectUserWithProvider`
