@@ -12,6 +12,7 @@ import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
+import 'api/attachment_uploader.dart';
 import 'api/channel.dart';
 import 'api/connection_status.dart';
 import 'api/requests.dart';
@@ -78,6 +79,7 @@ class StreamChatClient {
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
     RetryPolicy retryPolicy,
+    this.attachmentUploader,
   }) {
     _retryPolicy ??= RetryPolicy(
       retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
@@ -85,6 +87,8 @@ class StreamChatClient {
       shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
           attempt < 5,
     );
+
+    attachmentUploader ??= StreamAttachmentUploader(this);
 
     state = ClientState(this);
 
@@ -96,6 +100,9 @@ class StreamChatClient {
 
   /// Chat persistence client
   ChatPersistenceClient chatPersistenceClient;
+
+  /// Attachment uploader
+  AttachmentUploader attachmentUploader;
 
   /// Whether the chat persistence is available or not
   bool get persistenceEnabled => chatPersistenceClient != null;
@@ -795,12 +802,14 @@ class StreamChatClient {
     String path, {
     dynamic data,
     ProgressCallback onSendProgress,
+    CancelToken cancelToken,
   }) async {
     try {
       final response = await httpClient.post<String>(
         path,
         data: data,
         onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
       return response;
     } on DioError catch (error) {
@@ -1030,6 +1039,40 @@ class StreamChatClient {
         response.data, SearchMessagesResponse.fromJson);
   }
 
+  /// Send a [file] to the [channelId] of type [channelType]
+  Future<SendFileResponse> sendFile(
+    MultipartFile file,
+    String channelId,
+    String channelType, {
+    ProgressCallback onSendProgress,
+    CancelToken cancelToken,
+  }) async {
+    final response = await post(
+      '/channels/$channelType/$channelId/file',
+      data: FormData.fromMap({'file': file}),
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+    return decode(response.data, SendFileResponse.fromJson);
+  }
+
+  /// Send a [image] to the [channelId] of type [channelType]
+  Future<SendImageResponse> sendImage(
+    MultipartFile image,
+    String channelId,
+    String channelType, {
+    ProgressCallback onSendProgress,
+    CancelToken cancelToken,
+  }) async {
+    final response = await post(
+      '/channels/$channelType/$channelId/image',
+      data: FormData.fromMap({'file': image}),
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+    return decode(response.data, SendImageResponse.fromJson);
+  }
+
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) async {
     final response = await post('/devices', data: {
@@ -1202,77 +1245,18 @@ class StreamChatClient {
   }
 
   /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(
-    Message message, [
-    String cid,
-  ]) async {
-    message = message.copyWith(
-      status: MessageSendingStatus.updating,
-      updatedAt: message.updatedAt ?? DateTime.now(),
+  Future<UpdateMessageResponse> updateMessage(Message message) async {
+    final response = await post(
+      '/messages/${message.id}',
+      data: {'message': message},
     );
-
-    final channel = state?.channels != null ? state?.channels[cid] : null;
-    channel?.state?.addMessage(message);
-
-    return post('/messages/${message.id}', data: {'message': message})
-        .then((res) {
-      final updateMessageResponse = decode(
-        res?.data,
-        UpdateMessageResponse.fromJson,
-      );
-
-      channel?.state?.addMessage(updateMessageResponse?.message?.copyWith(
-        ownReactions: message.ownReactions,
-      ));
-
-      return updateMessageResponse;
-    }).catchError((error) {
-      if (error is DioError &&
-          error.type != DioErrorType.RESPONSE &&
-          state?.channels != null) {
-        channel?.state?.retryQueue?.add([message]);
-      }
-      throw error;
-    });
+    return decode(response.data, UpdateMessageResponse.fromJson);
   }
 
   /// Deletes the given message
-  Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
-    if (message.status == MessageSendingStatus.failed) {
-      state.channels[cid].state.addMessage(message.copyWith(
-        type: 'deleted',
-        status: MessageSendingStatus.sent,
-      ));
-      return EmptyResponse();
-    }
-
-    try {
-      message = message.copyWith(
-        type: 'deleted',
-        status: MessageSendingStatus.deleting,
-        deletedAt: message.deletedAt ?? DateTime.now(),
-      );
-
-      if (state?.channels != null) {
-        state.channels[cid]?.state?.addMessage(message);
-      }
-
-      final response = await delete('/messages/${message.id}');
-
-      if (state?.channels != null) {
-        state.channels[cid]?.state
-            ?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
-      }
-
-      return decode(response.data, EmptyResponse.fromJson);
-    } catch (error) {
-      if (error is DioError &&
-          error.type != DioErrorType.RESPONSE &&
-          state?.channels != null) {
-        state.channels[cid]?.state?.retryQueue?.add([message]);
-      }
-      rethrow;
-    }
+  Future<EmptyResponse> deleteMessage(Message message) async {
+    final response = await delete('/messages/${message.id}');
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Get a message by id

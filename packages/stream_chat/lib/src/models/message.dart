@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import 'attachment.dart';
 import 'reaction.dart';
@@ -163,7 +164,7 @@ class Message {
 
   /// Constructor used for json serialization
   Message({
-    this.id,
+    String id,
     this.text,
     this.type,
     this.attachments,
@@ -187,7 +188,7 @@ class Message {
     this.extraData,
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
-  });
+  }) : id = id ?? Uuid().v4();
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(

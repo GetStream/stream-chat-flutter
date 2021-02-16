@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +11,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:stream_chat_flutter/src/compress_video_service.dart';
+import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -19,16 +19,16 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
-import 'package:video_compress/video_compress.dart';
 
 import '../stream_chat_flutter.dart';
-import 'attachment_uploader.dart';
+import 'attachment/attachment.dart';
 import 'extension.dart';
 import 'quoted_message_widget.dart';
+import 'video_thumbnail_image.dart';
 
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
-  _SendingAttachment,
+  Attachment,
 );
 
 enum ActionsLocation {
@@ -44,7 +44,7 @@ enum DefaultAttachmentTypes {
 
 const _kMinMediaPickerSize = 360.0;
 
-const _kMaxAttachmentSize = 20480; //20MB
+const _kMaxAttachmentSize = 20971520; // 20MB in Bytes
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -99,7 +99,6 @@ class MessageInput extends StatefulWidget {
     this.maxHeight = 150,
     this.keyboardType = TextInputType.multiline,
     this.disableAttachments = false,
-    this.attachmentUploader,
     this.initialMessage,
     this.textEditingController,
     this.actions,
@@ -134,9 +133,6 @@ class MessageInput extends StatefulWidget {
 
   /// If true the attachments button will not be displayed
   final bool disableAttachments;
-
-  /// A delegate to upload attachments
-  final AttachmentUploader attachmentUploader;
 
   /// The text controller of the TextField
   final TextEditingController textEditingController;
@@ -178,7 +174,7 @@ class MessageInput extends StatefulWidget {
 }
 
 class MessageInputState extends State<MessageInput> {
-  final _attachments = <String, _SendingAttachment>{};
+  final _attachments = <String, Attachment>{};
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
@@ -203,8 +199,6 @@ class MessageInputState extends State<MessageInput> {
   TextEditingController textEditingController;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
-
-  AttachmentUploader _attachmentUploader;
 
   @override
   void initState() {
@@ -391,8 +385,7 @@ class MessageInputState extends State<MessageInput> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: AnimatedCrossFade(
-        crossFadeState: ((_messageIsPresent || _attachments.isNotEmpty) &&
-                _attachments.values.every((a) => a.isUploaded == true))
+        crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
         firstChild: _buildSendButton(context),
@@ -786,7 +779,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildFilePickerSection() {
     final _attachmentContainsFile = _attachments.values.any((it) {
-      return it.attachmentType == 'file';
+      return it.type == 'file';
     });
 
     Color _getIconColor(int index) {
@@ -943,7 +936,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildPickerSection() {
     final _attachmentContainsFile = _attachments.values.any((it) {
-      return it.attachmentType == 'file';
+      return it.type == 'file';
     });
 
     switch (_filePickerIndex) {
@@ -1045,98 +1038,47 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _addAttachment(AssetEntity medium) async {
-    final attachmentId = medium.id;
-    _attachments[attachmentId] = _SendingAttachment(id: attachmentId);
-    try {
-      final mediaFile = await medium.originFile.timeout(
-        Duration(seconds: 5),
-        onTimeout: () => medium.originFile,
-      );
+    final mediaFile = await medium.originFile.timeout(
+      Duration(seconds: 5),
+      onTimeout: () => medium.originFile,
+    );
 
-      var file = PlatformFile(
-        path: mediaFile.path,
-        size: ((await mediaFile.length()) / 1024).ceil(),
-        bytes: mediaFile.readAsBytesSync(),
-      );
+    var file = AttachmentFile(
+      path: mediaFile.path,
+      size: await mediaFile.length(),
+      bytes: mediaFile.readAsBytesSync(),
+    );
 
-      if (file.size > _kMaxAttachmentSize) {
-        if (medium?.type == AssetType.video) {
-          final mediaInfo = await compressVideoService.compress(file.path);
+    if (file.size > _kMaxAttachmentSize) {
+      if (medium?.type == AssetType.video) {
+        final mediaInfo = await VideoService.compressVideo(file.path);
 
-          if (mediaInfo.filesize / (1024 * 1024) > _kMaxAttachmentSize) {
-            _showErrorAlert(
-              'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
-            );
-            _attachments.remove(attachmentId);
-            return;
-          }
-          file = PlatformFile(
-            name: file.name,
-            size: (mediaInfo.filesize / 1024).ceil(),
-            bytes: await mediaInfo.file.readAsBytes(),
-            path: mediaInfo.path,
-          );
-        } else {
+        if (mediaInfo.filesize > _kMaxAttachmentSize) {
           _showErrorAlert(
-            'The file is too large to upload. The file size limit is 20MB.',
+            'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
           );
+          return;
         }
-      }
-
-      setState(() {
-        _attachments.update(attachmentId, (it) {
-          return it.copyWith(
-            file: file,
-            attachment: Attachment(
-              localUri: file.path != null ? Uri.parse(file.path) : null,
-              type: medium?.type == AssetType.image ? 'image' : 'video',
-            ),
-          );
-        });
-      });
-
-      final fileType = medium.type == AssetType.image
-          ? DefaultAttachmentTypes.image
-          : DefaultAttachmentTypes.video;
-
-      final url = await _uploadAttachment(
-        file,
-        fileType,
-        onSendProgress: (sent, total) {
-          setState(() {
-            _attachments.update(
-              attachmentId,
-              (it) => it.copyWith(totalUploaded: sent, totalSize: total),
-            );
-          });
-        },
-      );
-
-      if (fileType == DefaultAttachmentTypes.image) {
-        _attachments.update(attachmentId, (it) {
-          return it.copyWith(attachment: it.attachment.copyWith(imageUrl: url));
-        });
+        file = AttachmentFile(
+          name: file.name,
+          size: mediaInfo.filesize,
+          bytes: await mediaInfo.file.readAsBytes(),
+          path: mediaInfo.path,
+        );
       } else {
-        _attachments.update(attachmentId, (it) {
-          return it.copyWith(attachment: it.attachment.copyWith(assetUrl: url));
-        });
+        _showErrorAlert(
+          'The file is too large to upload. The file size limit is 20MB.',
+        );
       }
-
-      if (mounted) {
-        setState(() {
-          // Marking as upload complete
-          _attachments.update(
-            attachmentId,
-            (it) => it.copyWith(totalUploaded: it.totalSize),
-          );
-        });
-      }
-    } catch (e, s) {
-      setState(() => _attachments.remove(attachmentId));
-      print(e);
-      print(s);
-      _showErrorAlert('Error adding the attachment: $e');
     }
+
+    setState(() {
+      _attachments[medium.id] = Attachment(
+        id: medium.id,
+        file: file,
+        type: medium.type == AssetType.image ? 'image' : 'video',
+      );
+    });
   }
 
   Widget _buildCommandIcon(String iconType) {
@@ -1561,10 +1503,10 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildAttachments() {
     if (_attachments.isEmpty) return Offstage();
     final fileAttachments = _attachments.values
-        .where((it) => it.attachmentType == 'file')
+        .where((it) => it.type == 'file')
         .toList(growable: false);
     final remainingAttachments = _attachments.values
-        .where((it) => it.attachmentType != 'file')
+        .where((it) => it.type != 'file')
         .toList(growable: false);
     return Column(
       children: [
@@ -1582,37 +1524,20 @@ class MessageInputState extends State<MessageInput> {
                         borderRadius: BorderRadius.circular(10),
                         clipBehavior: Clip.antiAlias,
                         child: FileAttachment(
-                          attachment: e.attachment,
-                          attachmentType: FileAttachmentType.local,
-                          file: e.file,
+                          message: null,
+                          attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
                             56.0,
                           ),
                           trailing: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              child: CircleAvatar(
-                                backgroundColor: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .black
-                                    .withOpacity(0.6),
-                                maxRadius: 12.0,
-                                child: StreamSvgIcon.close(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .white,
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() => _attachments.remove(e.id));
-                              },
-                            ),
+                            child: _buildRemoveButton(e),
                           ),
                         ),
                       ),
                     )
-                    .insertBetween(const SizedBox(width: 8)),
+                    .insertBetween(const SizedBox(height: 8)),
               ),
             ),
           ),
@@ -1638,16 +1563,11 @@ class MessageInputState extends State<MessageInput> {
                                 child: _buildAttachment(attachment),
                               ),
                             ),
-                            _buildRemoveButton(attachment),
-                            if (!attachment.isUploaded)
-                              Positioned.fill(
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: _buildRemoveButton(attachment),
+                            ),
                           ],
                         ),
                       ),
@@ -1660,44 +1580,10 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildUploadProgressIndicator(int uploaded, int total) {
-    final theme = StreamChatTheme.of(context);
+  Widget _buildRemoveButton(Attachment attachment) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: theme.colorTheme.overlayDark.withOpacity(0.6),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5, bottom: 5, right: 11, left: 5),
-        child: Row(
-          children: [
-            SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation(Color(0xffb2b2b2)),
-              ),
-            ),
-            SizedBox(width: 8),
-            Text(
-              '${filesize(uploaded)} / ${filesize(total)}',
-              style: theme.textTheme.footnote.copyWith(
-                color: theme.colorTheme.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Positioned _buildRemoveButton(_SendingAttachment attachment) {
-    return Positioned(
       height: 24,
       width: 24,
-      top: 4,
-      right: 4,
       child: RawMaterialButton(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -1721,21 +1607,18 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildAttachment(_SendingAttachment attachment) {
-    if (widget.attachmentThumbnailBuilders
-            ?.containsKey(attachment.attachmentType) ==
+  Widget _buildAttachment(Attachment attachment) {
+    if (attachment == null) return Offstage();
+
+    if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
         true) {
-      return widget.attachmentThumbnailBuilders[attachment.attachmentType](
+      return widget.attachmentThumbnailBuilders[attachment.type](
         context,
         attachment,
       );
     }
 
-    if (attachment.attachment == null) {
-      return SizedBox();
-    }
-
-    switch (attachment.attachmentType) {
+    switch (attachment.type) {
       case 'image':
       case 'giphy':
         return attachment.file != null
@@ -1749,32 +1632,33 @@ class MessageInputState extends State<MessageInput> {
                   );
                 },
               )
-            : Image.network(
-                attachment.attachment.imageUrl,
+            : CachedNetworkImage(
+                imageUrl: attachment.imageUrl ??
+                    attachment.assetUrl ??
+                    attachment.thumbUrl,
                 fit: BoxFit.cover,
+                errorWidget: (_, obj, trace) {
+                  return getFileTypeImage(attachment.extraData['other']);
+                },
+                progressIndicatorBuilder: (context, _, progress) {
+                  return Center(
+                    child: Container(
+                      width: 20.0,
+                      height: 20.0,
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                },
               );
-        break;
       case 'video':
         return Stack(
           children: [
-            Positioned.fill(
-              child: Container(
-                child: FutureBuilder<File>(
-                  future: VideoCompress.getFileThumbnail(attachment.file.path),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Image.asset(
-                        'images/placeholder.png',
-                        package: 'stream_chat_flutter',
-                      );
-                    }
-
-                    return Image.file(
-                      snapshot.data,
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
+            Container(
+              height: 104,
+              width: 104,
+              child: VideoThumbnailImage(
+                video: attachment.file.path,
+                fit: BoxFit.cover,
               ),
             ),
             Positioned(
@@ -1787,7 +1671,6 @@ class MessageInputState extends State<MessageInput> {
             ),
           ],
         );
-        break;
       default:
         return Container(
           child: Icon(Icons.insert_drive_file),
@@ -1953,11 +1836,9 @@ class MessageInputState extends State<MessageInput> {
   /// Use this to add custom type attachments
   void addAttachment(Attachment attachment) {
     setState(() {
-      final _attachment = _SendingAttachment(
-        attachment: attachment,
-        totalUploaded: attachment.extraData['file_size'],
+      _attachments[attachment.id] = attachment.copyWith(
+        uploadState: attachment.uploadState ?? UploadState.success(),
       );
-      _attachments[_attachment.id] = _attachment;
     });
   }
 
@@ -1966,7 +1847,7 @@ class MessageInputState extends State<MessageInput> {
   void pickFile(DefaultAttachmentTypes fileType, [bool camera = false]) async {
     setState(() => _inputEnabled = false);
 
-    PlatformFile file;
+    AttachmentFile file;
     String attachmentType;
 
     if (fileType == DefaultAttachmentTypes.image) {
@@ -1988,8 +1869,8 @@ class MessageInputState extends State<MessageInput> {
         return;
       }
       final bytes = await pickedFile.readAsBytes();
-      file = PlatformFile(
-        size: (bytes.length / 1024).ceil(),
+      file = AttachmentFile(
+        size: bytes.length,
         path: pickedFile.path,
         bytes: bytes,
       );
@@ -2007,7 +1888,7 @@ class MessageInputState extends State<MessageInput> {
         withData: true,
       );
       if (res?.files?.isNotEmpty == true) {
-        file = res.files.single;
+        file = res.files.single.toAttachmentFile;
       }
     }
 
@@ -2017,7 +1898,7 @@ class MessageInputState extends State<MessageInput> {
 
     final mimeType = file.path.split('/').last.mimeType;
 
-    var extraDataMap = <String, dynamic>{};
+    final extraDataMap = <String, dynamic>{};
 
     if (camera) {
       if (mimeType.type == 'video' || mimeType.type == 'image') {
@@ -2035,97 +1916,46 @@ class MessageInputState extends State<MessageInput> {
       extraDataMap['file_size'] = file.size;
     }
 
-    final attachment = _SendingAttachment(
+    final attachment = Attachment(
       file: file,
-      attachment: Attachment(
-        localUri: file.path != null ? Uri.parse(file.path) : null,
-        type: attachmentType,
-        extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
-        title: file.name,
-      ),
+      type: attachmentType,
+      extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
     );
-    final attachmentId = attachment.id;
 
-    setState(() => _attachments[attachmentId] = attachment);
+    _attachments[attachment.id] = attachment;
 
-    if (file.size / 1024 > _kMaxAttachmentSize) {
-      if (attachmentType == 'video') {
-        final mediaInfo = await compressVideoService.compress(file.path);
-        file = PlatformFile(
-          name: mediaInfo.title,
-          size: (mediaInfo.filesize / 1024).ceil(),
+    if (file.size > _kMaxAttachmentSize) {
+      if (attachmentType == 'Video') {
+        final mediaInfo = await VideoService.compressVideo(file.path);
+
+        if (mediaInfo.filesize > _kMaxAttachmentSize) {
+          _showErrorAlert(
+            'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
+          );
+          _attachments.remove(attachment.id);
+          return;
+        }
+        file = AttachmentFile(
+          name: file.name,
+          size: mediaInfo.filesize,
           bytes: await mediaInfo.file.readAsBytes(),
           path: mediaInfo.path,
         );
-        setState(() {
-          _attachments.update(attachmentId, (it) => it.copyWith(file: file));
-        });
       } else {
         _showErrorAlert(
           'The file is too large to upload. The file size limit is 20MB.',
         );
-        setState(() => _attachments.remove(attachmentId));
-        return;
       }
     }
 
-    try {
-      final url = await _uploadAttachment(
-        file,
-        fileType,
-        onSendProgress: (sent, total) {
-          setState(() {
-            _attachments.update(
-              attachmentId,
-              (it) => it.copyWith(totalUploaded: sent, totalSize: total),
-            );
-          });
-        },
-      );
-
-      if (fileType == DefaultAttachmentTypes.image) {
-        _attachments.update(attachmentId, (it) {
-          return it.copyWith(attachment: it.attachment.copyWith(imageUrl: url));
-        });
-      } else {
-        _attachments.update(attachmentId, (it) {
-          return it.copyWith(attachment: it.attachment.copyWith(assetUrl: url));
-        });
-      }
-
-      if (mounted) {
-        setState(() {
-          // Marking as upload complete
-          _attachments.update(
-            attachmentId,
-            (it) => it.copyWith(totalUploaded: it.totalSize),
-          );
-        });
-      }
-    } catch (e, s) {
-      setState(() => _attachments.remove(attachmentId));
-      print(e);
-      print(s);
-      _showErrorAlert('Error adding the attachment: $e');
-    }
-  }
-
-  Future<String> _uploadAttachment(
-    PlatformFile file,
-    DefaultAttachmentTypes type, {
-    ProgressCallback onSendProgress,
-  }) {
-    if (type == DefaultAttachmentTypes.image) {
-      return _attachmentUploader.uploadImage(
-        file,
-        onSendProgress: onSendProgress,
-      );
-    } else {
-      return _attachmentUploader.uploadFile(
-        file,
-        onSendProgress: onSendProgress,
-      );
-    }
+    setState(() {
+      _attachments.update(attachment.id, (it) {
+        return it.copyWith(
+          file: file,
+          extraData: {...it.extraData}..update('file_size', (_) => file.size),
+        );
+      });
+    });
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
@@ -2203,7 +2033,7 @@ class MessageInputState extends State<MessageInput> {
     if (widget.editMessage != null) {
       message = widget.editMessage.copyWith(
         text: text,
-        attachments: _getAttachments(attachments).toList(),
+        attachments: attachments,
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
       );
@@ -2211,7 +2041,7 @@ class MessageInputState extends State<MessageInput> {
       message = (widget.initialMessage ?? Message()).copyWith(
         parentId: widget.parentMessage?.id,
         text: text,
-        attachments: _getAttachments(attachments).toList(),
+        attachments: attachments,
         mentionedUsers:
             _mentionedUsers.where((u) => text.contains('@${u.name}')).toList(),
         showInChannel: widget.parentMessage != null ? _sendAsDm : null,
@@ -2237,25 +2067,17 @@ class MessageInputState extends State<MessageInput> {
     _mentionedUsers.clear();
 
     if (widget.editMessage == null ||
-        widget.editMessage.status == MessageSendingStatus.failed) {
+        widget.editMessage.status == MessageSendingStatus.failed ||
+        widget.editMessage.status == MessageSendingStatus.sending) {
       sendingFuture = channel.sendMessage(message);
     } else {
-      sendingFuture = StreamChat.of(context).client.updateMessage(
-            message,
-            channel.cid,
-          );
+      sendingFuture = channel.updateMessage(message);
     }
 
     return sendingFuture.then((resp) {
       if (widget.onMessageSent != null) {
         widget.onMessageSent(resp.message);
       }
-    });
-  }
-
-  Iterable<Attachment> _getAttachments(List<_SendingAttachment> attachments) {
-    return attachments.map((attachment) {
-      return attachment.attachment;
     });
   }
 
@@ -2334,16 +2156,12 @@ class MessageInputState extends State<MessageInput> {
 
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
-
     _messageIsPresent = true;
-
-    message.attachments?.forEach((attachment) {
-      final _attachment = _SendingAttachment(
-        attachment: attachment,
-        totalUploaded: attachment.extraData['file_size'],
+    for (final attachment in message.attachments) {
+      _attachments[attachment.id] = attachment.copyWith(
+        uploadState: attachment.uploadState ?? UploadState.success(),
       );
-      _attachments[_attachment.id] = _attachment;
-    });
+    }
   }
 
   @override
@@ -2363,60 +2181,7 @@ class MessageInputState extends State<MessageInput> {
       FocusScope.of(context).requestFocus(_focusNode);
       _initialized = true;
     }
-    final channel = StreamChannel.of(context).channel;
-    if (_attachmentUploader == null) {
-      _attachmentUploader =
-          widget.attachmentUploader ?? StreamAttachmentUploader(channel);
-    } else if (_attachmentUploader is StreamAttachmentUploader) {
-      _attachmentUploader = StreamAttachmentUploader(channel);
-    }
     super.didChangeDependencies();
-  }
-}
-
-class _SendingAttachment {
-  _SendingAttachment({
-    String id,
-    this.file,
-    this.attachment,
-    this.totalUploaded = 0,
-    int totalSize,
-  })  : id = id ?? shortHash(DateTime.now().millisecondsSinceEpoch),
-        attachmentType = attachment?.type,
-        totalSize =
-            totalSize ?? file?.size ?? attachment.extraData['file_size'];
-
-  final String id;
-  final PlatformFile file;
-  final Attachment attachment;
-  final String attachmentType;
-
-  final int totalUploaded;
-  final int totalSize;
-
-  // Progress while the attachment is uploading to the server
-  // 0 -> 100
-  double get uploadPercentage {
-    if (totalSize == null) return null;
-    return (totalUploaded / totalSize) * 100;
-  }
-
-  bool get isUploaded => uploadPercentage == 100;
-
-  _SendingAttachment copyWith({
-    String id,
-    PlatformFile file,
-    Attachment attachment,
-    int totalUploaded,
-    int totalSize,
-  }) {
-    return _SendingAttachment(
-      id: id ?? this.id,
-      file: file ?? this.file,
-      attachment: attachment ?? this.attachment,
-      totalUploaded: totalUploaded ?? this.totalUploaded,
-      totalSize: totalSize ?? this.totalSize,
-    );
   }
 }
 

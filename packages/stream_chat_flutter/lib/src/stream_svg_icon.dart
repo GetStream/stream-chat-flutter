@@ -901,4 +901,16 @@ class StreamSvgIcon extends StatelessWidget {
       height: size,
     );
   }
+
+  factory StreamSvgIcon.retry({
+    double size,
+    Color color,
+  }) {
+    return StreamSvgIcon(
+      assetName: 'icon_retry.svg',
+      color: color,
+      width: size,
+      height: size,
+    );
+  }
 }

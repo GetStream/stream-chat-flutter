@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_svg_icon.dart';
+import 'dart:math';
 
 Future<void> launchURL(BuildContext context, String url) async {
   if (await canLaunch(url)) {
@@ -215,7 +216,7 @@ String getWebsiteName(String hostName) {
 }
 
 /// A method returns a human readable string representing a file _size
-String filesize(dynamic size, [int round = 2]) {
+String fileSize(dynamic size, [int round = 2]) {
   if (size == null) return 'Size N/A';
 
   /**

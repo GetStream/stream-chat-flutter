@@ -239,46 +239,50 @@ class _MessageListViewState extends State<MessageListView> {
 
   final MessageListController _messageListController = MessageListController();
 
-  final Map<String, VideoPackage> videoPackages = {};
-
   @override
   Widget build(BuildContext context) {
-    return MessageListCore(
-      loadingBuilder: (context) {
-        return Center(
-          child: const CircularProgressIndicator(),
-        );
+    return WillPopScope(
+      onWillPop: () async {
+        print('Getting popped');
+        return false;
       },
-      emptyBuilder: (context) {
-        return Center(
-          child: Text(
-            'No chats here yet...',
-            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(.5)),
-          ),
-        );
-      },
-      messageListBuilder: (context, list) {
-        return _buildListView(list);
-      },
-      messageListController: _messageListController,
-      parentMessage: widget.parentMessage,
-      showScrollToBottom: widget.showScrollToBottom,
-      errorWidgetBuilder: (BuildContext context, Object error) {
-        return Center(
-          child: Text(
-            'Something went wrong',
-            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(.5)),
-          ),
-        );
-      },
+      child: MessageListCore(
+        loadingBuilder: (context) {
+          return Center(
+            child: const CircularProgressIndicator(),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: Text(
+              'No chats here yet...',
+              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5)),
+            ),
+          );
+        },
+        messageListBuilder: (context, list) {
+          return _buildListView(list);
+        },
+        messageListController: _messageListController,
+        parentMessage: widget.parentMessage,
+        showScrollToBottom: widget.showScrollToBottom,
+        errorWidgetBuilder: (BuildContext context, Object error) {
+          return Center(
+            child: Text(
+              'Something went wrong',
+              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5)),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -778,7 +782,6 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
-      videoPackages: videoPackages,
     );
   }
 
@@ -939,10 +942,12 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
-      videoPackages: videoPackages,
     );
 
-    if (!message.isDeleted && !message.isSystem && !message.isEphemeral) {
+    if (!message.isDeleted &&
+        !message.isSystem &&
+        !message.isEphemeral &&
+        widget.onMessageSwiped != null) {
       child = Swipeable(
         onSwipeEnd: () {
           FocusScope.of(context).unfocus();
@@ -1056,7 +1061,6 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel.reloadChannel();
     }
     _messageNewListener?.cancel();
-    videoPackages.values.forEach((e) => e.dispose());
     super.dispose();
   }
 }

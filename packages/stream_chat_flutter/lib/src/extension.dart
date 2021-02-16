@@ -1,7 +1,7 @@
 import 'package:characters/characters.dart';
 import 'package:emojis/emoji.dart';
-import 'package:http_parser/http_parser.dart' as http_parser;
-import 'package:mime/mime.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 final _emojis = Emoji.all();
 
@@ -23,16 +23,6 @@ extension StringExtension on String {
     if (characters.length > 3) return false;
     return characters.every((c) => _emojis.map((e) => e.char).contains(c));
   }
-
-  /// Returns the mime type from the passed file name.
-  http_parser.MediaType get mimeType {
-    if (this == null) return null;
-    if (toLowerCase().endsWith('heic')) {
-      return http_parser.MediaType.parse('image/heic');
-    } else {
-      return http_parser.MediaType.parse(lookupMimeType(this));
-    }
-  }
 }
 
 /// List extension
@@ -42,4 +32,15 @@ extension IterableX<T> on Iterable<T> {
         yield item;
         yield e;
       }).skip(1).toList(growable: false);
+}
+
+///
+extension PlatformFileX on PlatformFile {
+  ///
+  AttachmentFile get toAttachmentFile => AttachmentFile(
+        path: path,
+        name: name,
+        bytes: bytes,
+        size: size,
+      );
 }

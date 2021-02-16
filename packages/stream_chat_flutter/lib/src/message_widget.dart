@@ -14,6 +14,7 @@ import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'attachment/attachment.dart';
 import 'extension.dart';
 import 'image_group.dart';
 import 'message_text.dart';
@@ -142,9 +143,6 @@ class MessageWidget extends StatefulWidget {
   /// Function called when quotedMessage is tapped
   final OnQuotedMessageTap onQuotedMessageTap;
 
-  /// The cache for the video controllers of attachments IDed as message ID + attachment index
-  final Map<String, VideoPackage> videoPackages;
-
   ///
   MessageWidget({
     Key key,
@@ -193,7 +191,6 @@ class MessageWidget extends StatefulWidget {
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
     this.onQuotedMessageTap,
-    this.videoPackages,
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
             return ImageAttachment(
@@ -236,6 +233,7 @@ class MessageWidget extends StatefulWidget {
           },
           'file': (context, message, attachment) {
             return FileAttachment(
+              message: message,
               attachment: attachment,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,
@@ -250,7 +248,8 @@ class MessageWidget extends StatefulWidget {
   _MessageWidgetState createState() => _MessageWidgetState();
 }
 
-class _MessageWidgetState extends State<MessageWidget> {
+class _MessageWidgetState extends State<MessageWidget>
+    with AutomaticKeepAliveClientMixin<MessageWidget> {
   bool get showThreadReplyIndicator => widget.showThreadReplyIndicator;
 
   bool get showSendingIndicator => widget.showSendingIndicator;
@@ -299,7 +298,11 @@ class _MessageWidgetState extends State<MessageWidget> {
       isDeleted;
 
   @override
+  bool get wantKeepAlive => widget.message.attachments?.isNotEmpty == true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final avatarWidth = widget.messageTheme.avatarTheme.constraints.maxWidth;
     var leftPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
@@ -744,7 +747,6 @@ class _MessageWidgetState extends State<MessageWidget> {
                   !isFailedState &&
                   widget.onThreadTap != null,
               showFlagButton: widget.showFlagButton,
-              videoPackages: widget.videoPackages,
             ),
           );
         });
@@ -773,7 +775,6 @@ class _MessageWidgetState extends State<MessageWidget> {
               editMessageInputBuilder: widget.editMessageInputBuilder,
               onThreadTap: widget.onThreadTap,
               showReactions: widget.showReactions,
-              videoPackages: widget.videoPackages,
             ),
           );
         });
@@ -824,6 +825,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               ),
               images: images,
               message: widget.message,
+              messageTheme: widget.messageTheme,
               onShowMessage: widget.onShowMessage,
             ),
           ),
@@ -838,41 +840,6 @@ class _MessageWidgetState extends State<MessageWidget> {
         children: widget.message.attachments
                 ?.where((element) => element.ogScrapeUrl == null)
                 ?.map((attachment) {
-              if (attachment.type == 'video') {
-                VideoPackage package;
-
-                if (widget.videoPackages == null) {
-                  package = VideoPackage(context, attachment, () {});
-                } else {
-                  package = widget?.videoPackages[
-                          '${widget.message.id}${widget.message.attachments.indexOf(attachment)}'] ??
-                      VideoPackage(context, attachment, () {});
-                }
-
-                if (widget.videoPackages != null) {
-                  widget.videoPackages[
-                          '${widget.message.id}${widget.message.attachments.indexOf(attachment)}'] =
-                      package;
-                }
-
-                return Transform(
-                  transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-                  alignment: Alignment.center,
-                  child: VideoAttachment(
-                    attachment: attachment,
-                    messageTheme: widget.messageTheme,
-                    size: Size(
-                      MediaQuery.of(context).size.width * 0.8,
-                      MediaQuery.of(context).size.height * 0.3,
-                    ),
-                    message: widget.message,
-                    onShowMessage: widget.onShowMessage,
-                    onReturnAction: widget.onReturnAction,
-                    videoPackage: package,
-                  ),
-                );
-              }
-
               final attachmentBuilder =
                   widget.attachmentBuilders[attachment.type];
 
@@ -885,7 +852,6 @@ class _MessageWidgetState extends State<MessageWidget> {
               return wrapAttachmentWidget(
                 context,
                 attachmentWidget,
-                attachment: attachment,
               );
             })?.insertBetween(SizedBox(
               height: widget.attachmentPadding.vertical / 2,
@@ -897,9 +863,8 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   Widget wrapAttachmentWidget(
     BuildContext context,
-    Widget attachmentWidget, {
-    Attachment attachment,
-  }) {
+    Widget attachmentWidget,
+  ) {
     final attachmentShape =
         widget.attachmentShape ?? _getDefaultAttachmentShape(context);
     return Material(
@@ -930,8 +895,29 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   Widget _buildSendingIndicator() {
     final style = widget.messageTheme.createdAt;
+    final message = widget.message;
+
+    if (hasNonUrlAttachments &&
+        (message.status == MessageSendingStatus.sending ||
+            message.status == MessageSendingStatus.updating)) {
+      final totalAttachments = message.attachments.length;
+      final uploadRemaining = message.attachments.where((it) {
+        return !it.uploadState.isSuccess;
+      }).length;
+      if (uploadRemaining == 0) {
+        return StreamSvgIcon.check(
+          size: style.fontSize,
+          color: IconTheme.of(context).color.withOpacity(0.5),
+        );
+      }
+      return Text(
+        'Uploading $uploadRemaining/$totalAttachments ...',
+        style: style,
+      );
+    }
+
     Widget child = SendingIndicator(
-      message: widget.message,
+      message: message,
       isMessageRead: isMessageRead,
       size: style.fontSize,
     );
@@ -1032,18 +1018,12 @@ class _MessageWidgetState extends State<MessageWidget> {
       return;
     }
     if (widget.message.status == MessageSendingStatus.failed_update) {
-      StreamChat.of(context).client.updateMessage(
-            widget.message,
-            channel.cid,
-          );
+      channel.updateMessage(widget.message);
       return;
     }
 
     if (widget.message.status == MessageSendingStatus.failed_delete) {
-      StreamChat.of(context).client.deleteMessage(
-            widget.message,
-            channel.cid,
-          );
+      channel.deleteMessage(widget.message);
       return;
     }
   }

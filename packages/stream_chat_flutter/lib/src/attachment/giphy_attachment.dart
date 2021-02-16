@@ -1,48 +1,42 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../stream_chat_flutter.dart';
-import 'attachment_error.dart';
-import 'full_screen_media.dart';
+import '../full_screen_media.dart';
+import '../stream_chat_theme.dart';
+import '../stream_svg_icon.dart';
+import 'attachment_widget.dart';
 
-class GiphyAttachment extends StatelessWidget {
-  final Attachment attachment;
+class GiphyAttachment extends AttachmentWidget {
   final MessageTheme messageTheme;
-  final Message message;
-  final Size size;
   final ShowMessageCallback onShowMessage;
   final ValueChanged<ReturnActionType> onReturnAction;
 
   const GiphyAttachment({
     Key key,
-    this.attachment,
+    @required Message message,
+    @required Attachment attachment,
+    Size size,
     this.messageTheme,
-    this.message,
-    this.size,
     this.onShowMessage,
     this.onReturnAction,
-  }) : super(key: key);
+  }) : super(key: key, message: message, attachment: attachment, size: size);
 
   @override
   Widget build(BuildContext context) {
-    if (attachment.thumbUrl == null &&
-        attachment.imageUrl == null &&
-        attachment.assetUrl == null) {
-      return AttachmentError(
-        attachment: attachment,
-      );
+    final imageUrl =
+        attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+    if (imageUrl == null && source == AttachmentSource.network) {
+      return AttachmentError();
     }
-
-    return attachment.actions != null
-        ? _buildSendingAttachment(context)
-        : _buildSentAttachment(context);
+    if (attachment.actions != null) {
+      return _buildSendingAttachment(context, imageUrl);
+    }
+    return _buildSentAttachment(context, imageUrl);
   }
 
-  Widget _buildSendingAttachment(context) {
+  Widget _buildSendingAttachment(BuildContext context, String imageUrl) {
     final streamChannel = StreamChannel.of(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -67,9 +61,7 @@ class GiphyAttachment extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GestureDetector(
-                      onTap: () async {
-                        _onImageTap(context);
-                      },
+                      onTap: () => _onImageTap(context),
                       child: ClipRRect(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(8),
@@ -87,13 +79,10 @@ class GiphyAttachment extends StatelessWidget {
                               ),
                             );
                           },
-                          imageUrl: attachment.thumbUrl ??
-                              attachment.imageUrl ??
-                              attachment.assetUrl,
-                          errorWidget: (context, url, error) => AttachmentError(
-                            attachment: attachment,
-                            size: size,
-                          ),
+                          imageUrl: imageUrl,
+                          errorWidget: (context, url, error) {
+                            return AttachmentError(size: size);
+                          },
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -305,44 +294,38 @@ class GiphyAttachment extends StatelessWidget {
   }
 
   void _onImageTap(BuildContext context) async {
-    var res = await Navigator.push(context, MaterialPageRoute(
-      builder: (_) {
-        final channel = StreamChannel.of(context).channel;
-
-        return StreamChannel(
-          channel: channel,
-          child: FullScreenMedia(
-            mediaAttachments: [
-              attachment,
-            ],
-            userName: message.user.name,
-            sentAt: message.createdAt,
-            message: message,
-            onShowMessage: onShowMessage,
-          ),
-        );
-      },
-    ));
-
-    if (res != null) {
-      onReturnAction(res);
-    }
+    final res = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) {
+          final channel = StreamChannel.of(context).channel;
+          return StreamChannel(
+            channel: channel,
+            child: FullScreenMedia(
+              mediaAttachments: [attachment],
+              userName: message.user.name,
+              sentAt: message.createdAt,
+              message: message,
+              onShowMessage: onShowMessage,
+            ),
+          );
+        },
+      ),
+    );
+    if (res != null) onReturnAction(res);
   }
 
-  Widget _buildSentAttachment(context) {
+  Widget _buildSentAttachment(BuildContext context, String imageUrl) {
     return Container(
       child: GestureDetector(
         onTap: () async {
-          var res =
+          final res =
               await Navigator.push(context, MaterialPageRoute(builder: (_) {
-            var channel = StreamChannel.of(context).channel;
-
+            final channel = StreamChannel.of(context).channel;
             return StreamChannel(
               channel: channel,
               child: FullScreenMedia(
-                mediaAttachments: [
-                  attachment,
-                ],
+                mediaAttachments: [attachment],
                 userName: message.user.name,
                 sentAt: message.createdAt,
                 message: message,
@@ -350,10 +333,7 @@ class GiphyAttachment extends StatelessWidget {
               ),
             );
           }));
-
-          if (res != null) {
-            onReturnAction(res);
-          }
+          if (res != null) onReturnAction(res);
         },
         child: Stack(
           children: [
@@ -369,13 +349,10 @@ class GiphyAttachment extends StatelessWidget {
                   ),
                 );
               },
-              imageUrl: attachment.thumbUrl ??
-                  attachment.imageUrl ??
-                  attachment.assetUrl,
-              errorWidget: (context, url, error) => AttachmentError(
-                attachment: attachment,
-                size: size,
-              ),
+              imageUrl: imageUrl,
+              errorWidget: (context, url, error) {
+                return AttachmentError(size: size);
+              },
               fit: BoxFit.cover,
             ),
             Positioned(

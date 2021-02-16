@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chewie/chewie.dart';
 import 'package:dio/dio.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -28,7 +28,6 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   final List<Attachment> mediaAttachments;
   final Message message;
 
-  final List<VideoPackage> videoPackages;
   final ValueChanged<int> mediaSelectedCallBack;
 
   /// Creates a channel header
@@ -41,7 +40,6 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
     this.totalPages = 0,
     this.mediaAttachments,
     this.message,
-    this.videoPackages,
     this.mediaSelectedCallBack,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
@@ -214,17 +212,14 @@ class _ImageFooterState extends State<ImageFooter> {
                       itemBuilder: (context, index) {
                         Widget media;
                         final attachment = widget.mediaAttachments[index];
-
                         if (attachment.type == 'video') {
-                          var controllerPackage = widget.videoPackages[
-                              videoAttachments.indexOf(attachment)];
-
                           media = InkWell(
                             onTap: () => widget.mediaSelectedCallBack(index),
                             child: FittedBox(
                               fit: BoxFit.cover,
-                              child: Chewie(
-                                controller: controllerPackage.chewieController,
+                              child: VideoThumbnailImage(
+                                video: attachment.file?.path ??
+                                    attachment.assetUrl,
                               ),
                             ),
                           );
