@@ -954,6 +954,8 @@ class StreamChatClient {
     await chatPersistenceClient?.disconnect(flush: flushChatPersistence);
     chatPersistenceClient = null;
 
+    _connectCompleter = null;
+
     if (clearUser == true) {
       state.dispose();
       state = ClientState(this);

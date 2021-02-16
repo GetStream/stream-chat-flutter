@@ -1702,7 +1702,6 @@ class ChannelClientState {
         );
       }
     });
-    _typingEventsController.add(_typings.keys.toList());
   }
 
   /// Call this method to dispose this object
