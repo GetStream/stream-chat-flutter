@@ -128,12 +128,10 @@ class RetryQueue {
       await channel.updateMessage(message);
     } else if (message.status == MessageSendingStatus.failed ||
         message.status == MessageSendingStatus.sending) {
-      await channel.sendMessage(
-        message,
-      );
+      await channel.sendMessage(message);
     } else if (message.status == MessageSendingStatus.failed_delete ||
         message.status == MessageSendingStatus.deleting) {
-      await channel.client.deleteMessage(message);
+      await channel.deleteMessage(message);
     }
   }
 
