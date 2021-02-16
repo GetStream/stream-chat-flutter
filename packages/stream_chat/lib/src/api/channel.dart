@@ -301,19 +301,17 @@ class Channel {
       user: _client.state.user,
       quotedMessage: quotedMessage,
       status: MessageSendingStatus.sending,
-      attachments: [
-        ...message.attachments.map(
-          (it) {
-            if (it.uploadState.isSuccess) return it;
-            return it.copyWith(
-              uploadState: UploadState.inProgress(
-                uploaded: 0,
-                total: it.file?.size ?? it.extraData['file_size'],
-              ),
-            );
-          },
-        )
-      ],
+      attachments: message.attachments?.map(
+        (it) {
+          if (it.uploadState.isSuccess) return it;
+          return it.copyWith(
+            uploadState: UploadState.inProgress(
+              uploaded: 0,
+              total: it.file?.size ?? it.extraData['file_size'],
+            ),
+          );
+        },
+      )?.toList(),
     );
 
     if (message.parentId != null && message.id == null) {
@@ -328,16 +326,18 @@ class Channel {
     state?.addMessage(message);
 
     try {
-      final attachmentsUploadCompleter = Completer<Message>();
-      _messageAttachmentsUploadCompleter[message.id] =
-          attachmentsUploadCompleter;
+      if (message.attachments?.isNotEmpty == true) {
+        final attachmentsUploadCompleter = Completer<Message>();
+        _messageAttachmentsUploadCompleter[message.id] =
+            attachmentsUploadCompleter;
 
-      unawaited(_uploadAttachments(
-        message.id,
-        message.attachments.map((it) => it.id),
-      ));
+        unawaited(_uploadAttachments(
+          message.id,
+          message.attachments.map((it) => it.id),
+        ));
 
-      message = await attachmentsUploadCompleter.future;
+        message = await attachmentsUploadCompleter.future;
+      }
 
       final response = await _client.post(
         '$_channelURL/message',
@@ -374,34 +374,34 @@ class Channel {
     message = message.copyWith(
       status: MessageSendingStatus.updating,
       updatedAt: message.updatedAt ?? DateTime.now(),
-      attachments: [
-        ...message.attachments.map(
-          (it) {
-            if (it.uploadState.isSuccess) return it;
-            return it.copyWith(
-              uploadState: UploadState.inProgress(
-                uploaded: 0,
-                total: it.file?.size ?? it.extraData['file_size'],
-              ),
-            );
-          },
-        )
-      ],
+      attachments: message.attachments?.map(
+        (it) {
+          if (it.uploadState.isSuccess) return it;
+          return it.copyWith(
+            uploadState: UploadState.inProgress(
+              uploaded: 0,
+              total: it.file?.size ?? it.extraData['file_size'],
+            ),
+          );
+        },
+      )?.toList(),
     );
 
     state?.addMessage(message);
 
     try {
-      final attachmentsUploadCompleter = Completer<Message>();
-      _messageAttachmentsUploadCompleter[message.id] =
-          attachmentsUploadCompleter;
+      if (message.attachments?.isNotEmpty == true) {
+        final attachmentsUploadCompleter = Completer<Message>();
+        _messageAttachmentsUploadCompleter[message.id] =
+            attachmentsUploadCompleter;
 
-      unawaited(_uploadAttachments(
-        message.id,
-        message.attachments.map((it) => it.id),
-      ));
+        unawaited(_uploadAttachments(
+          message.id,
+          message.attachments.map((it) => it.id),
+        ));
 
-      message = await attachmentsUploadCompleter.future;
+        message = await attachmentsUploadCompleter.future;
+      }
 
       final response = await _client.updateMessage(message);
       state?.addMessage(response?.message?.copyWith(
