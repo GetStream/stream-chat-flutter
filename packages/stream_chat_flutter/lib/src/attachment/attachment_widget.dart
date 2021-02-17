@@ -11,6 +11,7 @@ enum AttachmentSource {
 extension AttachmentSourceX on AttachmentSource {
   /// The [when] method is the equivalent to pattern matching.
   /// Its prototype depends on the AttachmentSource defined.
+  // ignore: missing_return
   T when<T>({
     @required T Function() local,
     @required T Function() network,
