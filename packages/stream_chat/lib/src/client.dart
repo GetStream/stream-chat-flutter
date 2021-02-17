@@ -1246,6 +1246,16 @@ class StreamChatClient {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Sends the message to the given channel
+  Future<SendMessageResponse> sendMessage(
+      Message message, String channelId, String channelType) async {
+    final response = await post(
+      '/channels/$channelType/$channelId/message',
+      data: {'message': message},
+    );
+    return decode(response.data, SendMessageResponse.fromJson);
+  }
+
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(Message message) async {
     final response = await post(

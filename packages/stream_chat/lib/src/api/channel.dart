@@ -338,18 +338,9 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.post(
-        '$_channelURL/message',
-        data: {
-          'message': message.toJson(),
-        },
-      );
-
-      final res = _client.decode(response.data, SendMessageResponse.fromJson);
-
-      state?.addMessage(res.message);
-
-      return res;
+      final response = await _client.sendMessage(message, id, type);
+      state?.addMessage(response.message);
+      return response;
     } catch (error) {
       if (error is DioError && error.type != DioErrorType.RESPONSE) {
         state?.retryQueue?.add([message]);
