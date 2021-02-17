@@ -7,16 +7,16 @@ part 'attachment_file.freezed.dart';
 
 part 'attachment_file.g.dart';
 
-///
+/// Union class to hold various [UploadState] of a attachment.
 @freezed
 abstract class UploadState with _$UploadState {
-  ///
+  /// InProgress state of the union
   const factory UploadState.inProgress({int uploaded, int total}) = InProgress;
 
-  ///
+  /// Success state of the union
   const factory UploadState.success() = Success;
 
-  ///
+  /// Failed state of the union
   const factory UploadState.failed({@required String error}) = Failed;
 
   /// Creates a new instance from a json
@@ -24,15 +24,15 @@ abstract class UploadState with _$UploadState {
       _$UploadStateFromJson(json);
 }
 
-///
+/// Helper extension for UploadState
 extension UploadStateX on UploadState {
-  ///
+  /// Returns true if state is [InProgress]
   bool get isInProgress => this is InProgress;
 
-  ///
+  /// Returns true if state is [Success]
   bool get isSuccess => this is Success;
 
-  ///
+  /// Returns true if state is [Failed]
   bool get isFailed => this is Failed;
 }
 
@@ -40,10 +40,10 @@ Uint8List _fromString(String bytes) => Uint8List.fromList(bytes.codeUnits);
 
 String _toString(Uint8List bytes) => String.fromCharCodes(bytes);
 
-///
+/// The class that contains the information about an attachment file
 @JsonSerializable()
 class AttachmentFile {
-  ///
+  /// Creates a new [AttachmentFile] instance.
   const AttachmentFile({
     this.path,
     this.name,

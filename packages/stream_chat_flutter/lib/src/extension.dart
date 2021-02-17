@@ -34,9 +34,9 @@ extension IterableX<T> on Iterable<T> {
       }).skip(1).toList(growable: false);
 }
 
-///
+/// Useful extension for [PlatformFile]
 extension PlatformFileX on PlatformFile {
-  ///
+  /// Converts the [PlatformFile] into [AttachmentFile]
   AttachmentFile get toAttachmentFile => AttachmentFile(
         path: path,
         name: name,

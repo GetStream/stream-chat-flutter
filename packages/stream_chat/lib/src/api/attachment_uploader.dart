@@ -3,9 +3,13 @@ import 'package:stream_chat/src/models/attachment_file.dart';
 import '../client.dart';
 import '../extensions/string_extension.dart';
 
-///
+/// Class responsible for uploading images and files from a given channel
 abstract class AttachmentUploader {
+  /// Uploads a image [file] to the given channel.
+  /// Returns image [file] URL once sent successfully.
   ///
+  /// Optionally, access upload progress using [onSendProgress]
+  /// and cancel the request using [cancelToken]
   Future<String> uploadImage(
     AttachmentFile file,
     String channelId,
@@ -14,7 +18,11 @@ abstract class AttachmentUploader {
     CancelToken cancelToken,
   });
 
+  /// Uploads a [file] to the given channel.
+  /// Returns [file] URL once sent successfully.
   ///
+  /// Optionally, access upload progress using [onSendProgress]
+  /// and cancel the request using [cancelToken]
   Future<String> uploadFile(
     AttachmentFile file,
     String channelId,
@@ -24,11 +32,11 @@ abstract class AttachmentUploader {
   });
 }
 
-///
+/// Stream's default implementation of [AttachmentUploader]
 class StreamAttachmentUploader implements AttachmentUploader {
   final StreamChatClient _client;
 
-  ///
+  /// Creates a new [StreamAttachmentUploader] instance.
   const StreamAttachmentUploader(this._client);
 
   @override
