@@ -67,8 +67,6 @@ class ChannelListView extends StatefulWidget {
     this.channelWidget,
     this.channelPreviewBuilder,
     this.separatorBuilder,
-    this.errorBuilder,
-    this.emptyBuilder,
     this.onImageTap,
     this.onStartChatPressed,
     this.swipeToAction = false,
@@ -77,16 +75,14 @@ class ChannelListView extends StatefulWidget {
     this.padding,
     this.selectedChannels = const [],
     this.onViewInfoTap,
+    this.errorBuilder,
+    this.emptyBuilder,
+    this.loadingBuilder,
+    this.listBuilder,
   }) : super(key: key);
-
-  /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
 
   /// If true a default swipe to action behaviour will be added to this widget
   final bool swipeToAction;
-
-  /// The builder used when the channel list is empty.
-  final WidgetBuilder emptyBuilder;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -147,6 +143,18 @@ class ChannelListView extends StatefulWidget {
 
   final ViewInfoCallback onViewInfoTap;
 
+  /// The builder that will be used in case of error
+  final ErrorBuilder errorBuilder;
+
+  /// The builder that will be used in case of loading
+  final WidgetBuilder loadingBuilder;
+
+  /// The builder which is used when list of channels loads
+  final Function(BuildContext, List<Channel>) listBuilder;
+
+  /// The builder used when the channel list is empty.
+  final WidgetBuilder emptyBuilder;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -161,16 +169,16 @@ class _ChannelListViewState extends State<ChannelListView>
   Widget build(BuildContext context) {
     var child = ChannelListCore(
       channelListController: _channelListController,
-      listBuilder: (context, list) {
+      listBuilder: widget.listBuilder ?? (context, list) {
         return _buildListView(list);
       },
-      emptyBuilder: (BuildContext context) {
+      emptyBuilder: widget.emptyBuilder ?? (BuildContext context) {
         return _buildEmptyWidget();
       },
-      errorBuilder: (BuildContext context, dynamic error) {
+      errorBuilder: widget.errorBuilder ?? (BuildContext context, dynamic error) {
         return _buildErrorWidget(context);
       },
-      loadingBuilder: (BuildContext context) {
+      loadingBuilder: widget.loadingBuilder ?? (BuildContext context) {
         return _buildLoadingWidget();
       },
       pagination: widget.pagination,
@@ -236,10 +244,6 @@ class _ChannelListViewState extends State<ChannelListView>
   }
 
   Widget _buildEmptyWidget() {
-    if (widget.emptyBuilder != null) {
-      return widget.emptyBuilder(context);
-    }
-
     return LayoutBuilder(
       builder: (context, viewportConstraints) {
         return SingleChildScrollView(

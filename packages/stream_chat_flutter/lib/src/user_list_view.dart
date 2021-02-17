@@ -45,8 +45,6 @@ class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
   const UserListView({
     Key key,
-    this.errorBuilder,
-    this.emptyBuilder,
     this.filter,
     this.options,
     this.sort,
@@ -61,17 +59,15 @@ class UserListView extends StatefulWidget {
     this.pullToRefresh = true,
     this.groupAlphabetically = false,
     this.crossAxisCount = 1,
+    this.errorBuilder,
+    this.emptyBuilder,
+    this.loadingBuilder,
+    this.listBuilder,
   })  : assert(
           crossAxisCount == 1 || groupAlphabetically == false,
           'Cannot group alphabetically when crossAxisCount > 1',
         ),
         super(key: key);
-
-  /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
-
-  /// The builder used when the channel list is empty.
-  final WidgetBuilder emptyBuilder;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -130,6 +126,18 @@ class UserListView extends StatefulWidget {
   /// The number of children in the cross axis.
   final int crossAxisCount;
 
+  /// The builder that will be used in case of error
+  final Widget Function(Error error) errorBuilder;
+
+  /// The builder that will be used to build the list
+  final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
+
+  /// The builder that will be used for loading
+  final WidgetBuilder loadingBuilder;
+
+  /// The builder used when the channel list is empty.
+  final WidgetBuilder emptyBuilder;
+
   @override
   _UserListViewState createState() => _UserListViewState();
 }
@@ -143,13 +151,13 @@ class _UserListViewState extends State<UserListView>
   @override
   Widget build(BuildContext context) {
     var child = UserListCore(
-      errorBuilder: (err) {
+      errorBuilder: widget.errorBuilder ?? (err) {
         return _buildError(err);
       },
-      emptyBuilder: (context) {
+      emptyBuilder: widget.emptyBuilder ?? (context) {
         return _buildEmpty();
       },
-      loadingBuilder: (context) {
+      loadingBuilder: widget.loadingBuilder ?? (context) {
         return LayoutBuilder(
           builder: (context, viewportConstraints) {
             return SingleChildScrollView(
@@ -166,7 +174,7 @@ class _UserListViewState extends State<UserListView>
           },
         );
       },
-      listBuilder: (context, list) {
+      listBuilder: widget.listBuilder ?? (context, list) {
         return _buildListView(list);
       },
       pagination: widget.pagination,
@@ -194,10 +202,6 @@ class _UserListViewState extends State<UserListView>
 
   Widget _buildError(Error error) {
     print((error).stackTrace);
-
-    if (widget.errorBuilder != null) {
-      return widget.errorBuilder(error);
-    }
 
     var message = error.toString();
     if (error is DioError) {
@@ -246,10 +250,6 @@ class _UserListViewState extends State<UserListView>
   }
 
   Widget _buildEmpty() {
-    if (widget.emptyBuilder != null) {
-      return widget.emptyBuilder(context);
-    }
-
     return LayoutBuilder(
       builder: (context, viewportConstraints) {
         return SingleChildScrollView(
