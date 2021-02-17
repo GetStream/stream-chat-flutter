@@ -314,10 +314,22 @@ class StreamChannelState extends State<StreamChannel> {
   @override
   void initState() {
     super.initState();
+    _populateFutures();
+  }
+
+  void _populateFutures() {
     _futures = [widget.channel.initialized];
     if (initialMessageId != null) {
       _futures.add(_loadChannelAtMessage);
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant StreamChannel oldWidget) {
+    if (oldWidget.initialMessageId != initialMessageId) {
+      _populateFutures();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
