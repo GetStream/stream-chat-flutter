@@ -48,61 +48,6 @@ void main() {
             mockDio.post<String>('/channels/messaging/testid/message', data: {
           'message': message.toJson(),
         })).called(1);
-
-        // final imageFile = MultipartFile.fromString('value');
-        //
-        // channelClient
-        //     .sendImage(imageFile)
-        //     .then((response) {
-        //   final imageUrl = response.file;
-        //   final attachment = Attachment(
-        //     type = "image",
-        //     imageUrl = imageUrl,
-        //   )
-        //   val message = Message(
-        //     attachments = mutableListOf(attachment),
-        //   )
-        //   channelClient
-        //       .sendMessage(message)
-        //       .enqueue {
-        //     /* ... */
-        //   }
-        // })
-        //     .catchError(onError);
-
-        //final channelClient = client.channel("messaging", id:'general');
-        //
-        // // Upload an image without detailed progress
-        // channelClient.sendImage(imageFile).enqueue { result->
-        //     if (result.isSuccess) {
-        //         // Successful upload, you can now attach this image
-        //         // to an message that you then send to a channel
-        //         val imageUrl = result.data()
-        //         val attachment = Attachment(
-        //             type = "image",
-        //             imageUrl = imageUrl,
-        //         )
-        //         val message = Message(
-        //             attachments = mutableListOf(attachment),
-        //         )
-        //         channelClient.sendMessage(message).enqueue { /* ... */ }
-        //     }
-        // }
-        //
-        // // Upload a file, monitoring for progress with a ProgressCallback
-        // channelClient.sendFile(anyOtherFile, object : ProgressCallback {
-        //     override fun onSuccess(file: String) {
-        //         val fileUrl = file
-        //     }
-        //
-        //     override fun onError(error: ChatError) {
-        //         // Handle error
-        //     }
-        //
-        //     override fun onProgress(progress: Long) {
-        //         // You can render the uploading progress here
-        //     }
-        // }).enqueue() // No callback passed to enqueue, as we'll get notified above anyway
       });
 
       test('markRead', () async {
@@ -278,8 +223,7 @@ void main() {
 
         await channelClient.sendImage(image);
 
-        verify(mockUploader.sendImage(image, channelId, channelType))
-            .called(1);
+        verify(mockUploader.sendImage(image, channelId, channelType)).called(1);
       });
 
       test('deleteFile', () async {
