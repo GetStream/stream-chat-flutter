@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../stream_chat_flutter.dart';
 import 'stream_svg_icon.dart';
-import 'dart:math';
 
 Future<void> launchURL(BuildContext context, String url) async {
   if (await canLaunch(url)) {

@@ -142,10 +142,6 @@ class _ImageFooterState extends State<ImageFooter> {
   }
 
   void _showPhotosModal(context) {
-    var videoAttachments = widget.mediaAttachments
-        .where((element) => element.type == 'video')
-        .toList();
-
     showModalBottomSheet(
       context: context,
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
