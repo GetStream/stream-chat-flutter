@@ -229,12 +229,13 @@ class Channel {
       client.logger.info('Uploading ${it.id} attachment...');
 
       void updateAttachment(Attachment attachment) {
-        message = message.copyWith(
-            attachments: message.attachments.map((it) {
-          if (it.id != attachment.id) return it;
-          return attachment;
-        }).toList(growable: false));
-        state?.addMessage(message);
+        final index = message.attachments.indexWhere((it) {
+          return it.id == attachment.id;
+        });
+        if (index != -1) {
+          message.attachments[index] = attachment;
+          state?.addMessage(message);
+        }
       }
 
       void onSendProgress(int sent, int total) {
