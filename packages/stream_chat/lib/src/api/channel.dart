@@ -281,9 +281,7 @@ class Channel {
     });
   }
 
-  /// Send a [message] to this channel. Optionally pass a [attachmentUploader]
-  /// for custom attachments upload.
-  ///
+  /// Send a [message] to this channel.
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually sending the message.
   Future<SendMessageResponse> sendMessage(Message message) async {
@@ -360,9 +358,7 @@ class Channel {
     }
   }
 
-  /// Updates the [message] in this channel. Optionally pass a [attachmentUploader]
-  /// for custom attachments upload.
-  ///
+  /// Updates the [message] in this channel.
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
   Future<UpdateMessageResponse> updateMessage(Message message) async {
