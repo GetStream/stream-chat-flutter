@@ -113,13 +113,17 @@ class _InProgressState extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _IconButton(
-          icon: StreamSvgIcon.close(
-            color: StreamChatTheme.of(context).colorTheme.white,
+        Align(
+          alignment: Alignment.topRight,
+          child: _IconButton(
+            icon: StreamSvgIcon.close(
+              color: StreamChatTheme.of(context).colorTheme.white,
+            ),
+            onPressed: () => channel.cancelAttachmentUpload(attachmentId),
           ),
-          onPressed: () => channel.cancelAttachmentUpload(attachmentId),
         ),
-        Center(
+        Align(
+          alignment: Alignment.topRight,
           child: UploadProgressIndicator(
             uploaded: sent,
             total: total,

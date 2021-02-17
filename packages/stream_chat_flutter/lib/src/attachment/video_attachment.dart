@@ -86,11 +86,7 @@ class VideoAttachment extends AttachmentWidget {
               },
               child: Stack(
                 children: [
-                  Container(
-                    height: size?.height,
-                    width: size?.width,
-                    child: videoWidget,
-                  ),
+                  videoWidget,
                   Center(
                     child: Material(
                       shape: CircleBorder(),

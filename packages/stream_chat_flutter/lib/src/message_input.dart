@@ -1653,13 +1653,11 @@ class MessageInputState extends State<MessageInput> {
       case 'video':
         return Stack(
           children: [
-            Container(
+            VideoThumbnailImage(
               height: 104,
               width: 104,
-              child: VideoThumbnailImage(
-                video: attachment.file.path,
-                fit: BoxFit.cover,
-              ),
+              video: attachment.file?.path ?? attachment.assetUrl,
+              fit: BoxFit.cover,
             ),
             Positioned(
               left: 8,

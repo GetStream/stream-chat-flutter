@@ -242,12 +242,7 @@ class FileAttachment extends AttachmentWidget {
               progressIndicatorColor: theme.colorTheme.accentBlue,
             );
           },
-          success: () {
-            return Text(
-              '${fileSize(size, 1)}/${fileSize(size, 1)}',
-              style: textStyle,
-            );
-          },
+          success: () => Text('${fileSize(size, 2)}', style: textStyle),
           failed: (_) => Text('UPLOAD ERROR', style: textStyle),
         ) ??
         Text('${fileSize(size)}', style: textStyle);

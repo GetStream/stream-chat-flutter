@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'stream_chat_theme.dart';
-import 'utils.dart';
 
 class UploadProgressIndicator extends StatelessWidget {
   final int uploaded;
@@ -24,6 +23,7 @@ class UploadProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamChatTheme.of(context);
+    final _percentage = (uploaded / total) * 100;
     Widget child = Padding(
       padding: padding,
       child: Row(
@@ -39,7 +39,7 @@ class UploadProgressIndicator extends StatelessWidget {
           ),
           SizedBox(width: 8),
           Text(
-            '${fileSize(uploaded, 1)}/${fileSize(total, 1)}',
+            '${_percentage.toInt()}%',
             style: textStyle ??
                 theme.textTheme.footnote.copyWith(
                   color: theme.colorTheme.white,

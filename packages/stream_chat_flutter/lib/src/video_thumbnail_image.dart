@@ -58,28 +58,33 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
     return FutureBuilder<Uint8List>(
       future: thumbnailFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          if (widget.errorBuilder != null) {
-            return widget.errorBuilder(context, snapshot.error);
-          }
-          return Center(child: StreamSvgIcon.error());
-        }
-        if (!snapshot.hasData) {
-          if (widget.placeholderBuilder != null) {
-            return widget.placeholderBuilder(context);
-          }
-          return Image.asset(
-            'images/placeholder.png',
-            package: 'stream_chat_flutter',
-            fit: widget.fit,
-          );
-        }
-        final data = snapshot.data;
-        return Image.memory(
-          data,
-          fit: widget.fit,
-          height: widget.height,
-          width: widget.width,
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          child: Builder(
+            key: ValueKey<AsyncSnapshot<Uint8List>>(snapshot),
+            builder: (_) {
+              if (snapshot.hasError) {
+                return widget.errorBuilder?.call(context, snapshot.error) ??
+                    Center(child: StreamSvgIcon.error());
+              }
+              if (!snapshot.hasData) {
+                return widget.placeholderBuilder?.call(context) ??
+                    Image.asset(
+                      'images/placeholder.png',
+                      package: 'stream_chat_flutter',
+                      fit: widget.fit,
+                      height: widget.height,
+                      width: widget.width,
+                    );
+              }
+              return Image.memory(
+                snapshot.data,
+                fit: widget.fit,
+                height: widget.height,
+                width: widget.width,
+              );
+            },
+          ),
         );
       },
     );
