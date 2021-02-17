@@ -151,32 +151,36 @@ class _UserListViewState extends State<UserListView>
   @override
   Widget build(BuildContext context) {
     var child = UserListCore(
-      errorBuilder: widget.errorBuilder ?? (err) {
-        return _buildError(err);
-      },
-      emptyBuilder: widget.emptyBuilder ?? (context) {
-        return _buildEmpty();
-      },
-      loadingBuilder: widget.loadingBuilder ?? (context) {
-        return LayoutBuilder(
-          builder: (context, viewportConstraints) {
-            return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: viewportConstraints.maxHeight,
-                ),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
+      errorBuilder: widget.errorBuilder ??
+          (err) {
+            return _buildError(err);
+          },
+      emptyBuilder: widget.emptyBuilder ??
+          (context) {
+            return _buildEmpty();
+          },
+      loadingBuilder: widget.loadingBuilder ??
+          (context) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              },
             );
           },
-        );
-      },
-      listBuilder: widget.listBuilder ?? (context, list) {
-        return _buildListView(list);
-      },
+      listBuilder: widget.listBuilder ??
+          (context, list) {
+            return _buildListView(list);
+          },
       pagination: widget.pagination,
       options: widget.options,
       sort: widget.sort,

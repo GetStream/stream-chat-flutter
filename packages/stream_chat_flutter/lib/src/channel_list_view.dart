@@ -169,18 +169,22 @@ class _ChannelListViewState extends State<ChannelListView>
   Widget build(BuildContext context) {
     var child = ChannelListCore(
       channelListController: _channelListController,
-      listBuilder: widget.listBuilder ?? (context, list) {
-        return _buildListView(list);
-      },
-      emptyBuilder: widget.emptyBuilder ?? (BuildContext context) {
-        return _buildEmptyWidget();
-      },
-      errorBuilder: widget.errorBuilder ?? (BuildContext context, dynamic error) {
-        return _buildErrorWidget(context);
-      },
-      loadingBuilder: widget.loadingBuilder ?? (BuildContext context) {
-        return _buildLoadingWidget();
-      },
+      listBuilder: widget.listBuilder ??
+          (context, list) {
+            return _buildListView(list);
+          },
+      emptyBuilder: widget.emptyBuilder ??
+          (BuildContext context) {
+            return _buildEmptyWidget();
+          },
+      errorBuilder: widget.errorBuilder ??
+          (BuildContext context, dynamic error) {
+            return _buildErrorWidget(context);
+          },
+      loadingBuilder: widget.loadingBuilder ??
+          (BuildContext context) {
+            return _buildLoadingWidget();
+          },
       pagination: widget.pagination,
       options: widget.options,
       sort: widget.sort,
