@@ -53,14 +53,16 @@ class MessageSearchListView extends StatefulWidget {
     this.sortOptions,
     this.paginationParams,
     this.messageFilters,
-    this.emptyBuilder,
-    this.errorBuilder,
     this.separatorBuilder,
     this.itemBuilder,
     this.onItemTap,
     this.showResultCount = true,
     this.pullToRefresh = true,
     this.showErrorTile = false,
+    this.emptyBuilder,
+    this.errorBuilder,
+    this.loadingBuilder,
+    this.childBuilder,
   }) : super(key: key);
 
   /// Message String to search on
@@ -94,12 +96,6 @@ class MessageSearchListView extends StatefulWidget {
   /// Function called when tapping on a [MessageSearchItem]
   final MessageSearchItemTapCallback onItemTap;
 
-  /// The builder used when the channel list is empty.
-  final EmptyMessageSearchBuilder emptyBuilder;
-
-  /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
-
   /// Builder used to create a custom item separator
   final IndexedWidgetBuilder separatorBuilder;
 
@@ -110,6 +106,18 @@ class MessageSearchListView extends StatefulWidget {
   final bool pullToRefresh;
 
   final bool showErrorTile;
+
+  /// The builder that is used when the search messages are fetched
+  final Widget Function(List<GetMessageResponse>) childBuilder;
+
+  /// The builder used when the channel list is empty.
+  final WidgetBuilder emptyBuilder;
+
+  /// The builder that will be used in case of error
+  final ErrorBuilder errorBuilder;
+
+  /// The builder that will be used in case of loading
+  final WidgetBuilder loadingBuilder;
 
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
@@ -128,101 +136,98 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       paginationParams: widget.paginationParams,
       messageFilters: widget.messageFilters,
       messageSearchListController: _messageSearchListController,
-      emptyBuilder: (context) {
-        if (widget.emptyBuilder != null) {
-          return widget.emptyBuilder(context, widget.messageQuery);
-        }
-        return LayoutBuilder(
-          builder: (context, viewportConstraints) {
-            return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: viewportConstraints.maxHeight,
-                ),
-                child: Center(
-                  child: Text('There are no messages currently'),
-                ),
-              ),
-            );
-          },
-        );
-      },
-      errorBuilder: (BuildContext context, dynamic error) {
-        if (error is Error) {
-          print((error).stackTrace);
-        }
-
-        if (widget.errorBuilder != null) {
-          return widget.errorBuilder(error);
-        }
-
-        var message = error.toString();
-        if (error is DioError) {
-          if (error.type == DioErrorType.RESPONSE) {
-            message = error.message;
-          } else {
-            message = 'Check your connection and retry';
-          }
-        }
-        return InfoTile(
-          showMessage: widget.showErrorTile,
-          tileAnchor: Alignment.topCenter,
-          childAnchor: Alignment.topCenter,
-          message: 'An error occurred.',
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      WidgetSpan(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 2.0),
-                          child: Icon(Icons.error_outline),
-                        ),
-                      ),
-                      TextSpan(text: 'Error loading messages'),
-                    ],
+      emptyBuilder: widget.emptyBuilder ??
+          (context) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: Text('There are no messages currently'),
+                    ),
                   ),
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(message),
-                ),
-                RaisedButton(
-                  onPressed: () {
-                    _messageSearchListController.loadData();
-                  },
-                  child: Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-      loadingBuilder: (context) {
-        return LayoutBuilder(
-          builder: (context, viewportConstraints) {
-            return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: viewportConstraints.maxHeight,
-                ),
-                child: Center(
-                  child: CircularProgressIndicator(),
+                );
+              },
+            );
+          },
+      errorBuilder: widget.emptyBuilder ??
+          (BuildContext context, dynamic error) {
+            if (error is Error) {
+              print((error).stackTrace);
+            }
+
+            var message = error.toString();
+            if (error is DioError) {
+              if (error.type == DioErrorType.RESPONSE) {
+                message = error.message;
+              } else {
+                message = 'Check your connection and retry';
+              }
+            }
+            return InfoTile(
+              showMessage: widget.showErrorTile,
+              tileAnchor: Alignment.topCenter,
+              childAnchor: Alignment.topCenter,
+              message: 'An error occurred.',
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 2.0),
+                              child: Icon(Icons.error_outline),
+                            ),
+                          ),
+                          TextSpan(text: 'Error loading messages'),
+                        ],
+                      ),
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Text(message),
+                    ),
+                    RaisedButton(
+                      onPressed: () {
+                        _messageSearchListController.loadData();
+                      },
+                      child: Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
             );
           },
-        );
-      },
-      childBuilder: (list) {
-        return _buildListView(list);
-      },
+      loadingBuilder: widget.loadingBuilder ??
+          (context) {
+            return LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: viewportConstraints.maxHeight,
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+      childBuilder: widget.childBuilder ??
+          (list) {
+            return _buildListView(list);
+          },
     );
   }
 

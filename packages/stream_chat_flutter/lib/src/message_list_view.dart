@@ -126,6 +126,10 @@ class MessageListView extends StatefulWidget {
     this.messageHighlightColor,
     this.onShowMessage,
     this.showConnectionStateTile = false,
+    this.loadingBuilder,
+    this.emptyBuilder,
+    this.messageListBuilder,
+    this.errorWidgetBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -185,6 +189,20 @@ class MessageListView extends StatefulWidget {
 
   final bool showConnectionStateTile;
 
+  /// Function called when messages are fetched
+  final Widget Function(BuildContext, List<Message>) messageListBuilder;
+
+  /// Function used to build a loading widget
+  final WidgetBuilder loadingBuilder;
+
+  /// Function used to build an empty widget
+  final WidgetBuilder emptyBuilder;
+
+  /// Callback triggered when an error occurs while performing the given request.
+  /// This parameter can be used to display an error message to users in the event
+  /// of a connection failure.
+  final ErrorBuilder errorWidgetBuilder;
+
   @override
   _MessageListViewState createState() => _MessageListViewState();
 }
@@ -242,41 +260,45 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
-      loadingBuilder: (context) {
-        return Center(
-          child: const CircularProgressIndicator(),
-        );
-      },
-      emptyBuilder: (context) {
-        return Center(
-          child: Text(
-            'No chats here yet...',
-            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(.5)),
-          ),
-        );
-      },
-      messageListBuilder: (context, list) {
-        return _buildListView(list);
-      },
+      loadingBuilder: widget.loadingBuilder ??
+          (context) {
+            return Center(
+              child: const CircularProgressIndicator(),
+            );
+          },
+      emptyBuilder: widget.emptyBuilder ??
+          (context) {
+            return Center(
+              child: Text(
+                'No chats here yet...',
+                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5)),
+              ),
+            );
+          },
+      messageListBuilder: widget.messageListBuilder ??
+          (context, list) {
+            return _buildListView(list);
+          },
       messageListController: _messageListController,
       parentMessage: widget.parentMessage,
       showScrollToBottom: widget.showScrollToBottom,
-      errorWidgetBuilder: (BuildContext context, Object error) {
-        return Center(
-          child: Text(
-            'Something went wrong',
-            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(.5)),
-          ),
-        );
-      },
+      errorWidgetBuilder: widget.errorWidgetBuilder ??
+          (BuildContext context, Object error) {
+            return Center(
+              child: Text(
+                'Something went wrong',
+                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5)),
+              ),
+            );
+          },
     );
   }
 
