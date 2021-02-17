@@ -245,15 +245,20 @@ class Channel {
       }
 
       final isImage = it.type == 'image';
-      final uploader = _client.attachmentUploader;
       final cancelToken = CancelToken();
       Future<String> future;
       if (isImage) {
-        future = uploader.uploadImage(it.file, id, type,
-            onSendProgress: onSendProgress, cancelToken: cancelToken);
+        future = sendImage(
+          it.file,
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+        ).then((it) => it.file);
       } else {
-        future = uploader.uploadFile(it.file, id, type,
-            onSendProgress: onSendProgress, cancelToken: cancelToken);
+        future = sendFile(
+          it.file,
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+        ).then((it) => it.file);
       }
       _cancelableAttachmentUploadRequest[it.id] = cancelToken;
       return future.then((url) {
@@ -446,7 +451,7 @@ class Channel {
 
   /// Send a file to this channel
   Future<SendFileResponse> sendFile(
-    MultipartFile file, {
+    AttachmentFile file, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   }) {
@@ -461,12 +466,12 @@ class Channel {
 
   /// Send an image to this channel
   Future<SendImageResponse> sendImage(
-    MultipartFile image, {
+    AttachmentFile file, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   }) {
     return _client.sendImage(
-      image,
+      file,
       id,
       type,
       onSendProgress: onSendProgress,

@@ -10,7 +10,7 @@ export './src/api/connection_status.dart';
 export './src/api/requests.dart';
 export './src/api/requests.dart';
 export './src/api/responses.dart';
-export './src/api/attachment_uploader.dart' show AttachmentUploader;
+export './src/attachment_file_uploader.dart' show AttachmentFileUploader;
 export './src/client.dart';
 export './src/event_type.dart';
 export './src/models/action.dart';

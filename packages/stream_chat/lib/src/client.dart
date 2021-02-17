@@ -8,11 +8,12 @@ import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
-import 'api/attachment_uploader.dart';
+import 'attachment_file_uploader.dart';
 import 'api/channel.dart';
 import 'api/connection_status.dart';
 import 'api/requests.dart';
@@ -102,7 +103,7 @@ class StreamChatClient {
   ChatPersistenceClient chatPersistenceClient;
 
   /// Attachment uploader
-  AttachmentUploader attachmentUploader;
+  AttachmentFileUploader attachmentUploader;
 
   /// Whether the chat persistence is available or not
   bool get persistenceEnabled => chatPersistenceClient != null;
@@ -1043,36 +1044,36 @@ class StreamChatClient {
 
   /// Send a [file] to the [channelId] of type [channelType]
   Future<SendFileResponse> sendFile(
-    MultipartFile file,
+    AttachmentFile file,
     String channelId,
     String channelType, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
-  }) async {
-    final response = await post(
-      '/channels/$channelType/$channelId/file',
-      data: FormData.fromMap({'file': file}),
+  }) {
+    return attachmentUploader.sendFile(
+      file,
+      channelId,
+      channelType,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );
-    return decode(response.data, SendFileResponse.fromJson);
   }
 
   /// Send a [image] to the [channelId] of type [channelType]
   Future<SendImageResponse> sendImage(
-    MultipartFile image,
+    AttachmentFile image,
     String channelId,
     String channelType, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
-  }) async {
-    final response = await post(
-      '/channels/$channelType/$channelId/image',
-      data: FormData.fromMap({'file': image}),
+  }) {
+    return attachmentUploader.sendImage(
+      image,
+      channelId,
+      channelType,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );
-    return decode(response.data, SendImageResponse.fromJson);
   }
 
   /// Add a device for Push Notifications.
