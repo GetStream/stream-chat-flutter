@@ -125,21 +125,13 @@ class RetryQueue {
   Future<void> _sendMessage(Message message) async {
     if (message.status == MessageSendingStatus.failed_update ||
         message.status == MessageSendingStatus.updating) {
-      await channel.client.updateMessage(
-        message,
-        channel.cid,
-      );
+      await channel.updateMessage(message);
     } else if (message.status == MessageSendingStatus.failed ||
         message.status == MessageSendingStatus.sending) {
-      await channel.sendMessage(
-        message,
-      );
+      await channel.sendMessage(message);
     } else if (message.status == MessageSendingStatus.failed_delete ||
         message.status == MessageSendingStatus.deleting) {
-      await channel.client.deleteMessage(
-        message,
-        channel.cid,
-      );
+      await channel.deleteMessage(message);
     }
   }
 

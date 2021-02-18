@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'attachment/attachment.dart';
+
 class ChannelFileDisplayScreen extends StatefulWidget {
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be provided.
@@ -164,6 +166,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: FileAttachment(
+                    message: media.values.toList()[position],
                     attachment: media.keys.toList()[position],
                   ),
                 ),

@@ -18,7 +18,7 @@ extension MessageEntityX on MessageEntity {
       ownReactions: ownReactions,
       attachments: attachments?.map((it) {
         final json = jsonDecode(it);
-        return Attachment.fromJson(json);
+        return Attachment.fromData(json);
       })?.toList(),
       createdAt: createdAt,
       extraData: extraData,
@@ -47,7 +47,9 @@ extension MessageX on Message {
   MessageEntity toEntity({String cid}) {
     return MessageEntity(
       id: id,
-      attachments: attachments?.map((it) => jsonEncode(it))?.toList() ?? [],
+      attachments: attachments?.map((it) {
+        return jsonEncode(it.toData());
+      })?.toList(),
       channelCid: cid,
       type: type,
       parentId: parentId,

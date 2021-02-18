@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/full_screen_media.dart';
@@ -9,12 +8,14 @@ class ImageGroup extends StatelessWidget {
     Key key,
     @required this.images,
     @required this.message,
+    @required this.messageTheme,
     @required this.size,
     this.onShowMessage,
   }) : super(key: key);
 
   final List<Attachment> images;
   final Message message;
+  final MessageTheme messageTheme;
   final Size size;
   final ShowMessageCallback onShowMessage;
 
@@ -129,14 +130,12 @@ class ImageGroup extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context, int index) {
-    return GestureDetector(
-      onTap: () => _onTap(context, index),
-      child: CachedNetworkImage(
-        imageUrl: images[index].imageUrl ??
-            images[index].thumbUrl ??
-            images[index].assetUrl,
-        fit: BoxFit.cover,
-      ),
+    return ImageAttachment(
+      attachment: images[index],
+      size: size,
+      message: message,
+      messageTheme: messageTheme,
+      onAttachmentTap: () => _onTap(context, index),
     );
   }
 }

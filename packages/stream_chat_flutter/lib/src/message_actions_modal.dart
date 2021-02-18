@@ -33,7 +33,6 @@ class MessageActionsModal extends StatefulWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final DisplayWidget showUserAvatar;
-  final Map<String, VideoPackage> videoPackages;
 
   const MessageActionsModal({
     Key key,
@@ -54,7 +53,6 @@ class MessageActionsModal extends StatefulWidget {
     this.messageShape,
     this.attachmentShape,
     this.reverse = false,
-    this.videoPackages,
   }) : super(key: key);
 
   @override
@@ -182,7 +180,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 showSendingIndicator: false,
                                 shape: widget.messageShape,
                                 attachmentShape: widget.attachmentShape,
-                                videoPackages: widget.videoPackages,
                               ),
                             ),
                             SizedBox(height: 8),
@@ -298,10 +295,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     if (answer) {
       try {
         Navigator.pop(context);
-        await StreamChat.of(context).client.deleteMessage(
-              widget.message,
-              StreamChannel.of(context).channel.cid,
-            );
+        await StreamChannel.of(context).channel.deleteMessage(widget.message);
       } catch (err) {
         _showErrorAlert();
       }
@@ -570,10 +564,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
-        final client = StreamChat.of(context).client;
         final channel = StreamChannel.of(context).channel;
         if (isUpdateFailed) {
-          client.updateMessage(widget.message, channel.cid);
+          channel.updateMessage(widget.message);
         } else {
           channel.sendMessage(widget.message);
         }

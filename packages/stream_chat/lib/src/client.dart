@@ -8,10 +8,12 @@ import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
+import 'attachment_file_uploader.dart';
 import 'api/channel.dart';
 import 'api/connection_status.dart';
 import 'api/requests.dart';
@@ -78,6 +80,7 @@ class StreamChatClient {
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
     RetryPolicy retryPolicy,
+    this.attachmentFileUploader,
   }) {
     _retryPolicy ??= RetryPolicy(
       retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
@@ -85,6 +88,8 @@ class StreamChatClient {
       shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
           attempt < 5,
     );
+
+    attachmentFileUploader ??= StreamAttachmentFileUploader(this);
 
     state = ClientState(this);
 
@@ -96,6 +101,9 @@ class StreamChatClient {
 
   /// Chat persistence client
   ChatPersistenceClient chatPersistenceClient;
+
+  /// Attachment uploader
+  AttachmentFileUploader attachmentFileUploader;
 
   /// Whether the chat persistence is available or not
   bool get persistenceEnabled => chatPersistenceClient != null;
@@ -794,9 +802,16 @@ class StreamChatClient {
   Future<Response<String>> post(
     String path, {
     dynamic data,
+    ProgressCallback onSendProgress,
+    CancelToken cancelToken,
   }) async {
     try {
-      final response = await httpClient.post<String>(path, data: data);
+      final response = await httpClient.post<String>(
+        path,
+        data: data,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
       return response;
     } on DioError catch (error) {
       throw _parseError(error);
@@ -1027,6 +1042,40 @@ class StreamChatClient {
         response.data, SearchMessagesResponse.fromJson);
   }
 
+  /// Send a [file] to the [channelId] of type [channelType]
+  Future<SendFileResponse> sendFile(
+    AttachmentFile file,
+    String channelId,
+    String channelType, {
+    ProgressCallback onSendProgress,
+    CancelToken cancelToken,
+  }) {
+    return attachmentFileUploader.sendFile(
+      file,
+      channelId,
+      channelType,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+  }
+
+  /// Send a [image] to the [channelId] of type [channelType]
+  Future<SendImageResponse> sendImage(
+    AttachmentFile image,
+    String channelId,
+    String channelType, {
+    ProgressCallback onSendProgress,
+    CancelToken cancelToken,
+  }) {
+    return attachmentFileUploader.sendImage(
+      image,
+      channelId,
+      channelType,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+  }
+
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) async {
     final response = await post('/devices', data: {
@@ -1198,78 +1247,29 @@ class StreamChatClient {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(
-    Message message, [
-    String cid,
-  ]) async {
-    message = message.copyWith(
-      status: MessageSendingStatus.updating,
-      updatedAt: message.updatedAt ?? DateTime.now(),
+  /// Sends the message to the given channel
+  Future<SendMessageResponse> sendMessage(
+      Message message, String channelId, String channelType) async {
+    final response = await post(
+      '/channels/$channelType/$channelId/message',
+      data: {'message': message.toJson()},
     );
+    return decode(response.data, SendMessageResponse.fromJson);
+  }
 
-    final channel = state?.channels != null ? state?.channels[cid] : null;
-    channel?.state?.addMessage(message);
-
-    return post('/messages/${message.id}', data: {'message': message})
-        .then((res) {
-      final updateMessageResponse = decode(
-        res?.data,
-        UpdateMessageResponse.fromJson,
-      );
-
-      channel?.state?.addMessage(updateMessageResponse?.message?.copyWith(
-        ownReactions: message.ownReactions,
-      ));
-
-      return updateMessageResponse;
-    }).catchError((error) {
-      if (error is DioError &&
-          error.type != DioErrorType.RESPONSE &&
-          state?.channels != null) {
-        channel?.state?.retryQueue?.add([message]);
-      }
-      throw error;
-    });
+  /// Update the given message
+  Future<UpdateMessageResponse> updateMessage(Message message) async {
+    final response = await post(
+      '/messages/${message.id}',
+      data: {'message': message},
+    );
+    return decode(response.data, UpdateMessageResponse.fromJson);
   }
 
   /// Deletes the given message
-  Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
-    if (message.status == MessageSendingStatus.failed) {
-      state.channels[cid].state.addMessage(message.copyWith(
-        type: 'deleted',
-        status: MessageSendingStatus.sent,
-      ));
-      return EmptyResponse();
-    }
-
-    try {
-      message = message.copyWith(
-        type: 'deleted',
-        status: MessageSendingStatus.deleting,
-        deletedAt: message.deletedAt ?? DateTime.now(),
-      );
-
-      if (state?.channels != null) {
-        state.channels[cid]?.state?.addMessage(message);
-      }
-
-      final response = await delete('/messages/${message.id}');
-
-      if (state?.channels != null) {
-        state.channels[cid]?.state
-            ?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
-      }
-
-      return decode(response.data, EmptyResponse.fromJson);
-    } catch (error) {
-      if (error is DioError &&
-          error.type != DioErrorType.RESPONSE &&
-          state?.channels != null) {
-        state.channels[cid]?.state?.retryQueue?.add([message]);
-      }
-      rethrow;
-    }
+  Future<EmptyResponse> deleteMessage(Message message) async {
+    final response = await delete('/messages/${message.id}');
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Get a message by id

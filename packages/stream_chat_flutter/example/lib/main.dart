@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
+
+final chatPersistentClient = StreamChatPersistenceClient(
+  logLevel: Level.INFO,
+  connectionMode: ConnectionMode.background,
+);
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
   /// project dashboard.
   final client = StreamChatClient(
     's2dxdhpxd94g',
     logLevel: Level.INFO,
-  );
+  )..chatPersistenceClient = chatPersistentClient;
 
   /// Set the current user and connect the websocket. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -20,8 +28,7 @@ void main() async {
 
   final channel = client.channel('messaging', id: 'godevs');
 
-  // ignore: unawaited_futures
-  channel.watch();
+  await channel.watch();
 
   runApp(MyApp(client, channel));
 }
@@ -49,6 +56,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
       builder: (context, widget) {
         return StreamChat(
           child: widget,

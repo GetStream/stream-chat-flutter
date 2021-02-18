@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
@@ -48,36 +51,34 @@ class _FullScreenMediaState extends State<FullScreenMedia>
 
   int _currentPage;
 
-  List<VideoPackage> videoPackages = [];
+  final videoPackages = <String, VideoPackage>{};
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
     _pageController = PageController(initialPage: widget.startIndex);
     _currentPage = widget.startIndex;
-    widget.mediaAttachments
-        .where((element) => element.type == 'video')
-        .toList()
-        .forEach((element) {
-      videoPackages.add(VideoPackage(
-        context,
-        element,
-        () {
-          setState(() {});
-        },
-        showControls: true,
-      ));
-    });
+    for (final attachment in widget.mediaAttachments) {
+      if (attachment.type != 'video') continue;
+      final package = VideoPackage(attachment, showControls: true);
+      videoPackages[attachment.id] = package;
+    }
+    initializePlayers();
+  }
+
+  Future<void> initializePlayers() async {
+    await Future.wait(videoPackages.values.map(
+      (it) => it.initialize(),
+    ));
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    var videoAttachments = widget.mediaAttachments
-        .where((element) => element.type == 'video')
-        .toList();
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -92,14 +93,18 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                       _currentPage = val;
                     });
                   },
-                  itemBuilder: (context, position) {
-                    if (widget.mediaAttachments[position].type == 'image' ||
-                        widget.mediaAttachments[position].type == 'giphy') {
+                  itemBuilder: (context, index) {
+                    final attachment = widget.mediaAttachments[index];
+                    if (attachment.type == 'image' ||
+                        attachment.type == 'giphy') {
+                      final imageUrl = attachment.imageUrl ??
+                          attachment.assetUrl ??
+                          attachment.thumbUrl;
                       return PhotoView(
-                        imageProvider: CachedNetworkImageProvider(
-                            widget.mediaAttachments[position].imageUrl ??
-                                widget.mediaAttachments[position].assetUrl ??
-                                widget.mediaAttachments[position].thumbUrl),
+                        imageProvider:
+                            imageUrl == null && attachment.localUri != null
+                                ? Image.memory(attachment.file.bytes).image
+                                : CachedNetworkImageProvider(imageUrl),
                         maxScale: PhotoViewComputedScale.covered,
                         minScale: PhotoViewComputedScale.contained,
                         heroAttributes: PhotoViewHeroAttributes(
@@ -125,12 +130,9 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                           }
                         },
                       );
-                    } else if (widget.mediaAttachments[position].type ==
-                        'video') {
-                      var controllerPackage = videoPackages[videoAttachments
-                          .indexOf(widget.mediaAttachments[position])];
-
-                      if (!controllerPackage.initialised) {
+                    } else if (attachment.type == 'video') {
+                      final controller = videoPackages[attachment.id];
+                      if (!controller.initialized) {
                         return Center(
                           child: CircularProgressIndicator(),
                         );
@@ -151,7 +153,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                             vertical: 50.0,
                           ),
                           child: Chewie(
-                            controller: controllerPackage.chewieController,
+                            controller: controller.chewieController,
                           ),
                         ),
                       );
@@ -188,7 +190,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                   totalPages: widget.mediaAttachments.length,
                   mediaAttachments: widget.mediaAttachments,
                   message: widget.message,
-                  videoPackages: videoPackages,
                   mediaSelectedCallBack: (val) {
                     setState(() {
                       _currentPage = val;
@@ -224,54 +225,58 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   }
 
   @override
-  void dispose() {
-    videoPackages.forEach((element) {
-      element.dispose();
-    });
+  void dispose() async {
+    for (final package in videoPackages.values) {
+      await package.dispose();
+    }
     super.dispose();
   }
 }
 
 class VideoPackage {
-  VideoPlayerController _videoPlayerController;
+  final bool _showControls;
+  final bool _autoInitialize;
+  final VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
-  bool initialised = false;
-  VoidCallback onInit;
-  BuildContext context;
-  bool showControls;
-
-  ///
-  VideoPackage(this.context, Attachment attachment, this.onInit,
-      {this.showControls = false}) {
-    _videoPlayerController = VideoPlayerController.network(attachment.assetUrl);
-    _videoPlayerController.initialize().whenComplete(() {
-      initialised = true;
-      _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController,
-        autoInitialize: true,
-        showControls: showControls,
-        aspectRatio: _videoPlayerController.value.aspectRatio,
-      );
-      onInit();
-    });
-
-    VoidCallback errorListener;
-    errorListener = () {
-      if (_videoPlayerController.value.hasError) {
-        Navigator.pop(context);
-        launchURL(context, attachment.titleLink);
-      }
-      _videoPlayerController.removeListener(errorListener);
-    };
-    _videoPlayerController.addListener(errorListener);
-  }
 
   VideoPlayerController get videoPlayer => _videoPlayerController;
 
   ChewieController get chewieController => _chewieController;
 
-  void dispose() {
-    _videoPlayerController.dispose();
-    _chewieController.dispose();
+  bool get initialized => _videoPlayerController.value.initialized;
+
+  VideoPackage(
+    Attachment attachment, {
+    bool showControls = false,
+    bool autoInitialize = true,
+  })  : assert(attachment != null),
+        _showControls = showControls,
+        _autoInitialize = autoInitialize,
+        _videoPlayerController = attachment.localUri != null
+            ? VideoPlayerController.file(File.fromUri(attachment.localUri))
+            : VideoPlayerController.network(attachment.assetUrl);
+
+  Future<void> initialize() {
+    return _videoPlayerController.initialize().then((_) {
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController,
+        autoInitialize: _autoInitialize,
+        showControls: _showControls,
+        aspectRatio: _videoPlayerController.value.aspectRatio,
+      );
+    });
+  }
+
+  void addListener(VoidCallback listener) {
+    return _videoPlayerController.addListener(listener);
+  }
+
+  void removeListener(VoidCallback listener) {
+    return _videoPlayerController.removeListener(listener);
+  }
+
+  Future<void> dispose() {
+    _chewieController?.dispose();
+    return _videoPlayerController?.dispose();
   }
 }

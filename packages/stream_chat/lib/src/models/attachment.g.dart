@@ -8,6 +8,7 @@ part of 'attachment.dart';
 
 Attachment _$AttachmentFromJson(Map json) {
   return Attachment(
+    id: json['id'] as String,
     type: json['type'] as String,
     titleLink: json['title_link'] as String,
     title: json['title'] as String,
@@ -35,9 +36,16 @@ Attachment _$AttachmentFromJson(Map json) {
     extraData: (json['extra_data'] as Map)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
-    localUri: json['local_uri'] == null
+    file: json['file'] == null
         ? null
-        : Uri.parse(json['local_uri'] as String),
+        : AttachmentFile.fromJson((json['file'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
+    uploadState: json['upload_state'] == null
+        ? null
+        : UploadState.fromJson((json['upload_state'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
   );
 }
 
@@ -68,7 +76,9 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
   writeNotNull('author_icon', instance.authorIcon);
   writeNotNull('asset_url', instance.assetUrl);
   writeNotNull('actions', instance.actions?.map((e) => e?.toJson())?.toList());
-  writeNotNull('local_uri', instance.localUri?.toString());
+  writeNotNull('file', instance.file?.toJson());
+  writeNotNull('upload_state', instance.uploadState?.toJson());
   writeNotNull('extra_data', instance.extraData);
+  writeNotNull('id', instance.id);
   return val;
 }

@@ -10,7 +10,11 @@ import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:test/test.dart';
 
+import 'package:stream_chat/stream_chat.dart';
+
 class MockDio extends Mock implements DioForNative {}
+
+class MockAttachmentUploader extends Mock implements AttachmentFileUploader {}
 
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
 
@@ -170,6 +174,11 @@ void main() {
 
       test('sendFile', () async {
         final mockDio = MockDio();
+        final mockUploader = MockAttachmentUploader();
+
+        final file = AttachmentFile(path: 'filePath/fileName.pdf');
+        final channelId = 'testId';
+        final channelType = 'messaging';
 
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
@@ -178,23 +187,25 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
+          attachmentFileUploader: mockUploader,
         );
-        final channelClient = client.channel('messaging', id: 'testid');
-        final file = MultipartFile.fromString('file');
+        final channelClient = client.channel(channelType, id: channelId);
 
-        when(mockDio.post<String>('/channels/messaging/testid/file',
-                data: argThat(isA<FormData>(), named: 'data')))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockUploader.sendFile(file, channelId, channelType))
+            .thenAnswer((_) async => SendFileResponse());
 
         await channelClient.sendFile(file);
 
-        verify(mockDio.post<String>('/channels/messaging/testid/file',
-                data: argThat(isA<FormData>(), named: 'data')))
-            .called(1);
+        verify(mockUploader.sendFile(file, channelId, channelType)).called(1);
       });
 
       test('sendImage', () async {
         final mockDio = MockDio();
+        final mockUploader = MockAttachmentUploader();
+
+        final image = AttachmentFile(path: 'imagePath/imageName.jpeg');
+        final channelId = 'testId';
+        final channelType = 'messaging';
 
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
@@ -203,19 +214,16 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
+          attachmentFileUploader: mockUploader,
         );
-        final channelClient = client.channel('messaging', id: 'testid');
-        final file = MultipartFile.fromString('file');
+        final channelClient = client.channel(channelType, id: channelId);
 
-        when(mockDio.post<String>('/channels/messaging/testid/image',
-                data: argThat(isA<FormData>(), named: 'data')))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockUploader.sendImage(image, channelId, channelType))
+            .thenAnswer((_) async => SendImageResponse());
 
-        await channelClient.sendImage(file);
+        await channelClient.sendImage(image);
 
-        verify(mockDio.post<String>('/channels/messaging/testid/image',
-                data: argThat(isA<FormData>(), named: 'data')))
-            .called(1);
+        verify(mockUploader.sendImage(image, channelId, channelType)).called(1);
       });
 
       test('deleteFile', () async {

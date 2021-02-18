@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_player/video_player.dart';
 
+import 'attachment/attachment.dart';
+
 class ChannelMediaDisplayScreen extends StatefulWidget {
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be provided.
