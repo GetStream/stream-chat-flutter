@@ -1,3 +1,8 @@
+## 1.1.1-beta
+
+- Added MessageInput button color customization options
+- Fixed author theme and messageinput background
+
 ## 1.1.0-beta
 
 - Update stream_chat_core dependency
