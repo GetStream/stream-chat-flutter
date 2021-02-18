@@ -32,6 +32,7 @@ dependencies:
   video_compress: ^2.1.1
   visibility_detector: ^0.1.5
   http_parser: ^3.1.4
+  meta: ^1.2.4
   lottie: ^0.7.0+1
   substring_highlight: ^0.1.2
   flutter_slidable: ^0.5.7

@@ -12,7 +12,7 @@ dependencies:
   moor: ^3.4.0
   path: ^1.7.0
   path_provider: ^1.6.27
-  sqlite3_flutter_libs: ^0.3.0
+  sqlite3_flutter_libs: ^0.4.0+1
   stream_chat: ^1.1.0-beta
 
 dev_dependencies:
