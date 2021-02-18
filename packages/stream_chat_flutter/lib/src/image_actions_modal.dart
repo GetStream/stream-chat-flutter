@@ -105,10 +105,9 @@ class ImageActionsModal extends StatelessWidget {
                       () {
                         Navigator.pop(context);
                         Navigator.pop(context);
-                        StreamChat.of(context).client.deleteMessage(
-                              message,
-                              StreamChannel.of(context).channel.cid,
-                            );
+                        StreamChannel.of(context)
+                            .channel
+                            .deleteMessage(message);
                       },
                       color: StreamChatTheme.of(context).colorTheme.accentRed,
                     ),

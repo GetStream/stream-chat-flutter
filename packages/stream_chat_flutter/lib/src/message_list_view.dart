@@ -257,8 +257,6 @@ class _MessageListViewState extends State<MessageListView> {
 
   final MessageListController _messageListController = MessageListController();
 
-  final Map<String, VideoPackage> videoPackages = {};
-
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
@@ -800,7 +798,6 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
-      videoPackages: videoPackages,
     );
   }
 
@@ -961,10 +958,12 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
-      videoPackages: videoPackages,
     );
 
-    if (!message.isDeleted && !message.isSystem && !message.isEphemeral) {
+    if (!message.isDeleted &&
+        !message.isSystem &&
+        !message.isEphemeral &&
+        widget.onMessageSwiped != null) {
       child = Swipeable(
         onSwipeEnd: () {
           FocusScope.of(context).unfocus();
@@ -1078,7 +1077,6 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel.reloadChannel();
     }
     _messageNewListener?.cancel();
-    videoPackages.values.forEach((e) => e.dispose());
     super.dispose();
   }
 }

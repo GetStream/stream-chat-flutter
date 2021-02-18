@@ -1,5 +1,7 @@
 import 'package:characters/characters.dart';
 import 'package:emojis/emoji.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 final _emojis = Emoji.all();
 
@@ -10,9 +12,11 @@ extension StringExtension on String {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
 
-  //  Emojis guidelines
-  //  1 to 3 emojis: big size with no text bubble.
-  //  4+ emojis or emojis+text: standard size with text bubble.
+  /// Returns whether the string contains only emoji's or not.
+  ///
+  ///  Emojis guidelines
+  ///  1 to 3 emojis: big size with no text bubble.
+  ///  4+ emojis or emojis+text: standard size with text bubble.
   bool get isOnlyEmoji {
     final characters = trim().characters;
     if (characters.isEmpty) return false;
@@ -28,4 +32,15 @@ extension IterableX<T> on Iterable<T> {
         yield item;
         yield e;
       }).skip(1).toList(growable: false);
+}
+
+/// Useful extension for [PlatformFile]
+extension PlatformFileX on PlatformFile {
+  /// Converts the [PlatformFile] into [AttachmentFile]
+  AttachmentFile get toAttachmentFile => AttachmentFile(
+        path: path,
+        name: name,
+        bytes: bytes,
+        size: size,
+      );
 }

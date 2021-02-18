@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_player/video_player.dart';
 
-import 'attachment_error.dart';
+import 'attachment/attachment.dart';
 import 'extension.dart';
-import 'image_attachment.dart';
 import 'message_text.dart';
 import 'stream_chat_theme.dart';
 import 'user_avatar.dart';
@@ -200,10 +199,7 @@ class QuotedMessageWidget extends StatelessWidget {
         ),
       );
     }
-    return AttachmentError(
-      attachment: attachment,
-      size: size,
-    );
+    return AttachmentError(size: size);
   }
 
   Widget _parseAttachments(BuildContext context) {
@@ -231,8 +227,8 @@ class QuotedMessageWidget extends StatelessWidget {
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
       child: Material(
-        clipBehavior: Clip.hardEdge,
-        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        type: MaterialType.transparency,
         shape: attachment.type == 'file' ? null : _getDefaultShape(context),
         child: child,
       ),
@@ -294,10 +290,9 @@ class QuotedMessageWidget extends StatelessWidget {
           },
           imageUrl:
               attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
-          errorWidget: (context, url, error) => AttachmentError(
-            attachment: attachment,
-            size: size,
-          ),
+          errorWidget: (context, url, error) {
+            return AttachmentError(size: size);
+          },
           fit: BoxFit.cover,
         );
       },

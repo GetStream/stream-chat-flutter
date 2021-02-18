@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/models/attachment_file.dart';
+import 'package:uuid/uuid.dart';
 
 import 'action.dart';
 import 'serialization.dart';
@@ -52,9 +54,20 @@ class Attachment {
 
   final Uri localUri;
 
+  /// The file present inside this attachment.
+  final AttachmentFile file;
+
+  /// The current upload state of the attachment
+  final UploadState uploadState;
+
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
+
+  /// The attachment ID.
+  ///
+  /// This is created locally for uniquely identifying a attachment.
+  final String id;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -79,11 +92,20 @@ class Attachment {
     'actions',
   ];
 
+  /// Known db specific top level fields.
+  /// Useful for [Serialization] methods.
+  static const dbSpecificTopLevelFields = [
+    'id',
+    'upload_state',
+    'file',
+  ];
+
   /// Constructor used for json serialization
   Attachment({
+    String id,
     this.type,
     this.titleLink,
-    this.title,
+    String title,
     this.thumbUrl,
     this.text,
     this.pretext,
@@ -100,8 +122,11 @@ class Attachment {
     this.assetUrl,
     this.actions,
     this.extraData,
-    this.localUri,
-  });
+    this.file,
+    this.uploadState,
+  })  : id = id ?? Uuid().v4(),
+        title = title ?? file?.name,
+        localUri = file?.path != null ? Uri.parse(file.path) : null;
 
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) {
@@ -111,9 +136,21 @@ class Attachment {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$AttachmentToJson(this), topLevelFields);
+      _$AttachmentToJson(this), topLevelFields)
+    ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
+
+  /// Create a new instance from a db data
+  factory Attachment.fromData(Map<String, dynamic> json) {
+    return _$AttachmentFromJson(Serialization.moveToExtraDataFromRoot(
+        json, topLevelFields + dbSpecificTopLevelFields));
+  }
+
+  /// Serialize to db data
+  Map<String, dynamic> toData() => Serialization.moveFromExtraDataToRoot(
+      _$AttachmentToJson(this), topLevelFields + dbSpecificTopLevelFields);
 
   Attachment copyWith({
+    String id,
     String type,
     String titleLink,
     String title,
@@ -132,10 +169,12 @@ class Attachment {
     String authorIcon,
     String assetUrl,
     List<Action> actions,
-    Uri localUri,
+    AttachmentFile file,
+    UploadState uploadState,
     Map<String, dynamic> extraData,
   }) =>
       Attachment(
+        id: id ?? this.id,
         type: type ?? this.type,
         titleLink: titleLink ?? this.titleLink,
         title: title ?? this.title,
@@ -154,7 +193,8 @@ class Attachment {
         authorIcon: authorIcon ?? this.authorIcon,
         assetUrl: assetUrl ?? this.assetUrl,
         actions: actions ?? this.actions,
-        localUri: localUri ?? this.localUri,
+        file: file ?? this.file,
+        uploadState: uploadState ?? this.uploadState,
         extraData: extraData ?? this.extraData,
       );
 

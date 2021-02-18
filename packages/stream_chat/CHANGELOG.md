@@ -1,3 +1,9 @@
+## 1.1.0-beta
+
+- Fixed minor bugs
+- Add support for custom attachment upload [docs here](https://getstream.io/chat/docs/flutter-dart/file_uploads/?language=dart)
+- Add support for asynchronous attachment upload
+
 ## 1.0.3-beta
 
 - Fixed issue with disconnecting after connecting without awaiting the connection result

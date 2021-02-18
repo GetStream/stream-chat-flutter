@@ -2,6 +2,7 @@ library stream_chat;
 
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
+export 'package:dio/src/options.dart' show ProgressCallback;
 export 'package:logging/logging.dart' show Logger, Level;
 
 export './src/api/channel.dart';
@@ -9,10 +10,12 @@ export './src/api/connection_status.dart';
 export './src/api/requests.dart';
 export './src/api/requests.dart';
 export './src/api/responses.dart';
+export './src/attachment_file_uploader.dart' show AttachmentFileUploader;
 export './src/client.dart';
 export './src/event_type.dart';
 export './src/models/action.dart';
 export './src/models/attachment.dart';
+export './src/models/attachment_file.dart';
 export './src/models/channel_config.dart';
 export './src/models/channel_model.dart';
 export './src/models/channel_state.dart';
@@ -26,4 +29,5 @@ export './src/models/own_user.dart';
 export './src/models/reaction.dart';
 export './src/models/read.dart';
 export './src/models/user.dart';
+export './src/extensions/string_extension.dart';
 export './src/db/chat_persistence_client.dart';
