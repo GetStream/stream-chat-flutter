@@ -1252,7 +1252,7 @@ class StreamChatClient {
       Message message, String channelId, String channelType) async {
     final response = await post(
       '/channels/$channelType/$channelId/message',
-      data: {'message': message},
+      data: {'message': message.toJson()},
     );
     return decode(response.data, SendMessageResponse.fromJson);
   }
