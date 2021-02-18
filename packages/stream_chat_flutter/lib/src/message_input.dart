@@ -1683,8 +1683,8 @@ class MessageInputState extends State<MessageInput> {
     return IconButton(
       icon: StreamSvgIcon.lightning(
         color: _commandsOverlay != null
-            ? StreamChatTheme.of(context).colorTheme.accentBlue
-            : StreamChatTheme.of(context).colorTheme.grey,
+            ? StreamChatTheme.of(context).channelTheme.actionButtonColor
+            : StreamChatTheme.of(context).channelTheme.actionButtonIdleColor,
       ),
       padding: const EdgeInsets.all(0),
       constraints: BoxConstraints.tightFor(
@@ -1721,8 +1721,8 @@ class MessageInputState extends State<MessageInput> {
     return IconButton(
       icon: StreamSvgIcon.attach(
         color: _openFilePickerSection
-            ? StreamChatTheme.of(context).colorTheme.accentBlue
-            : StreamChatTheme.of(context).colorTheme.grey,
+            ? StreamChatTheme.of(context).channelTheme.actionButtonColor
+            : StreamChatTheme.of(context).channelTheme.actionButtonIdleColor,
       ),
       padding: const EdgeInsets.all(0),
       constraints: BoxConstraints.tightFor(
@@ -1961,7 +1961,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildIdleSendButton(BuildContext context) {
     return StreamSvgIcon(
       assetName: _getIdleSendIcon(),
-      color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+      color: StreamChatTheme.of(context).channelTheme.sendButtonIdleColor,
     );
   }
 
@@ -1976,7 +1976,7 @@ class MessageInputState extends State<MessageInput> {
       ),
       icon: StreamSvgIcon(
         assetName: _getSendIcon(),
-        color: StreamChatTheme.of(context).colorTheme.accentBlue,
+        color: StreamChatTheme.of(context).channelTheme.sendButtonColor,
       ),
     );
   }

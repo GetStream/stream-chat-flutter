@@ -182,9 +182,10 @@ class StreamChatThemeData {
           ),
           indicatorIconSize: 16.0),
       channelTheme: ChannelTheme(
-        messageInputButtonIconTheme: IconThemeData(
-          color: accentColor,
-        ),
+        actionButtonColor: colorTheme.accentBlue,
+        actionButtonIdleColor: colorTheme.grey,
+        sendButtonColor: colorTheme.accentBlue,
+        sendButtonIdleColor: colorTheme.greyGainsboro,
         channelHeaderTheme: ChannelHeaderTheme(
           avatarTheme: AvatarTheme(
             borderRadius: BorderRadius.circular(20),
@@ -627,36 +628,47 @@ class ChannelTheme {
   /// Theme of the [ChannelHeader] widget
   final ChannelHeaderTheme channelHeaderTheme;
 
-  /// IconTheme of the send button in [MessageInput]
-  final IconThemeData messageInputButtonIconTheme;
+  /// Background color of [MessageInput] send button
+  final Color sendButtonColor;
 
-  /// Theme of the send button in [MessageInput]
-  final ButtonThemeData messageInputButtonTheme;
+  /// Background color of [MessageInput] action buttons
+  final Color actionButtonColor;
+
+  /// Background color of [MessageInput] send button
+  final Color sendButtonIdleColor;
+
+  /// Background color of [MessageInput] action buttons
+  final Color actionButtonIdleColor;
 
   /// Background color of [MessageInput]
   final Color inputBackground;
 
   ChannelTheme({
     this.channelHeaderTheme,
-    this.messageInputButtonIconTheme,
-    this.messageInputButtonTheme,
+    this.actionButtonColor,
+    this.sendButtonColor,
+    this.actionButtonIdleColor,
+    this.sendButtonIdleColor,
     this.inputBackground,
   });
 
   /// Creates a copy of [ChannelTheme] with specified attributes overridden.
   ChannelTheme copyWith({
     ChannelHeaderTheme channelHeaderTheme,
-    IconThemeData messageInputButtonIconTheme,
-    ButtonThemeData messageInputButtonTheme,
     Color inputBackground,
+    Color actionButtonColor,
+    Color sendButtonColor,
+    Color actionButtonIdleColor,
+    Color sendButtonIdleColor,
   }) =>
       ChannelTheme(
         channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
-        messageInputButtonIconTheme:
-            messageInputButtonIconTheme ?? this.messageInputButtonIconTheme,
-        messageInputButtonTheme:
-            messageInputButtonTheme ?? this.messageInputButtonTheme,
         inputBackground: inputBackground ?? this.inputBackground,
+        actionButtonColor: actionButtonColor ?? this.actionButtonColor,
+        sendButtonColor: sendButtonColor ?? this.sendButtonColor,
+        actionButtonIdleColor:
+            actionButtonIdleColor ?? this.actionButtonIdleColor,
+        sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
       );
 
   ChannelTheme merge(ChannelTheme other) {
@@ -664,11 +676,11 @@ class ChannelTheme {
     return copyWith(
       channelHeaderTheme: channelHeaderTheme?.merge(other.channelHeaderTheme) ??
           other.channelHeaderTheme,
-      messageInputButtonIconTheme: messageInputButtonIconTheme
-              ?.merge(other.messageInputButtonIconTheme) ??
-          other.messageInputButtonIconTheme,
-      messageInputButtonTheme: other.messageInputButtonTheme,
       inputBackground: other.inputBackground,
+      actionButtonColor: other.actionButtonColor,
+      actionButtonIdleColor: other.actionButtonIdleColor,
+      sendButtonColor: other.sendButtonColor,
+      sendButtonIdleColor: other.sendButtonIdleColor,
     );
   }
 }
