@@ -1,3 +1,10 @@
+## 1.1.0-beta
+
+- Update stream_chat_core dependency
+- Expose common builders in ListView widgets
+- Add support for asynchronous attachment upload while sending a message
+- Fixed minor bugs
+
 ## 1.0.2-beta
 
 - Update stream_chat_core dependency
