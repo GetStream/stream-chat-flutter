@@ -234,64 +234,66 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = SafeArea(
-      child: GestureDetector(
-        onPanUpdate: (details) {
-          if (details.delta.dy > 0) {
-            _focusNode.unfocus();
-            if (_openFilePickerSection) {
-              setState(() {
-                _openFilePickerSection = false;
-              });
+    Widget child = Container(
+      color: StreamChatTheme.of(context).channelTheme.inputBackground,
+      child: SafeArea(
+        child: GestureDetector(
+          onPanUpdate: (details) {
+            if (details.delta.dy > 0) {
+              _focusNode.unfocus();
+              if (_openFilePickerSection) {
+                setState(() {
+                  _openFilePickerSection = false;
+                });
+              }
             }
-          }
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_hasQuotedMessage)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: StreamSvgIcon.reply(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_hasQuotedMessage)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: StreamSvgIcon.reply(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .greyGainsboro,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Reply to Message',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon.closeSmall(),
-                      onPressed: widget.onQuotedMessageCleared,
-                    ),
-                  ],
+                      Text(
+                        'Reply to Message',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: StreamSvgIcon.closeSmall(),
+                        onPressed: widget.onQuotedMessageCleared,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _buildTextField(context),
-            ),
-            if (widget.parentMessage != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _buildDmCheckbox(),
+                padding: const EdgeInsets.all(8.0),
+                child: _buildTextField(context),
               ),
-            _buildFilePickerSection(),
-          ],
+              if (widget.parentMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: _buildDmCheckbox(),
+                ),
+              _buildFilePickerSection(),
+            ],
+          ),
         ),
       ),
     );
     if (widget.editMessage == null) {
       child = Material(
-        color: StreamChatTheme.of(context).colorTheme.white,
         elevation: 8,
         child: child,
       );

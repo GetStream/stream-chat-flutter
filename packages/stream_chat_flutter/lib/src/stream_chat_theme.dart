@@ -206,6 +206,7 @@ class StreamChatThemeData {
         inputBackground: colorTheme.white.withAlpha(12),
       ),
       ownMessageTheme: MessageTheme(
+        messageAuthor: textTheme.footnote.copyWith(color: colorTheme.grey),
         messageText: textTheme.body,
         createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
         replies: textTheme.footnoteBold.copyWith(color: accentColor),
@@ -231,6 +232,7 @@ class StreamChatThemeData {
         reactionsMaskColor: colorTheme.whiteSnow,
         messageText: textTheme.body,
         createdAt: textTheme.footnote.copyWith(color: colorTheme.grey),
+        messageAuthor: textTheme.footnote.copyWith(color: colorTheme.grey),
         replies: textTheme.footnoteBold.copyWith(color: accentColor),
         messageLinks: TextStyle(
           color: accentColor,
