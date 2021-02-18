@@ -34,11 +34,11 @@ abstract class AttachmentFileUploader {
 }
 
 /// Stream's default implementation of [AttachmentFileUploader]
-class StreamAttachmentUploader implements AttachmentFileUploader {
+class StreamAttachmentFileUploader implements AttachmentFileUploader {
   final StreamChatClient _client;
 
-  /// Creates a new [StreamAttachmentUploader] instance.
-  const StreamAttachmentUploader(this._client);
+  /// Creates a new [StreamAttachmentFileUploader] instance.
+  const StreamAttachmentFileUploader(this._client);
 
   @override
   Future<SendImageResponse> sendImage(

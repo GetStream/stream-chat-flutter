@@ -80,7 +80,7 @@ class StreamChatClient {
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
     RetryPolicy retryPolicy,
-    this.attachmentUploader,
+    this.attachmentFileUploader,
   }) {
     _retryPolicy ??= RetryPolicy(
       retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
@@ -89,7 +89,7 @@ class StreamChatClient {
           attempt < 5,
     );
 
-    attachmentUploader ??= StreamAttachmentUploader(this);
+    attachmentFileUploader ??= StreamAttachmentFileUploader(this);
 
     state = ClientState(this);
 
@@ -103,7 +103,7 @@ class StreamChatClient {
   ChatPersistenceClient chatPersistenceClient;
 
   /// Attachment uploader
-  AttachmentFileUploader attachmentUploader;
+  AttachmentFileUploader attachmentFileUploader;
 
   /// Whether the chat persistence is available or not
   bool get persistenceEnabled => chatPersistenceClient != null;
@@ -1050,7 +1050,7 @@ class StreamChatClient {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   }) {
-    return attachmentUploader.sendFile(
+    return attachmentFileUploader.sendFile(
       file,
       channelId,
       channelType,
@@ -1067,7 +1067,7 @@ class StreamChatClient {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   }) {
-    return attachmentUploader.sendImage(
+    return attachmentFileUploader.sendImage(
       image,
       channelId,
       channelType,
