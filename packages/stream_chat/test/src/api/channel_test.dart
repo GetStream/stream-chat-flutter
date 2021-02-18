@@ -187,7 +187,7 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-          attachmentUploader: mockUploader,
+          attachmentFileUploader: mockUploader,
         );
         final channelClient = client.channel(channelType, id: channelId);
 
@@ -214,7 +214,7 @@ void main() {
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-          attachmentUploader: mockUploader,
+          attachmentFileUploader: mockUploader,
         );
         final channelClient = client.channel(channelType, id: channelId);
 
