@@ -308,12 +308,7 @@ class Channel {
       attachments: message.attachments?.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
-          return it.copyWith(
-            uploadState: UploadState.inProgress(
-              uploaded: 0,
-              total: it.file?.size ?? it.extraData['file_size'],
-            ),
-          );
+          return it.copyWith(uploadState: UploadState.preparing());
         },
       )?.toList(),
     );
@@ -370,12 +365,7 @@ class Channel {
       attachments: message.attachments?.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
-          return it.copyWith(
-            uploadState: UploadState.inProgress(
-              uploaded: 0,
-              total: it.file?.size ?? it.extraData['file_size'],
-            ),
-          );
+          return it.copyWith(uploadState: UploadState.preparing());
         },
       )?.toList(),
     );

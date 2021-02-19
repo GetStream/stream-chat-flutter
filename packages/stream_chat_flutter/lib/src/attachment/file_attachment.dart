@@ -181,6 +181,14 @@ class FileAttachment extends AttachmentWidget {
     final attachmentId = attachment.id;
     var trailingWidget = trailing;
     trailingWidget ??= attachment.uploadState?.when(
+          preparing: () => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildButton(
+              icon: StreamSvgIcon.close(color: theme.colorTheme.white),
+              fillColor: theme.colorTheme.overlayDark,
+              onPressed: () => channel.cancelAttachmentUpload(attachmentId),
+            ),
+          ),
           inProgress: (_, __) => Padding(
             padding: const EdgeInsets.all(8.0),
             child: _buildButton(
@@ -232,6 +240,16 @@ class FileAttachment extends AttachmentWidget {
       color: theme.colorTheme.grey,
     );
     return attachment.uploadState?.when(
+          preparing: () {
+            return UploadProgressIndicator(
+              uploaded: 0,
+              total: double.maxFinite.toInt(),
+              showBackground: false,
+              padding: EdgeInsets.zero,
+              textStyle: textStyle,
+              progressIndicatorColor: theme.colorTheme.accentBlue,
+            );
+          },
           inProgress: (sent, total) {
             return UploadProgressIndicator(
               uploaded: sent,

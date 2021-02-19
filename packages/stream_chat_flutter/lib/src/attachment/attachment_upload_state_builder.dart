@@ -11,6 +11,7 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
   final FailedBuilder failedBuilder;
   final WidgetBuilder successBuilder;
   final InProgressBuilder inProgressBuilder;
+  final WidgetBuilder preparingBuilder;
 
   const AttachmentUploadStateBuilder({
     Key key,
@@ -19,6 +20,7 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
     this.failedBuilder,
     this.successBuilder,
     this.inProgressBuilder,
+    this.preparingBuilder,
   })  : assert(message != null),
         assert(attachment != null),
         super(key: key);
@@ -51,7 +53,11 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
     var success = successBuilder;
     success ??= (context) => _SuccessState();
 
+    var preparing = preparingBuilder;
+    preparing ??= (context) => _PreparingState(attachmentId: attachmentId);
+
     return attachment.uploadState.when(
+      preparing: () => preparing(context),
       inProgress: (sent, total) => inProgress(context, sent, total),
       success: () => success(context),
       failed: (error) => failed(context, error),
@@ -90,6 +96,42 @@ class _IconButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: icon,
       ),
+    );
+  }
+}
+
+class _PreparingState extends StatelessWidget {
+  final String attachmentId;
+
+  const _PreparingState({
+    Key key,
+    @required this.attachmentId,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final channel = StreamChannel.of(context).channel;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Align(
+          alignment: Alignment.topRight,
+          child: _IconButton(
+            icon: StreamSvgIcon.close(
+              color: StreamChatTheme.of(context).colorTheme.white,
+            ),
+            onPressed: () => channel.cancelAttachmentUpload(attachmentId),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: UploadProgressIndicator(
+            uploaded: 0,
+            total: double.maxFinite.toInt(),
+          ),
+        )
+      ],
     );
   }
 }

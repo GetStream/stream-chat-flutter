@@ -10,6 +10,9 @@ part 'attachment_file.g.dart';
 /// Union class to hold various [UploadState] of a attachment.
 @freezed
 abstract class UploadState with _$UploadState {
+  /// Preparing state of the union
+  const factory UploadState.preparing() = Preparing;
+
   /// InProgress state of the union
   const factory UploadState.inProgress({int uploaded, int total}) = InProgress;
 
@@ -26,6 +29,9 @@ abstract class UploadState with _$UploadState {
 
 /// Helper extension for UploadState
 extension UploadStateX on UploadState {
+  /// Returns true if state is [Preparing]
+  bool get isPreparing => this is Preparing;
+
   /// Returns true if state is [InProgress]
   bool get isInProgress => this is InProgress;
 
