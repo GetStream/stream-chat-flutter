@@ -1,3 +1,9 @@
+## 1.2.0-beta
+
+- 🛑 **BREAKING** Changed signature of `StreamClient.search` method
+- Added `pinMessage` feature [docs here](https://getstream.io/chat/docs/flutter-dart/pinned_messages/?language=dart)
+- Fixed minor bugs
+
 ## 1.1.0-beta
 
 - Fixed minor bugs
