@@ -67,6 +67,8 @@ class StreamExample extends StatelessWidget {
 /// [ChannelListCore] is a `builder` with callbacks for constructing UIs based
 /// on different scenarios.
 class HomeScreen extends StatelessWidget {
+  final channelListController = ChannelListController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,6 +77,15 @@ class HomeScreen extends StatelessWidget {
       ),
       body: ChannelsBloc(
         child: ChannelListCore(
+          channelListController: channelListController,
+          filter: {
+            'type': 'messaging',
+            'members': {
+              r'$in': [
+                StreamChatCore.of(context).user.id,
+              ]
+            }
+          },
           emptyBuilder: (BuildContext context) {
             return Center(
               child: Text('Looks like you are not in any channels'),
@@ -99,31 +110,36 @@ class HomeScreen extends StatelessWidget {
             BuildContext context,
             List<Channel> channels,
           ) =>
-              ListView.builder(
-            itemCount: channels.length,
-            itemBuilder: (BuildContext context, int index) {
-              final _item = channels[index];
-              return ListTile(
-                title: Text(_item.name),
-                subtitle: Text(_item.state.lastMessage.text),
-                onTap: () {
-                  /// Display a list of messages when the user taps on an item.
-                  /// We can use [StreamChannel] to wrap our [MessageScreen] screen
-                  /// with the selected channel.
-                  ///
-                  /// This allows us to use a built-in inherited widget for accessing
-                  /// our `channel` later on.
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => StreamChannel(
-                        channel: _item,
-                        child: MessageScreen(),
-                      ),
-                    ),
-                  );
-                },
-              );
+              LazyLoadScrollView(
+            onEndOfPage: () async {
+              channelListController.paginateData();
             },
+            child: ListView.builder(
+              itemCount: channels.length,
+              itemBuilder: (BuildContext context, int index) {
+                final _item = channels[index];
+                return ListTile(
+                  title: Text(_item.name),
+                  subtitle: Text(_item.state.lastMessage.text),
+                  onTap: () {
+                    /// Display a list of messages when the user taps on an item.
+                    /// We can use [StreamChannel] to wrap our [MessageScreen] screen
+                    /// with the selected channel.
+                    ///
+                    /// This allows us to use a built-in inherited widget for accessing
+                    /// our `channel` later on.
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => StreamChannel(
+                          channel: _item,
+                          child: MessageScreen(),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
