@@ -24,6 +24,7 @@ import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
+import 'extensions/map_extension.dart';
 
 /// Handler function used for logging records. Function requires a single [LogRecord]
 /// as the only parameter.
@@ -1021,27 +1022,36 @@ class StreamChatClient {
 
   /// A message search.
   Future<SearchMessagesResponse> search(
-    Map<String, dynamic> filters,
-    List<SortOption> sort,
+    Map<String, dynamic> filters, {
     String query,
-    PaginationParams paginationParams, {
+    List<SortOption> sort,
+    PaginationParams paginationParams,
     Map<String, dynamic> messageFilters,
   }) async {
+    assert(() {
+      if (query == null && messageFilters == null) {
+        throw ArgumentError('Provide at least `query` or `messageFilters`');
+      }
+      if (query != null && messageFilters != null) {
+        throw ArgumentError(
+          "Can't provide both `query` and `messageFilters` at the same time",
+        );
+      }
+      return true;
+    }());
+
     final payload = {
       'filter_conditions': filters,
-      if (messageFilters != null) ...{
-        'message_filter_conditions': messageFilters,
-      },
+      'message_filter_conditions': messageFilters,
       'query': query,
       'sort': sort,
-    };
+      if (paginationParams != null) ...paginationParams.toJson(),
+    }.nullProtected;
 
-    if (paginationParams != null) {
-      payload.addAll(paginationParams.toJson());
-    }
+    final response = await get('/search', queryParameters: {
+      'payload': json.encode(payload),
+    });
 
-    final response = await get('/search',
-        queryParameters: {'payload': json.encode(payload)});
     return decode<SearchMessagesResponse>(
         response.data, SearchMessagesResponse.fromJson);
   }

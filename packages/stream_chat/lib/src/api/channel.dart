@@ -514,6 +514,26 @@ class Channel {
     );
   }
 
+  /// A message search.
+  Future<SearchMessagesResponse> search({
+    String query,
+    Map<String, dynamic> messageFilters,
+    List<SortOption> sort,
+    PaginationParams paginationParams,
+  }) {
+    return _client.search(
+      {
+        'cid': {
+          r'$in': [cid],
+        },
+      },
+      sort: sort,
+      query: query,
+      paginationParams: paginationParams,
+      messageFilters: messageFilters,
+    );
+  }
+
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(
     String url, {
