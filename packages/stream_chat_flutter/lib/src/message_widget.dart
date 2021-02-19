@@ -578,9 +578,7 @@ class _MessageWidgetState extends State<MessageWidget>
       if (showUsername)
         Text(
           widget.message.user.name,
-          style: widget.messageTheme.replies.copyWith(
-            color: widget.messageTheme.createdAt.color,
-          ),
+          style: widget.messageTheme.messageAuthor,
         ),
       if (showTimeStamp)
         Text(
