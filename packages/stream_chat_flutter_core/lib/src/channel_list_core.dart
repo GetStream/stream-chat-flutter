@@ -64,7 +64,10 @@ class ChannelListCore extends StatefulWidget {
     this.filter,
     this.options,
     this.sort,
-    this.pagination,
+    this.pagination = const PaginationParams(
+      offset: 0,
+      limit: 25,
+    ),
     this.channelListController,
   })  : assert(errorBuilder != null),
         assert(emptyBuilder != null),
