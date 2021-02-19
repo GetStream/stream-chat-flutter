@@ -273,6 +273,79 @@ void main() {
         verify(mockDio.delete<String>('/channels/messaging/testid/image',
             queryParameters: {'url': url})).called(1);
       });
+
+      test('pinMessage should throw argument error', () {
+        final client = StreamChatClient('api-key');
+
+        final channelClient = client.channel('messaging', id: 'testid');
+
+        final message = Message(text: 'Hello');
+
+        expect(
+          () => channelClient.pinMessage(message, 'InvalidType'),
+          throwsArgumentError,
+        );
+      });
+
+      test('should be pinned successfully', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = StreamChatClient(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
+
+        final channelClient = client.channel('messaging', id: 'testid');
+
+        final message = Message(
+          text: 'Hello',
+          id: 'test',
+        );
+
+        when(mockDio.post<String>(
+          '/messages/${message.id}',
+          data: anything,
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await channelClient.pinMessage(message, 30);
+
+        verify(mockDio.post<String>('/messages/${message.id}', data: anything))
+            .called(1);
+      });
+
+      test('should be unpinned successfully', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = StreamChatClient(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
+
+        final channelClient = client.channel('messaging', id: 'testid');
+
+        final message = Message(
+          text: 'Hello',
+          id: 'test',
+        );
+
+        when(mockDio.post<String>(
+          '/messages/${message.id}',
+          data: anything,
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await channelClient.unpinMessage(message);
+
+        verify(mockDio.post<String>('/messages/${message.id}', data: anything))
+            .called(1);
+      });
     });
 
     test('sendEvent', () async {

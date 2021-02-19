@@ -27,6 +27,13 @@ ChannelState _$ChannelStateFromJson(Map json) {
                 (k, e) => MapEntry(k as String, e),
               )))
         ?.toList(),
+    pinnedMessages: (json['pinned_messages'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Message.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList(),
     watcherCount: json['watcher_count'] as int,
     watchers: (json['watchers'] as List)
         ?.map((e) => e == null
@@ -50,6 +57,8 @@ Map<String, dynamic> _$ChannelStateToJson(ChannelState instance) =>
       'channel': instance.channel?.toJson(),
       'messages': instance.messages?.map((e) => e?.toJson())?.toList(),
       'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'pinned_messages':
+          instance.pinnedMessages?.map((e) => e?.toJson())?.toList(),
       'watcher_count': instance.watcherCount,
       'watchers': instance.watchers?.map((e) => e?.toJson())?.toList(),
       'read': instance.read?.map((e) => e?.toJson())?.toList(),

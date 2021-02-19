@@ -24,6 +24,7 @@ import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
+import 'extensions/map_extension.dart';
 
 /// Handler function used for logging records. Function requires a single [LogRecord]
 /// as the only parameter.
@@ -1021,27 +1022,39 @@ class StreamChatClient {
 
   /// A message search.
   Future<SearchMessagesResponse> search(
-    Map<String, dynamic> filters,
-    List<SortOption> sort,
+    Map<String, dynamic> filters, {
     String query,
-    PaginationParams paginationParams, {
+    List<SortOption> sort,
+    PaginationParams paginationParams,
     Map<String, dynamic> messageFilters,
   }) async {
+    assert(() {
+      if (filters == null || filters.isEmpty) {
+        throw ArgumentError('`filters` cannot be set as null or empty');
+      }
+      if (query == null && messageFilters == null) {
+        throw ArgumentError('Provide at least `query` or `messageFilters`');
+      }
+      if (query != null && messageFilters != null) {
+        throw ArgumentError(
+          "Can't provide both `query` and `messageFilters` at the same time",
+        );
+      }
+      return true;
+    }());
+
     final payload = {
       'filter_conditions': filters,
-      if (messageFilters != null) ...{
-        'message_filter_conditions': messageFilters,
-      },
+      'message_filter_conditions': messageFilters,
       'query': query,
       'sort': sort,
-    };
+      if (paginationParams != null) ...paginationParams.toJson(),
+    }.nullProtected;
 
-    if (paginationParams != null) {
-      payload.addAll(paginationParams.toJson());
-    }
+    final response = await get('/search', queryParameters: {
+      'payload': json.encode(payload),
+    });
 
-    final response = await get('/search',
-        queryParameters: {'payload': json.encode(payload)});
     return decode<SearchMessagesResponse>(
         response.data, SearchMessagesResponse.fromJson);
   }
@@ -1295,7 +1308,7 @@ class StreamChatClient {
   Future<UpdateMessageResponse> updateMessage(Message message) async {
     final response = await post(
       '/messages/${message.id}',
-      data: {'message': message},
+      data: {'message': message.toJson()},
     );
     return decode(response.data, UpdateMessageResponse.fromJson);
   }
@@ -1310,6 +1323,38 @@ class StreamChatClient {
   Future<GetMessageResponse> getMessage(String messageId) async {
     final response = await get('/messages/$messageId');
     return decode(response.data, GetMessageResponse.fromJson);
+  }
+
+  /// Pins provided message
+  Future<UpdateMessageResponse> pinMessage(
+    Message message,
+    Object timeoutOrExpirationDate,
+  ) {
+    assert(() {
+      if (timeoutOrExpirationDate is! DateTime &&
+          timeoutOrExpirationDate is! num &&
+          timeoutOrExpirationDate != null) {
+        throw ArgumentError('Invalid timeout or Expiration date');
+      }
+      return true;
+    }());
+
+    DateTime pinExpires;
+    if (timeoutOrExpirationDate is DateTime) {
+      pinExpires = timeoutOrExpirationDate.toUtc();
+    } else if (timeoutOrExpirationDate is num) {
+      pinExpires = DateTime.now().add(
+        Duration(seconds: timeoutOrExpirationDate.toInt()),
+      );
+    }
+    return updateMessage(
+      message.copyWith(pinned: true, pinExpires: pinExpires),
+    );
+  }
+
+  /// Unpins provided message
+  Future<UpdateMessageResponse> unpinMessage(Message message) {
+    return updateMessage(message.copyWith(pinned: false));
   }
 }
 
