@@ -23,6 +23,13 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
       'size': instance.size,
     };
 
+_$Preparing _$_$PreparingFromJson(Map json) {
+  return _$Preparing();
+}
+
+Map<String, dynamic> _$_$PreparingToJson(_$Preparing instance) =>
+    <String, dynamic>{};
+
 _$InProgress _$_$InProgressFromJson(Map json) {
   return _$InProgress(
     uploaded: json['uploaded'] as int,
