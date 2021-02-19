@@ -822,10 +822,14 @@ class StreamChatClient {
   Future<Response<String>> delete(
     String path, {
     Map<String, dynamic> queryParameters,
+    CancelToken cancelToken,
   }) async {
     try {
-      final response = await httpClient.delete<String>(path,
-          queryParameters: queryParameters);
+      final response = await httpClient.delete<String>(
+        path,
+        queryParameters: queryParameters,
+        cancelToken: cancelToken,
+      );
       return response;
     } on DioError catch (error) {
       throw _parseError(error);
@@ -1072,6 +1076,36 @@ class StreamChatClient {
       channelId,
       channelType,
       onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+  }
+
+  /// Delete a file from this channel
+  Future<EmptyResponse> deleteFile(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken cancelToken,
+  }) {
+    return attachmentFileUploader.deleteFile(
+      url,
+      channelId,
+      channelType,
+      cancelToken: cancelToken,
+    );
+  }
+
+  /// Delete an image from this channel
+  Future<EmptyResponse> deleteImage(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken cancelToken,
+  }) {
+    return attachmentFileUploader.deleteImage(
+      url,
+      channelId,
+      channelType,
       cancelToken: cancelToken,
     );
   }

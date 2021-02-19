@@ -31,6 +31,28 @@ abstract class AttachmentFileUploader {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   });
+
+  /// Deletes a image using its [url] from the given channel.
+  /// Returns [EmptyResponse] once deleted successfully.
+  ///
+  /// Optionally, cancel the request using [cancelToken]
+  Future<EmptyResponse> deleteImage(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken cancelToken,
+  });
+
+  /// Deletes a file using its [url] from the given channel.
+  /// Returns [EmptyResponse] once deleted successfully.
+  ///
+  /// Optionally, cancel the request using [cancelToken]
+  Future<EmptyResponse> deleteFile(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken cancelToken,
+  });
 }
 
 /// Stream's default implementation of [AttachmentFileUploader]
@@ -88,5 +110,35 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
       cancelToken: cancelToken,
     );
     return _client.decode(response.data, SendFileResponse.fromJson);
+  }
+
+  @override
+  Future<EmptyResponse> deleteImage(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken cancelToken,
+  }) async {
+    final response = await _client.delete(
+      '/channels/$channelType/$channelId/image',
+      queryParameters: {'url': url},
+      cancelToken: cancelToken,
+    );
+    return _client.decode(response.data, EmptyResponse.fromJson);
+  }
+
+  @override
+  Future<EmptyResponse> deleteFile(
+    String url,
+    String channelId,
+    String channelType, {
+    CancelToken cancelToken,
+  }) async {
+    final response = await _client.delete(
+      '/channels/$channelType/$channelId/file',
+      queryParameters: {'url': url},
+      cancelToken: cancelToken,
+    );
+    return _client.decode(response.data, EmptyResponse.fromJson);
   }
 }

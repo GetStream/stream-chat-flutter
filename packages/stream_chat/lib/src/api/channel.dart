@@ -480,17 +480,19 @@ class Channel {
   }
 
   /// Delete a file from this channel
-  Future<EmptyResponse> deleteFile(String url) async {
-    final response = await _client
-        .delete('$_channelURL/file', queryParameters: {'url': url});
-    return _client.decode(response.data, EmptyResponse.fromJson);
+  Future<EmptyResponse> deleteFile(
+    String url, {
+    CancelToken cancelToken,
+  }) {
+    return _client.deleteFile(url, id, type, cancelToken: cancelToken);
   }
 
   /// Delete an image from this channel
-  Future<EmptyResponse> deleteImage(String url) async {
-    final response = await _client
-        .delete('$_channelURL/image', queryParameters: {'url': url});
-    return _client.decode(response.data, EmptyResponse.fromJson);
+  Future<EmptyResponse> deleteImage(
+    String url, {
+    CancelToken cancelToken,
+  }) {
+    return _client.deleteImage(url, id, type, cancelToken: cancelToken);
   }
 
   /// Send an event on this channel
