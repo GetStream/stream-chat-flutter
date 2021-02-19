@@ -330,7 +330,7 @@ class Channel {
     state?.addMessage(message);
 
     try {
-      if (message.attachments?.isNotEmpty == true) {
+      if (message.attachments?.any((it) => !it.uploadState.isSuccess) == true) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
@@ -383,7 +383,7 @@ class Channel {
     state?.addMessage(message);
 
     try {
-      if (message.attachments?.isNotEmpty == true) {
+      if (message.attachments?.any((it) => !it.uploadState.isSuccess) == true) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
@@ -449,6 +449,41 @@ class Channel {
     }
   }
 
+  /// Pins provided message
+  Future<UpdateMessageResponse> pinMessage(
+    Message message,
+    Object timeoutOrExpirationDate,
+  ) {
+    assert(() {
+      if (timeoutOrExpirationDate is! DateTime &&
+          timeoutOrExpirationDate is! num &&
+          timeoutOrExpirationDate != null) {
+        throw ArgumentError('Invalid timeout or Expiration date');
+      }
+      return true;
+    }());
+
+    DateTime pinExpires;
+    if (timeoutOrExpirationDate is DateTime) {
+      pinExpires = timeoutOrExpirationDate;
+    } else if (timeoutOrExpirationDate is num) {
+      pinExpires = DateTime.now().add(
+        Duration(seconds: timeoutOrExpirationDate.toInt()),
+      );
+    }
+    return updateMessage(
+      message.copyWith(
+        pinned: true,
+        pinExpires: pinExpires,
+      ),
+    );
+  }
+
+  /// Unpins provided message
+  Future<UpdateMessageResponse> unpinMessage(Message message) {
+    return updateMessage(message.copyWith(pinned: false));
+  }
+
   /// Send a file to this channel
   Future<SendFileResponse> sendFile(
     AttachmentFile file, {
@@ -476,6 +511,26 @@ class Channel {
       type,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
+    );
+  }
+
+  /// A message search.
+  Future<SearchMessagesResponse> search({
+    String query,
+    Map<String, dynamic> messageFilters,
+    List<SortOption> sort,
+    PaginationParams paginationParams,
+  }) {
+    return _client.search(
+      {
+        'cid': {
+          r'$in': [cid],
+        },
+      },
+      sort: sort,
+      query: query,
+      paginationParams: paginationParams,
+      messageFilters: messageFilters,
     );
   }
 

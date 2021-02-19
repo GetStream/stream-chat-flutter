@@ -64,6 +64,10 @@ void main() {
       "reaction_scores": {
           "love": 1
       },
+      "pinned": false,
+      "pinned_at": null,
+      "pin_expires": null,
+      "pinned_by": null,
       "reply_count": 0,
       "created_at": "2020-01-28T22:17:31.107978Z",
       "updated_at": "2020-01-28T22:17:31.130506Z",
@@ -86,6 +90,10 @@ void main() {
       expect(message.createdAt, DateTime.parse("2020-01-28T22:17:31.107978Z"));
       expect(message.updatedAt, DateTime.parse("2020-01-28T22:17:31.130506Z"));
       expect(message.mentionedUsers, isA<List<User>>());
+      expect(message.pinned, false);
+      expect(message.pinnedAt, null);
+      expect(message.pinExpires, null);
+      expect(message.pinnedBy, null);
     });
 
     test('should serialize to json correctly', () {
@@ -143,6 +151,10 @@ void main() {
             "parent_id": "parentId",
             "quoted_message": null,
             "quoted_message_id": null,
+            "pinned": false,
+            "pinned_at": null,
+            "pin_expires": null,
+            "pinned_by": null,
             "show_in_channel": true,
             "hey": "test"
           }
