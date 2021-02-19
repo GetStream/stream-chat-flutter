@@ -247,6 +247,20 @@ class UpdateChannelResponse extends _BaseResponse {
       _$UpdateChannelResponseFromJson(json);
 }
 
+/// Model response for [Channel.updatePartial] api call
+@JsonSerializable(createToJson: false)
+class PartialUpdateChannelResponse extends _BaseResponse {
+  /// Updated channel
+  ChannelModel channel;
+
+  /// Channel members
+  List<Member> members;
+
+  /// Create a new instance from a json
+  static PartialUpdateChannelResponse fromJson(Map<String, dynamic> json) =>
+      _$PartialUpdateChannelResponseFromJson(json);
+}
+
 /// Model response for [Channel.inviteMembers] api call
 @JsonSerializable(createToJson: false)
 class InviteMembersResponse extends _BaseResponse {

@@ -225,6 +225,23 @@ UpdateChannelResponse _$UpdateChannelResponseFromJson(Map json) {
           ));
 }
 
+PartialUpdateChannelResponse _$PartialUpdateChannelResponseFromJson(Map json) {
+  return PartialUpdateChannelResponse()
+    ..duration = json['duration'] as String
+    ..channel = json['channel'] == null
+        ? null
+        : ChannelModel.fromJson((json['channel'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          ))
+    ..members = (json['members'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Member.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList();
+}
+
 InviteMembersResponse _$InviteMembersResponseFromJson(Map json) {
   return InviteMembersResponse()
     ..duration = json['duration'] as String

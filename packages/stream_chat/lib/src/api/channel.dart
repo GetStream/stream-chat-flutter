@@ -635,6 +635,13 @@ class Channel {
     return _client.decode(response.data, UpdateChannelResponse.fromJson);
   }
 
+  /// Edit the channel custom data
+  Future<PartialUpdateChannelResponse> updatePartial(
+      Map<String, dynamic> channelData) async {
+    final response = await _client.patch(_channelURL, data: channelData);
+    return _client.decode(response.data, PartialUpdateChannelResponse.fromJson);
+  }
+
   /// Delete this channel. Messages are permanently removed.
   Future<EmptyResponse> delete() async {
     final response = await _client.delete(_channelURL);
