@@ -938,15 +938,33 @@ void main() {
 
     group('channel', () {
       test('should update channel', () async {
-        final client = StreamChatClient('test');
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = StreamChatClient(
+          'api-key',
+          httpClient: mockDio,
+        );
+
         final channelClient =
             client.channel('type', id: 'id', extraData: {'name': 'init'});
-        await channelClient.updatePartial({
-          'set': {
-            'name': 'demo',
-          }
-        });
-        expect(channelClient.extraData['name'], 'demo');
+
+        var update = {
+          'set': {'name': 'demo'}
+        };
+
+        when(mockDio.patch<String>(
+          '/channels/${channelClient.type}/${channelClient.id}',
+          data: update,
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await channelClient.updatePartial(update);
+        verify(mockDio.patch<String>(
+                '/channels/${channelClient.type}/${channelClient.id}',
+                data: update))
+            .called(1);
       });
     });
   });
