@@ -123,17 +123,19 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final User user;
 
-  ///
+  /// If true the message is pinned
   final bool pinned;
 
-  /// Reserved field indicating when the message was created.
+  /// Reserved field indicating when the message was pinned
   @JsonKey(toJson: Serialization.readOnly)
   final DateTime pinnedAt;
 
-  /// Reserved field indicating when the message was created.
+  /// Reserved field indicating when the message will expire
+  ///
+  /// if `null` message has no expiry
   final DateTime pinExpires;
 
-  ///
+  /// Reserved field indicating who pinned the message
   @JsonKey(toJson: Serialization.readOnly)
   final User pinnedBy;
 
