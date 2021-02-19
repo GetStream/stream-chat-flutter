@@ -132,9 +132,9 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     final client = StreamChatCore.of(context).client;
     return client.search(
       filter,
-      sort,
-      query,
-      pagination,
+      sort: sort,
+      query: query,
+      paginationParams: pagination,
       messageFilters: messageFilter,
     );
   }
