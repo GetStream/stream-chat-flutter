@@ -935,5 +935,19 @@ void main() {
         });
       });
     });
+
+    group('channel', () {
+      test('should update channel', () async {
+        final client = StreamChatClient('test');
+        final channelClient =
+            client.channel('type', id: 'id', extraData: {'name': 'init'});
+        await channelClient.updatePartial({
+          'set': {
+            'name': 'demo',
+          }
+        });
+        expect(channelClient.extraData['name'], 'demo');
+      });
+    });
   });
 }
