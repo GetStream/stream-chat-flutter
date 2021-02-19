@@ -154,7 +154,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               },
             );
           },
-      errorBuilder: widget.emptyBuilder ??
+      errorBuilder: widget.errorBuilder ??
           (BuildContext context, dynamic error) {
             if (error is Error) {
               print((error).stackTrace);
