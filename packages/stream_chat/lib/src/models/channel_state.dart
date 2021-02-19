@@ -20,6 +20,9 @@ class ChannelState {
   /// A paginated list of channel members
   final List<Member> members;
 
+  /// A paginated list of pinned messages
+  final List<Message> pinnedMessages;
+
   /// The count of users watching the channel
   final int watcherCount;
 
@@ -34,6 +37,7 @@ class ChannelState {
     this.channel,
     this.messages = const [],
     this.members = const [],
+    this.pinnedMessages = const [],
     this.watcherCount,
     this.watchers = const [],
     this.read = const [],
@@ -51,6 +55,7 @@ class ChannelState {
     ChannelModel channel,
     List<Message> messages,
     List<Member> members,
+    List<Message> pinnedMessages,
     int watcherCount,
     List<User> watchers,
     List<Read> read,
@@ -59,6 +64,7 @@ class ChannelState {
         channel: channel ?? this.channel,
         messages: messages ?? this.messages,
         members: members ?? this.members,
+        pinnedMessages: pinnedMessages ?? this.pinnedMessages,
         watcherCount: watcherCount ?? this.watcherCount,
         watchers: watchers ?? this.watchers,
         read: read ?? this.read,

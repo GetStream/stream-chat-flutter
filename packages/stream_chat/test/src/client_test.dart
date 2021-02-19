@@ -934,6 +934,56 @@ void main() {
           expect(client.delete('/test'), throwsA(ApiError('test error', 400)));
         });
       });
+
+      group('pin message', () {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = StreamChatClient(
+          'api-key',
+          httpClient: mockDio,
+        );
+
+        test('should throw argument error', () {
+          final message = Message(text: 'Hello');
+          expect(
+            () => client.pinMessage(message, 'InvalidType'),
+            throwsArgumentError,
+          );
+        });
+
+        test('should complete successfully', () async {
+          final timeout = 30;
+          final message = Message(text: 'Hello');
+
+          when(mockDio.post<String>(
+            '/messages/${message.id}',
+            data: anything,
+          )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+          await client.pinMessage(message, timeout);
+
+          verify(mockDio.post<String>('/messages/${message.id}',
+              data: {'message': anything})).called(1);
+        });
+
+        test('should unpin message successfully', () async {
+          final message = Message(text: 'Hello');
+
+          when(mockDio.post<String>(
+            '/messages/${message.id}',
+            data: anything,
+          )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+          await client.unpinMessage(message);
+
+          verify(mockDio.post<String>('/messages/${message.id}',
+                  data: anything))
+              .called(1);
+        });
+      });
     });
   });
 }

@@ -1295,7 +1295,7 @@ class StreamChatClient {
   Future<UpdateMessageResponse> updateMessage(Message message) async {
     final response = await post(
       '/messages/${message.id}',
-      data: {'message': message},
+      data: {'message': message.toJson()},
     );
     return decode(response.data, UpdateMessageResponse.fromJson);
   }
@@ -1310,6 +1310,38 @@ class StreamChatClient {
   Future<GetMessageResponse> getMessage(String messageId) async {
     final response = await get('/messages/$messageId');
     return decode(response.data, GetMessageResponse.fromJson);
+  }
+
+  /// Pins provided message
+  Future<UpdateMessageResponse> pinMessage(
+    Message message,
+    Object timeoutOrExpirationDate,
+  ) {
+    assert(() {
+      if (timeoutOrExpirationDate is! DateTime &&
+          timeoutOrExpirationDate is! num &&
+          timeoutOrExpirationDate != null) {
+        throw ArgumentError('Invalid timeout or Expiration date');
+      }
+      return true;
+    }());
+
+    DateTime pinExpires;
+    if (timeoutOrExpirationDate is DateTime) {
+      pinExpires = timeoutOrExpirationDate.toUtc();
+    } else if (timeoutOrExpirationDate is num) {
+      pinExpires = DateTime.now().add(
+        Duration(seconds: timeoutOrExpirationDate.toInt()),
+      );
+    }
+    return updateMessage(
+      message.copyWith(pinned: true, pinExpires: pinExpires),
+    );
+  }
+
+  /// Unpins provided message
+  Future<UpdateMessageResponse> unpinMessage(Message message) {
+    return updateMessage(message.copyWith(pinned: false));
   }
 }
 

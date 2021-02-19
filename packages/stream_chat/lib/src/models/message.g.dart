@@ -75,6 +75,18 @@ Message _$MessageFromJson(Map json) {
         : User.fromJson((json['user'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
+    pinned: json['pinned'] as bool,
+    pinnedAt: json['pinned_at'] == null
+        ? null
+        : DateTime.parse(json['pinned_at'] as String),
+    pinExpires: json['pin_expires'] == null
+        ? null
+        : DateTime.parse(json['pin_expires'] as String),
+    pinnedBy: json['pinned_by'] == null
+        ? null
+        : User.fromJson((json['pinned_by'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     extraData: (json['extra_data'] as Map)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
@@ -116,6 +128,10 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('user', readonly(instance.user));
+  val['pinned'] = instance.pinned;
+  val['pinned_at'] = readonly(instance.pinnedAt);
+  val['pin_expires'] = instance.pinExpires?.toIso8601String();
+  val['pinned_by'] = readonly(instance.pinnedBy);
   writeNotNull('extra_data', instance.extraData);
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   return val;

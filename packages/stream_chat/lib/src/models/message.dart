@@ -8,6 +8,12 @@ import 'user.dart';
 
 part 'message.g.dart';
 
+class _PinExpires {
+  const _PinExpires();
+}
+
+const _pinExpires = _PinExpires();
+
 /// Enum defining the status of a sending message
 enum MessageSendingStatus {
   /// Message is being sent
@@ -117,6 +123,20 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final User user;
 
+  ///
+  final bool pinned;
+
+  /// Reserved field indicating when the message was created.
+  @JsonKey(toJson: Serialization.readOnly)
+  final DateTime pinnedAt;
+
+  /// Reserved field indicating when the message was created.
+  final DateTime pinExpires;
+
+  ///
+  @JsonKey(toJson: Serialization.readOnly)
+  final User pinnedBy;
+
   /// Message custom extraData
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
@@ -160,6 +180,10 @@ class Message {
     'updated_at',
     'deleted_at',
     'user',
+    'pinned',
+    'pinned_at',
+    'pin_expires',
+    'pinned_by',
   ];
 
   /// Constructor used for json serialization
@@ -185,10 +209,15 @@ class Message {
     this.createdAt,
     this.updatedAt,
     this.user,
+    this.pinned = false,
+    this.pinnedAt,
+    DateTime pinExpires,
+    this.pinnedBy,
     this.extraData,
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
-  }) : id = id ?? Uuid().v4();
+  })  : id = id ?? Uuid().v4(),
+        pinExpires = pinExpires?.toUtc();
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
@@ -222,35 +251,52 @@ class Message {
     DateTime updatedAt,
     DateTime deletedAt,
     User user,
+    bool pinned,
+    DateTime pinnedAt,
+    Object pinExpires = _pinExpires,
+    User pinnedBy,
     Map<String, dynamic> extraData,
     MessageSendingStatus status,
-  }) =>
-      Message(
-        id: id ?? this.id,
-        text: text ?? this.text,
-        type: type ?? this.type,
-        attachments: attachments ?? this.attachments,
-        mentionedUsers: mentionedUsers ?? this.mentionedUsers,
-        reactionCounts: reactionCounts ?? this.reactionCounts,
-        reactionScores: reactionScores ?? this.reactionScores,
-        latestReactions: latestReactions ?? this.latestReactions,
-        ownReactions: ownReactions ?? this.ownReactions,
-        parentId: parentId ?? this.parentId,
-        quotedMessage: quotedMessage ?? this.quotedMessage,
-        quotedMessageId: quotedMessageId ?? this.quotedMessageId,
-        replyCount: replyCount ?? this.replyCount,
-        threadParticipants: threadParticipants ?? this.threadParticipants,
-        showInChannel: showInChannel ?? this.showInChannel,
-        command: command ?? this.command,
-        createdAt: createdAt ?? this.createdAt,
-        silent: silent ?? this.silent,
-        extraData: extraData ?? this.extraData,
-        user: user ?? this.user,
-        shadowed: shadowed ?? this.shadowed,
-        updatedAt: updatedAt ?? this.updatedAt,
-        deletedAt: deletedAt ?? this.deletedAt,
-        status: status ?? this.status,
-      );
+  }) {
+    assert(() {
+      if (pinExpires is! DateTime &&
+          pinExpires != null &&
+          pinExpires is! _PinExpires) {
+        throw ArgumentError('`pinExpires` can only be set as DateTime or null');
+      }
+      return true;
+    }());
+    return Message(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      type: type ?? this.type,
+      attachments: attachments ?? this.attachments,
+      mentionedUsers: mentionedUsers ?? this.mentionedUsers,
+      reactionCounts: reactionCounts ?? this.reactionCounts,
+      reactionScores: reactionScores ?? this.reactionScores,
+      latestReactions: latestReactions ?? this.latestReactions,
+      ownReactions: ownReactions ?? this.ownReactions,
+      parentId: parentId ?? this.parentId,
+      quotedMessage: quotedMessage ?? this.quotedMessage,
+      quotedMessageId: quotedMessageId ?? this.quotedMessageId,
+      replyCount: replyCount ?? this.replyCount,
+      threadParticipants: threadParticipants ?? this.threadParticipants,
+      showInChannel: showInChannel ?? this.showInChannel,
+      command: command ?? this.command,
+      createdAt: createdAt ?? this.createdAt,
+      silent: silent ?? this.silent,
+      extraData: extraData ?? this.extraData,
+      user: user ?? this.user,
+      shadowed: shadowed ?? this.shadowed,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      status: status ?? this.status,
+      pinned: pinned ?? this.pinned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      pinnedBy: pinnedBy ?? this.pinnedBy,
+      pinExpires: pinExpires == _pinExpires ? this.pinExpires : pinExpires,
+    );
+  }
 
   /// Returns a new [Message] that is a combination of this message and the given
   /// [other] message.
@@ -281,6 +327,10 @@ class Message {
       updatedAt: other.updatedAt,
       deletedAt: other.deletedAt,
       status: other.status,
+      pinned: other.pinned,
+      pinnedAt: other.pinnedAt,
+      pinExpires: other.pinExpires,
+      pinnedBy: other.pinnedBy,
     );
   }
 }
