@@ -885,7 +885,7 @@ class _MessageListViewState extends State<MessageListView> {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
-      showUsername: true,
+      showUsername: showUsername,
       showTimestamp: showTimeStamp,
       showSendingIndicator: showSendingIndicator,
       showUserAvatar: showUserAvatar,
