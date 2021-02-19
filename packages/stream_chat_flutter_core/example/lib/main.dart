@@ -120,7 +120,17 @@ class HomeScreen extends StatelessWidget {
                 final _item = channels[index];
                 return ListTile(
                   title: Text(_item.name),
-                  subtitle: Text(_item.state.lastMessage.text),
+                  subtitle: StreamBuilder<Message>(
+                    stream: _item.state.lastMessageStream,
+                    initialData: _item.state.lastMessage,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(snapshot.data.text);
+                      }
+
+                      return SizedBox();
+                    },
+                  ),
                   onTap: () {
                     /// Display a list of messages when the user taps on an item.
                     /// We can use [StreamChannel] to wrap our [MessageScreen] screen
@@ -161,6 +171,7 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   TextEditingController _controller;
   ScrollController _scrollController;
+  final messageListController = MessageListController();
 
   @override
   void initState() {
@@ -191,68 +202,83 @@ class _MessageScreenState extends State<MessageScreen> {
     final channel = StreamChannel.of(context).channel;
     return Scaffold(
       appBar: AppBar(
-        title: Text(channel.name),
+        title: StreamBuilder<List<User>>(
+          initialData: channel.state.typingEvents,
+          stream: channel.state.typingEventsStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data.isNotEmpty) {
+              return Text('${snapshot.data.first.name} is typing...');
+            }
+            return SizedBox();
+          },
+        ),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: MessageListCore(
-                emptyBuilder: (BuildContext context) {
-                  return Center(
-                    child: Text('Nothing here yet'),
-                  );
+              child: LazyLoadScrollView(
+                onEndOfPage: () async {
+                  messageListController.paginateData();
                 },
-                loadingBuilder: (BuildContext context) {
-                  return Center(
-                    child: SizedBox(
-                      height: 100.0,
-                      width: 100.0,
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                },
-                messageListBuilder: (
-                  BuildContext context,
-                  List<Message> messages,
-                ) {
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messages.length,
-                    reverse: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      final item = messages[index];
-                      final client = StreamChatCore.of(context).client;
-                      if (item.user.id == client.uid) {
-                        return Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(item.text),
-                          ),
-                        );
-                      } else {
-                        return Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(item.text),
-                          ),
-                        );
-                      }
-                    },
-                  );
-                },
-                errorWidgetBuilder: (BuildContext context, error) {
-                  print(error?.toString());
-                  return Center(
-                    child: SizedBox(
-                      height: 100.0,
-                      width: 100.0,
-                      child: Text('Oh no, an error occured. Please see logs.'),
-                    ),
-                  );
-                },
+                child: MessageListCore(
+                  emptyBuilder: (BuildContext context) {
+                    return Center(
+                      child: Text('Nothing here yet'),
+                    );
+                  },
+                  loadingBuilder: (BuildContext context) {
+                    return Center(
+                      child: SizedBox(
+                        height: 100.0,
+                        width: 100.0,
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  },
+                  messageListBuilder: (
+                    BuildContext context,
+                    List<Message> messages,
+                  ) {
+                    return ListView.builder(
+                      controller: _scrollController,
+                      itemCount: messages.length,
+                      reverse: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        final item = messages[index];
+                        final client = StreamChatCore.of(context).client;
+                        if (item.user.id == client.uid) {
+                          return Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(item.text),
+                            ),
+                          );
+                        } else {
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(item.text),
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                  errorWidgetBuilder: (BuildContext context, error) {
+                    print(error?.toString());
+                    return Center(
+                      child: SizedBox(
+                        height: 100.0,
+                        width: 100.0,
+                        child:
+                            Text('Oh no, an error occured. Please see logs.'),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             Padding(
