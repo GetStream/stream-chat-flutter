@@ -180,18 +180,25 @@ void main() {
           httpClient: mockDio,
         );
 
+        final filter = {
+          'cid': {
+            r'$in': ['messaging:testId']
+          }
+        };
+
+        final query = 'hello';
+
         final queryParams = {
           'payload': json.encode({
-            "filter_conditions": null,
-            'query': null,
-            'sort': null,
+            'filter_conditions': filter,
+            'query': query,
           }),
         };
 
         when(mockDio.get<String>('/search', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.search(null, null, null, null);
+        await client.search(filter, query: query);
 
         verify(mockDio.get<String>('/search', queryParameters: queryParams))
             .called(1);
@@ -218,10 +225,10 @@ void main() {
 
         final queryParams = {
           'payload': json.encode({
-            "filter_conditions": filters,
+            'filter_conditions': filters,
             'query': query,
             'sort': sortOptions,
-            "limit": 10,
+            'limit': 10,
           }),
         };
 
@@ -230,9 +237,9 @@ void main() {
 
         await client.search(
           filters,
-          sortOptions,
-          query,
-          PaginationParams(),
+          sort: sortOptions,
+          query: query,
+          paginationParams: PaginationParams(),
         );
 
         verify(mockDio.get<String>('/search', queryParameters: queryParams))
@@ -648,7 +655,7 @@ void main() {
 
         when(mockDio.post<String>(
           '/messages/${message.id}',
-          data: {'message': message},
+          data: {'message': anything},
         )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.updateMessage(message);

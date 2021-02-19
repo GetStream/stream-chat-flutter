@@ -1029,6 +1029,9 @@ class StreamChatClient {
     Map<String, dynamic> messageFilters,
   }) async {
     assert(() {
+      if (filters == null || filters.isEmpty) {
+        throw ArgumentError('`filters` cannot be set as null or empty');
+      }
       if (query == null && messageFilters == null) {
         throw ArgumentError('Provide at least `query` or `messageFilters`');
       }
