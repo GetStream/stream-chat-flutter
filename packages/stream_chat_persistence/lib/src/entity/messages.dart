@@ -64,6 +64,18 @@ class Messages extends Table {
   /// Id of the User who sent the message
   TextColumn get userId => text().nullable()();
 
+  /// Whether the message is pinned or not
+  BoolColumn get pinned => boolean().withDefault(const Constant(false))();
+
+  /// The DateTime at which the message was pinned
+  DateTimeColumn get pinnedAt => dateTime().nullable()();
+
+  /// The DateTime on which the message pin expires
+  DateTimeColumn get pinExpires => dateTime().nullable()();
+
+  /// Id of the User who pinned the message
+  TextColumn get pinnedByUserId => text().nullable()();
+
   /// The channel cid of which this message is part of
   TextColumn get channelCid => text().nullable().customConstraint(
       'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE')();

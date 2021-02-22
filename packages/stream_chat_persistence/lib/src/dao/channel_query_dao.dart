@@ -101,12 +101,14 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         final members = await _db.memberDao.getMembersByCid(cid);
         final reads = await _db.readDao.getReadsByCid(cid);
         final messages = await _db.messageDao.getMessagesByCid(cid);
+        final pinnedMessages = await _db.pinnedMessageDao.getMessagesByCid(cid);
 
         return channelEntity.toChannelState(
           createdBy: userEntity?.toUser(),
           members: members,
           reads: reads,
           messages: messages,
+          pinnedMessages: pinnedMessages,
         );
       }).get();
     }));

@@ -56,10 +56,17 @@ abstract class ChatPersistenceClient {
     PaginationParams messagePagination,
   });
 
+  /// Get stored pinned [Message]s by providing channel [cid]
+  Future<List<Message>> getPinnedMessagesByCid(
+    String cid, {
+    PaginationParams messagePagination,
+  });
+
   /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
     String cid, {
     PaginationParams messagePagination,
+    PaginationParams pinnedMessagePagination,
   }) async {
     final members = await getMembersByCid(cid);
     final reads = await getReadsByCid(cid);
@@ -68,10 +75,15 @@ abstract class ChatPersistenceClient {
       cid,
       messagePagination: messagePagination,
     );
+    final pinnedMessages = await getPinnedMessagesByCid(
+      cid,
+      messagePagination: pinnedMessagePagination,
+    );
     return ChannelState(
       members: members,
       read: reads,
       messages: messages,
+      pinnedMessages: pinnedMessages,
       channel: channel,
     );
   }
@@ -101,16 +113,32 @@ abstract class ChatPersistenceClient {
     return deleteMessageByIds([messageId]);
   }
 
+  /// Remove a pinned message by [messageId]
+  Future<void> deletePinnedMessageById(String messageId) {
+    return deletePinnedMessageByIds([messageId]);
+  }
+
   /// Remove a message by [messageIds]
   Future<void> deleteMessageByIds(List<String> messageIds);
+
+  /// Remove a pinned message by [messageIds]
+  Future<void> deletePinnedMessageByIds(List<String> messageIds);
 
   /// Remove a message by channel [cid]
   Future<void> deleteMessageByCid(String cid) {
     return deleteMessageByCids([cid]);
   }
 
+  /// Remove a pinned message by channel [cid]
+  Future<void> deletePinnedMessageByCid(String cid) {
+    return deletePinnedMessageByCids([cid]);
+  }
+
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
+
+  /// Remove a pinned message by message [cids]
+  Future<void> deletePinnedMessageByCids(List<String> cids);
 
   /// Remove a channel by [cid]
   Future<void> deleteChannels(List<String> cids);
@@ -118,6 +146,10 @@ abstract class ChatPersistenceClient {
   /// Updates the message data of a particular channel [cid] with
   /// the new [messages] data
   Future<void> updateMessages(String cid, List<Message> messages);
+
+  /// Updates the pinned message data of a particular channel [cid] with
+  /// the new [messages] data
+  Future<void> updatePinnedMessages(String cid, List<Message> messages);
 
   /// Returns all the threads by parent message of a particular channel by
   /// providing channel [cid]
@@ -204,6 +236,12 @@ abstract class ChatPersistenceClient {
       return updateMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
+    final updatePinnedMessagesFuture = channelStates.map((it) {
+      final cid = it.channel.cid;
+      final messages = it.pinnedMessages.where((it) => it != null);
+      return updatePinnedMessages(cid, messages.toList(growable: false));
+    }).toList(growable: false);
+
     final updateReadsFuture = channelStates.map((it) {
       final cid = it.channel.cid;
       final reads = it.read?.where((it) => it != null) ?? [];
@@ -218,6 +256,7 @@ abstract class ChatPersistenceClient {
 
     await Future.wait([
       ...updateMessagesFuture,
+      ...updatePinnedMessagesFuture,
       ...updateReadsFuture,
       ...updateMembersFuture,
       updateUsers(users.toList(growable: false)),

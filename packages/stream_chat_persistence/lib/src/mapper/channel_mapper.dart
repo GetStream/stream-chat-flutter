@@ -28,11 +28,13 @@ extension ChannelEntityX on ChannelEntity {
     List<Member> members,
     List<Read> reads,
     List<Message> messages,
+    List<Message> pinnedMessages,
   }) {
     return ChannelState(
       members: members,
       read: reads,
       messages: messages,
+      pinnedMessages: pinnedMessages,
       channel: toChannelModel(createdBy: createdBy),
     );
   }

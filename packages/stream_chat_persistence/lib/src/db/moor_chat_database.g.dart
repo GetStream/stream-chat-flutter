@@ -673,6 +673,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   final DateTime updatedAt;
   final DateTime deletedAt;
   final String userId;
+  final bool pinned;
+  final DateTime pinnedAt;
+  final DateTime pinExpires;
+  final String pinnedByUserId;
   final String channelCid;
   final Map<String, Object> extraData;
   MessageEntity(
@@ -694,6 +698,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       this.updatedAt,
       this.deletedAt,
       this.userId,
+      @required this.pinned,
+      this.pinnedAt,
+      this.pinExpires,
+      this.pinnedByUserId,
       this.channelCid,
       this.extraData});
   factory MessageEntity.fromData(
@@ -739,6 +747,14 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      pinned:
+          boolType.mapFromDatabaseResponse(data['${effectivePrefix}pinned']),
+      pinnedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_at']),
+      pinExpires: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}pin_expires']),
+      pinnedByUserId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
       channelCid: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
       extraData: $MessagesTable.$converter5.mapToDart(stringType
@@ -810,6 +826,18 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
     }
+    if (!nullToAbsent || pinned != null) {
+      map['pinned'] = Variable<bool>(pinned);
+    }
+    if (!nullToAbsent || pinnedAt != null) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt);
+    }
+    if (!nullToAbsent || pinExpires != null) {
+      map['pin_expires'] = Variable<DateTime>(pinExpires);
+    }
+    if (!nullToAbsent || pinnedByUserId != null) {
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId);
+    }
     if (!nullToAbsent || channelCid != null) {
       map['channel_cid'] = Variable<String>(channelCid);
     }
@@ -844,6 +872,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime>(json['deletedAt']),
       userId: serializer.fromJson<String>(json['userId']),
+      pinned: serializer.fromJson<bool>(json['pinned']),
+      pinnedAt: serializer.fromJson<DateTime>(json['pinnedAt']),
+      pinExpires: serializer.fromJson<DateTime>(json['pinExpires']),
+      pinnedByUserId: serializer.fromJson<String>(json['pinnedByUserId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
       extraData: serializer.fromJson<Map<String, Object>>(json['extraData']),
     );
@@ -870,6 +902,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime>(deletedAt),
       'userId': serializer.toJson<String>(userId),
+      'pinned': serializer.toJson<bool>(pinned),
+      'pinnedAt': serializer.toJson<DateTime>(pinnedAt),
+      'pinExpires': serializer.toJson<DateTime>(pinExpires),
+      'pinnedByUserId': serializer.toJson<String>(pinnedByUserId),
       'channelCid': serializer.toJson<String>(channelCid),
       'extraData': serializer.toJson<Map<String, Object>>(extraData),
     };
@@ -894,6 +930,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           Value<DateTime> updatedAt = const Value.absent(),
           Value<DateTime> deletedAt = const Value.absent(),
           Value<String> userId = const Value.absent(),
+          bool pinned,
+          Value<DateTime> pinnedAt = const Value.absent(),
+          Value<DateTime> pinExpires = const Value.absent(),
+          Value<String> pinnedByUserId = const Value.absent(),
           Value<String> channelCid = const Value.absent(),
           Value<Map<String, Object>> extraData = const Value.absent()}) =>
       MessageEntity(
@@ -921,6 +961,11 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
         deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         userId: userId.present ? userId.value : this.userId,
+        pinned: pinned ?? this.pinned,
+        pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
+        pinExpires: pinExpires.present ? pinExpires.value : this.pinExpires,
+        pinnedByUserId:
+            pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
         channelCid: channelCid.present ? channelCid.value : this.channelCid,
         extraData: extraData.present ? extraData.value : this.extraData,
       );
@@ -945,6 +990,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('userId: $userId, ')
+          ..write('pinned: $pinned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('pinExpires: $pinExpires, ')
+          ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -993,8 +1042,8 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
                                                                           userId
                                                                               .hashCode,
                                                                           $mrjc(
-                                                                              channelCid.hashCode,
-                                                                              extraData.hashCode))))))))))))))))))));
+                                                                              pinned.hashCode,
+                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, extraData.hashCode))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1017,6 +1066,10 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.userId == this.userId &&
+          other.pinned == this.pinned &&
+          other.pinnedAt == this.pinnedAt &&
+          other.pinExpires == this.pinExpires &&
+          other.pinnedByUserId == this.pinnedByUserId &&
           other.channelCid == this.channelCid &&
           other.extraData == this.extraData);
 }
@@ -1040,6 +1093,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<DateTime> updatedAt;
   final Value<DateTime> deletedAt;
   final Value<String> userId;
+  final Value<bool> pinned;
+  final Value<DateTime> pinnedAt;
+  final Value<DateTime> pinExpires;
+  final Value<String> pinnedByUserId;
   final Value<String> channelCid;
   final Value<Map<String, Object>> extraData;
   const MessagesCompanion({
@@ -1061,6 +1118,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.userId = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.pinExpires = const Value.absent(),
+    this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
   });
@@ -1083,6 +1144,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.userId = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.pinExpires = const Value.absent(),
+    this.pinnedByUserId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
@@ -1106,6 +1171,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Expression<DateTime> updatedAt,
     Expression<DateTime> deletedAt,
     Expression<String> userId,
+    Expression<bool> pinned,
+    Expression<DateTime> pinnedAt,
+    Expression<DateTime> pinExpires,
+    Expression<String> pinnedByUserId,
     Expression<String> channelCid,
     Expression<String> extraData,
   }) {
@@ -1128,6 +1197,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (userId != null) 'user_id': userId,
+      if (pinned != null) 'pinned': pinned,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
+      if (pinExpires != null) 'pin_expires': pinExpires,
+      if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
       if (channelCid != null) 'channel_cid': channelCid,
       if (extraData != null) 'extra_data': extraData,
     });
@@ -1152,6 +1225,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       Value<DateTime> updatedAt,
       Value<DateTime> deletedAt,
       Value<String> userId,
+      Value<bool> pinned,
+      Value<DateTime> pinnedAt,
+      Value<DateTime> pinExpires,
+      Value<String> pinnedByUserId,
       Value<String> channelCid,
       Value<Map<String, Object>> extraData}) {
     return MessagesCompanion(
@@ -1173,6 +1250,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       userId: userId ?? this.userId,
+      pinned: pinned ?? this.pinned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      pinExpires: pinExpires ?? this.pinExpires,
+      pinnedByUserId: pinnedByUserId ?? this.pinnedByUserId,
       channelCid: channelCid ?? this.channelCid,
       extraData: extraData ?? this.extraData,
     );
@@ -1244,6 +1325,18 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
+    if (pinned.present) {
+      map['pinned'] = Variable<bool>(pinned.value);
+    }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
+    }
+    if (pinExpires.present) {
+      map['pin_expires'] = Variable<DateTime>(pinExpires.value);
+    }
+    if (pinnedByUserId.present) {
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId.value);
+    }
     if (channelCid.present) {
       map['channel_cid'] = Variable<String>(channelCid.value);
     }
@@ -1275,6 +1368,10 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('userId: $userId, ')
+          ..write('pinned: $pinned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('pinExpires: $pinExpires, ')
+          ..write('pinnedByUserId: $pinnedByUserId, ')
           ..write('channelCid: $channelCid, ')
           ..write('extraData: $extraData')
           ..write(')'))
@@ -1517,6 +1614,54 @@ class $MessagesTable extends Messages
     );
   }
 
+  final VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
+  GeneratedBoolColumn _pinned;
+  @override
+  GeneratedBoolColumn get pinned => _pinned ??= _constructPinned();
+  GeneratedBoolColumn _constructPinned() {
+    return GeneratedBoolColumn('pinned', $tableName, false,
+        defaultValue: const Constant(false));
+  }
+
+  final VerificationMeta _pinnedAtMeta = const VerificationMeta('pinnedAt');
+  GeneratedDateTimeColumn _pinnedAt;
+  @override
+  GeneratedDateTimeColumn get pinnedAt => _pinnedAt ??= _constructPinnedAt();
+  GeneratedDateTimeColumn _constructPinnedAt() {
+    return GeneratedDateTimeColumn(
+      'pinned_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _pinExpiresMeta = const VerificationMeta('pinExpires');
+  GeneratedDateTimeColumn _pinExpires;
+  @override
+  GeneratedDateTimeColumn get pinExpires =>
+      _pinExpires ??= _constructPinExpires();
+  GeneratedDateTimeColumn _constructPinExpires() {
+    return GeneratedDateTimeColumn(
+      'pin_expires',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _pinnedByUserIdMeta =
+      const VerificationMeta('pinnedByUserId');
+  GeneratedTextColumn _pinnedByUserId;
+  @override
+  GeneratedTextColumn get pinnedByUserId =>
+      _pinnedByUserId ??= _constructPinnedByUserId();
+  GeneratedTextColumn _constructPinnedByUserId() {
+    return GeneratedTextColumn(
+      'pinned_by_user_id',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
   GeneratedTextColumn _channelCid;
   @override
@@ -1559,6 +1704,10 @@ class $MessagesTable extends Messages
         updatedAt,
         deletedAt,
         userId,
+        pinned,
+        pinnedAt,
+        pinExpires,
+        pinnedByUserId,
         channelCid,
         extraData
       ];
@@ -1641,6 +1790,26 @@ class $MessagesTable extends Messages
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
     }
+    if (data.containsKey('pinned')) {
+      context.handle(_pinnedMeta,
+          pinned.isAcceptableOrUnknown(data['pinned'], _pinnedMeta));
+    }
+    if (data.containsKey('pinned_at')) {
+      context.handle(_pinnedAtMeta,
+          pinnedAt.isAcceptableOrUnknown(data['pinned_at'], _pinnedAtMeta));
+    }
+    if (data.containsKey('pin_expires')) {
+      context.handle(
+          _pinExpiresMeta,
+          pinExpires.isAcceptableOrUnknown(
+              data['pin_expires'], _pinExpiresMeta));
+    }
+    if (data.containsKey('pinned_by_user_id')) {
+      context.handle(
+          _pinnedByUserIdMeta,
+          pinnedByUserId.isAcceptableOrUnknown(
+              data['pinned_by_user_id'], _pinnedByUserIdMeta));
+    }
     if (data.containsKey('channel_cid')) {
       context.handle(
           _channelCidMeta,
@@ -1662,6 +1831,1201 @@ class $MessagesTable extends Messages
   @override
   $MessagesTable createAlias(String alias) {
     return $MessagesTable(_db, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converter0 =
+      ListConverter<String>();
+  static TypeConverter<MessageSendingStatus, int> $converter1 =
+      MessageSendingStatusConverter();
+  static TypeConverter<List<String>, String> $converter2 =
+      ListConverter<String>();
+  static TypeConverter<Map<String, int>, String> $converter3 =
+      MapConverter<int>();
+  static TypeConverter<Map<String, int>, String> $converter4 =
+      MapConverter<int>();
+  static TypeConverter<Map<String, Object>, String> $converter5 =
+      MapConverter<Object>();
+}
+
+class PinnedMessageEntity extends DataClass
+    implements Insertable<PinnedMessageEntity> {
+  final String id;
+  final String messageText;
+  final List<String> attachments;
+  final MessageSendingStatus status;
+  final String type;
+  final List<String> mentionedUsers;
+  final Map<String, int> reactionCounts;
+  final Map<String, int> reactionScores;
+  final String parentId;
+  final String quotedMessageId;
+  final int replyCount;
+  final bool showInChannel;
+  final bool shadowed;
+  final String command;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime deletedAt;
+  final String userId;
+  final bool pinned;
+  final DateTime pinnedAt;
+  final DateTime pinExpires;
+  final String pinnedByUserId;
+  final String channelCid;
+  final Map<String, Object> extraData;
+  PinnedMessageEntity(
+      {@required this.id,
+      this.messageText,
+      this.attachments,
+      this.status,
+      this.type,
+      this.mentionedUsers,
+      this.reactionCounts,
+      this.reactionScores,
+      this.parentId,
+      this.quotedMessageId,
+      this.replyCount,
+      this.showInChannel,
+      this.shadowed,
+      this.command,
+      @required this.createdAt,
+      this.updatedAt,
+      this.deletedAt,
+      this.userId,
+      @required this.pinned,
+      this.pinnedAt,
+      this.pinExpires,
+      this.pinnedByUserId,
+      this.channelCid,
+      this.extraData});
+  factory PinnedMessageEntity.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final intType = db.typeSystem.forDartType<int>();
+    final boolType = db.typeSystem.forDartType<bool>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    return PinnedMessageEntity(
+      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      messageText: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
+      attachments: $PinnedMessagesTable.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}attachments'])),
+      status: $PinnedMessagesTable.$converter1.mapToDart(
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
+      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      mentionedUsers: $PinnedMessagesTable.$converter2.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}mentioned_users'])),
+      reactionCounts: $PinnedMessagesTable.$converter3.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}reaction_counts'])),
+      reactionScores: $PinnedMessagesTable.$converter4.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}reaction_scores'])),
+      parentId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
+      quotedMessageId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}quoted_message_id']),
+      replyCount: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
+      showInChannel: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}show_in_channel']),
+      shadowed:
+          boolType.mapFromDatabaseResponse(data['${effectivePrefix}shadowed']),
+      command:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}command']),
+      createdAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      updatedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
+      deletedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      pinned:
+          boolType.mapFromDatabaseResponse(data['${effectivePrefix}pinned']),
+      pinnedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_at']),
+      pinExpires: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}pin_expires']),
+      pinnedByUserId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
+      channelCid: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+      extraData: $PinnedMessagesTable.$converter5.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || messageText != null) {
+      map['message_text'] = Variable<String>(messageText);
+    }
+    if (!nullToAbsent || attachments != null) {
+      final converter = $PinnedMessagesTable.$converter0;
+      map['attachments'] = Variable<String>(converter.mapToSql(attachments));
+    }
+    if (!nullToAbsent || status != null) {
+      final converter = $PinnedMessagesTable.$converter1;
+      map['status'] = Variable<int>(converter.mapToSql(status));
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || mentionedUsers != null) {
+      final converter = $PinnedMessagesTable.$converter2;
+      map['mentioned_users'] =
+          Variable<String>(converter.mapToSql(mentionedUsers));
+    }
+    if (!nullToAbsent || reactionCounts != null) {
+      final converter = $PinnedMessagesTable.$converter3;
+      map['reaction_counts'] =
+          Variable<String>(converter.mapToSql(reactionCounts));
+    }
+    if (!nullToAbsent || reactionScores != null) {
+      final converter = $PinnedMessagesTable.$converter4;
+      map['reaction_scores'] =
+          Variable<String>(converter.mapToSql(reactionScores));
+    }
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
+    if (!nullToAbsent || quotedMessageId != null) {
+      map['quoted_message_id'] = Variable<String>(quotedMessageId);
+    }
+    if (!nullToAbsent || replyCount != null) {
+      map['reply_count'] = Variable<int>(replyCount);
+    }
+    if (!nullToAbsent || showInChannel != null) {
+      map['show_in_channel'] = Variable<bool>(showInChannel);
+    }
+    if (!nullToAbsent || shadowed != null) {
+      map['shadowed'] = Variable<bool>(shadowed);
+    }
+    if (!nullToAbsent || command != null) {
+      map['command'] = Variable<String>(command);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || pinned != null) {
+      map['pinned'] = Variable<bool>(pinned);
+    }
+    if (!nullToAbsent || pinnedAt != null) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt);
+    }
+    if (!nullToAbsent || pinExpires != null) {
+      map['pin_expires'] = Variable<DateTime>(pinExpires);
+    }
+    if (!nullToAbsent || pinnedByUserId != null) {
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId);
+    }
+    if (!nullToAbsent || channelCid != null) {
+      map['channel_cid'] = Variable<String>(channelCid);
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $PinnedMessagesTable.$converter5;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
+    }
+    return map;
+  }
+
+  factory PinnedMessageEntity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return PinnedMessageEntity(
+      id: serializer.fromJson<String>(json['id']),
+      messageText: serializer.fromJson<String>(json['messageText']),
+      attachments: serializer.fromJson<List<String>>(json['attachments']),
+      status: serializer.fromJson<MessageSendingStatus>(json['status']),
+      type: serializer.fromJson<String>(json['type']),
+      mentionedUsers: serializer.fromJson<List<String>>(json['mentionedUsers']),
+      reactionCounts:
+          serializer.fromJson<Map<String, int>>(json['reactionCounts']),
+      reactionScores:
+          serializer.fromJson<Map<String, int>>(json['reactionScores']),
+      parentId: serializer.fromJson<String>(json['parentId']),
+      quotedMessageId: serializer.fromJson<String>(json['quotedMessageId']),
+      replyCount: serializer.fromJson<int>(json['replyCount']),
+      showInChannel: serializer.fromJson<bool>(json['showInChannel']),
+      shadowed: serializer.fromJson<bool>(json['shadowed']),
+      command: serializer.fromJson<String>(json['command']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime>(json['deletedAt']),
+      userId: serializer.fromJson<String>(json['userId']),
+      pinned: serializer.fromJson<bool>(json['pinned']),
+      pinnedAt: serializer.fromJson<DateTime>(json['pinnedAt']),
+      pinExpires: serializer.fromJson<DateTime>(json['pinExpires']),
+      pinnedByUserId: serializer.fromJson<String>(json['pinnedByUserId']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
+      extraData: serializer.fromJson<Map<String, Object>>(json['extraData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'messageText': serializer.toJson<String>(messageText),
+      'attachments': serializer.toJson<List<String>>(attachments),
+      'status': serializer.toJson<MessageSendingStatus>(status),
+      'type': serializer.toJson<String>(type),
+      'mentionedUsers': serializer.toJson<List<String>>(mentionedUsers),
+      'reactionCounts': serializer.toJson<Map<String, int>>(reactionCounts),
+      'reactionScores': serializer.toJson<Map<String, int>>(reactionScores),
+      'parentId': serializer.toJson<String>(parentId),
+      'quotedMessageId': serializer.toJson<String>(quotedMessageId),
+      'replyCount': serializer.toJson<int>(replyCount),
+      'showInChannel': serializer.toJson<bool>(showInChannel),
+      'shadowed': serializer.toJson<bool>(shadowed),
+      'command': serializer.toJson<String>(command),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime>(deletedAt),
+      'userId': serializer.toJson<String>(userId),
+      'pinned': serializer.toJson<bool>(pinned),
+      'pinnedAt': serializer.toJson<DateTime>(pinnedAt),
+      'pinExpires': serializer.toJson<DateTime>(pinExpires),
+      'pinnedByUserId': serializer.toJson<String>(pinnedByUserId),
+      'channelCid': serializer.toJson<String>(channelCid),
+      'extraData': serializer.toJson<Map<String, Object>>(extraData),
+    };
+  }
+
+  PinnedMessageEntity copyWith(
+          {String id,
+          Value<String> messageText = const Value.absent(),
+          Value<List<String>> attachments = const Value.absent(),
+          Value<MessageSendingStatus> status = const Value.absent(),
+          Value<String> type = const Value.absent(),
+          Value<List<String>> mentionedUsers = const Value.absent(),
+          Value<Map<String, int>> reactionCounts = const Value.absent(),
+          Value<Map<String, int>> reactionScores = const Value.absent(),
+          Value<String> parentId = const Value.absent(),
+          Value<String> quotedMessageId = const Value.absent(),
+          Value<int> replyCount = const Value.absent(),
+          Value<bool> showInChannel = const Value.absent(),
+          Value<bool> shadowed = const Value.absent(),
+          Value<String> command = const Value.absent(),
+          DateTime createdAt,
+          Value<DateTime> updatedAt = const Value.absent(),
+          Value<DateTime> deletedAt = const Value.absent(),
+          Value<String> userId = const Value.absent(),
+          bool pinned,
+          Value<DateTime> pinnedAt = const Value.absent(),
+          Value<DateTime> pinExpires = const Value.absent(),
+          Value<String> pinnedByUserId = const Value.absent(),
+          Value<String> channelCid = const Value.absent(),
+          Value<Map<String, Object>> extraData = const Value.absent()}) =>
+      PinnedMessageEntity(
+        id: id ?? this.id,
+        messageText: messageText.present ? messageText.value : this.messageText,
+        attachments: attachments.present ? attachments.value : this.attachments,
+        status: status.present ? status.value : this.status,
+        type: type.present ? type.value : this.type,
+        mentionedUsers:
+            mentionedUsers.present ? mentionedUsers.value : this.mentionedUsers,
+        reactionCounts:
+            reactionCounts.present ? reactionCounts.value : this.reactionCounts,
+        reactionScores:
+            reactionScores.present ? reactionScores.value : this.reactionScores,
+        parentId: parentId.present ? parentId.value : this.parentId,
+        quotedMessageId: quotedMessageId.present
+            ? quotedMessageId.value
+            : this.quotedMessageId,
+        replyCount: replyCount.present ? replyCount.value : this.replyCount,
+        showInChannel:
+            showInChannel.present ? showInChannel.value : this.showInChannel,
+        shadowed: shadowed.present ? shadowed.value : this.shadowed,
+        command: command.present ? command.value : this.command,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        userId: userId.present ? userId.value : this.userId,
+        pinned: pinned ?? this.pinned,
+        pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
+        pinExpires: pinExpires.present ? pinExpires.value : this.pinExpires,
+        pinnedByUserId:
+            pinnedByUserId.present ? pinnedByUserId.value : this.pinnedByUserId,
+        channelCid: channelCid.present ? channelCid.value : this.channelCid,
+        extraData: extraData.present ? extraData.value : this.extraData,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PinnedMessageEntity(')
+          ..write('id: $id, ')
+          ..write('messageText: $messageText, ')
+          ..write('attachments: $attachments, ')
+          ..write('status: $status, ')
+          ..write('type: $type, ')
+          ..write('mentionedUsers: $mentionedUsers, ')
+          ..write('reactionCounts: $reactionCounts, ')
+          ..write('reactionScores: $reactionScores, ')
+          ..write('parentId: $parentId, ')
+          ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('replyCount: $replyCount, ')
+          ..write('showInChannel: $showInChannel, ')
+          ..write('shadowed: $shadowed, ')
+          ..write('command: $command, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('userId: $userId, ')
+          ..write('pinned: $pinned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('pinExpires: $pinExpires, ')
+          ..write('pinnedByUserId: $pinnedByUserId, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          messageText.hashCode,
+          $mrjc(
+              attachments.hashCode,
+              $mrjc(
+                  status.hashCode,
+                  $mrjc(
+                      type.hashCode,
+                      $mrjc(
+                          mentionedUsers.hashCode,
+                          $mrjc(
+                              reactionCounts.hashCode,
+                              $mrjc(
+                                  reactionScores.hashCode,
+                                  $mrjc(
+                                      parentId.hashCode,
+                                      $mrjc(
+                                          quotedMessageId.hashCode,
+                                          $mrjc(
+                                              replyCount.hashCode,
+                                              $mrjc(
+                                                  showInChannel.hashCode,
+                                                  $mrjc(
+                                                      shadowed.hashCode,
+                                                      $mrjc(
+                                                          command.hashCode,
+                                                          $mrjc(
+                                                              createdAt
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  updatedAt
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      deletedAt
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          userId
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              pinned.hashCode,
+                                                                              $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, extraData.hashCode))))))))))))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is PinnedMessageEntity &&
+          other.id == this.id &&
+          other.messageText == this.messageText &&
+          other.attachments == this.attachments &&
+          other.status == this.status &&
+          other.type == this.type &&
+          other.mentionedUsers == this.mentionedUsers &&
+          other.reactionCounts == this.reactionCounts &&
+          other.reactionScores == this.reactionScores &&
+          other.parentId == this.parentId &&
+          other.quotedMessageId == this.quotedMessageId &&
+          other.replyCount == this.replyCount &&
+          other.showInChannel == this.showInChannel &&
+          other.shadowed == this.shadowed &&
+          other.command == this.command &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.userId == this.userId &&
+          other.pinned == this.pinned &&
+          other.pinnedAt == this.pinnedAt &&
+          other.pinExpires == this.pinExpires &&
+          other.pinnedByUserId == this.pinnedByUserId &&
+          other.channelCid == this.channelCid &&
+          other.extraData == this.extraData);
+}
+
+class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
+  final Value<String> id;
+  final Value<String> messageText;
+  final Value<List<String>> attachments;
+  final Value<MessageSendingStatus> status;
+  final Value<String> type;
+  final Value<List<String>> mentionedUsers;
+  final Value<Map<String, int>> reactionCounts;
+  final Value<Map<String, int>> reactionScores;
+  final Value<String> parentId;
+  final Value<String> quotedMessageId;
+  final Value<int> replyCount;
+  final Value<bool> showInChannel;
+  final Value<bool> shadowed;
+  final Value<String> command;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime> deletedAt;
+  final Value<String> userId;
+  final Value<bool> pinned;
+  final Value<DateTime> pinnedAt;
+  final Value<DateTime> pinExpires;
+  final Value<String> pinnedByUserId;
+  final Value<String> channelCid;
+  final Value<Map<String, Object>> extraData;
+  const PinnedMessagesCompanion({
+    this.id = const Value.absent(),
+    this.messageText = const Value.absent(),
+    this.attachments = const Value.absent(),
+    this.status = const Value.absent(),
+    this.type = const Value.absent(),
+    this.mentionedUsers = const Value.absent(),
+    this.reactionCounts = const Value.absent(),
+    this.reactionScores = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.quotedMessageId = const Value.absent(),
+    this.replyCount = const Value.absent(),
+    this.showInChannel = const Value.absent(),
+    this.shadowed = const Value.absent(),
+    this.command = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.pinExpires = const Value.absent(),
+    this.pinnedByUserId = const Value.absent(),
+    this.channelCid = const Value.absent(),
+    this.extraData = const Value.absent(),
+  });
+  PinnedMessagesCompanion.insert({
+    @required String id,
+    this.messageText = const Value.absent(),
+    this.attachments = const Value.absent(),
+    this.status = const Value.absent(),
+    this.type = const Value.absent(),
+    this.mentionedUsers = const Value.absent(),
+    this.reactionCounts = const Value.absent(),
+    this.reactionScores = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.quotedMessageId = const Value.absent(),
+    this.replyCount = const Value.absent(),
+    this.showInChannel = const Value.absent(),
+    this.shadowed = const Value.absent(),
+    this.command = const Value.absent(),
+    @required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.pinned = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.pinExpires = const Value.absent(),
+    this.pinnedByUserId = const Value.absent(),
+    this.channelCid = const Value.absent(),
+    this.extraData = const Value.absent(),
+  })  : id = Value(id),
+        createdAt = Value(createdAt);
+  static Insertable<PinnedMessageEntity> custom({
+    Expression<String> id,
+    Expression<String> messageText,
+    Expression<String> attachments,
+    Expression<int> status,
+    Expression<String> type,
+    Expression<String> mentionedUsers,
+    Expression<String> reactionCounts,
+    Expression<String> reactionScores,
+    Expression<String> parentId,
+    Expression<String> quotedMessageId,
+    Expression<int> replyCount,
+    Expression<bool> showInChannel,
+    Expression<bool> shadowed,
+    Expression<String> command,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> updatedAt,
+    Expression<DateTime> deletedAt,
+    Expression<String> userId,
+    Expression<bool> pinned,
+    Expression<DateTime> pinnedAt,
+    Expression<DateTime> pinExpires,
+    Expression<String> pinnedByUserId,
+    Expression<String> channelCid,
+    Expression<String> extraData,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (messageText != null) 'message_text': messageText,
+      if (attachments != null) 'attachments': attachments,
+      if (status != null) 'status': status,
+      if (type != null) 'type': type,
+      if (mentionedUsers != null) 'mentioned_users': mentionedUsers,
+      if (reactionCounts != null) 'reaction_counts': reactionCounts,
+      if (reactionScores != null) 'reaction_scores': reactionScores,
+      if (parentId != null) 'parent_id': parentId,
+      if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
+      if (replyCount != null) 'reply_count': replyCount,
+      if (showInChannel != null) 'show_in_channel': showInChannel,
+      if (shadowed != null) 'shadowed': shadowed,
+      if (command != null) 'command': command,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (userId != null) 'user_id': userId,
+      if (pinned != null) 'pinned': pinned,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
+      if (pinExpires != null) 'pin_expires': pinExpires,
+      if (pinnedByUserId != null) 'pinned_by_user_id': pinnedByUserId,
+      if (channelCid != null) 'channel_cid': channelCid,
+      if (extraData != null) 'extra_data': extraData,
+    });
+  }
+
+  PinnedMessagesCompanion copyWith(
+      {Value<String> id,
+      Value<String> messageText,
+      Value<List<String>> attachments,
+      Value<MessageSendingStatus> status,
+      Value<String> type,
+      Value<List<String>> mentionedUsers,
+      Value<Map<String, int>> reactionCounts,
+      Value<Map<String, int>> reactionScores,
+      Value<String> parentId,
+      Value<String> quotedMessageId,
+      Value<int> replyCount,
+      Value<bool> showInChannel,
+      Value<bool> shadowed,
+      Value<String> command,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime> deletedAt,
+      Value<String> userId,
+      Value<bool> pinned,
+      Value<DateTime> pinnedAt,
+      Value<DateTime> pinExpires,
+      Value<String> pinnedByUserId,
+      Value<String> channelCid,
+      Value<Map<String, Object>> extraData}) {
+    return PinnedMessagesCompanion(
+      id: id ?? this.id,
+      messageText: messageText ?? this.messageText,
+      attachments: attachments ?? this.attachments,
+      status: status ?? this.status,
+      type: type ?? this.type,
+      mentionedUsers: mentionedUsers ?? this.mentionedUsers,
+      reactionCounts: reactionCounts ?? this.reactionCounts,
+      reactionScores: reactionScores ?? this.reactionScores,
+      parentId: parentId ?? this.parentId,
+      quotedMessageId: quotedMessageId ?? this.quotedMessageId,
+      replyCount: replyCount ?? this.replyCount,
+      showInChannel: showInChannel ?? this.showInChannel,
+      shadowed: shadowed ?? this.shadowed,
+      command: command ?? this.command,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      userId: userId ?? this.userId,
+      pinned: pinned ?? this.pinned,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      pinExpires: pinExpires ?? this.pinExpires,
+      pinnedByUserId: pinnedByUserId ?? this.pinnedByUserId,
+      channelCid: channelCid ?? this.channelCid,
+      extraData: extraData ?? this.extraData,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (messageText.present) {
+      map['message_text'] = Variable<String>(messageText.value);
+    }
+    if (attachments.present) {
+      final converter = $PinnedMessagesTable.$converter0;
+      map['attachments'] =
+          Variable<String>(converter.mapToSql(attachments.value));
+    }
+    if (status.present) {
+      final converter = $PinnedMessagesTable.$converter1;
+      map['status'] = Variable<int>(converter.mapToSql(status.value));
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (mentionedUsers.present) {
+      final converter = $PinnedMessagesTable.$converter2;
+      map['mentioned_users'] =
+          Variable<String>(converter.mapToSql(mentionedUsers.value));
+    }
+    if (reactionCounts.present) {
+      final converter = $PinnedMessagesTable.$converter3;
+      map['reaction_counts'] =
+          Variable<String>(converter.mapToSql(reactionCounts.value));
+    }
+    if (reactionScores.present) {
+      final converter = $PinnedMessagesTable.$converter4;
+      map['reaction_scores'] =
+          Variable<String>(converter.mapToSql(reactionScores.value));
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (quotedMessageId.present) {
+      map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
+    }
+    if (replyCount.present) {
+      map['reply_count'] = Variable<int>(replyCount.value);
+    }
+    if (showInChannel.present) {
+      map['show_in_channel'] = Variable<bool>(showInChannel.value);
+    }
+    if (shadowed.present) {
+      map['shadowed'] = Variable<bool>(shadowed.value);
+    }
+    if (command.present) {
+      map['command'] = Variable<String>(command.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (pinned.present) {
+      map['pinned'] = Variable<bool>(pinned.value);
+    }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<DateTime>(pinnedAt.value);
+    }
+    if (pinExpires.present) {
+      map['pin_expires'] = Variable<DateTime>(pinExpires.value);
+    }
+    if (pinnedByUserId.present) {
+      map['pinned_by_user_id'] = Variable<String>(pinnedByUserId.value);
+    }
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    if (extraData.present) {
+      final converter = $PinnedMessagesTable.$converter5;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinnedMessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('messageText: $messageText, ')
+          ..write('attachments: $attachments, ')
+          ..write('status: $status, ')
+          ..write('type: $type, ')
+          ..write('mentionedUsers: $mentionedUsers, ')
+          ..write('reactionCounts: $reactionCounts, ')
+          ..write('reactionScores: $reactionScores, ')
+          ..write('parentId: $parentId, ')
+          ..write('quotedMessageId: $quotedMessageId, ')
+          ..write('replyCount: $replyCount, ')
+          ..write('showInChannel: $showInChannel, ')
+          ..write('shadowed: $shadowed, ')
+          ..write('command: $command, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('userId: $userId, ')
+          ..write('pinned: $pinned, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('pinExpires: $pinExpires, ')
+          ..write('pinnedByUserId: $pinnedByUserId, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PinnedMessagesTable extends PinnedMessages
+    with TableInfo<$PinnedMessagesTable, PinnedMessageEntity> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $PinnedMessagesTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedTextColumn _id;
+  @override
+  GeneratedTextColumn get id => _id ??= _constructId();
+  GeneratedTextColumn _constructId() {
+    return GeneratedTextColumn(
+      'id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _messageTextMeta =
+      const VerificationMeta('messageText');
+  GeneratedTextColumn _messageText;
+  @override
+  GeneratedTextColumn get messageText =>
+      _messageText ??= _constructMessageText();
+  GeneratedTextColumn _constructMessageText() {
+    return GeneratedTextColumn(
+      'message_text',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _attachmentsMeta =
+      const VerificationMeta('attachments');
+  GeneratedTextColumn _attachments;
+  @override
+  GeneratedTextColumn get attachments =>
+      _attachments ??= _constructAttachments();
+  GeneratedTextColumn _constructAttachments() {
+    return GeneratedTextColumn(
+      'attachments',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _statusMeta = const VerificationMeta('status');
+  GeneratedIntColumn _status;
+  @override
+  GeneratedIntColumn get status => _status ??= _constructStatus();
+  GeneratedIntColumn _constructStatus() {
+    return GeneratedIntColumn(
+      'status',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedTextColumn _type;
+  @override
+  GeneratedTextColumn get type => _type ??= _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _mentionedUsersMeta =
+      const VerificationMeta('mentionedUsers');
+  GeneratedTextColumn _mentionedUsers;
+  @override
+  GeneratedTextColumn get mentionedUsers =>
+      _mentionedUsers ??= _constructMentionedUsers();
+  GeneratedTextColumn _constructMentionedUsers() {
+    return GeneratedTextColumn(
+      'mentioned_users',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _reactionCountsMeta =
+      const VerificationMeta('reactionCounts');
+  GeneratedTextColumn _reactionCounts;
+  @override
+  GeneratedTextColumn get reactionCounts =>
+      _reactionCounts ??= _constructReactionCounts();
+  GeneratedTextColumn _constructReactionCounts() {
+    return GeneratedTextColumn(
+      'reaction_counts',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _reactionScoresMeta =
+      const VerificationMeta('reactionScores');
+  GeneratedTextColumn _reactionScores;
+  @override
+  GeneratedTextColumn get reactionScores =>
+      _reactionScores ??= _constructReactionScores();
+  GeneratedTextColumn _constructReactionScores() {
+    return GeneratedTextColumn(
+      'reaction_scores',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _parentIdMeta = const VerificationMeta('parentId');
+  GeneratedTextColumn _parentId;
+  @override
+  GeneratedTextColumn get parentId => _parentId ??= _constructParentId();
+  GeneratedTextColumn _constructParentId() {
+    return GeneratedTextColumn(
+      'parent_id',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _quotedMessageIdMeta =
+      const VerificationMeta('quotedMessageId');
+  GeneratedTextColumn _quotedMessageId;
+  @override
+  GeneratedTextColumn get quotedMessageId =>
+      _quotedMessageId ??= _constructQuotedMessageId();
+  GeneratedTextColumn _constructQuotedMessageId() {
+    return GeneratedTextColumn(
+      'quoted_message_id',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _replyCountMeta = const VerificationMeta('replyCount');
+  GeneratedIntColumn _replyCount;
+  @override
+  GeneratedIntColumn get replyCount => _replyCount ??= _constructReplyCount();
+  GeneratedIntColumn _constructReplyCount() {
+    return GeneratedIntColumn(
+      'reply_count',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _showInChannelMeta =
+      const VerificationMeta('showInChannel');
+  GeneratedBoolColumn _showInChannel;
+  @override
+  GeneratedBoolColumn get showInChannel =>
+      _showInChannel ??= _constructShowInChannel();
+  GeneratedBoolColumn _constructShowInChannel() {
+    return GeneratedBoolColumn(
+      'show_in_channel',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _shadowedMeta = const VerificationMeta('shadowed');
+  GeneratedBoolColumn _shadowed;
+  @override
+  GeneratedBoolColumn get shadowed => _shadowed ??= _constructShadowed();
+  GeneratedBoolColumn _constructShadowed() {
+    return GeneratedBoolColumn(
+      'shadowed',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _commandMeta = const VerificationMeta('command');
+  GeneratedTextColumn _command;
+  @override
+  GeneratedTextColumn get command => _command ??= _constructCommand();
+  GeneratedTextColumn _constructCommand() {
+    return GeneratedTextColumn(
+      'command',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  GeneratedDateTimeColumn _createdAt;
+  @override
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn(
+      'created_at',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  GeneratedDateTimeColumn _updatedAt;
+  @override
+  GeneratedDateTimeColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
+  GeneratedDateTimeColumn _constructUpdatedAt() {
+    return GeneratedDateTimeColumn(
+      'updated_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
+  GeneratedDateTimeColumn _deletedAt;
+  @override
+  GeneratedDateTimeColumn get deletedAt => _deletedAt ??= _constructDeletedAt();
+  GeneratedDateTimeColumn _constructDeletedAt() {
+    return GeneratedDateTimeColumn(
+      'deleted_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  @override
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn(
+      'user_id',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
+  GeneratedBoolColumn _pinned;
+  @override
+  GeneratedBoolColumn get pinned => _pinned ??= _constructPinned();
+  GeneratedBoolColumn _constructPinned() {
+    return GeneratedBoolColumn('pinned', $tableName, false,
+        defaultValue: const Constant(false));
+  }
+
+  final VerificationMeta _pinnedAtMeta = const VerificationMeta('pinnedAt');
+  GeneratedDateTimeColumn _pinnedAt;
+  @override
+  GeneratedDateTimeColumn get pinnedAt => _pinnedAt ??= _constructPinnedAt();
+  GeneratedDateTimeColumn _constructPinnedAt() {
+    return GeneratedDateTimeColumn(
+      'pinned_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _pinExpiresMeta = const VerificationMeta('pinExpires');
+  GeneratedDateTimeColumn _pinExpires;
+  @override
+  GeneratedDateTimeColumn get pinExpires =>
+      _pinExpires ??= _constructPinExpires();
+  GeneratedDateTimeColumn _constructPinExpires() {
+    return GeneratedDateTimeColumn(
+      'pin_expires',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _pinnedByUserIdMeta =
+      const VerificationMeta('pinnedByUserId');
+  GeneratedTextColumn _pinnedByUserId;
+  @override
+  GeneratedTextColumn get pinnedByUserId =>
+      _pinnedByUserId ??= _constructPinnedByUserId();
+  GeneratedTextColumn _constructPinnedByUserId() {
+    return GeneratedTextColumn(
+      'pinned_by_user_id',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
+  GeneratedTextColumn _channelCid;
+  @override
+  GeneratedTextColumn get channelCid => _channelCid ??= _constructChannelCid();
+  GeneratedTextColumn _constructChannelCid() {
+    return GeneratedTextColumn('channel_cid', $tableName, true,
+        $customConstraints:
+            'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE');
+  }
+
+  final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
+  GeneratedTextColumn _extraData;
+  @override
+  GeneratedTextColumn get extraData => _extraData ??= _constructExtraData();
+  GeneratedTextColumn _constructExtraData() {
+    return GeneratedTextColumn(
+      'extra_data',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        messageText,
+        attachments,
+        status,
+        type,
+        mentionedUsers,
+        reactionCounts,
+        reactionScores,
+        parentId,
+        quotedMessageId,
+        replyCount,
+        showInChannel,
+        shadowed,
+        command,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        userId,
+        pinned,
+        pinnedAt,
+        pinExpires,
+        pinnedByUserId,
+        channelCid,
+        extraData
+      ];
+  @override
+  $PinnedMessagesTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'pinned_messages';
+  @override
+  final String actualTableName = 'pinned_messages';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<PinnedMessageEntity> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('message_text')) {
+      context.handle(
+          _messageTextMeta,
+          messageText.isAcceptableOrUnknown(
+              data['message_text'], _messageTextMeta));
+    }
+    context.handle(_attachmentsMeta, const VerificationResult.success());
+    context.handle(_statusMeta, const VerificationResult.success());
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
+    }
+    context.handle(_mentionedUsersMeta, const VerificationResult.success());
+    context.handle(_reactionCountsMeta, const VerificationResult.success());
+    context.handle(_reactionScoresMeta, const VerificationResult.success());
+    if (data.containsKey('parent_id')) {
+      context.handle(_parentIdMeta,
+          parentId.isAcceptableOrUnknown(data['parent_id'], _parentIdMeta));
+    }
+    if (data.containsKey('quoted_message_id')) {
+      context.handle(
+          _quotedMessageIdMeta,
+          quotedMessageId.isAcceptableOrUnknown(
+              data['quoted_message_id'], _quotedMessageIdMeta));
+    }
+    if (data.containsKey('reply_count')) {
+      context.handle(
+          _replyCountMeta,
+          replyCount.isAcceptableOrUnknown(
+              data['reply_count'], _replyCountMeta));
+    }
+    if (data.containsKey('show_in_channel')) {
+      context.handle(
+          _showInChannelMeta,
+          showInChannel.isAcceptableOrUnknown(
+              data['show_in_channel'], _showInChannelMeta));
+    }
+    if (data.containsKey('shadowed')) {
+      context.handle(_shadowedMeta,
+          shadowed.isAcceptableOrUnknown(data['shadowed'], _shadowedMeta));
+    }
+    if (data.containsKey('command')) {
+      context.handle(_commandMeta,
+          command.isAcceptableOrUnknown(data['command'], _commandMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at'], _deletedAtMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
+    }
+    if (data.containsKey('pinned')) {
+      context.handle(_pinnedMeta,
+          pinned.isAcceptableOrUnknown(data['pinned'], _pinnedMeta));
+    }
+    if (data.containsKey('pinned_at')) {
+      context.handle(_pinnedAtMeta,
+          pinnedAt.isAcceptableOrUnknown(data['pinned_at'], _pinnedAtMeta));
+    }
+    if (data.containsKey('pin_expires')) {
+      context.handle(
+          _pinExpiresMeta,
+          pinExpires.isAcceptableOrUnknown(
+              data['pin_expires'], _pinExpiresMeta));
+    }
+    if (data.containsKey('pinned_by_user_id')) {
+      context.handle(
+          _pinnedByUserIdMeta,
+          pinnedByUserId.isAcceptableOrUnknown(
+              data['pinned_by_user_id'], _pinnedByUserIdMeta));
+    }
+    if (data.containsKey('channel_cid')) {
+      context.handle(
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid'], _channelCidMeta));
+    }
+    context.handle(_extraDataMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PinnedMessageEntity map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return PinnedMessageEntity.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  $PinnedMessagesTable createAlias(String alias) {
+    return $PinnedMessagesTable(_db, alias);
   }
 
   static TypeConverter<List<String>, String> $converter0 =
@@ -3979,6 +5343,9 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
   $ChannelsTable get channels => _channels ??= $ChannelsTable(this);
   $MessagesTable _messages;
   $MessagesTable get messages => _messages ??= $MessagesTable(this);
+  $PinnedMessagesTable _pinnedMessages;
+  $PinnedMessagesTable get pinnedMessages =>
+      _pinnedMessages ??= $PinnedMessagesTable(this);
   $ReactionsTable _reactions;
   $ReactionsTable get reactions => _reactions ??= $ReactionsTable(this);
   $UsersTable _users;
@@ -4001,6 +5368,9 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
   MessageDao _messageDao;
   MessageDao get messageDao =>
       _messageDao ??= MessageDao(this as MoorChatDatabase);
+  PinnedMessageDao _pinnedMessageDao;
+  PinnedMessageDao get pinnedMessageDao =>
+      _pinnedMessageDao ??= PinnedMessageDao(this as MoorChatDatabase);
   MemberDao _memberDao;
   MemberDao get memberDao => _memberDao ??= MemberDao(this as MoorChatDatabase);
   ReactionDao _reactionDao;
@@ -4020,6 +5390,7 @@ abstract class _$MoorChatDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         channels,
         messages,
+        pinnedMessages,
         reactions,
         users,
         members,
