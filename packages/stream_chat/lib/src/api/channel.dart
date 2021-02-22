@@ -1502,6 +1502,13 @@ class ChannelClientState {
   Stream<List<Message>> get messagesStream =>
       channelStateStream.map((cs) => cs.messages);
 
+  /// Channel pinned message list
+  List<Message> get pinnedMessages => _channelState.pinnedMessages;
+
+  /// Channel pinned message list as a stream
+  Stream<List<Message>> get pinnedMessagesStream =>
+      channelStateStream.map((cs) => cs.pinnedMessages);
+
   /// Get channel last message
   Message get lastMessage => _channelState.messages?.isNotEmpty == true
       ? _channelState.messages.last
