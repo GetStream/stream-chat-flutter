@@ -37,11 +37,12 @@ class ChannelState {
     this.channel,
     this.messages = const [],
     this.members = const [],
-    this.pinnedMessages = const [],
     this.watcherCount,
     this.watchers = const [],
     this.read = const [],
-  });
+  }) : pinnedMessages = messages.where((it) {
+          return it.pinned;
+        }).toList(growable: false);
 
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) =>
@@ -55,7 +56,6 @@ class ChannelState {
     ChannelModel channel,
     List<Message> messages,
     List<Member> members,
-    List<Message> pinnedMessages,
     int watcherCount,
     List<User> watchers,
     List<Read> read,
@@ -64,7 +64,6 @@ class ChannelState {
         channel: channel ?? this.channel,
         messages: messages ?? this.messages,
         members: members ?? this.members,
-        pinnedMessages: pinnedMessages ?? this.pinnedMessages,
         watcherCount: watcherCount ?? this.watcherCount,
         watchers: watchers ?? this.watchers,
         read: read ?? this.read,
