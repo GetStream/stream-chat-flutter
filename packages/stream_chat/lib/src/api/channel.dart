@@ -1208,11 +1208,21 @@ class Channel {
   void _startCleaningPinnedMessages() {
     _pinnedMessagesTimer = Timer.periodic(Duration(seconds: 30), (_) {
       final now = DateTime.now();
-      final messageExpired = state.channelState.pinnedMessages
-          .any((m) => m.pinExpires.isBefore(now));
-      if (messageExpired) {
-        state._channelState =
-            state._channelState.copyWith(pinnedMessages: state.pinnedMessages);
+      final expiredMessages = state.channelState.pinnedMessages
+              ?.where((m) => m.pinExpires?.isBefore(now) == true)
+              ?.toList() ??
+          [];
+      if (expiredMessages.isNotEmpty) {
+        expiredMessages.forEach((m) => state.addMessage(m.copyWith(
+              pinExpires: null,
+              pinned: false,
+              pinnedAt: null,
+              pinnedBy: null,
+            )));
+
+        state._channelState = state._channelState.copyWith(
+          pinnedMessages: state.pinnedMessages.where(_pinIsValid()).toList(),
+        );
       }
     });
   }
@@ -1527,12 +1537,11 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs.messages);
 
   /// Channel pinned message list
-  List<Message> get pinnedMessages =>
-      _channelState.pinnedMessages?.where(_pinIsValid())?.toList();
+  List<Message> get pinnedMessages => _channelState.pinnedMessages?.toList();
 
   /// Channel pinned message list as a stream
-  Stream<List<Message>> get pinnedMessagesStream => channelStateStream
-      .map((cs) => cs.pinnedMessages?.where(_pinIsValid())?.toList());
+  Stream<List<Message>> get pinnedMessagesStream =>
+      channelStateStream.map((cs) => cs.pinnedMessages?.toList());
 
   /// Get channel last message
   Message get lastMessage => _channelState.messages?.isNotEmpty == true
