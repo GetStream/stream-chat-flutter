@@ -40,9 +40,6 @@ class Channel {
 
     state = ChannelClientState(this, channelState);
     _initializedCompleter.complete(true);
-    _startCleaning();
-    _startCleaningPinnedMessages();
-
     _client.logger.info('New Channel instance initialized created');
   }
 
@@ -845,8 +842,6 @@ class Channel {
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
     }
-    _startCleaning();
-    _startCleaningPinnedMessages();
   }
 
   /// Stop watching the channel
@@ -1186,51 +1181,8 @@ class Channel {
     ));
   }
 
-  Timer _cleaningTimer;
-  void _startCleaning() {
-    if (config?.typingEvents == false) {
-      return;
-    }
-
-    _cleaningTimer = Timer.periodic(Duration(seconds: 1), (_) {
-      final now = DateTime.now();
-
-      if (_lastTypingEvent != null &&
-          now.difference(_lastTypingEvent).inSeconds > 1) {
-        stopTyping();
-      }
-
-      state._clean();
-    });
-  }
-
-  Timer _pinnedMessagesTimer;
-  void _startCleaningPinnedMessages() {
-    _pinnedMessagesTimer = Timer.periodic(Duration(seconds: 30), (_) {
-      final now = DateTime.now();
-      final expiredMessages = state.channelState.pinnedMessages
-              ?.where((m) => m.pinExpires?.isBefore(now) == true)
-              ?.toList() ??
-          [];
-      if (expiredMessages.isNotEmpty) {
-        expiredMessages.forEach((m) => state.addMessage(m.copyWith(
-              pinExpires: null,
-              pinned: false,
-              pinnedAt: null,
-              pinnedBy: null,
-            )));
-
-        state._channelState = state._channelState.copyWith(
-          pinnedMessages: state.pinnedMessages.where(_pinIsValid()).toList(),
-        );
-      }
-    });
-  }
-
   /// Call this method to dispose the channel client
   void dispose() {
-    _pinnedMessagesTimer.cancel();
-    _cleaningTimer.cancel();
     state.dispose();
   }
 
@@ -1280,6 +1232,10 @@ class ChannelClientState {
     _listenMemberRemoved();
 
     _computeInitialUnread();
+
+    _startCleaning();
+
+    _startCleaningPinnedMessages();
 
     _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid)
@@ -1777,6 +1733,47 @@ class ChannelClientState {
     }));
   }
 
+  Timer _cleaningTimer;
+  void _startCleaning() {
+    if (_channel.config?.typingEvents == false) {
+      return;
+    }
+
+    _cleaningTimer = Timer.periodic(Duration(seconds: 1), (_) {
+      final now = DateTime.now();
+
+      if (_channel._lastTypingEvent != null &&
+          now.difference(_channel._lastTypingEvent).inSeconds > 1) {
+        _channel.stopTyping();
+      }
+
+      _clean();
+    });
+  }
+
+  Timer _pinnedMessagesTimer;
+  void _startCleaningPinnedMessages() {
+    _pinnedMessagesTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      final now = DateTime.now();
+      final expiredMessages = channelState.pinnedMessages
+              ?.where((m) => m.pinExpires?.isBefore(now) == true)
+              ?.toList() ??
+          [];
+      if (expiredMessages.isNotEmpty) {
+        expiredMessages.forEach((m) => addMessage(m.copyWith(
+              pinExpires: null,
+              pinned: false,
+              pinnedAt: null,
+              pinnedBy: null,
+            )));
+
+        _channelState = _channelState.copyWith(
+          pinnedMessages: pinnedMessages.where(_pinIsValid()).toList(),
+        );
+      }
+    });
+  }
+
   void _clean() {
     final now = DateTime.now();
     _typings.forEach((user, lastTypingEvent) {
@@ -1800,6 +1797,8 @@ class ChannelClientState {
     _channelStateController.close();
     _isUpToDateController.close();
     _threadsController.close();
+    _cleaningTimer.cancel();
+    _pinnedMessagesTimer.cancel();
     _typingEventsController.close();
   }
 }
