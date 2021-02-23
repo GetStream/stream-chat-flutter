@@ -41,6 +41,7 @@ class Channel {
     state = ChannelClientState(this, channelState);
     _initializedCompleter.complete(true);
     _startCleaning();
+    _startCleaningPinnedMessages();
 
     _client.logger.info('New Channel instance initialized created');
   }
@@ -845,6 +846,7 @@ class Channel {
       _initializedCompleter.complete(true);
     }
     _startCleaning();
+    _startCleaningPinnedMessages();
   }
 
   /// Stop watching the channel
@@ -1185,13 +1187,12 @@ class Channel {
   }
 
   Timer _cleaningTimer;
-
   void _startCleaning() {
     if (config?.typingEvents == false) {
       return;
     }
 
-    _cleaningTimer = Timer.periodic(Duration(milliseconds: 500), (_) {
+    _cleaningTimer = Timer.periodic(Duration(seconds: 1), (_) {
       final now = DateTime.now();
 
       if (_lastTypingEvent != null &&
@@ -1203,8 +1204,22 @@ class Channel {
     });
   }
 
+  Timer _pinnedMessagesTimer;
+  void _startCleaningPinnedMessages() {
+    _pinnedMessagesTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      final now = DateTime.now();
+      final messageExpired = state.channelState.pinnedMessages
+          .any((m) => m.pinExpires.isBefore(now));
+      if (messageExpired) {
+        state._channelState =
+            state._channelState.copyWith(pinnedMessages: state.pinnedMessages);
+      }
+    });
+  }
+
   /// Call this method to dispose the channel client
   void dispose() {
+    _pinnedMessagesTimer.cancel();
     _cleaningTimer.cancel();
     state.dispose();
   }
@@ -1413,6 +1428,15 @@ class ChannelClientState {
           ..removeWhere((it) => it.userId != userId),
       );
       addMessage(message);
+
+      if (message.pinned == true) {
+        _channelState = _channelState.copyWith(
+          pinnedMessages: [
+            ..._channelState.pinnedMessages ?? [],
+            message,
+          ],
+        );
+      }
     }));
   }
 
@@ -1503,11 +1527,12 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs.messages);
 
   /// Channel pinned message list
-  List<Message> get pinnedMessages => _channelState.pinnedMessages;
+  List<Message> get pinnedMessages =>
+      _channelState.pinnedMessages?.where(_pinIsValid())?.toList();
 
   /// Channel pinned message list as a stream
-  Stream<List<Message>> get pinnedMessagesStream =>
-      channelStateStream.map((cs) => cs.pinnedMessages);
+  Stream<List<Message>> get pinnedMessagesStream => channelStateStream
+      .map((cs) => cs.pinnedMessages?.where(_pinIsValid())?.toList());
 
   /// Get channel last message
   Message get lastMessage => _channelState.messages?.isNotEmpty == true
@@ -1768,4 +1793,9 @@ class ChannelClientState {
     _threadsController.close();
     _typingEventsController.close();
   }
+}
+
+bool Function(Message) _pinIsValid() {
+  final now = DateTime.now();
+  return (Message m) => m.pinExpires.isAfter(now);
 }
