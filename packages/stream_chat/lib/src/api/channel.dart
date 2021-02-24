@@ -1655,6 +1655,7 @@ class ChannelClientState {
       watcherCount: updatedState.watcherCount,
       members: newMembers,
       read: newReads,
+      pinnedMessages: updatedState.pinnedMessages,
     );
   }
 
@@ -1755,21 +1756,24 @@ class ChannelClientState {
   void _startCleaningPinnedMessages() {
     _pinnedMessagesTimer = Timer.periodic(Duration(seconds: 30), (_) {
       final now = DateTime.now();
-      final expiredMessages = channelState.pinnedMessages
+      var expiredMessages = channelState.pinnedMessages
               ?.where((m) => m.pinExpires?.isBefore(now) == true)
               ?.toList() ??
           [];
       if (expiredMessages.isNotEmpty) {
-        expiredMessages.forEach((m) => addMessage(m.copyWith(
-              pinExpires: null,
-              pinned: false,
-              pinnedAt: null,
-              pinnedBy: null,
-            )));
+        expiredMessages = expiredMessages
+            .map((m) => m.copyWith(
+                  pinExpires: null,
+                  pinned: false,
+                  pinnedAt: null,
+                  pinnedBy: null,
+                ))
+            .toList();
 
-        _channelState = _channelState.copyWith(
+        updateChannelState(_channelState.copyWith(
           pinnedMessages: pinnedMessages.where(_pinIsValid()).toList(),
-        );
+          messages: expiredMessages,
+        ));
       }
     });
   }
