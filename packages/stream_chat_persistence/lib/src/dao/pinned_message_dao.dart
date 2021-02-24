@@ -1,19 +1,19 @@
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
-import 'package:stream_chat_persistence/src/entity/messages.dart';
+import 'package:stream_chat_persistence/src/entity/pinned_messages.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 
 import '../mapper/mapper.dart';
 
-part 'message_dao.g.dart';
+part 'pinned_message_dao.g.dart';
 
 /// The Data Access Object for operations in [Messages] table.
-@UseDao(tables: [Messages, Users])
-class MessageDao extends DatabaseAccessor<MoorChatDatabase>
-    with _$MessageDaoMixin {
+@UseDao(tables: [PinnedMessages, Users])
+class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
+    with _$PinnedMessageDaoMixin {
   /// Creates a new message dao instance
-  MessageDao(this._db) : super(_db);
+  PinnedMessageDao(this._db) : super(_db);
 
   final MoorChatDatabase _db;
 
@@ -21,26 +21,28 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
-  /// Removes all the messages by matching [Messages.id] in [messageIds]
+  /// Removes all the messages by matching [PinnedMessages.id] in [messageIds]
   ///
   /// This will automatically delete the following linked records
   /// 1. Message Reactions
   Future<void> deleteMessageByIds(List<String> messageIds) {
-    return (delete(messages)..where((tbl) => tbl.id.isIn(messageIds))).go();
+    return (delete(pinnedMessages)..where((tbl) => tbl.id.isIn(messageIds)))
+        .go();
   }
 
-  /// Removes all the messages by matching [Messages.channelCid] in [cids]
+  /// Removes all the messages by matching [PinnedMessages.channelCid] in [cids]
   ///
   /// This will automatically delete the following linked records
   /// 1. Message Reactions
   Future<void> deleteMessageByCids(List<String> cids) async {
-    return (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
+    return (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids)))
+        .go();
   }
 
   Future<Message> _messageFromJoinRow(TypedResult rows) async {
-    final userEntity = rows.readTable(_users);
+    final userEntity = rows.readTable(users);
     final pinnedByEntity = rows.readTable(_pinnedByUsers);
-    final msgEntity = rows.readTable(messages);
+    final msgEntity = rows.readTable(pinnedMessages);
     final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
     final ownReactions = await _db.reactionDao.getReactionsByUserId(
       msgEntity.id,
@@ -59,46 +61,46 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     );
   }
 
-  /// Returns a single message by matching the [Messages.id] with [id]
+  /// Returns a single message by matching the [PinnedMessages.id] with [id]
   Future<Message> getMessageById(String id) async {
-    return await (select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-          _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+    return await (select(pinnedMessages).join([
+      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      leftOuterJoin(_pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(messages.id.equals(id)))
+          ..where(pinnedMessages.id.equals(id)))
         .map(_messageFromJoinRow)
         .getSingle();
   }
 
   /// Returns all the messages of a particular thread by matching
-  /// [Messages.channelCid] with [cid]
+  /// [PinnedMessages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async {
-    return Future.wait(await (select(messages).join([
-      leftOuterJoin(users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-          _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+    return Future.wait(await (select(pinnedMessages).join([
+      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      leftOuterJoin(_pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(messages.channelCid.equals(cid))
-          ..where(isNotNull(messages.parentId))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+          ..where(pinnedMessages.channelCid.equals(cid))
+          ..where(isNotNull(pinnedMessages.parentId))
+          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
   }
 
   /// Returns all the messages of a particular thread by matching
-  /// [Messages.parentId] with [parentId]
+  /// [PinnedMessages.parentId] with [parentId]
   Future<List<Message>> getThreadMessagesByParentId(
     String parentId, {
     PaginationParams options,
   }) async {
-    final msgList = await Future.wait(await (select(messages).join([
-      innerJoin(_users, messages.userId.equalsExp(_users.id)),
-      innerJoin(
-          _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+    final msgList = await Future.wait(await (select(pinnedMessages).join([
+      innerJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      innerJoin(_pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(messages.parentId.equals(parentId))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+          ..where(pinnedMessages.parentId.equals(parentId))
+          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
 
@@ -110,20 +112,20 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Returns all the messages of a channel by matching
-  /// [Messages.channelCid] with [parentId]
+  /// [PinnedMessages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
     String cid, {
     PaginationParams messagePagination,
   }) async {
-    final msgList = await Future.wait(await (select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-          _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+    final msgList = await Future.wait(await (select(pinnedMessages).join([
+      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      leftOuterJoin(_pinnedByUsers,
+          pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(messages.channelCid.equals(cid))
-          ..where(
-              isNull(messages.parentId) | messages.showInChannel.equals(true))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+          ..where(pinnedMessages.channelCid.equals(cid))
+          ..where(isNull(pinnedMessages.parentId) |
+              pinnedMessages.showInChannel.equals(true))
+          ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
 
@@ -158,8 +160,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
 
     return batch((batch) {
       batch.insertAll(
-        messages,
-        messageList.map((it) => it.toEntity(cid: cid)).toList(),
+        pinnedMessages,
+        messageList.map((it) => it.toPinnedEntity(cid: cid)).toList(),
         mode: InsertMode.insertOrReplace,
       );
     });

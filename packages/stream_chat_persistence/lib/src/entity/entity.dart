@@ -1,5 +1,6 @@
 export 'channels.dart';
 export 'messages.dart';
+export 'pinned_messages.dart';
 export 'reactions.dart';
 export 'users.dart';
 export 'members.dart';

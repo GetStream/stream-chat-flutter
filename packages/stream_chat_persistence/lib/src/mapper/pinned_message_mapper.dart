@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
-/// Useful mapping functions for [MessageEntity]
-extension MessageEntityX on MessageEntity {
-  /// Maps a [MessageEntity] into [Message]
+/// Useful mapping functions for [PinnedMessageEntity]
+extension PinnedMessageEntityX on PinnedMessageEntity {
+  /// Maps a [PinnedMessageEntity] into [Message]
   Message toMessage({
     User user,
     User pinnedBy,
@@ -47,10 +47,10 @@ extension MessageEntityX on MessageEntity {
 }
 
 /// Useful mapping functions for [Message]
-extension MessageX on Message {
-  /// Maps a [Message] into [MessageEntity]
-  MessageEntity toEntity({String cid}) {
-    return MessageEntity(
+extension PMessageX on Message {
+  /// Maps a [Message] into [PinnedMessageEntity]
+  PinnedMessageEntity toPinnedEntity({String cid}) {
+    return PinnedMessageEntity(
       id: id,
       attachments: attachments?.map((it) {
         return jsonEncode(it.toData());
