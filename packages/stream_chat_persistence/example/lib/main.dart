@@ -5,7 +5,10 @@ import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 Future<void> main() async {
   /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
   /// project dashboard.
-  final client = StreamChatClient('b67pax5b2wdq');
+  final client = StreamChatClient(
+    'b67pax5b2wdq',
+    logLevel: Level.INFO,
+  );
 
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -175,6 +178,15 @@ class _MessageViewState extends State<MessageView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        StreamBuilder<List<Message>>(
+          initialData: widget.channel.state.pinnedMessages,
+          stream: widget.channel.state.pinnedMessagesStream,
+          builder: (context, snap) {
+            return Column(
+              children: snap.data?.map((p) => Text(p.text))?.toList() ?? [],
+            );
+          },
+        ),
         Expanded(
           child: ListView.builder(
             controller: _scrollController,
@@ -183,11 +195,17 @@ class _MessageViewState extends State<MessageView> {
             itemBuilder: (BuildContext context, int index) {
               final item = _messages[index];
               if (item.user.id == widget.channel.client.uid) {
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(item.text),
+                return GestureDetector(
+                  onLongPress: () {
+                    print('pinning');
+                    widget.channel.pinMessage(item, 120);
+                  },
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item.text),
+                    ),
                   ),
                 );
               } else {
