@@ -130,6 +130,7 @@ class MessageListView extends StatefulWidget {
     this.emptyBuilder,
     this.messageListBuilder,
     this.errorWidgetBuilder,
+    this.customAttachmentBuilders,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -202,6 +203,10 @@ class MessageListView extends StatefulWidget {
   /// This parameter can be used to display an error message to users in the event
   /// of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
+
+  /// Attachment builders for the default message widget
+  /// Please change this in the [MessageWidget] if you are using a custom implementation
+  final Map<String, AttachmentBuilder> customAttachmentBuilders;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -798,6 +803,7 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
+      customAttachmentBuilders: widget.customAttachmentBuilders,
     );
   }
 
@@ -958,6 +964,7 @@ class _MessageListViewState extends State<MessageListView> {
             break;
         }
       },
+      customAttachmentBuilders: widget.customAttachmentBuilders,
     );
 
     if (!message.isDeleted &&
