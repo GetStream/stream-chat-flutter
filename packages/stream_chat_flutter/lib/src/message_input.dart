@@ -417,19 +417,21 @@ class MessageInputState extends State<MessageInput> {
           ),
           splashRadius: 24,
         ),
-        secondChild: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            if (!widget.disableAttachments) _buildAttachmentButton(),
-            if (widget.editMessage == null &&
-                StreamChannel.of(context)
-                        .channel
-                        ?.config
-                        ?.commands
-                        ?.isNotEmpty ==
-                    true)
-              _buildCommandButton(),
-          ].insertBetween(const SizedBox(width: 8)),
+        secondChild: FittedBox(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if (!widget.disableAttachments) _buildAttachmentButton(),
+              if (widget.editMessage == null &&
+                  StreamChannel.of(context)
+                          .channel
+                          ?.config
+                          ?.commands
+                          ?.isNotEmpty ==
+                      true)
+                _buildCommandButton(),
+            ].insertBetween(const SizedBox(width: 8)),
+          ),
         ),
         duration: Duration(milliseconds: 300),
         alignment: Alignment.center,
