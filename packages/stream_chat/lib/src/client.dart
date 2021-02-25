@@ -10,6 +10,7 @@ import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/own_user.dart';
+import 'package:stream_chat/src/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
@@ -888,9 +889,8 @@ class StreamChatClient {
 
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
-  // TODO: get the right version of the lib from the build toolchain
   String get _userAgent =>
-      'stream-chat-dart-client-${PACKAGE_VERSION.split('+')[0]}';
+      'stream-chat-dart-client-${Platform.name}-${PACKAGE_VERSION.split('+')[0]}';
 
   Map<String, String> get _commonQueryParams => {
         'user_id': state.user?.id,
