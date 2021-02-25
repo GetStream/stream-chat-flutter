@@ -1,4 +1,6 @@
-import 'platform_detector_web.dart' if (dart.library.io) 'src/platform_io.dart';
+import 'platform_detector_stub.dart'
+    if (dart.library.html) 'platform_detector_web.dart'
+    if (dart.library.io) 'platform_detector_io.dart';
 
 enum PlatformType {
   Android,
@@ -10,7 +12,8 @@ enum PlatformType {
   Fuchsia,
 }
 
-abstract class Platform {
+class CurrentPlatform {
+  CurrentPlatform._();
   static bool get isAndroid => currentPlatform == PlatformType.Android;
   static bool get isIos => currentPlatform == PlatformType.Ios;
   static bool get isWeb => currentPlatform == PlatformType.Web;

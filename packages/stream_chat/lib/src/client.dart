@@ -890,7 +890,7 @@ class StreamChatClient {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   String get _userAgent =>
-      'stream-chat-dart-client-${Platform.name}-${PACKAGE_VERSION.split('+')[0]}';
+      'stream-chat-dart-client-${CurrentPlatform.name}-${PACKAGE_VERSION.split('+')[0]}';
 
   Map<String, String> get _commonQueryParams => {
         'user_id': state.user?.id,
