@@ -2008,6 +2008,7 @@ class MessageInputState extends State<MessageInput> {
 
     if (_commandEnabled) {
       text = '/${_chosenCommand.name} ' + text;
+      FocusScope.of(context).unfocus();
     }
 
     final attachments = [..._attachments.values];
