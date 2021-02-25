@@ -392,7 +392,8 @@ class MessageInputState extends State<MessageInput> {
             : CrossFadeState.showSecond,
         firstChild: _buildSendButton(context),
         secondChild: _buildIdleSendButton(context),
-        duration: Duration(milliseconds: 300),
+        duration:
+            StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
         alignment: Alignment.center,
       ),
     );

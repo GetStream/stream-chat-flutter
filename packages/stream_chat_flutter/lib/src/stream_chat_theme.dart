@@ -60,6 +60,9 @@ class StreamChatThemeData {
   /// Theme of other users messages
   final MessageTheme otherMessageTheme;
 
+  /// Theme of other users messages
+  final MessageInputTheme messageInputTheme;
+
   /// The widget that will be built when the channel image is unavailable
   final Widget Function(BuildContext, Channel) defaultChannelImage;
 
@@ -80,6 +83,7 @@ class StreamChatThemeData {
     this.channelTheme,
     this.otherMessageTheme,
     this.ownMessageTheme,
+    this.messageInputTheme,
     this.defaultChannelImage,
     this.defaultUserImage,
     this.primaryIconTheme,
@@ -108,6 +112,7 @@ class StreamChatThemeData {
     ChannelTheme channelTheme,
     MessageTheme ownMessageTheme,
     MessageTheme otherMessageTheme,
+    MessageInputTheme messageInputTheme,
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
@@ -123,6 +128,7 @@ class StreamChatThemeData {
         channelTheme: channelTheme ?? this.channelTheme,
         ownMessageTheme: ownMessageTheme ?? this.ownMessageTheme,
         otherMessageTheme: otherMessageTheme ?? this.otherMessageTheme,
+        messageInputTheme: messageInputTheme ?? this.messageInputTheme,
         reactionIcons: reactionIcons ?? this.reactionIcons,
       );
 
@@ -143,6 +149,8 @@ class StreamChatThemeData {
           other.ownMessageTheme,
       otherMessageTheme: otherMessageTheme?.merge(other.otherMessageTheme) ??
           other.otherMessageTheme,
+      messageInputTheme: messageInputTheme?.merge(other.messageInputTheme) ??
+          other.messageInputTheme,
       reactionIcons: other.reactionIcons,
     );
   }
@@ -247,6 +255,9 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
+      ),
+      messageInputTheme: MessageInputTheme(
+        sendAnimationDuration: Duration(milliseconds: 7000),
       ),
       reactionIcons: [
         ReactionIcon(
@@ -869,6 +880,27 @@ class ChannelHeaderTheme {
           lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       color: other.color,
+    );
+  }
+}
+
+class MessageInputTheme {
+  final Duration sendAnimationDuration;
+
+  const MessageInputTheme({
+    this.sendAnimationDuration,
+  });
+
+  MessageInputTheme copyWith({Duration sendAnimationDuration}) =>
+      MessageInputTheme(
+        sendAnimationDuration:
+            sendAnimationDuration ?? this.sendAnimationDuration,
+      );
+
+  MessageInputTheme merge(MessageInputTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      sendAnimationDuration: other.sendAnimationDuration,
     );
   }
 }
