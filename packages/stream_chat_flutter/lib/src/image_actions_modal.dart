@@ -103,11 +103,20 @@ class ImageActionsModal extends StatelessWidget {
                         color: StreamChatTheme.of(context).colorTheme.accentRed,
                       ),
                       () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        StreamChannel.of(context)
-                            .channel
-                            .deleteMessage(message);
+                        if (message.attachments.length > 1 ||
+                            message.text.isNotEmpty) {
+                          var channel = StreamChannel.of(context).channel;
+                          channel.updateMessage(
+                              message..attachments.removeAt(currentIndex));
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        } else {
+                          var channel = StreamChannel.of(context).channel;
+                          channel.deleteMessage(message).then((value) {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          });
+                        }
                       },
                       color: StreamChatTheme.of(context).colorTheme.accentRed,
                     ),
