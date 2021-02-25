@@ -14,16 +14,16 @@ enum PlatformType {
 
 class CurrentPlatform {
   CurrentPlatform._();
-  static bool get isAndroid => currentPlatform == PlatformType.Android;
-  static bool get isIos => currentPlatform == PlatformType.Ios;
-  static bool get isWeb => currentPlatform == PlatformType.Web;
-  static bool get isMacOS => currentPlatform == PlatformType.MacOS;
-  static bool get isWindows => currentPlatform == PlatformType.Windows;
-  static bool get isLinux => currentPlatform == PlatformType.Linux;
-  static bool get isFuchsia => currentPlatform == PlatformType.Fuchsia;
+  static bool get isAndroid => type == PlatformType.Android;
+  static bool get isIos => type == PlatformType.Ios;
+  static bool get isWeb => type == PlatformType.Web;
+  static bool get isMacOS => type == PlatformType.MacOS;
+  static bool get isWindows => type == PlatformType.Windows;
+  static bool get isLinux => type == PlatformType.Linux;
+  static bool get isFuchsia => type == PlatformType.Fuchsia;
 
   static String get name {
-    switch (currentPlatform) {
+    switch (type) {
       case PlatformType.Android:
         return 'android';
       case PlatformType.Ios:
@@ -43,5 +43,5 @@ class CurrentPlatform {
     }
   }
 
-  PlatformType get type => currentPlatform;
+  static PlatformType get type => currentPlatform;
 }
