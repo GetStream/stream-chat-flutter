@@ -257,7 +257,7 @@ class StreamChatThemeData {
         ),
       ),
       messageInputTheme: MessageInputTheme(
-        sendAnimationDuration: Duration(milliseconds: 7000),
+        sendAnimationDuration: Duration(milliseconds: 300),
       ),
       reactionIcons: [
         ReactionIcon(
