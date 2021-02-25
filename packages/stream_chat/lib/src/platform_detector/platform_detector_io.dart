@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'platform_detector.dart';
 
-//Override default method, to provide .io access
 PlatformType get currentPlatform {
   if (Platform.isWindows) return PlatformType.Windows;
   if (Platform.isFuchsia) return PlatformType.Fuchsia;
