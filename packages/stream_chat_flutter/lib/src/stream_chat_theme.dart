@@ -204,7 +204,7 @@ class StreamChatThemeData {
             color: colorTheme.black.withOpacity(.5),
           ),
         ),
-        inputBackground: colorTheme.white.withAlpha(12),
+        inputBackground: colorTheme.white,
       ),
       ownMessageTheme: MessageTheme(
         messageAuthor: textTheme.footnote.copyWith(color: colorTheme.grey),
