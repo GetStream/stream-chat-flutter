@@ -73,7 +73,7 @@ abstract class ChatPersistenceClient {
       getReadsByCid(cid),
       getChannelByCid(cid),
       getMessagesByCid(cid, messagePagination: messagePagination),
-      getPinnedMessagesByCid(cid,messagePagination: pinnedMessagePagination),
+      getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
     return ChannelState(
       members: data[0],

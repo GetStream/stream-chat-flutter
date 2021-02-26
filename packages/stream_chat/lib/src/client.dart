@@ -491,7 +491,7 @@ class StreamChatClient {
 
       if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        unawaited(_queryChannels(filter: {
+        unawaited(queryChannelsOnline(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
@@ -615,7 +615,7 @@ class StreamChatClient {
       yield await _queryChannelsStreams[hash];
     } else {
       if (true) {
-        final channels = await _queryChannelsOffline(
+        final channels = await queryChannelsOffline(
           filter: filter,
           sort: sort,
           paginationParams: paginationParams,
@@ -623,7 +623,7 @@ class StreamChatClient {
         if (channels.isNotEmpty) yield channels;
       }
 
-      final newQueryChannelsFuture = _queryChannels(
+      final newQueryChannelsFuture = queryChannelsOnline(
         filter: filter,
         sort: sort,
         options: options,
@@ -637,7 +637,8 @@ class StreamChatClient {
     }
   }
 
-  Future<List<Channel>> _queryChannels({
+  /// Requests channels with a given query from the API.
+  Future<List<Channel>> queryChannelsOnline({
     @required Map<String, dynamic> filter,
     List<SortOption<ChannelModel>> sort,
     Map<String, dynamic> options,
@@ -712,7 +713,8 @@ class StreamChatClient {
     return updateData.value;
   }
 
-  Future<List<Channel>> _queryChannelsOffline({
+  /// Requests channels with a given query from the Persistence client.
+  Future<List<Channel>> queryChannelsOffline({
     @required Map<String, dynamic> filter,
     @required List<SortOption<ChannelModel>> sort,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
