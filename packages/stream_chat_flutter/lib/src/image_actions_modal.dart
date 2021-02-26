@@ -109,10 +109,7 @@ class ImageActionsModal extends StatelessWidget {
                           final remainingAttachments = [...message.attachments]
                             ..removeAt(currentIndex);
                           channel.updateMessage(message.copyWith(
-                            attachments: remainingAttachments.map((e) {
-                              return e.copyWith(
-                                  uploadState: UploadState.success());
-                            }).toList(),
+                            attachments: remainingAttachments,
                           ));
                           Navigator.pop(context);
                           Navigator.pop(context);

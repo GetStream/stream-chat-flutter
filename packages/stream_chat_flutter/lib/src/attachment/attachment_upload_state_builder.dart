@@ -27,7 +27,9 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (attachment.uploadState == null) return Offstage();
+    if (message.status == null || message.status == MessageSendingStatus.sent) {
+      return Offstage();
+    }
 
     final messageId = message.id;
     final attachmentId = attachment.id;
