@@ -199,10 +199,7 @@ class StreamChatThemeData {
             ),
           ),
           color: colorTheme.white,
-          title: TextStyle(
-            fontSize: 14,
-            color: colorTheme.black,
-          ),
+          title: textTheme.headlineBold,
           lastMessageAt: TextStyle(
             fontSize: 11,
             color: colorTheme.black.withOpacity(.5),
@@ -257,7 +254,7 @@ class StreamChatThemeData {
         actionButtonIdleColor: colorTheme.grey,
         sendButtonColor: colorTheme.accentBlue,
         sendButtonIdleColor: colorTheme.greyGainsboro,
-        inputBackground: colorTheme.white.withAlpha(12),
+        inputBackground: colorTheme.white,
       ),
       reactionIcons: [
         ReactionIcon(
