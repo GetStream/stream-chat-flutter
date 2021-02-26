@@ -4,7 +4,7 @@ part 'requests.g.dart';
 
 /// Sorting options
 @JsonSerializable(createFactory: false)
-class SortOption {
+class SortOption<T> {
   /// Ascending order
   static const ASC = 1;
 
@@ -17,6 +17,10 @@ class SortOption {
   /// A sorting direction
   final int direction;
 
+  /// Sorting field Comparator required for offline sorting
+  @JsonKey(ignore: true)
+  final Comparator<T> comparator;
+
   /// Creates a new SortOption instance
   ///
   /// For example:
@@ -24,7 +28,11 @@ class SortOption {
   /// // Sort channels by the last message date:
   /// final sorting = SortOption("last_message_at")
   /// ```
-  const SortOption(this.field, {this.direction = DESC});
+  const SortOption(
+    this.field, {
+    this.direction = DESC,
+    this.comparator,
+  });
 
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
@@ -67,7 +75,7 @@ class PaginationParams {
   /// ```
   const PaginationParams({
     this.limit = 10,
-    this.offset,
+    this.offset = 0,
     this.greaterThan,
     this.greaterThanOrEqual,
     this.lessThan,

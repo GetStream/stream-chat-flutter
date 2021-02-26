@@ -10,6 +10,7 @@ import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -86,7 +87,7 @@ void main() {
       });
     });
 
-    group('queryChannels', () {
+    group('queryChannelsOnline', () {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();
 
@@ -106,13 +107,14 @@ void main() {
             "watch": true,
             "presence": false,
             "limit": 10,
+            "offset": 0,
           }),
         };
 
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.queryChannels(waitForConnect: false);
+        await client.queryChannelsOnline(filter: null, waitForConnect: false);
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
@@ -134,7 +136,7 @@ void main() {
             "\$in": ["test"],
           },
         };
-        final sortOptions = <SortOption>[];
+        final sortOptions = <SortOption<ChannelModel>>[];
         final options = {"state": false, "watch": false, "presence": true};
         final paginationParams = PaginationParams(
           limit: 10,
@@ -152,10 +154,10 @@ void main() {
 
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
             .thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          return Response(data: '{"channels":[]}', statusCode: 200);
         });
 
-        await client.queryChannels(
+        await client.queryChannelsOnline(
           filter: queryFilter,
           sort: sortOptions,
           options: options,
@@ -229,6 +231,7 @@ void main() {
             'query': query,
             'sort': sortOptions,
             'limit': 10,
+            'offset': 0,
           }),
         };
 
@@ -346,7 +349,8 @@ void main() {
         };
 
         when(mockDio.get<String>('/users', queryParameters: queryParams))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+            .thenAnswer(
+                (_) async => Response(data: '{"users":[]}', statusCode: 200));
 
         await client.queryUsers();
 
@@ -382,7 +386,7 @@ void main() {
 
         when(mockDio.get<String>('/users', queryParameters: queryParams))
             .thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          return Response(data: '{"users":[]}', statusCode: 200);
         });
 
         await client.queryUsers(

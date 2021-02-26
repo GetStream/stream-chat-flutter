@@ -106,7 +106,7 @@ class ChannelListCore extends StatefulWidget {
   /// Sorting is based on field and direction, multiple sorting options can be provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
   /// Direction can be ascending or descending.
-  final List<SortOption> sort;
+  final List<SortOption<ChannelModel>> sort;
 
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
@@ -118,8 +118,7 @@ class ChannelListCore extends StatefulWidget {
   _ChannelListCoreState createState() => _ChannelListCoreState();
 }
 
-class _ChannelListCoreState extends State<ChannelListCore>
-    with WidgetsBindingObserver {
+class _ChannelListCoreState extends State<ChannelListCore> {
   @override
   Widget build(BuildContext context) {
     final channelsBloc = ChannelsBloc.of(context);
@@ -133,32 +132,19 @@ class _ChannelListCoreState extends State<ChannelListCore>
     return StreamBuilder<List<Channel>>(
       stream: channelsBlocState.channelsStream,
       builder: (context, snapshot) {
-        var child;
         if (snapshot.hasError) {
-          child = _buildErrorWidget(
-            snapshot,
-            context,
-            channelsBlocState,
-          );
-        } else if (!snapshot.hasData) {
-          child = _buildLoadingWidget();
-        } else {
-          final channels = snapshot.data;
-
-          child = widget.emptyBuilder(context);
-
-          if (channels.isNotEmpty) {
-            return widget.listBuilder(context, channels);
-          }
+          return _buildErrorWidget(snapshot, context, channelsBlocState);
         }
-
-        return child;
+        if (!snapshot.hasData) {
+          return widget.loadingBuilder(context);
+        }
+        final channels = snapshot.data;
+        if (channels.isEmpty) {
+          return widget.emptyBuilder(context);
+        }
+        return widget.listBuilder(context, channels);
       },
     );
-  }
-
-  Widget _buildLoadingWidget() {
-    return widget.loadingBuilder(context);
   }
 
   Widget _buildErrorWidget(
@@ -173,10 +159,9 @@ class _ChannelListCoreState extends State<ChannelListCore>
     return widget.errorBuilder(context, snapshot.error);
   }
 
-  void loadData() {
+  Future<void> loadData() {
     final channelsBloc = ChannelsBloc.of(context);
-
-    channelsBloc.queryChannels(
+    return channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination,
@@ -184,10 +169,9 @@ class _ChannelListCoreState extends State<ChannelListCore>
     );
   }
 
-  void paginateData() {
+  Future<void> paginateData() {
     final channelsBloc = ChannelsBloc.of(context);
-
-    channelsBloc.queryChannels(
+    return channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination.copyWith(
@@ -197,39 +181,21 @@ class _ChannelListCoreState extends State<ChannelListCore>
     );
   }
 
-  StreamSubscription _subscription;
+  StreamSubscription<Event> _subscription;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addObserver(this);
-
-    final channelsBloc = ChannelsBloc.of(context);
-    channelsBloc.queryChannels(
-      filter: widget.filter,
-      sortOptions: widget.sort,
-      paginationParams: widget.pagination,
-      options: widget.options,
-    );
-
+    loadData();
     final client = StreamChatCore.of(context).client;
-
     _subscription = client
         .on(
-      EventType.connectionRecovered,
-      EventType.notificationAddedToChannel,
-      EventType.notificationMessageNew,
-      EventType.channelVisible,
-    )
-        .listen((event) {
-      channelsBloc.queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination,
-        options: widget.options,
-      );
-    });
+          EventType.connectionRecovered,
+          EventType.notificationAddedToChannel,
+          EventType.notificationMessageNew,
+          EventType.channelVisible,
+        )
+        .listen((event) => loadData());
 
     if (widget.channelListController != null) {
       widget.channelListController.loadData = loadData;
@@ -246,20 +212,13 @@ class _ChannelListCoreState extends State<ChannelListCore>
         widget.pagination?.toJson()?.toString() !=
             oldWidget.pagination?.toJson()?.toString() ||
         widget.options?.toString() != oldWidget.options?.toString()) {
-      final channelsBloc = ChannelsBloc.of(context);
-      channelsBloc.queryChannels(
-        filter: widget.filter,
-        sortOptions: widget.sort,
-        paginationParams: widget.pagination,
-        options: widget.options,
-      );
+      loadData();
     }
   }
 
   @override
   void dispose() {
     _subscription.cancel();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
@@ -268,10 +227,10 @@ class _ChannelListCoreState extends State<ChannelListCore>
 class ChannelListController {
   /// This function calls Stream's servers to load a list of channels. If there is existing data,
   /// calling this function causes a reload.
-  VoidCallback loadData;
+  AsyncCallback loadData;
 
   /// This function is used to load another page of data. Note, [loadData] should be
   /// used to populate the initial page of data. Calling [paginateData] performs a query
   /// to load subsequent pages.
-  VoidCallback paginateData;
+  AsyncCallback paginateData;
 }

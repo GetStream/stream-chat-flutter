@@ -1245,7 +1245,9 @@ class ChannelClientState {
       _channel._client.chatPersistenceClient
           ?.getChannelStateByCid(_channel.cid)
           ?.then((state) {
-        updateChannelState(state);
+        // Replacing the persistence state members with the latest `channelState.members`
+        // as they may have changes over the time.
+        updateChannelState(state.copyWith(members: channelState.members));
         retryFailedMessages();
       });
     });
