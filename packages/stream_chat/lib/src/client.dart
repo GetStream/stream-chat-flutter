@@ -589,24 +589,6 @@ class StreamChatClient {
     bool preferOffline = false,
     bool waitForConnect = true,
   }) async* {
-    if (waitForConnect) {
-      if (_connectCompleter != null && !_connectCompleter.isCompleted) {
-        logger.info('awaiting connection completer');
-        await _connectCompleter.future;
-      }
-      if (wsConnectionStatus != ConnectionStatus.connected) {
-        final errorMessage =
-            'You cannot use queryChannels without an active connection. Please call `connectUser` to connect the client.';
-        if (persistenceEnabled) {
-          logger.warning(
-              '$errorMessage\nTrying to retrieve channels from the offline storage.');
-          preferOffline = true;
-        } else {
-          throw Exception(errorMessage);
-        }
-      }
-    }
-
     final hash = base64.encode(utf8.encode(
       '$filter${_asMap(sort)}$options${paginationParams?.toJson()}$messageLimit$preferOffline',
     ));
@@ -644,7 +626,21 @@ class StreamChatClient {
     Map<String, dynamic> options,
     int messageLimit,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
+    bool waitForConnect = true,
   }) async {
+    if (waitForConnect) {
+      if (_connectCompleter != null && !_connectCompleter.isCompleted) {
+        logger.info('awaiting connection completer');
+        await _connectCompleter.future;
+      }
+      if (wsConnectionStatus != ConnectionStatus.connected) {
+        throw Exception(
+          'You cannot use queryChannels without an active connection.'
+          ' Please call `connectUser` to connect the client.',
+        );
+      }
+    }
+
     logger.info('Query channel start');
     final defaultOptions = {
       'state': true,
@@ -683,7 +679,7 @@ class StreamChatClient {
       QueryChannelsResponse.fromJson,
     );
 
-    if (res.channels?.isEmpty == true && (paginationParams?.offset ?? 0) == 0) {
+    if ((res.channels ?? []).isEmpty && (paginationParams?.offset ?? 0) == 0) {
       logger.warning('''We could not find any channel for this query.
           Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
           If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''');
