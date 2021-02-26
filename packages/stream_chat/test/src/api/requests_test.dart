@@ -12,7 +12,7 @@ void main() {
     test('PaginationParams', () {
       final option = PaginationParams();
       final j = option.toJson();
-      expect(j, {'limit': 10});
+      expect(j, {'limit': 10, 'offset': 0});
     });
   });
 }
