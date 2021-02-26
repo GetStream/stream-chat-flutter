@@ -227,6 +227,18 @@ class FileAttachment extends AttachmentWidget {
           },
         );
 
+    if (message.status == null || message.status == MessageSendingStatus.sent) {
+      trailingWidget = IconButton(
+        icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
+        padding: const EdgeInsets.all(8),
+        visualDensity: VisualDensity.compact,
+        splashRadius: 16,
+        onPressed: () {
+          launchURL(context, attachment.assetUrl);
+        },
+      );
+    }
+
     return Material(
       type: MaterialType.transparency,
       child: trailingWidget,
