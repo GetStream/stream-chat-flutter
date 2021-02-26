@@ -586,7 +586,7 @@ class StreamChatClient {
     Map<String, dynamic> options,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
     int messageLimit,
-    bool preferOffline = true,
+    bool preferOffline = false,
     bool waitForConnect = true,
   }) async* {
     if (waitForConnect) {
@@ -614,7 +614,7 @@ class StreamChatClient {
     if (_queryChannelsStreams.containsKey(hash)) {
       yield await _queryChannelsStreams[hash];
     } else {
-      if (true) {
+      if (preferOffline) {
         final channels = await queryChannelsOffline(
           filter: filter,
           sort: sort,
