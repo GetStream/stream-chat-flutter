@@ -349,7 +349,8 @@ void main() {
         };
 
         when(mockDio.get<String>('/users', queryParameters: queryParams))
-            .thenAnswer((_) async => Response(data: '{"users":[]}', statusCode: 200));
+            .thenAnswer(
+                (_) async => Response(data: '{"users":[]}', statusCode: 200));
 
         await client.queryUsers();
 
