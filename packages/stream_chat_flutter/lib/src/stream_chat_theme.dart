@@ -195,10 +195,7 @@ class StreamChatThemeData {
             ),
           ),
           color: colorTheme.white,
-          title: TextStyle(
-            fontSize: 14,
-            color: colorTheme.black,
-          ),
+          title: textTheme.headlineBold,
           lastMessageAt: TextStyle(
             fontSize: 11,
             color: colorTheme.black.withOpacity(.5),
