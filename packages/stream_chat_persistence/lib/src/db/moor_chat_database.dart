@@ -25,6 +25,7 @@ LazyDatabase _openConnection(
 @UseMoor(tables: [
   Channels,
   Messages,
+  PinnedMessages,
   Reactions,
   Users,
   Members,
@@ -35,6 +36,7 @@ LazyDatabase _openConnection(
   UserDao,
   ChannelDao,
   MessageDao,
+  PinnedMessageDao,
   MemberDao,
   ReactionDao,
   ReadDao,
@@ -67,7 +69,7 @@ class MoorChatDatabase extends _$MoorChatDatabase {
 
   // you should bump this number whenever you change or add a table definition.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

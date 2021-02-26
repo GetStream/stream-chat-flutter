@@ -15,9 +15,7 @@ part 'channel_query_dao.g.dart';
 class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     with _$ChannelQueryDaoMixin {
   /// Creates a new channel query dao instance
-  ChannelQueryDao(this._db) : super(_db);
-
-  final MoorChatDatabase _db;
+  ChannelQueryDao(MoorChatDatabase db) : super(db);
 
   String _computeHash(Map<String, dynamic> filter) {
     if (filter == null) {
@@ -37,19 +35,19 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   ) async {
     final hash = _computeHash(filter);
     if (clearQueryCache) {
-      await (delete(channelQueries)
-            ..where((query) => query.queryHash.equals(hash)))
-          .go();
+      await batch((it) {
+        it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
+          channelQueries,
+          (c) => c.queryHash.equals(hash),
+        );
+      });
     }
 
-    return batch((batch) {
-      batch.insertAll(
+    return batch((it) {
+      it.insertAll(
         channelQueries,
         cids.map((cid) {
-          return ChannelQueryEntity(
-            queryHash: hash,
-            channelCid: cid,
-          );
+          return ChannelQueryEntity(queryHash: hash, channelCid: cid);
         }).toList(),
         mode: InsertMode.insertOrReplace,
       );
@@ -57,68 +55,74 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Get list of channels by filter, sort and paginationParams
-  Future<List<ChannelState>> getChannelStates({
+  Future<List<ChannelModel>> getChannels({
     Map<String, dynamic> filter,
-    List<SortOption> sort = const [],
+    List<SortOption<ChannelModel>> sort = const [],
     PaginationParams paginationParams,
   }) async {
+    assert(() {
+      if (sort != null && sort.any((it) => it.comparator == null)) {
+        throw ArgumentError(
+          'SortOption requires a comparator in order to sort',
+        );
+      }
+      return true;
+    }());
+
     final hash = _computeHash(filter);
-    final cachedChannels = await Future.wait(await (select(channelQueries)
+    final cachedChannelCids = await (select(channelQueries)
           ..where((c) => c.queryHash.equals(hash)))
-        .get()
-        .then((channelQueries) {
-      final cids = channelQueries.map((c) => c.channelCid).toList();
-      final query = select(channels)..where((c) => c.cid.isIn(cids));
+        .map((c) => c.channelCid)
+        .get();
 
-      sort = sort
-          ?.where((s) => ChannelModel.topLevelFields.contains(s.field))
-          ?.toList();
+    final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
-      if (sort != null && sort.isNotEmpty) {
-        query.orderBy(sort.map((s) {
-          final orderExpression = CustomExpression('channels.${s.field}');
-          return (c) => OrderingTerm(
-                expression: orderExpression,
-                mode: s.direction == 1 ? OrderingMode.asc : OrderingMode.desc,
-              );
-        }).toList());
-      }
+    final cachedChannels = await (query.join([
+      leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
+    ]).map((row) {
+      final createdByEntity = row.readTable(users);
+      final channelEntity = row.readTable(channels);
+      return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
+    })).get();
 
-      if (paginationParams != null) {
-        query.limit(
-          paginationParams.limit ?? 10,
-          offset: paginationParams.offset,
-        );
-      }
+    final possibleSortingFields = cachedChannels.fold<List<String>>(
+        ChannelModel.topLevelFields, (previousValue, element) {
+      return {...previousValue, ...element.extraData.keys}.toList();
+    });
 
-      return query.join([
-        leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
-      ]).map((row) async {
-        final userEntity = row.readTable(users);
-        final channelEntity = row.readTable(channels);
+    sort = sort
+        ?.where((s) => possibleSortingFields.contains(s.field))
+        ?.toList(growable: false);
 
-        final cid = channelEntity.cid;
-        final members = await _db.memberDao.getMembersByCid(cid);
-        final reads = await _db.readDao.getReadsByCid(cid);
-        final messages = await _db.messageDao.getMessagesByCid(cid);
+    Comparator<ChannelModel> chainedComparator = (a, b) {
+      final dateA = a.lastMessageAt ?? a.createdAt;
+      final dateB = b.lastMessageAt ?? b.createdAt;
+      return dateB.compareTo(dateA);
+    };
 
-        return channelEntity.toChannelState(
-          createdBy: userEntity?.toUser(),
-          members: members,
-          reads: reads,
-          messages: messages,
-        );
-      }).get();
-    }));
+    if (sort != null && sort.isNotEmpty) {
+      chainedComparator = (a, b) {
+        int result;
+        for (final comparator in sort.map((it) => it.comparator)) {
+          try {
+            result = comparator(a, b);
+          } catch (e) {
+            result = 0;
+          }
+          if (result != 0) return result;
+        }
+        return 0;
+      };
+    }
 
-    if (sort?.isEmpty != false && cachedChannels?.isNotEmpty == true) {
-      cachedChannels
-          .sort((a, b) => b.channel.updatedAt.compareTo(a.channel.updatedAt));
-      cachedChannels.sort((a, b) {
-        final dateA = a.channel.lastMessageAt ?? a.channel.createdAt;
-        final dateB = b.channel.lastMessageAt ?? b.channel.createdAt;
-        return dateB.compareTo(dateA);
-      });
+    cachedChannels.sort(chainedComparator);
+
+    if (paginationParams?.offset != null) {
+      cachedChannels.removeRange(0, paginationParams.offset);
+    }
+
+    if (paginationParams?.limit != null) {
+      return cachedChannels.take(paginationParams.limit).toList();
     }
 
     return cachedChannels;

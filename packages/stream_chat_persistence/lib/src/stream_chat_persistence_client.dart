@@ -82,8 +82,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deletePinnedMessageByIds(List<String> messageIds) {
+    return _db.pinnedMessageDao.deleteMessageByIds(messageIds);
+  }
+
+  @override
   Future<void> deleteMessageByCids(List<String> cids) {
     return _db.messageDao.deleteMessageByCids(cids);
+  }
+
+  @override
+  Future<void> deletePinnedMessageByCids(List<String> cids) {
+    return _db.pinnedMessageDao.deleteMessageByCids(cids);
   }
 
   @override
@@ -102,6 +112,17 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     PaginationParams messagePagination,
   }) {
     return _db.messageDao.getMessagesByCid(
+      cid,
+      messagePagination: messagePagination,
+    );
+  }
+
+  @override
+  Future<List<Message>> getPinnedMessagesByCid(
+    String cid, {
+    PaginationParams messagePagination,
+  }) {
+    return _db.pinnedMessageDao.getMessagesByCid(
       cid,
       messagePagination: messagePagination,
     );
@@ -140,14 +161,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
-    List<SortOption> sort = const [],
+    List<SortOption<ChannelModel>> sort = const [],
     PaginationParams paginationParams,
-  }) {
-    return _db.channelQueryDao.getChannelStates(
+  }) async {
+    final channels = await _db.channelQueryDao.getChannels(
       filter: filter,
       sort: sort,
       paginationParams: paginationParams,
     );
+    return Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
   }
 
   @override
@@ -176,6 +198,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> updateMessages(String cid, List<Message> messages) {
     return _db.messageDao.updateMessages(cid, messages);
+  }
+
+  @override
+  Future<void> updatePinnedMessages(String cid, List<Message> messages) {
+    return _db.pinnedMessageDao.updateMessages(cid, messages);
   }
 
   @override

@@ -227,6 +227,20 @@ class FileAttachment extends AttachmentWidget {
           },
         );
 
+    if (message != null &&
+        (message.status == null ||
+            message.status == MessageSendingStatus.sent)) {
+      trailingWidget = IconButton(
+        icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
+        padding: const EdgeInsets.all(8),
+        visualDensity: VisualDensity.compact,
+        splashRadius: 16,
+        onPressed: () {
+          launchURL(context, attachment.assetUrl);
+        },
+      );
+    }
+
     return Material(
       type: MaterialType.transparency,
       child: trailingWidget,
@@ -241,6 +255,9 @@ class FileAttachment extends AttachmentWidget {
     );
     return attachment.uploadState?.when(
           preparing: () {
+            if (message == null) {
+              return Text('${fileSize(size, 2)}', style: textStyle);
+            }
             return UploadProgressIndicator(
               uploaded: 0,
               total: double.maxFinite.toInt(),

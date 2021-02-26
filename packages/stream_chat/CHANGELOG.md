@@ -1,3 +1,10 @@
+## 1.3.0-beta
+
+- Save pinned messages in offline storage
+- Minor fixes
+- `StreamClient.QueryChannels` now returns a Stream and fetches the channels from storage before calling the api
+- Added `StreamClient.QueryChannelsOnline` and `StreamClient.QueryChannelsOffline` to fetch channels only from online or offline
+
 ## 1.2.0-beta
 
 - 🛑 **BREAKING** Changed signature of `StreamClient.search` method
