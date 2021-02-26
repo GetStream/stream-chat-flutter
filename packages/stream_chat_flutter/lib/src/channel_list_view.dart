@@ -180,15 +180,13 @@ class _ChannelListViewState extends State<ChannelListView> {
 
     if (widget.pullToRefresh) {
       child = RefreshIndicator(
-        onRefresh: () async => _channelListController.loadData(),
+        onRefresh: () => _channelListController.loadData(),
         child: child,
       );
     }
 
     return LazyLoadScrollView(
-      onEndOfPage: () async {
-        _channelListController.paginateData();
-      },
+      onEndOfPage: () => _channelListController.paginateData(),
       child: child,
     );
   }
@@ -451,9 +449,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             style: Theme.of(context).textTheme.headline6,
           ),
           FlatButton(
-            onPressed: () {
-              _channelListController.loadData();
-            },
+            onPressed: () => _channelListController.loadData(),
             child: Text('Retry'),
           ),
         ],

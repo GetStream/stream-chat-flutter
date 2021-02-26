@@ -159,10 +159,9 @@ class _ChannelListCoreState extends State<ChannelListCore> {
     return widget.errorBuilder(context, snapshot.error);
   }
 
-  void loadData() {
+  Future<void> loadData() {
     final channelsBloc = ChannelsBloc.of(context);
-
-    channelsBloc.queryChannels(
+    return channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination,
@@ -170,10 +169,9 @@ class _ChannelListCoreState extends State<ChannelListCore> {
     );
   }
 
-  void paginateData() {
+  Future<void> paginateData() {
     final channelsBloc = ChannelsBloc.of(context);
-
-    channelsBloc.queryChannels(
+    return channelsBloc.queryChannels(
       filter: widget.filter,
       sortOptions: widget.sort,
       paginationParams: widget.pagination.copyWith(
@@ -229,10 +227,10 @@ class _ChannelListCoreState extends State<ChannelListCore> {
 class ChannelListController {
   /// This function calls Stream's servers to load a list of channels. If there is existing data,
   /// calling this function causes a reload.
-  VoidCallback loadData;
+  AsyncCallback loadData;
 
   /// This function is used to load another page of data. Note, [loadData] should be
   /// used to populate the initial page of data. Calling [paginateData] performs a query
   /// to load subsequent pages.
-  VoidCallback paginateData;
+  AsyncCallback paginateData;
 }
