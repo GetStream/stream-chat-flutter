@@ -99,7 +99,7 @@ class ChannelListView extends StatefulWidget {
   /// Sorting is based on field and direction, multiple sorting options can be provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
   /// Direction can be ascending or descending.
-  final List<SortOption> sort;
+  final List<SortOption<ChannelModel>> sort;
 
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
@@ -159,54 +159,42 @@ class ChannelListView extends StatefulWidget {
   _ChannelListViewState createState() => _ChannelListViewState();
 }
 
-class _ChannelListViewState extends State<ChannelListView>
-    with WidgetsBindingObserver {
-  final ScrollController _scrollController = ScrollController();
-  final SlidableController _slideController = SlidableController();
-  final ChannelListController _channelListController = ChannelListController();
+class _ChannelListViewState extends State<ChannelListView> {
+  final _slideController = SlidableController();
+
+  final _channelListController = ChannelListController();
 
   @override
   Widget build(BuildContext context) {
-    var child = ChannelListCore(
-      channelListController: _channelListController,
-      listBuilder: widget.listBuilder ??
-          (context, list) {
-            return _buildListView(list);
-          },
-      emptyBuilder: widget.emptyBuilder ??
-          (BuildContext context) {
-            return _buildEmptyWidget();
-          },
-      errorBuilder: widget.errorBuilder ??
-          (BuildContext context, dynamic error) {
-            return _buildErrorWidget(context);
-          },
-      loadingBuilder: widget.loadingBuilder ??
-          (BuildContext context) {
-            return _buildLoadingWidget();
-          },
+    Widget child = ChannelListCore(
       pagination: widget.pagination,
       options: widget.options,
       sort: widget.sort,
       filter: widget.filter,
+      channelListController: _channelListController,
+      listBuilder: widget.listBuilder ?? _buildListView,
+      emptyBuilder: widget.emptyBuilder ?? _buildEmptyWidget,
+      errorBuilder: widget.errorBuilder ?? _buildErrorWidget,
+      loadingBuilder: widget.loadingBuilder ?? _buildLoadingWidget,
     );
 
-    if (!widget.pullToRefresh) {
-      return child;
-    } else {
-      return RefreshIndicator(
-        onRefresh: () async {
-          _channelListController.loadData();
-        },
+    if (widget.pullToRefresh) {
+      child = RefreshIndicator(
+        onRefresh: () async => _channelListController.loadData(),
         child: child,
       );
     }
+
+    return LazyLoadScrollView(
+      onEndOfPage: () async {
+        _channelListController.paginateData();
+      },
+      child: child,
+    );
   }
 
-  Widget _buildListView(
-    List<Channel> channels,
-  ) {
-    var child;
+  Widget _buildListView(BuildContext context, List<Channel> channels) {
+    Widget child;
 
     if (channels.isNotEmpty) {
       if (widget.crossAxisCount > 1) {
@@ -216,7 +204,6 @@ class _ChannelListViewState extends State<ChannelListView>
               crossAxisCount: widget.crossAxisCount),
           itemCount: channels.length,
           physics: AlwaysScrollableScrollPhysics(),
-          controller: _scrollController,
           itemBuilder: (context, index) {
             return _gridItemBuilder(context, index, channels);
           },
@@ -236,18 +223,17 @@ class _ChannelListViewState extends State<ChannelListView>
           itemBuilder: (context, index) {
             return _listItemBuilder(context, index, channels);
           },
-          controller: _scrollController,
         );
       }
     }
 
     return AnimatedSwitcher(
       child: child,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
     );
   }
 
-  Widget _buildEmptyWidget() {
+  Widget _buildEmptyWidget(BuildContext context) {
     return LayoutBuilder(
       builder: (context, viewportConstraints) {
         return SingleChildScrollView(
@@ -326,7 +312,7 @@ class _ChannelListViewState extends State<ChannelListView>
     );
   }
 
-  Widget _buildLoadingWidget() {
+  Widget _buildLoadingWidget(BuildContext context) {
     return ListView(
       padding: widget.padding,
       physics: AlwaysScrollableScrollPhysics(),
@@ -341,13 +327,13 @@ class _ChannelListViewState extends State<ChannelListView>
               return _separatorBuilder(context, i);
             }
           }
-          return _buildLoadingItem();
+          return _buildLoadingItem(context);
         },
       ),
     );
   }
 
-  Shimmer _buildLoadingItem() {
+  Shimmer _buildLoadingItem(BuildContext context) {
     if (widget.crossAxisCount > 1) {
       return Shimmer.fromColors(
         baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
@@ -443,9 +429,7 @@ class _ChannelListViewState extends State<ChannelListView>
     }
   }
 
-  Widget _buildErrorWidget(
-    BuildContext context,
-  ) {
+  Widget _buildErrorWidget(BuildContext context, Object error) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -572,23 +556,13 @@ class _ChannelListViewState extends State<ChannelListView>
               ],
               child: Container(
                 color: StreamChatTheme.of(context).colorTheme.whiteSnow,
-                child: widget.channelPreviewBuilder != null
-                    ? widget.channelPreviewBuilder(
-                        context,
-                        channel,
-                      )
-                    : ChannelPreview(
-                        onLongPress: widget.onChannelLongPress,
-                        channel: channel,
-                        onImageTap: widget.onImageTap != null
-                            ? () {
-                                widget.onImageTap(channel);
-                              }
-                            : null,
-                        onTap: (channel) {
-                          onTap(channel, widget.channelWidget);
-                        },
-                      ),
+                child: widget.channelPreviewBuilder?.call(context, channel) ??
+                    ChannelPreview(
+                      onLongPress: widget.onChannelLongPress,
+                      channel: channel,
+                      onImageTap: widget.onImageTap?.call(channel),
+                      onTap: (channel) => onTap(channel, widget.channelWidget),
+                    ),
               ),
             );
           },
@@ -618,9 +592,7 @@ class _ChannelListViewState extends State<ChannelListView>
               width: 64,
               height: 64,
             ),
-            onTap: () {
-              widget.onChannelTap(channel, null);
-            },
+            onTap: () => widget.onChannelTap(channel, null),
           ),
           SizedBox(height: 7),
           Padding(
@@ -679,71 +651,5 @@ class _ChannelListViewState extends State<ChannelListView>
       height: 1,
       color: effect.color.withOpacity(effect.alpha ?? 1.0),
     );
-  }
-
-  void _listenChannelPagination(ChannelsBlocState channelsProvider) {
-    if (_scrollController.position.maxScrollExtent ==
-            _scrollController.offset &&
-        _scrollController.offset != 0) {
-      _channelListController.paginateData();
-    }
-  }
-
-  StreamSubscription _subscription;
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addObserver(this);
-
-    final channelsBloc = ChannelsBloc.of(context);
-    channelsBloc.queryChannels(
-      filter: widget.filter,
-      sortOptions: widget.sort,
-      paginationParams: widget.pagination,
-      options: widget.options,
-    );
-
-    _scrollController.addListener(() {
-      channelsBloc.queryChannelsLoading.first.then((loading) {
-        if (!loading) {
-          _listenChannelPagination(channelsBloc);
-        }
-      });
-    });
-
-    final client = StreamChat.of(context).client;
-
-    _subscription = client
-        .on(
-      EventType.connectionRecovered,
-      EventType.notificationAddedToChannel,
-      EventType.notificationMessageNew,
-      EventType.channelVisible,
-    )
-        .listen((event) {
-      _channelListController.loadData();
-    });
-  }
-
-  @override
-  void didUpdateWidget(ChannelListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.filter?.toString() != oldWidget.filter?.toString() ||
-        jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
-        widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString() ||
-        widget.options?.toString() != oldWidget.options?.toString()) {
-      _channelListController.loadData();
-    }
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 }

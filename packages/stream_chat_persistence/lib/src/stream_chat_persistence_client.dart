@@ -161,14 +161,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
-    List<SortOption> sort = const [],
+    List<SortOption<ChannelModel>> sort = const [],
     PaginationParams paginationParams,
-  }) {
-    return _db.channelQueryDao.getChannelStates(
+  }) async {
+    final channels = await _db.channelQueryDao.getChannels(
       filter: filter,
       sort: sort,
       paginationParams: paginationParams,
     );
+    return Future.wait(channels.map((e) => getChannelStateByCid(e.cid)));
   }
 
   @override

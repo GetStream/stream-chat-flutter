@@ -8,7 +8,7 @@ import 'message.dart';
 
 part 'channel_state.g.dart';
 
-/// The class that contains the information about a command
+/// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelState {
   /// The channel to which this state belongs

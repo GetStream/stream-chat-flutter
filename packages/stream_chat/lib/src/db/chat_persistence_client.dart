@@ -68,23 +68,19 @@ abstract class ChatPersistenceClient {
     PaginationParams messagePagination,
     PaginationParams pinnedMessagePagination,
   }) async {
-    final members = await getMembersByCid(cid);
-    final reads = await getReadsByCid(cid);
-    final channel = await getChannelByCid(cid);
-    final messages = await getMessagesByCid(
-      cid,
-      messagePagination: messagePagination,
-    );
-    final pinnedMessages = await getPinnedMessagesByCid(
-      cid,
-      messagePagination: pinnedMessagePagination,
-    );
+    final data = await Future.wait([
+      getMembersByCid(cid),
+      getReadsByCid(cid),
+      getChannelByCid(cid),
+      getMessagesByCid(cid, messagePagination: messagePagination),
+      getPinnedMessagesByCid(cid,messagePagination: pinnedMessagePagination),
+    ]);
     return ChannelState(
-      members: members,
-      read: reads,
-      messages: messages,
-      pinnedMessages: pinnedMessages,
-      channel: channel,
+      members: data[0],
+      read: data[1],
+      channel: data[2],
+      messages: data[3],
+      pinnedMessages: data[4],
     );
   }
 
@@ -94,7 +90,7 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
-    List<SortOption> sort = const [],
+    List<SortOption<ChannelModel>> sort = const [],
     PaginationParams paginationParams,
   });
 
