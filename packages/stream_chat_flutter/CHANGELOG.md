@@ -1,7 +1,16 @@
+## 1.3.0-beta
+
+- Added `MessageInputTheme`
+- Fixed overflow in `MessageInput` animation
+- Delete only image on imagegallery
+- Close keyboard after sending a command
+- Exposed `customAttachmentBuilders` through `MessageListView`
+- Update `stream_chat_core` dependency
+
 ## 1.2.0-beta
 
 - Minor fixes
-- Update stream_chat_core dependency
+- Update `stream_chat_core` dependency
 
 ## 1.1.1-beta
 
