@@ -235,7 +235,7 @@ class MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     Widget child = Container(
-      color: StreamChatTheme.of(context).channelTheme.inputBackground,
+      color: StreamChatTheme.of(context).messageInputTheme.inputBackground,
       child: SafeArea(
         child: GestureDetector(
           onPanUpdate: (details) {
@@ -1684,8 +1684,10 @@ class MessageInputState extends State<MessageInput> {
     return IconButton(
       icon: StreamSvgIcon.lightning(
         color: _commandsOverlay != null
-            ? StreamChatTheme.of(context).channelTheme.actionButtonColor
-            : StreamChatTheme.of(context).channelTheme.actionButtonIdleColor,
+            ? StreamChatTheme.of(context).messageInputTheme.actionButtonColor
+            : StreamChatTheme.of(context)
+                .messageInputTheme
+                .actionButtonIdleColor,
       ),
       padding: const EdgeInsets.all(0),
       constraints: BoxConstraints.tightFor(
@@ -1722,8 +1724,10 @@ class MessageInputState extends State<MessageInput> {
     return IconButton(
       icon: StreamSvgIcon.attach(
         color: _openFilePickerSection
-            ? StreamChatTheme.of(context).channelTheme.actionButtonColor
-            : StreamChatTheme.of(context).channelTheme.actionButtonIdleColor,
+            ? StreamChatTheme.of(context).messageInputTheme.actionButtonColor
+            : StreamChatTheme.of(context)
+                .messageInputTheme
+                .actionButtonIdleColor,
       ),
       padding: const EdgeInsets.all(0),
       constraints: BoxConstraints.tightFor(
@@ -1962,7 +1966,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildIdleSendButton(BuildContext context) {
     return StreamSvgIcon(
       assetName: _getIdleSendIcon(),
-      color: StreamChatTheme.of(context).channelTheme.sendButtonIdleColor,
+      color: StreamChatTheme.of(context).messageInputTheme.sendButtonIdleColor,
     );
   }
 
@@ -1977,7 +1981,7 @@ class MessageInputState extends State<MessageInput> {
       ),
       icon: StreamSvgIcon(
         assetName: _getSendIcon(),
-        color: StreamChatTheme.of(context).channelTheme.sendButtonColor,
+        color: StreamChatTheme.of(context).messageInputTheme.sendButtonColor,
       ),
     );
   }
