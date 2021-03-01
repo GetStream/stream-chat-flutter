@@ -1441,7 +1441,7 @@ class ChannelClientState {
 
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        newMessages[oldIndex] = newMessages[oldIndex].merge(message);
+        newMessages[oldIndex] = message;
       } else {
         newMessages.add(message);
       }

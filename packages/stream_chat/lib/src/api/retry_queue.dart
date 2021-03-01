@@ -47,6 +47,7 @@ class RetryQueue {
 
   /// Add a list of messages
   void add(List<Message> messages) {
+    logger?.info('added ${messages.length} messages');
     final messageList = _messageQueue.toList();
     _messageQueue.addAll(messages
         .where((element) => !messageList.any((m) => m.id == element.id)));
