@@ -9,14 +9,19 @@ Map<Function, Timer> timeouts = {};
 void debounce({
   @required Duration timeout,
   @required Function target,
-  @required List arguments,
+  List positionalArguments,
+  Map<Symbol, dynamic> namedArguments,
 }) {
   if (timeouts.containsKey(target)) {
     timeouts[target].cancel();
   }
 
   final timer = Timer(timeout, () {
-    Function.apply(target, arguments);
+    Function.apply(
+      target,
+      positionalArguments,
+      namedArguments,
+    );
   });
 
   timeouts[target] = timer;

@@ -241,7 +241,7 @@ class Channel {
         debounce(
           timeout: Duration(seconds: 1),
           target: updateAttachment,
-          arguments: [
+          positionalArguments: [
             it.copyWith(
               uploadState: UploadState.inProgress(uploaded: sent, total: total),
             ),
@@ -1695,7 +1695,7 @@ class ChannelClientState {
     debounce(
       timeout: Duration(milliseconds: 500),
       target: _channel._client.chatPersistenceClient?.updateChannelState,
-      arguments: [v],
+      positionalArguments: [v],
     );
   }
 
