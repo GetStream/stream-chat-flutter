@@ -4,12 +4,12 @@ env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
 on:
-  # pull_request:
+  pull_request:
   #   branches:
   #     - master
   #   paths-ignore:
   #     - 'docs/**'
-  push:
+  # push:
     # branches:
     #   - master
     # paths-ignore:
