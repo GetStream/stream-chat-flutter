@@ -845,7 +845,9 @@ class ChannelHeaderTheme {
   }
 }
 
+/// Defines the theme dedicated to the [MessageInput] widget
 class MessageInputTheme {
+  /// Duration of the [MessageInput] send button animation
   final Duration sendAnimationDuration;
 
   /// Background color of [MessageInput] send button
@@ -863,6 +865,7 @@ class MessageInputTheme {
   /// Background color of [MessageInput]
   final Color inputBackground;
 
+  /// Returns a new [MessageInputTheme]
   const MessageInputTheme({
     this.sendAnimationDuration,
     this.actionButtonColor,
@@ -872,6 +875,7 @@ class MessageInputTheme {
     this.inputBackground,
   });
 
+  /// Returns a new [MessageInputTheme] replacing some of its properties
   MessageInputTheme copyWith({
     Duration sendAnimationDuration,
     Color inputBackground,
@@ -891,6 +895,7 @@ class MessageInputTheme {
         sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
       );
 
+  /// Merges [this] [MessageInputTheme] with the [other]
   MessageInputTheme merge(MessageInputTheme other) {
     if (other == null) return this;
     return copyWith(

@@ -1,3 +1,12 @@
+## 1.3.1-beta
+
+* Update llc dependency
+
+## 1.3.0-beta
+
+* Update llc dependency
+* Minor fixes
+
 ## 1.2.0-beta
 
 * Update llc dependency
