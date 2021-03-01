@@ -146,7 +146,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
           onEndOfPage: () => messageSearchBloc.loadMore(
             filter: {
               'cid': {
-                r'$in': ['messaging:${StreamChannel.of(context).channel.id}']
+                r'$in': [StreamChannel.of(context).channel.cid]
               }
             },
             messageFilter: {
