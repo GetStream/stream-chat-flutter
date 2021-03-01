@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 /// Map of timeouts being debounced
-Map timeouts = {};
+Map<Function, Timer> timeouts = {};
 
 /// Runs a function avoiding calling it too many times in a [timeoutMS] window
 void debounce({

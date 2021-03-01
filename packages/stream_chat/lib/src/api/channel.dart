@@ -238,9 +238,15 @@ class Channel {
       }
 
       void onSendProgress(int sent, int total) {
-        updateAttachment(it.copyWith(
-          uploadState: UploadState.inProgress(uploaded: sent, total: total),
-        ));
+        debounce(
+          timeout: Duration(seconds: 1),
+          target: updateAttachment,
+          arguments: [
+            it.copyWith(
+              uploadState: UploadState.inProgress(uploaded: sent, total: total),
+            ),
+          ],
+        );
       }
 
       final isImage = it.type == 'image';
