@@ -94,7 +94,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         ?.where((s) => possibleSortingFields.contains(s.field))
         ?.toList(growable: false);
 
-    Comparator<ChannelModel> chainedComparator = (a, b) {
+    var chainedComparator = (a, b) {
       final dateA = a.lastMessageAt ?? a.createdAt;
       final dateB = b.lastMessageAt ?? b.createdAt;
       return dateB.compareTo(dateA);
