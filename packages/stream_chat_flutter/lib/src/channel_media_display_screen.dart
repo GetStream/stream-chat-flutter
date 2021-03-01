@@ -44,7 +44,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     messageSearchBloc.search(
       filter: {
         'cid': {
-          r'$in': ['messaging:${StreamChannel.of(context).channel.id}']
+          r'$in': [StreamChannel.of(context).channel.cid],
         }
       },
       messageFilter: {
