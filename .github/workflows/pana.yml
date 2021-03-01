@@ -34,7 +34,7 @@ jobs:
           PERCENTAGE=$(( $TOTAL * 100 / $TOTAL_MAX ))
           if (( $PERCENTAGE < 90 ))
           then
-            echo Score too low!
+            echo Score $PERCENTAGE is too low!
             exit 1
           fi
   stream_chat_persistence:
