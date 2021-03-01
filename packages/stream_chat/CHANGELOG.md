@@ -1,4 +1,4 @@
-## 1.3.2-beta
+## 1.3.2+1-beta
 
 - Fixed queryChannels bug
 
