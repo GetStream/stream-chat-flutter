@@ -5,15 +5,15 @@ env:
 
 on:
   pull_request:
-  #   branches:
-  #     - master
-  #   paths-ignore:
-  #     - 'docs/**'
-  # push:
-    # branches:
-    #   - master
-    # paths-ignore:
-    #   - 'docs/**'
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
 
 jobs:
   stream_chat:
