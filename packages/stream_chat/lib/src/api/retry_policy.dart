@@ -18,7 +18,8 @@ class RetryPolicy {
   final bool Function(StreamChatClient client, int attempt, ApiError apiError)
       shouldRetry;
 
-  /// In the case that we want to retry a failed request the retryTimeout method is called to determine the timeout
+  /// In the case that we want to retry a failed request the retryTimeout
+  /// method is called to determine the timeout
   final Duration Function(
       StreamChatClient client, int attempt, ApiError apiError) retryTimeout;
 

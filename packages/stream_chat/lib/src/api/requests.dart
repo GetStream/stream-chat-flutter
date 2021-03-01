@@ -5,22 +5,6 @@ part 'requests.g.dart';
 /// Sorting options
 @JsonSerializable(createFactory: false)
 class SortOption<T> {
-  /// Ascending order
-  static const ASC = 1;
-
-  /// Descending order
-  static const DESC = -1;
-
-  /// A sorting field name
-  final String field;
-
-  /// A sorting direction
-  final int direction;
-
-  /// Sorting field Comparator required for offline sorting
-  @JsonKey(ignore: true)
-  final Comparator<T> comparator;
-
   /// Creates a new SortOption instance
   ///
   /// For example:
@@ -34,6 +18,24 @@ class SortOption<T> {
     this.comparator,
   });
 
+  /// Ascending order
+  // ignore: constant_identifier_names
+  static const ASC = 1;
+
+  /// Descending order
+  // ignore: constant_identifier_names
+  static const DESC = -1;
+
+  /// A sorting field name
+  final String field;
+
+  /// A sorting direction
+  final int direction;
+
+  /// Sorting field Comparator required for offline sorting
+  @JsonKey(ignore: true)
+  final Comparator<T> comparator;
+
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
 }
@@ -41,6 +43,25 @@ class SortOption<T> {
 /// Pagination options.
 @JsonSerializable(createFactory: false, includeIfNull: false)
 class PaginationParams {
+  /// Creates a new PaginationParams instance
+  ///
+  /// For example:
+  /// ```dart
+  /// // limit to 50
+  /// final paginationParams = PaginationParams(limit: 50);
+  ///
+  /// // limit to 50 with offset
+  /// final paginationParams = PaginationParams(limit: 50, offset: 50);
+  /// ```
+  const PaginationParams({
+    this.limit = 10,
+    this.offset = 0,
+    this.greaterThan,
+    this.greaterThanOrEqual,
+    this.lessThan,
+    this.lessThanOrEqual,
+  });
+
   /// The amount of items requested from the APIs.
   final int limit;
 
@@ -62,25 +83,6 @@ class PaginationParams {
   /// Filter on ids smaller than or equal to the given value.
   @JsonKey(name: 'id_lte')
   final String lessThanOrEqual;
-
-  /// Creates a new PaginationParams instance
-  ///
-  /// For example:
-  /// ```dart
-  /// // limit to 50
-  /// final paginationParams = PaginationParams(limit: 50);
-  ///
-  /// // limit to 50 with offset
-  /// final paginationParams = PaginationParams(limit: 50, offset: 50);
-  /// ```
-  const PaginationParams({
-    this.limit = 10,
-    this.offset = 0,
-    this.greaterThan,
-    this.greaterThanOrEqual,
-    this.lessThan,
-    this.lessThanOrEqual,
-  });
 
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$PaginationParamsToJson(this);
