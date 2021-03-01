@@ -56,19 +56,20 @@ class SystemMessage extends StatelessWidget {
           onMessageTap(message);
         }
       },
-      child: Container(
-        width: double.infinity,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            divider,
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          divider,
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     message.text,
+                    softWrap: true,
                     style: TextStyle(
                       fontSize: 10,
                       color: Theme.of(context)
@@ -107,9 +108,9 @@ class SystemMessage extends StatelessWidget {
                 ],
               ),
             ),
-            divider,
-          ],
-        ),
+          ),
+          divider,
+        ],
       ),
     );
   }
