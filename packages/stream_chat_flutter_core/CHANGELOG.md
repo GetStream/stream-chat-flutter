@@ -1,3 +1,7 @@
+## 1.3.2-beta
+
+* Update llc dependency
+
 ## 1.3.1-beta
 
 * Update llc dependency
