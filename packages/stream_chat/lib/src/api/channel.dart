@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
+import 'package:stream_chat/src/debounce.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
@@ -1685,7 +1686,11 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    _channel._client.chatPersistenceClient?.updateChannelState(v);
+    debounce(
+      timeout: Duration(milliseconds: 500),
+      target: _channel._client.chatPersistenceClient?.updateChannelState,
+      arguments: [v],
+    );
   }
 
   /// The channel threads related to this channel
