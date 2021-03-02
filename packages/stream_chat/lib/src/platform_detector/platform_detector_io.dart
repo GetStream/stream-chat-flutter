@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'platform_detector.dart';
 
+/// Version running on native systems
 PlatformType get currentPlatform {
   if (Platform.isWindows) return PlatformType.Windows;
   if (Platform.isFuchsia) return PlatformType.Fuchsia;

@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
+import 'package:stream_chat/src/debounce.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
@@ -237,9 +238,15 @@ class Channel {
       }
 
       void onSendProgress(int sent, int total) {
-        updateAttachment(it.copyWith(
-          uploadState: UploadState.inProgress(uploaded: sent, total: total),
-        ));
+        debounce(
+          timeout: Duration(seconds: 1),
+          target: updateAttachment,
+          positionalArguments: [
+            it.copyWith(
+              uploadState: UploadState.inProgress(uploaded: sent, total: total),
+            ),
+          ],
+        );
       }
 
       final isImage = it.type == 'image';
@@ -1441,7 +1448,7 @@ class ChannelClientState {
 
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        newMessages[oldIndex] = newMessages[oldIndex].merge(message);
+        newMessages[oldIndex] = message;
       } else {
         newMessages.add(message);
       }
@@ -1685,7 +1692,11 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    _channel._client.chatPersistenceClient?.updateChannelState(v);
+    debounce(
+      timeout: Duration(milliseconds: 500),
+      target: _channel._client.chatPersistenceClient?.updateChannelState,
+      positionalArguments: [v],
+    );
   }
 
   /// The channel threads related to this channel
