@@ -17,6 +17,7 @@ jobs:
       - uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: build_nightly
+          repo: GetStream/flutter-samples
           token: ${{ secrets.GH_TOKEN }}
   dispatch_stable:
     if: github.ref == 'refs/heads/master'
@@ -24,5 +25,6 @@ jobs:
     steps:
       - uses: benc-uk/workflow-dispatch@v1
         with:
+          repo: GetStream/flutter-samples
           workflow: build
           token: ${{ secrets.GH_TOKEN }}
