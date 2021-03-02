@@ -1692,11 +1692,14 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    debounce(
-      timeout: Duration(milliseconds: 500),
-      target: _channel._client.chatPersistenceClient?.updateChannelState,
-      positionalArguments: [v],
-    );
+
+    if (_channel._client.persistenceEnabled) {
+      debounce(
+        timeout: Duration(milliseconds: 500),
+        target: _channel._client.chatPersistenceClient?.updateChannelState,
+        positionalArguments: [v],
+      );
+    }
   }
 
   /// The channel threads related to this channel
