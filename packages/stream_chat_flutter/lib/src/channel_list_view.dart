@@ -284,7 +284,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   left: 0,
                   bottom: 32,
                   child: Center(
-                    child: FlatButton(
+                    child: TextButton(
                       onPressed: widget.onStartChatPressed,
                       child: Text(
                         'Start a chat',
@@ -445,7 +445,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             ),
             style: Theme.of(context).textTheme.headline6,
           ),
-          FlatButton(
+          TextButton(
             onPressed: () => _channelListController.loadData(),
             child: Text('Retry'),
           ),

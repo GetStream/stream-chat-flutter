@@ -42,7 +42,9 @@ class ChannelName extends StatelessWidget {
         if (extraData['name'] == null) {
           final otherMembers =
               members.where((member) => member.userId != client.user.id);
-          if (otherMembers.isNotEmpty) {
+          if (otherMembers.length == 1) {
+            title = otherMembers.first.user.name;
+          } else if (otherMembers.isNotEmpty) {
             final maxWidth = constraints.maxWidth;
             final maxChars = maxWidth / textStyle.fontSize;
             var currentChars = 0;
