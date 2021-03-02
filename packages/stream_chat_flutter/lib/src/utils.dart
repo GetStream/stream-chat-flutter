@@ -59,7 +59,7 @@ Future<bool> showConfirmationDialog(
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                FlatButton(
+                TextButton(
                   child: Text(
                     cancelText,
                     style: StreamChatTheme.of(context)
@@ -75,7 +75,7 @@ Future<bool> showConfirmationDialog(
                     Navigator.of(context).pop(false);
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: Text(
                     okText,
                     style: StreamChatTheme.of(context)
@@ -145,7 +145,7 @@ Future<bool> showInfoDialog(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              FlatButton(
+              TextButton(
                 child: Text(
                   okText,
                   style: TextStyle(

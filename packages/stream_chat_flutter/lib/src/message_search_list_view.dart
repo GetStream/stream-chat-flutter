@@ -195,7 +195,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                       padding: const EdgeInsets.only(top: 16.0),
                       child: Text(message),
                     ),
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         _messageSearchListController.loadData();
                       },

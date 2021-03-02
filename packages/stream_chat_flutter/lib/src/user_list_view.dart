@@ -242,7 +242,7 @@ class _UserListViewState extends State<UserListView>
             ),
             child: Text(message),
           ),
-          FlatButton(
+          TextButton(
             onPressed: () {
               _userListController.loadData();
             },
