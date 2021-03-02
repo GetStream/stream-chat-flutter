@@ -844,7 +844,7 @@ class _MessageListViewState extends State<MessageListView> {
             message: message,
             onMessageTap: (message) {
               if (widget.onSystemMessageTap != null) {
-               widget.onSystemMessageTap(message);
+                widget.onSystemMessageTap(message);
               }
               FocusScope.of(context).unfocus();
             },
