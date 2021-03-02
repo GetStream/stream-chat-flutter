@@ -611,7 +611,9 @@ class StreamChatClient {
         options: options,
         paginationParams: paginationParams,
         messageLimit: messageLimit,
-      );
+      ).whenComplete(() {
+        _queryChannelsStreams.remove(hash);
+      });
 
       _queryChannelsStreams[hash] = newQueryChannelsFuture;
 

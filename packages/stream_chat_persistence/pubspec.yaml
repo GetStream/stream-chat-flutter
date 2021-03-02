@@ -9,6 +9,8 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  flutter:
+    sdk: flutter
   moor: ^3.4.0
   path: ^1.7.0
   path_provider: ^1.6.27
