@@ -136,6 +136,8 @@ class MessageListView extends StatefulWidget {
     this.messageListBuilder,
     this.errorWidgetBuilder,
     this.customAttachmentBuilders,
+    this.onMessageTap,
+    this.onSystemMessageTap,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -215,6 +217,12 @@ class MessageListView extends StatefulWidget {
   /// Attachment builders for the default message widget
   /// Please change this in the [MessageWidget] if you are using a custom implementation
   final Map<String, AttachmentBuilder> customAttachmentBuilders;
+
+  /// Called when any message is tapped except a system message (use [onSystemMessageTap] instead)
+  final void Function(Message) onMessageTap;
+
+  /// Called when system message is tapped
+  final void Function(Message) onSystemMessageTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -364,6 +372,9 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
+                onPageScrollStart: () {
+                  FocusScope.of(context).unfocus();
+                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -812,6 +823,12 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 
@@ -825,6 +842,12 @@ class _MessageListViewState extends State<MessageListView> {
           SystemMessage(
             key: ValueKey<String>('MESSAGE-${message.id}'),
             message: message,
+            onMessageTap: (message) {
+              if (widget.onSystemMessageTap != null) {
+                widget.onSystemMessageTap(message);
+              }
+              FocusScope.of(context).unfocus();
+            },
           );
     }
 
@@ -974,6 +997,12 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
     );
 
     if (!message.isDeleted &&
