@@ -12,6 +12,7 @@ on:
 jobs:
   dispatch_nightly:
     if: github.base_ref == 'develop'
+    runs-on: ubuntu-latest
     steps:
       - uses: benc-uk/workflow-dispatch@v1
         with:
@@ -19,6 +20,7 @@ jobs:
           token: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
   dispatch_stable:
     if: github.base_ref == 'master'
+    runs-on: ubuntu-latest
     steps:
       - uses: benc-uk/workflow-dispatch@v1
         with:
