@@ -1,0 +1,25 @@
+name: pana
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+on:
+  push:
+    - develop
+    - master
+
+jobs:
+  dispatch_nightly:
+    if: github.base_ref == 'develop'
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build_nightly
+          token: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+  dispatch_stable:
+    if: github.base_ref == 'master'
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build
+          token: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
