@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:stream_chat/src/extensions/map_extension.dart';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
@@ -1048,7 +1049,7 @@ class StreamChatClient {
       'query': query,
       'sort': sort,
       if (paginationParams != null) ...paginationParams.toJson(),
-    };
+    }.nullProtected;
 
     final response = await get('/search', queryParameters: {
       'payload': json.encode(payload),
