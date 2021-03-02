@@ -5,8 +5,9 @@ env:
 
 on:
   push:
-    - develop
-    - master
+    branches:
+      - develop
+      - master
 
 jobs:
   dispatch_nightly:
