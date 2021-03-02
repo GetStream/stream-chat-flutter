@@ -60,6 +60,9 @@ class StreamChatThemeData {
   /// Theme of other users messages
   final MessageTheme otherMessageTheme;
 
+  /// Theme of other users messages
+  final MessageInputTheme messageInputTheme;
+
   /// The widget that will be built when the channel image is unavailable
   final Widget Function(BuildContext, Channel) defaultChannelImage;
 
@@ -80,6 +83,7 @@ class StreamChatThemeData {
     this.channelTheme,
     this.otherMessageTheme,
     this.ownMessageTheme,
+    this.messageInputTheme,
     this.defaultChannelImage,
     this.defaultUserImage,
     this.primaryIconTheme,
@@ -108,6 +112,7 @@ class StreamChatThemeData {
     ChannelTheme channelTheme,
     MessageTheme ownMessageTheme,
     MessageTheme otherMessageTheme,
+    MessageInputTheme messageInputTheme,
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
@@ -123,6 +128,7 @@ class StreamChatThemeData {
         channelTheme: channelTheme ?? this.channelTheme,
         ownMessageTheme: ownMessageTheme ?? this.ownMessageTheme,
         otherMessageTheme: otherMessageTheme ?? this.otherMessageTheme,
+        messageInputTheme: messageInputTheme ?? this.messageInputTheme,
         reactionIcons: reactionIcons ?? this.reactionIcons,
       );
 
@@ -143,6 +149,8 @@ class StreamChatThemeData {
           other.ownMessageTheme,
       otherMessageTheme: otherMessageTheme?.merge(other.otherMessageTheme) ??
           other.otherMessageTheme,
+      messageInputTheme: messageInputTheme?.merge(other.messageInputTheme) ??
+          other.messageInputTheme,
       reactionIcons: other.reactionIcons,
     );
   }
@@ -182,10 +190,6 @@ class StreamChatThemeData {
           ),
           indicatorIconSize: 16.0),
       channelTheme: ChannelTheme(
-        actionButtonColor: colorTheme.accentBlue,
-        actionButtonIdleColor: colorTheme.grey,
-        sendButtonColor: colorTheme.accentBlue,
-        sendButtonIdleColor: colorTheme.greyGainsboro,
         channelHeaderTheme: ChannelHeaderTheme(
           avatarTheme: AvatarTheme(
             borderRadius: BorderRadius.circular(20),
@@ -195,16 +199,12 @@ class StreamChatThemeData {
             ),
           ),
           color: colorTheme.white,
-          title: TextStyle(
-            fontSize: 14,
-            color: colorTheme.black,
-          ),
+          title: textTheme.headlineBold,
           lastMessageAt: TextStyle(
             fontSize: 11,
             color: colorTheme.black.withOpacity(.5),
           ),
         ),
-        inputBackground: colorTheme.white.withAlpha(12),
       ),
       ownMessageTheme: MessageTheme(
         messageAuthor: textTheme.footnote.copyWith(color: colorTheme.grey),
@@ -247,6 +247,14 @@ class StreamChatThemeData {
             width: 32,
           ),
         ),
+      ),
+      messageInputTheme: MessageInputTheme(
+        sendAnimationDuration: Duration(milliseconds: 300),
+        actionButtonColor: colorTheme.accentBlue,
+        actionButtonIdleColor: colorTheme.grey,
+        sendButtonColor: colorTheme.accentBlue,
+        sendButtonIdleColor: colorTheme.greyGainsboro,
+        inputBackground: colorTheme.white,
       ),
       reactionIcons: [
         ReactionIcon(
@@ -628,47 +636,16 @@ class ChannelTheme {
   /// Theme of the [ChannelHeader] widget
   final ChannelHeaderTheme channelHeaderTheme;
 
-  /// Background color of [MessageInput] send button
-  final Color sendButtonColor;
-
-  /// Background color of [MessageInput] action buttons
-  final Color actionButtonColor;
-
-  /// Background color of [MessageInput] send button
-  final Color sendButtonIdleColor;
-
-  /// Background color of [MessageInput] action buttons
-  final Color actionButtonIdleColor;
-
-  /// Background color of [MessageInput]
-  final Color inputBackground;
-
   ChannelTheme({
     this.channelHeaderTheme,
-    this.actionButtonColor,
-    this.sendButtonColor,
-    this.actionButtonIdleColor,
-    this.sendButtonIdleColor,
-    this.inputBackground,
   });
 
   /// Creates a copy of [ChannelTheme] with specified attributes overridden.
   ChannelTheme copyWith({
     ChannelHeaderTheme channelHeaderTheme,
-    Color inputBackground,
-    Color actionButtonColor,
-    Color sendButtonColor,
-    Color actionButtonIdleColor,
-    Color sendButtonIdleColor,
   }) =>
       ChannelTheme(
         channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
-        inputBackground: inputBackground ?? this.inputBackground,
-        actionButtonColor: actionButtonColor ?? this.actionButtonColor,
-        sendButtonColor: sendButtonColor ?? this.sendButtonColor,
-        actionButtonIdleColor:
-            actionButtonIdleColor ?? this.actionButtonIdleColor,
-        sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
       );
 
   ChannelTheme merge(ChannelTheme other) {
@@ -676,11 +653,6 @@ class ChannelTheme {
     return copyWith(
       channelHeaderTheme: channelHeaderTheme?.merge(other.channelHeaderTheme) ??
           other.channelHeaderTheme,
-      inputBackground: other.inputBackground,
-      actionButtonColor: other.actionButtonColor,
-      actionButtonIdleColor: other.actionButtonIdleColor,
-      sendButtonColor: other.sendButtonColor,
-      sendButtonIdleColor: other.sendButtonIdleColor,
     );
   }
 }
@@ -869,6 +841,70 @@ class ChannelHeaderTheme {
           lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       color: other.color,
+    );
+  }
+}
+
+/// Defines the theme dedicated to the [MessageInput] widget
+class MessageInputTheme {
+  /// Duration of the [MessageInput] send button animation
+  final Duration sendAnimationDuration;
+
+  /// Background color of [MessageInput] send button
+  final Color sendButtonColor;
+
+  /// Background color of [MessageInput] action buttons
+  final Color actionButtonColor;
+
+  /// Background color of [MessageInput] send button
+  final Color sendButtonIdleColor;
+
+  /// Background color of [MessageInput] action buttons
+  final Color actionButtonIdleColor;
+
+  /// Background color of [MessageInput]
+  final Color inputBackground;
+
+  /// Returns a new [MessageInputTheme]
+  const MessageInputTheme({
+    this.sendAnimationDuration,
+    this.actionButtonColor,
+    this.sendButtonColor,
+    this.actionButtonIdleColor,
+    this.sendButtonIdleColor,
+    this.inputBackground,
+  });
+
+  /// Returns a new [MessageInputTheme] replacing some of its properties
+  MessageInputTheme copyWith({
+    Duration sendAnimationDuration,
+    Color inputBackground,
+    Color actionButtonColor,
+    Color sendButtonColor,
+    Color actionButtonIdleColor,
+    Color sendButtonIdleColor,
+  }) =>
+      MessageInputTheme(
+        sendAnimationDuration:
+            sendAnimationDuration ?? this.sendAnimationDuration,
+        inputBackground: inputBackground ?? this.inputBackground,
+        actionButtonColor: actionButtonColor ?? this.actionButtonColor,
+        sendButtonColor: sendButtonColor ?? this.sendButtonColor,
+        actionButtonIdleColor:
+            actionButtonIdleColor ?? this.actionButtonIdleColor,
+        sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
+      );
+
+  /// Merges [this] [MessageInputTheme] with the [other]
+  MessageInputTheme merge(MessageInputTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      sendAnimationDuration: other.sendAnimationDuration,
+      inputBackground: other.inputBackground,
+      actionButtonColor: other.actionButtonColor,
+      actionButtonIdleColor: other.actionButtonIdleColor,
+      sendButtonColor: other.sendButtonColor,
+      sendButtonIdleColor: other.sendButtonIdleColor,
     );
   }
 }

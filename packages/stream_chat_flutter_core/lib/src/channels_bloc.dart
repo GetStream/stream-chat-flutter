@@ -84,7 +84,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
     Map<String, dynamic> filter,
-    List<SortOption> sortOptions,
+    List<SortOption<ChannelModel>> sortOptions,
     PaginationParams paginationParams,
     Map<String, dynamic> options,
     bool onlyOffline = false,
@@ -102,21 +102,21 @@ class ChannelsBlocState extends State<ChannelsBloc>
           paginationParams.offset == null ||
           paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
-      final _channels = await client.queryChannels(
+      await for (final channels in client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
-        onlyOffline: onlyOffline,
-      );
-
-      if (clear) {
-        _channelsController.add(_channels);
-      } else {
-        final l = oldChannels + _channels;
-        _channelsController.add(l);
+        preferOffline: onlyOffline,
+      )) {
+        if (clear) {
+          _channelsController.add(channels);
+        } else {
+          final l = oldChannels + channels;
+          _channelsController.add(l);
+        }
+        _queryChannelsLoadingController.sink.add(false);
       }
-      _queryChannelsLoadingController.sink.add(false);
     } catch (err, stackTrace) {
       print(err);
       print(stackTrace);

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:test/test.dart';
 import 'package:stream_chat/version.dart';
 

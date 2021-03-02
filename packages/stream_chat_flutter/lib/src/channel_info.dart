@@ -49,8 +49,11 @@ class ChannelInfo extends StatelessWidget {
     var alternativeWidget;
 
     if (channel.memberCount != null && channel.memberCount > 2) {
+      var text = '${channel.memberCount} Members';
+      final watcherCount = channel.state.watcherCount ?? 0;
+      if (watcherCount > 0) text += ' $watcherCount Online';
       alternativeWidget = Text(
-        '${channel.memberCount} Members, ${channel.state.watcherCount} Online',
+        text,
         style: StreamChatTheme.of(context)
             .channelTheme
             .channelHeaderTheme

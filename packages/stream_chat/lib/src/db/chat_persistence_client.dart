@@ -56,23 +56,31 @@ abstract class ChatPersistenceClient {
     PaginationParams messagePagination,
   });
 
+  /// Get stored pinned [Message]s by providing channel [cid]
+  Future<List<Message>> getPinnedMessagesByCid(
+    String cid, {
+    PaginationParams messagePagination,
+  });
+
   /// Get [ChannelState] data by providing channel [cid]
   Future<ChannelState> getChannelStateByCid(
     String cid, {
     PaginationParams messagePagination,
+    PaginationParams pinnedMessagePagination,
   }) async {
-    final members = await getMembersByCid(cid);
-    final reads = await getReadsByCid(cid);
-    final channel = await getChannelByCid(cid);
-    final messages = await getMessagesByCid(
-      cid,
-      messagePagination: messagePagination,
-    );
+    final data = await Future.wait([
+      getMembersByCid(cid),
+      getReadsByCid(cid),
+      getChannelByCid(cid),
+      getMessagesByCid(cid, messagePagination: messagePagination),
+      getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
+    ]);
     return ChannelState(
-      members: members,
-      read: reads,
-      messages: messages,
-      channel: channel,
+      members: data[0],
+      read: data[1],
+      channel: data[2],
+      messages: data[3],
+      pinnedMessages: data[4],
     );
   }
 
@@ -82,7 +90,7 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
-    List<SortOption> sort = const [],
+    List<SortOption<ChannelModel>> sort = const [],
     PaginationParams paginationParams,
   });
 
@@ -101,16 +109,32 @@ abstract class ChatPersistenceClient {
     return deleteMessageByIds([messageId]);
   }
 
+  /// Remove a pinned message by [messageId]
+  Future<void> deletePinnedMessageById(String messageId) {
+    return deletePinnedMessageByIds([messageId]);
+  }
+
   /// Remove a message by [messageIds]
   Future<void> deleteMessageByIds(List<String> messageIds);
+
+  /// Remove a pinned message by [messageIds]
+  Future<void> deletePinnedMessageByIds(List<String> messageIds);
 
   /// Remove a message by channel [cid]
   Future<void> deleteMessageByCid(String cid) {
     return deleteMessageByCids([cid]);
   }
 
+  /// Remove a pinned message by channel [cid]
+  Future<void> deletePinnedMessageByCid(String cid) {
+    return deletePinnedMessageByCids([cid]);
+  }
+
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
+
+  /// Remove a pinned message by message [cids]
+  Future<void> deletePinnedMessageByCids(List<String> cids);
 
   /// Remove a channel by [cid]
   Future<void> deleteChannels(List<String> cids);
@@ -118,6 +142,10 @@ abstract class ChatPersistenceClient {
   /// Updates the message data of a particular channel [cid] with
   /// the new [messages] data
   Future<void> updateMessages(String cid, List<Message> messages);
+
+  /// Updates the pinned message data of a particular channel [cid] with
+  /// the new [messages] data
+  Future<void> updatePinnedMessages(String cid, List<Message> messages);
 
   /// Returns all the threads by parent message of a particular channel by
   /// providing channel [cid]
@@ -204,6 +232,12 @@ abstract class ChatPersistenceClient {
       return updateMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
+    final updatePinnedMessagesFuture = channelStates.map((it) {
+      final cid = it.channel.cid;
+      final messages = it.pinnedMessages.where((it) => it != null);
+      return updatePinnedMessages(cid, messages.toList(growable: false));
+    }).toList(growable: false);
+
     final updateReadsFuture = channelStates.map((it) {
       final cid = it.channel.cid;
       final reads = it.read?.where((it) => it != null) ?? [];
@@ -218,6 +252,7 @@ abstract class ChatPersistenceClient {
 
     await Future.wait([
       ...updateMessagesFuture,
+      ...updatePinnedMessagesFuture,
       ...updateReadsFuture,
       ...updateMembersFuture,
       updateUsers(users.toList(growable: false)),

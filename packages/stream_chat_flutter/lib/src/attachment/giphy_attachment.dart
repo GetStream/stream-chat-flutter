@@ -202,24 +202,26 @@ class GiphyAttachment extends AttachmentWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: FlatButton(
+                    child: Container(
                       height: 50,
-                      onPressed: () {
-                        streamChannel.channel.sendAction(message, {
-                          'image_action': 'cancel',
-                        });
-                      },
-                      child: Text(
-                        'Cancel',
-                        style: StreamChatTheme.of(context)
-                            .textTheme
-                            .bodyBold
-                            .copyWith(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .black
-                                  .withOpacity(0.5),
-                            ),
+                      child: TextButton(
+                        onPressed: () {
+                          streamChannel.channel.sendAction(message, {
+                            'image_action': 'cancel',
+                          });
+                        },
+                        child: Text(
+                          'Cancel',
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .bodyBold
+                              .copyWith(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .black
+                                    .withOpacity(0.5),
+                              ),
+                        ),
                       ),
                     ),
                   ),
@@ -232,20 +234,22 @@ class GiphyAttachment extends AttachmentWidget {
                     height: 50.0,
                   ),
                   Expanded(
-                    child: FlatButton(
+                    child: Container(
                       height: 50,
-                      onPressed: () {
-                        streamChannel.channel.sendAction(message, {
-                          'image_action': 'send',
-                        });
-                      },
-                      child: Text(
-                        'Send',
-                        style: TextStyle(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentBlue,
-                            fontWeight: FontWeight.bold),
+                      child: TextButton(
+                        onPressed: () {
+                          streamChannel.channel.sendAction(message, {
+                            'image_action': 'send',
+                          });
+                        },
+                        child: Text(
+                          'Send',
+                          style: TextStyle(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
