@@ -356,6 +356,9 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
+                onPageScrollStart: () {
+                  FocusScope.of(context).unfocus();
+                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -804,6 +807,9 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: () {
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 
@@ -965,6 +971,9 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: () {
+        FocusScope.of(context).unfocus();
+      },
     );
 
     if (!message.isDeleted &&
