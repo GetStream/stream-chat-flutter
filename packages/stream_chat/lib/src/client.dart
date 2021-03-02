@@ -468,7 +468,7 @@ class StreamChatClient {
       user: state.user,
       connectParams: {
         'api_key': apiKey,
-        'Authorization': token,
+        'authorization': token,
         'stream-auth-type': _authType,
         'X-Stream-Client': _userAgent,
       },
