@@ -1,4 +1,4 @@
-name: pana
+name: dispatch_workflows
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
