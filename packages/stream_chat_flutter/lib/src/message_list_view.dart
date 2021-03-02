@@ -28,6 +28,10 @@ typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message,
 );
+typedef SystemMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
@@ -128,6 +132,7 @@ class MessageListView extends StatefulWidget {
     this.showConnectionStateTile = false,
     this.loadingBuilder,
     this.emptyBuilder,
+    this.systemMessageBuilder,
     this.messageListBuilder,
     this.errorWidgetBuilder,
     this.customAttachmentBuilders,
@@ -135,6 +140,9 @@ class MessageListView extends StatefulWidget {
 
   /// Function used to build a custom message widget
   final MessageBuilder messageBuilder;
+
+  /// Function used to build a custom system message widget
+  final SystemMessageBuilder systemMessageBuilder;
 
   /// Function used to build a custom parent message widget
   final ParentMessageBuilder parentMessageBuilder;
@@ -813,10 +821,11 @@ class _MessageListViewState extends State<MessageListView> {
     int index,
   ) {
     if (message.type == 'system' && message.text?.isNotEmpty == true) {
-      return SystemMessage(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        message: message,
-      );
+      return widget.systemMessageBuilder?.call(context, message) ??
+          SystemMessage(
+            key: ValueKey<String>('MESSAGE-${message.id}'),
+            message: message,
+          );
     }
 
     final userId = StreamChat.of(context).user.id;
