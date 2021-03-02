@@ -64,6 +64,7 @@ class MessageListCore extends StatefulWidget {
     this.showScrollToBottom = true,
     this.parentMessage,
     this.messageListController,
+    this.messageFilter,
   })  : assert(loadingBuilder != null),
         assert(emptyBuilder != null),
         assert(messageListBuilder != null),
@@ -95,6 +96,9 @@ class MessageListCore extends StatefulWidget {
   /// first message or the parent of the conversation.
   final Message parentMessage;
 
+  /// Predicate used to filter messages
+  final bool Function(Message) messageFilter;
+
   @override
   _MessageListCoreState createState() => _MessageListCoreState();
 }
@@ -105,6 +109,8 @@ class _MessageListCoreState extends State<MessageListCore> {
   bool get _upToDate => streamChannel.channel.state.isUpToDate;
 
   bool get _isThreadConversation => widget.parentMessage != null;
+
+  OwnUser get _currentUser => streamChannel.channel.client.state.user;
 
   int initialIndex;
   double initialAlignment;
@@ -121,13 +127,16 @@ class _MessageListCoreState extends State<MessageListCore> {
             .map((threads) => threads[widget.parentMessage.id])
         : streamChannel.channel.state?.messagesStream;
 
+    bool defaultFilter(Message m) {
+      final isMyMessage = m.user.id == _currentUser.id;
+      final isDeletedOrShadowed = m.isDeleted || m.shadowed;
+      if (isDeletedOrShadowed && !isMyMessage) return false;
+      return true;
+    }
+
     return StreamBuilder<List<Message>>(
-      stream: messagesStream?.map((messages) => messages
-          ?.where((e) =>
-              (!e.isDeleted && e.shadowed != true) ||
-              (e.isDeleted &&
-                  e.user.id == streamChannel.channel.client.state.user.id))
-          ?.toList()),
+      stream: messagesStream?.map((messages) =>
+          messages?.where(widget.messageFilter ?? defaultFilter)?.toList()),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return widget.loadingBuilder(context);

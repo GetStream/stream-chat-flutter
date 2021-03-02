@@ -21,28 +21,28 @@ class StreamBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      alignment: Alignment.center,
       children: [
-        Padding(
+        RawMaterialButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+          elevation: 0,
+          highlightElevation: 0,
+          focusElevation: 0,
+          disabledElevation: 0,
+          hoverElevation: 0,
+          onPressed: () {
+            if (onPressed != null) {
+              onPressed();
+            } else {
+              Navigator.maybePop(context);
+            }
+          },
           padding: const EdgeInsets.all(14.0),
-          child: RawMaterialButton(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            elevation: 0,
-            highlightElevation: 0,
-            focusElevation: 0,
-            disabledElevation: 0,
-            hoverElevation: 0,
-            onPressed: () {
-              if (onPressed != null) {
-                onPressed();
-              } else {
-                Navigator.maybePop(context);
-              }
-            },
-            child: StreamSvgIcon.left(
-              size: 24,
-              color: StreamChatTheme.of(context).colorTheme.black,
-            ),
+          child: StreamSvgIcon.left(
+            size: 24,
+            color: StreamChatTheme.of(context).colorTheme.black,
           ),
         ),
         if (showUnreads)

@@ -2139,7 +2139,7 @@ class MessageInputState extends State<MessageInput> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)

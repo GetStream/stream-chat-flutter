@@ -1,3 +1,8 @@
+## 1.3.2-beta
+
+- Updated `stream_chat_core` dependency
+- Fixed minor bugs
+
 ## 1.3.1-beta
 
 - Updated `stream_chat_core` dependency

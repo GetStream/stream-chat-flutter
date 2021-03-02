@@ -28,6 +28,10 @@ typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message,
 );
+typedef SystemMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
@@ -128,13 +132,20 @@ class MessageListView extends StatefulWidget {
     this.showConnectionStateTile = false,
     this.loadingBuilder,
     this.emptyBuilder,
+    this.systemMessageBuilder,
     this.messageListBuilder,
     this.errorWidgetBuilder,
+    this.messageFilter,
     this.customAttachmentBuilders,
+    this.onMessageTap,
+    this.onSystemMessageTap,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder messageBuilder;
+
+  /// Function used to build a custom system message widget
+  final SystemMessageBuilder systemMessageBuilder;
 
   /// Function used to build a custom parent message widget
   final ParentMessageBuilder parentMessageBuilder;
@@ -204,9 +215,18 @@ class MessageListView extends StatefulWidget {
   /// of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
 
+  /// Predicate used to filter messages
+  final bool Function(Message) messageFilter;
+
   /// Attachment builders for the default message widget
   /// Please change this in the [MessageWidget] if you are using a custom implementation
   final Map<String, AttachmentBuilder> customAttachmentBuilders;
+
+  /// Called when any message is tapped except a system message (use [onSystemMessageTap] instead)
+  final void Function(Message) onMessageTap;
+
+  /// Called when system message is tapped
+  final void Function(Message) onSystemMessageTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -265,6 +285,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
+      messageFilter: widget.messageFilter,
       loadingBuilder: widget.loadingBuilder ??
           (context) {
             return Center(
@@ -356,6 +377,9 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
+                onPageScrollStart: () {
+                  FocusScope.of(context).unfocus();
+                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -804,6 +828,12 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 
@@ -813,10 +843,17 @@ class _MessageListViewState extends State<MessageListView> {
     int index,
   ) {
     if (message.type == 'system' && message.text?.isNotEmpty == true) {
-      return SystemMessage(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        message: message,
-      );
+      return widget.systemMessageBuilder?.call(context, message) ??
+          SystemMessage(
+            key: ValueKey<String>('MESSAGE-${message.id}'),
+            message: message,
+            onMessageTap: (message) {
+              if (widget.onSystemMessageTap != null) {
+                widget.onSystemMessageTap(message);
+              }
+              FocusScope.of(context).unfocus();
+            },
+          );
     }
 
     final userId = StreamChat.of(context).user.id;
@@ -965,6 +1002,12 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
     );
 
     if (!message.isDeleted &&
