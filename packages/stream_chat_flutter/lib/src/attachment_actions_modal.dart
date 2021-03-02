@@ -109,7 +109,9 @@ class AttachmentActionsModal extends StatelessWidget {
                             received,
                           );
                         },
-                      );
+                      ).catchError((_) {
+                        progressNotifier.value = null;
+                      });
 
                       // Closing attachment actions modal before opening
                       // attachment download dialog
@@ -212,9 +214,8 @@ class AttachmentActionsModal extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable: progressNotifier,
         builder: (_, _DownloadProgress progress, __) {
-          final value = progress.toProgressIndicatorValue;
-          final downloadComplete = value == 1.0;
-          if (value == 1.0) {
+          // Pop the dialog in case the progress is null or it's completed.
+          if (progress == null || progress?.toProgressIndicatorValue == 1.0) {
             Future.delayed(
               const Duration(milliseconds: 500),
               Navigator.of(context).pop,
@@ -231,38 +232,46 @@ class AttachmentActionsModal extends StatelessWidget {
                   color: theme.colorTheme.white,
                 ),
                 child: Center(
-                  child: downloadComplete
+                  child: progress == null
                       ? Container(
-                          height: 160,
-                          width: 160,
-                          child: StreamSvgIcon.check(
+                          height: 100,
+                          width: 100,
+                          child: StreamSvgIcon.error(
                             color: theme.colorTheme.greyGainsboro,
                           ),
                         )
-                      : Container(
-                          height: 100,
-                          width: 100,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              CircularProgressIndicator(
-                                value: value,
-                                strokeWidth: 8.0,
-                                valueColor: AlwaysStoppedAnimation(
-                                  theme.colorTheme.accentBlue,
-                                ),
+                      : progress.toProgressIndicatorValue == 1.0
+                          ? Container(
+                              height: 160,
+                              width: 160,
+                              child: StreamSvgIcon.check(
+                                color: theme.colorTheme.greyGainsboro,
                               ),
-                              Center(
-                                child: Text(
-                                  '${progress.toPercentage}%',
-                                  style: theme.textTheme.headline.copyWith(
-                                    color: theme.colorTheme.grey,
+                            )
+                          : Container(
+                              height: 100,
+                              width: 100,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  CircularProgressIndicator(
+                                    value: progress.toProgressIndicatorValue,
+                                    strokeWidth: 8.0,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      theme.colorTheme.accentBlue,
+                                    ),
                                   ),
-                                ),
+                                  Center(
+                                    child: Text(
+                                      '${progress.toPercentage}%',
+                                      style: theme.textTheme.headline.copyWith(
+                                        color: theme.colorTheme.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
                 ),
               ),
             ),
