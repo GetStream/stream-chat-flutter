@@ -18,37 +18,7 @@ class SystemMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final divider = Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Divider(),
-      ),
-    );
-
-    final createdAt = Jiffy(message.createdAt.toLocal());
-    final now = DateTime.now();
-    final hourInfo = createdAt.format('h:mm a');
-
-    String dayInfo;
-    if (Jiffy(createdAt).isSame(now, Units.DAY)) {
-      dayInfo = 'TODAY';
-    } else if (Jiffy(createdAt)
-        .isSame(now.subtract(Duration(days: 1)), Units.DAY)) {
-      dayInfo = 'YESTERDAY';
-    } else if (Jiffy(createdAt).isAfter(
-      now.subtract(Duration(days: 7)),
-      Units.DAY,
-    )) {
-      dayInfo = createdAt.format('EEEE').toUpperCase();
-    } else if (Jiffy(createdAt).isAfter(
-      Jiffy(now).subtract(years: 1),
-      Units.DAY,
-    )) {
-      dayInfo = createdAt.format('dd/MM').toUpperCase();
-    } else {
-      dayInfo = createdAt.format('dd/MM/yyyy').toUpperCase();
-    }
-
+    final theme = StreamChatTheme.of(context);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -56,61 +26,13 @@ class SystemMessage extends StatelessWidget {
           onMessageTap(message);
         }
       },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          divider,
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    message.text,
-                    softWrap: true,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .color
-                          .withOpacity(.5),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: dayInfo,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(text: ' AT'),
-                        TextSpan(text: ' $hourInfo'),
-                      ],
-                      style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Theme.of(context)
-                          .textTheme
-                          .headline6
-                          .color
-                          .withOpacity(.5),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          divider,
-        ],
+      child: Text(
+        message.text,
+        textAlign: TextAlign.center,
+        softWrap: true,
+        style: theme.textTheme.captionBold.copyWith(
+          color: theme.colorTheme.grey,
+        ),
       ),
     );
   }
