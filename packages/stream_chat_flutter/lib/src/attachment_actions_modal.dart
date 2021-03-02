@@ -207,65 +207,68 @@ class AttachmentActionsModal extends StatelessWidget {
     ValueNotifier<_DownloadProgress> progressNotifier,
   ) {
     final theme = StreamChatTheme.of(context);
-    return ValueListenableBuilder(
-      valueListenable: progressNotifier,
-      builder: (_, _DownloadProgress progress, __) {
-        final value = progress.toProgressIndicatorValue;
-        final downloadComplete = value == 1.0;
-        if (value == 1.0) {
-          Future.delayed(
-            const Duration(milliseconds: 500),
-            Navigator.of(context).pop,
-          );
-        }
-        return Material(
-          type: MaterialType.transparency,
-          child: Center(
-            child: Container(
-              height: 182,
-              width: 182,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: theme.colorTheme.white,
-              ),
-              child: Center(
-                child: downloadComplete
-                    ? Container(
-                        height: 160,
-                        width: 160,
-                        child: StreamSvgIcon.check(
-                          color: theme.colorTheme.greyGainsboro,
-                        ),
-                      )
-                    : Container(
-                        height: 100,
-                        width: 100,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CircularProgressIndicator(
-                              value: value,
-                              strokeWidth: 8.0,
-                              valueColor: AlwaysStoppedAnimation(
-                                theme.colorTheme.accentBlue,
-                              ),
-                            ),
-                            Center(
-                              child: Text(
-                                '${progress.toPercentage}%',
-                                style: theme.textTheme.headline.copyWith(
-                                  color: theme.colorTheme.grey,
+    return WillPopScope(
+      onWillPop: () => Future.value(false),
+      child: ValueListenableBuilder(
+        valueListenable: progressNotifier,
+        builder: (_, _DownloadProgress progress, __) {
+          final value = progress.toProgressIndicatorValue;
+          final downloadComplete = value == 1.0;
+          if (value == 1.0) {
+            Future.delayed(
+              const Duration(milliseconds: 500),
+              Navigator.of(context).pop,
+            );
+          }
+          return Material(
+            type: MaterialType.transparency,
+            child: Center(
+              child: Container(
+                height: 182,
+                width: 182,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: theme.colorTheme.white,
+                ),
+                child: Center(
+                  child: downloadComplete
+                      ? Container(
+                          height: 160,
+                          width: 160,
+                          child: StreamSvgIcon.check(
+                            color: theme.colorTheme.greyGainsboro,
+                          ),
+                        )
+                      : Container(
+                          height: 100,
+                          width: 100,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CircularProgressIndicator(
+                                value: value,
+                                strokeWidth: 8.0,
+                                valueColor: AlwaysStoppedAnimation(
+                                  theme.colorTheme.accentBlue,
                                 ),
                               ),
-                            ),
-                          ],
+                              Center(
+                                child: Text(
+                                  '${progress.toPercentage}%',
+                                  style: theme.textTheme.headline.copyWith(
+                                    color: theme.colorTheme.grey,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
