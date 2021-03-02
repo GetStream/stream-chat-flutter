@@ -144,7 +144,7 @@ class MessageWidget extends StatefulWidget {
   final OnQuotedMessageTap onQuotedMessageTap;
 
   /// Function called when message is tapped
-  final VoidCallback onMessageTap;
+  final void Function(Message) onMessageTap;
 
   ///
   MessageWidget({
@@ -315,7 +315,9 @@ class _MessageWidgetState extends State<MessageWidget>
       type: MaterialType.transparency,
       child: Portal(
         child: InkWell(
-          onTap: widget.onMessageTap,
+          onTap: () {
+            widget.onMessageTap(widget.message);
+          },
           onLongPress: widget.message.isDeleted && !isFailedState
               ? null
               : () => onLongPress(context),
