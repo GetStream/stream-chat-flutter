@@ -135,6 +135,7 @@ class MessageListView extends StatefulWidget {
     this.systemMessageBuilder,
     this.messageListBuilder,
     this.errorWidgetBuilder,
+    this.messageFilter,
     this.customAttachmentBuilders,
     this.onMessageTap,
     this.onSystemMessageTap,
@@ -214,6 +215,9 @@ class MessageListView extends StatefulWidget {
   /// of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
 
+  /// Predicate used to filter messages
+  final bool Function(Message) messageFilter;
+
   /// Attachment builders for the default message widget
   /// Please change this in the [MessageWidget] if you are using a custom implementation
   final Map<String, AttachmentBuilder> customAttachmentBuilders;
@@ -281,6 +285,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
+      messageFilter: widget.messageFilter,
       loadingBuilder: widget.loadingBuilder ??
           (context) {
             return Center(
