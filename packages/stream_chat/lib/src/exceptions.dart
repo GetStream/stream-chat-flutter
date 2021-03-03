@@ -2,6 +2,13 @@ import 'dart:convert';
 
 /// Exception related to api calls
 class ApiError extends Error {
+  /// Creates a new ApiError instance using the response body and status code
+  ApiError(this.body, this.status) : jsonData = _decode(body) {
+    if (jsonData != null && jsonData.containsKey('code')) {
+      _code = jsonData['code'];
+    }
+  }
+
   /// Raw body of the response
   final String body;
 
@@ -26,13 +33,6 @@ class ApiError extends Error {
     }
   }
 
-  /// Creates a new ApiError instance using the response body and status code
-  ApiError(this.body, this.status) : jsonData = _decode(body) {
-    if (jsonData != null && jsonData.containsKey('code')) {
-      _code = jsonData['code'];
-    }
-  }
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -48,7 +48,6 @@ class ApiError extends Error {
       body.hashCode ^ jsonData.hashCode ^ status.hashCode ^ _code.hashCode;
 
   @override
-  String toString() {
-    return 'ApiError{body: $body, jsonData: $jsonData, status: $status, code: $_code}';
-  }
+  String toString() => 'ApiError{body: $body, jsonData: $jsonData, '
+      'status: $status, code: $_code}';
 }

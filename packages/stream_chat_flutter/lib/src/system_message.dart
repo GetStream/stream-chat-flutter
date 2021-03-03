@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// It shows a date divider depending on the date difference

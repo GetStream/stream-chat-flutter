@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/api/responses.dart';
+import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
-import 'client.dart';
-import 'extensions/string_extension.dart';
+import 'package:stream_chat/src/extensions/string_extension.dart';
 
 /// Class responsible for uploading images and files to a given channel
 abstract class AttachmentFileUploader {
@@ -57,10 +57,10 @@ abstract class AttachmentFileUploader {
 
 /// Stream's default implementation of [AttachmentFileUploader]
 class StreamAttachmentFileUploader implements AttachmentFileUploader {
-  final StreamChatClient _client;
-
   /// Creates a new [StreamAttachmentFileUploader] instance.
   const StreamAttachmentFileUploader(this._client);
+
+  final StreamChatClient _client;
 
   @override
   Future<SendImageResponse> sendImage(

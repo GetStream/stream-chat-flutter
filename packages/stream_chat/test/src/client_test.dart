@@ -188,7 +188,7 @@ void main() {
           }
         };
 
-        final query = 'hello';
+        const query = 'hello';
 
         final queryParams = {
           'payload': json.encode({

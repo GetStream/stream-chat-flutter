@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
 import 'package:stream_chat/src/debounce.dart';
@@ -13,13 +13,6 @@ import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import '../client.dart';
-import '../models/event.dart';
-import '../models/member.dart';
-import '../models/message.dart';
-import 'requests.dart';
-import 'responses.dart';
 
 /// This a the class that manages a specific channel.
 class Channel {
@@ -57,7 +50,8 @@ class Channel {
   set extraData(Map<String, dynamic> extraData) {
     if (_initializedCompleter.isCompleted) {
       throw Exception(
-          'Once the channel is initialized you should use channel.update to update channel data');
+          'Once the channel is initialized you should use channel.update '
+          'to update channel data');
     }
     _extraData = extraData;
   }
@@ -168,14 +162,15 @@ class Channel {
   final Completer<bool> _initializedCompleter = Completer();
 
   /// True if this is initialized
-  /// Call [watch] to initialize the client or instantiate it using [Channel.fromState]
+  /// Call [watch] to initialize the client or instantiate it using
+  /// [Channel.fromState]
   Future<bool> get initialized => _initializedCompleter.future;
 
   final _cancelableAttachmentUploadRequest = <String, CancelToken>{};
   final _messageAttachmentsUploadCompleter = <String, Completer>{};
 
-  /// Cancels [attachmentId] upload request. Throws exception if the request hasn't
-  /// even started yet, Already completed or Already cancelled.
+  /// Cancels [attachmentId] upload request. Throws exception if the request
+  /// hasn't even started yet, Already completed or Already cancelled.
   ///
   /// Optionally, provide a [reason] for the cancellation.
   void cancelAttachmentUpload(
@@ -185,7 +180,8 @@ class Channel {
     final cancelToken = _cancelableAttachmentUploadRequest[attachmentId];
     if (cancelToken == null) {
       throw Exception(
-        "Upload request for this Attachment hasn't started yet or else Already completed",
+        "Upload request for this Attachment hasn't started yet or else "
+        'Already completed',
       );
     }
     if (cancelToken.isCancelled) throw Exception('Already cancelled');
@@ -193,15 +189,14 @@ class Channel {
   }
 
   /// Retries the failed [attachmentId] upload request.
-  Future<void> retryAttachmentUpload(String messageId, String attachmentId) {
-    return _uploadAttachments(messageId, [attachmentId]);
-  }
+  Future<void> retryAttachmentUpload(String messageId, String attachmentId) =>
+      _uploadAttachments(messageId, [attachmentId]);
 
   Future<void> _uploadAttachments(
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    var message = state.messages.firstWhere(
+    final message = state.messages.firstWhere(
       (it) => it.id == messageId,
       orElse: () => null,
     );
@@ -228,9 +223,8 @@ class Channel {
       client.logger.info('Uploading ${it.id} attachment...');
 
       void updateAttachment(Attachment attachment) {
-        final index = message.attachments.indexWhere((it) {
-          return it.id == attachment.id;
-        });
+        final index =
+            message.attachments.indexWhere((it) => it.id == attachment.id);
         if (index != -1) {
           message.attachments[index] = attachment;
           state?.addMessage(message);
@@ -239,7 +233,7 @@ class Channel {
 
       void onSendProgress(int sent, int total) {
         debounce(
-          timeout: Duration(seconds: 1),
+          timeout: const Duration(seconds: 1),
           target: updateAttachment,
           positionalArguments: [
             it.copyWith(
@@ -270,11 +264,17 @@ class Channel {
         client.logger.info('Attachment ${it.id} uploaded successfully...');
         if (isImage) {
           updateAttachment(
-            it.copyWith(imageUrl: url, uploadState: UploadState.success()),
+            it.copyWith(
+              imageUrl: url,
+              uploadState: const UploadState.success(),
+            ),
           );
         } else {
           updateAttachment(
-            it.copyWith(assetUrl: url, uploadState: UploadState.success()),
+            it.copyWith(
+              assetUrl: url,
+              uploadState: const UploadState.success(),
+            ),
           );
         }
       }).catchError((e, stk) {
@@ -305,6 +305,7 @@ class Channel {
       (m) => m.id == message?.quotedMessageId,
       orElse: () => null,
     );
+    // ignore: parameter_assignments
     message = message.copyWith(
       createdAt: message.createdAt ?? DateTime.now(),
       user: _client.state.user,
@@ -313,7 +314,7 @@ class Channel {
       attachments: message.attachments?.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
-          return it.copyWith(uploadState: UploadState.preparing());
+          return it.copyWith(uploadState: const UploadState.preparing());
         },
       )?.toList(),
     );
@@ -340,6 +341,7 @@ class Channel {
           message.attachments.map((it) => it.id),
         ));
 
+        // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
       }
 
@@ -364,13 +366,14 @@ class Channel {
         .remove(message.id)
         ?.completeError('Message Cancelled');
 
+    // ignore: parameter_assignments
     message = message.copyWith(
       status: MessageSendingStatus.updating,
       updatedAt: message.updatedAt ?? DateTime.now(),
       attachments: message.attachments?.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
-          return it.copyWith(uploadState: UploadState.preparing());
+          return it.copyWith(uploadState: const UploadState.preparing());
         },
       )?.toList(),
     );
@@ -388,6 +391,7 @@ class Channel {
           message.attachments.map((it) => it.id),
         ));
 
+        // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
       }
 
@@ -423,6 +427,7 @@ class Channel {
     }
 
     try {
+      // ignore: parameter_assignments
       message = message.copyWith(
         type: 'deleted',
         status: MessageSendingStatus.deleting,
@@ -456,7 +461,7 @@ class Channel {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
-    }());
+    }(), 'Check for invalid token or expiration date');
 
     DateTime pinExpires;
     if (timeoutOrExpirationDate is DateTime) {
@@ -475,39 +480,36 @@ class Channel {
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(Message message) {
-    return updateMessage(message.copyWith(pinned: false));
-  }
+  Future<UpdateMessageResponse> unpinMessage(Message message) =>
+      updateMessage(message.copyWith(pinned: false));
 
   /// Send a file to this channel
   Future<SendFileResponse> sendFile(
     AttachmentFile file, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
-  }) {
-    return _client.sendFile(
-      file,
-      id,
-      type,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-  }
+  }) =>
+      _client.sendFile(
+        file,
+        id,
+        type,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
 
   /// Send an image to this channel
   Future<SendImageResponse> sendImage(
     AttachmentFile file, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
-  }) {
-    return _client.sendImage(
-      file,
-      id,
-      type,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-  }
+  }) =>
+      _client.sendImage(
+        file,
+        id,
+        type,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
 
   /// A message search.
   Future<SearchMessagesResponse> search({
@@ -515,35 +517,32 @@ class Channel {
     Map<String, dynamic> messageFilters,
     List<SortOption> sort,
     PaginationParams paginationParams,
-  }) {
-    return _client.search(
-      {
-        'cid': {
-          r'$in': [cid],
+  }) =>
+      _client.search(
+        {
+          'cid': {
+            r'$in': [cid],
+          },
         },
-      },
-      sort: sort,
-      query: query,
-      paginationParams: paginationParams,
-      messageFilters: messageFilters,
-    );
-  }
+        sort: sort,
+        query: query,
+        paginationParams: paginationParams,
+        messageFilters: messageFilters,
+      );
 
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(
     String url, {
     CancelToken cancelToken,
-  }) {
-    return _client.deleteFile(url, id, type, cancelToken: cancelToken);
-  }
+  }) =>
+      _client.deleteFile(url, id, type, cancelToken: cancelToken);
 
   /// Delete an image from this channel
   Future<EmptyResponse> deleteImage(
     String url, {
     CancelToken cancelToken,
-  }) {
-    return _client.deleteImage(url, id, type, cancelToken: cancelToken);
-  }
+  }) =>
+      _client.deleteImage(url, id, type, cancelToken: cancelToken);
 
   /// Send an event on this channel
   Future<EmptyResponse> sendEvent(Event event) {
@@ -551,9 +550,7 @@ class Channel {
     return _client.post(
       '$_channelURL/event',
       data: {'event': event.toJson()},
-    ).then((res) {
-      return _client.decode(res.data, EmptyResponse.fromJson);
-    });
+    ).then((res) => _client.decode(res.data, EmptyResponse.fromJson));
   }
 
   /// Send a reaction to this channel
@@ -643,11 +640,10 @@ class Channel {
     }
 
     final latestReactions = [...message.latestReactions ?? <Reaction>[]]
-      ..removeWhere((r) {
-        return r.userId == reaction.userId &&
-            r.type == reaction.type &&
-            r.messageId == reaction.messageId;
-      });
+      ..removeWhere((r) =>
+          r.userId == reaction.userId &&
+          r.type == reaction.type &&
+          r.messageId == reaction.messageId);
 
     final ownReactions = [...latestReactions ?? <Reaction>[]]
       ..removeWhere((it) => it.userId != user.id);
@@ -825,7 +821,7 @@ class Channel {
     })
       ..addAll(options);
 
-    var response;
+    ChannelState response;
 
     try {
       response = await query(options: watchOptions);
@@ -861,7 +857,8 @@ class Channel {
   }
 
   /// List the message replies for a parent message
-  /// Set [preferOffline] to true to avoid the api call if the data is already in the offline storage
+  /// Set [preferOffline] to true to avoid the api call if the data is already
+  /// in the offline storage
   Future<QueryRepliesResponse> getReplies(
     String parentId,
     PaginationParams options, {
@@ -940,16 +937,15 @@ class Channel {
   }
 
   /// Creates a new channel
-  Future<ChannelState> create() async {
-    return query(options: {
-      'watch': false,
-      'state': false,
-      'presence': false,
-    });
-  }
+  Future<ChannelState> create() async => query(options: {
+        'watch': false,
+        'state': false,
+        'presence': false,
+      });
 
   /// Query the API, get messages, members or other channel fields
-  /// Set [preferOffline] to true to avoid the api call if the data is already in the offline storage
+  /// Set [preferOffline] to true to avoid the api call if the data is already
+  /// in the offline storage
   Future<ChannelState> query({
     Map<String, dynamic> options = const {},
     PaginationParams messagesPagination,
@@ -1112,8 +1108,9 @@ class Channel {
     });
   }
 
-  /// Hides the channel from [StreamChatClient.queryChannels] for the user until a message is added
-  ///	If [clearHistory] is set to true - all messages will be removed for the user
+  /// Hides the channel from [StreamChatClient.queryChannels] for the user
+  /// until a message is added If [clearHistory] is set to true - all messages
+  /// will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();
     final response = await _client
@@ -1134,28 +1131,28 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  /// Stream of [Event] coming from websocket connection specific for the channel
-  /// Pass an eventType as parameter in order to filter just a type of event
+  /// Stream of [Event] coming from websocket connection specific for the
+  /// channel. Pass an eventType as parameter in order to filter just a type
+  /// of event
   Stream<Event> on([
     String eventType,
     String eventType2,
     String eventType3,
     String eventType4,
-  ]) {
-    return _client
-        .on(
-          eventType,
-          eventType2,
-          eventType3,
-          eventType4,
-        )
-        .where((e) => e.cid == cid);
-  }
+  ]) =>
+      _client
+          .on(
+            eventType,
+            eventType2,
+            eventType3,
+            eventType4,
+          )
+          .where((e) => e.cid == cid);
 
   DateTime _lastTypingEvent;
 
-  /// First of the [EventType.typingStart] and [EventType.typingStop] events based on the users keystrokes.
-  /// Call this on every keystroke.
+  /// First of the [EventType.typingStart] and [EventType.typingStop] events
+  /// based on the users keystrokes. Call this on every keystroke.
   Future<void> keyStroke([String parentId]) async {
     if (config?.typingEvents == false) {
       return;
@@ -1196,15 +1193,14 @@ class Channel {
   void _checkInitialized() {
     if (!_initializedCompleter.isCompleted) {
       throw Exception(
-          "Channel $cid hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [Channel.fromState]");
+          "Channel $cid hasn't been initialized yet. Make sure to call .watch()"
+          ' or to instantiate the client using [Channel.fromState]');
     }
   }
 }
 
 /// The class that handles the state of the channel listening to the events
 class ChannelClientState {
-  final _subscriptions = <StreamSubscription>[];
-
   /// Creates a new instance listening to events and updating the state
   ChannelClientState(this._channel, ChannelState channelState) {
     retryQueue = RetryQueue(
@@ -1252,13 +1248,15 @@ class ChannelClientState {
       _channel._client.chatPersistenceClient
           ?.getChannelStateByCid(_channel.cid)
           ?.then((state) {
-        // Replacing the persistence state members with the latest `channelState.members`
-        // as they may have changes over the time.
+        // Replacing the persistence state members with the latest
+        // `channelState.members` as they may have changes over the time.
         updateChannelState(state.copyWith(members: channelState.members));
         retryFailedMessages();
       });
     });
   }
+
+  final _subscriptions = <StreamSubscription>[];
 
   void _computeInitialUnread() {
     final userRead = channelState?.read?.firstWhere(
@@ -1338,8 +1336,8 @@ class ChannelClientState {
 
   /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
   /// This flag should be managed by UI sdks.
-  /// When false, any new message (received by WebSocket event - [EventType.messageNew]) will not
-  /// be pushed on to message list.
+  /// When false, any new message (received by WebSocket event
+  /// - [EventType.messageNew]) will not be pushed on to message list.
   bool get isUpToDate => _isUpToDateController.value;
 
   set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
@@ -1357,12 +1355,18 @@ class ChannelClientState {
   Future<void> retryFailedMessages() async {
     final failedMessages =
         <Message>[...messages, ...threads.values.expand((v) => v)]
-            .where((message) =>
-                message.status != null &&
-                message.status != MessageSendingStatus.sent &&
-                message.createdAt.isBefore(DateTime.now().subtract(Duration(
-                  seconds: 1,
-                ))))
+            .where(
+              (message) =>
+                  message.status != null &&
+                  message.status != MessageSendingStatus.sent &&
+                  message.createdAt.isBefore(
+                    DateTime.now().subtract(
+                      const Duration(
+                        seconds: 1,
+                      ),
+                    ),
+                  ),
+            )
             .toList();
 
     retryQueue.add(failedMessages);
@@ -1471,27 +1475,32 @@ class ChannelClientState {
       return;
     }
 
-    _subscriptions.add(_channel
-        .on(
-      EventType.messageRead,
-      EventType.notificationMarkRead,
-    )
-        .listen((event) {
-      final readList = List<Read>.from(_channelState?.read ?? []);
-      final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
+    _subscriptions.add(
+      _channel
+          .on(
+        EventType.messageRead,
+        EventType.notificationMarkRead,
+      )
+          .listen(
+        (event) {
+          final readList = List<Read>.from(_channelState?.read ?? []);
+          final userReadIndex =
+              read?.indexWhere((r) => r.user.id == event.user.id);
 
-      if (userReadIndex != null && userReadIndex != -1) {
-        final userRead = readList.removeAt(userReadIndex);
-        if (userRead.user?.id == _channel._client.state.user.id) {
-          _unreadCountController.add(0);
-        }
-        readList.add(Read(
-          user: event.user,
-          lastRead: event.createdAt,
-        ));
-        _channelState = _channelState.copyWith(read: readList);
-      }
-    }));
+          if (userReadIndex != null && userReadIndex != -1) {
+            final userRead = readList.removeAt(userReadIndex);
+            if (userRead.user?.id == _channel._client.state.user.id) {
+              _unreadCountController.add(0);
+            }
+            readList.add(Read(
+              user: event.user,
+              lastRead: event.createdAt,
+            ));
+            _channelState = _channelState.copyWith(read: readList);
+          }
+        },
+      ),
+    );
   }
 
   /// Channel message list
@@ -1527,11 +1536,8 @@ class ChannelClientState {
           List<Member>, Map<String, User>, List<Member>>(
         channelStateStream.map((cs) => cs.members),
         _channel.client.state.usersStream,
-        (members, users) {
-          return members
-              .map((e) => e.copyWith(user: users[e.user.id]))
-              .toList();
-        },
+        (members, users) =>
+            members.map((e) => e.copyWith(user: users[e.user.id])).toList(),
       );
 
   /// Channel watcher count
@@ -1551,9 +1557,7 @@ class ChannelClientState {
       CombineLatestStream.combine2<List<User>, Map<String, User>, List<User>>(
         channelStateStream.map((cs) => cs.watchers),
         _channel.client.state.usersStream,
-        (watchers, users) {
-          return watchers.map((e) => users[e.id] ?? e).toList();
-        },
+        (watchers, users) => watchers.map((e) => users[e.id] ?? e).toList(),
       );
 
   /// Channel read list
@@ -1625,9 +1629,7 @@ class ChannelClientState {
                   true)
               ?.toList() ??
           [],
-    ];
-
-    newMessages.sort(_sortByCreatedAt);
+    ]..sort(_sortByCreatedAt);
 
     final newWatchers = <User>[
       ...updatedState?.watchers ?? [],
@@ -1692,10 +1694,9 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-
     if (_channel._client.persistenceEnabled) {
       debounce(
-        timeout: Duration(milliseconds: 500),
+        timeout: const Duration(milliseconds: 500),
         target: _channel._client.chatPersistenceClient?.updateChannelState,
         positionalArguments: [v],
       );
@@ -1735,28 +1736,37 @@ class ChannelClientState {
       return;
     }
 
-    _subscriptions.add(_channel.on(EventType.typingStart).listen((event) {
-      if (event.user.id != _channel.client.state.user.id) {
-        _typings[event.user] = DateTime.now();
-        _typingEventsController.add(_typings.keys.toList());
-      }
-    }));
-
-    _subscriptions.add(_channel.on(EventType.typingStop).listen((event) {
-      if (event.user.id != _channel.client.state.user.id) {
-        _typings.remove(event.user);
-        _typingEventsController.add(_typings.keys.toList());
-      }
-    }));
+    _subscriptions
+      ..add(
+        _channel.on(EventType.typingStart).listen(
+          (event) {
+            if (event.user.id != _channel.client.state.user.id) {
+              _typings[event.user] = DateTime.now();
+              _typingEventsController.add(_typings.keys.toList());
+            }
+          },
+        ),
+      )
+      ..add(
+        _channel.on(EventType.typingStop).listen(
+          (event) {
+            if (event.user.id != _channel.client.state.user.id) {
+              _typings.remove(event.user);
+              _typingEventsController.add(_typings.keys.toList());
+            }
+          },
+        ),
+      );
   }
 
   Timer _cleaningTimer;
+
   void _startCleaning() {
     if (_channel.config?.typingEvents == false) {
       return;
     }
 
-    _cleaningTimer = Timer.periodic(Duration(seconds: 1), (_) {
+    _cleaningTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       final now = DateTime.now();
 
       if (_channel._lastTypingEvent != null &&
@@ -1769,8 +1779,9 @@ class ChannelClientState {
   }
 
   Timer _pinnedMessagesTimer;
+
   void _startCleaningPinnedMessages() {
-    _pinnedMessagesTimer = Timer.periodic(Duration(seconds: 30), (_) {
+    _pinnedMessagesTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       final now = DateTime.now();
       var expiredMessages = channelState.pinnedMessages
               ?.where((m) => m.pinExpires?.isBefore(now) == true)
@@ -1781,8 +1792,6 @@ class ChannelClientState {
             .map((m) => m.copyWith(
                   pinExpires: null,
                   pinned: false,
-                  pinnedAt: null,
-                  pinnedBy: null,
                 ))
             .toList();
 

@@ -1,6 +1,7 @@
-import 'user.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 /// Used to avoid to serialize properties to json
+// ignore: prefer_void_to_null
 Null readonly(_) => null;
 
 /// Helper class for serialization to and from json
@@ -9,9 +10,8 @@ class Serialization {
   static const Function readOnly = readonly;
 
   /// List of users to list of userIds
-  static List<String> userIds(List<User> users) {
-    return users?.map((u) => u.id)?.toList();
-  }
+  static List<String> userIds(List<User> users) =>
+      users?.map((u) => u.id)?.toList();
 
   /// Takes unknown json keys and puts them in the `extra_data` key
   static Map<String, dynamic> moveToExtraDataFromRoot(
@@ -34,7 +34,8 @@ class Serialization {
       });
   }
 
-  /// Takes values in `extra_data` key and puts them on the root level of the json map
+  /// Takes values in `extra_data` key and puts them on the root level of
+  /// the json map
   static Map<String, dynamic> moveFromExtraDataToRoot(
     Map<String, dynamic> json,
     List<String> topLevelFields,
