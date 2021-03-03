@@ -5,7 +5,6 @@ import 'package:stream_chat/src/extensions/map_extension.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/channel.dart';
 import 'package:stream_chat/src/api/connection_status.dart';
@@ -510,7 +509,7 @@ class StreamChatClient {
 
       if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        unawaited(queryChannelsOnline(filter: {
+        queryChannelsOnline(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
@@ -522,7 +521,7 @@ class StreamChatClient {
               online: true,
             ));
           },
-        ));
+        );
       } else {
         _synced = false;
       }

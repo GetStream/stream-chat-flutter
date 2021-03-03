@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
 import 'package:stream_chat/src/debounce.dart';
@@ -336,10 +335,10 @@ class Channel {
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
 
-        unawaited(_uploadAttachments(
+        _uploadAttachments(
           message.id,
           message.attachments.map((it) => it.id),
-        ));
+        );
 
         // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
@@ -386,10 +385,10 @@ class Channel {
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
 
-        unawaited(_uploadAttachments(
+        _uploadAttachments(
           message.id,
           message.attachments.map((it) => it.id),
-        ));
+        );
 
         // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
