@@ -143,6 +143,9 @@ class MessageWidget extends StatefulWidget {
   /// Function called when quotedMessage is tapped
   final OnQuotedMessageTap onQuotedMessageTap;
 
+  /// Function called when message is tapped
+  final void Function(Message) onMessageTap;
+
   ///
   MessageWidget({
     Key key,
@@ -157,6 +160,7 @@ class MessageWidget extends StatefulWidget {
     this.borderRadiusGeometry,
     this.attachmentBorderRadiusGeometry,
     this.onMentionTap,
+    this.onMessageTap,
     this.showReactionPickerIndicator = false,
     this.showUserAvatar = DisplayWidget.show,
     this.showSendingIndicator = true,
@@ -311,6 +315,9 @@ class _MessageWidgetState extends State<MessageWidget>
       type: MaterialType.transparency,
       child: Portal(
         child: InkWell(
+          onTap: () {
+            widget.onMessageTap(widget.message);
+          },
           onLongPress: widget.message.isDeleted && !isFailedState
               ? null
               : () => onLongPress(context),

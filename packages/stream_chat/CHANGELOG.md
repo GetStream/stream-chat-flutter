@@ -1,3 +1,7 @@
+## 1.3.2+1-beta
+
+- Fixed queryChannels bug
+
 ## 1.3.1-beta
 
 - Debounced frequent db calls

@@ -348,7 +348,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)
@@ -413,7 +413,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:stream_chat/src/extensions/map_extension.dart';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
@@ -367,7 +368,7 @@ class StreamChatClient {
   Map<String, String> get _httpHeaders => {
         'Authorization': token,
         'stream-auth-type': _authType,
-        'x-stream-client': _userAgent,
+        'X-Stream-Client': _userAgent,
         'Content-Encoding': 'gzip',
       };
 
@@ -488,7 +489,7 @@ class StreamChatClient {
         'api_key': apiKey,
         'authorization': token,
         'stream-auth-type': _authType,
-        'x-stream-client': _userAgent,
+        'X-Stream-Client': _userAgent,
       },
       connectPayload: {
         'user_id': state.user.id,
@@ -628,7 +629,9 @@ class StreamChatClient {
         options: options,
         paginationParams: paginationParams,
         messageLimit: messageLimit,
-      );
+      ).whenComplete(() {
+        _queryChannelsStreams.remove(hash);
+      });
 
       _queryChannelsStreams[hash] = newQueryChannelsFuture;
 
@@ -1046,7 +1049,7 @@ class StreamChatClient {
       'query': query,
       'sort': sort,
       if (paginationParams != null) ...paginationParams.toJson(),
-    };
+    }.nullProtected;
 
     final response = await get('/search', queryParameters: {
       'payload': json.encode(payload),
