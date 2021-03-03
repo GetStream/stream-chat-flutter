@@ -4,17 +4,40 @@ import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/serialization.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import '../event_type.dart';
-import 'member.dart';
-import 'own_user.dart';
-import 'reaction.dart';
-import 'user.dart';
-
 part 'event.g.dart';
 
 /// The class that contains the information about an event
 @JsonSerializable()
 class Event {
+  /// Constructor used for json serialization
+  Event({
+    this.type,
+    this.cid,
+    this.connectionId,
+    this.createdAt,
+    this.me,
+    this.user,
+    this.message,
+    this.totalUnreadCount,
+    this.unreadChannels,
+    this.reaction,
+    this.online,
+    this.channel,
+    this.member,
+    this.channelId,
+    this.channelType,
+    this.parentId,
+    this.extraData,
+  }) : isLocal = true;
+
+  /// Create a new instance from a json
+  factory Event.fromJson(Map<String, dynamic> json) =>
+      _$EventFromJson(Serialization.moveToExtraDataFromRoot(
+        json,
+        topLevelFields,
+      ))
+        ..isLocal = false;
+
   /// The type of the event
   /// [EventType] contains some predefined constant types
   final String type;
@@ -71,27 +94,6 @@ class Event {
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
-  /// Constructor used for json serialization
-  Event({
-    this.type,
-    this.cid,
-    this.connectionId,
-    this.createdAt,
-    this.me,
-    this.user,
-    this.message,
-    this.totalUnreadCount,
-    this.unreadChannels,
-    this.reaction,
-    this.online,
-    this.channel,
-    this.member,
-    this.channelId,
-    this.channelType,
-    this.parentId,
-    this.extraData,
-  }) : isLocal = true;
-
   /// Known top level fields.
   /// Useful for [Serialization] methods.
   static final topLevelFields = [
@@ -114,15 +116,6 @@ class Event {
     'is_local',
   ];
 
-  /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return _$EventFromJson(Serialization.moveToExtraDataFromRoot(
-      json,
-      topLevelFields,
-    ))
-      ..isLocal = false;
-  }
-
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$EventToJson(this),
@@ -133,16 +126,6 @@ class Event {
 /// The channel embedded in the event object
 @JsonSerializable()
 class EventChannel extends ChannelModel {
-  /// A paginated list of channel members
-  final List<Member> members;
-
-  /// Known top level fields.
-  /// Useful for [Serialization] methods.
-  static final topLevelFields = [
-    'members',
-    ...ChannelModel.topLevelFields,
-  ];
-
   /// Constructor used for json serialization
   EventChannel({
     this.members,
@@ -174,12 +157,21 @@ class EventChannel extends ChannelModel {
         );
 
   /// Create a new instance from a json
-  factory EventChannel.fromJson(Map<String, dynamic> json) {
-    return _$EventChannelFromJson(Serialization.moveToExtraDataFromRoot(
-      json,
-      topLevelFields,
-    ));
-  }
+  factory EventChannel.fromJson(Map<String, dynamic> json) =>
+      _$EventChannelFromJson(Serialization.moveToExtraDataFromRoot(
+        json,
+        topLevelFields,
+      ));
+
+  /// A paginated list of channel members
+  final List<Member> members;
+
+  /// Known top level fields.
+  /// Useful for [Serialization] methods.
+  static final topLevelFields = [
+    'members',
+    ...ChannelModel.topLevelFields,
+  ];
 
   /// Serialize to json
   @override

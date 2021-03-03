@@ -1,10 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/models/attachment.dart';
+import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/src/models/serialization.dart';
+import 'package:stream_chat/src/models/user.dart';
 import 'package:uuid/uuid.dart';
-
-import 'attachment.dart';
-import 'reaction.dart';
-import 'serialization.dart';
-import 'user.dart';
 
 part 'message.g.dart';
 
@@ -29,9 +28,11 @@ enum MessageSendingStatus {
   failed,
 
   /// Message failed to updated
+  // ignore: constant_identifier_names
   failed_update,
 
   /// Message failed to delete
+  // ignore: constant_identifier_names
   failed_delete,
 
   /// Message correctly sent
@@ -41,7 +42,45 @@ enum MessageSendingStatus {
 /// The class that contains the information about a message
 @JsonSerializable()
 class Message {
-  /// The message ID. This is either created by Stream or set client side when the message is added.
+  /// Constructor used for json serialization
+  Message({
+    String id,
+    this.text,
+    this.type,
+    this.attachments,
+    this.mentionedUsers,
+    this.silent,
+    this.shadowed,
+    this.reactionCounts,
+    this.reactionScores,
+    this.latestReactions,
+    this.ownReactions,
+    this.parentId,
+    this.quotedMessage,
+    this.quotedMessageId,
+    this.replyCount = 0,
+    this.threadParticipants,
+    this.showInChannel,
+    this.command,
+    this.createdAt,
+    this.updatedAt,
+    this.user,
+    this.pinned = false,
+    this.pinnedAt,
+    DateTime pinExpires,
+    this.pinnedBy,
+    this.extraData,
+    this.deletedAt,
+    this.status = MessageSendingStatus.sent,
+  })  : id = id ?? Uuid().v4(),
+        pinExpires = pinExpires?.toUtc();
+
+  /// Create a new instance from a json
+  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+
+  /// The message ID. This is either created by Stream or set client side when
+  /// the message is added.
   final String id;
 
   /// The text of this message
@@ -55,7 +94,8 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String type;
 
-  /// The list of attachments, either provided by the user or generated from a command or as a result of URL scraping.
+  /// The list of attachments, either provided by the user or generated from a
+  /// command or as a result of URL scraping.
   @JsonKey(includeIfNull: false)
   final List<Attachment> attachments;
 
@@ -188,43 +228,6 @@ class Message {
     'pinned_by',
   ];
 
-  /// Constructor used for json serialization
-  Message({
-    String id,
-    this.text,
-    this.type,
-    this.attachments,
-    this.mentionedUsers,
-    this.silent,
-    this.shadowed,
-    this.reactionCounts,
-    this.reactionScores,
-    this.latestReactions,
-    this.ownReactions,
-    this.parentId,
-    this.quotedMessage,
-    this.quotedMessageId,
-    this.replyCount = 0,
-    this.threadParticipants,
-    this.showInChannel,
-    this.command,
-    this.createdAt,
-    this.updatedAt,
-    this.user,
-    this.pinned = false,
-    this.pinnedAt,
-    DateTime pinExpires,
-    this.pinnedBy,
-    this.extraData,
-    this.deletedAt,
-    this.status = MessageSendingStatus.sent,
-  })  : id = id ?? Uuid().v4(),
-        pinExpires = pinExpires?.toUtc();
-
-  /// Create a new instance from a json
-  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
-
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
       _$MessageToJson(this), topLevelFields);
@@ -267,7 +270,7 @@ class Message {
         throw ArgumentError('`pinExpires` can only be set as DateTime or null');
       }
       return true;
-    }());
+    }(), 'Validate type for pinExpires');
     return Message(
       id: id ?? this.id,
       text: text ?? this.text,
@@ -300,8 +303,8 @@ class Message {
     );
   }
 
-  /// Returns a new [Message] that is a combination of this message and the given
-  /// [other] message.
+  /// Returns a new [Message] that is a combination of this message and the
+  /// given [other] message.
   Message merge(Message other) {
     if (other == null) return this;
     return copyWith(
@@ -344,6 +347,12 @@ class TranslatedMessage extends Message {
   /// Constructor used for json serialization
   TranslatedMessage(this.i18n);
 
+  /// Create a new instance from a json
+  factory TranslatedMessage.fromJson(Map<String, dynamic> json) =>
+      _$TranslatedMessageFromJson(
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields),
+      );
+
   /// A Map of
   final Map<String, String> i18n;
 
@@ -353,13 +362,6 @@ class TranslatedMessage extends Message {
     'i18n',
     ...Message.topLevelFields,
   ];
-
-  /// Create a new instance from a json
-  factory TranslatedMessage.fromJson(Map<String, dynamic> json) {
-    return _$TranslatedMessageFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields),
-    );
-  }
 
   /// Serialize to json
   @override

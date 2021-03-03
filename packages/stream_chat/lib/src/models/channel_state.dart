@@ -1,16 +1,26 @@
 import 'package:json_annotation/json_annotation.dart';
-
-import '../models/read.dart';
-import '../models/user.dart';
-import 'channel_model.dart';
-import 'member.dart';
-import 'message.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/member.dart';
+import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/models/read.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 part 'channel_state.g.dart';
 
 /// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelState {
+  /// Constructor used for json serialization
+  ChannelState({
+    this.channel,
+    this.messages = const [],
+    this.members = const [],
+    this.pinnedMessages = const [],
+    this.watcherCount,
+    this.watchers = const [],
+    this.read = const [],
+  });
+
   /// The channel to which this state belongs
   final ChannelModel channel;
 
@@ -31,17 +41,6 @@ class ChannelState {
 
   /// The list of channel reads
   final List<Read> read;
-
-  /// Constructor used for json serialization
-  ChannelState({
-    this.channel,
-    this.messages = const [],
-    this.members = const [],
-    this.pinnedMessages = const [],
-    this.watcherCount,
-    this.watchers = const [],
-    this.read = const [],
-  });
 
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) =>

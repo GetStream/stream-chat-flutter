@@ -1,15 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/device.dart';
 import 'package:stream_chat/src/models/event.dart';
-
-import '../models/channel_model.dart';
-import '../models/channel_state.dart';
-import '../models/member.dart';
-import '../models/message.dart';
-import '../models/reaction.dart';
-import '../models/read.dart';
-import '../models/user.dart';
+import 'package:stream_chat/src/models/member.dart';
+import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/src/models/read.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 part 'responses.g.dart';
 

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_chat/src/api/channel.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
@@ -12,12 +12,6 @@ import 'package:stream_chat/stream_chat.dart';
 
 /// The retry queue associated to a channel
 class RetryQueue {
-  /// The channel of this queue
-  final Channel channel;
-
-  /// The logger associated to this queue
-  final Logger logger;
-
   /// Instantiate a new RetryQueue object
   RetryQueue({
     @required this.channel,
@@ -29,6 +23,12 @@ class RetryQueue {
 
     _listenFailedEvents();
   }
+
+  /// The channel of this queue
+  final Channel channel;
+
+  /// The logger associated to this queue
+  final Logger logger;
 
   final _subscriptions = <StreamSubscription>[];
 
