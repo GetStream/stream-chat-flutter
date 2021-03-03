@@ -304,7 +304,7 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
@@ -1903,14 +1903,12 @@ class MessageInputState extends State<MessageInput> {
 
     if (file == null) return;
 
-    final mimeType = file.path.split('/').last.mimeType;
+    final mimeType = file.name?.mimeType;
 
     final extraDataMap = <String, dynamic>{};
 
-    if (camera) {
-      if (mimeType.type == 'video' || mimeType.type == 'image') {
-        attachmentType = mimeType.type;
-      }
+    if (mimeType.type == 'video' || mimeType.type == 'image') {
+      attachmentType = mimeType.type;
     } else {
       attachmentType = 'file';
     }

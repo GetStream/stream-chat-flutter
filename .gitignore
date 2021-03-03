@@ -45,7 +45,7 @@ build/
 .project
 .classpath
 .settings
-/.fvm
+**/.fvm
 
 .melos_tool/
 /packages/flutter_widgets/example/ios/Flutter/.last_build_id

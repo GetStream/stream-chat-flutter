@@ -70,16 +70,28 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   }) async {
-    final filename = file.path?.split('/')?.last;
+    final filename = file.path?.split('/')?.last ?? file.name;
     final mimeType = filename.mimeType;
+
+    MultipartFile multiPartFile;
+    if (file.path != null) {
+      multiPartFile = await MultipartFile.fromFile(
+        file.path,
+        filename: filename,
+        contentType: mimeType,
+      );
+    } else if (file.bytes != null) {
+      multiPartFile = MultipartFile.fromBytes(
+        file.bytes,
+        filename: filename,
+        contentType: mimeType,
+      );
+    }
+
     final response = await _client.post(
       '/channels/$channelType/$channelId/image',
       data: FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: filename,
-          contentType: mimeType,
-        ),
+        'file': multiPartFile,
       }),
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
@@ -95,16 +107,28 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
   }) async {
-    final filename = file.path?.split('/')?.last;
+    final filename = file.path?.split('/')?.last ?? file.name;
     final mimeType = filename.mimeType;
+
+    MultipartFile multiPartFile;
+    if (file.path != null) {
+      multiPartFile = await MultipartFile.fromFile(
+        file.path,
+        filename: filename,
+        contentType: mimeType,
+      );
+    } else if (file.bytes != null) {
+      multiPartFile = MultipartFile.fromBytes(
+        file.bytes,
+        filename: filename,
+        contentType: mimeType,
+      );
+    }
+
     final response = await _client.post(
       '/channels/$channelType/$channelId/file',
       data: FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: filename,
-          contentType: mimeType,
-        ),
+        'file': multiPartFile,
       }),
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,

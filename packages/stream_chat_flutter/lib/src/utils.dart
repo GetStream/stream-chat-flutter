@@ -36,63 +36,65 @@ Future<bool> showConfirmationDialog(
       )),
       builder: (context) {
         final effect = StreamChatTheme.of(context).colorTheme.borderTop;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 26.0),
-            if (icon != null) icon,
-            SizedBox(height: 26.0),
-            Text(
-              title,
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-            SizedBox(height: 7.0),
-            Text(
-              question,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 36.0),
-            Container(
-              color: effect.color.withOpacity(effect.alpha ?? 1),
-              height: 1,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  child: Text(
-                    cancelText,
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .bodyBold
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(0.5)),
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 26.0),
+              if (icon != null) icon,
+              SizedBox(height: 26.0),
+              Text(
+                title,
+                style: StreamChatTheme.of(context).textTheme.headlineBold,
+              ),
+              SizedBox(height: 7.0),
+              Text(
+                question,
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 36.0),
+              Container(
+                color: effect.color.withOpacity(effect.alpha ?? 1),
+                height: 1,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    child: Text(
+                      cancelText,
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .bodyBold
+                          .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5)),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                TextButton(
-                  child: Text(
-                    okText,
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .bodyBold
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentRed),
+                  TextButton(
+                    child: Text(
+                      okText,
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .bodyBold
+                          .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentRed),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
                   ),
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         );
       });
 }

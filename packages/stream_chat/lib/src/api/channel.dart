@@ -277,6 +277,7 @@ class Channel {
           );
         }
       }).catchError((e, stk) {
+        client.logger.severe('error uploading the attachment', e, stk);
         updateAttachment(
           it.copyWith(uploadState: UploadState.failed(error: e.toString())),
         );
