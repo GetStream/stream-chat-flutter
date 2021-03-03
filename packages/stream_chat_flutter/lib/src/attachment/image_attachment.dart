@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_upload_state_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import 'attachment_title.dart';
 import '../full_screen_media.dart';
@@ -51,11 +52,32 @@ class ImageAttachment extends AttachmentWidget {
         );
       },
       network: () {
-        final imageUrl =
+        var imageUrl =
             attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+
         if (imageUrl == null) {
           return AttachmentError(size: size);
         }
+
+        var imageUri = Uri.parse(imageUrl);
+        if (imageUri.host == 'stream-io-cdn.com') {
+          imageUri = imageUri.replace(queryParameters: {
+            ...imageUri.queryParameters,
+            'height': '500',
+            'width': '500',
+            'crop': 'center',
+            'resize': 'crop',
+          });
+        } else if (imageUri.host == 'stream-cloud-uploads.imgix.net') {
+          imageUri = imageUri.replace(queryParameters: {
+            ...imageUri.queryParameters,
+            'height': '500',
+            'width': '500',
+            'fit': 'crop',
+          });
+        }
+        imageUrl = imageUri.toString();
+
         return _buildImageAttachment(
           context,
           CachedNetworkImage(
@@ -65,9 +87,7 @@ class ImageAttachment extends AttachmentWidget {
               return Container(
                 width: size?.width,
                 height: size?.height,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: Image.memory(kTransparentImage),
               );
             },
             imageUrl: imageUrl,
