@@ -45,7 +45,7 @@ class StreamChatThemeData {
   /// The text themes used in the widgets
   final TextTheme textTheme;
 
-  /// The text themes used in the widgets
+  /// The color themes used in the widgets
   final ColorTheme colorTheme;
 
   /// Theme of the [ChannelPreview]
