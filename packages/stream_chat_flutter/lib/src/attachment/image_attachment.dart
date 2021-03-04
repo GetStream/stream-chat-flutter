@@ -63,8 +63,8 @@ class ImageAttachment extends AttachmentWidget {
         if (imageUri.host == 'stream-io-cdn.com') {
           imageUri = imageUri.replace(queryParameters: {
             ...imageUri.queryParameters,
-            'height': '500',
-            'width': '500',
+            'h': '500',
+            'w': '500',
             'crop': 'center',
             'resize': 'crop',
           });
