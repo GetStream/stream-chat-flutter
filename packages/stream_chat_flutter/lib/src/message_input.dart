@@ -113,6 +113,7 @@ class MessageInput extends StatefulWidget {
     this.quotedMessage,
     this.onQuotedMessageCleared,
     this.sendButtonLocation = SendButtonLocation.outside,
+    this.autofocus = false,
   }) : super(key: key);
 
   /// Message to edit
@@ -163,6 +164,9 @@ class MessageInput extends StatefulWidget {
 
   /// The location of the send button
   final SendButtonLocation sendButtonLocation;
+
+  ///
+  final bool autofocus;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -488,7 +492,7 @@ class MessageInputState extends State<MessageInput> {
                       controller: textEditingController,
                       focusNode: _focusNode,
                       style: theme.messageInputTheme.inputTextStyle,
-                      autofocus: false,
+                      autofocus: widget.autofocus,
                       textAlignVertical: TextAlignVertical.center,
                       decoration: _getInputDecoration(),
                       textCapitalization: TextCapitalization.sentences,
