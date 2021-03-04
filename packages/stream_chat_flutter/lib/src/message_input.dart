@@ -114,6 +114,7 @@ class MessageInput extends StatefulWidget {
     this.onQuotedMessageCleared,
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
+    this.hideSendAsDm = false,
   }) : super(key: key);
 
   /// Message to edit
@@ -140,6 +141,9 @@ class MessageInput extends StatefulWidget {
 
   /// If true the attachments button will not be displayed
   final bool disableAttachments;
+
+  /// Hide send as dm checkbox
+  final bool hideSendAsDm;
 
   /// The text controller of the TextField
   final TextEditingController textEditingController;
@@ -294,7 +298,7 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.all(8.0),
                 child: _buildTextField(context),
               ),
-              if (widget.parentMessage != null)
+              if (widget.parentMessage != null && !widget.hideSendAsDm)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: _buildDmCheckbox(),
@@ -323,10 +327,10 @@ class MessageInputState extends State<MessageInput> {
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
-        if (widget.sendButtonLocation == SendButtonLocation.outside)
-          _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          _animateSendButton(context),
       ],
     );
   }
@@ -702,7 +706,9 @@ class MessageInputState extends State<MessageInput> {
             .last
             .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
-      Overlay.of(context).insert(_mentionsOverlay);
+      if (_mentionsOverlay != null) {
+        Overlay.of(context).insert(_mentionsOverlay);
+      }
     }
   }
 
@@ -727,7 +733,9 @@ class MessageInputState extends State<MessageInput> {
         _commandsOverlay = null;
       } else {
         _commandsOverlay = _buildCommandsOverlayEntry();
-        Overlay.of(context).insert(_commandsOverlay);
+        if (_commandsOverlay != null) {
+          Overlay.of(context).insert(_commandsOverlay);
+        }
       }
     }
   }
@@ -741,6 +749,10 @@ class MessageInputState extends State<MessageInput> {
             ?.where((c) => c.name.contains(text.replaceFirst('/', '')))
             ?.toList() ??
         [];
+
+    if (commands.isEmpty) {
+      return null;
+    }
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -1271,6 +1283,10 @@ class MessageInputState extends State<MessageInput> {
           return m.user.name.toLowerCase().contains(query);
         })?.toList() ??
         [];
+
+    if (members.isEmpty) {
+      return null;
+    }
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;

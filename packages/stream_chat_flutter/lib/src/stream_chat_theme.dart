@@ -51,6 +51,9 @@ class StreamChatThemeData {
   /// Theme of the [ChannelPreview]
   final ChannelPreviewTheme channelPreviewTheme;
 
+  /// Theme of the [ChannelListHeader]
+  final ChannelListHeaderTheme channelListHeaderTheme;
+
   /// Theme of the chat widgets dedicated to a channel
   final ChannelTheme channelTheme;
 
@@ -79,6 +82,7 @@ class StreamChatThemeData {
   const StreamChatThemeData({
     this.textTheme,
     this.colorTheme,
+    this.channelListHeaderTheme,
     this.channelPreviewTheme,
     this.channelTheme,
     this.otherMessageTheme,
@@ -98,9 +102,7 @@ class StreamChatThemeData {
         accentBlue: theme.accentColor,
       ),
       defaultTheme.textTheme,
-    ).copyWith(
-        // primaryIconTheme: theme.primaryIconTheme,
-        );
+    );
     return defaultTheme.merge(customizedTheme) ?? customizedTheme;
   }
 
@@ -116,9 +118,12 @@ class StreamChatThemeData {
     Widget Function(BuildContext, Channel) defaultChannelImage,
     Widget Function(BuildContext, User) defaultUserImage,
     IconThemeData primaryIconTheme,
+    ChannelListHeaderTheme channelListHeaderTheme,
     List<ReactionIcon> reactionIcons,
   }) =>
       StreamChatThemeData(
+        channelListHeaderTheme:
+            channelListHeaderTheme ?? this.channelListHeaderTheme,
         textTheme: textTheme ?? this.textTheme,
         colorTheme: colorTheme ?? this.colorTheme,
         primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
@@ -135,6 +140,9 @@ class StreamChatThemeData {
   StreamChatThemeData merge(StreamChatThemeData other) {
     if (other == null) return this;
     return copyWith(
+      channelListHeaderTheme:
+          channelListHeaderTheme?.merge(other.channelListHeaderTheme) ??
+              other.channelListHeaderTheme,
       textTheme: textTheme?.merge(other.textTheme) ?? other.textTheme,
       colorTheme: colorTheme?.merge(other.colorTheme) ?? other.colorTheme,
       primaryIconTheme: other.primaryIconTheme,
@@ -189,6 +197,17 @@ class StreamChatThemeData {
             color: colorTheme.black.withOpacity(.5),
           ),
           indicatorIconSize: 16.0),
+      channelListHeaderTheme: ChannelListHeaderTheme(
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
+          ),
+        ),
+        color: colorTheme.white,
+        title: textTheme.headlineBold,
+      ),
       channelTheme: ChannelTheme(
         channelHeaderTheme: ChannelHeaderTheme(
           avatarTheme: AvatarTheme(
@@ -850,6 +869,39 @@ class ChannelHeaderTheme {
     return copyWith(
       title: title?.merge(other.title) ?? other.title,
       subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
+      avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
+      color: other.color,
+    );
+  }
+}
+
+class ChannelListHeaderTheme {
+  final TextStyle title;
+  final AvatarTheme avatarTheme;
+  final Color color;
+
+  const ChannelListHeaderTheme({
+    this.title,
+    this.avatarTheme,
+    this.color,
+  });
+
+  ChannelListHeaderTheme copyWith({
+    TextStyle title,
+    TextStyle subtitle,
+    AvatarTheme avatarTheme,
+    Color color,
+  }) =>
+      ChannelListHeaderTheme(
+        title: title ?? this.title,
+        avatarTheme: avatarTheme ?? this.avatarTheme,
+        color: color ?? this.color,
+      );
+
+  ChannelListHeaderTheme merge(ChannelListHeaderTheme other) {
+    if (other == null) return this;
+    return copyWith(
+      title: title?.merge(other.title) ?? other.title,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       color: other.color,
     );
