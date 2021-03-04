@@ -72,6 +72,7 @@ class Message {
     this.extraData,
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
+    this.skipPush,
   })  : id = id ?? Uuid().v4(),
         pinExpires = pinExpires?.toUtc();
 
@@ -142,6 +143,9 @@ class Message {
 
   /// If true the message is silent
   final bool silent;
+
+  /// If true the message will not send a push notification
+  final bool skipPush;
 
   /// If true the message is shadowed
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -226,6 +230,7 @@ class Message {
     'pinned_at',
     'pin_expires',
     'pinned_by',
+    'skip_push',
   ];
 
   /// Serialize to json
@@ -262,6 +267,7 @@ class Message {
     User pinnedBy,
     Map<String, dynamic> extraData,
     MessageSendingStatus status,
+    bool skipPush,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -300,6 +306,7 @@ class Message {
       pinnedAt: pinnedAt ?? this.pinnedAt,
       pinnedBy: pinnedBy ?? this.pinnedBy,
       pinExpires: pinExpires == _pinExpires ? this.pinExpires : pinExpires,
+      skipPush: skipPush ?? this.skipPush,
     );
   }
 

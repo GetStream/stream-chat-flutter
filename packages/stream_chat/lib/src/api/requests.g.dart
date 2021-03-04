@@ -6,7 +6,7 @@ part of 'requests.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Map<String, dynamic> _$SortOptionToJson(SortOption instance) =>
+Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
     <String, dynamic>{
       'field': instance.field,
       'direction': instance.direction,
