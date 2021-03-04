@@ -57,7 +57,7 @@ class ChannelInfo extends StatelessWidget {
         style: StreamChatTheme.of(context)
             .channelTheme
             .channelHeaderTheme
-            .lastMessageAt,
+            .subtitle,
       );
     } else {
       final otherMember = members.firstWhere(
@@ -72,7 +72,7 @@ class ChannelInfo extends StatelessWidget {
             style: StreamChatTheme.of(context)
                 .channelTheme
                 .channelHeaderTheme
-                .lastMessageAt,
+                .subtitle,
           );
         } else {
           alternativeWidget = Text(

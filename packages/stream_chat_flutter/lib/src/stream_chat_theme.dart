@@ -254,6 +254,19 @@ class StreamChatThemeData {
         sendButtonColor: colorTheme.accentBlue,
         sendButtonIdleColor: colorTheme.greyGainsboro,
         inputBackground: colorTheme.white,
+        inputTextStyle: textTheme.body,
+        idleBorderGradient: LinearGradient(
+          colors: [
+            colorTheme.greyGainsboro,
+            colorTheme.greyGainsboro,
+          ],
+        ),
+        activeBorderGradient: LinearGradient(
+          colors: [
+            colorTheme.greyGainsboro,
+            colorTheme.greyGainsboro,
+          ],
+        ),
       ),
       reactionIcons: [
         ReactionIcon(
@@ -863,6 +876,18 @@ class MessageInputTheme {
   /// Background color of [MessageInput]
   final Color inputBackground;
 
+  /// TextStyle of [MessageInput]
+  final TextStyle inputTextStyle;
+
+  /// InputDecoration of [MessageInput]
+  final InputDecoration inputDecoration;
+
+  /// Border gradient when the [MessageInput] is not focused
+  final Gradient idleBorderGradient;
+
+  /// Border gradient when the [MessageInput] is focused
+  final Gradient activeBorderGradient;
+
   /// Returns a new [MessageInputTheme]
   const MessageInputTheme({
     this.sendAnimationDuration,
@@ -871,6 +896,10 @@ class MessageInputTheme {
     this.actionButtonIdleColor,
     this.sendButtonIdleColor,
     this.inputBackground,
+    this.inputTextStyle,
+    this.inputDecoration,
+    this.activeBorderGradient,
+    this.idleBorderGradient,
   });
 
   /// Returns a new [MessageInputTheme] replacing some of its properties
@@ -881,6 +910,10 @@ class MessageInputTheme {
     Color sendButtonColor,
     Color actionButtonIdleColor,
     Color sendButtonIdleColor,
+    TextStyle inputTextStyle,
+    InputDecoration inputDecoration,
+    Gradient activeBorderGradient,
+    Gradient idleBorderGradient,
   }) =>
       MessageInputTheme(
         sendAnimationDuration:
@@ -890,7 +923,11 @@ class MessageInputTheme {
         sendButtonColor: sendButtonColor ?? this.sendButtonColor,
         actionButtonIdleColor:
             actionButtonIdleColor ?? this.actionButtonIdleColor,
+        inputTextStyle: inputTextStyle ?? this.inputTextStyle,
         sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
+        inputDecoration: inputDecoration ?? this.inputDecoration,
+        activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
+        idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
       );
 
   /// Merges [this] [MessageInputTheme] with the [other]
@@ -903,6 +940,10 @@ class MessageInputTheme {
       actionButtonIdleColor: other.actionButtonIdleColor,
       sendButtonColor: other.sendButtonColor,
       sendButtonIdleColor: other.sendButtonIdleColor,
+      inputTextStyle: other.inputTextStyle,
+      inputDecoration: other.inputDecoration,
+      activeBorderGradient: other.activeBorderGradient,
+      idleBorderGradient: other.idleBorderGradient,
     );
   }
 }

@@ -432,7 +432,7 @@ class _MessageListViewState extends State<MessageListView> {
                             style: StreamChatTheme.of(context)
                                 .channelTheme
                                 .channelHeaderTheme
-                                .lastMessageAt,
+                                .subtitle,
                           ),
                         ),
                       );

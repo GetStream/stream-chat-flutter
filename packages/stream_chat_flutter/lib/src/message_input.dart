@@ -42,6 +42,11 @@ enum DefaultAttachmentTypes {
   file,
 }
 
+enum SendButtonLocation {
+  inside,
+  outside,
+}
+
 const _kMinMediaPickerSize = 360.0;
 
 const _kMaxAttachmentSize = 20971520; // 20MB in Bytes
@@ -107,6 +112,7 @@ class MessageInput extends StatefulWidget {
     this.focusNode,
     this.quotedMessage,
     this.onQuotedMessageCleared,
+    this.sendButtonLocation = SendButtonLocation.outside,
   }) : super(key: key);
 
   /// Message to edit
@@ -154,6 +160,9 @@ class MessageInput extends StatefulWidget {
 
   ///
   final VoidCallback onQuotedMessageCleared;
+
+  /// The location of the send button
+  final SendButtonLocation sendButtonLocation;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -310,7 +319,8 @@ class MessageInputState extends State<MessageInput> {
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
-        _animateSendButton(context),
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
       ],
@@ -448,97 +458,164 @@ class MessageInputState extends State<MessageInput> {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: theme.colorTheme.greyGainsboro),
+            gradient: _focusNode.hasFocus
+                ? theme.messageInputTheme.activeBorderGradient
+                : theme.messageInputTheme.idleBorderGradient,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildReplyToMessage(),
-              _buildAttachments(),
-              LimitedBox(
-                maxHeight: widget.maxHeight,
-                child: TextField(
-                  key: Key('messageInputText'),
-                  enabled: _inputEnabled,
-                  minLines: null,
-                  maxLines: null,
-                  onSubmitted: (_) => sendMessage(),
-                  keyboardType: widget.keyboardType,
-                  controller: textEditingController,
-                  focusNode: _focusNode,
-                  style: theme.textTheme.body,
-                  autofocus: false,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: _getHint(),
-                    hintStyle: theme.textTheme.body.copyWith(
-                      color: theme.colorTheme.grey,
+          child: Padding(
+            padding: const EdgeInsets.all(1.5),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color: theme.messageInputTheme.inputBackground,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildReplyToMessage(),
+                  _buildAttachments(),
+                  LimitedBox(
+                    maxHeight: widget.maxHeight,
+                    child: TextField(
+                      key: Key('messageInputText'),
+                      enabled: _inputEnabled,
+                      minLines: null,
+                      maxLines: null,
+                      onSubmitted: (_) => sendMessage(),
+                      keyboardType: widget.keyboardType,
+                      controller: textEditingController,
+                      focusNode: _focusNode,
+                      style: theme.messageInputTheme.inputTextStyle,
+                      autofocus: false,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _getInputDecoration(),
+                      textCapitalization: TextCapitalization.sentences,
                     ),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
-                    prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
-                    suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
-                    prefixIcon: _commandEnabled
-                        ? Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: theme.colorTheme.accentBlue,
-                            ),
-                            margin: const EdgeInsets.only(right: 4, left: 8),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                StreamSvgIcon.lightning(
-                                  color: Colors.white,
-                                  size: 16.0,
-                                ),
-                                Text(
-                                  _chosenCommand?.name?.toUpperCase() ?? '',
-                                  style: StreamChatTheme.of(context)
-                                      .textTheme
-                                      .footnoteBold
-                                      .copyWith(
-                                        color: Colors.white,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : null,
-                    suffixIcon: _commandEnabled
-                        ? IconButton(
-                            icon: StreamSvgIcon.closeSmall(),
-                            splashRadius: 24,
-                            padding: const EdgeInsets.all(0),
-                            constraints: BoxConstraints.tightFor(
-                              height: 24,
-                              width: 24,
-                            ),
-                            onPressed: () {
-                              setState(() => _commandEnabled = false);
-                            },
-                          )
-                        : null,
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  InputDecoration _getInputDecoration() {
+    final theme = StreamChatTheme.of(context);
+    final passedDecoration = theme.messageInputTheme.inputDecoration;
+    return InputDecoration(
+      isDense: true,
+      hintText: _getHint(),
+      hintStyle: theme.messageInputTheme.inputTextStyle.copyWith(
+        color: theme.colorTheme.grey,
+      ),
+      border:
+          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      focusedBorder:
+          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      enabledBorder:
+          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      errorBorder:
+          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      disabledBorder:
+          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
+      prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
+      suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
+      prefixIcon: _commandEnabled
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: theme.colorTheme.accentBlue,
+              ),
+              margin: const EdgeInsets.only(right: 4, left: 8),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  StreamSvgIcon.lightning(
+                    color: Colors.white,
+                    size: 16.0,
+                  ),
+                  Text(
+                    _chosenCommand?.name?.toUpperCase() ?? '',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnoteBold
+                        .copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                ],
+              ),
+            )
+          : null,
+      suffixIcon: Row(
+        children: [
+          if (_commandEnabled)
+            IconButton(
+              icon: StreamSvgIcon.closeSmall(),
+              splashRadius: 24,
+              padding: const EdgeInsets.all(0),
+              constraints: BoxConstraints.tightFor(
+                height: 24,
+                width: 24,
+              ),
+              onPressed: () {
+                setState(() => _commandEnabled = false);
+              },
+            ),
+          if (widget.sendButtonLocation == SendButtonLocation.inside)
+            _animateSendButton(context),
+        ],
+      ),
+    ).copyWith(
+      icon: passedDecoration?.icon,
+      labelText: passedDecoration?.labelText,
+      labelStyle: passedDecoration?.labelStyle,
+      helperText: passedDecoration?.helperText,
+      helperStyle: passedDecoration?.helperStyle,
+      helperMaxLines: passedDecoration?.helperMaxLines,
+      hintText: passedDecoration?.hintText,
+      hintStyle: passedDecoration?.hintStyle,
+      hintTextDirection: passedDecoration?.hintTextDirection,
+      hintMaxLines: passedDecoration?.hintMaxLines,
+      errorText: passedDecoration?.errorText,
+      errorStyle: passedDecoration?.errorStyle,
+      errorMaxLines: passedDecoration?.errorMaxLines,
+      floatingLabelBehavior: passedDecoration?.floatingLabelBehavior,
+      isCollapsed: passedDecoration?.isCollapsed,
+      isDense: passedDecoration?.isDense,
+      contentPadding: passedDecoration?.contentPadding,
+      prefixIcon: passedDecoration?.prefixIcon,
+      prefix: passedDecoration?.prefix,
+      prefixText: passedDecoration?.prefixText,
+      prefixIconConstraints: passedDecoration?.prefixIconConstraints,
+      prefixStyle: passedDecoration?.prefixStyle,
+      suffixIcon: passedDecoration?.suffixIcon,
+      suffix: passedDecoration?.suffix,
+      suffixText: passedDecoration?.suffixText,
+      suffixStyle: passedDecoration?.suffixStyle,
+      suffixIconConstraints: passedDecoration?.suffixIconConstraints,
+      counter: passedDecoration?.counter,
+      counterText: passedDecoration?.counterText,
+      counterStyle: passedDecoration?.counterStyle,
+      filled: passedDecoration?.filled,
+      fillColor: passedDecoration?.fillColor,
+      focusColor: passedDecoration?.focusColor,
+      hoverColor: passedDecoration?.hoverColor,
+      errorBorder: passedDecoration?.errorBorder,
+      focusedBorder: passedDecoration?.focusedBorder,
+      focusedErrorBorder: passedDecoration?.focusedErrorBorder,
+      disabledBorder: passedDecoration?.disabledBorder,
+      enabledBorder: passedDecoration?.enabledBorder,
+      border: passedDecoration?.border,
+      enabled: passedDecoration?.enabled,
+      semanticCounterText: passedDecoration?.semanticCounterText,
+      alignLabelWithHint: passedDecoration?.alignLabelWithHint,
     );
   }
 
