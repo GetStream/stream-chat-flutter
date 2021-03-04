@@ -926,6 +926,7 @@ class MessageInputState extends State<MessageInput> {
       child: Material(
         color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,

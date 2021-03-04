@@ -637,21 +637,16 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   ],
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: widget.editMessageInputBuilder != null
-                    ? widget.editMessageInputBuilder(context, widget.message)
-                    : MessageInput(
-                        editMessage: widget.message,
-                        preMessageSending: (m) {
-                          FocusScope.of(context).unfocus();
-                          Navigator.pop(context);
-                          return m;
-                        },
-                      ),
-              ),
+              widget.editMessageInputBuilder != null
+                  ? widget.editMessageInputBuilder(context, widget.message)
+                  : MessageInput(
+                      editMessage: widget.message,
+                      preMessageSending: (m) {
+                        FocusScope.of(context).unfocus();
+                        Navigator.pop(context);
+                        return m;
+                      },
+                    ),
             ],
           ),
         );
