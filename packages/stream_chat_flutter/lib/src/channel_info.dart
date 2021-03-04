@@ -69,10 +69,7 @@ class ChannelInfo extends StatelessWidget {
         if (otherMember.user.online) {
           alternativeWidget = Text(
             'Online',
-            style: StreamChatTheme.of(context)
-                .channelTheme
-                .channelHeaderTheme
-                .subtitle,
+            style: textStyle,
           );
         } else {
           alternativeWidget = Text(
