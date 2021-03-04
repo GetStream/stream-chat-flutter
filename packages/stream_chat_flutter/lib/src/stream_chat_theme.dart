@@ -60,7 +60,7 @@ class StreamChatThemeData {
   /// Theme of other users messages
   final MessageTheme otherMessageTheme;
 
-  /// Theme of other users messages
+  /// Theme dedicated to the [MessageInput] widget
   final MessageInputTheme messageInputTheme;
 
   /// The widget that will be built when the channel image is unavailable
@@ -200,9 +200,8 @@ class StreamChatThemeData {
           ),
           color: colorTheme.white,
           title: textTheme.headlineBold,
-          lastMessageAt: TextStyle(
-            fontSize: 11,
-            color: colorTheme.black.withOpacity(.5),
+          subtitle: textTheme.footnote.copyWith(
+            color: Color(0xff7A7A7A),
           ),
         ),
       ),
@@ -809,26 +808,26 @@ class ChannelPreviewTheme {
 
 class ChannelHeaderTheme {
   final TextStyle title;
-  final TextStyle lastMessageAt;
+  final TextStyle subtitle;
   final AvatarTheme avatarTheme;
   final Color color;
 
   const ChannelHeaderTheme({
     this.title,
-    this.lastMessageAt,
+    this.subtitle,
     this.avatarTheme,
     this.color,
   });
 
   ChannelHeaderTheme copyWith({
     TextStyle title,
-    TextStyle lastMessageAt,
+    TextStyle subtitle,
     AvatarTheme avatarTheme,
     Color color,
   }) =>
       ChannelHeaderTheme(
         title: title ?? this.title,
-        lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+        subtitle: subtitle ?? this.subtitle,
         avatarTheme: avatarTheme ?? this.avatarTheme,
         color: color ?? this.color,
       );
@@ -837,8 +836,7 @@ class ChannelHeaderTheme {
     if (other == null) return this;
     return copyWith(
       title: title?.merge(other.title) ?? other.title,
-      lastMessageAt:
-          lastMessageAt?.merge(other.lastMessageAt) ?? other.lastMessageAt,
+      subtitle: subtitle?.merge(other.subtitle) ?? other.subtitle,
       avatarTheme: avatarTheme?.merge(other.avatarTheme) ?? other.avatarTheme,
       color: other.color,
     );

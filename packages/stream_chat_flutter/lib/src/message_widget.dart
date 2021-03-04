@@ -958,6 +958,7 @@ class _MessageWidgetState extends State<MessageWidget>
             user: widget.message.user,
             onTap: widget.onUserAvatarTap,
             constraints: widget.messageTheme.avatarTheme.constraints,
+            borderRadius: widget.messageTheme.avatarTheme.borderRadius,
             showOnlineStatus: false,
           ),
         ),
