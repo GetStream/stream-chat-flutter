@@ -1275,11 +1275,16 @@ class ChannelClientState {
             m.attachments?.isNotEmpty == true &&
             m.attachments?.any((e) {
                   final url = e.imageUrl ?? e.assetUrl;
-                  if (url == null || !url.contains('stream-io-cdn.com')) {
+                  if (url == null || !url.contains('')) {
+                    return false;
+                  }
+                  final uri = Uri.parse(url);
+                  if (uri.host != 'stream-io-cdn.com' ||
+                      uri.queryParameters['Expires'] == null) {
                     return false;
                   }
                   final expiration =
-                      DateTime.parse(Uri.parse(url).queryParameters['Expires']);
+                      DateTime.parse(uri.queryParameters['Expires']);
                   return expiration.isBefore(DateTime.now());
                 }) ==
                 true)
