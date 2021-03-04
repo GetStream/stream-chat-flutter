@@ -930,116 +930,25 @@ class MessageInputState extends State<MessageInput> {
                     color: StreamChatTheme.of(context).colorTheme.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: _buildPickerSection(),
+                  child: _PickerWidget(
+                    filePickerIndex: _filePickerIndex,
+                    containsFile: _attachmentContainsFile,
+                    selectedMedias: _attachments.keys.toList(),
+                    onAddMoreFilesClick: pickFile,
+                    onMediaSelected: (media) {
+                      if (_attachments.containsKey(media.id)) {
+                        setState(() => _attachments.remove(media.id));
+                      } else {
+                        _addAttachment(media);
+                      }
+                    },
+                  ),
                 ),
               ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildPickerSection() {
-    final _attachmentContainsFile = _attachments.values.any((it) {
-      return it.type == 'file';
-    });
-
-    switch (_filePickerIndex) {
-      case 0:
-        return FutureBuilder<bool>(
-            future: PhotoManager.requestPermission(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              if (snapshot.data) {
-                if (_attachmentContainsFile) {
-                  return GestureDetector(
-                    onTap: () {
-                      pickFile(DefaultAttachmentTypes.file);
-                    },
-                    child: Container(
-                      constraints: BoxConstraints.expand(),
-                      color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                      child: Text(
-                        'Add more files',
-                        style: TextStyle(
-                          color:
-                              StreamChatTheme.of(context).colorTheme.accentBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                    ),
-                  );
-                }
-                return MediaListView(
-                  selectedIds: _attachments.keys.toList(),
-                  onSelect: (media) async {
-                    if (!_attachments.containsKey(media.id)) {
-                      _addAttachment(media);
-                    } else {
-                      setState(() => _attachments.remove(media.id));
-                    }
-                  },
-                );
-              }
-
-              return InkWell(
-                onTap: () async {
-                  PhotoManager.openSetting();
-                },
-                child: Container(
-                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SvgPicture.asset(
-                        'svgs/icon_picture_empty_state.svg',
-                        package: 'stream_chat_flutter',
-                        height: 140,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
-                      ),
-                      Text(
-                        'Please enable access to your photos \nand videos so you can share them with friends.',
-                        style: StreamChatTheme.of(context)
-                            .textTheme
-                            .body
-                            .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .grey),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 6.0),
-                      Center(
-                        child: Text(
-                          'Allow access to your gallery',
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .accentBlue,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            });
-        break;
-      default:
-        return SizedBox();
-    }
   }
 
   void _addAttachment(AssetEntity medium) async {
@@ -2237,4 +2146,115 @@ class Tuple2<T1, T2> {
 
   @override
   int get hashCode => item1.hashCode ^ item2.hashCode;
+}
+
+class _PickerWidget extends StatefulWidget {
+  final int filePickerIndex;
+  final bool containsFile;
+  final List<String> selectedMedias;
+  final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
+  final void Function(AssetEntity) onMediaSelected;
+
+  const _PickerWidget({
+    Key key,
+    @required this.filePickerIndex,
+    @required this.containsFile,
+    @required this.selectedMedias,
+    @required this.onAddMoreFilesClick,
+    @required this.onMediaSelected,
+  }) : super(key: key);
+
+  @override
+  __PickerWidgetState createState() => __PickerWidgetState();
+}
+
+class __PickerWidgetState extends State<_PickerWidget> {
+  Future<bool> requestPermission;
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermission = PhotoManager.requestPermission();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.filePickerIndex != 0) {
+      return Offstage();
+    }
+    return FutureBuilder<bool>(
+        future: requestPermission,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.data) {
+            if (widget.containsFile) {
+              return GestureDetector(
+                onTap: () {
+                  widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
+                },
+                child: Container(
+                  constraints: BoxConstraints.expand(),
+                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                  child: Text(
+                    'Add more files',
+                    style: TextStyle(
+                      color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                ),
+              );
+            }
+            return MediaListView(
+              selectedIds: widget.selectedMedias,
+              onSelect: widget.onMediaSelected,
+            );
+          }
+
+          return InkWell(
+            onTap: () async {
+              PhotoManager.openSetting();
+            },
+            child: Container(
+              color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SvgPicture.asset(
+                    'svgs/icon_picture_empty_state.svg',
+                    package: 'stream_chat_flutter',
+                    height: 140,
+                    color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  ),
+                  Text(
+                    'Please enable access to your photos \nand videos so you can share them with friends.',
+                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                        color: StreamChatTheme.of(context).colorTheme.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 6.0),
+                  Center(
+                    child: Text(
+                      'Allow access to your gallery',
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .bodyBold
+                          .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 }
