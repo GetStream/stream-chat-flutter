@@ -104,6 +104,14 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
 
+    final leadingWidget = leading ??
+        (showBackButton
+            ? StreamBackButton(
+                onPressed: onBackPressed,
+                showUnreads: true,
+              )
+            : SizedBox());
+
     return ConnectionStatusBuilder(
       statusBuilder: (context, status) {
         var statusString = '';
@@ -128,13 +136,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
           child: AppBar(
             brightness: Theme.of(context).brightness,
             elevation: 1,
-            leading: leading ??
-                (showBackButton
-                    ? StreamBackButton(
-                        onPressed: onBackPressed,
-                        showUnreads: true,
-                      )
-                    : SizedBox()),
+            leading: leadingWidget,
             backgroundColor: StreamChatTheme.of(context)
                 .channelTheme
                 .channelHeaderTheme

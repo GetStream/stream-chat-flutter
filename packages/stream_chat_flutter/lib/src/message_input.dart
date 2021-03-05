@@ -42,8 +42,12 @@ enum DefaultAttachmentTypes {
   file,
 }
 
+/// Available locations for the sendMessage button relative to the textField
 enum SendButtonLocation {
+  /// inside the textField
   inside,
+
+  /// outside the textField
   outside,
 }
 
@@ -520,16 +524,31 @@ class MessageInputState extends State<MessageInput> {
       hintStyle: theme.messageInputTheme.inputTextStyle.copyWith(
         color: theme.colorTheme.grey,
       ),
-      border:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      focusedBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      enabledBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      errorBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
-      disabledBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
       contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
       prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
       suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),

@@ -875,17 +875,25 @@ class ChannelHeaderTheme {
   }
 }
 
+/// Theme dedicated to the [ChannelListHeader]
 class ChannelListHeaderTheme {
+  ///
   final TextStyle title;
+
+  ///
   final AvatarTheme avatarTheme;
+
+  /// Background color of the appbar
   final Color color;
 
+  /// Returns a new [ChannelListHeaderTheme]
   const ChannelListHeaderTheme({
     this.title,
     this.avatarTheme,
     this.color,
   });
 
+  /// Returns a new [ChannelListHeaderTheme] replacing some of its properties
   ChannelListHeaderTheme copyWith({
     TextStyle title,
     TextStyle subtitle,
@@ -898,6 +906,7 @@ class ChannelListHeaderTheme {
         color: color ?? this.color,
       );
 
+  /// Merges [this] [ChannelListHeaderTheme] with the [other]
   ChannelListHeaderTheme merge(ChannelListHeaderTheme other) {
     if (other == null) return this;
     return copyWith(
