@@ -414,13 +414,19 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _animateSendButton(BuildContext context) {
+    final sendButton = widget.activeSendButton != null
+        ? InkWell(
+            child: widget.activeSendButton,
+            onTap: sendMessage,
+          )
+        : _buildSendButton(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: AnimatedCrossFade(
         crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
-        firstChild: widget.activeSendButton ?? _buildSendButton(context),
+        firstChild: sendButton,
         secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
         duration:
             StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
