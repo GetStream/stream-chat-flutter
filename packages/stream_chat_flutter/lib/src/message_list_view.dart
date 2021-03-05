@@ -36,6 +36,7 @@ typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
 typedef OnMessageSwiped = void Function(Message);
+typedef OnMessageTap = void Function(Message);
 typedef ReplyTapCallback = void Function(Message);
 
 class MessageDetails {
@@ -223,10 +224,10 @@ class MessageListView extends StatefulWidget {
   final Map<String, AttachmentBuilder> customAttachmentBuilders;
 
   /// Called when any message is tapped except a system message (use [onSystemMessageTap] instead)
-  final void Function(Message) onMessageTap;
+  final OnMessageTap onMessageTap;
 
   /// Called when system message is tapped
-  final void Function(Message) onSystemMessageTap;
+  final OnMessageTap onSystemMessageTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
