@@ -63,6 +63,9 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
+  /// Callback to call when the title is tapped.
+  final VoidCallback onTitleTap;
+
   /// The message parent of this thread
   final Message parent;
 
@@ -88,6 +91,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     this.subtitle,
     this.leading,
     this.actions,
+    this.onTitleTap,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -109,43 +113,49 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
       centerTitle: true,
       actions: actions,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          title ??
-              Text(
-                'Thread Reply',
-                style: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .title,
-              ),
-          SizedBox(height: 2),
-          subtitle ??
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+      title: InkWell(
+        onTap: onTitleTap,
+        child: Container(
+          height: preferredSize.height,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              title ??
                   Text(
-                    'with ',
+                    'Thread Reply',
                     style: StreamChatTheme.of(context)
                         .channelTheme
                         .channelHeaderTheme
-                        .subtitle,
+                        .title,
                   ),
-                  Flexible(
-                    child: ChannelName(
-                      textStyle: StreamChatTheme.of(context)
-                          .channelTheme
-                          .channelHeaderTheme
-                          .subtitle,
-                    ),
+              SizedBox(height: 2),
+              subtitle ??
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'with ',
+                        style: StreamChatTheme.of(context)
+                            .channelTheme
+                            .channelHeaderTheme
+                            .subtitle,
+                      ),
+                      Flexible(
+                        child: ChannelName(
+                          textStyle: StreamChatTheme.of(context)
+                              .channelTheme
+                              .channelHeaderTheme
+                              .subtitle,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
