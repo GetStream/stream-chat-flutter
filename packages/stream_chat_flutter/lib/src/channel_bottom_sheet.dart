@@ -238,8 +238,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
         color: StreamChatTheme.of(context).colorTheme.accentRed,
       ),
     );
-    var channel = StreamChannel.of(context).channel;
     if (res == true) {
+      final channel = StreamChannel.of(context).channel;
       await channel.removeMembers([StreamChat.of(context).user.id]);
       Navigator.pop(context);
     }
