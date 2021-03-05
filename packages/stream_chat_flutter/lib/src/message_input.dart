@@ -175,7 +175,7 @@ class MessageInput extends StatefulWidget {
   /// The location of the send button
   final SendButtonLocation sendButtonLocation;
 
-  ///
+  /// Autofocus property passed to the TextField
   final bool autofocus;
 
   /// Send button widget in an idle state
