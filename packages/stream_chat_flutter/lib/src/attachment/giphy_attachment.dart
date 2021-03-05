@@ -348,10 +348,10 @@ class GiphyAttachment extends AttachmentWidget {
               height: size?.height,
               width: size?.width,
               placeholder: (_, __) {
-                return Container(
-                  width: size?.width,
-                  height: size?.height,
-                  child: Image.memory(kTransparentImage),
+                return Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
                 );
               },
               imageUrl: imageUrl,
