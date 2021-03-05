@@ -1761,6 +1761,31 @@ class ChannelClientState {
             }
           },
         ),
+      )
+      ..add(
+        _channel
+            .on()
+            .where((event) =>
+                event.user != null &&
+                members?.any((m) => m.userId == event.user.id) == true)
+            .listen(
+          (event) {
+            final newMembers = List<Member>.from(members);
+            final oldMemberIndex =
+                newMembers.indexWhere((m) => m.userId == event.user.id);
+            if (oldMemberIndex > -1) {
+              final oldMember = newMembers.removeAt(oldMemberIndex);
+              updateChannelState(ChannelState(
+                members: [
+                  ...newMembers,
+                  oldMember.copyWith(
+                    user: event.user,
+                  ),
+                ],
+              ));
+            }
+          },
+        ),
       );
   }
 
