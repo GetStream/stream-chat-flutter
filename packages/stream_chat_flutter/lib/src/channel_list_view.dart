@@ -393,16 +393,17 @@ class _ChannelListViewState extends State<ChannelListView> {
           subtitle: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: StreamChatTheme.of(context).colorTheme.white,
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  constraints: BoxConstraints.tightFor(
-                    height: 16,
-                    width: 238,
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: StreamChatTheme.of(context).colorTheme.white,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    constraints: BoxConstraints.expand(
+                      height: 16,
+                    ),
                   ),
                 ),
               ),
