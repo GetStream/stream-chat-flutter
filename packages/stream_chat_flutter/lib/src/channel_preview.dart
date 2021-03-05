@@ -70,6 +70,7 @@ class ChannelPreview extends StatelessWidget {
           return Opacity(
             opacity: snapshot.data ? 0.5 : 1,
             child: ListTile(
+              visualDensity: VisualDensity.compact,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8,
               ),
