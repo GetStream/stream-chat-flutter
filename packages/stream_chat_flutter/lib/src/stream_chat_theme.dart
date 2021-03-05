@@ -267,6 +267,7 @@ class StreamChatThemeData {
         ),
       ),
       messageInputTheme: MessageInputTheme(
+        borderRadius: BorderRadius.circular(20),
         sendAnimationDuration: Duration(milliseconds: 300),
         actionButtonColor: colorTheme.accentBlue,
         actionButtonIdleColor: colorTheme.grey,
@@ -949,6 +950,9 @@ class MessageInputTheme {
   /// Border gradient when the [MessageInput] is focused
   final Gradient activeBorderGradient;
 
+  /// Border radius of [MessageInput]
+  final BorderRadius borderRadius;
+
   /// Returns a new [MessageInputTheme]
   const MessageInputTheme({
     this.sendAnimationDuration,
@@ -961,6 +965,7 @@ class MessageInputTheme {
     this.inputDecoration,
     this.activeBorderGradient,
     this.idleBorderGradient,
+    this.borderRadius,
   });
 
   /// Returns a new [MessageInputTheme] replacing some of its properties
@@ -975,6 +980,7 @@ class MessageInputTheme {
     InputDecoration inputDecoration,
     Gradient activeBorderGradient,
     Gradient idleBorderGradient,
+    BorderRadius borderRadius,
   }) =>
       MessageInputTheme(
         sendAnimationDuration:
@@ -989,6 +995,7 @@ class MessageInputTheme {
         inputDecoration: inputDecoration ?? this.inputDecoration,
         activeBorderGradient: activeBorderGradient ?? this.activeBorderGradient,
         idleBorderGradient: idleBorderGradient ?? this.idleBorderGradient,
+        borderRadius: borderRadius ?? this.borderRadius,
       );
 
   /// Merges [this] [MessageInputTheme] with the [other]
@@ -1005,6 +1012,7 @@ class MessageInputTheme {
       inputDecoration: other.inputDecoration,
       activeBorderGradient: other.activeBorderGradient,
       idleBorderGradient: other.idleBorderGradient,
+      borderRadius: other.borderRadius,
     );
   }
 }

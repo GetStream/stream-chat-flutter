@@ -119,6 +119,8 @@ class MessageInput extends StatefulWidget {
     this.sendButtonLocation = SendButtonLocation.outside,
     this.autofocus = false,
     this.hideSendAsDm = false,
+    this.idleSendButton,
+    this.activeSendButton,
   }) : super(key: key);
 
   /// Message to edit
@@ -175,6 +177,12 @@ class MessageInput extends StatefulWidget {
 
   ///
   final bool autofocus;
+
+  /// Send button widget in an idle state
+  final Widget idleSendButton;
+
+  /// Send button widget in an active state
+  final Widget activeSendButton;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -412,8 +420,8 @@ class MessageInputState extends State<MessageInput> {
         crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
-        firstChild: _buildSendButton(context),
-        secondChild: _buildIdleSendButton(context),
+        firstChild: widget.activeSendButton ?? _buildSendButton(context),
+        secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
         duration:
             StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
         alignment: Alignment.center,
@@ -469,7 +477,7 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: theme.messageInputTheme.borderRadius,
             gradient: _focusNode.hasFocus
                 ? theme.messageInputTheme.activeBorderGradient
                 : theme.messageInputTheme.idleBorderGradient,
@@ -479,7 +487,7 @@ class MessageInputState extends State<MessageInput> {
             child: Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.0),
+                borderRadius: theme.messageInputTheme.borderRadius,
                 color: theme.messageInputTheme.inputBackground,
               ),
               child: Column(
