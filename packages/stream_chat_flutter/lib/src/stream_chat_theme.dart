@@ -878,10 +878,10 @@ class ChannelHeaderTheme {
 
 /// Theme dedicated to the [ChannelListHeader]
 class ChannelListHeaderTheme {
-  ///
+  /// Style of the title text
   final TextStyle title;
 
-  ///
+  /// Theme dedicated to the userAvatar
   final AvatarTheme avatarTheme;
 
   /// Background color of the appbar
