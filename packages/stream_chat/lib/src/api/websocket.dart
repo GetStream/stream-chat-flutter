@@ -2,28 +2,29 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-
-import '../models/event.dart';
-import '../models/user.dart';
-import 'connection_status.dart';
-import 'web_socket_channel_stub.dart'
+import 'package:stream_chat/src/api/connection_status.dart';
+import 'package:stream_chat/src/api/web_socket_channel_stub.dart'
     if (dart.library.html) 'web_socket_channel_html.dart'
     if (dart.library.io) 'web_socket_channel_io.dart';
+import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/user.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// Typedef which exposes an [Event] as the only parameter.
 typedef EventHandler = void Function(Event);
 
-/// Typedef used for connecting to a websocket. Method returns a  [WebSocketChannel]
-/// and accepts a connection [url] and an optional [Iterable] of `protocols`.
+/// Typedef used for connecting to a websocket. Method returns a
+/// [WebSocketChannel] and accepts a connection [url] and an optional
+/// [Iterable] of `protocols`.
 typedef ConnectWebSocket = WebSocketChannel Function(String url,
     {Iterable<String> protocols});
 
 // TODO: parse error even
-// TODO: if parsing an error into an event fails we should not hide the original error
+// TODO: if parsing an error into an event fails we should not hide the
+// TODO: original error
 /// A WebSocket connection that reconnects upon failure.
 class WebSocket {
   /// Creates a new websocket
@@ -75,7 +76,8 @@ class WebSocket {
   /// WS connection payload
   final Map<String, dynamic> connectPayload;
 
-  /// Functions that will be called every time a new event is received from the connection
+  /// Functions that will be called every time a new event is received from the
+  /// connection
   final EventHandler handler;
 
   /// A WS specific logger instance
@@ -87,8 +89,9 @@ class WebSocket {
   final ConnectWebSocket connectFunc;
 
   /// Interval of the reconnection monitor timer
-  /// This checks that it received a new event in the last [reconnectionMonitorTimeout] seconds,
-  /// otherwise it considers the connection unhealthy and reconnects the WS
+  /// This checks that it received a new event in the last
+  /// [reconnectionMonitorTimeout] seconds, otherwise it considers the
+  /// connection unhealthy and reconnects the WS
   final int reconnectionMonitorInterval;
 
   /// Interval of the health event sending timer
@@ -96,7 +99,8 @@ class WebSocket {
   /// make the server aware that the client is still listening
   final int healthCheckInterval;
 
-  /// The timeout that uses the reconnection monitor timer to consider the connection unhealthy
+  /// The timeout that uses the reconnection monitor timer to consider the
+  /// connection unhealthy
   final int reconnectionMonitorTimeout;
 
   final _connectionStatusController =
@@ -121,9 +125,7 @@ class WebSocket {
       _connecting = false,
       _reconnecting = false;
 
-  Event _decodeEvent(String source) {
-    return Event.fromJson(json.decode(source));
-  }
+  Event _decodeEvent(String source) => Event.fromJson(json.decode(source));
 
   Completer<Event> _connectionCompleter = Completer<Event>();
 
@@ -166,8 +168,8 @@ class WebSocket {
       return;
     }
 
-    logger.info(
-        'connection closed | closeCode: ${_channel.closeCode} | closedReason: ${_channel.closeReason}');
+    logger.info('connection closed | closeCode: ${_channel.closeCode} | '
+        'closedReason: ${_channel.closeReason}');
 
     if (!_reconnecting) {
       _reconnect();
@@ -200,8 +202,7 @@ class WebSocket {
   }
 
   Future<void> _onConnectionError(error, [stacktrace]) async {
-    logger.severe('error connecting');
-    logger.severe(error);
+    logger..severe('error connecting')..severe(error);
     if (stacktrace != null) {
       logger.severe(stacktrace);
     }
@@ -219,21 +220,21 @@ class WebSocket {
     }
   }
 
-  void _startReconnectionMonitor() {
-    final reconnectionTimer = (_) {
-      final now = DateTime.now();
-      if (_lastEventAt != null &&
-          now.difference(_lastEventAt).inSeconds > reconnectionMonitorTimeout) {
-        _channel.sink.close();
-      }
-    };
+  void _reconnectionTimer(_) {
+    final now = DateTime.now();
+    if (_lastEventAt != null &&
+        now.difference(_lastEventAt).inSeconds > reconnectionMonitorTimeout) {
+      _channel.sink.close();
+    }
+  }
 
+  void _startReconnectionMonitor() {
     _reconnectionMonitor = Timer.periodic(
       Duration(seconds: reconnectionMonitorInterval),
-      reconnectionTimer,
+      _reconnectionTimer,
     );
 
-    reconnectionTimer(_reconnectionMonitor);
+    _reconnectionTimer(_reconnectionMonitor);
   }
 
   void _reconnectTimer() async {
@@ -283,20 +284,20 @@ class WebSocket {
     }
   }
 
+  void _healthCheckTimer(_) {
+    logger.info('sending health.check');
+    _channel.sink.add("{'type': 'health.check'}");
+  }
+
   void _startHealthCheck() {
     logger.info('start health check monitor');
 
-    final healthCheckTimer = (_) {
-      logger.info('sending health.check');
-      _channel.sink.add("{'type': 'health.check'}");
-    };
-
     _healthCheck = Timer.periodic(
       Duration(seconds: healthCheckInterval),
-      healthCheckTimer,
+      _healthCheckTimer,
     );
 
-    healthCheckTimer(_healthCheck);
+    _healthCheckTimer(_healthCheck);
   }
 
   /// Disconnects the WS and releases eventual resources

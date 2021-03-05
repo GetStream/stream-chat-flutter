@@ -28,6 +28,10 @@ typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message,
 );
+typedef SystemMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
@@ -128,14 +132,21 @@ class MessageListView extends StatefulWidget {
       this.showConnectionStateTile = false,
       this.loadingBuilder,
       this.emptyBuilder,
+      this.systemMessageBuilder,
       this.messageListBuilder,
       this.errorWidgetBuilder,
+      this.messageFilter,
       this.customAttachmentBuilders,
+      this.onMessageTap,
+      this.onSystemMessageTap,
       this.onAttachmentTap})
       : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder messageBuilder;
+
+  /// Function used to build a custom system message widget
+  final SystemMessageBuilder systemMessageBuilder;
 
   /// Function used to build a custom parent message widget
   final ParentMessageBuilder parentMessageBuilder;
@@ -205,9 +216,18 @@ class MessageListView extends StatefulWidget {
   /// of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
 
+  /// Predicate used to filter messages
+  final bool Function(Message) messageFilter;
+
   /// Attachment builders for the default message widget
   /// Please change this in the [MessageWidget] if you are using a custom implementation
   final Map<String, AttachmentBuilder> customAttachmentBuilders;
+
+  /// Called when any message is tapped except a system message (use [onSystemMessageTap] instead)
+  final void Function(Message) onMessageTap;
+
+  /// Called when system message is tapped
+  final void Function(Message) onSystemMessageTap;
 
   // Customize onTap on attachment
   final void Function(Message message, Attachment attachment) onAttachmentTap;
@@ -269,6 +289,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
+      messageFilter: widget.messageFilter,
       loadingBuilder: widget.loadingBuilder ??
           (context) {
             return Center(
@@ -360,6 +381,9 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
+                onPageScrollStart: () {
+                  FocusScope.of(context).unfocus();
+                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -808,6 +832,12 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 
@@ -817,10 +847,17 @@ class _MessageListViewState extends State<MessageListView> {
     int index,
   ) {
     if (message.type == 'system' && message.text?.isNotEmpty == true) {
-      return SystemMessage(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        message: message,
-      );
+      return widget.systemMessageBuilder?.call(context, message) ??
+          SystemMessage(
+            key: ValueKey<String>('MESSAGE-${message.id}'),
+            message: message,
+            onMessageTap: (message) {
+              if (widget.onSystemMessageTap != null) {
+                widget.onSystemMessageTap(message);
+              }
+              FocusScope.of(context).unfocus();
+            },
+          );
     }
 
     final userId = StreamChat.of(context).user.id;
@@ -888,89 +925,95 @@ class _MessageListViewState extends State<MessageListView> {
             : null;
 
     Widget child = MessageWidget(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        message: message,
-        reverse: isMyMessage,
-        showReactions: !message.isDeleted,
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        showInChannelIndicator: showInChannelIndicator,
-        showThreadReplyIndicator: showThreadReplyIndicator,
-        showUsername: showUsername,
-        showTimestamp: showTimeStamp,
-        showSendingIndicator: showSendingIndicator,
-        showUserAvatar: showUserAvatar,
-        onQuotedMessageTap: (quotedMessageId) async {
-          final scrollToIndex = () {
-            final index = messages.indexWhere((m) => m.id == quotedMessageId);
-            _scrollController?.scrollTo(
-              index: index,
-              duration: const Duration(milliseconds: 350),
-            );
-          };
-          if (messages.map((e) => e.id).contains(quotedMessageId)) {
-            scrollToIndex();
-          } else {
-            await streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (messages.map((e) => e.id).contains(quotedMessageId)) {
-                  scrollToIndex();
-                }
-              });
+      key: ValueKey<String>('MESSAGE-${message.id}'),
+      message: message,
+      reverse: isMyMessage,
+      showReactions: !message.isDeleted,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      showInChannelIndicator: showInChannelIndicator,
+      showThreadReplyIndicator: showThreadReplyIndicator,
+      showUsername: showUsername,
+      showTimestamp: showTimeStamp,
+      showSendingIndicator: showSendingIndicator,
+      showUserAvatar: showUserAvatar,
+      onQuotedMessageTap: (quotedMessageId) async {
+        final scrollToIndex = () {
+          final index = messages.indexWhere((m) => m.id == quotedMessageId);
+          _scrollController?.scrollTo(
+            index: index,
+            duration: const Duration(milliseconds: 350),
+          );
+        };
+        if (messages.map((e) => e.id).contains(quotedMessageId)) {
+          scrollToIndex();
+        } else {
+          await streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (messages.map((e) => e.id).contains(quotedMessageId)) {
+                scrollToIndex();
+              }
             });
-          }
-        },
-        showEditMessage: isMyMessage,
-        showDeleteMessage: isMyMessage,
-        showThreadReplyMessage: !isThreadMessage,
-        showFlagButton: !isMyMessage,
-        borderSide: borderSide,
-        onThreadTap: _onThreadTap,
-        onReplyTap: widget.onReplyTap,
-        attachmentBorderRadiusGeometry: BorderRadius.only(
-          topLeft: Radius.circular(attachmentBorderRadius),
-          bottomLeft: Radius.circular(
-            (timeDiff >= 1 || !isNextUserSame) &&
-                    !(hasReplies || isThreadMessage || hasFileAttachment)
-                ? 0
-                : attachmentBorderRadius,
-          ),
-          topRight: Radius.circular(attachmentBorderRadius),
-          bottomRight: Radius.circular(attachmentBorderRadius),
+          });
+        }
+      },
+      showEditMessage: isMyMessage,
+      showDeleteMessage: isMyMessage,
+      showThreadReplyMessage: !isThreadMessage,
+      showFlagButton: !isMyMessage,
+      borderSide: borderSide,
+      onThreadTap: _onThreadTap,
+      onReplyTap: widget.onReplyTap,
+      attachmentBorderRadiusGeometry: BorderRadius.only(
+        topLeft: Radius.circular(attachmentBorderRadius),
+        bottomLeft: Radius.circular(
+          (timeDiff >= 1 || !isNextUserSame) &&
+                  !(hasReplies || isThreadMessage || hasFileAttachment)
+              ? 0
+              : attachmentBorderRadius,
         ),
-        attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
-        borderRadiusGeometry: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          bottomLeft: Radius.circular(
-            (timeDiff >= 1 || !isNextUserSame) &&
-                    !(hasReplies || isThreadMessage)
-                ? 0
-                : 16,
-          ),
-          topRight: Radius.circular(16),
-          bottomRight: Radius.circular(16),
+        topRight: Radius.circular(attachmentBorderRadius),
+        bottomRight: Radius.circular(attachmentBorderRadius),
+      ),
+      attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
+      borderRadiusGeometry: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        bottomLeft: Radius.circular(
+          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
+              ? 0
+              : 16,
         ),
-        textPadding: EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: isOnlyEmoji ? 0 : 16.0,
-        ),
-        messageTheme: isMyMessage
-            ? StreamChatTheme.of(context).ownMessageTheme
-            : StreamChatTheme.of(context).otherMessageTheme,
-        readList: readList,
-        allRead: allRead,
-        onShowMessage: widget.onShowMessage,
-        onReturnAction: (action) {
-          switch (action) {
-            case ReturnActionType.none:
-              break;
-            case ReturnActionType.reply:
-              FocusScope.of(context).unfocus();
-              widget.onMessageSwiped(message);
-              break;
-          }
-        },
-        customAttachmentBuilders: widget.customAttachmentBuilders,
-        onAttachmentTap: widget.onAttachmentTap);
+        topRight: Radius.circular(16),
+        bottomRight: Radius.circular(16),
+      ),
+      textPadding: EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: isOnlyEmoji ? 0 : 16.0,
+      ),
+      messageTheme: isMyMessage
+          ? StreamChatTheme.of(context).ownMessageTheme
+          : StreamChatTheme.of(context).otherMessageTheme,
+      readList: readList,
+      allRead: allRead,
+      onShowMessage: widget.onShowMessage,
+      onReturnAction: (action) {
+        switch (action) {
+          case ReturnActionType.none:
+            break;
+          case ReturnActionType.reply:
+            FocusScope.of(context).unfocus();
+            widget.onMessageSwiped(message);
+            break;
+        }
+      },
+      customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
+      onAttachmentTap: widget.onAttachmentTap,
+    );
 
     if (!message.isDeleted &&
         !message.isSystem &&

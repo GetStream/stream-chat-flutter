@@ -251,24 +251,45 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   void _showFlagDialog() async {
     final client = StreamChat.of(context).client;
 
-    var answer = await showConfirmationDialog(context,
-        title: 'Flag Message',
-        icon: StreamSvgIcon.flag(
-          color: StreamChatTheme.of(context).colorTheme.accentRed,
-          size: 24.0,
-        ),
-        question:
-            'Do you want to send a copy of this message to a\nmoderator for further investigation?',
-        okText: 'FLAG',
-        cancelText: 'CANCEL');
+    final answer = await showConfirmationDialog(
+      context,
+      title: 'Flag Message',
+      icon: StreamSvgIcon.flag(
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        size: 24.0,
+      ),
+      question:
+          'Do you want to send a copy of this message to a\nmoderator for further investigation?',
+      okText: 'FLAG',
+      cancelText: 'CANCEL',
+    );
 
-    if (answer) {
+    final theme = StreamChatTheme.of(context);
+    if (answer == true) {
       try {
         await client.flagMessage(widget.message.id);
-        _showDismissAlert();
+        await showInfoDialog(
+          context,
+          icon: StreamSvgIcon.flag(
+            color: theme.colorTheme.accentRed,
+            size: 24.0,
+          ),
+          details: 'The message has been reported to a moderator.',
+          title: 'Message flagged',
+          okText: 'OK',
+        );
       } catch (err) {
         if (json.decode(err?.body ?? {})['code'] == 4) {
-          _showDismissAlert();
+          await showInfoDialog(
+            context,
+            icon: StreamSvgIcon.flag(
+              color: theme.colorTheme.accentRed,
+              size: 24.0,
+            ),
+            details: 'The message has been reported to a moderator.',
+            title: 'Message flagged',
+            okText: 'OK',
+          );
         } else {
           _showErrorAlert();
         }
@@ -306,133 +327,16 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     }
   }
 
-  void _showDismissAlert() {
-    showModalBottomSheet(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-      context: context,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
-      )),
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 26.0,
-            ),
-            StreamSvgIcon.flag(
-              color: StreamChatTheme.of(context).colorTheme.accentRed,
-              size: 24.0,
-            ),
-            SizedBox(
-              height: 26.0,
-            ),
-            Text(
-              'Message flagged',
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-            SizedBox(
-              height: 7.0,
-            ),
-            Text('The message has been reported to a moderator.'),
-            SizedBox(
-              height: 36.0,
-            ),
-            Container(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
-              height: 1.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  child: Text(
-                    'OK',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .bodyBold
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentBlue),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showErrorAlert() {
-    showModalBottomSheet(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-      context: context,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
-      )),
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 26.0,
-            ),
-            StreamSvgIcon.error(
-              color: StreamChatTheme.of(context).colorTheme.accentRed,
-              size: 24.0,
-            ),
-            SizedBox(
-              height: 26.0,
-            ),
-            Text(
-              'Something went wrong',
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-            SizedBox(
-              height: 7.0,
-            ),
-            Text('The operation couldn\'t be completed.'),
-            SizedBox(
-              height: 36.0,
-            ),
-            Container(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
-              height: 1.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  child: Text(
-                    'OK',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .bodyBold
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentBlue),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+    showInfoDialog(
+      context,
+      icon: StreamSvgIcon.error(
+        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        size: 24.0,
+      ),
+      details: 'The operation couldn\'t be completed.',
+      title: 'Something went wrong',
+      okText: 'OK',
     );
   }
 

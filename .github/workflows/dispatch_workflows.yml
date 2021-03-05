@@ -1,0 +1,30 @@
+name: dispatch_workflows
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+
+jobs:
+  dispatch_nightly:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: build_nightly
+          repo: GetStream/flutter-samples
+          token: ${{ secrets.GH_TOKEN }}
+  dispatch_stable:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          repo: GetStream/flutter-samples
+          workflow: build
+          token: ${{ secrets.GH_TOKEN }}

@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import '../upload_progress_indicator.dart';
 import 'attachment_widget.dart';
@@ -102,13 +103,11 @@ class FileAttachment extends AttachmentWidget {
             errorWidget: (_, obj, trace) {
               return getFileTypeImage(attachment.extraData['other']);
             },
-            progressIndicatorBuilder: (context, _, progress) {
-              return Center(
-                child: Container(
-                  width: 20.0,
-                  height: 20.0,
-                  child: const CircularProgressIndicator(),
-                ),
+            placeholder: (_, __) {
+              return Container(
+                width: size?.width,
+                height: size?.height,
+                child: Image.memory(kTransparentImage),
               );
             },
           ),

@@ -12,6 +12,10 @@ void debounce({
   List positionalArguments,
   Map<Symbol, dynamic> namedArguments,
 }) {
+  if (target == null) {
+    return;
+  }
+
   if (timeouts.containsKey(target)) {
     timeouts[target].cancel();
   }

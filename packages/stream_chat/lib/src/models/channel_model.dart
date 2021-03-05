@@ -1,14 +1,35 @@
 import 'package:json_annotation/json_annotation.dart';
-
-import 'channel_config.dart';
-import 'serialization.dart';
-import 'user.dart';
+import 'package:stream_chat/src/models/channel_config.dart';
+import 'package:stream_chat/src/models/serialization.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 part 'channel_model.g.dart';
 
 /// The class that contains the information about a channel
 @JsonSerializable()
 class ChannelModel {
+  /// Constructor used for json serialization
+  ChannelModel({
+    this.id,
+    this.type,
+    this.cid,
+    this.config,
+    this.createdBy,
+    this.frozen,
+    this.lastMessageAt,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+    this.memberCount,
+    this.extraData,
+    this.team,
+  });
+
+  /// Create a new instance from a json
+  factory ChannelModel.fromJson(Map<String, dynamic> json) =>
+      _$ChannelModelFromJson(
+          Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+
   /// The id of this channel
   final String id;
 
@@ -76,40 +97,15 @@ class ChannelModel {
     'team',
   ];
 
-  /// Constructor used for json serialization
-  ChannelModel({
-    this.id,
-    this.type,
-    this.cid,
-    this.config,
-    this.createdBy,
-    this.frozen,
-    this.lastMessageAt,
-    this.createdAt,
-    this.updatedAt,
-    this.deletedAt,
-    this.memberCount,
-    this.extraData,
-    this.team,
-  });
-
   /// Shortcut for channel name
   String get name =>
       extraData?.containsKey('name') == true ? extraData['name'] : cid;
 
-  /// Create a new instance from a json
-  factory ChannelModel.fromJson(Map<String, dynamic> json) {
-    return _$ChannelModelFromJson(
-        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
-  }
-
   /// Serialize to json
-  Map<String, dynamic> toJson() {
-    return Serialization.moveFromExtraDataToRoot(
-      _$ChannelModelToJson(this),
-      topLevelFields,
-    );
-  }
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+        _$ChannelModelToJson(this),
+        topLevelFields,
+      );
 
   /// Creates a copy of [ChannelModel] with specified attributes overridden.
   ChannelModel copyWith({
@@ -143,8 +139,8 @@ class ChannelModel {
         team: team ?? this.team,
       );
 
-  /// Returns a new [ChannelModel] that is a combination of this channelModel and the given
-  /// [other] channelModel.
+  /// Returns a new [ChannelModel] that is a combination of this channelModel
+  /// and the given [other] channelModel.
   ChannelModel merge(ChannelModel other) {
     if (other == null) return this;
     return copyWith(

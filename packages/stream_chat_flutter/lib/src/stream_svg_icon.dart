@@ -18,24 +18,15 @@ class StreamSvgIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final key = Key('StreamSvgIcon-$assetName');
-    return kIsWeb
-        ? Image.network(
-            'packages/stream_chat_flutter/svgs/$assetName',
-            width: width,
-            height: height,
-            key: key,
-            color: color,
-            alignment: Alignment.center,
-          )
-        : SvgPicture.asset(
-            'lib/svgs/$assetName',
-            package: 'stream_chat_flutter',
-            key: key,
-            width: width,
-            height: height,
-            color: color,
-            alignment: Alignment.center,
-          );
+    return SvgPicture.asset(
+      'lib/svgs/$assetName',
+      package: 'stream_chat_flutter',
+      key: key,
+      width: width,
+      height: height,
+      color: color,
+      alignment: Alignment.center,
+    );
   }
 
   factory StreamSvgIcon.settings({

@@ -17,6 +17,9 @@ This repository contains code for our [Dart](https://dart.dev/) and [Flutter](ht
 
 Stream allows developers to rapidly deploy scalable feeds and chat messaging with an industry leading 99.999% uptime SLA guarantee.
 
+## Sample apps and demos 
+Our team maintains a dedicated repository for fully-fledged sample applications and demos. Consider checking out [GetStream/flutter-samples](https://github.com/GetStream/flutter-samples) to learn more or get started by looking at our latest [Stream Chat demo](https://github.com/GetStream/flutter-samples/tree/main/stream_chat_v1). 
+
 ## Structure
 Stream Chat Dart is a monorepo built using [Melos](https://docs.page/invertase/melos). Individual packages can be found in the `packages` directory while configuration and top level commands can be found in `melos.yaml`. 
 

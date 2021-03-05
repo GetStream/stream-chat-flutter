@@ -101,18 +101,17 @@ abstract class ChatPersistenceClient {
   Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
     List<String> cids,
+    // ignore: avoid_positional_boolean_parameters
     bool clearQueryCache,
   );
 
   /// Remove a message by [messageId]
-  Future<void> deleteMessageById(String messageId) {
-    return deleteMessageByIds([messageId]);
-  }
+  Future<void> deleteMessageById(String messageId) =>
+      deleteMessageByIds([messageId]);
 
   /// Remove a pinned message by [messageId]
-  Future<void> deletePinnedMessageById(String messageId) {
-    return deletePinnedMessageByIds([messageId]);
-  }
+  Future<void> deletePinnedMessageById(String messageId) =>
+      deletePinnedMessageByIds([messageId]);
 
   /// Remove a message by [messageIds]
   Future<void> deleteMessageByIds(List<String> messageIds);
@@ -121,14 +120,11 @@ abstract class ChatPersistenceClient {
   Future<void> deletePinnedMessageByIds(List<String> messageIds);
 
   /// Remove a message by channel [cid]
-  Future<void> deleteMessageByCid(String cid) {
-    return deleteMessageByCids([cid]);
-  }
+  Future<void> deleteMessageByCid(String cid) => deleteMessageByCids([cid]);
 
   /// Remove a pinned message by channel [cid]
-  Future<void> deletePinnedMessageByCid(String cid) {
-    return deletePinnedMessageByCids([cid]);
-  }
+  Future<void> deletePinnedMessageByCid(String cid) async =>
+      deletePinnedMessageByCids([cid]);
 
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
@@ -175,9 +171,8 @@ abstract class ChatPersistenceClient {
   Future<void> deleteMembersByCids(List<String> cids);
 
   /// Update the channel state data using [channelState]
-  Future<void> updateChannelState(ChannelState channelState) {
-    return updateChannelStates([channelState]);
-  }
+  Future<void> updateChannelState(ChannelState channelState) =>
+      updateChannelStates([channelState]);
 
   /// Update list of channel states
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {
@@ -195,31 +190,31 @@ abstract class ChatPersistenceClient {
       deleteMembers,
     ]);
 
-    final channels = channelStates.map((it) {
-      return it.channel;
-    }).where((it) => it != null);
+    final channels =
+        channelStates.map((it) => it.channel).where((it) => it != null);
 
-    final reactions = channelStates.expand((it) => it.messages).expand((it) {
-      return [
-        if (it.ownReactions != null)
-          ...it.ownReactions.where((r) => r.userId != null),
-        if (it.latestReactions != null)
-          ...it.latestReactions.where((r) => r.userId != null)
-      ];
-    }).where((it) => it != null);
+    final reactions = channelStates
+        .expand((it) => it.messages)
+        .expand((it) => [
+              if (it.ownReactions != null)
+                ...it.ownReactions.where((r) => r.userId != null),
+              if (it.latestReactions != null)
+                ...it.latestReactions.where((r) => r.userId != null)
+            ])
+        .where((it) => it != null);
 
     final users = channelStates
         .map((cs) => [
               cs.channel?.createdBy,
-              ...cs.messages?.map((m) {
-                return [
-                  m.user,
-                  if (m.latestReactions != null)
-                    ...m.latestReactions.map((r) => r.user),
-                  if (m.ownReactions != null)
-                    ...m.ownReactions.map((r) => r.user),
-                ];
-              })?.expand((v) => v),
+              ...cs.messages
+                  ?.map((m) => [
+                        m.user,
+                        if (m.latestReactions != null)
+                          ...m.latestReactions.map((r) => r.user),
+                        if (m.ownReactions != null)
+                          ...m.ownReactions.map((r) => r.user),
+                      ])
+                  ?.expand((v) => v),
               if (cs.read != null) ...cs.read.map((r) => r.user),
               if (cs.members != null) ...cs.members.map((m) => m.user),
             ])
