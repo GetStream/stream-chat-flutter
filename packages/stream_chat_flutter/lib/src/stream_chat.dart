@@ -121,15 +121,5 @@ class StreamChatState extends State<StreamChat> {
   @override
   void initState() {
     super.initState();
-
-    if (!kIsWeb) {
-      client.state?.totalUnreadCountStream?.listen((count) {
-        if (count > 0) {
-          FlutterAppBadger.updateBadgeCount(count);
-        } else {
-          FlutterAppBadger.removeBadge();
-        }
-      });
-    }
   }
 }
