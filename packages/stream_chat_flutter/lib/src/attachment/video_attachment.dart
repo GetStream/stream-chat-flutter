@@ -11,6 +11,7 @@ class VideoAttachment extends AttachmentWidget {
   final MessageTheme messageTheme;
   final ShowMessageCallback onShowMessage;
   final ValueChanged<ReturnActionType> onReturnAction;
+  final VoidCallback onAttachmentTap;
 
   const VideoAttachment({
     Key key,
@@ -20,6 +21,7 @@ class VideoAttachment extends AttachmentWidget {
     this.messageTheme,
     this.onShowMessage,
     this.onReturnAction,
+    this.onAttachmentTap,
   }) : super(key: key, message: message, attachment: attachment, size: size);
 
   @override
@@ -65,25 +67,26 @@ class VideoAttachment extends AttachmentWidget {
         children: <Widget>[
           Expanded(
             child: GestureDetector(
-              onTap: () async {
-                final channel = StreamChannel.of(context).channel;
-                final res = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => StreamChannel(
-                      channel: channel,
-                      child: FullScreenMedia(
-                        mediaAttachments: [attachment],
-                        userName: message.user.name,
-                        sentAt: message.createdAt,
-                        message: message,
-                        onShowMessage: onShowMessage,
+              onTap: onAttachmentTap ??
+                  () async {
+                    final channel = StreamChannel.of(context).channel;
+                    final res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => StreamChannel(
+                          channel: channel,
+                          child: FullScreenMedia(
+                            mediaAttachments: [attachment],
+                            userName: message.user.name,
+                            sentAt: message.createdAt,
+                            message: message,
+                            onShowMessage: onShowMessage,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-                if (res != null) onReturnAction(res);
-              },
+                    );
+                    if (res != null) onReturnAction(res);
+                  },
               child: Stack(
                 children: [
                   videoWidget,

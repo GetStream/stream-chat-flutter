@@ -1,5 +1,6 @@
 library stream_chat;
 
+export 'package:async/async.dart';
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
 export 'package:dio/src/options.dart' show ProgressCallback;
@@ -14,6 +15,7 @@ export './src/attachment_file_uploader.dart' show AttachmentFileUploader;
 export './src/client.dart';
 export './src/db/chat_persistence_client.dart';
 export './src/event_type.dart';
+export './src/extensions/rate_limit.dart';
 export './src/extensions/string_extension.dart';
 export './src/models/action.dart';
 export './src/models/attachment.dart';

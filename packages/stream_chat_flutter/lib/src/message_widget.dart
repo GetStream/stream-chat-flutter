@@ -150,6 +150,9 @@ class MessageWidget extends StatefulWidget {
   /// List of custom actions shown on message long tap
   final List<MessageAction> customActions;
 
+  // Customize onTap on attachment
+  final void Function(Message message, Attachment attachment) onAttachmentTap;
+
   ///
   MessageWidget({
     Key key,
@@ -200,6 +203,7 @@ class MessageWidget extends StatefulWidget {
     this.allRead = false,
     this.onQuotedMessageTap,
     this.customActions = const [],
+    this.onAttachmentTap,
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
             return ImageAttachment(
@@ -212,6 +216,9 @@ class MessageWidget extends StatefulWidget {
               ),
               onShowMessage: onShowMessage,
               onReturnAction: onReturnAction,
+              onAttachmentTap: () {
+                onAttachmentTap(message, attachment);
+              },
             );
           },
           'video': (context, message, attachment) {
@@ -225,30 +232,31 @@ class MessageWidget extends StatefulWidget {
               message: message,
               onShowMessage: onShowMessage,
               onReturnAction: onReturnAction,
+              onAttachmentTap: () {
+                onAttachmentTap(message, attachment);
+              },
             );
           },
           'giphy': (context, message, attachment) {
             return GiphyAttachment(
-              attachment: attachment,
-              messageTheme: messageTheme,
-              message: message,
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
-              ),
-              onShowMessage: onShowMessage,
-              onReturnAction: onReturnAction,
-            );
+                attachment: attachment,
+                messageTheme: messageTheme,
+                message: message,
+                size: Size(
+                  MediaQuery.of(context).size.width * 0.8,
+                  MediaQuery.of(context).size.height * 0.3,
+                ),
+                onShowMessage: onShowMessage,
+                onReturnAction: onReturnAction);
           },
           'file': (context, message, attachment) {
             return FileAttachment(
-              message: message,
-              attachment: attachment,
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
-              ),
-            );
+                message: message,
+                attachment: attachment,
+                size: Size(
+                  MediaQuery.of(context).size.width * 0.8,
+                  MediaQuery.of(context).size.height * 0.3,
+                ));
           },
         }..addAll(customAttachmentBuilders ?? {}),
         super(key: key);
