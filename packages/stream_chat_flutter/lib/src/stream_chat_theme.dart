@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/src/channel_preview.dart';
 import 'package:stream_chat_flutter/src/message_input.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
@@ -1008,7 +1009,8 @@ class MessageInputTheme {
       sendButtonColor: other.sendButtonColor,
       sendButtonIdleColor: other.sendButtonIdleColor,
       inputTextStyle: other.inputTextStyle,
-      inputDecoration: other.inputDecoration,
+      inputDecoration: inputDecoration?.merge(other.inputDecoration) ??
+          other.inputDecoration,
       activeBorderGradient: other.activeBorderGradient,
       idleBorderGradient: other.idleBorderGradient,
       borderRadius: other.borderRadius,
