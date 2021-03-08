@@ -897,7 +897,6 @@ class ChannelListHeaderTheme {
   /// Returns a new [ChannelListHeaderTheme] replacing some of its properties
   ChannelListHeaderTheme copyWith({
     TextStyle title,
-    TextStyle subtitle,
     AvatarTheme avatarTheme,
     Color color,
   }) =>
