@@ -602,39 +602,39 @@ class StreamChatClient {
     Map<String, dynamic> options,
     PaginationParams paginationParams = const PaginationParams(),
     int messageLimit,
-    bool preferOffline = false,
     bool waitForConnect = true,
   }) async* {
     final hash = base64.encode(utf8.encode(
       '$filter${_asMap(sort)}$options${paginationParams?.toJson()}'
-      '$messageLimit$preferOffline',
+      '$messageLimit',
     ));
 
     if (_queryChannelsStreams.containsKey(hash)) {
       yield await _queryChannelsStreams[hash];
     } else {
-      if (preferOffline) {
-        final channels = await queryChannelsOffline(
-          filter: filter,
-          sort: sort,
-          paginationParams: paginationParams,
-        );
-        if (channels.isNotEmpty) yield channels;
-      }
-
-      final newQueryChannelsFuture = queryChannelsOnline(
+      final channels = await queryChannelsOffline(
         filter: filter,
         sort: sort,
-        options: options,
         paginationParams: paginationParams,
-        messageLimit: messageLimit,
-      ).whenComplete(() {
-        _queryChannelsStreams.remove(hash);
-      });
+      );
+      if (channels.isNotEmpty) yield channels;
 
-      _queryChannelsStreams[hash] = newQueryChannelsFuture;
+      if (wsConnectionStatus == ConnectionStatus.connected) {
+        final newQueryChannelsFuture = queryChannelsOnline(
+          filter: filter,
+          sort: sort,
+          options: options,
+          paginationParams: paginationParams,
+          messageLimit: messageLimit,
+          waitForConnect: waitForConnect,
+        ).whenComplete(() {
+          _queryChannelsStreams.remove(hash);
+        });
 
-      yield await newQueryChannelsFuture;
+        _queryChannelsStreams[hash] = newQueryChannelsFuture;
+
+        yield await newQueryChannelsFuture;
+      }
     }
   }
 

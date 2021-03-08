@@ -107,7 +107,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
-        preferOffline: onlyOffline,
       )) {
         if (clear) {
           _channelsController.add(channels);
