@@ -11,6 +11,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
@@ -1642,11 +1643,15 @@ class MessageInputState extends State<MessageInput> {
                   return getFileTypeImage(attachment.extraData['other']);
                 },
                 progressIndicatorBuilder: (context, _, progress) {
-                  return Center(
-                    child: Container(
-                      width: 20.0,
-                      height: 20.0,
-                      child: const CircularProgressIndicator(),
+                  return Shimmer.fromColors(
+                    baseColor:
+                        StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                    highlightColor:
+                        StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                    child: Image.asset(
+                      'images/placeholder.png',
+                      fit: BoxFit.cover,
+                      package: 'stream_chat_flutter',
                     ),
                   );
                 },

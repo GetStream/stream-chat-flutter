@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -348,10 +349,16 @@ class GiphyAttachment extends AttachmentWidget {
               height: size?.height,
               width: size?.width,
               placeholder: (_, __) {
-                return Image.asset(
-                  'images/placeholder.png',
-                  fit: BoxFit.cover,
-                  package: 'stream_chat_flutter',
+                return Shimmer.fromColors(
+                  baseColor:
+                      StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  highlightColor:
+                      StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                  child: Image.asset(
+                    'images/placeholder.png',
+                    fit: BoxFit.cover,
+                    package: 'stream_chat_flutter',
+                  ),
                 );
               },
               imageUrl: imageUrl,

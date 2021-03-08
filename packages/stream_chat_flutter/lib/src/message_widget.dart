@@ -216,9 +216,11 @@ class MessageWidget extends StatefulWidget {
               ),
               onShowMessage: onShowMessage,
               onReturnAction: onReturnAction,
-              onAttachmentTap: () {
-                onAttachmentTap(message, attachment);
-              },
+              onAttachmentTap: onAttachmentTap != null
+                  ? () {
+                      onAttachmentTap?.call(message, attachment);
+                    }
+                  : null,
             );
           },
           'video': (context, message, attachment) {
@@ -232,31 +234,35 @@ class MessageWidget extends StatefulWidget {
               message: message,
               onShowMessage: onShowMessage,
               onReturnAction: onReturnAction,
-              onAttachmentTap: () {
-                onAttachmentTap(message, attachment);
-              },
+              onAttachmentTap: onAttachmentTap != null
+                  ? () {
+                      onAttachmentTap?.call(message, attachment);
+                    }
+                  : null,
             );
           },
           'giphy': (context, message, attachment) {
             return GiphyAttachment(
-                attachment: attachment,
-                messageTheme: messageTheme,
-                message: message,
-                size: Size(
-                  MediaQuery.of(context).size.width * 0.8,
-                  MediaQuery.of(context).size.height * 0.3,
-                ),
-                onShowMessage: onShowMessage,
-                onReturnAction: onReturnAction);
+              attachment: attachment,
+              messageTheme: messageTheme,
+              message: message,
+              size: Size(
+                MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
+              ),
+              onShowMessage: onShowMessage,
+              onReturnAction: onReturnAction,
+            );
           },
           'file': (context, message, attachment) {
             return FileAttachment(
-                message: message,
-                attachment: attachment,
-                size: Size(
-                  MediaQuery.of(context).size.width * 0.8,
-                  MediaQuery.of(context).size.height * 0.3,
-                ));
+              message: message,
+              attachment: attachment,
+              size: Size(
+                MediaQuery.of(context).size.width * 0.8,
+                MediaQuery.of(context).size.height * 0.3,
+              ),
+            );
           },
         }..addAll(customAttachmentBuilders ?? {}),
         super(key: key);

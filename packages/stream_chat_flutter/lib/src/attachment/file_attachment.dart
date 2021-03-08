@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
@@ -104,10 +105,15 @@ class FileAttachment extends AttachmentWidget {
               return getFileTypeImage(attachment.extraData['other']);
             },
             placeholder: (_, __) {
-              return Image.asset(
-                'images/placeholder.png',
-                fit: BoxFit.cover,
-                package: 'stream_chat_flutter',
+              return Shimmer.fromColors(
+                baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                highlightColor:
+                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                child: Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
+                ),
               );
             },
           ),
