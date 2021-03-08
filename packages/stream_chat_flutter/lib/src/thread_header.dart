@@ -63,8 +63,23 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it calls [Navigator.pop]
   final VoidCallback onBackPressed;
 
+  /// Callback to call when the title is tapped.
+  final VoidCallback onTitleTap;
+
   /// The message parent of this thread
   final Message parent;
+
+  /// Title widget
+  final Widget title;
+
+  /// Subtitle widget
+  final Widget subtitle;
+
+  /// Leading widget
+  final Widget leading;
+
+  /// AppBar actions
+  final List<Widget> actions;
 
   /// Instantiate a new ThreadHeader
   ThreadHeader({
@@ -72,6 +87,11 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     @required this.parent,
     this.showBackButton = true,
     this.onBackPressed,
+    this.title,
+    this.subtitle,
+    this.leading,
+    this.actions,
+    this.onTitleTap,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -81,51 +101,61 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       brightness: Theme.of(context).brightness,
       elevation: 1,
-      leading: showBackButton
-          ? StreamBackButton(
-              cid: StreamChannel.of(context).channel.cid,
-              onPressed: onBackPressed,
-              showUnreads: true,
-            )
-          : SizedBox(),
+      leading: leading ??
+          (showBackButton
+              ? StreamBackButton(
+                  cid: StreamChannel.of(context).channel.cid,
+                  onPressed: onBackPressed,
+                  showUnreads: true,
+                )
+              : SizedBox()),
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
       centerTitle: true,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Thread Reply',
-            style: StreamChatTheme.of(context)
-                .channelTheme
-                .channelHeaderTheme
-                .title,
-          ),
-          SizedBox(height: 2),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+      actions: actions,
+      title: InkWell(
+        onTap: onTitleTap,
+        child: Container(
+          height: preferredSize.height,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'with ',
-                style: StreamChatTheme.of(context)
-                    .channelTheme
-                    .channelHeaderTheme
-                    .lastMessageAt,
-              ),
-              Flexible(
-                child: ChannelName(
-                  textStyle: StreamChatTheme.of(context)
-                      .channelTheme
-                      .channelHeaderTheme
-                      .lastMessageAt,
-                ),
-              ),
+              title ??
+                  Text(
+                    'Thread Reply',
+                    style: StreamChatTheme.of(context)
+                        .channelTheme
+                        .channelHeaderTheme
+                        .title,
+                  ),
+              SizedBox(height: 2),
+              subtitle ??
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'with ',
+                        style: StreamChatTheme.of(context)
+                            .channelTheme
+                            .channelHeaderTheme
+                            .subtitle,
+                      ),
+                      Flexible(
+                        child: ChannelName(
+                          textStyle: StreamChatTheme.of(context)
+                              .channelTheme
+                              .channelHeaderTheme
+                              .subtitle,
+                        ),
+                      ),
+                    ],
+                  ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

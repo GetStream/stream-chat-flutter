@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -34,6 +35,9 @@ class MessageActionsModal extends StatefulWidget {
   final ShapeBorder attachmentShape;
   final DisplayWidget showUserAvatar;
 
+  /// List of custom actions
+  final List<MessageAction> customActions;
+
   const MessageActionsModal({
     Key key,
     @required this.message,
@@ -53,6 +57,7 @@ class MessageActionsModal extends StatefulWidget {
     this.messageShape,
     this.attachmentShape,
     this.reverse = false,
+    this.customActions = const [],
   }) : super(key: key);
 
   @override
@@ -223,6 +228,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                         _buildFlagButton(context),
                                       if (widget.showDeleteMessage)
                                         _buildDeleteButton(context),
+                                      ...widget.customActions.map((action) {
+                                        return _buildCustomAction(
+                                          context,
+                                          action,
+                                        );
+                                      })
                                     ].insertBetween(
                                       Container(
                                         height: 1,
@@ -244,6 +255,27 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
               },
             ),
         ],
+      ),
+    );
+  }
+
+  InkWell _buildCustomAction(
+    BuildContext context,
+    MessageAction messageAction,
+  ) {
+    return InkWell(
+      onTap: () {
+        messageAction.onTap?.call(widget.message);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            messageAction.leading ?? Offstage(),
+            const SizedBox(width: 16),
+            messageAction.title ?? Offstage(),
+          ],
+        ),
       ),
     );
   }
@@ -541,21 +573,16 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   ],
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: widget.editMessageInputBuilder != null
-                    ? widget.editMessageInputBuilder(context, widget.message)
-                    : MessageInput(
-                        editMessage: widget.message,
-                        preMessageSending: (m) {
-                          FocusScope.of(context).unfocus();
-                          Navigator.pop(context);
-                          return m;
-                        },
-                      ),
-              ),
+              widget.editMessageInputBuilder != null
+                  ? widget.editMessageInputBuilder(context, widget.message)
+                  : MessageInput(
+                      editMessage: widget.message,
+                      preMessageSending: (m) {
+                        FocusScope.of(context).unfocus();
+                        Navigator.pop(context);
+                        return m;
+                      },
+                    ),
             ],
           ),
         );

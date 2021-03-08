@@ -7,6 +7,7 @@ export 'src/channel_name.dart';
 export 'src/channel_preview.dart';
 export 'src/date_divider.dart';
 export 'src/deleted_message.dart';
+export 'src/message_action.dart';
 export 'src/attachment/attachment.dart';
 export 'src/full_screen_media.dart';
 export 'src/image_header.dart';

@@ -84,16 +84,17 @@ class StreamChatClient {
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
-    // ignore: avoid_unused_constructor_parameters
     RetryPolicy retryPolicy,
     this.attachmentFileUploader,
   }) {
-    _retryPolicy ??= RetryPolicy(
-      retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
-          Duration(seconds: 1 * attempt),
-      shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
-          attempt < 5,
-    );
+    _retryPolicy = retryPolicy ??
+        RetryPolicy(
+          retryTimeout:
+              (StreamChatClient client, int attempt, ApiError error) =>
+                  Duration(seconds: 1 * attempt),
+          shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
+              attempt < 5,
+        );
 
     attachmentFileUploader ??= StreamAttachmentFileUploader(this);
 

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -146,6 +147,9 @@ class MessageWidget extends StatefulWidget {
   /// Function called when message is tapped
   final void Function(Message) onMessageTap;
 
+  /// List of custom actions shown on message long tap
+  final List<MessageAction> customActions;
+
   // Customize onTap on attachment
   final void Function(Message message, Attachment attachment) onAttachmentTap;
 
@@ -198,6 +202,7 @@ class MessageWidget extends StatefulWidget {
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
     this.onQuotedMessageTap,
+    this.customActions = const [],
     this.onAttachmentTap,
   })  : attachmentBuilders = {
           'image': (context, message, attachment) {
@@ -760,6 +765,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   !isFailedState &&
                   widget.onThreadTap != null,
               showFlagButton: widget.showFlagButton,
+              customActions: widget.customActions,
             ),
           );
         });
@@ -966,6 +972,7 @@ class _MessageWidgetState extends State<MessageWidget>
             user: widget.message.user,
             onTap: widget.onUserAvatarTap,
             constraints: widget.messageTheme.avatarTheme.constraints,
+            borderRadius: widget.messageTheme.avatarTheme.borderRadius,
             showOnlineStatus: false,
           ),
         ),

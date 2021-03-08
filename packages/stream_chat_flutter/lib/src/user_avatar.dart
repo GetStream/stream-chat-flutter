@@ -39,26 +39,29 @@ class UserAvatar extends StatelessWidget {
         user.extraData['image'] != '';
     final streamChatTheme = StreamChatTheme.of(context);
 
-    Widget avatar = ClipRRect(
-      clipBehavior: Clip.antiAlias,
-      borderRadius: borderRadius ??
-          streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
-      child: Container(
-        constraints: constraints ??
-            streamChatTheme.ownMessageTheme.avatarTheme.constraints,
-        decoration: BoxDecoration(
-          color: streamChatTheme.colorTheme.accentBlue,
+    Widget avatar = FittedBox(
+      fit: BoxFit.cover,
+      child: ClipRRect(
+        clipBehavior: Clip.antiAlias,
+        borderRadius: borderRadius ??
+            streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
+        child: Container(
+          constraints: constraints ??
+              streamChatTheme.ownMessageTheme.avatarTheme.constraints,
+          decoration: BoxDecoration(
+            color: streamChatTheme.colorTheme.accentBlue,
+          ),
+          child: hasImage
+              ? CachedNetworkImage(
+                  filterQuality: FilterQuality.high,
+                  imageUrl: user.extraData['image'],
+                  errorWidget: (_, __, ___) {
+                    return streamChatTheme.defaultUserImage(context, user);
+                  },
+                  fit: BoxFit.cover,
+                )
+              : streamChatTheme.defaultUserImage(context, user),
         ),
-        child: hasImage
-            ? CachedNetworkImage(
-                filterQuality: FilterQuality.high,
-                imageUrl: user.extraData['image'],
-                errorWidget: (_, __, ___) {
-                  return streamChatTheme.defaultUserImage(context, user);
-                },
-                fit: BoxFit.cover,
-              )
-            : streamChatTheme.defaultUserImage(context, user),
       ),
     );
 
@@ -91,6 +94,7 @@ class UserAvatar extends StatelessWidget {
                 alignment: onlineIndicatorAlignment,
                 child: Material(
                   type: MaterialType.circle,
+                  color: streamChatTheme.colorTheme.white,
                   child: Container(
                     margin: const EdgeInsets.all(2.0),
                     constraints: onlineIndicatorConstraints ??
@@ -103,7 +107,6 @@ class UserAvatar extends StatelessWidget {
                       color: streamChatTheme.colorTheme.accentGreen,
                     ),
                   ),
-                  color: streamChatTheme.colorTheme.white,
                 ),
               ),
             ),

@@ -144,7 +144,7 @@ class _MessageListCoreState extends State<MessageListCore> {
           return widget.errorWidgetBuilder(context, snapshot.error);
         } else {
           final messageList = snapshot.data?.reversed?.toList() ?? [];
-          if (messageList.isEmpty) {
+          if (messageList.isEmpty && !_isThreadConversation) {
             if (_upToDate) {
               return widget.emptyBuilder(context);
             }

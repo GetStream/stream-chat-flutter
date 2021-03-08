@@ -42,6 +42,15 @@ enum DefaultAttachmentTypes {
   file,
 }
 
+/// Available locations for the sendMessage button relative to the textField
+enum SendButtonLocation {
+  /// inside the textField
+  inside,
+
+  /// outside the textField
+  outside,
+}
+
 const _kMinMediaPickerSize = 360.0;
 
 const _kMaxAttachmentSize = 20971520; // 20MB in Bytes
@@ -107,6 +116,11 @@ class MessageInput extends StatefulWidget {
     this.focusNode,
     this.quotedMessage,
     this.onQuotedMessageCleared,
+    this.sendButtonLocation = SendButtonLocation.outside,
+    this.autofocus = false,
+    this.hideSendAsDm = false,
+    this.idleSendButton,
+    this.activeSendButton,
   }) : super(key: key);
 
   /// Message to edit
@@ -134,6 +148,9 @@ class MessageInput extends StatefulWidget {
   /// If true the attachments button will not be displayed
   final bool disableAttachments;
 
+  /// Hide send as dm checkbox
+  final bool hideSendAsDm;
+
   /// The text controller of the TextField
   final TextEditingController textEditingController;
 
@@ -154,6 +171,18 @@ class MessageInput extends StatefulWidget {
 
   ///
   final VoidCallback onQuotedMessageCleared;
+
+  /// The location of the send button
+  final SendButtonLocation sendButtonLocation;
+
+  /// Autofocus property passed to the TextField
+  final bool autofocus;
+
+  /// Send button widget in an idle state
+  final Widget idleSendButton;
+
+  /// Send button widget in an active state
+  final Widget activeSendButton;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -281,7 +310,7 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.all(8.0),
                 child: _buildTextField(context),
               ),
-              if (widget.parentMessage != null)
+              if (widget.parentMessage != null && !widget.hideSendAsDm)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: _buildDmCheckbox(),
@@ -310,9 +339,10 @@ class MessageInputState extends State<MessageInput> {
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
-        _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          _animateSendButton(context),
       ],
     );
   }
@@ -384,14 +414,20 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _animateSendButton(BuildContext context) {
+    final sendButton = widget.activeSendButton != null
+        ? InkWell(
+            child: widget.activeSendButton,
+            onTap: sendMessage,
+          )
+        : _buildSendButton(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: AnimatedCrossFade(
         crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
-        firstChild: _buildSendButton(context),
-        secondChild: _buildIdleSendButton(context),
+        firstChild: sendButton,
+        secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
         duration:
             StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
         alignment: Alignment.center,
@@ -447,99 +483,137 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: theme.colorTheme.greyGainsboro),
+            borderRadius: theme.messageInputTheme.borderRadius,
+            gradient: _focusNode.hasFocus
+                ? theme.messageInputTheme.activeBorderGradient
+                : theme.messageInputTheme.idleBorderGradient,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildReplyToMessage(),
-              _buildAttachments(),
-              LimitedBox(
-                maxHeight: widget.maxHeight,
-                child: TextField(
-                  key: Key('messageInputText'),
-                  enabled: _inputEnabled,
-                  minLines: null,
-                  maxLines: null,
-                  onSubmitted: (_) => sendMessage(),
-                  keyboardType: widget.keyboardType,
-                  controller: textEditingController,
-                  focusNode: _focusNode,
-                  style: theme.textTheme.body,
-                  autofocus: false,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: _getHint(),
-                    hintStyle: theme.textTheme.body.copyWith(
-                      color: theme.colorTheme.grey,
+          child: Padding(
+            padding: const EdgeInsets.all(1.5),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: theme.messageInputTheme.borderRadius,
+                color: theme.messageInputTheme.inputBackground,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildReplyToMessage(),
+                  _buildAttachments(),
+                  LimitedBox(
+                    maxHeight: widget.maxHeight,
+                    child: TextField(
+                      key: Key('messageInputText'),
+                      enabled: _inputEnabled,
+                      minLines: null,
+                      maxLines: null,
+                      onSubmitted: (_) => sendMessage(),
+                      keyboardType: widget.keyboardType,
+                      controller: textEditingController,
+                      focusNode: _focusNode,
+                      style: theme.messageInputTheme.inputTextStyle,
+                      autofocus: widget.autofocus,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _getInputDecoration(),
+                      textCapitalization: TextCapitalization.sentences,
                     ),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
-                    prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
-                    suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
-                    prefixIcon: _commandEnabled
-                        ? Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: theme.colorTheme.accentBlue,
-                            ),
-                            margin: const EdgeInsets.only(right: 4, left: 8),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                StreamSvgIcon.lightning(
-                                  color: Colors.white,
-                                  size: 16.0,
-                                ),
-                                Text(
-                                  _chosenCommand?.name?.toUpperCase() ?? '',
-                                  style: StreamChatTheme.of(context)
-                                      .textTheme
-                                      .footnoteBold
-                                      .copyWith(
-                                        color: Colors.white,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : null,
-                    suffixIcon: _commandEnabled
-                        ? IconButton(
-                            icon: StreamSvgIcon.closeSmall(),
-                            splashRadius: 24,
-                            padding: const EdgeInsets.all(0),
-                            constraints: BoxConstraints.tightFor(
-                              height: 24,
-                              width: 24,
-                            ),
-                            onPressed: () {
-                              setState(() => _commandEnabled = false);
-                            },
-                          )
-                        : null,
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  InputDecoration _getInputDecoration() {
+    final theme = StreamChatTheme.of(context);
+    final passedDecoration = theme.messageInputTheme.inputDecoration;
+    return InputDecoration(
+      isDense: true,
+      hintText: _getHint(),
+      hintStyle: theme.messageInputTheme.inputTextStyle.copyWith(
+        color: theme.colorTheme.grey,
+      ),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
+      prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
+      suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
+      prefixIcon: _commandEnabled
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: theme.colorTheme.accentBlue,
+              ),
+              margin: const EdgeInsets.only(right: 4, left: 8),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  StreamSvgIcon.lightning(
+                    color: Colors.white,
+                    size: 16.0,
+                  ),
+                  Text(
+                    _chosenCommand?.name?.toUpperCase() ?? '',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnoteBold
+                        .copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                ],
+              ),
+            )
+          : null,
+      suffixIcon: Row(
+        children: [
+          if (_commandEnabled)
+            IconButton(
+              icon: StreamSvgIcon.closeSmall(),
+              splashRadius: 24,
+              padding: const EdgeInsets.all(0),
+              constraints: BoxConstraints.tightFor(
+                height: 24,
+                width: 24,
+              ),
+              onPressed: () {
+                setState(() => _commandEnabled = false);
+              },
+            ),
+          if (widget.sendButtonLocation == SendButtonLocation.inside)
+            _animateSendButton(context),
+        ],
+      ),
+    ).merge(passedDecoration);
   }
 
   Timer _debounce;
@@ -621,7 +695,9 @@ class MessageInputState extends State<MessageInput> {
             .last
             .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
-      Overlay.of(context).insert(_mentionsOverlay);
+      if (_mentionsOverlay != null) {
+        Overlay.of(context).insert(_mentionsOverlay);
+      }
     }
   }
 
@@ -646,7 +722,9 @@ class MessageInputState extends State<MessageInput> {
         _commandsOverlay = null;
       } else {
         _commandsOverlay = _buildCommandsOverlayEntry();
-        Overlay.of(context).insert(_commandsOverlay);
+        if (_commandsOverlay != null) {
+          Overlay.of(context).insert(_commandsOverlay);
+        }
       }
     }
   }
@@ -660,6 +738,10 @@ class MessageInputState extends State<MessageInput> {
             ?.where((c) => c.name.contains(text.replaceFirst('/', '')))
             ?.toList() ??
         [];
+
+    if (commands.isEmpty) {
+      return null;
+    }
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -833,6 +915,7 @@ class MessageInputState extends State<MessageInput> {
       child: Material(
         color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1099,6 +1182,10 @@ class MessageInputState extends State<MessageInput> {
           return m.user.name.toLowerCase().contains(query);
         })?.toList() ??
         [];
+
+    if (members.isEmpty) {
+      return null;
+    }
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
