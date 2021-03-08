@@ -13,16 +13,16 @@ class VideoAttachment extends AttachmentWidget {
   final ValueChanged<ReturnActionType> onReturnAction;
   final VoidCallback onAttachmentTap;
 
-  const VideoAttachment(
-      {Key key,
-      @required Message message,
-      @required Attachment attachment,
-      Size size,
-      this.messageTheme,
-      this.onShowMessage,
-      this.onReturnAction,
-      this.onAttachmentTap})
-      : super(key: key, message: message, attachment: attachment, size: size);
+  const VideoAttachment({
+    Key key,
+    @required Message message,
+    @required Attachment attachment,
+    Size size,
+    this.messageTheme,
+    this.onShowMessage,
+    this.onReturnAction,
+    this.onAttachmentTap,
+  }) : super(key: key, message: message, attachment: attachment, size: size);
 
   @override
   Widget build(BuildContext context) {
