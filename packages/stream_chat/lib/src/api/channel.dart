@@ -218,21 +218,21 @@ class Channel {
     }
 
     client.logger.info('Found ${attachments.length} attachments');
+
+    void updateAttachment(Attachment attachment) {
+      final index =
+          message.attachments.indexWhere((it) => it.id == attachment.id);
+      if (index != -1) {
+        message.attachments[index] = attachment;
+        state?.addMessage(message);
+      }
+    }
+
     return Future.wait(attachments.map((it) {
       client.logger.info('Uploading ${it.id} attachment...');
 
-      void updateAttachment(Attachment attachment) {
-        final index =
-            message.attachments.indexWhere((it) => it.id == attachment.id);
-        if (index != -1) {
-          message.attachments[index] = attachment;
-          state?.addMessage(message);
-        }
-      }
-
       final throttledUpdateAttachment = updateAttachment.throttled(
         const Duration(milliseconds: 500),
-        trailing: true,
       );
 
       void onSendProgress(int sent, int total) {
@@ -283,6 +283,7 @@ class Channel {
           it.copyWith(uploadState: UploadState.failed(error: e.toString())),
         );
       }).whenComplete(() {
+        throttledUpdateAttachment?.cancel();
         _cancelableAttachmentUploadRequest.remove(it.id);
       });
     })).whenComplete(() {
@@ -1703,7 +1704,7 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   BehaviorSubject<ChannelState> _channelStateController;
 
-  final ApplicableFunction _debouncedUpdatePersistenceChannelState;
+  final Debounce _debouncedUpdatePersistenceChannelState;
 
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
@@ -1827,6 +1828,7 @@ class ChannelClientState {
 
   /// Call this method to dispose this object
   void dispose() {
+    _debouncedUpdatePersistenceChannelState?.cancel();
     _unreadCountController.close();
     retryQueue.dispose();
     _subscriptions.forEach((s) => s.cancel());
