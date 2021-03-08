@@ -6,12 +6,12 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
-import 'package:stream_chat/src/debounce.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat/src/extensions/rate_limit.dart';
 
 /// This a the class that manages a specific channel.
 class Channel {
@@ -218,28 +218,29 @@ class Channel {
     }
 
     client.logger.info('Found ${attachments.length} attachments');
+
+    void updateAttachment(Attachment attachment) {
+      final index =
+          message.attachments.indexWhere((it) => it.id == attachment.id);
+      if (index != -1) {
+        message.attachments[index] = attachment;
+        state?.addMessage(message);
+      }
+    }
+
     return Future.wait(attachments.map((it) {
       client.logger.info('Uploading ${it.id} attachment...');
 
-      void updateAttachment(Attachment attachment) {
-        final index =
-            message.attachments.indexWhere((it) => it.id == attachment.id);
-        if (index != -1) {
-          message.attachments[index] = attachment;
-          state?.addMessage(message);
-        }
-      }
+      final throttledUpdateAttachment = updateAttachment.throttled(
+        const Duration(milliseconds: 500),
+      );
 
       void onSendProgress(int sent, int total) {
-        debounce(
-          timeout: const Duration(seconds: 1),
-          target: updateAttachment,
-          positionalArguments: [
-            it.copyWith(
-              uploadState: UploadState.inProgress(uploaded: sent, total: total),
-            ),
-          ],
-        );
+        throttledUpdateAttachment([
+          it.copyWith(
+            uploadState: UploadState.inProgress(uploaded: sent, total: total),
+          ),
+        ]);
       }
 
       final isImage = it.type == 'image';
@@ -282,6 +283,7 @@ class Channel {
           it.copyWith(uploadState: UploadState.failed(error: e.toString())),
         );
       }).whenComplete(() {
+        throttledUpdateAttachment?.cancel();
         _cancelableAttachmentUploadRequest.remove(it.id);
       });
     })).whenComplete(() {
@@ -1202,7 +1204,12 @@ class Channel {
 /// The class that handles the state of the channel listening to the events
 class ChannelClientState {
   /// Creates a new instance listening to events and updating the state
-  ChannelClientState(this._channel, ChannelState channelState) {
+  ChannelClientState(
+    this._channel,
+    ChannelState channelState,
+  ) : _debouncedUpdatePersistenceChannelState = _channel
+            ?._client?.chatPersistenceClient?.updateChannelState
+            ?.debounced(const Duration(seconds: 1)) {
     retryQueue = RetryQueue(
       channel: _channel,
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
@@ -1697,15 +1704,11 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   BehaviorSubject<ChannelState> _channelStateController;
 
+  final Debounce _debouncedUpdatePersistenceChannelState;
+
   set _channelState(ChannelState v) {
     _channelStateController.add(v);
-    if (_channel._client.persistenceEnabled) {
-      debounce(
-        timeout: const Duration(milliseconds: 500),
-        target: _channel._client.chatPersistenceClient?.updateChannelState,
-        positionalArguments: [v],
-      );
-    }
+    _debouncedUpdatePersistenceChannelState?.call([v]);
   }
 
   /// The channel threads related to this channel
@@ -1850,6 +1853,7 @@ class ChannelClientState {
 
   /// Call this method to dispose this object
   void dispose() {
+    _debouncedUpdatePersistenceChannelState?.cancel();
     _unreadCountController.close();
     retryQueue.dispose();
     _subscriptions.forEach((s) => s.cancel());
