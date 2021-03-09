@@ -3,9 +3,10 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
-import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -98,17 +99,26 @@ class _ImageFooterState extends State<ImageFooter> {
                 onPressed: () async {
                   final attachment =
                       widget.mediaAttachments[widget.currentPage];
-                  var url = attachment.imageUrl ??
+                  final url = attachment.imageUrl ??
                       attachment.assetUrl ??
                       attachment.thumbUrl;
-                  var type = attachment.type == 'image'
+                  final type = attachment.type == 'image'
                       ? 'jpg'
                       : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
-                  var request = await HttpClient().getUrl(Uri.parse(url));
-                  var response = await request.close();
-                  var bytes =
+                  final request = await HttpClient().getUrl(Uri.parse(url));
+                  final response = await request.close();
+                  final bytes =
                       await consolidateHttpClientResponseBytes(response);
-                  await Share.file('File', 'image.$type', bytes, 'image/$type');
+                  final tmpPath = await getTemporaryDirectory();
+                  final filePath = '${tmpPath.path}/${attachment.id}.$type';
+                  final file = File(filePath);
+                  await file.writeAsBytes(bytes);
+                  await Share.shareFiles(
+                    [filePath],
+                    mimeTypes: [
+                      'image/$type',
+                    ],
+                  );
                 },
               ),
               InkWell(
