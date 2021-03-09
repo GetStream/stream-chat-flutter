@@ -91,36 +91,40 @@ class _ImageFooterState extends State<ImageFooter> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                icon: StreamSvgIcon.iconShare(
-                  size: 24.0,
-                  color: StreamChatTheme.of(context).colorTheme.black,
-                ),
-                onPressed: () async {
-                  final attachment =
-                      widget.mediaAttachments[widget.currentPage];
-                  final url = attachment.imageUrl ??
-                      attachment.assetUrl ??
-                      attachment.thumbUrl;
-                  final type = attachment.type == 'image'
-                      ? 'jpg'
-                      : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
-                  final request = await HttpClient().getUrl(Uri.parse(url));
-                  final response = await request.close();
-                  final bytes =
-                      await consolidateHttpClientResponseBytes(response);
-                  final tmpPath = await getTemporaryDirectory();
-                  final filePath = '${tmpPath.path}/${attachment.id}.$type';
-                  final file = File(filePath);
-                  await file.writeAsBytes(bytes);
-                  await Share.shareFiles(
-                    [filePath],
-                    mimeTypes: [
-                      'image/$type',
-                    ],
-                  );
-                },
-              ),
+              kIsWeb
+                  ? SizedBox()
+                  : IconButton(
+                      icon: StreamSvgIcon.iconShare(
+                        size: 24.0,
+                        color: StreamChatTheme.of(context).colorTheme.black,
+                      ),
+                      onPressed: () async {
+                        final attachment =
+                            widget.mediaAttachments[widget.currentPage];
+                        final url = attachment.imageUrl ??
+                            attachment.assetUrl ??
+                            attachment.thumbUrl;
+                        final type = attachment.type == 'image'
+                            ? 'jpg'
+                            : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
+                        final request =
+                            await HttpClient().getUrl(Uri.parse(url));
+                        final response = await request.close();
+                        final bytes =
+                            await consolidateHttpClientResponseBytes(response);
+                        final tmpPath = await getTemporaryDirectory();
+                        final filePath =
+                            '${tmpPath.path}/${attachment.id}.$type';
+                        final file = File(filePath);
+                        await file.writeAsBytes(bytes);
+                        await Share.shareFiles(
+                          [filePath],
+                          mimeTypes: [
+                            'image/$type',
+                          ],
+                        );
+                      },
+                    ),
               InkWell(
                 onTap: widget.onTitleTap,
                 child: Container(
