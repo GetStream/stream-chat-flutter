@@ -157,53 +157,14 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       errorBuilder: widget.errorBuilder ??
           (BuildContext context, dynamic error) {
             if (error is Error) {
-              print((error).stackTrace);
-            }
-
-            var message = error.toString();
-            if (error is DioError) {
-              if (error.type == DioErrorType.RESPONSE) {
-                message = error.message;
-              } else {
-                message = 'Check your connection and retry';
-              }
+              print(error.stackTrace);
             }
             return InfoTile(
               showMessage: widget.showErrorTile,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
               message: 'An error occurred.',
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 2.0),
-                              child: Icon(Icons.error_outline),
-                            ),
-                          ),
-                          TextSpan(text: 'Error loading messages'),
-                        ],
-                      ),
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Text(message),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _messageSearchListController.loadData();
-                      },
-                      child: Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
+              child: Container(),
             );
           },
       loadingBuilder: widget.loadingBuilder ??
