@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
@@ -238,6 +237,9 @@ class MessageReactionsModal extends StatelessWidget {
                 borderRadius: BorderRadius.circular(32),
               ),
               Positioned(
+                bottom: 6,
+                left: isCurrentUser ? -3 : null,
+                right: isCurrentUser ? -3 : null,
                 child: Align(
                   alignment:
                       reverse ? Alignment.centerRight : Alignment.centerLeft,
@@ -251,9 +253,6 @@ class MessageReactionsModal extends StatelessWidget {
                     highlightOwnReactions: false,
                   ),
                 ),
-                bottom: 6,
-                left: isCurrentUser ? -3 : null,
-                right: isCurrentUser ? -3 : null,
               ),
             ],
           ),

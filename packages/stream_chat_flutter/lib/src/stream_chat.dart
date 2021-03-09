@@ -92,9 +92,9 @@ class StreamChatState extends State<StreamChat> {
               ),
               child: StreamChatCore(
                 client: client,
-                child: widget.child,
                 onBackgroundEventReceived: widget.onBackgroundEventReceived,
                 backgroundKeepAlive: widget.backgroundKeepAlive,
+                child: widget.child,
               ),
             );
           },

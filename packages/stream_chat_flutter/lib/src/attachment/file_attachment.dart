@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 import '../upload_progress_indicator.dart';
 import 'attachment_widget.dart';
@@ -45,10 +44,10 @@ class FileAttachment extends AttachmentWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              child: _getFileTypeImage(context),
               height: 40.0,
               width: 33.33,
               margin: EdgeInsets.all(8.0),
+              child: _getFileTypeImage(context),
             ),
             SizedBox(width: 8.0),
             Expanded(

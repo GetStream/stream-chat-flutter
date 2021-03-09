@@ -13,7 +13,6 @@ class StreamNeumorphicButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: child,
       margin: EdgeInsets.all(8.0),
       height: 40,
       width: 40,
@@ -35,6 +34,7 @@ class StreamNeumorphicButton extends StatelessWidget {
           ),
         ],
       ),
+      child: child,
     );
   }
 }

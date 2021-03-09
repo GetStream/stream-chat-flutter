@@ -56,6 +56,11 @@ class _MediaListViewState extends State<MediaListView> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0),
             child: InkWell(
+              onTap: () {
+                if (widget.onSelect != null) {
+                  widget.onSelect(media);
+                }
+              },
               child: Stack(
                 children: [
                   AspectRatio(
@@ -125,11 +130,6 @@ class _MediaListViewState extends State<MediaListView> {
                   ]
                 ],
               ),
-              onTap: () {
-                if (widget.onSelect != null) {
-                  widget.onSelect(media);
-                }
-              },
             ),
           );
         },

@@ -78,12 +78,12 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
               Navigator.of(context).pop();
             },
             child: Container(
+              width: 24.0,
+              height: 24.0,
               child: StreamSvgIcon.left(
                 color: StreamChatTheme.of(context).colorTheme.black,
                 size: 24.0,
               ),
-              width: 24.0,
-              height: 24.0,
             ),
           ),
         ),

@@ -377,9 +377,9 @@ class _MessageWidgetState extends State<MessageWidget>
                                     portal: Container(
                                       transform:
                                           Matrix4.translationValues(-12, 0, 0),
-                                      child: _buildReactionIndicator(context),
                                       constraints:
                                           BoxConstraints(maxWidth: 22 * 6.0),
+                                      child: _buildReactionIndicator(context),
                                     ),
                                     portalAnchor: Alignment(-1.0, -1.0),
                                     childAnchor: Alignment(1, -1.0),
