@@ -107,7 +107,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
-        preferOffline: onlyOffline,
       )) {
         if (clear) {
           _channelsController.add(channels);
@@ -173,11 +172,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }));
 
     _subscriptions.add(client
-        .on(EventType.channelDeleted, EventType.notificationRemovedFromChannel)
+        .on(
+      EventType.channelDeleted,
+      EventType.notificationRemovedFromChannel,
+    )
         .listen((e) {
       final channel = e.channel;
-      _channelsController
-          .add(List.from(channels..removeWhere((c) => c.cid == channel.cid)));
+      _channelsController.add(List.from(
+          (channels ?? [])..removeWhere((c) => c.cid == channel.cid)));
     }));
   }
 

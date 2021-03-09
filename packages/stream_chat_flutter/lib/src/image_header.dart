@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'image_actions_modal.dart';
+import 'attachment_actions_modal.dart';
 
 class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   /// True if this header shows the leading back button
@@ -110,11 +110,8 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       builder: (context) {
         return StreamChannel(
           channel: channel,
-          child: ImageActionsModal(
-            userName: userName,
-            sentAt: sentAt,
+          child: AttachmentActionsModal(
             message: message,
-            urls: urls,
             currentIndex: currentIndex,
             onShowMessage: onShowMessage,
           ),

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_upload_state_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -51,22 +52,46 @@ class ImageAttachment extends AttachmentWidget {
         );
       },
       network: () {
-        final imageUrl =
+        var imageUrl =
             attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+
         if (imageUrl == null) {
           return AttachmentError(size: size);
         }
+
+        var imageUri = Uri.parse(imageUrl);
+        if (imageUri.host == 'stream-io-cdn.com') {
+          imageUri = imageUri.replace(queryParameters: {
+            ...imageUri.queryParameters,
+            'h': '500',
+            'w': '500',
+            'crop': 'center',
+            'resize': 'crop',
+          });
+        } else if (imageUri.host == 'stream-cloud-uploads.imgix.net') {
+          imageUri = imageUri.replace(queryParameters: {
+            ...imageUri.queryParameters,
+            'height': '500',
+            'width': '500',
+            'fit': 'crop',
+          });
+        }
+        imageUrl = imageUri.toString();
+
         return _buildImageAttachment(
           context,
           CachedNetworkImage(
             height: size?.height,
             width: size?.width,
             placeholder: (_, __) {
-              return Container(
-                width: size?.width,
-                height: size?.height,
-                child: Center(
-                  child: CircularProgressIndicator(),
+              return Shimmer.fromColors(
+                baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                highlightColor:
+                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                child: Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
                 ),
               );
             },

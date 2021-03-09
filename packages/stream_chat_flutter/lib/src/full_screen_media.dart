@@ -243,7 +243,7 @@ class VideoPackage {
 
   ChewieController get chewieController => _chewieController;
 
-  bool get initialized => _videoPlayerController.value.initialized;
+  bool get initialized => _videoPlayerController.value.isInitialized;
 
   VideoPackage(
     Attachment attachment, {

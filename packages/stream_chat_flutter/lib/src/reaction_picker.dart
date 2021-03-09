@@ -94,6 +94,19 @@ class _ReactionPickerState extends State<ReactionPicker>
                               height: 24,
                               width: 24,
                             ),
+                            onPressed: () {
+                              if (ownReactionIndex != -1) {
+                                removeReaction(
+                                  context,
+                                  widget.message.ownReactions[ownReactionIndex],
+                                );
+                              } else {
+                                sendReaction(
+                                  context,
+                                  reactionIcon.type,
+                                );
+                              }
+                            },
                             child: AnimatedBuilder(
                                 animation: animations[index],
                                 builder: (context, val) {
@@ -121,19 +134,6 @@ class _ReactionPickerState extends State<ReactionPicker>
                                     ),
                                   );
                                 }),
-                            onPressed: () {
-                              if (ownReactionIndex != -1) {
-                                removeReaction(
-                                  context,
-                                  widget.message.ownReactions[ownReactionIndex],
-                                );
-                              } else {
-                                sendReaction(
-                                  context,
-                                  reactionIcon.type,
-                                );
-                              }
-                            },
                           ),
                         );
                       })

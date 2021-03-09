@@ -1,3 +1,17 @@
+## 1.4.0-beta
+
+- Unfocus `MessageInput` only when sending commands
+- Updated default error for `MessageSearchListView`
+- Show error messages as system and keep them in the message input
+- Remove notification badge logic
+- Use shimmer while loading images
+- Polished `StreamChatTheme` adding more options and a new `MessageInputTheme` dedicated to `MessageInput`
+- Add possibility to specify custom message actions using `MessageWidget.customActions`
+- Added `MessageListView.onAttachmentTap` callback
+- Fixed message newline issue
+- Fixed `MessageListView` scroll keyboard behaviour
+- Minor fixes and improveqments
+
 ## 1.3.2-beta
 
 - Updated `stream_chat_core` dependency

@@ -1,12 +1,35 @@
 import 'package:json_annotation/json_annotation.dart';
-
-import '../models/user.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 part 'member.g.dart';
 
-/// The class that contains the information about the user membership in a channel
+/// The class that contains the information about the user membership
+/// in a channel
 @JsonSerializable()
 class Member {
+  /// Constructor used for json serialization
+  Member({
+    this.user,
+    this.inviteAcceptedAt,
+    this.inviteRejectedAt,
+    this.invited,
+    this.role,
+    this.userId,
+    this.isModerator,
+    this.createdAt,
+    this.updatedAt,
+    this.banned,
+    this.shadowBanned,
+  });
+
+  /// Create a new instance from a json
+  factory Member.fromJson(Map<String, dynamic> json) {
+    final member = _$MemberFromJson(json);
+    return member.copyWith(
+      userId: member.user?.id,
+    );
+  }
+
   /// The interested user
   final User user;
 
@@ -39,29 +62,6 @@ class Member {
 
   /// The last date of update
   final DateTime updatedAt;
-
-  /// Constructor used for json serialization
-  Member({
-    this.user,
-    this.inviteAcceptedAt,
-    this.inviteRejectedAt,
-    this.invited,
-    this.role,
-    this.userId,
-    this.isModerator,
-    this.createdAt,
-    this.updatedAt,
-    this.banned,
-    this.shadowBanned,
-  });
-
-  /// Create a new instance from a json
-  factory Member.fromJson(Map<String, dynamic> json) {
-    final member = _$MemberFromJson(json);
-    return member.copyWith(
-      userId: member.user?.id,
-    );
-  }
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({

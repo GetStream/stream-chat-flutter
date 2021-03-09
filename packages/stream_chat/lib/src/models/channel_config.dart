@@ -1,12 +1,34 @@
 import 'package:json_annotation/json_annotation.dart';
-
-import 'command.dart';
-
+import 'package:stream_chat/src/models/command.dart';
 part 'channel_config.g.dart';
 
 /// The class that contains the information about the configuration of a channel
 @JsonSerializable()
 class ChannelConfig {
+  /// Constructor used for json serialization
+  ChannelConfig({
+    this.automod,
+    this.commands,
+    this.connectEvents,
+    this.createdAt,
+    this.updatedAt,
+    this.maxMessageLength,
+    this.messageRetention,
+    this.mutes,
+    this.name,
+    this.reactions,
+    this.readEvents,
+    this.replies,
+    this.search,
+    this.typingEvents,
+    this.uploads,
+    this.urlEnrichment,
+  });
+
+  /// Create a new instance from a json
+  factory ChannelConfig.fromJson(Map<String, dynamic> json) =>
+      _$ChannelConfigFromJson(json);
+
   /// Moderation configuration
   final String automod;
 
@@ -54,30 +76,6 @@ class ChannelConfig {
 
   /// True if urls appears as attachments
   final bool urlEnrichment;
-
-  /// Constructor used for json serialization
-  ChannelConfig({
-    this.automod,
-    this.commands,
-    this.connectEvents,
-    this.createdAt,
-    this.updatedAt,
-    this.maxMessageLength,
-    this.messageRetention,
-    this.mutes,
-    this.name,
-    this.reactions,
-    this.readEvents,
-    this.replies,
-    this.search,
-    this.typingEvents,
-    this.uploads,
-    this.urlEnrichment,
-  });
-
-  /// Create a new instance from a json
-  factory ChannelConfig.fromJson(Map<String, dynamic> json) =>
-      _$ChannelConfigFromJson(json);
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);

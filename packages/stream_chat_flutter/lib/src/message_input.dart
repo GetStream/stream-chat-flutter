@@ -11,6 +11,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
@@ -40,6 +41,15 @@ enum DefaultAttachmentTypes {
   image,
   video,
   file,
+}
+
+/// Available locations for the sendMessage button relative to the textField
+enum SendButtonLocation {
+  /// inside the textField
+  inside,
+
+  /// outside the textField
+  outside,
 }
 
 const _kMinMediaPickerSize = 360.0;
@@ -107,6 +117,11 @@ class MessageInput extends StatefulWidget {
     this.focusNode,
     this.quotedMessage,
     this.onQuotedMessageCleared,
+    this.sendButtonLocation = SendButtonLocation.outside,
+    this.autofocus = false,
+    this.hideSendAsDm = false,
+    this.idleSendButton,
+    this.activeSendButton,
   }) : super(key: key);
 
   /// Message to edit
@@ -134,6 +149,9 @@ class MessageInput extends StatefulWidget {
   /// If true the attachments button will not be displayed
   final bool disableAttachments;
 
+  /// Hide send as dm checkbox
+  final bool hideSendAsDm;
+
   /// The text controller of the TextField
   final TextEditingController textEditingController;
 
@@ -154,6 +172,18 @@ class MessageInput extends StatefulWidget {
 
   ///
   final VoidCallback onQuotedMessageCleared;
+
+  /// The location of the send button
+  final SendButtonLocation sendButtonLocation;
+
+  /// Autofocus property passed to the TextField
+  final bool autofocus;
+
+  /// Send button widget in an idle state
+  final Widget idleSendButton;
+
+  /// Send button widget in an active state
+  final Widget activeSendButton;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -281,7 +311,7 @@ class MessageInputState extends State<MessageInput> {
                 padding: const EdgeInsets.all(8.0),
                 child: _buildTextField(context),
               ),
-              if (widget.parentMessage != null)
+              if (widget.parentMessage != null && !widget.hideSendAsDm)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: _buildDmCheckbox(),
@@ -304,15 +334,16 @@ class MessageInputState extends State<MessageInput> {
   Flex _buildTextField(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         if (!_commandEnabled) _buildExpandActionsButton(),
         if (widget.actionsLocation == ActionsLocation.left)
           ...widget.actions ?? [],
         _buildTextInput(context),
-        _animateSendButton(context),
         if (widget.actionsLocation == ActionsLocation.right)
           ...widget.actions ?? [],
+        if (widget.sendButtonLocation == SendButtonLocation.outside)
+          _animateSendButton(context),
       ],
     );
   }
@@ -384,14 +415,20 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _animateSendButton(BuildContext context) {
+    final sendButton = widget.activeSendButton != null
+        ? InkWell(
+            onTap: sendMessage,
+            child: widget.activeSendButton,
+          )
+        : _buildSendButton(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: AnimatedCrossFade(
         crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
             ? CrossFadeState.showFirst
             : CrossFadeState.showSecond,
-        firstChild: _buildSendButton(context),
-        secondChild: _buildIdleSendButton(context),
+        firstChild: sendButton,
+        secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
         duration:
             StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
         alignment: Alignment.center,
@@ -447,99 +484,137 @@ class MessageInputState extends State<MessageInput> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(color: theme.colorTheme.greyGainsboro),
+            borderRadius: theme.messageInputTheme.borderRadius,
+            gradient: _focusNode.hasFocus
+                ? theme.messageInputTheme.activeBorderGradient
+                : theme.messageInputTheme.idleBorderGradient,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildReplyToMessage(),
-              _buildAttachments(),
-              LimitedBox(
-                maxHeight: widget.maxHeight,
-                child: TextField(
-                  key: Key('messageInputText'),
-                  enabled: _inputEnabled,
-                  minLines: null,
-                  maxLines: null,
-                  onSubmitted: (_) => sendMessage(),
-                  keyboardType: widget.keyboardType,
-                  controller: textEditingController,
-                  focusNode: _focusNode,
-                  style: theme.textTheme.body,
-                  autofocus: false,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: _getHint(),
-                    hintStyle: theme.textTheme.body.copyWith(
-                      color: theme.colorTheme.grey,
+          child: Padding(
+            padding: const EdgeInsets.all(1.5),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: theme.messageInputTheme.borderRadius,
+                color: theme.messageInputTheme.inputBackground,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildReplyToMessage(),
+                  _buildAttachments(),
+                  LimitedBox(
+                    maxHeight: widget.maxHeight,
+                    child: TextField(
+                      key: Key('messageInputText'),
+                      enabled: _inputEnabled,
+                      minLines: null,
+                      maxLines: null,
+                      onSubmitted: (_) => sendMessage(),
+                      keyboardType: widget.keyboardType,
+                      controller: textEditingController,
+                      focusNode: _focusNode,
+                      style: theme.messageInputTheme.inputTextStyle,
+                      autofocus: widget.autofocus,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _getInputDecoration(),
+                      textCapitalization: TextCapitalization.sentences,
                     ),
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent)),
-                    contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
-                    prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
-                    suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
-                    prefixIcon: _commandEnabled
-                        ? Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: theme.colorTheme.accentBlue,
-                            ),
-                            margin: const EdgeInsets.only(right: 4, left: 8),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                StreamSvgIcon.lightning(
-                                  color: Colors.white,
-                                  size: 16.0,
-                                ),
-                                Text(
-                                  _chosenCommand?.name?.toUpperCase() ?? '',
-                                  style: StreamChatTheme.of(context)
-                                      .textTheme
-                                      .footnoteBold
-                                      .copyWith(
-                                        color: Colors.white,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : null,
-                    suffixIcon: _commandEnabled
-                        ? IconButton(
-                            icon: StreamSvgIcon.closeSmall(),
-                            splashRadius: 24,
-                            padding: const EdgeInsets.all(0),
-                            constraints: BoxConstraints.tightFor(
-                              height: 24,
-                              width: 24,
-                            ),
-                            onPressed: () {
-                              setState(() => _commandEnabled = false);
-                            },
-                          )
-                        : null,
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-              )
-            ],
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  InputDecoration _getInputDecoration() {
+    final theme = StreamChatTheme.of(context);
+    final passedDecoration = theme.messageInputTheme.inputDecoration;
+    return InputDecoration(
+      isDense: true,
+      hintText: _getHint(),
+      hintStyle: theme.messageInputTheme.inputTextStyle.copyWith(
+        color: theme.colorTheme.grey,
+      ),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.transparent,
+        ),
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
+      prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
+      suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
+      prefixIcon: _commandEnabled
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: theme.colorTheme.accentBlue,
+              ),
+              margin: const EdgeInsets.only(right: 4, left: 8),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  StreamSvgIcon.lightning(
+                    color: Colors.white,
+                    size: 16.0,
+                  ),
+                  Text(
+                    _chosenCommand?.name?.toUpperCase() ?? '',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnoteBold
+                        .copyWith(
+                          color: Colors.white,
+                        ),
+                  ),
+                ],
+              ),
+            )
+          : null,
+      suffixIcon: Row(
+        children: [
+          if (_commandEnabled)
+            IconButton(
+              icon: StreamSvgIcon.closeSmall(),
+              splashRadius: 24,
+              padding: const EdgeInsets.all(0),
+              constraints: BoxConstraints.tightFor(
+                height: 24,
+                width: 24,
+              ),
+              onPressed: () {
+                setState(() => _commandEnabled = false);
+              },
+            ),
+          if (widget.sendButtonLocation == SendButtonLocation.inside)
+            _animateSendButton(context),
+        ],
+      ),
+    ).merge(passedDecoration);
   }
 
   Timer _debounce;
@@ -621,7 +696,9 @@ class MessageInputState extends State<MessageInput> {
             .last
             .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
-      Overlay.of(context).insert(_mentionsOverlay);
+      if (_mentionsOverlay != null) {
+        Overlay.of(context).insert(_mentionsOverlay);
+      }
     }
   }
 
@@ -646,7 +723,9 @@ class MessageInputState extends State<MessageInput> {
         _commandsOverlay = null;
       } else {
         _commandsOverlay = _buildCommandsOverlayEntry();
-        Overlay.of(context).insert(_commandsOverlay);
+        if (_commandsOverlay != null) {
+          Overlay.of(context).insert(_commandsOverlay);
+        }
       }
     }
   }
@@ -660,6 +739,10 @@ class MessageInputState extends State<MessageInput> {
             ?.where((c) => c.name.contains(text.replaceFirst('/', '')))
             ?.toList() ??
         [];
+
+    if (commands.isEmpty) {
+      return null;
+    }
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -833,6 +916,7 @@ class MessageInputState extends State<MessageInput> {
       child: Material(
         color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -930,116 +1014,25 @@ class MessageInputState extends State<MessageInput> {
                     color: StreamChatTheme.of(context).colorTheme.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: _buildPickerSection(),
+                  child: _PickerWidget(
+                    filePickerIndex: _filePickerIndex,
+                    containsFile: _attachmentContainsFile,
+                    selectedMedias: _attachments.keys.toList(),
+                    onAddMoreFilesClick: pickFile,
+                    onMediaSelected: (media) {
+                      if (_attachments.containsKey(media.id)) {
+                        setState(() => _attachments.remove(media.id));
+                      } else {
+                        _addAttachment(media);
+                      }
+                    },
+                  ),
                 ),
               ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildPickerSection() {
-    final _attachmentContainsFile = _attachments.values.any((it) {
-      return it.type == 'file';
-    });
-
-    switch (_filePickerIndex) {
-      case 0:
-        return FutureBuilder<bool>(
-            future: PhotoManager.requestPermission(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-
-              if (snapshot.data) {
-                if (_attachmentContainsFile) {
-                  return GestureDetector(
-                    onTap: () {
-                      pickFile(DefaultAttachmentTypes.file);
-                    },
-                    child: Container(
-                      constraints: BoxConstraints.expand(),
-                      color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                      child: Text(
-                        'Add more files',
-                        style: TextStyle(
-                          color:
-                              StreamChatTheme.of(context).colorTheme.accentBlue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                    ),
-                  );
-                }
-                return MediaListView(
-                  selectedIds: _attachments.keys.toList(),
-                  onSelect: (media) async {
-                    if (!_attachments.containsKey(media.id)) {
-                      _addAttachment(media);
-                    } else {
-                      setState(() => _attachments.remove(media.id));
-                    }
-                  },
-                );
-              }
-
-              return InkWell(
-                onTap: () async {
-                  PhotoManager.openSetting();
-                },
-                child: Container(
-                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SvgPicture.asset(
-                        'svgs/icon_picture_empty_state.svg',
-                        package: 'stream_chat_flutter',
-                        height: 140,
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
-                      ),
-                      Text(
-                        'Please enable access to your photos \nand videos so you can share them with friends.',
-                        style: StreamChatTheme.of(context)
-                            .textTheme
-                            .body
-                            .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .grey),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 6.0),
-                      Center(
-                        child: Text(
-                          'Allow access to your gallery',
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .accentBlue,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            });
-        break;
-      default:
-        return SizedBox();
-    }
   }
 
   void _addAttachment(AssetEntity medium) async {
@@ -1090,81 +1083,81 @@ class MessageInputState extends State<MessageInput> {
     switch (iconType) {
       case 'giphy':
         return CircleAvatar(
+          radius: 12,
           child: StreamSvgIcon.giphyIcon(
             size: 24.0,
           ),
-          radius: 12,
         );
         break;
       case 'ban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.iconUserDelete(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'flag':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.flag(
             size: 14.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'imgur':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: ClipOval(
             child: StreamSvgIcon.imgur(
               size: 24.0,
             ),
           ),
-          radius: 12,
         );
         break;
       case 'mute':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.mute(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'unban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.userAdd(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'unmute':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.volumeUp(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       default:
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.lightning(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
     }
@@ -1190,6 +1183,10 @@ class MessageInputState extends State<MessageInput> {
           return m.user.name.toLowerCase().contains(query);
         })?.toList() ??
         [];
+
+    if (members.isEmpty) {
+      return null;
+    }
 
     RenderBox renderBox = context.findRenderObject();
     final size = renderBox.size;
@@ -1646,11 +1643,15 @@ class MessageInputState extends State<MessageInput> {
                   return getFileTypeImage(attachment.extraData['other']);
                 },
                 progressIndicatorBuilder: (context, _, progress) {
-                  return Center(
-                    child: Container(
-                      width: 20.0,
-                      height: 20.0,
-                      child: const CircularProgressIndicator(),
+                  return Shimmer.fromColors(
+                    baseColor:
+                        StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                    highlightColor:
+                        StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                    child: Image.asset(
+                      'images/placeholder.png',
+                      fit: BoxFit.cover,
+                      package: 'stream_chat_flutter',
                     ),
                   );
                 },
@@ -1676,8 +1677,8 @@ class MessageInputState extends State<MessageInput> {
         );
       default:
         return Container(
-          child: Icon(Icons.insert_drive_file),
           color: Colors.black26,
+          child: Icon(Icons.insert_drive_file),
         );
     }
   }
@@ -1903,14 +1904,12 @@ class MessageInputState extends State<MessageInput> {
 
     if (file == null) return;
 
-    final mimeType = file.path.split('/').last.mimeType;
+    final mimeType = file.name?.mimeType;
 
     final extraDataMap = <String, dynamic>{};
 
-    if (camera) {
-      if (mimeType.type == 'video' || mimeType.type == 'image') {
-        attachmentType = mimeType.type;
-      }
+    if (mimeType.type == 'video' || mimeType.type == 'image') {
+      attachmentType = mimeType.type;
     } else {
       attachmentType = 'file';
     }
@@ -2013,9 +2012,10 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
+    final shouldUnfocus = _commandEnabled;
+
     if (_commandEnabled) {
       text = '/${_chosenCommand.name} ' + text;
-      FocusScope.of(context).unfocus();
     }
 
     final attachments = [..._attachments.values];
@@ -2082,7 +2082,14 @@ class MessageInputState extends State<MessageInput> {
       sendingFuture = channel.updateMessage(message);
     }
 
+    if (!shouldUnfocus) {
+      FocusScope.of(context).requestFocus(_focusNode);
+    }
+
     return sendingFuture.then((resp) {
+      if (resp.message?.type == 'error') {
+        _parseExistingMessage(message);
+      }
       if (widget.onMessageSent != null) {
         widget.onMessageSent(resp.message);
       }
@@ -2140,6 +2147,9 @@ class MessageInputState extends State<MessageInput> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)
@@ -2150,9 +2160,6 @@ class MessageInputState extends State<MessageInput> {
                                 .colorTheme
                                 .accentBlue),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
                 ),
               ],
             ),
@@ -2239,4 +2246,115 @@ class Tuple2<T1, T2> {
 
   @override
   int get hashCode => item1.hashCode ^ item2.hashCode;
+}
+
+class _PickerWidget extends StatefulWidget {
+  final int filePickerIndex;
+  final bool containsFile;
+  final List<String> selectedMedias;
+  final void Function(DefaultAttachmentTypes) onAddMoreFilesClick;
+  final void Function(AssetEntity) onMediaSelected;
+
+  const _PickerWidget({
+    Key key,
+    @required this.filePickerIndex,
+    @required this.containsFile,
+    @required this.selectedMedias,
+    @required this.onAddMoreFilesClick,
+    @required this.onMediaSelected,
+  }) : super(key: key);
+
+  @override
+  __PickerWidgetState createState() => __PickerWidgetState();
+}
+
+class __PickerWidgetState extends State<_PickerWidget> {
+  Future<bool> requestPermission;
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermission = PhotoManager.requestPermission();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.filePickerIndex != 0) {
+      return Offstage();
+    }
+    return FutureBuilder<bool>(
+        future: requestPermission,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.data) {
+            if (widget.containsFile) {
+              return GestureDetector(
+                onTap: () {
+                  widget.onAddMoreFilesClick(DefaultAttachmentTypes.file);
+                },
+                child: Container(
+                  constraints: BoxConstraints.expand(),
+                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Add more files',
+                    style: TextStyle(
+                      color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            }
+            return MediaListView(
+              selectedIds: widget.selectedMedias,
+              onSelect: widget.onMediaSelected,
+            );
+          }
+
+          return InkWell(
+            onTap: () async {
+              PhotoManager.openSetting();
+            },
+            child: Container(
+              color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SvgPicture.asset(
+                    'svgs/icon_picture_empty_state.svg',
+                    package: 'stream_chat_flutter',
+                    height: 140,
+                    color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  ),
+                  Text(
+                    'Please enable access to your photos \nand videos so you can share them with friends.',
+                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
+                        color: StreamChatTheme.of(context).colorTheme.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 6.0),
+                  Center(
+                    child: Text(
+                      'Allow access to your gallery',
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .bodyBold
+                          .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 }

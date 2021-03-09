@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.0
-  stream_chat: ^1.3.0
+  stream_chat: ^1.4.0
   stream_chat_persistence:
     path: ../
 

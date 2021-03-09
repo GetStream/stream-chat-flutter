@@ -21,7 +21,8 @@ class MessageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = _replaceMentions(message.text);
+    final text = _replaceMentions(message.text).replaceAll('\n', '\\\n');
+
     return MarkdownBody(
       data: text,
       onTapLink: (

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../full_screen_media.dart';
@@ -139,6 +140,7 @@ class GiphyAttachment extends AttachmentWidget {
                         Card(
                           color: Colors.white,
                           elevation: 2,
+                          shape: CircleBorder(),
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
@@ -152,7 +154,6 @@ class GiphyAttachment extends AttachmentWidget {
                               });
                             },
                           ),
-                          shape: CircleBorder(),
                         ),
                         Expanded(
                           child: Center(
@@ -167,6 +168,7 @@ class GiphyAttachment extends AttachmentWidget {
                         Card(
                           color: Colors.white,
                           elevation: 2,
+                          shape: CircleBorder(),
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
@@ -180,7 +182,6 @@ class GiphyAttachment extends AttachmentWidget {
                               });
                             },
                           ),
-                          shape: CircleBorder(),
                         ),
                       ],
                     ),
@@ -345,11 +346,15 @@ class GiphyAttachment extends AttachmentWidget {
               height: size?.height,
               width: size?.width,
               placeholder: (_, __) {
-                return Container(
-                  width: size?.width,
-                  height: size?.height,
-                  child: Center(
-                    child: CircularProgressIndicator(),
+                return Shimmer.fromColors(
+                  baseColor:
+                      StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  highlightColor:
+                      StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                  child: Image.asset(
+                    'images/placeholder.png',
+                    fit: BoxFit.cover,
+                    package: 'stream_chat_flutter',
                   ),
                 );
               },

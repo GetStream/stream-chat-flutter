@@ -223,8 +223,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     }
 
     return AnimatedSwitcher(
-      child: child,
       duration: const Duration(milliseconds: 500),
+      child: child,
     );
   }
 
@@ -393,16 +393,17 @@ class _ChannelListViewState extends State<ChannelListView> {
           subtitle: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: StreamChatTheme.of(context).colorTheme.white,
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  constraints: BoxConstraints.tightFor(
-                    height: 16,
-                    width: 238,
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: StreamChatTheme.of(context).colorTheme.white,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    constraints: BoxConstraints.expand(
+                      height: 16,
+                    ),
                   ),
                 ),
               ),
@@ -468,8 +469,8 @@ class _ChannelListViewState extends State<ChannelListView> {
             MaterialPageRoute(
               builder: (context) {
                 return StreamChannel(
-                  child: widget.channelWidget,
                   channel: client,
+                  child: widget.channelWidget,
                 );
               },
             ),
@@ -505,12 +506,12 @@ class _ChannelListViewState extends State<ChannelListView> {
                       context: context,
                       builder: (context) {
                         return StreamChannel(
+                          channel: channel,
                           child: ChannelBottomSheet(
                             onViewInfoTap: () {
                               widget.onViewInfoTap(channel);
                             },
                           ),
-                          channel: channel,
                         );
                       },
                     );
@@ -553,7 +554,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ChannelPreview(
                       onLongPress: widget.onChannelLongPress,
                       channel: channel,
-                      onImageTap: widget.onImageTap?.call(channel),
+                      onImageTap: () => widget.onImageTap?.call(channel),
                       onTap: (channel) => onTap(channel, widget.channelWidget),
                     ),
               ),
@@ -591,13 +592,13 @@ class _ChannelListViewState extends State<ChannelListView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: StreamChannel(
+              channel: channel,
               child: ChannelName(
                 textStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              channel: channel,
             ),
           ),
         ],

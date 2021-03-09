@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
@@ -43,10 +44,10 @@ class FileAttachment extends AttachmentWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              child: _getFileTypeImage(context),
               height: 40.0,
               width: 33.33,
               margin: EdgeInsets.all(8.0),
+              child: _getFileTypeImage(context),
             ),
             SizedBox(width: 8.0),
             Expanded(
@@ -102,12 +103,15 @@ class FileAttachment extends AttachmentWidget {
             errorWidget: (_, obj, trace) {
               return getFileTypeImage(attachment.extraData['other']);
             },
-            progressIndicatorBuilder: (context, _, progress) {
-              return Center(
-                child: Container(
-                  width: 20.0,
-                  height: 20.0,
-                  child: const CircularProgressIndicator(),
+            placeholder: (_, __) {
+              return Shimmer.fromColors(
+                baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                highlightColor:
+                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                child: Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
                 ),
               );
             },

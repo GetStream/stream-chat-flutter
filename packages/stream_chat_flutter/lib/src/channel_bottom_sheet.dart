@@ -114,9 +114,9 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                             children: [
                               UserAvatar(
                                 user: members[index].user,
-                                constraints: BoxConstraints(
-                                  maxHeight: 64.0,
-                                  maxWidth: 64.0,
+                                constraints: BoxConstraints.tightFor(
+                                  height: 64.0,
+                                  width: 64.0,
                                 ),
                                 borderRadius: BorderRadius.circular(32.0),
                                 onlineIndicatorConstraints:
@@ -238,8 +238,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
         color: StreamChatTheme.of(context).colorTheme.accentRed,
       ),
     );
-    var channel = StreamChannel.of(context).channel;
     if (res == true) {
+      final channel = StreamChannel.of(context).channel;
       await channel.removeMembers([StreamChat.of(context).user.id]);
       Navigator.pop(context);
     }

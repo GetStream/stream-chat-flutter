@@ -1,12 +1,53 @@
 import 'package:json_annotation/json_annotation.dart';
-
-import 'serialization.dart';
+import 'package:stream_chat/src/models/serialization.dart';
 
 part 'user.g.dart';
 
 /// The class that defines the user model
 @JsonSerializable()
 class User {
+  /// Constructor used for json serialization
+  User({
+    this.id,
+    this.role,
+    this.createdAt,
+    this.updatedAt,
+    this.lastActive,
+    this.online,
+    this.extraData,
+    this.banned,
+    this.teams,
+  });
+
+  /// Create a new instance from a json
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+
+  /// Use this named constructor to create a new user instance
+  User.init(
+    this.id, {
+    this.online,
+    this.extraData,
+  })  : createdAt = null,
+        updatedAt = null,
+        lastActive = null,
+        banned = null,
+        teams = null,
+        role = null;
+
+  /// Known top level fields.
+  /// Useful for [Serialization] methods.
+  static const topLevelFields = [
+    'id',
+    'role',
+    'created_at',
+    'updated_at',
+    'last_active',
+    'online',
+    'banned',
+    'teams',
+  ];
+
   /// User id
   final String id;
 
@@ -42,43 +83,8 @@ class User {
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
-  /// Known top level fields.
-  /// Useful for [Serialization] methods.
-  static const topLevelFields = [
-    'id',
-    'role',
-    'created_at',
-    'updated_at',
-    'last_active',
-    'online',
-    'banned',
-    'teams',
-  ];
-
-  /// Use this named constructor to create a new user instance
-  User.init(
-    this.id, {
-    this.online,
-    this.extraData,
-  })  : createdAt = null,
-        updatedAt = null,
-        lastActive = null,
-        banned = null,
-        teams = null,
-        role = null;
-
-  /// Constructor used for json serialization
-  User({
-    this.id,
-    this.role,
-    this.createdAt,
-    this.updatedAt,
-    this.lastActive,
-    this.online,
-    this.extraData,
-    this.banned,
-    this.teams,
-  });
+  @override
+  int get hashCode => id.hashCode;
 
   /// Shortcut for user name
   String get name =>
@@ -86,23 +92,12 @@ class User {
           ? extraData['name']
           : id;
 
-  /// Create a new instance from a json
-  factory User.fromJson(Map<String, dynamic> json) {
-    return _$UserFromJson(
-        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
-  }
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() {
-    return Serialization.moveFromExtraDataToRoot(
-        _$UserToJson(this), topLevelFields);
-  }
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is User && runtimeType == other.runtimeType && id == other.id;
 
-  @override
-  int get hashCode => id.hashCode;
+  /// Serialize to json
+  Map<String, dynamic> toJson() =>
+      Serialization.moveFromExtraDataToRoot(_$UserToJson(this), topLevelFields);
 }

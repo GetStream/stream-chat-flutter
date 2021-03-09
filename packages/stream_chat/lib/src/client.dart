@@ -1,36 +1,34 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:stream_chat/src/extensions/map_extension.dart';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:pedantic/pedantic.dart' show unawaited;
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/api/channel.dart';
+import 'package:stream_chat/src/api/connection_status.dart';
+import 'package:stream_chat/src/api/requests.dart';
+import 'package:stream_chat/src/api/responses.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
+import 'package:stream_chat/src/api/websocket.dart';
+import 'package:stream_chat/src/attachment_file_uploader.dart';
+import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/exceptions.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/channel_state.dart';
+import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/own_user.dart';
+import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/src/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
-import 'attachment_file_uploader.dart';
-import 'api/channel.dart';
-import 'api/connection_status.dart';
-import 'api/requests.dart';
-import 'api/responses.dart';
-import 'api/websocket.dart';
-import 'db/chat_persistence_client.dart';
-import 'exceptions.dart';
-import 'models/channel_state.dart';
-import 'models/event.dart';
-import 'models/message.dart';
-import 'models/user.dart';
-import 'extensions/map_extension.dart';
-
-/// Handler function used for logging records. Function requires a single [LogRecord]
-/// as the only parameter.
+/// Handler function used for logging records. Function requires a single
+/// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
 
 /// Used for decoding [Map] data to a generic type `T`.
@@ -62,7 +60,9 @@ extension on PushProvider {
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
-/// This library can be used on any Dart project and on both mobile and web apps with Flutter.
+/// This library can be used on any Dart project and on both mobile and web apps
+/// with Flutter.
+///
 /// You can sign up for a Stream account at https://getstream.io/chat/
 ///
 /// The Chat client will manage API call, event handling and manage the
@@ -73,7 +73,8 @@ extension on PushProvider {
 /// ```
 class StreamChatClient {
   /// Create a client instance with default options.
-  /// You should only create the client once and re-use it across your application.
+  /// You should only create the client once and re-use it across your
+  /// application.
   StreamChatClient(
     this.apiKey, {
     this.tokenProvider,
@@ -86,12 +87,14 @@ class StreamChatClient {
     RetryPolicy retryPolicy,
     this.attachmentFileUploader,
   }) {
-    _retryPolicy ??= RetryPolicy(
-      retryTimeout: (StreamChatClient client, int attempt, ApiError error) =>
-          Duration(seconds: 1 * attempt),
-      shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
-          attempt < 5,
-    );
+    _retryPolicy = retryPolicy ??
+        RetryPolicy(
+          retryTimeout:
+              (StreamChatClient client, int attempt, ApiError error) =>
+                  Duration(seconds: 1 * attempt),
+          shouldRetry: (StreamChatClient client, int attempt, ApiError error) =>
+              attempt < 5,
+        );
 
     attachmentFileUploader ??= StreamAttachmentFileUploader(this);
 
@@ -122,30 +125,39 @@ class StreamChatClient {
   /// This client state
   ClientState state;
 
-  /// By default the Chat client will write all messages with level Warn or Error to stdout.
-  /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
+  /// By default the Chat client will write all messages with level Warn or
+  /// Error to stdout.
+  ///
+  /// During development you might want to enable more logging information,
+  /// you can change the default log level when constructing the client.
   ///
   /// ```dart
-  /// final client = StreamChatClient("stream-chat-api-key", logLevel: Level.INFO);
+  /// final client = StreamChatClient("stream-chat-api-key",
+  /// logLevel: Level.INFO);
   /// ```
   final Level logLevel;
 
   /// Client specific logger instance.
-  /// Refer to the class [Logger] to learn more about the specific implementation.
+  /// Refer to the class [Logger] to learn more about the specific
+  /// implementation.
   final Logger logger = Logger.detached('📡');
 
   /// A function that has a parameter of type [LogRecord].
   /// This is called on every new log record.
-  /// By default the client will use the handler returned by [_getDefaultLogHandler].
-  /// Setting it you can handle the log messages directly instead of have them written to stdout,
-  /// this is very convenient if you use an error tracking tool or if you want to centralize your logs into one facility.
+  /// By default the client will use the handler returned by
+  /// [_getDefaultLogHandler].
+  /// Setting it you can handle the log messages directly instead of have them
+  /// written to stdout,
+  /// this is very convenient if you use an error tracking tool or if you want
+  /// to centralize your logs into one facility.
   ///
   /// ```dart
   /// myLogHandlerFunction = (LogRecord record) {
   ///  // do something with the record (ie. send it to Sentry or Fabric)
   /// }
   ///
-  /// final client = StreamChatClient("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+  /// final client = StreamChatClient("stream-chat-api-key",
+  /// logHandlerFunction: myLogHandlerFunction);
   ///```
   LogHandlerFunction logHandlerFunction;
 
@@ -156,14 +168,18 @@ class StreamChatClient {
   /// Your project Stream Chat base url.
   final String baseURL;
 
-  /// A function in which you send a request to your own backend to get a Stream Chat API token.
+  /// A function in which you send a request to your own backend to get a Stream
+  /// Chat API token.
+  ///
   /// The token will be the return value of the function.
-  /// It's used by the client to refresh the token once expired or to connect the user without a predefined token using [connectUserWithProvider].
+  /// It's used by the client to refresh the token once expired or to connect
+  /// the user without a predefined token using [connectUserWithProvider].
   final TokenProvider tokenProvider;
 
   /// [Dio] httpClient
-  /// It's be chosen because it's easy to use and supports interesting features out of the box
-  /// (Interceptors, Global configuration, FormData, File downloading etc.)
+  /// It's be chosen because it's easy to use and supports interesting features
+  /// out of the box (Interceptors, Global configuration, FormData,
+  /// File downloading etc.)
   @visibleForTesting
   Dio httpClient = Dio();
 
@@ -234,7 +250,7 @@ class StreamChatClient {
                   (options.data is Map || options.data == null)) {
                 options.data = {
                   'connection_id': _connectionId,
-                  ...(options.data ?? {}),
+                  ...options.data ?? {},
                 };
               }
 
@@ -278,7 +294,7 @@ class StreamChatClient {
         await _disconnect();
 
         final newToken = await tokenProvider(userId);
-        await Future.delayed(Duration(seconds: 4));
+        await Future.delayed(const Duration(seconds: 4));
         token = newToken;
 
         httpClient.unlock();
@@ -312,7 +328,10 @@ class StreamChatClient {
     };
     return (LogRecord record) {
       print(
-          '(${record.time}) ${levelEmojiMapper[record.level.name] ?? record.level.name} ${record.loggerName} ${record.message}');
+        '(${record.time}) '
+        '${levelEmojiMapper[record.level.name] ?? record.level.name} '
+        '${record.loggerName} ${record.message}',
+      );
       if (record.stackTrace != null) {
         print(record.stackTrace);
       }
@@ -321,11 +340,10 @@ class StreamChatClient {
 
   Logger _detachedLogger(
     String name,
-  ) {
-    return Logger.detached(name)
-      ..level = logLevel
-      ..onRecord.listen(logHandlerFunction ?? _getDefaultLogHandler());
-  }
+  ) =>
+      Logger.detached(name)
+        ..level = logLevel
+        ..onRecord.listen(logHandlerFunction ?? _getDefaultLogHandler());
 
   void _setupLogger() {
     logger.level = logLevel;
@@ -350,7 +368,7 @@ class StreamChatClient {
   Map<String, String> get _httpHeaders => {
         'Authorization': token,
         'stream-auth-type': _authType,
-        'x-stream-client': _userAgent,
+        'X-Stream-Client': _userAgent,
         'Content-Encoding': 'gzip',
       };
 
@@ -386,7 +404,8 @@ class StreamChatClient {
   /// Set the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
   @Deprecated(
-      'Use `connectUserWithProvider` instead. Will be removed in Future releases')
+    'Use `connectUserWithProvider` instead. Will be removed in Future releases',
+  )
   Future<Event> setUserWithProvider(User user) => connectUserWithProvider(user);
 
   /// Connects the current user using the [tokenProvider] to fetch the token.
@@ -470,7 +489,7 @@ class StreamChatClient {
         'api_key': apiKey,
         'authorization': token,
         'stream-auth-type': _authType,
-        'x-stream-client': _userAgent,
+        'X-Stream-Client': _userAgent,
       },
       connectPayload: {
         'user_id': state.user.id,
@@ -491,7 +510,8 @@ class StreamChatClient {
 
       if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        unawaited(queryChannelsOnline(filter: {
+        // ignore: unawaited_futures
+        queryChannelsOnline(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
@@ -503,7 +523,7 @@ class StreamChatClient {
               online: true,
             ));
           },
-        ));
+        );
       } else {
         _synced = false;
       }
@@ -521,6 +541,7 @@ class StreamChatClient {
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
       if (err is Map) {
+        // ignore: only_throw_errors
         throw err;
       }
     });
@@ -558,13 +579,12 @@ class StreamChatClient {
       res.events.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       res.events.forEach((element) {
-        logger.fine('element.type: ${element.type}');
-        logger.fine('element.message.text: ${element.message?.text}');
+        logger
+          ..fine('element.type: ${element.type}')
+          ..fine('element.message.text: ${element.message?.text}');
       });
 
-      res.events.forEach((event) {
-        handleEvent(event);
-      });
+      res.events.forEach(handleEvent);
 
       await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
       _synced = true;
@@ -573,9 +593,7 @@ class StreamChatClient {
     }
   }
 
-  String _asMap(sort) {
-    return sort?.map((s) => s.toJson().toString())?.join('');
-  }
+  String _asMap(sort) => sort?.map((s) => s.toJson().toString())?.join('');
 
   final _queryChannelsStreams = <String, Future<List<Channel>>>{};
 
@@ -584,40 +602,41 @@ class StreamChatClient {
     Map<String, dynamic> filter,
     List<SortOption<ChannelModel>> sort,
     Map<String, dynamic> options,
-    PaginationParams paginationParams = const PaginationParams(limit: 10),
+    PaginationParams paginationParams = const PaginationParams(),
     int messageLimit,
-    bool preferOffline = false,
     bool waitForConnect = true,
   }) async* {
     final hash = base64.encode(utf8.encode(
-      '$filter${_asMap(sort)}$options${paginationParams?.toJson()}$messageLimit$preferOffline',
+      '$filter${_asMap(sort)}$options${paginationParams?.toJson()}'
+      '$messageLimit',
     ));
 
     if (_queryChannelsStreams.containsKey(hash)) {
       yield await _queryChannelsStreams[hash];
     } else {
-      if (preferOffline) {
-        final channels = await queryChannelsOffline(
-          filter: filter,
-          sort: sort,
-          paginationParams: paginationParams,
-        );
-        if (channels.isNotEmpty) yield channels;
-      }
-
-      final newQueryChannelsFuture = queryChannelsOnline(
+      final channels = await queryChannelsOffline(
         filter: filter,
         sort: sort,
-        options: options,
         paginationParams: paginationParams,
-        messageLimit: messageLimit,
-      ).whenComplete(() {
-        _queryChannelsStreams.remove(hash);
-      });
+      );
+      if (channels.isNotEmpty) yield channels;
 
-      _queryChannelsStreams[hash] = newQueryChannelsFuture;
+      if (wsConnectionStatus == ConnectionStatus.connected) {
+        final newQueryChannelsFuture = queryChannelsOnline(
+          filter: filter,
+          sort: sort,
+          options: options,
+          paginationParams: paginationParams,
+          messageLimit: messageLimit,
+          waitForConnect: waitForConnect,
+        ).whenComplete(() {
+          _queryChannelsStreams.remove(hash);
+        });
 
-      yield await newQueryChannelsFuture;
+        _queryChannelsStreams[hash] = newQueryChannelsFuture;
+
+        yield await newQueryChannelsFuture;
+      }
     }
   }
 
@@ -627,7 +646,7 @@ class StreamChatClient {
     List<SortOption<ChannelModel>> sort,
     Map<String, dynamic> options,
     int messageLimit,
-    PaginationParams paginationParams = const PaginationParams(limit: 10),
+    PaginationParams paginationParams = const PaginationParams(),
     bool waitForConnect = true,
   }) async {
     if (waitForConnect) {
@@ -650,7 +669,7 @@ class StreamChatClient {
       'presence': false,
     };
 
-    var payload = <String, dynamic>{
+    final payload = <String, dynamic>{
       'filter_conditions': filter,
       'sort': sort,
     };
@@ -682,9 +701,12 @@ class StreamChatClient {
     );
 
     if ((res.channels ?? []).isEmpty && (paginationParams?.offset ?? 0) == 0) {
-      logger.warning('''We could not find any channel for this query.
+      logger.warning(
+        '''
+        We could not find any channel for this query.
           Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
-          If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''');
+          If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''',
+      );
       return <Channel>[];
     }
 
@@ -715,7 +737,7 @@ class StreamChatClient {
   Future<List<Channel>> queryChannelsOffline({
     @required Map<String, dynamic> filter,
     @required List<SortOption<ChannelModel>> sort,
-    PaginationParams paginationParams = const PaginationParams(limit: 10),
+    PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = await chatPersistenceClient?.getChannelStates(
       filter: filter,
@@ -771,6 +793,7 @@ class StreamChatClient {
       );
       return response;
     } on DioError catch (error) {
+      // ignore: only_throw_errors
       throw _parseError(error);
     }
   }
@@ -791,6 +814,7 @@ class StreamChatClient {
       );
       return response;
     } on DioError catch (error) {
+      // ignore: only_throw_errors
       throw _parseError(error);
     }
   }
@@ -809,6 +833,7 @@ class StreamChatClient {
       );
       return response;
     } on DioError catch (error) {
+      // ignore: only_throw_errors
       throw _parseError(error);
     }
   }
@@ -827,6 +852,7 @@ class StreamChatClient {
       );
       return response;
     } on DioError catch (error) {
+      // ignore: only_throw_errors
       throw _parseError(error);
     }
   }
@@ -845,6 +871,7 @@ class StreamChatClient {
       );
       return response;
     } on DioError catch (error) {
+      // ignore: only_throw_errors
       throw _parseError(error);
     }
   }
@@ -864,8 +891,8 @@ class StreamChatClient {
 
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
-  String get _userAgent =>
-      'stream-chat-dart-client-${CurrentPlatform.name}-${PACKAGE_VERSION.split('+')[0]}';
+  String get _userAgent => 'stream-chat-dart-client-${CurrentPlatform.name}-'
+      '${PACKAGE_VERSION.split('+')[0]}';
 
   Map<String, String> get _commonQueryParams => {
         'user_id': state.user?.id,
@@ -873,14 +900,15 @@ class StreamChatClient {
         'connection_id': _connectionId,
       };
 
-  /// Set the current user with an anonymous id, this triggers a connection to the API.
-  /// It returns a [Future] that resolves when the connection is setup.
+  /// Set the current user with an anonymous id, this triggers a connection to
+  /// the API. It returns a [Future] that resolves when the connection is setup.
   @Deprecated(
       'Use `connectAnonymousUser` instead. Will be removed in Future releases')
   Future<Event> setAnonymousUser() => connectAnonymousUser();
 
-  /// Connects the current user with an anonymous id, this triggers a connection to the API.
-  /// It returns a [Future] that resolves when the connection is setup.
+  /// Connects the current user with an anonymous id, this triggers a connection
+  /// to the API. It returns a [Future] that resolves when the connection is
+  /// setup.
   Future<Event> connectAnonymousUser() async {
     if (_connectCompleter != null && !_connectCompleter.isCompleted) {
       logger.warning('Already connecting');
@@ -923,14 +951,14 @@ class StreamChatClient {
   }
 
   /// Closes the websocket connection and resets the client
-  /// If [flushChatPersistence] is true the client deletes all offline user's data
-  /// If [clearUser] is true the client unsets the current user
+  /// If [flushChatPersistence] is true the client deletes all offline
+  /// user's data. If [clearUser] is true the client unsets the current user
   Future<void> disconnect({
     bool flushChatPersistence = false,
     bool clearUser = false,
   }) async {
-    logger.info(
-        'Disconnecting flushOfflineStorage: $flushChatPersistence; clearUser: $clearUser');
+    logger.info('Disconnecting flushOfflineStorage: $flushChatPersistence; '
+        'clearUser: $clearUser');
 
     await chatPersistenceClient?.disconnect(flush: flushChatPersistence);
     chatPersistenceClient = null;
@@ -966,9 +994,7 @@ class StreamChatClient {
     final payload = <String, dynamic>{
       'filter_conditions': filter ?? {},
       'sort': sort,
-    };
-
-    payload.addAll(defaultOptions);
+    }..addAll(defaultOptions);
 
     if (pagination != null) {
       payload.addAll(pagination.toJson());
@@ -1016,7 +1042,7 @@ class StreamChatClient {
         );
       }
       return true;
-    }());
+    }(), 'Check incoming params.');
 
     final payload = {
       'filter_conditions': filters,
@@ -1041,15 +1067,14 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
-  }) {
-    return attachmentFileUploader.sendFile(
-      file,
-      channelId,
-      channelType,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-  }
+  }) =>
+      attachmentFileUploader.sendFile(
+        file,
+        channelId,
+        channelType,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
 
   /// Send a [image] to the [channelId] of type [channelType]
   Future<SendImageResponse> sendImage(
@@ -1058,15 +1083,14 @@ class StreamChatClient {
     String channelType, {
     ProgressCallback onSendProgress,
     CancelToken cancelToken,
-  }) {
-    return attachmentFileUploader.sendImage(
-      image,
-      channelId,
-      channelType,
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-    );
-  }
+  }) =>
+      attachmentFileUploader.sendImage(
+        image,
+        channelId,
+        channelType,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
 
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(
@@ -1074,14 +1098,13 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken cancelToken,
-  }) {
-    return attachmentFileUploader.deleteFile(
-      url,
-      channelId,
-      channelType,
-      cancelToken: cancelToken,
-    );
-  }
+  }) =>
+      attachmentFileUploader.deleteFile(
+        url,
+        channelId,
+        channelType,
+        cancelToken: cancelToken,
+      );
 
   /// Delete an image from this channel
   Future<EmptyResponse> deleteImage(
@@ -1089,14 +1112,13 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     CancelToken cancelToken,
-  }) {
-    return attachmentFileUploader.deleteImage(
-      url,
-      channelId,
-      channelType,
-      cancelToken: cancelToken,
-    );
-  }
+  }) =>
+      attachmentFileUploader.deleteImage(
+        url,
+        channelId,
+        channelType,
+        cancelToken: cancelToken,
+      );
 
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) async {
@@ -1146,9 +1168,8 @@ class StreamChatClient {
   }
 
   /// Update or Create the given user object.
-  Future<UpdateUsersResponse> updateUser(User user) async {
-    return updateUsers([user]);
-  }
+  Future<UpdateUsersResponse> updateUser(User user) async =>
+      updateUsers([user]);
 
   /// Batch update a list of users
   Future<UpdateUsersResponse> updateUsers(List<User> users) async {
@@ -1197,23 +1218,21 @@ class StreamChatClient {
   Future<EmptyResponse> shadowBan(
     String targetID, [
     Map<String, dynamic> options = const {},
-  ]) async {
-    return banUser(targetID, {
-      'shadow': true,
-      ...options,
-    });
-  }
+  ]) async =>
+      banUser(targetID, {
+        'shadow': true,
+        ...options,
+      });
 
   /// Removes shadow ban from a user
   Future<EmptyResponse> removeShadowBan(
     String targetID, [
     Map<String, dynamic> options = const {},
-  ]) async {
-    return unbanUser(targetID, {
-      'shadow': true,
-      ...options,
-    });
-  }
+  ]) async =>
+      unbanUser(targetID, {
+        'shadow': true,
+        ...options,
+      });
 
   /// Mutes a user
   Future<EmptyResponse> muteUser(String targetID) async {
@@ -1312,7 +1331,7 @@ class StreamChatClient {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
-    }());
+    }(), 'Check whether time out is valid');
 
     DateTime pinExpires;
     if (timeoutOrExpirationDate is DateTime) {
@@ -1328,15 +1347,12 @@ class StreamChatClient {
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(Message message) {
-    return updateMessage(message.copyWith(pinned: false));
-  }
+  Future<UpdateMessageResponse> unpinMessage(Message message) =>
+      updateMessage(message.copyWith(pinned: false));
 }
 
 /// The class that handles the state of the channel listening to the events
 class ClientState {
-  final _subscriptions = <StreamSubscription>[];
-
   /// Creates a new instance listening to events and updating the state
   ClientState(this._client) {
     _subscriptions.addAll([
@@ -1358,16 +1374,12 @@ class ClientState {
           .on()
           .where((event) => event.unreadChannels != null)
           .map((e) => e.unreadChannels)
-          .listen((unreadChannels) {
-        _unreadChannelsController.add(unreadChannels);
-      }),
+          .listen(_unreadChannelsController.add),
       _client
           .on()
           .where((event) => event.totalUnreadCount != null)
           .map((e) => e.totalUnreadCount)
-          .listen((totalUnreadCount) {
-        _totalUnreadCountController.add(totalUnreadCount);
-      }),
+          .listen(_totalUnreadCountController.add),
     ]);
 
     _listenChannelDeleted();
@@ -1376,6 +1388,8 @@ class ClientState {
 
     _listenUserUpdated();
   }
+
+  final _subscriptions = <StreamSubscription>[];
 
   /// Used internally for optimistic update of unread count
   set totalUnreadCount(int unreadCount) {

@@ -1,10 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'attachment_file.freezed.dart';
-
 part 'attachment_file.g.dart';
 
 /// Union class to hold various [UploadState] of a attachment.
@@ -57,8 +56,12 @@ class AttachmentFile {
     this.size,
   });
 
-  /// The absolute path for a cached copy of this file. It can be used to create a
-  /// file instance with a descriptor for the given path.
+  /// Create a new instance from a json
+  factory AttachmentFile.fromJson(Map<String, dynamic> json) =>
+      _$AttachmentFileFromJson(json);
+
+  /// The absolute path for a cached copy of this file. It can be used to
+  /// create a file instance with a descriptor for the given path.
   /// ```
   /// final File myFile = File(platformFile.path);
   /// ```
@@ -67,8 +70,8 @@ class AttachmentFile {
   /// File name including its extension.
   final String name;
 
-  /// Byte data for this file. Particularly useful if you want to manipulate its data
-  /// or easily upload to somewhere else.
+  /// Byte data for this file. Particularly useful if you want to manipulate
+  /// its data or easily upload to somewhere else.
   @JsonKey(toJson: _toString, fromJson: _fromString)
   final Uint8List bytes;
 
@@ -77,11 +80,6 @@ class AttachmentFile {
 
   /// File extension for this file.
   String get extension => name?.split('.')?.last;
-
-  /// Create a new instance from a json
-  factory AttachmentFile.fromJson(Map<String, dynamic> json) {
-    return _$AttachmentFileFromJson(json);
-  }
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);

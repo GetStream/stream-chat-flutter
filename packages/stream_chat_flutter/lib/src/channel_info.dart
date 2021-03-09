@@ -57,7 +57,7 @@ class ChannelInfo extends StatelessWidget {
         style: StreamChatTheme.of(context)
             .channelTheme
             .channelHeaderTheme
-            .lastMessageAt,
+            .subtitle,
       );
     } else {
       final otherMember = members.firstWhere(
@@ -69,10 +69,7 @@ class ChannelInfo extends StatelessWidget {
         if (otherMember.user.online) {
           alternativeWidget = Text(
             'Online',
-            style: StreamChatTheme.of(context)
-                .channelTheme
-                .channelHeaderTheme
-                .lastMessageAt,
+            style: textStyle,
           );
         } else {
           alternativeWidget = Text(

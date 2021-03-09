@@ -28,10 +28,15 @@ typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message,
 );
+typedef SystemMessageBuilder = Widget Function(
+  BuildContext,
+  Message,
+);
 typedef ThreadBuilder = Widget Function(BuildContext context, Message parent);
 typedef ThreadTapCallback = void Function(Message, Widget);
 
 typedef OnMessageSwiped = void Function(Message);
+typedef OnMessageTap = void Function(Message);
 typedef ReplyTapCallback = void Function(Message);
 
 class MessageDetails {
@@ -128,13 +133,21 @@ class MessageListView extends StatefulWidget {
     this.showConnectionStateTile = false,
     this.loadingBuilder,
     this.emptyBuilder,
+    this.systemMessageBuilder,
     this.messageListBuilder,
     this.errorWidgetBuilder,
+    this.messageFilter,
     this.customAttachmentBuilders,
+    this.onMessageTap,
+    this.onSystemMessageTap,
+    this.onAttachmentTap,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
   final MessageBuilder messageBuilder;
+
+  /// Function used to build a custom system message widget
+  final SystemMessageBuilder systemMessageBuilder;
 
   /// Function used to build a custom parent message widget
   final ParentMessageBuilder parentMessageBuilder;
@@ -204,9 +217,21 @@ class MessageListView extends StatefulWidget {
   /// of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
 
+  /// Predicate used to filter messages
+  final bool Function(Message) messageFilter;
+
   /// Attachment builders for the default message widget
   /// Please change this in the [MessageWidget] if you are using a custom implementation
   final Map<String, AttachmentBuilder> customAttachmentBuilders;
+
+  /// Called when any message is tapped except a system message (use [onSystemMessageTap] instead)
+  final OnMessageTap onMessageTap;
+
+  /// Called when system message is tapped
+  final OnMessageTap onSystemMessageTap;
+
+  // Customize onTap on attachment
+  final void Function(Message message, Attachment attachment) onAttachmentTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -265,6 +290,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) {
     return MessageListCore(
+      messageFilter: widget.messageFilter,
       loadingBuilder: widget.loadingBuilder ??
           (context) {
             return Center(
@@ -356,6 +382,9 @@ class _MessageListViewState extends State<MessageListView> {
               childAnchor: Alignment.topCenter,
               message: statusString,
               child: LazyLoadScrollView(
+                onPageScrollStart: () {
+                  FocusScope.of(context).unfocus();
+                },
                 onStartOfPage: () async {
                   _inBetweenList = false;
                   if (!_upToDate) {
@@ -408,7 +437,7 @@ class _MessageListViewState extends State<MessageListView> {
                             style: StreamChatTheme.of(context)
                                 .channelTheme
                                 .channelHeaderTheme
-                                .lastMessageAt,
+                                .subtitle,
                           ),
                         ),
                       );
@@ -595,9 +624,6 @@ class _MessageListViewState extends State<MessageListView> {
             children: [
               FloatingActionButton(
                 backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-                child: StreamSvgIcon.down(
-                  color: StreamChatTheme.of(context).colorTheme.black,
-                ),
                 onPressed: () {
                   if (unreadCount > 0) {
                     streamChannel.channel.markRead();
@@ -615,6 +641,9 @@ class _MessageListViewState extends State<MessageListView> {
                     );
                   }
                 },
+                child: StreamSvgIcon.down(
+                  color: StreamChatTheme.of(context).colorTheme.black,
+                ),
               ),
               if (showUnreadCount)
                 Positioned(
@@ -804,6 +833,12 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 
@@ -812,11 +847,19 @@ class _MessageListViewState extends State<MessageListView> {
     List<Message> messages,
     int index,
   ) {
-    if (message.type == 'system' && message.text?.isNotEmpty == true) {
-      return SystemMessage(
-        key: ValueKey<String>('MESSAGE-${message.id}'),
-        message: message,
-      );
+    if ((message.type == 'system' || message.type == 'error') &&
+        message.text?.isNotEmpty == true) {
+      return widget.systemMessageBuilder?.call(context, message) ??
+          SystemMessage(
+            key: ValueKey<String>('MESSAGE-${message.id}'),
+            message: message,
+            onMessageTap: (message) {
+              if (widget.onSystemMessageTap != null) {
+                widget.onSystemMessageTap(message);
+              }
+              FocusScope.of(context).unfocus();
+            },
+          );
     }
 
     final userId = StreamChat.of(context).user.id;
@@ -965,6 +1008,13 @@ class _MessageListViewState extends State<MessageListView> {
         }
       },
       customAttachmentBuilders: widget.customAttachmentBuilders,
+      onMessageTap: (message) {
+        if (widget.onMessageTap != null) {
+          widget.onMessageTap(message);
+        }
+        FocusScope.of(context).unfocus();
+      },
+      onAttachmentTap: widget.onAttachmentTap,
     );
 
     if (!message.isDeleted &&
@@ -995,10 +1045,6 @@ class _MessageListViewState extends State<MessageListView> {
           end: colorTheme.white.withOpacity(0),
         ),
         duration: const Duration(seconds: 3),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: child,
-        ),
         onEnd: () => initialMessageHighlightComplete = true,
         builder: (_, color, child) {
           return Container(
@@ -1006,6 +1052,10 @@ class _MessageListViewState extends State<MessageListView> {
             child: child,
           );
         },
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: child,
+        ),
       );
     }
     return child;

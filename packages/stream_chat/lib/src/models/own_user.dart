@@ -1,9 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
-
-import 'device.dart';
-import 'mute.dart';
-import 'serialization.dart';
-import 'user.dart';
+import 'package:stream_chat/src/models/device.dart';
+import 'package:stream_chat/src/models/mute.dart';
+import 'package:stream_chat/src/models/serialization.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 part 'own_user.g.dart';
 
@@ -11,6 +10,36 @@ part 'own_user.g.dart';
 /// This object can be found in [Event]
 @JsonSerializable()
 class OwnUser extends User {
+  /// Constructor used for json serialization
+  OwnUser({
+    this.devices,
+    this.mutes,
+    this.totalUnreadCount,
+    this.unreadChannels,
+    this.channelMutes,
+    String id,
+    String role,
+    DateTime createdAt,
+    DateTime updatedAt,
+    DateTime lastActive,
+    bool online,
+    Map<String, dynamic> extraData,
+    bool banned,
+  }) : super(
+          id: id,
+          role: role,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          lastActive: lastActive,
+          online: online,
+          extraData: extraData,
+          banned: banned,
+        );
+
+  /// Create a new instance from a json
+  factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+
   /// List of user devices
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Device> devices;
@@ -42,42 +71,8 @@ class OwnUser extends User {
     ...User.topLevelFields,
   ];
 
-  /// Constructor used for json serialization
-  OwnUser({
-    this.devices,
-    this.mutes,
-    this.totalUnreadCount,
-    this.unreadChannels,
-    this.channelMutes,
-    String id,
-    String role,
-    DateTime createdAt,
-    DateTime updatedAt,
-    DateTime lastActive,
-    bool online,
-    Map<String, dynamic> extraData,
-    bool banned,
-  }) : super(
-          id: id,
-          role: role,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          lastActive: lastActive,
-          online: online,
-          extraData: extraData,
-          banned: banned,
-        );
-
-  /// Create a new instance from a json
-  factory OwnUser.fromJson(Map<String, dynamic> json) {
-    return _$OwnUserFromJson(
-        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
-  }
-
   /// Serialize to json
   @override
-  Map<String, dynamic> toJson() {
-    return Serialization.moveFromExtraDataToRoot(
-        _$OwnUserToJson(this), topLevelFields);
-  }
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+      _$OwnUserToJson(this), topLevelFields);
 }
