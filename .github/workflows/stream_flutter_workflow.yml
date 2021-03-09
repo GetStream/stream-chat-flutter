@@ -30,7 +30,7 @@ jobs:
         run: melos bootstrap
       - name: 'Dart Analyze'
         run: |
-          melos exec -c 3 -- \
+          melos exec -c 3 --ignore="*example*" -- \
             tuneup check
       - name: 'Pub Check'
         run: |
