@@ -2012,9 +2012,10 @@ class MessageInputState extends State<MessageInput> {
       return;
     }
 
+    final shouldUnfocus = _commandEnabled;
+
     if (_commandEnabled) {
       text = '/${_chosenCommand.name} ' + text;
-      FocusScope.of(context).unfocus();
     }
 
     final attachments = [..._attachments.values];
@@ -2079,6 +2080,10 @@ class MessageInputState extends State<MessageInput> {
       sendingFuture = channel.sendMessage(message);
     } else {
       sendingFuture = channel.updateMessage(message);
+    }
+
+    if (!shouldUnfocus) {
+      FocusScope.of(context).requestFocus(_focusNode);
     }
 
     return sendingFuture.then((resp) {
