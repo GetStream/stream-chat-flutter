@@ -111,10 +111,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
         return StreamChannel(
           channel: channel,
           child: AttachmentActionsModal(
-            userName: userName,
-            sentAt: sentAt,
             message: message,
-            attachments: urls,
             currentIndex: currentIndex,
             onShowMessage: onShowMessage,
           ),
