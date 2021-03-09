@@ -1,3 +1,10 @@
+## 1.4.0-beta
+
+- Improved attachment uploading
+- Fix: update member presence
+- Added skip_push to message model
+- Minor fixes and improvements
+
 ## 1.3.2+1-beta
 
 - Fixed queryChannels bug
