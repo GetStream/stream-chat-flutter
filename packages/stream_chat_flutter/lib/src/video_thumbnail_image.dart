@@ -67,21 +67,27 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
             builder: (_) {
               if (snapshot.hasError) {
                 return widget.errorBuilder?.call(context, snapshot.error) ??
-                    Center(child: StreamSvgIcon.error());
+                    Center(
+                      child: StreamSvgIcon.error(),
+                    );
               }
               if (!snapshot.hasData) {
-                return widget.placeholderBuilder?.call(context) ??
-                    Shimmer.fromColors(
-                      baseColor:
-                          StreamChatTheme.of(context).colorTheme.greyGainsboro,
-                      highlightColor:
-                          StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                      child: Image.asset(
-                        'images/placeholder.png',
-                        fit: BoxFit.cover,
-                        package: 'stream_chat_flutter',
+                return Container(
+                  constraints: BoxConstraints.expand(),
+                  child: widget.placeholderBuilder?.call(context) ??
+                      Shimmer.fromColors(
+                        baseColor: StreamChatTheme.of(context)
+                            .colorTheme
+                            .greyGainsboro,
+                        highlightColor:
+                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                        child: Image.asset(
+                          'images/placeholder.png',
+                          fit: BoxFit.cover,
+                          package: 'stream_chat_flutter',
+                        ),
                       ),
-                    );
+                );
               }
               return Image.memory(
                 snapshot.data,
