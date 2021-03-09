@@ -55,7 +55,7 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
     return Container(
         height: widget.size.height,
         width: widget.size.width,
-        child: _controller.value.initialized
+        child: _controller.value.isInitialized
             ? VideoPlayer(_controller)
             : CircularProgressIndicator());
   }
