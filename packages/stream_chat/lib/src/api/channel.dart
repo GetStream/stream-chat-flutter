@@ -338,6 +338,7 @@ class Channel {
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
 
+        // ignore: unawaited_futures
         _uploadAttachments(
           message.id,
           message.attachments.map((it) => it.id),
@@ -388,6 +389,7 @@ class Channel {
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
 
+        // ignore: unawaited_futures
         _uploadAttachments(
           message.id,
           message.attachments.map((it) => it.id),
