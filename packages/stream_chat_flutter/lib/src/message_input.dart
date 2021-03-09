@@ -2082,6 +2082,9 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return sendingFuture.then((resp) {
+      if (resp.message?.type == 'error') {
+        _parseExistingMessage(message);
+      }
       if (widget.onMessageSent != null) {
         widget.onMessageSent(resp.message);
       }

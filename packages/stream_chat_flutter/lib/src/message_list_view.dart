@@ -847,7 +847,8 @@ class _MessageListViewState extends State<MessageListView> {
     List<Message> messages,
     int index,
   ) {
-    if (message.type == 'system' && message.text?.isNotEmpty == true) {
+    if ((message.type == 'system' || message.type == 'error') &&
+        message.text?.isNotEmpty == true) {
       return widget.systemMessageBuilder?.call(context, message) ??
           SystemMessage(
             key: ValueKey<String>('MESSAGE-${message.id}'),
