@@ -19,21 +19,22 @@ class GiphyAttachment extends AttachmentWidget {
   const GiphyAttachment({
     Key key,
     @required Message message,
-    @required Attachment attachment,
+    @required List<Attachment> attachment,
     Size size,
     this.messageTheme,
     this.onShowMessage,
     this.onReturnAction,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(key: key, message: message, attachments: attachment, size: size);
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl =
-        attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+    final imageUrl = attachments[0].thumbUrl ??
+        attachments[0].imageUrl ??
+        attachments[0].assetUrl;
     if (imageUrl == null && source == AttachmentSource.network) {
       return AttachmentError();
     }
-    if (attachment.actions != null) {
+    if (attachments[0].actions != null) {
       return _buildSendingAttachment(context, imageUrl);
     }
     return _buildSentAttachment(context, imageUrl);
@@ -132,7 +133,7 @@ class GiphyAttachment extends AttachmentWidget {
                   ),
                 ],
               ),
-              if (attachment.title != null)
+              if (attachments[0].title != null)
                 Container(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
@@ -161,7 +162,7 @@ class GiphyAttachment extends AttachmentWidget {
                         Expanded(
                           child: Center(
                             child: Text(
-                              '"${attachment.title}"',
+                              '"${attachments[0].title}"',
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
                               ),
@@ -310,7 +311,7 @@ class GiphyAttachment extends AttachmentWidget {
           return StreamChannel(
             channel: channel,
             child: FullScreenMedia(
-              mediaAttachments: [attachment],
+              mediaAttachments: [attachments[0]],
               userName: message.user.name,
               sentAt: message.createdAt,
               message: message,
@@ -333,7 +334,7 @@ class GiphyAttachment extends AttachmentWidget {
             return StreamChannel(
               channel: channel,
               child: FullScreenMedia(
-                mediaAttachments: [attachment],
+                mediaAttachments: [attachments[0]],
                 userName: message.user.name,
                 sentAt: message.createdAt,
                 message: message,

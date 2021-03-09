@@ -20,7 +20,8 @@ import 'extension.dart';
 import 'image_group.dart';
 import 'message_text.dart';
 
-typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
+typedef AttachmentBuilder = Widget Function(
+    BuildContext, Message, List<Attachment>);
 typedef OnQuotedMessageTap = void Function(String);
 
 /// The display behaviour of a widget
@@ -137,6 +138,7 @@ class MessageWidget extends StatefulWidget {
 
   final bool showFlagButton;
   final Map<String, AttachmentBuilder> attachmentBuilders;
+  final Map<String, AttachmentBuilder> customAttachmentBuilders;
 
   /// Center user avatar with bottom of the message
   final bool translateUserAvatar;
@@ -151,7 +153,8 @@ class MessageWidget extends StatefulWidget {
   final List<MessageAction> customActions;
 
   // Customize onTap on attachment
-  final void Function(Message message, Attachment attachment) onAttachmentTap;
+  final void Function(Message message, List<Attachment> attachment)
+      onAttachmentTap;
 
   ///
   MessageWidget({
@@ -192,7 +195,7 @@ class MessageWidget extends StatefulWidget {
     this.editMessageInputBuilder,
     this.textBuilder,
     this.onReturnAction,
-    Map<String, AttachmentBuilder> customAttachmentBuilders,
+    this.customAttachmentBuilders,
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
@@ -205,9 +208,9 @@ class MessageWidget extends StatefulWidget {
     this.customActions = const [],
     this.onAttachmentTap,
   })  : attachmentBuilders = {
-          'image': (context, message, attachment) {
+          'image': (context, message, attachments) {
             return ImageAttachment(
-              attachment: attachment,
+              attachments: attachments,
               message: message,
               messageTheme: messageTheme,
               size: Size(
@@ -218,14 +221,14 @@ class MessageWidget extends StatefulWidget {
               onReturnAction: onReturnAction,
               onAttachmentTap: onAttachmentTap != null
                   ? () {
-                      onAttachmentTap?.call(message, attachment);
+                      onAttachmentTap?.call(message, attachments);
                     }
                   : null,
             );
           },
-          'video': (context, message, attachment) {
+          'video': (context, message, attachments) {
             return VideoAttachment(
-              attachment: attachment,
+              attachments: attachments,
               messageTheme: messageTheme,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,
@@ -236,14 +239,14 @@ class MessageWidget extends StatefulWidget {
               onReturnAction: onReturnAction,
               onAttachmentTap: onAttachmentTap != null
                   ? () {
-                      onAttachmentTap?.call(message, attachment);
+                      onAttachmentTap?.call(message, attachments);
                     }
                   : null,
             );
           },
-          'giphy': (context, message, attachment) {
+          'giphy': (context, message, attachments) {
             return GiphyAttachment(
-              attachment: attachment,
+              attachment: attachments,
               messageTheme: messageTheme,
               message: message,
               size: Size(
@@ -254,10 +257,10 @@ class MessageWidget extends StatefulWidget {
               onReturnAction: onReturnAction,
             );
           },
-          'file': (context, message, attachment) {
+          'file': (context, message, attachments) {
             return FileAttachment(
               message: message,
-              attachment: attachment,
+              attachments: attachments,
               size: Size(
                 MediaQuery.of(context).size.width * 0.8,
                 MediaQuery.of(context).size.height * 0.3,
@@ -837,6 +840,22 @@ class _MessageWidgetState extends State<MessageWidget>
         [];
 
     if (images.length > 1) {
+      if (widget.customAttachmentBuilders != null &&
+          widget.customAttachmentBuilders['image'] != null) {
+        final attachmentBuilder = widget.customAttachmentBuilders['image'];
+
+        if (attachmentBuilder == null) return SizedBox();
+        final attachmentWidget = attachmentBuilder(
+          context,
+          widget.message,
+          images,
+        );
+        return wrapAttachmentWidget(
+          context,
+          attachmentWidget,
+        );
+      }
+
       return Padding(
         padding: widget.attachmentPadding,
         child: wrapAttachmentWidget(
@@ -872,7 +891,7 @@ class _MessageWidgetState extends State<MessageWidget>
               final attachmentWidget = attachmentBuilder(
                 context,
                 widget.message,
-                attachment,
+                [attachment],
               );
               return wrapAttachmentWidget(
                 context,

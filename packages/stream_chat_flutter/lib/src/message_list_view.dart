@@ -231,7 +231,8 @@ class MessageListView extends StatefulWidget {
   final OnMessageTap onSystemMessageTap;
 
   // Customize onTap on attachment
-  final void Function(Message message, Attachment attachment) onAttachmentTap;
+  final void Function(Message message, List<Attachment> attachments)
+      onAttachmentTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();

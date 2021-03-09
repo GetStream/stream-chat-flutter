@@ -18,15 +18,15 @@ class FileAttachment extends AttachmentWidget {
   const FileAttachment({
     Key key,
     @required Message message,
-    @required Attachment attachment,
+    @required List<Attachment> attachments,
     Size size,
     this.title,
     this.trailing,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(key: key, message: message, attachments: attachments, size: size);
 
-  bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
+  bool get isVideoAttachment => attachments[0].title?.mimeType?.type == 'video';
 
-  bool get isImageAttachment => attachment.title?.mimeType?.type == 'image';
+  bool get isImageAttachment => attachments[0].title?.mimeType?.type == 'image';
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class FileAttachment extends AttachmentWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    attachment?.title ?? 'File',
+                    attachments[0]?.title ?? 'File',
                     style: StreamChatTheme.of(context).textTheme.bodyBold,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -90,19 +90,19 @@ class FileAttachment extends AttachmentWidget {
         shape: _getDefaultShape(context),
         child: source.when(
           local: () => Image.memory(
-            attachment.file.bytes,
+            attachments[0].file.bytes,
             fit: BoxFit.cover,
             errorBuilder: (_, obj, trace) {
-              return getFileTypeImage(attachment.extraData['other']);
+              return getFileTypeImage(attachments[0].extraData['other']);
             },
           ),
           network: () => CachedNetworkImage(
-            imageUrl: attachment.imageUrl ??
-                attachment.assetUrl ??
-                attachment.thumbUrl,
+            imageUrl: attachments[0].imageUrl ??
+                attachments[0].assetUrl ??
+                attachments[0].thumbUrl,
             fit: BoxFit.cover,
             errorWidget: (_, obj, trace) {
-              return getFileTypeImage(attachment.extraData['other']);
+              return getFileTypeImage(attachments[0].extraData['other']);
             },
             placeholder: (_, __) {
               return Shimmer.fromColors(
@@ -128,7 +128,7 @@ class FileAttachment extends AttachmentWidget {
         shape: _getDefaultShape(context),
         child: source.when(
           local: () => VideoThumbnailImage(
-            video: attachment.file.path,
+            video: attachments[0].file.path,
             placeholderBuilder: (_) {
               return Center(
                 child: Container(
@@ -140,7 +140,7 @@ class FileAttachment extends AttachmentWidget {
             },
           ),
           network: () => VideoThumbnailImage(
-            video: attachment.assetUrl,
+            video: attachments[0].assetUrl,
             placeholderBuilder: (_) {
               return Center(
                 child: Container(
@@ -154,7 +154,7 @@ class FileAttachment extends AttachmentWidget {
         ),
       );
     }
-    return getFileTypeImage(attachment.extraData['mime_type']);
+    return getFileTypeImage(attachments[0].extraData['mime_type']);
   }
 
   Widget _buildButton({
@@ -183,52 +183,52 @@ class FileAttachment extends AttachmentWidget {
   Widget _buildTrailing(BuildContext context) {
     final theme = StreamChatTheme.of(context);
     final channel = StreamChannel.of(context).channel;
-    final attachmentId = attachment.id;
+    final attachmentId = attachments[0].id;
     var trailingWidget = trailing;
-    trailingWidget ??= attachment.uploadState?.when(
-          preparing: () => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildButton(
-              icon: StreamSvgIcon.close(color: theme.colorTheme.white),
-              fillColor: theme.colorTheme.overlayDark,
-              onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-            ),
-          ),
-          inProgress: (_, __) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildButton(
-              icon: StreamSvgIcon.close(color: theme.colorTheme.white),
-              fillColor: theme.colorTheme.overlayDark,
-              onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-            ),
-          ),
-          success: () => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: theme.colorTheme.accentBlue,
-              maxRadius: 12.0,
-              child: StreamSvgIcon.check(color: theme.colorTheme.white),
-            ),
-          ),
-          failed: (_) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildButton(
-              icon: StreamSvgIcon.retry(color: theme.colorTheme.white),
-              fillColor: theme.colorTheme.overlayDark,
-              onPressed: () => channel.retryAttachmentUpload(
-                message?.id,
-                attachmentId,
+    trailingWidget ??= attachments[0].uploadState?.when(
+              preparing: () => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildButton(
+                  icon: StreamSvgIcon.close(color: theme.colorTheme.white),
+                  fillColor: theme.colorTheme.overlayDark,
+                  onPressed: () => channel.cancelAttachmentUpload(attachmentId),
+                ),
               ),
-            ),
-          ),
-        ) ??
+              inProgress: (_, __) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildButton(
+                  icon: StreamSvgIcon.close(color: theme.colorTheme.white),
+                  fillColor: theme.colorTheme.overlayDark,
+                  onPressed: () => channel.cancelAttachmentUpload(attachmentId),
+                ),
+              ),
+              success: () => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircleAvatar(
+                  backgroundColor: theme.colorTheme.accentBlue,
+                  maxRadius: 12.0,
+                  child: StreamSvgIcon.check(color: theme.colorTheme.white),
+                ),
+              ),
+              failed: (_) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildButton(
+                  icon: StreamSvgIcon.retry(color: theme.colorTheme.white),
+                  fillColor: theme.colorTheme.overlayDark,
+                  onPressed: () => channel.retryAttachmentUpload(
+                    message?.id,
+                    attachmentId,
+                  ),
+                ),
+              ),
+            ) ??
         IconButton(
           icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
           padding: const EdgeInsets.all(8),
           visualDensity: VisualDensity.compact,
           splashRadius: 16,
           onPressed: () {
-            launchURL(context, attachment.assetUrl);
+            launchURL(context, attachments[0].assetUrl);
           },
         );
 
@@ -241,7 +241,7 @@ class FileAttachment extends AttachmentWidget {
         visualDensity: VisualDensity.compact,
         splashRadius: 16,
         onPressed: () {
-          launchURL(context, attachment.assetUrl);
+          launchURL(context, attachments[0].assetUrl);
         },
       );
     }
@@ -254,37 +254,38 @@ class FileAttachment extends AttachmentWidget {
 
   Widget _buildSubtitle(BuildContext context) {
     final theme = StreamChatTheme.of(context);
-    final size = attachment.file?.size ?? attachment.extraData['file_size'];
+    final size =
+        attachments[0].file?.size ?? attachments[0].extraData['file_size'];
     final textStyle = theme.textTheme.footnote.copyWith(
       color: theme.colorTheme.grey,
     );
-    return attachment.uploadState?.when(
-          preparing: () {
-            if (message == null) {
-              return Text('${fileSize(size, 2)}', style: textStyle);
-            }
-            return UploadProgressIndicator(
-              uploaded: 0,
-              total: double.maxFinite.toInt(),
-              showBackground: false,
-              padding: EdgeInsets.zero,
-              textStyle: textStyle,
-              progressIndicatorColor: theme.colorTheme.accentBlue,
-            );
-          },
-          inProgress: (sent, total) {
-            return UploadProgressIndicator(
-              uploaded: sent,
-              total: total,
-              showBackground: false,
-              padding: EdgeInsets.zero,
-              textStyle: textStyle,
-              progressIndicatorColor: theme.colorTheme.accentBlue,
-            );
-          },
-          success: () => Text('${fileSize(size, 2)}', style: textStyle),
-          failed: (_) => Text('UPLOAD ERROR', style: textStyle),
-        ) ??
+    return attachments[0].uploadState?.when(
+              preparing: () {
+                if (message == null) {
+                  return Text('${fileSize(size, 2)}', style: textStyle);
+                }
+                return UploadProgressIndicator(
+                  uploaded: 0,
+                  total: double.maxFinite.toInt(),
+                  showBackground: false,
+                  padding: EdgeInsets.zero,
+                  textStyle: textStyle,
+                  progressIndicatorColor: theme.colorTheme.accentBlue,
+                );
+              },
+              inProgress: (sent, total) {
+                return UploadProgressIndicator(
+                  uploaded: sent,
+                  total: total,
+                  showBackground: false,
+                  padding: EdgeInsets.zero,
+                  textStyle: textStyle,
+                  progressIndicatorColor: theme.colorTheme.accentBlue,
+                );
+              },
+              success: () => Text('${fileSize(size, 2)}', style: textStyle),
+              failed: (_) => Text('UPLOAD ERROR', style: textStyle),
+            ) ??
         Text('${fileSize(size)}', style: textStyle);
   }
 }

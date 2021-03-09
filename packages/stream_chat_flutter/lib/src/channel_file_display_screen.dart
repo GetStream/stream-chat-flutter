@@ -167,7 +167,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: FileAttachment(
                     message: media.values.toList()[position],
-                    attachment: media.keys.toList()[position],
+                    attachments: [media.keys.toList()[position]],
                   ),
                 ),
               );

@@ -262,7 +262,7 @@ class QuotedMessageWidget extends StatelessWidget {
     return {
       'image': (_, attachment) {
         return ImageAttachment(
-          attachment: attachment,
+          attachments: [attachment],
           message: message,
           messageTheme: messageTheme,
           size: Size(32, 32),

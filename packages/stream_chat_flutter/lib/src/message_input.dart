@@ -1527,7 +1527,7 @@ class MessageInputState extends State<MessageInput> {
                         clipBehavior: Clip.antiAlias,
                         child: FileAttachment(
                           message: null,
-                          attachment: e,
+                          attachments: [e],
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
                             56.0,

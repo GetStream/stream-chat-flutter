@@ -212,7 +212,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                   child: media[position].attachment.type == 'image'
                       ? IgnorePointer(
                           child: ImageAttachment(
-                            attachment: media[position].attachment,
+                            attachments: [media[position].attachment],
                             message: media[position].message,
                             showTitle: false,
                             size: Size(

@@ -19,26 +19,26 @@ class ImageAttachment extends AttachmentWidget {
   const ImageAttachment({
     Key key,
     @required Message message,
-    @required Attachment attachment,
+    @required List<Attachment> attachments,
     Size size,
     this.messageTheme,
     this.showTitle = false,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(key: key, message: message, attachments: attachments, size: size);
 
   @override
   Widget build(BuildContext context) {
     return source.when(
       local: () {
-        if (attachment.localUri == null) {
+        if (attachments[0].localUri == null) {
           return AttachmentError(size: size);
         }
         return _buildImageAttachment(
           context,
           Image.memory(
-            attachment.file.bytes,
+            attachments[0].file.bytes,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -52,8 +52,9 @@ class ImageAttachment extends AttachmentWidget {
         );
       },
       network: () {
-        var imageUrl =
-            attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
+        var imageUrl = attachments[0].thumbUrl ??
+            attachments[0].imageUrl ??
+            attachments[0].assetUrl;
 
         if (imageUrl == null) {
           return AttachmentError(size: size);
@@ -125,7 +126,7 @@ class ImageAttachment extends AttachmentWidget {
                               return StreamChannel(
                                 channel: channel,
                                 child: FullScreenMedia(
-                                  mediaAttachments: [attachment],
+                                  mediaAttachments: [attachments[0]],
                                   userName: message.user.name,
                                   sentAt: message.createdAt,
                                   message: message,
@@ -143,18 +144,18 @@ class ImageAttachment extends AttachmentWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: AttachmentUploadStateBuilder(
                     message: message,
-                    attachment: attachment,
+                    attachment: attachments[0],
                   ),
                 ),
               ],
             ),
           ),
-          if (showTitle && attachment.title != null)
+          if (showTitle && attachments[0].title != null)
             Material(
               color: messageTheme.messageBackgroundColor,
               child: AttachmentTitle(
                 messageTheme: messageTheme,
-                attachment: attachment,
+                attachment: attachments[0],
               ),
             ),
         ],

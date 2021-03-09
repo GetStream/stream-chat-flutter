@@ -16,25 +16,25 @@ class VideoAttachment extends AttachmentWidget {
   const VideoAttachment({
     Key key,
     @required Message message,
-    @required Attachment attachment,
+    @required List<Attachment> attachments,
     Size size,
     this.messageTheme,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(key: key, message: message, attachments: attachments, size: size);
 
   @override
   Widget build(BuildContext context) {
     return source.when(
       local: () {
-        if (attachment.file == null) {
+        if (attachments[0].file == null) {
           return AttachmentError(size: size);
         }
         return _buildVideoAttachment(
           context,
           VideoThumbnailImage(
-            video: attachment.file.path,
+            video: attachments[0].file.path,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -43,13 +43,13 @@ class VideoAttachment extends AttachmentWidget {
         );
       },
       network: () {
-        if (attachment.assetUrl == null) {
+        if (attachments[0].assetUrl == null) {
           return AttachmentError(size: size);
         }
         return _buildVideoAttachment(
           context,
           VideoThumbnailImage(
-            video: attachment.assetUrl,
+            video: attachments[0].assetUrl,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -76,7 +76,7 @@ class VideoAttachment extends AttachmentWidget {
                         builder: (_) => StreamChannel(
                           channel: channel,
                           child: FullScreenMedia(
-                            mediaAttachments: [attachment],
+                            mediaAttachments: [attachments[0]],
                             userName: message.user.name,
                             sentAt: message.createdAt,
                             message: message,
@@ -103,19 +103,19 @@ class VideoAttachment extends AttachmentWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: AttachmentUploadStateBuilder(
                       message: message,
-                      attachment: attachment,
+                      attachment: attachments[0],
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          if (attachment.title != null)
+          if (attachments[0].title != null)
             Material(
               color: messageTheme.messageBackgroundColor,
               child: AttachmentTitle(
                 messageTheme: messageTheme,
-                attachment: attachment,
+                attachment: attachments[0],
               ),
             ),
         ],

@@ -34,17 +34,17 @@ extension AttachmentSourceX on AttachmentSource {
 abstract class AttachmentWidget extends StatelessWidget {
   final Size size;
   final Message message;
-  final Attachment attachment;
+  final List<Attachment> attachments;
   final AttachmentSource _source;
 
-  AttachmentSource get source => _source ?? attachment.file != null
+  AttachmentSource get source => _source ?? attachments[0].file != null
       ? AttachmentSource.local
       : AttachmentSource.network;
 
   const AttachmentWidget({
     Key key,
     @required this.message,
-    @required this.attachment,
+    @required this.attachments,
     this.size,
     AttachmentSource source,
   })  : _source = source,

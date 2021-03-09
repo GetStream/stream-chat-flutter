@@ -131,7 +131,7 @@ class ImageGroup extends StatelessWidget {
 
   Widget _buildImage(BuildContext context, int index) {
     return ImageAttachment(
-      attachment: images[index],
+      attachments: [images[index]],
       size: size,
       message: message,
       messageTheme: messageTheme,
