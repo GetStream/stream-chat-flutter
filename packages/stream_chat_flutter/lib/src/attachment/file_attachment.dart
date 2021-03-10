@@ -45,10 +45,10 @@ class FileAttachment extends AttachmentWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              child: _getFileTypeImage(context),
               height: 40.0,
               width: 33.33,
               margin: EdgeInsets.all(8.0),
+              child: _getFileTypeImage(context),
             ),
             SizedBox(width: 8.0),
             Expanded(

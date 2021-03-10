@@ -9,26 +9,32 @@ import 'package:path_provider/path_provider.dart';
 import '../stream_chat_flutter.dart';
 import 'extension.dart';
 
+/// Callback to download an attachment asset
 typedef AttachmentDownloader = Future<String> Function(
   Attachment attachment, {
   ProgressCallback progressCallback,
 });
 
+/// Widget that shows the options in the gallery view
 class AttachmentActionsModal extends StatelessWidget {
+  /// The message containing the attachments
   final Message message;
-  final String userName;
-  final String sentAt;
-  final List<Attachment> attachments;
+
+  /// Current page index
   final currentIndex;
+
+  /// Callback to show the message
   final VoidCallback onShowMessage;
+
+  /// Callback to download images
   final AttachmentDownloader imageDownloader;
+
+  /// Callback to provide download files
   final AttachmentDownloader fileDownloader;
 
+  /// Returns a new [AttachmentActionsModal]
   const AttachmentActionsModal({
     this.message,
-    this.userName,
-    this.sentAt,
-    this.attachments,
     this.currentIndex,
     this.onShowMessage,
     this.imageDownloader,
@@ -85,13 +91,13 @@ class AttachmentActionsModal extends StatelessWidget {
                   ),
                   _buildButton(
                     context,
-                    'Save ${attachments[currentIndex].type == 'video' ? 'Video' : 'Image'}',
+                    'Save ${message.attachments[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                     StreamSvgIcon.iconSave(
                       size: 24.0,
                       color: theme.colorTheme.grey,
                     ),
                     () {
-                      final attachment = attachments[currentIndex];
+                      final attachment = message.attachments[currentIndex];
                       final isImage = attachment.type == 'image';
                       final saveFile = fileDownloader ?? _downloadAttachment;
                       final saveImage = imageDownloader ?? _downloadAttachment;

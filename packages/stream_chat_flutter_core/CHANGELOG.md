@@ -1,3 +1,8 @@
+## 1.4.0-beta
+
+* Added `MessageListCore.messageFilter` to filter messages locally
+* Minor fixes and improvements
+
 ## 1.3.2-beta
 
 * Update llc dependency

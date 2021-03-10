@@ -238,6 +238,9 @@ class MessageReactionsModal extends StatelessWidget {
                 borderRadius: BorderRadius.circular(32),
               ),
               Positioned(
+                bottom: 6,
+                left: isCurrentUser ? -3 : null,
+                right: isCurrentUser ? -3 : null,
                 child: Align(
                   alignment:
                       reverse ? Alignment.centerRight : Alignment.centerLeft,
@@ -251,9 +254,6 @@ class MessageReactionsModal extends StatelessWidget {
                     highlightOwnReactions: false,
                   ),
                 ),
-                bottom: 6,
-                left: isCurrentUser ? -3 : null,
-                right: isCurrentUser ? -3 : null,
               ),
             ],
           ),

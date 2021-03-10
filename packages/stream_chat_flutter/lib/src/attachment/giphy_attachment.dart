@@ -143,6 +143,7 @@ class GiphyAttachment extends AttachmentWidget {
                         Card(
                           color: Colors.white,
                           elevation: 2,
+                          shape: CircleBorder(),
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
@@ -156,7 +157,6 @@ class GiphyAttachment extends AttachmentWidget {
                               });
                             },
                           ),
-                          shape: CircleBorder(),
                         ),
                         Expanded(
                           child: Center(
@@ -171,6 +171,7 @@ class GiphyAttachment extends AttachmentWidget {
                         Card(
                           color: Colors.white,
                           elevation: 2,
+                          shape: CircleBorder(),
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
@@ -184,7 +185,6 @@ class GiphyAttachment extends AttachmentWidget {
                               });
                             },
                           ),
-                          shape: CircleBorder(),
                         ),
                       ],
                     ),
