@@ -213,11 +213,11 @@ class MessageWidget extends StatefulWidget {
             );
 
             if (attachments.length > 1) {
-              return wrapAttachmentWidget(
-                context,
-                Padding(
-                  padding: attachmentPadding,
-                  child: Material(
+              return Padding(
+                padding: attachmentPadding,
+                child: wrapAttachmentWidget(
+                  context,
+                  Material(
                     color: messageTheme.messageBackgroundColor,
                     child: ImageGroup(
                       size: Size(
@@ -230,9 +230,9 @@ class MessageWidget extends StatefulWidget {
                       onShowMessage: onShowMessage,
                     ),
                   ),
+                  border,
+                  reverse,
                 ),
-                border,
-                reverse,
               );
             }
 
