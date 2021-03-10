@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_getters_setters
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:stream_chat/src/extensions/map_extension.dart';
@@ -106,14 +108,22 @@ class StreamChatClient {
     logger.info('instantiating new client');
   }
 
+  set chatPersistenceClient(ChatPersistenceClient value) {
+    _originalChatPersistenceClient = value;
+  }
+
+  ChatPersistenceClient _originalChatPersistenceClient;
+
   /// Chat persistence client
-  ChatPersistenceClient chatPersistenceClient;
+  ChatPersistenceClient get chatPersistenceClient => _chatPersistenceClient;
+
+  ChatPersistenceClient _chatPersistenceClient;
 
   /// Attachment uploader
   AttachmentFileUploader attachmentFileUploader;
 
   /// Whether the chat persistence is available or not
-  bool get persistenceEnabled => chatPersistenceClient != null;
+  bool get persistenceEnabled => _chatPersistenceClient != null;
 
   RetryPolicy _retryPolicy;
 
@@ -357,7 +367,7 @@ class StreamChatClient {
 
   /// Call this function to dispose the client
   void dispose() async {
-    await chatPersistenceClient?.disconnect();
+    await _chatPersistenceClient?.disconnect();
     await _disconnect();
     httpClient.close();
     await _controller.close();
@@ -446,8 +456,8 @@ class StreamChatClient {
 
     if (!event.isLocal) {
       if (_synced && event.createdAt != null) {
-        await chatPersistenceClient?.updateConnectionInfo(event);
-        await chatPersistenceClient?.updateLastSyncAt(event.createdAt);
+        await _chatPersistenceClient?.updateConnectionInfo(event);
+        await _chatPersistenceClient?.updateLastSyncAt(event.createdAt);
       }
     }
 
@@ -478,8 +488,9 @@ class StreamChatClient {
 
     _wsConnectionStatus = ConnectionStatus.connecting;
 
-    if (persistenceEnabled) {
-      await chatPersistenceClient.connect(state.user.id);
+    if (_originalChatPersistenceClient != null) {
+      _chatPersistenceClient = _originalChatPersistenceClient;
+      await _chatPersistenceClient.connect(state.user.id);
     }
 
     _ws = WebSocket(
@@ -532,10 +543,10 @@ class StreamChatClient {
     _connectionStatusSubscription =
         _ws.connectionStatusStream.listen(_connectionStatusHandler);
 
-    var event = await chatPersistenceClient?.getConnectionInfo();
+    var event = await _chatPersistenceClient?.getConnectionInfo();
 
     await _ws.connect().then((e) async {
-      await chatPersistenceClient?.updateConnectionInfo(e);
+      await _chatPersistenceClient?.updateConnectionInfo(e);
       event = e;
       await resync();
     }).catchError((err, stacktrace) {
@@ -551,14 +562,14 @@ class StreamChatClient {
 
   /// Get the events missed while offline to sync the offline storage
   Future<void> resync([List<String> cids]) async {
-    final lastSyncAt = await chatPersistenceClient?.getLastSyncAt();
+    final lastSyncAt = await _chatPersistenceClient?.getLastSyncAt();
 
     if (lastSyncAt == null) {
       _synced = true;
       return;
     }
 
-    cids ??= await chatPersistenceClient?.getChannelCids();
+    cids ??= await _chatPersistenceClient?.getChannelCids();
 
     if (cids?.isEmpty == true) {
       return;
@@ -586,7 +597,7 @@ class StreamChatClient {
 
       res.events.forEach(handleEvent);
 
-      await chatPersistenceClient?.updateLastSyncAt(DateTime.now());
+      await _chatPersistenceClient?.updateLastSyncAt(DateTime.now());
       _synced = true;
     } catch (error) {
       logger.severe('Error during resync $error');
@@ -723,7 +734,7 @@ class StreamChatClient {
 
     final updateData = _mapChannelStateToChannel(channels);
 
-    await chatPersistenceClient?.updateChannelQueries(
+    await _chatPersistenceClient?.updateChannelQueries(
       filter,
       channels.map((c) => c.channel.cid).toList(),
       paginationParams?.offset == null || paginationParams.offset == 0,
@@ -739,7 +750,7 @@ class StreamChatClient {
     @required List<SortOption<ChannelModel>> sort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    final offlineChannels = await chatPersistenceClient?.getChannelStates(
+    final offlineChannels = await _chatPersistenceClient?.getChannelStates(
       filter: filter,
       sort: sort,
       paginationParams: paginationParams,
@@ -957,11 +968,14 @@ class StreamChatClient {
     bool flushChatPersistence = false,
     bool clearUser = false,
   }) async {
+    print('Sahil : $wsConnectionStatus');
+    if (wsConnectionStatus != ConnectionStatus.connected) return;
+
     logger.info('Disconnecting flushOfflineStorage: $flushChatPersistence; '
         'clearUser: $clearUser');
 
-    await chatPersistenceClient?.disconnect(flush: flushChatPersistence);
-    chatPersistenceClient = null;
+    await _chatPersistenceClient?.disconnect(flush: flushChatPersistence);
+    _chatPersistenceClient = null;
 
     _connectCompleter = null;
 
