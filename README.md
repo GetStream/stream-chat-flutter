@@ -1,4 +1,4 @@
-# Official Flutter packages for [Stream Chat](https://getstream.io/chat/)
+# Official Flutter packages for [Stream Chat](https://getstream.io/chat/sdk/flutter/)
 
 ![](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v4.png)
 
