@@ -117,7 +117,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
 
     cachedChannels.sort(chainedComparator);
 
-    if (paginationParams?.offset != null) {
+    if (paginationParams?.offset != null && cachedChannels.isNotEmpty) {
       cachedChannels.removeRange(0, paginationParams.offset);
     }
 

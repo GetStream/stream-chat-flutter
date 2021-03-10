@@ -85,8 +85,5 @@ class MoorChatDatabase extends _$MoorChatDatabase {
       );
 
   /// Closes the database instance
-  Future<void> disconnect() async {
-    await _isolate?.shutdownAll();
-    await close();
-  }
+  Future<void> disconnect() => _isolate?.shutdownAll() ?? close();
 }
