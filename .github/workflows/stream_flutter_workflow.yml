@@ -82,7 +82,6 @@ jobs:
         with:
           path: packages/stream_chat/lcov.info
           min_coverage: 50
-          exclude: "**/*.g.dart **/*.freezed.dart"
   test_flutter:
     runs-on: ubuntu-latest
     timeout-minutes: 15
