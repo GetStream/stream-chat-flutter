@@ -417,8 +417,8 @@ class MessageInputState extends State<MessageInput> {
   Widget _animateSendButton(BuildContext context) {
     final sendButton = widget.activeSendButton != null
         ? InkWell(
-            child: widget.activeSendButton,
             onTap: sendMessage,
+            child: widget.activeSendButton,
           )
         : _buildSendButton(context);
     return Padding(
@@ -1083,81 +1083,81 @@ class MessageInputState extends State<MessageInput> {
     switch (iconType) {
       case 'giphy':
         return CircleAvatar(
+          radius: 12,
           child: StreamSvgIcon.giphyIcon(
             size: 24.0,
           ),
-          radius: 12,
         );
         break;
       case 'ban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.iconUserDelete(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'flag':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.flag(
             size: 14.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'imgur':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: ClipOval(
             child: StreamSvgIcon.imgur(
               size: 24.0,
             ),
           ),
-          radius: 12,
         );
         break;
       case 'mute':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.mute(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'unban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.userAdd(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       case 'unmute':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.volumeUp(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
       default:
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          radius: 12,
           child: StreamSvgIcon.lightning(
             size: 16.0,
             color: Colors.white,
           ),
-          radius: 12,
         );
         break;
     }
@@ -1677,8 +1677,8 @@ class MessageInputState extends State<MessageInput> {
         );
       default:
         return Container(
-          child: Icon(Icons.insert_drive_file),
           color: Colors.black26,
+          child: Icon(Icons.insert_drive_file),
         );
     }
   }
@@ -2147,6 +2147,9 @@ class MessageInputState extends State<MessageInput> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)
@@ -2157,9 +2160,6 @@ class MessageInputState extends State<MessageInput> {
                                 .colorTheme
                                 .accentBlue),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
                 ),
               ],
             ),
@@ -2298,6 +2298,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
                 child: Container(
                   constraints: BoxConstraints.expand(),
                   color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                  alignment: Alignment.center,
                   child: Text(
                     'Add more files',
                     style: TextStyle(
@@ -2305,7 +2306,6 @@ class __PickerWidgetState extends State<_PickerWidget> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  alignment: Alignment.center,
                 ),
               );
             }

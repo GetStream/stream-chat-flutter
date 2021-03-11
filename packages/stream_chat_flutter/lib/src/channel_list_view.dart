@@ -223,8 +223,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     }
 
     return AnimatedSwitcher(
-      child: child,
       duration: const Duration(milliseconds: 500),
+      child: child,
     );
   }
 
@@ -469,8 +469,8 @@ class _ChannelListViewState extends State<ChannelListView> {
             MaterialPageRoute(
               builder: (context) {
                 return StreamChannel(
-                  child: widget.channelWidget,
                   channel: client,
+                  child: widget.channelWidget,
                 );
               },
             ),
@@ -506,12 +506,12 @@ class _ChannelListViewState extends State<ChannelListView> {
                       context: context,
                       builder: (context) {
                         return StreamChannel(
+                          channel: channel,
                           child: ChannelBottomSheet(
                             onViewInfoTap: () {
                               widget.onViewInfoTap(channel);
                             },
                           ),
-                          channel: channel,
                         );
                       },
                     );
@@ -592,13 +592,13 @@ class _ChannelListViewState extends State<ChannelListView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: StreamChannel(
+              channel: channel,
               child: ChannelName(
                 textStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              channel: channel,
             ),
           ),
         ],

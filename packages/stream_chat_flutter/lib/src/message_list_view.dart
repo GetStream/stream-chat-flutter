@@ -624,9 +624,6 @@ class _MessageListViewState extends State<MessageListView> {
             children: [
               FloatingActionButton(
                 backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-                child: StreamSvgIcon.down(
-                  color: StreamChatTheme.of(context).colorTheme.black,
-                ),
                 onPressed: () {
                   if (unreadCount > 0) {
                     streamChannel.channel.markRead();
@@ -644,6 +641,9 @@ class _MessageListViewState extends State<MessageListView> {
                     );
                   }
                 },
+                child: StreamSvgIcon.down(
+                  color: StreamChatTheme.of(context).colorTheme.black,
+                ),
               ),
               if (showUnreadCount)
                 Positioned(
@@ -1045,10 +1045,6 @@ class _MessageListViewState extends State<MessageListView> {
           end: colorTheme.white.withOpacity(0),
         ),
         duration: const Duration(seconds: 3),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: child,
-        ),
         onEnd: () => initialMessageHighlightComplete = true,
         builder: (_, color, child) {
           return Container(
@@ -1056,6 +1052,10 @@ class _MessageListViewState extends State<MessageListView> {
             child: child,
           );
         },
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: child,
+        ),
       );
     }
     return child;

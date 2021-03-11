@@ -510,6 +510,7 @@ class StreamChatClient {
 
       if (status == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
+        // ignore: unawaited_futures
         queryChannelsOnline(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),

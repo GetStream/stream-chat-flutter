@@ -28,6 +28,9 @@ class UrlAttachment extends StatelessWidget {
             Container(
               clipBehavior: Clip.antiAliasWithSaveLayer,
               margin: EdgeInsets.symmetric(horizontal: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
               child: Stack(
                 children: [
                   CachedNetworkImage(
@@ -39,6 +42,12 @@ class UrlAttachment extends StatelessWidget {
                     left: 0.0,
                     bottom: -1,
                     child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(16.0),
+                        ),
+                        color: StreamChatTheme.of(context).colorTheme.blueAlice,
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.only(
                           top: 8.0,
@@ -57,18 +66,9 @@ class UrlAttachment extends StatelessWidget {
                               ),
                         ),
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16.0),
-                        ),
-                        color: StreamChatTheme.of(context).colorTheme.blueAlice,
-                      ),
                     ),
                   ),
                 ],
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
               ),
             ),
           Padding(

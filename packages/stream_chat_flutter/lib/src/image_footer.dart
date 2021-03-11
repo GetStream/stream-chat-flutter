@@ -237,13 +237,13 @@ class _ImageFooterState extends State<ImageFooter> {
                           media = InkWell(
                             onTap: () => widget.mediaSelectedCallBack(index),
                             child: AspectRatio(
+                              aspectRatio: 1.0,
                               child: CachedNetworkImage(
                                 imageUrl: attachment.imageUrl ??
                                     attachment.assetUrl ??
                                     attachment.thumbUrl,
                                 fit: BoxFit.cover,
                               ),
-                              aspectRatio: 1.0,
                             ),
                           );
                         }
