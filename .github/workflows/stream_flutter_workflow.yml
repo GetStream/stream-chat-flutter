@@ -77,7 +77,7 @@ jobs:
           flutter pub run test --coverage coverage/
           format_coverage --lcov --in=coverage/ --out=lcov.info --packages=.packages --report-on=lib
       - name: CodeCov
-        run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat/lcov.info -F stream_chat
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat/lcov.info -F stream_chat
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat/lcov.info
