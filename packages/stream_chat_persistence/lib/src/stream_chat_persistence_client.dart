@@ -19,10 +19,12 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// Connection mode on which the client will work
     ConnectionMode connectionMode = ConnectionMode.regular,
     Level logLevel = Level.WARNING,
+    MoorChatDatabase db,
   })  : assert(connectionMode != null),
         assert(logLevel != null),
         _connectionMode = connectionMode,
-        _logger = Logger.detached('💽')..level = logLevel;
+        _logger = Logger.detached('💽')..level = logLevel,
+        _db = db;
 
   MoorChatDatabase _db;
   final Logger _logger;

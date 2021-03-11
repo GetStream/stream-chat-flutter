@@ -8,6 +8,7 @@ class SharedDB {
   static dynamic constructDatabase(
     String userId, {
     bool logStatements = false,
+    bool persistOnDisk = true,
   }) {
     throw 'Unsupported Platform';
   }
