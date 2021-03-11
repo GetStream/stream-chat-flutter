@@ -80,7 +80,7 @@ jobs:
         run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat/lcov.info -F stream_chat
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
-          path: "packages/stream_chat/lcov.info"
+          path: packages/stream_chat/lcov.info
           min_coverage: 50
           exclude: "**/*.g.dart **/*.freezed.dart"
   test_flutter:
