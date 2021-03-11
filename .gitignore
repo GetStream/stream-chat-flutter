@@ -2,7 +2,7 @@
 .atom/
 .idea/
 .vscode/
-
+**/lcov.info
 .packages
 .pub/
 .dart_tool/
