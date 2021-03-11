@@ -18,6 +18,7 @@ LazyDatabase _openConnection(
     return await SharedDB.constructDatabase(
       userId,
       logStatements: logStatements,
+      persistOnDisk: persistOnDisk,
     );
   });
 }
@@ -53,7 +54,7 @@ class MoorChatDatabase extends _$MoorChatDatabase {
   }) : super(_openConnection(
           _userId,
           logStatements: logStatements,
-          persistOnDisk: true,
+          persistOnDisk: persistOnDisk,
         ));
 
   /// Instantiate a new database instance

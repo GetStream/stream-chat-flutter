@@ -9,11 +9,10 @@ void main() {
       final streamChatPersistenceClient = StreamChatPersistenceClient(
         connectionMode: ConnectionMode.background,
         logLevel: Level.INFO,
-        db: MoorChatDatabase(
+      )..db = MoorChatDatabase(
           'test',
           persistOnDisk: false,
-        ),
-      );
+        );
 
       expect(
         () => streamChatPersistenceClient.connect('test'),

@@ -12,9 +12,7 @@ class SharedDB {
   static Future<WebDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
-
-    /// ignored on web
-    bool persistOnDisk = true,
+    bool persistOnDisk = true, // ignored on web
   }) async {
     final dbName = 'db_$userId';
     return WebDatabase(dbName, logStatements: logStatements);
