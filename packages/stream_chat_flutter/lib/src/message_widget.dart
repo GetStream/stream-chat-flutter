@@ -21,7 +21,10 @@ import 'image_group.dart';
 import 'message_text.dart';
 
 typedef AttachmentBuilder = Widget Function(
-    BuildContext, Message, List<Attachment>);
+  BuildContext,
+  Message,
+  List<Attachment>,
+);
 typedef OnQuotedMessageTap = void Function(String);
 
 /// The display behaviour of a widget
