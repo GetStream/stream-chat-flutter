@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'db/moor_chat_database.dart';
@@ -24,13 +25,14 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         _connectionMode = connectionMode,
         _logger = Logger.detached('💽')..level = logLevel;
 
-  MoorChatDatabase _db;
+  @visibleForTesting
+  MoorChatDatabase db;
   final Logger _logger;
   final ConnectionMode _connectionMode;
 
   @override
   Future<void> connect(String userId) async {
-    if (_db != null) {
+    if (db != null) {
       throw Exception(
         'An instance of StreamChatDatabase is already connected.\n'
         'disconnect the previous instance before connecting again.',
@@ -39,71 +41,71 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     switch (_connectionMode) {
       case ConnectionMode.regular:
         _logger.info('Connecting on a regular isolate');
-        _db = MoorChatDatabase(userId);
+        db = MoorChatDatabase(userId);
         return;
       case ConnectionMode.background:
         _logger.info('Connecting on background isolate');
-        _db = await SharedDB.constructMoorChatDatabase(userId);
+        db = await SharedDB.constructMoorChatDatabase(userId);
         return;
     }
   }
 
   @override
   Future<Event> getConnectionInfo() {
-    return _db.connectionEventDao.connectionEvent;
+    return db.connectionEventDao.connectionEvent;
   }
 
   @override
   Future<void> updateConnectionInfo(Event event) {
-    return _db.connectionEventDao.updateConnectionEvent(event);
+    return db.connectionEventDao.updateConnectionEvent(event);
   }
 
   @override
   Future<void> updateLastSyncAt(DateTime lastSyncAt) {
-    return _db.connectionEventDao.updateLastSyncAt(lastSyncAt);
+    return db.connectionEventDao.updateLastSyncAt(lastSyncAt);
   }
 
   @override
   Future<DateTime> getLastSyncAt() {
-    return _db.connectionEventDao.lastSyncAt;
+    return db.connectionEventDao.lastSyncAt;
   }
 
   @override
   Future<void> deleteChannels(List<String> cids) {
-    return _db.channelDao.deleteChannelByCids(cids);
+    return db.channelDao.deleteChannelByCids(cids);
   }
 
   @override
-  Future<List<String>> getChannelCids() => _db.channelDao.cids;
+  Future<List<String>> getChannelCids() => db.channelDao.cids;
 
   @override
   Future<void> deleteMessageByIds(List<String> messageIds) {
-    return _db.messageDao.deleteMessageByIds(messageIds);
+    return db.messageDao.deleteMessageByIds(messageIds);
   }
 
   @override
   Future<void> deletePinnedMessageByIds(List<String> messageIds) {
-    return _db.pinnedMessageDao.deleteMessageByIds(messageIds);
+    return db.pinnedMessageDao.deleteMessageByIds(messageIds);
   }
 
   @override
   Future<void> deleteMessageByCids(List<String> cids) {
-    return _db.messageDao.deleteMessageByCids(cids);
+    return db.messageDao.deleteMessageByCids(cids);
   }
 
   @override
   Future<void> deletePinnedMessageByCids(List<String> cids) {
-    return _db.pinnedMessageDao.deleteMessageByCids(cids);
+    return db.pinnedMessageDao.deleteMessageByCids(cids);
   }
 
   @override
   Future<List<Member>> getMembersByCid(String cid) {
-    return _db.memberDao.getMembersByCid(cid);
+    return db.memberDao.getMembersByCid(cid);
   }
 
   @override
   Future<ChannelModel> getChannelByCid(String cid) {
-    return _db.channelDao.getChannelByCid(cid);
+    return db.channelDao.getChannelByCid(cid);
   }
 
   @override
@@ -111,7 +113,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     String cid, {
     PaginationParams messagePagination,
   }) {
-    return _db.messageDao.getMessagesByCid(
+    return db.messageDao.getMessagesByCid(
       cid,
       messagePagination: messagePagination,
     );
@@ -122,7 +124,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     String cid, {
     PaginationParams messagePagination,
   }) {
-    return _db.pinnedMessageDao.getMessagesByCid(
+    return db.pinnedMessageDao.getMessagesByCid(
       cid,
       messagePagination: messagePagination,
     );
@@ -130,12 +132,12 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<List<Read>> getReadsByCid(String cid) {
-    return _db.readDao.getReadsByCid(cid);
+    return db.readDao.getReadsByCid(cid);
   }
 
   @override
   Future<Map<String, List<Message>>> getChannelThreads(String cid) async {
-    final messages = await _db.messageDao.getThreadMessages(cid);
+    final messages = await db.messageDao.getThreadMessages(cid);
     final messageByParentIdDictionary = <String, List<Message>>{};
     for (final message in messages) {
       final parentId = message.parentId;
@@ -152,7 +154,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     String parentId, {
     PaginationParams options,
   }) {
-    return _db.messageDao.getThreadMessagesByParentId(
+    return db.messageDao.getThreadMessagesByParentId(
       parentId,
       options: options,
     );
@@ -164,7 +166,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     List<SortOption<ChannelModel>> sort = const [],
     PaginationParams paginationParams,
   }) async {
-    final channels = await _db.channelQueryDao.getChannels(
+    final channels = await db.channelQueryDao.getChannels(
       filter: filter,
       sort: sort,
       paginationParams: paginationParams,
@@ -178,7 +180,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     List<String> cids,
     bool clearQueryCache,
   ) {
-    return _db.channelQueryDao.updateChannelQueries(
+    return db.channelQueryDao.updateChannelQueries(
       filter,
       cids,
       clearQueryCache,
@@ -187,63 +189,63 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<void> updateChannels(List<ChannelModel> channels) {
-    return _db.channelDao.updateChannels(channels);
+    return db.channelDao.updateChannels(channels);
   }
 
   @override
   Future<void> updateMembers(String cid, List<Member> members) {
-    return _db.memberDao.updateMembers(cid, members);
+    return db.memberDao.updateMembers(cid, members);
   }
 
   @override
   Future<void> updateMessages(String cid, List<Message> messages) {
-    return _db.messageDao.updateMessages(cid, messages);
+    return db.messageDao.updateMessages(cid, messages);
   }
 
   @override
   Future<void> updatePinnedMessages(String cid, List<Message> messages) {
-    return _db.pinnedMessageDao.updateMessages(cid, messages);
+    return db.pinnedMessageDao.updateMessages(cid, messages);
   }
 
   @override
   Future<void> updateReactions(List<Reaction> reactions) {
-    return _db.reactionDao.updateReactions(reactions);
+    return db.reactionDao.updateReactions(reactions);
   }
 
   @override
   Future<void> updateReads(String cid, List<Read> reads) {
-    return _db.readDao.updateReads(cid, reads);
+    return db.readDao.updateReads(cid, reads);
   }
 
   @override
   Future<void> updateUsers(List<User> users) {
-    return _db.userDao.updateUsers(users);
+    return db.userDao.updateUsers(users);
   }
 
   @override
   Future<void> deleteReactionsByMessageId(List<String> messageIds) {
-    return _db.reactionDao.deleteReactionsByMessageIds(messageIds);
+    return db.reactionDao.deleteReactionsByMessageIds(messageIds);
   }
 
   @override
   Future<void> deleteMembersByCids(List<String> cids) {
-    return _db.memberDao.deleteMemberByCids(cids);
+    return db.memberDao.deleteMemberByCids(cids);
   }
 
   @override
   Future<void> disconnect({bool flush = false}) async {
-    if (_db != null) {
+    if (db != null) {
       _logger.info('Disconnecting');
       if (flush) {
         _logger.info('Flushing');
-        await _db.batch((batch) {
-          _db.allTables.forEach((table) {
-            _db.delete(table).go();
+        await db.batch((batch) {
+          db.allTables.forEach((table) {
+            db.delete(table).go();
           });
         });
       }
-      await _db.disconnect();
-      _db = null;
+      await db.disconnect();
+      db = null;
     }
   }
 }
