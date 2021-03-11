@@ -968,9 +968,6 @@ class StreamChatClient {
     bool flushChatPersistence = false,
     bool clearUser = false,
   }) async {
-    print('Sahil : $wsConnectionStatus');
-    if (wsConnectionStatus != ConnectionStatus.connected) return;
-
     logger.info('Disconnecting flushOfflineStorage: $flushChatPersistence; '
         'clearUser: $clearUser');
 
