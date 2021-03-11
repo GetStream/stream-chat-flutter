@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -347,4 +349,22 @@ StreamSvgIcon getFileTypeImage(String type) {
       return StreamSvgIcon.filetypeGeneric();
       break;
   }
+}
+
+Widget wrapAttachmentWidget(
+  BuildContext context,
+  Widget attachmentWidget,
+  ShapeBorder attachmentShape,
+  bool reverse,
+) {
+  return Material(
+    clipBehavior: Clip.antiAlias,
+    shape: attachmentShape,
+    type: MaterialType.transparency,
+    child: Transform(
+      transform: Matrix4.rotationY(reverse ? pi : 0),
+      alignment: Alignment.center,
+      child: attachmentWidget,
+    ),
+  );
 }
