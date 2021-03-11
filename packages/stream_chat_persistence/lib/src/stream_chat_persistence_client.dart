@@ -371,6 +371,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> updateChannelStates(List<ChannelState> channelStates) {
+    return readProtected(() async {
+      return _db.transaction(() async {
+        await super.updateChannelStates(channelStates);
+      });
+    });
+  }
+
+  @override
   Future<void> disconnect({bool flush = false}) async {
     return _mutex.protectWrite(() async {
       _logger.info('disconnect');
@@ -387,92 +396,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         await _db.disconnect();
         _db = null;
       }
-    });
-  }
-
-  @override
-  Future<void> updateChannelStates(List<ChannelState> channelStates) {
-    return readProtected(() async {
-      return _db.transaction(() async {
-        final deleteReactions = deleteReactionsByMessageId(channelStates
-            .expand((it) => it.messages)
-            .map((m) => m.id)
-            .toList(growable: false));
-
-        final deleteMembers = deleteMembersByCids(
-          channelStates.map((it) => it.channel.cid).toList(growable: false),
-        );
-
-        await Future.wait([
-          deleteReactions,
-          deleteMembers,
-        ]);
-
-        final channels =
-            channelStates.map((it) => it.channel).where((it) => it != null);
-
-        final reactions = channelStates
-            .expand((it) => it.messages)
-            .expand((it) => [
-                  if (it.ownReactions != null)
-                    ...it.ownReactions.where((r) => r.userId != null),
-                  if (it.latestReactions != null)
-                    ...it.latestReactions.where((r) => r.userId != null)
-                ])
-            .where((it) => it != null);
-
-        final users = channelStates
-            .map((cs) => [
-                  cs.channel?.createdBy,
-                  ...cs.messages
-                      ?.map((m) => [
-                            m.user,
-                            if (m.latestReactions != null)
-                              ...m.latestReactions.map((r) => r.user),
-                            if (m.ownReactions != null)
-                              ...m.ownReactions.map((r) => r.user),
-                          ])
-                      ?.expand((v) => v),
-                  if (cs.read != null) ...cs.read.map((r) => r.user),
-                  if (cs.members != null) ...cs.members.map((m) => m.user),
-                ])
-            .expand((it) => it)
-            .where((it) => it != null);
-
-        final updateMessagesFuture = channelStates.map((it) {
-          final cid = it.channel.cid;
-          final messages = it.messages.where((it) => it != null);
-          return updateMessages(cid, messages.toList(growable: false));
-        }).toList(growable: false);
-
-        final updatePinnedMessagesFuture = channelStates.map((it) {
-          final cid = it.channel.cid;
-          final messages = it.pinnedMessages.where((it) => it != null);
-          return updatePinnedMessages(cid, messages.toList(growable: false));
-        }).toList(growable: false);
-
-        final updateReadsFuture = channelStates.map((it) {
-          final cid = it.channel.cid;
-          final reads = it.read?.where((it) => it != null) ?? [];
-          return updateReads(cid, reads.toList(growable: false));
-        }).toList(growable: false);
-
-        final updateMembersFuture = channelStates.map((it) {
-          final cid = it.channel.cid;
-          final members = it.members.where((it) => it != null);
-          return updateMembers(cid, members.toList(growable: false));
-        }).toList(growable: false);
-
-        await Future.wait([
-          ...updateMessagesFuture,
-          ...updatePinnedMessagesFuture,
-          ...updateReadsFuture,
-          ...updateMembersFuture,
-          updateUsers(users.toList(growable: false)),
-          updateChannels(channels.toList(growable: false)),
-          updateReactions(reactions.toList(growable: false)),
-        ]);
-      });
     });
   }
 }
