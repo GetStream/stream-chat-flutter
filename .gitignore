@@ -3,6 +3,7 @@
 .idea/
 .vscode/
 **/lcov.info
+coverage
 .packages
 .pub/
 .dart_tool/

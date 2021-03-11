@@ -82,6 +82,7 @@ jobs:
         with:
           path: packages/stream_chat/lcov.info
           min_coverage: 50
+
   test_flutter:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -98,4 +99,6 @@ jobs:
       - name: 'Flutter Test'
         run: |
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-            flutter test
+            flutter test --coverage
+      - name: CodeCov
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat_persistence/coverage/lcov.info -F stream_chat_persistence
