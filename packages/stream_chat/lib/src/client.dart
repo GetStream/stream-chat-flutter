@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:stream_chat/src/extensions/map_extension.dart';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
@@ -18,6 +17,7 @@ import 'package:stream_chat/src/attachment_file_uploader.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/extensions/map_extension.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
@@ -519,24 +519,25 @@ class StreamChatClient {
         ),
       );
 
-      if (status == ConnectionStatus.connected &&
-          state.channels?.isNotEmpty == true) {
-        // ignore: unawaited_futures
-        queryChannelsOnline(filter: {
-          'cid': {
-            '\$in': state.channels.keys.toList(),
-          },
-        }).then(
-          (_) async {
-            await resync();
-            handleEvent(Event(
-              type: EventType.connectionRecovered,
-              online: true,
-            ));
-          },
-        );
-      } else {
-        _synced = false;
+      if (status == ConnectionStatus.connected) {
+        handleEvent(Event(
+          type: EventType.connectionRecovered,
+          online: true,
+        ));
+        if (state.channels?.isNotEmpty == true) {
+          // ignore: unawaited_futures
+          queryChannelsOnline(filter: {
+            'cid': {
+              '\$in': state.channels.keys.toList(),
+            },
+          }).then(
+            (_) async {
+              await resync();
+            },
+          );
+        } else {
+          _synced = false;
+        }
       }
     };
 
