@@ -56,7 +56,7 @@ jobs:
             flutter format .
           ./.github/workflows/scripts/validate-formatting.sh
 
-  test_dart:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -71,44 +71,25 @@ jobs:
           flutter pub global activate coverage
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
-      - name: 'Flutter Test'
+      - name: 'Dart Test'
         run: |
           cd packages/stream_chat
           flutter pub run test --coverage coverage/
           format_coverage --lcov --in=coverage/ --out=lcov.info --packages=.packages --report-on=lib
-      - name: CodeCov
-        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat/lcov.info -F stream_chat
-      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
-        with:
-          path: packages/stream_chat/lcov.info
-          min_coverage: 50
-
-  test_flutter:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: 'Install Flutter'
-        run: ./.github/workflows/scripts/install-flutter.sh stable
-      - name: 'Install Tools'
-        run: ./.github/workflows/scripts/install-tools.sh
-      - name: 'Bootstrap Workspace'
-        run: melos bootstrap
       - name: 'Flutter Test'
         run: |
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
             flutter test --coverage
       - name: CodeCov
-        run: |
-          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat_persistence/coverage/lcov.info -F stream_chat_persistence
-          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat_flutter_core/coverage/lcov.info -F stream_chat_flutter_core
-          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f packages/stream_chat_flutter/coverage/lcov.info -F stream_chat_flutter
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
-          path: packages/stream_chat_persistence/coverage/lcov.info
-          min_coverage: 0.2
+          path: packages/stream_chat/lcov.info
+          min_coverage: 50
+      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+        path: packages/stream_chat_persistence/coverage/lcov.info
+        min_coverage: 0.2
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
