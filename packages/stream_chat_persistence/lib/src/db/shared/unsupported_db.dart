@@ -1,3 +1,5 @@
+import 'package:moor/backends.dart';
+import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 /// A Helper class to construct new instances of [MoorChatDatabase]
@@ -5,7 +7,7 @@ class SharedDB {
   /// Returns a new instance of database.
   ///
   /// Generally used with [ConnectionMode.regular].
-  static dynamic constructDatabase(
+  static Future<DelegatedDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
     bool persistOnDisk = true,
@@ -16,7 +18,7 @@ class SharedDB {
   /// Return a new instance of moor chat database.
   ///
   /// Generally used with [ConnectionMode.background].
-  static dynamic constructMoorChatDatabase(
+  static MoorChatDatabase constructMoorChatDatabase(
     String userId, {
     bool logStatements = false,
   }) {

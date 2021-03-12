@@ -76,17 +76,21 @@ class SharedDB {
   /// [MoorChatDatabase.connect] created on a background isolate.
   ///
   /// Generally used with [ConnectionMode.background].
-  static Future<MoorChatDatabase> constructMoorChatDatabase(
+  static MoorChatDatabase constructMoorChatDatabase(
     String userId, {
     bool logStatements = false,
-  }) async {
+  }) {
     final dbName = 'db_$userId';
-    final isolate = await _createMoorIsolate(
-      dbName,
-      logStatements: logStatements,
+    return MoorChatDatabase.connect(
+      userId,
+      DatabaseConnection.delayed(Future(() async {
+        MoorIsolate isolate = await _createMoorIsolate(
+          dbName,
+          logStatements: logStatements,
+        );
+        return isolate.connect();
+      })),
     );
-    final connection = await isolate.connect();
-    return MoorChatDatabase.connect(userId, isolate, connection);
   }
 }
 

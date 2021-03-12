@@ -11,6 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  mutex: ^2.0.0
   moor: ^3.4.0
   path: ^1.7.0
   path_provider: ^1.6.27
