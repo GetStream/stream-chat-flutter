@@ -1463,10 +1463,16 @@ class ChannelClientState {
   void addMessage(Message message) {
     if (message.parentId == null || message.showInChannel == true) {
       final newMessages = List<Message>.from(_channelState.messages);
-
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        newMessages[oldIndex] = message;
+        Message m;
+        if (message.quotedMessageId != null && message.quotedMessage == null) {
+          final oldMessage = newMessages[oldIndex];
+          m = message.copyWith(
+            quotedMessage: oldMessage.quotedMessage,
+          );
+        }
+        newMessages[oldIndex] = m ?? message;
       } else {
         newMessages.add(message);
       }
