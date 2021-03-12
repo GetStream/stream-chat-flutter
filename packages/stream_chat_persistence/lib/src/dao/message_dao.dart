@@ -102,7 +102,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .map(_messageFromJoinRow)
         .get());
 
-    if (options?.lessThan != null) {
+    if (options?.lessThan != null && msgList.isNotEmpty) {
       final lessThanIndex = msgList.indexWhere((m) => m.id == options.lessThan);
       msgList.removeRange(lessThanIndex, msgList.length);
     }
