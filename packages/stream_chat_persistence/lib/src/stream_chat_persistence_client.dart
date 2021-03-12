@@ -3,6 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import 'db/moor_chat_database.dart';
 import 'db/shared/shared_db.dart';
+import 'package:logging/logging.dart' show LogRecord;
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
 enum ConnectionMode {
@@ -12,6 +13,12 @@ enum ConnectionMode {
   /// Connects the [StreamChatPersistenceClient] on a background isolate
   background,
 }
+
+final levelEmojiMapper = {
+  Level.INFO: 'ℹ️',
+  Level.WARNING: '⚠️',
+  Level.SEVERE: '🚨',
+};
 
 /// A [MoorChatDatabase] based implementation of the [ChatPersistenceClient]
 class StreamChatPersistenceClient extends ChatPersistenceClient {
@@ -25,7 +32,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         assert(logLevel != null),
         _connectionMode = connectionMode,
         _logger = Logger.detached('💽')..level = logLevel {
-    _logger.onRecord.listen(_getDefaultLogHandler());
+    _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
 
   /// A function that has a parameter of type [LogRecord].
@@ -53,22 +60,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   final ConnectionMode _connectionMode;
   final _mutex = ReadWriteMutex();
 
-  LogHandlerFunction _getDefaultLogHandler() {
-    final levelEmojiMapper = {
-      Level.INFO.name: 'ℹ️',
-      Level.WARNING.name: '⚠️',
-      Level.SEVERE.name: '🚨',
-    };
-    return (record) {
-      print(
-        '(${record.time}) '
-        '${levelEmojiMapper[record.level.name] ?? record.level.name} '
-        '${record.loggerName} ${record.message}',
-      );
-      if (record.stackTrace != null) {
-        print(record.stackTrace);
-      }
-    };
+  void _defaultLogHandler(LogRecord record) {
+    print(
+      '(${record.time}) '
+      '${levelEmojiMapper[record.level] ?? record.level.name} '
+      '${record.loggerName} ${record.message}',
+    );
+    if (record.stackTrace != null) print(record.stackTrace);
   }
 
   Future<T> readProtected<T>(Future<T> Function() f) async {
@@ -97,7 +95,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         return;
       case ConnectionMode.background:
         _logger.info('Connecting on background isolate');
-        _db = await SharedDB.constructMoorChatDatabase(userId);
+        _db = SharedDB.constructMoorChatDatabase(userId);
         return;
     }
   }

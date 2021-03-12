@@ -56,7 +56,6 @@ class MoorChatDatabase extends _$MoorChatDatabase {
   /// Instantiate a new database instance
   MoorChatDatabase.connect(
     this._userId,
-    this._isolate,
     DatabaseConnection connection,
   ) : super.connect(connection);
 
@@ -64,8 +63,6 @@ class MoorChatDatabase extends _$MoorChatDatabase {
 
   /// User id to which the database is connected
   String get userId => _userId;
-
-  MoorIsolate _isolate;
 
   // you should bump this number whenever you change or add a table definition.
   @override
@@ -85,12 +82,5 @@ class MoorChatDatabase extends _$MoorChatDatabase {
       );
 
   /// Closes the database instance
-  Future<void> disconnect() async {
-    if (_isolate != null) {
-      await _isolate.shutdownAll();
-      _isolate = null;
-    } else {
-      await close();
-    }
-  }
+  Future<void> disconnect() => close();
 }

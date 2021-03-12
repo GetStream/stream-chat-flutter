@@ -21,10 +21,10 @@ class SharedDB {
   /// default constructor.
   ///
   /// Generally used with [ConnectionMode.background].
-  static Future<MoorChatDatabase> constructMoorChatDatabase(
+  static MoorChatDatabase constructMoorChatDatabase(
     String userId, {
     bool logStatements = false,
-  }) async {
+  }) {
     final dbName = 'db_$userId';
     return MoorChatDatabase(dbName, logStatements: logStatements);
   }
