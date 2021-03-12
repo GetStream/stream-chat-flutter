@@ -1029,7 +1029,7 @@ class _MessageListViewState extends State<MessageListView> {
         backgroundIcon: StreamSvgIcon.reply(
           color: StreamChatTheme.of(context).colorTheme.accentBlue,
         ),
-        child: child,
+        child: Container(child: child),
       );
     }
 

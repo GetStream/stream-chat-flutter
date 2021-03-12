@@ -48,7 +48,6 @@ jobs:
       - name: 'Install Tools'
         run: |
           ./.github/workflows/scripts/install-tools.sh
-          curl -sL https://github.com/google/google-java-format/releases/download/google-java-format-1.3/google-java-format-1.3-all-deps.jar -o $HOME/google-java-format.jar
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
       - name: 'Dart'
@@ -56,20 +55,8 @@ jobs:
           melos exec -c 1 -- \
             flutter format .
           ./.github/workflows/scripts/validate-formatting.sh
-      - name: 'Objective-C'
-        if: ${{ success() || failure() }}
-        run: |
-          melos exec -c 4 --ignore="*platform_interface*" --ignore="*web*" -- \
-            find . -maxdepth 3 -name "*.h" -o -name "*.m" -print0 \| xargs -0 clang-format -i --style=Google --verbose
-          ./.github/workflows/scripts/validate-formatting.sh
-      - name: 'Java'
-        if: ${{ success() || failure() }}
-        run: |
-          melos exec -c 4 --ignore="*platform_interface*" --ignore="*web*" -- \
-            find . -maxdepth 12 -name "*.java" -print0 \| xargs -0 java -jar $HOME/google-java-format.jar --replace
-          ./.github/workflows/scripts/validate-formatting.sh
 
-  test_dart:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -79,26 +66,35 @@ jobs:
       - name: 'Install Flutter'
         run: ./.github/workflows/scripts/install-flutter.sh stable
       - name: 'Install Tools'
-        run: ./.github/workflows/scripts/install-tools.sh
+        run: |
+          ./.github/workflows/scripts/install-tools.sh
+          flutter pub global activate coverage
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
-      - name: 'Flutter Test'
-        run: cd packages/stream_chat && flutter pub run test
-
-  test_flutter:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: 'Install Flutter'
-        run: ./.github/workflows/scripts/install-flutter.sh stable
-      - name: 'Install Tools'
-        run: ./.github/workflows/scripts/install-tools.sh
-      - name: 'Bootstrap Workspace'
-        run: melos bootstrap
+      - name: 'Dart Test'
+        run: |
+          cd packages/stream_chat
+          flutter pub run test --coverage coverage/
+          format_coverage --lcov --in=coverage/ --out=lcov.info --packages=.packages --report-on=lib
       - name: 'Flutter Test'
         run: |
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-            flutter test
+            flutter test --coverage
+      - name: CodeCov
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+          path: packages/stream_chat/lcov.info
+          min_coverage: 50
+      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+          path: packages/stream_chat_persistence/coverage/lcov.info
+          min_coverage: 0.2
+      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+          path: packages/stream_chat_flutter_core/coverage/lcov.info
+          min_coverage: 4.5
+      - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+          path: packages/stream_chat_flutter/coverage/lcov.info
+          min_coverage: 16

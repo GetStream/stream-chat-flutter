@@ -10,6 +10,7 @@ class SharedDB {
   static Future<DelegatedDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
+    bool persistOnDisk = true,
   }) {
     throw 'Unsupported Platform';
   }

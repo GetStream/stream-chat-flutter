@@ -1,9 +1,10 @@
+import 'package:logging/logging.dart' show LogRecord;
+import 'package:meta/meta.dart';
 import 'package:mutex/mutex.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'db/moor_chat_database.dart';
 import 'db/shared/shared_db.dart';
-import 'package:logging/logging.dart' show LogRecord;
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
 enum ConnectionMode {
@@ -55,7 +56,8 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   ///```
   LogHandlerFunction logHandlerFunction;
 
-  MoorChatDatabase _db;
+  @visibleForTesting
+  MoorChatDatabase db;
   final Logger _logger;
   final ConnectionMode _connectionMode;
   final _mutex = ReadWriteMutex();
@@ -72,7 +74,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<T> readProtected<T>(Future<T> Function() f) async {
     T ret;
     await _mutex.protectRead(() async {
-      if (_db == null) {
+      if (db == null) {
         return;
       }
       ret = await f();
@@ -82,7 +84,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<void> connect(String userId) async {
-    if (_db != null) {
+    if (db != null) {
       throw Exception(
         'An instance of StreamChatDatabase is already connected.\n'
         'disconnect the previous instance before connecting again.',
@@ -91,11 +93,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     switch (_connectionMode) {
       case ConnectionMode.regular:
         _logger.info('Connecting on a regular isolate');
-        _db = MoorChatDatabase(userId);
+        db = MoorChatDatabase(userId);
         return;
       case ConnectionMode.background:
         _logger.info('Connecting on background isolate');
-        _db = SharedDB.constructMoorChatDatabase(userId);
+        db = SharedDB.constructMoorChatDatabase(userId);
         return;
     }
   }
@@ -104,7 +106,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<Event> getConnectionInfo() {
     return readProtected(() {
       _logger.info('getConnectionInfo');
-      return _db.connectionEventDao.connectionEvent;
+      return db.connectionEventDao.connectionEvent;
     });
   }
 
@@ -112,7 +114,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateConnectionInfo(Event event) {
     return readProtected(() {
       _logger.info('updateConnectionInfo');
-      return _db.connectionEventDao.updateConnectionEvent(event);
+      return db.connectionEventDao.updateConnectionEvent(event);
     });
   }
 
@@ -120,7 +122,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateLastSyncAt(DateTime lastSyncAt) {
     return readProtected(() {
       _logger.info('updateLastSyncAt');
-      return _db.connectionEventDao.updateLastSyncAt(lastSyncAt);
+      return db.connectionEventDao.updateLastSyncAt(lastSyncAt);
     });
   }
 
@@ -128,7 +130,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<DateTime> getLastSyncAt() {
     return readProtected(() {
       _logger.info('getLastSyncAt');
-      return _db.connectionEventDao.lastSyncAt;
+      return db.connectionEventDao.lastSyncAt;
     });
   }
 
@@ -136,7 +138,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteChannels(List<String> cids) {
     return readProtected(() {
       _logger.info('deleteChannels');
-      return _db.channelDao.deleteChannelByCids(cids);
+      return db.channelDao.deleteChannelByCids(cids);
     });
   }
 
@@ -144,7 +146,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<List<String>> getChannelCids() {
     return readProtected(() {
       _logger.info('getChannelCids');
-      return _db.channelDao.cids;
+      return db.channelDao.cids;
     });
   }
 
@@ -152,7 +154,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteMessageByIds(List<String> messageIds) {
     return readProtected(() {
       _logger.info('deleteMessageByIds');
-      return _db.messageDao.deleteMessageByIds(messageIds);
+      return db.messageDao.deleteMessageByIds(messageIds);
     });
   }
 
@@ -160,7 +162,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deletePinnedMessageByIds(List<String> messageIds) {
     return readProtected(() {
       _logger.info('deletePinnedMessageByIds');
-      return _db.pinnedMessageDao.deleteMessageByIds(messageIds);
+      return db.pinnedMessageDao.deleteMessageByIds(messageIds);
     });
   }
 
@@ -168,7 +170,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteMessageByCids(List<String> cids) {
     return readProtected(() {
       _logger.info('deleteMessageByCids');
-      return _db.messageDao.deleteMessageByCids(cids);
+      return db.messageDao.deleteMessageByCids(cids);
     });
   }
 
@@ -176,7 +178,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deletePinnedMessageByCids(List<String> cids) {
     return readProtected(() {
       _logger.info('deletePinnedMessageByCids');
-      return _db.pinnedMessageDao.deleteMessageByCids(cids);
+      return db.pinnedMessageDao.deleteMessageByCids(cids);
     });
   }
 
@@ -184,7 +186,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<List<Member>> getMembersByCid(String cid) {
     return readProtected(() {
       _logger.info('getMembersByCid');
-      return _db.memberDao.getMembersByCid(cid);
+      return db.memberDao.getMembersByCid(cid);
     });
   }
 
@@ -192,7 +194,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<ChannelModel> getChannelByCid(String cid) {
     return readProtected(() {
       _logger.info('getChannelByCid');
-      return _db.channelDao.getChannelByCid(cid);
+      return db.channelDao.getChannelByCid(cid);
     });
   }
 
@@ -203,7 +205,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }) {
     return readProtected(() {
       _logger.info('getMessagesByCid');
-      return _db.messageDao.getMessagesByCid(
+      return db.messageDao.getMessagesByCid(
         cid,
         messagePagination: messagePagination,
       );
@@ -217,7 +219,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }) {
     return readProtected(() {
       _logger.info('getPinnedMessagesByCid');
-      return _db.pinnedMessageDao.getMessagesByCid(
+      return db.pinnedMessageDao.getMessagesByCid(
         cid,
         messagePagination: messagePagination,
       );
@@ -228,7 +230,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<List<Read>> getReadsByCid(String cid) {
     return readProtected(() {
       _logger.info('getReadsByCid');
-      return _db.readDao.getReadsByCid(cid);
+      return db.readDao.getReadsByCid(cid);
     });
   }
 
@@ -236,7 +238,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<Map<String, List<Message>>> getChannelThreads(String cid) async {
     return readProtected(() async {
       _logger.info('getChannelThreads');
-      final messages = await _db.messageDao.getThreadMessages(cid);
+      final messages = await db.messageDao.getThreadMessages(cid);
       final messageByParentIdDictionary = <String, List<Message>>{};
       for (final message in messages) {
         final parentId = message.parentId;
@@ -256,7 +258,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }) {
     return readProtected(() async {
       _logger.info('getReplies');
-      return _db.messageDao.getThreadMessagesByParentId(
+      return db.messageDao.getThreadMessagesByParentId(
         parentId,
         options: options,
       );
@@ -271,7 +273,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }) async {
     return readProtected(() async {
       _logger.info('getChannelStates');
-      final channels = await _db.channelQueryDao.getChannels(
+      final channels = await db.channelQueryDao.getChannels(
         filter: filter,
         sort: sort,
         paginationParams: paginationParams,
@@ -288,7 +290,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   ) {
     return readProtected(() async {
       _logger.info('updateChannelQueries');
-      return _db.channelQueryDao.updateChannelQueries(
+      return db.channelQueryDao.updateChannelQueries(
         filter,
         cids,
         clearQueryCache,
@@ -300,7 +302,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateChannels(List<ChannelModel> channels) {
     return readProtected(() async {
       _logger.info('updateChannels');
-      return _db.channelDao.updateChannels(channels);
+      return db.channelDao.updateChannels(channels);
     });
   }
 
@@ -308,7 +310,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateMembers(String cid, List<Member> members) {
     return readProtected(() async {
       _logger.info('updateMembers');
-      return _db.memberDao.updateMembers(cid, members);
+      return db.memberDao.updateMembers(cid, members);
     });
   }
 
@@ -316,7 +318,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateMessages(String cid, List<Message> messages) {
     return readProtected(() async {
       _logger.info('updateMessages');
-      return _db.messageDao.updateMessages(cid, messages);
+      return db.messageDao.updateMessages(cid, messages);
     });
   }
 
@@ -324,7 +326,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updatePinnedMessages(String cid, List<Message> messages) {
     return readProtected(() async {
       _logger.info('updatePinnedMessages');
-      return _db.pinnedMessageDao.updateMessages(cid, messages);
+      return db.pinnedMessageDao.updateMessages(cid, messages);
     });
   }
 
@@ -332,7 +334,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateReactions(List<Reaction> reactions) {
     return readProtected(() async {
       _logger.info('updateReactions');
-      return _db.reactionDao.updateReactions(reactions);
+      return db.reactionDao.updateReactions(reactions);
     });
   }
 
@@ -340,7 +342,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateReads(String cid, List<Read> reads) {
     return readProtected(() async {
       _logger.info('updateReads');
-      return _db.readDao.updateReads(cid, reads);
+      return db.readDao.updateReads(cid, reads);
     });
   }
 
@@ -348,7 +350,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateUsers(List<User> users) {
     return readProtected(() async {
       _logger.info('updateUsers');
-      return _db.userDao.updateUsers(users);
+      return db.userDao.updateUsers(users);
     });
   }
 
@@ -356,7 +358,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteReactionsByMessageId(List<String> messageIds) {
     return readProtected(() async {
       _logger.info('deleteReactionsByMessageId');
-      return _db.reactionDao.deleteReactionsByMessageIds(messageIds);
+      return db.reactionDao.deleteReactionsByMessageIds(messageIds);
     });
   }
 
@@ -364,14 +366,14 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> deleteMembersByCids(List<String> cids) {
     return readProtected(() async {
       _logger.info('deleteMembersByCids');
-      return _db.memberDao.deleteMemberByCids(cids);
+      return db.memberDao.deleteMemberByCids(cids);
     });
   }
 
   @override
   Future<void> updateChannelStates(List<ChannelState> channelStates) {
     return readProtected(() async {
-      return _db.transaction(() async {
+      return db.transaction(() async {
         await super.updateChannelStates(channelStates);
       });
     });
@@ -381,18 +383,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> disconnect({bool flush = false}) async {
     return _mutex.protectWrite(() async {
       _logger.info('disconnect');
-      if (_db != null) {
+      if (db != null) {
         _logger.info('Disconnecting');
         if (flush) {
           _logger.info('Flushing');
-          await _db.batch((batch) {
-            _db.allTables.forEach((table) {
-              _db.delete(table).go();
+          await db.batch((batch) {
+            db.allTables.forEach((table) {
+              db.delete(table).go();
             });
           });
         }
-        await _db.disconnect();
-        _db = null;
+        await db.disconnect();
+        db = null;
       }
     });
   }

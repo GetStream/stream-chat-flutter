@@ -2,21 +2,23 @@ import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import '../entity/entity.dart';
-import '../dao/dao.dart';
 import '../converter/converter.dart';
+import '../dao/dao.dart';
+import '../entity/entity.dart';
 import 'shared/shared_db.dart';
 
 part 'moor_chat_database.g.dart';
 
 LazyDatabase _openConnection(
   String userId, {
-  logStatements = false,
+  bool logStatements = false,
+  bool persistOnDisk = true,
 }) {
   return LazyDatabase(() async {
     return await SharedDB.constructDatabase(
       userId,
       logStatements: logStatements,
+      persistOnDisk: persistOnDisk,
     );
   });
 }
@@ -48,9 +50,11 @@ class MoorChatDatabase extends _$MoorChatDatabase {
   MoorChatDatabase(
     this._userId, {
     logStatements = false,
+    bool persistOnDisk = true,
   }) : super(_openConnection(
           _userId,
           logStatements: logStatements,
+          persistOnDisk: persistOnDisk,
         ));
 
   /// Instantiate a new database instance
