@@ -272,7 +272,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                         )..chatPersistenceClient = chatPersistentClient;
 
                         try {
-                          await client.setUser(
+                          await client.connectUser(
                             User(id: userId, extraData: {
                               'name': username,
                             }),
@@ -292,6 +292,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             key: kStreamToken,
                             value: userToken,
                           );
+                          await client.disconnect();
                         } catch (e) {
                           var errorText = 'Error connecting, retry';
                           if (e is Map) {
