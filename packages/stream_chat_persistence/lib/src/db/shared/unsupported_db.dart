@@ -10,7 +10,6 @@ class SharedDB {
   static Future<DelegatedDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
-    bool persistOnDisk = true,
   }) {
     throw UnsupportedError(
         'No implementation of the constructDatabase api provided');

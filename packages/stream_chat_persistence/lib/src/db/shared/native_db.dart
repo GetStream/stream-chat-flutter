@@ -21,20 +21,17 @@ class SharedDB {
   static Future<VmDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
-    bool persistOnDisk = true,
   }) async {
     final dbName = 'db_$userId';
-    if (persistOnDisk) {
-      if (Platform.isIOS || Platform.isAndroid) {
-        final dir = await getApplicationDocumentsDirectory();
-        final path = join(dir.path, '$dbName.sqlite');
-        final file = File(path);
-        return VmDatabase(file, logStatements: logStatements);
-      }
-      if (Platform.isMacOS || Platform.isLinux) {
-        final file = File('$dbName.sqlite');
-        return VmDatabase(file, logStatements: logStatements);
-      }
+    if (Platform.isIOS || Platform.isAndroid) {
+      final dir = await getApplicationDocumentsDirectory();
+      final path = join(dir.path, '$dbName.sqlite');
+      final file = File(path);
+      return VmDatabase(file, logStatements: logStatements);
+    }
+    if (Platform.isMacOS || Platform.isLinux) {
+      final file = File('$dbName.sqlite');
+      return VmDatabase(file, logStatements: logStatements);
     }
     return VmDatabase.memory(logStatements: logStatements);
   }
