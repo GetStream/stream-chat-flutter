@@ -12,12 +12,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 
@@ -35,6 +35,8 @@ typedef AttachmentThumbnailBuilder = Widget Function(
 enum ActionsLocation {
   left,
   right,
+  leftInside,
+  rightInside,
 }
 
 enum DefaultAttachmentTypes {
@@ -122,6 +124,7 @@ class MessageInput extends StatefulWidget {
     this.hideSendAsDm = false,
     this.idleSendButton,
     this.activeSendButton,
+    this.showCommandsButton = true,
   }) : super(key: key);
 
   /// Message to edit
@@ -148,6 +151,9 @@ class MessageInput extends StatefulWidget {
 
   /// If true the attachments button will not be displayed
   final bool disableAttachments;
+
+  /// Use this property to hide/show the commands button
+  final bool showCommandsButton;
 
   /// Hide send as dm checkbox
   final bool hideSendAsDm;
@@ -336,12 +342,11 @@ class MessageInputState extends State<MessageInput> {
       direction: Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (!_commandEnabled) _buildExpandActionsButton(),
-        if (widget.actionsLocation == ActionsLocation.left)
-          ...widget.actions ?? [],
+        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.left)
+          _buildExpandActionsButton(),
         _buildTextInput(context),
-        if (widget.actionsLocation == ActionsLocation.right)
-          ...widget.actions ?? [],
+        if (!_commandEnabled && widget.actionsLocation == ActionsLocation.right)
+          _buildExpandActionsButton(),
         if (widget.sendButtonLocation == SendButtonLocation.outside)
           _animateSendButton(context),
       ],
@@ -421,22 +426,20 @@ class MessageInputState extends State<MessageInput> {
             child: widget.activeSendButton,
           )
         : _buildSendButton(context);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: AnimatedCrossFade(
-        crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
-            ? CrossFadeState.showFirst
-            : CrossFadeState.showSecond,
-        firstChild: sendButton,
-        secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
-        duration:
-            StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
-        alignment: Alignment.center,
-      ),
+    return AnimatedCrossFade(
+      crossFadeState: (_messageIsPresent || _attachments.isNotEmpty)
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      firstChild: sendButton,
+      secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
+      duration:
+          StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
+      alignment: Alignment.center,
     );
   }
 
   Widget _buildExpandActionsButton() {
+    print('_actionsShrunk: ${_actionsShrunk}');
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: AnimatedCrossFade(
@@ -457,10 +460,12 @@ class MessageInputState extends State<MessageInput> {
         ),
         secondChild: FittedBox(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
+            children: <Widget>[
               if (!widget.disableAttachments) _buildAttachmentButton(),
-              if (widget.editMessage == null &&
+              if (widget.showCommandsButton &&
+                  widget.editMessage == null &&
                   StreamChannel.of(context)
                           .channel
                           ?.config
@@ -468,6 +473,7 @@ class MessageInputState extends State<MessageInput> {
                           ?.isNotEmpty ==
                       true)
                 _buildCommandButton(),
+              ...widget.actions ?? [],
             ].insertBetween(const SizedBox(width: 8)),
           ),
         ),
@@ -565,8 +571,6 @@ class MessageInputState extends State<MessageInput> {
         ),
       ),
       contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
-      prefixIconConstraints: BoxConstraints.tight(Size(78, 24)),
-      suffixIconConstraints: BoxConstraints.tight(Size(40, 40)),
       prefixIcon: _commandEnabled
           ? Container(
               decoration: BoxDecoration(
@@ -594,8 +598,18 @@ class MessageInputState extends State<MessageInput> {
                 ],
               ),
             )
-          : null,
+          : (widget.actionsLocation == ActionsLocation.leftInside
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildExpandActionsButton(),
+                  ],
+                )
+              : null),
       suffixIcon: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (_commandEnabled)
             IconButton(
@@ -610,6 +624,9 @@ class MessageInputState extends State<MessageInput> {
                 setState(() => _commandEnabled = false);
               },
             ),
+          if (!_commandEnabled &&
+              widget.actionsLocation == ActionsLocation.rightInside)
+            _buildExpandActionsButton(),
           if (widget.sendButtonLocation == SendButtonLocation.inside)
             _animateSendButton(context),
         ],
@@ -619,7 +636,13 @@ class MessageInputState extends State<MessageInput> {
 
   Timer _debounce;
 
+  String _previousValue;
   void _onChanged(BuildContext context, String s) {
+    if (s == _previousValue) {
+      return;
+    }
+    _previousValue = s;
+
     if (_debounce?.isActive == true) _debounce.cancel();
     _debounce = Timer(
       const Duration(milliseconds: 350),
@@ -631,7 +654,11 @@ class MessageInputState extends State<MessageInput> {
 
         setState(() {
           _messageIsPresent = s.trim().isNotEmpty;
-          _actionsShrunk = s.trim().isNotEmpty;
+          _actionsShrunk = s.trim().isNotEmpty &&
+              ((widget.actions?.length ?? 0) +
+                      (widget.showCommandsButton ? 1 : 0) +
+                      (widget.disableAttachments ? 0 : 1) >
+                  1);
         });
 
         _commandsOverlay?.remove();
@@ -1965,24 +1992,31 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildIdleSendButton(BuildContext context) {
-    return StreamSvgIcon(
-      assetName: _getIdleSendIcon(),
-      color: StreamChatTheme.of(context).messageInputTheme.sendButtonIdleColor,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: StreamSvgIcon(
+        assetName: _getIdleSendIcon(),
+        color:
+            StreamChatTheme.of(context).messageInputTheme.sendButtonIdleColor,
+      ),
     );
   }
 
   Widget _buildSendButton(BuildContext context) {
-    return IconButton(
-      onPressed: sendMessage,
-      padding: const EdgeInsets.all(0),
-      splashRadius: 24,
-      constraints: BoxConstraints.tightFor(
-        height: 24,
-        width: 24,
-      ),
-      icon: StreamSvgIcon(
-        assetName: _getSendIcon(),
-        color: StreamChatTheme.of(context).messageInputTheme.sendButtonColor,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: IconButton(
+        onPressed: sendMessage,
+        padding: const EdgeInsets.all(0),
+        splashRadius: 24,
+        constraints: BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
+        ),
+        icon: StreamSvgIcon(
+          assetName: _getSendIcon(),
+          color: StreamChatTheme.of(context).messageInputTheme.sendButtonColor,
+        ),
       ),
     );
   }
