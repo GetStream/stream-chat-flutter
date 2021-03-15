@@ -571,35 +571,39 @@ class MessageInputState extends State<MessageInput> {
       ),
       contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
       prefixIcon: _commandEnabled
-          ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                constraints: BoxConstraints.tight(Size(78, 24)),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: theme.colorTheme.accentBlue,
-                ),
-                margin: const EdgeInsets.only(right: 4, left: 8),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    StreamSvgIcon.lightning(
-                      color: Colors.white,
-                      size: 16.0,
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    constraints: BoxConstraints.tight(Size(64, 24)),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: theme.colorTheme.accentBlue,
                     ),
-                    Text(
-                      _chosenCommand?.name?.toUpperCase() ?? '',
-                      style: StreamChatTheme.of(context)
-                          .textTheme
-                          .footnoteBold
-                          .copyWith(
-                            color: Colors.white,
-                          ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        StreamSvgIcon.lightning(
+                          color: Colors.white,
+                          size: 16.0,
+                        ),
+                        Text(
+                          _chosenCommand?.name?.toUpperCase() ?? '',
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .footnoteBold
+                              .copyWith(
+                                color: Colors.white,
+                              ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             )
           : (widget.actionsLocation == ActionsLocation.leftInside
               ? Row(
@@ -610,22 +614,27 @@ class MessageInputState extends State<MessageInput> {
                   ],
                 )
               : null),
+      suffixIconConstraints: BoxConstraints.tightFor(height: 40),
+      prefixIconConstraints: BoxConstraints.tightFor(height: 40),
       suffixIcon: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (_commandEnabled)
-            IconButton(
-              icon: StreamSvgIcon.closeSmall(),
-              splashRadius: 24,
-              padding: const EdgeInsets.all(0),
-              constraints: BoxConstraints.tightFor(
-                height: 24,
-                width: 24,
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                icon: StreamSvgIcon.closeSmall(),
+                splashRadius: 24,
+                padding: const EdgeInsets.all(0),
+                constraints: BoxConstraints.tightFor(
+                  height: 24,
+                  width: 24,
+                ),
+                onPressed: () {
+                  setState(() => _commandEnabled = false);
+                },
               ),
-              onPressed: () {
-                setState(() => _commandEnabled = false);
-              },
             ),
           if (!_commandEnabled &&
               widget.actionsLocation == ActionsLocation.rightInside)
@@ -1714,13 +1723,19 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandButton() {
+    final s = textEditingController.text.trim();
+
     return IconButton(
       icon: StreamSvgIcon.lightning(
-        color: _commandsOverlay != null
-            ? StreamChatTheme.of(context).messageInputTheme.actionButtonColor
-            : StreamChatTheme.of(context)
-                .messageInputTheme
-                .actionButtonIdleColor,
+        color: s.isNotEmpty
+            ? StreamChatTheme.of(context).colorTheme.greyGainsboro
+            : (_commandsOverlay != null
+                ? StreamChatTheme.of(context)
+                    .messageInputTheme
+                    .actionButtonColor
+                : StreamChatTheme.of(context)
+                    .messageInputTheme
+                    .actionButtonIdleColor),
       ),
       padding: const EdgeInsets.all(0),
       constraints: BoxConstraints.tightFor(
@@ -1741,7 +1756,9 @@ class MessageInputState extends State<MessageInput> {
         if (_commandsOverlay == null) {
           setState(() {
             _commandsOverlay = _buildCommandsOverlayEntry();
-            Overlay.of(context)?.insert(_commandsOverlay);
+            if (_commandsOverlay != null) {
+              Overlay.of(context).insert(_commandsOverlay);
+            }
           });
         } else {
           setState(() {
