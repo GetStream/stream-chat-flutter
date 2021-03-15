@@ -571,30 +571,34 @@ class MessageInputState extends State<MessageInput> {
       ),
       contentPadding: const EdgeInsets.fromLTRB(16, 12, 13, 11),
       prefixIcon: _commandEnabled
-          ? Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: theme.colorTheme.accentBlue,
-              ),
-              margin: const EdgeInsets.only(right: 4, left: 8),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  StreamSvgIcon.lightning(
-                    color: Colors.white,
-                    size: 16.0,
-                  ),
-                  Text(
-                    _chosenCommand?.name?.toUpperCase() ?? '',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .footnoteBold
-                        .copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                ],
+          ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                constraints: BoxConstraints.tight(Size(78, 24)),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: theme.colorTheme.accentBlue,
+                ),
+                margin: const EdgeInsets.only(right: 4, left: 8),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    StreamSvgIcon.lightning(
+                      color: Colors.white,
+                      size: 16.0,
+                    ),
+                    Text(
+                      _chosenCommand?.name?.toUpperCase() ?? '',
+                      style: StreamChatTheme.of(context)
+                          .textTheme
+                          .footnoteBold
+                          .copyWith(
+                            color: Colors.white,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             )
           : (widget.actionsLocation == ActionsLocation.leftInside
@@ -1737,7 +1741,7 @@ class MessageInputState extends State<MessageInput> {
         if (_commandsOverlay == null) {
           setState(() {
             _commandsOverlay = _buildCommandsOverlayEntry();
-            Overlay.of(context).insert(_commandsOverlay);
+            Overlay.of(context)?.insert(_commandsOverlay);
           });
         } else {
           setState(() {
