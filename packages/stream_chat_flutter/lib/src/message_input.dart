@@ -1904,11 +1904,11 @@ class MessageInputState extends State<MessageInput> {
 
     if (file == null) return;
 
-    final mimeType = file.name?.mimeType;
+    final mimeType = file.name?.mimeType ?? file.path.split('/').last.mimeType;
 
     final extraDataMap = <String, dynamic>{};
 
-    if (mimeType.type == 'video' || mimeType.type == 'image') {
+    if (mimeType?.type == 'video' || mimeType?.type == 'image') {
       attachmentType = mimeType.type;
     } else {
       attachmentType = 'file';
