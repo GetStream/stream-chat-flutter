@@ -1021,15 +1021,19 @@ class _MessageListViewState extends State<MessageListView> {
         !message.isSystem &&
         !message.isEphemeral &&
         widget.onMessageSwiped != null) {
-      child = Swipeable(
-        onSwipeEnd: () {
-          FocusScope.of(context).unfocus();
-          widget.onMessageSwiped(message);
-        },
-        backgroundIcon: StreamSvgIcon.reply(
-          color: StreamChatTheme.of(context).colorTheme.accentBlue,
+      child = Container(
+        decoration: BoxDecoration(),
+        clipBehavior: Clip.hardEdge,
+        child: Swipeable(
+          onSwipeEnd: () {
+            FocusScope.of(context).unfocus();
+            widget.onMessageSwiped(message);
+          },
+          backgroundIcon: StreamSvgIcon.reply(
+            color: StreamChatTheme.of(context).colorTheme.accentBlue,
+          ),
+          child: child,
         ),
-        child: Container(child: child),
       );
     }
 
