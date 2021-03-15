@@ -447,8 +447,15 @@ class MessageInputState extends State<MessageInput> {
             : CrossFadeState.showSecond,
         firstChild: IconButton(
           onPressed: () => setState(() => _actionsShrunk = false),
-          icon: StreamSvgIcon.emptyCircleLeft(
-            color: StreamChatTheme.of(context).colorTheme.accentBlue,
+          icon: Transform.rotate(
+            alignment: Alignment.center,
+            angle: (widget.actionsLocation == ActionsLocation.right ||
+                    widget.actionsLocation == ActionsLocation.rightInside)
+                ? pi
+                : 0,
+            child: StreamSvgIcon.emptyCircleLeft(
+              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+            ),
           ),
           padding: const EdgeInsets.all(0),
           constraints: BoxConstraints.tightFor(
