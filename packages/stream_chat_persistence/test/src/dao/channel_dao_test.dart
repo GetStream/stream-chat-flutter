@@ -88,15 +88,6 @@ void main() {
     expect(updatedCids, [cid]);
   });
 
-//   /// Updates all the channels using the new [channelList] data
-//   Future<void> updateChannels(List<ChannelModel> channelList) => batch(
-//         (it) => it.insertAll(
-//           channels,
-//           channelList.map((c) => c.toEntity()).toList(),
-//           mode: InsertMode.insertOrReplace,
-//         ),
-//       );
-
   test('updateChannels', () async {
     const id = 'testId';
     const cid = 'testCid';
