@@ -932,6 +932,7 @@ class _ChannelPageState extends State<ChannelPage> {
           ),
           MessageInput(
             focusNode: _focusNode,
+            actionsLocation: ActionsLocation.rightInside,
             quotedMessage: _quotedMessage,
             onQuotedMessageCleared: () {
               setState(() => _quotedMessage = null);

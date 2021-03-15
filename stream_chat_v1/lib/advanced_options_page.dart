@@ -75,7 +75,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value.isEmpty) {
                         setState(() {
-                          _apiKeyError = 'Please enter the Chat API Key';
+                          _apiKeyError =
+                              'Please enter the Chat API Key'.toUpperCase();
                         });
                         return _apiKeyError;
                       }
@@ -101,8 +102,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor:
                           StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       filled: true,
-                      labelText:
-                          'Chat API Key ${_apiKeyError != null ? ': $_apiKeyError' : ''}',
+                      labelText: _apiKeyError != null
+                          ? 'CHAT API KEY: $_apiKeyError'
+                          : 'Chat API Key',
                     ),
                     textInputAction: TextInputAction.next,
                   ),
@@ -119,7 +121,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value.isEmpty) {
                         setState(() {
-                          _userIdError = 'Please enter the User ID';
+                          _userIdError =
+                              'Please enter the User ID'.toUpperCase();
                         });
                         return _userIdError;
                       }
@@ -146,8 +149,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor:
                           StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       filled: true,
-                      labelText:
-                          'User ID ${_userIdError != null ? ': $_userIdError' : ''}',
+                      labelText: _userIdError != null
+                          ? 'USER ID: $_userIdError'
+                          : 'User ID',
                     ),
                   ),
                   SizedBox(height: 8),
@@ -163,7 +167,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     validator: (value) {
                       if (value.isEmpty) {
                         setState(() {
-                          _userTokenError = 'Please enter the user token';
+                          _userTokenError =
+                              'Please enter the user token'.toUpperCase();
                         });
                         return _userTokenError;
                       }
@@ -190,8 +195,9 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       fillColor:
                           StreamChatTheme.of(context).colorTheme.whiteSmoke,
                       filled: true,
-                      labelText:
-                          'User Token ${_userTokenError != null ? ': $_userTokenError' : ''}',
+                      labelText: _userTokenError != null
+                          ? 'USER TOKEN: $_userTokenError'
+                          : 'User Token',
                     ),
                   ),
                   SizedBox(height: 8),
@@ -300,7 +306,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                           }
                           Navigator.pop(context);
                           setState(() {
-                            _apiKeyError = errorText;
+                            _apiKeyError = errorText.toUpperCase();
                           });
                           loading = false;
                           await client.disconnect();
