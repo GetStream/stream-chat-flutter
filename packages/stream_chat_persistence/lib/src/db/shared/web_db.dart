@@ -1,7 +1,7 @@
 import 'package:moor/moor_web.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 
-import '../moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
 /// A Helper class to construct new instances of [MoorChatDatabase] specifically
 /// for Web applications

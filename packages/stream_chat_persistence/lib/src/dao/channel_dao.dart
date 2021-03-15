@@ -3,7 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-import '../mapper/mapper.dart';
+import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'channel_dao.g.dart';
 
@@ -15,15 +15,14 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
   ChannelDao(MoorChatDatabase db) : super(db);
 
   /// Get channel by cid
-  Future<ChannelModel> getChannelByCid(String cid) async {
-    return (select(channels)..where((c) => c.cid.equals(cid))).join([
-      leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
-    ]).map((rows) {
-      final channel = rows.readTable(channels);
-      final createdBy = rows.readTable(users);
-      return channel.toChannelModel(createdBy: createdBy?.toUser());
-    }).getSingle();
-  }
+  Future<ChannelModel> getChannelByCid(String cid) async =>
+      (select(channels)..where((c) => c.cid.equals(cid))).join([
+        leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
+      ]).map((rows) {
+        final channel = rows.readTable(channels);
+        final createdBy = rows.readTable(users);
+        return channel.toChannelModel(createdBy: createdBy?.toUser());
+      }).getSingle();
 
   /// Delete all channels by matching cid in [cids]
   ///
@@ -31,27 +30,22 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
   /// 1. Channel Reads
   /// 2. Channel Members
   /// 3. Channel Messages -> Messages Reactions
-  Future<void> deleteChannelByCids(List<String> cids) async {
-    return (delete(channels)..where((tbl) => tbl.cid.isIn(cids))).go();
-  }
+  Future<void> deleteChannelByCids(List<String> cids) async =>
+      (delete(channels)..where((tbl) => tbl.cid.isIn(cids))).go();
 
   /// Get the channel cids saved in the storage
-  Future<List<String>> get cids {
-    return (select(channels)
-          ..orderBy([(c) => OrderingTerm.desc(c.lastMessageAt)])
-          ..limit(250))
-        .map((c) => c.cid)
-        .get();
-  }
+  Future<List<String>> get cids => (select(channels)
+        ..orderBy([(c) => OrderingTerm.desc(c.lastMessageAt)])
+        ..limit(250))
+      .map((c) => c.cid)
+      .get();
 
   /// Updates all the channels using the new [channelList] data
-  Future<void> updateChannels(List<ChannelModel> channelList) {
-    return batch(
-      (it) => it.insertAll(
-        channels,
-        channelList.map((c) => c.toEntity()).toList(),
-        mode: InsertMode.insertOrReplace,
-      ),
-    );
-  }
+  Future<void> updateChannels(List<ChannelModel> channelList) => batch(
+        (it) => it.insertAll(
+          channels,
+          channelList.map((c) => c.toEntity()).toList(),
+          mode: InsertMode.insertOrReplace,
+        ),
+      );
 }

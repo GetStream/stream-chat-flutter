@@ -12,70 +12,66 @@ extension PinnedMessageEntityX on PinnedMessageEntity {
     List<Reaction> latestReactions,
     List<Reaction> ownReactions,
     Message quotedMessage,
-  }) {
-    return Message(
-      shadowed: shadowed,
-      latestReactions: latestReactions,
-      ownReactions: ownReactions,
-      attachments: attachments?.map((it) {
-        final json = jsonDecode(it);
-        return Attachment.fromData(json);
-      })?.toList(),
-      createdAt: createdAt,
-      extraData: extraData,
-      updatedAt: updatedAt,
-      id: id,
-      type: type,
-      status: status,
-      command: command,
-      parentId: parentId,
-      quotedMessageId: quotedMessageId,
-      quotedMessage: quotedMessage,
-      reactionCounts: reactionCounts,
-      reactionScores: reactionScores,
-      replyCount: replyCount,
-      showInChannel: showInChannel,
-      text: messageText,
-      user: user,
-      deletedAt: deletedAt,
-      pinned: pinned,
-      pinnedAt: pinnedAt,
-      pinExpires: pinExpires,
-      pinnedBy: pinnedBy,
-    );
-  }
+  }) =>
+      Message(
+        shadowed: shadowed,
+        latestReactions: latestReactions,
+        ownReactions: ownReactions,
+        attachments: attachments?.map((it) {
+          final json = jsonDecode(it);
+          return Attachment.fromData(json);
+        })?.toList(),
+        createdAt: createdAt,
+        extraData: extraData,
+        updatedAt: updatedAt,
+        id: id,
+        type: type,
+        status: status,
+        command: command,
+        parentId: parentId,
+        quotedMessageId: quotedMessageId,
+        quotedMessage: quotedMessage,
+        reactionCounts: reactionCounts,
+        reactionScores: reactionScores,
+        replyCount: replyCount,
+        showInChannel: showInChannel,
+        text: messageText,
+        user: user,
+        deletedAt: deletedAt,
+        pinned: pinned,
+        pinnedAt: pinnedAt,
+        pinExpires: pinExpires,
+        pinnedBy: pinnedBy,
+      );
 }
 
 /// Useful mapping functions for [Message]
 extension PMessageX on Message {
   /// Maps a [Message] into [PinnedMessageEntity]
-  PinnedMessageEntity toPinnedEntity({String cid}) {
-    return PinnedMessageEntity(
-      id: id,
-      attachments: attachments?.map((it) {
-        return jsonEncode(it.toData());
-      })?.toList(),
-      channelCid: cid,
-      type: type,
-      parentId: parentId,
-      quotedMessageId: quotedMessageId,
-      command: command,
-      createdAt: createdAt,
-      shadowed: shadowed,
-      showInChannel: showInChannel,
-      replyCount: replyCount,
-      reactionScores: reactionScores,
-      reactionCounts: reactionCounts,
-      status: status,
-      updatedAt: updatedAt,
-      extraData: extraData,
-      userId: user?.id,
-      deletedAt: deletedAt,
-      messageText: text,
-      pinned: pinned,
-      pinnedAt: pinnedAt,
-      pinExpires: pinExpires,
-      pinnedByUserId: pinnedBy?.id,
-    );
-  }
+  PinnedMessageEntity toPinnedEntity({String cid}) => PinnedMessageEntity(
+        id: id,
+        attachments:
+            attachments?.map((it) => jsonEncode(it.toData()))?.toList(),
+        channelCid: cid,
+        type: type,
+        parentId: parentId,
+        quotedMessageId: quotedMessageId,
+        command: command,
+        createdAt: createdAt,
+        shadowed: shadowed,
+        showInChannel: showInChannel,
+        replyCount: replyCount,
+        reactionScores: reactionScores,
+        reactionCounts: reactionCounts,
+        status: status,
+        updatedAt: updatedAt,
+        extraData: extraData,
+        userId: user?.id,
+        deletedAt: deletedAt,
+        messageText: text,
+        pinned: pinned,
+        pinnedAt: pinnedAt,
+        pinExpires: pinExpires,
+        pinnedByUserId: pinnedBy?.id,
+      );
 }
