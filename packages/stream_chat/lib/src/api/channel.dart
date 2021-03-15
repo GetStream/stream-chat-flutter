@@ -1209,9 +1209,11 @@ class ChannelClientState {
   ChannelClientState(
     this._channel,
     ChannelState channelState,
-  ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) {
-          _channel?._client?.chatPersistenceClient?.updateChannelState(state);
-        }).debounced(const Duration(seconds: 1)) {
+    //ignore: unnecessary_parenthesis
+  ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) =>
+                _channel?._client?.chatPersistenceClient
+                    ?.updateChannelState(state))
+            .debounced(const Duration(seconds: 1)) {
     retryQueue = RetryQueue(
       channel: _channel,
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
