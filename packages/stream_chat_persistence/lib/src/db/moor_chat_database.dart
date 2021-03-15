@@ -13,15 +13,12 @@ LazyDatabase _openConnection(
   String userId, {
   bool logStatements = false,
   bool persistOnDisk = true,
-}) {
-  return LazyDatabase(() async {
-    return await SharedDB.constructDatabase(
-      userId,
-      logStatements: logStatements,
-      persistOnDisk: persistOnDisk,
-    );
-  });
-}
+}) =>
+    LazyDatabase(() async => SharedDB.constructDatabase(
+          userId,
+          logStatements: logStatements,
+          persistOnDisk: persistOnDisk,
+        ));
 
 /// A chat database implemented using moor
 @UseMoor(tables: [

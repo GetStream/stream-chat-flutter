@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
-import '../moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
 /// A Helper class to construct new instances of [MoorChatDatabase] specifically
 /// for native platform applications
@@ -40,12 +40,10 @@ class SharedDB {
   }
 
   static void _startBackground(_IsolateStartRequest request) {
-    final executor = LazyDatabase(() async {
-      return VmDatabase(
-        File(request.targetPath),
-        logStatements: request.logStatements,
-      );
-    });
+    final executor = LazyDatabase(() async => VmDatabase(
+          File(request.targetPath),
+          logStatements: request.logStatements,
+        ));
     final moorIsolate = MoorIsolate.inCurrent(
       () => DatabaseConnection.fromExecutor(executor),
     );
@@ -69,7 +67,7 @@ class SharedDB {
       ),
     );
 
-    return (await receivePort.first as MoorIsolate);
+    return await receivePort.first as MoorIsolate;
   }
 
   /// Returns a new instance of [MoorChatDatabase] using the factory constructor
@@ -84,7 +82,7 @@ class SharedDB {
     return MoorChatDatabase.connect(
       userId,
       DatabaseConnection.delayed(Future(() async {
-        MoorIsolate isolate = await _createMoorIsolate(
+        final isolate = await _createMoorIsolate(
           dbName,
           logStatements: logStatements,
         );
@@ -95,13 +93,13 @@ class SharedDB {
 }
 
 class _IsolateStartRequest {
-  final SendPort sendMoorIsolate;
-  final String targetPath;
-  final bool logStatements;
-
   const _IsolateStartRequest(
     this.sendMoorIsolate,
     this.targetPath, {
     this.logStatements = false,
   });
+
+  final SendPort sendMoorIsolate;
+  final String targetPath;
+  final bool logStatements;
 }
