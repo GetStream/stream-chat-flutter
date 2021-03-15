@@ -107,10 +107,11 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                         return Text(
                           _getChannelName(
-                              2 * MediaQuery.of(context).size.width / 3,
-                              members: snapshot.data,
-                              extraData: state.data.channel.extraData,
-                              maxFontSize: 16.0),
+                            2 * MediaQuery.of(context).size.width / 3,
+                            members: snapshot.data,
+                            extraData: state.data.channel.extraData,
+                            maxFontSize: 16.0,
+                          ),
                           style: TextStyle(
                             color: StreamChatTheme.of(context).colorTheme.black,
                             fontSize: 16,
@@ -376,8 +377,12 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     child: StreamSvgIcon.closeSmall(),
                     onTap: () {
                       setState(() {
-                        _nameController.text =
-                            _getChannelName(MediaQuery.of(context).size.width);
+                        _nameController.text = _getChannelName(
+                          2 * MediaQuery.of(context).size.width / 3,
+                          members: channel.state.members,
+                          extraData: channel.extraData,
+                          maxFontSize: 16.0,
+                        );
                         _focusNode.unfocus();
                       });
                     },
@@ -996,8 +1001,12 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     );
   }
 
-  String _getChannelName(double width,
-      {List<Member> members, Map extraData, double maxFontSize}) {
+  String _getChannelName(
+    double width, {
+    List<Member> members,
+    Map extraData,
+    double maxFontSize,
+  }) {
     String title;
     var client = StreamChat.of(context);
     if (extraData['name'] == null) {
