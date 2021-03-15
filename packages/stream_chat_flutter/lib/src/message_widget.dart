@@ -913,7 +913,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _parseAttachments() {
-    Map<String, List<Attachment>> attachmentGroups = {};
+    Map attachmentGroups = <String, List<Attachment>>{};
 
     widget.message.attachments
         .where((element) => element.ogScrapeUrl == null)
@@ -925,7 +925,7 @@ class _MessageWidgetState extends State<MessageWidget>
       attachmentGroups[e.type].add(e);
     });
 
-    List<Widget> attachmentList = [];
+    List attachmentList = <Widget>[];
 
     attachmentGroups.forEach((type, attachments) {
       final attachmentBuilder = widget.attachmentBuilders[type];

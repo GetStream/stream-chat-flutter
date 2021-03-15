@@ -1,10 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 import '../full_screen_media.dart';
 import '../stream_chat_theme.dart';
