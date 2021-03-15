@@ -13,10 +13,20 @@ lane :match_me do
     type: "adhoc",
     app_identifier: [
         "io.getstream.flutter",
-        "io.getstream.flutter.Notifications"
     ],
     readonly: is_ci,
     force_for_new_devices: true
+  )
+end
+
+desc "Installs all Certs and Profiles necessary for appstore"
+lane :match_appstore do
+  match(
+    type: "appstore",
+    app_identifier: [
+        "io.getstream.flutter",
+    ],
+    readonly: is_ci
   )
 end
 
@@ -41,6 +51,39 @@ platform :ios do
         firebase_app_distribution(
             app: "1:674907137625:ios:cafb9fb076a453c4d7f348",
             groups: "ios-stream-testers"
+        )
+    end
+end
+
+platform :ios do
+    desc "Deploy build to TestFlight"
+    lane :deploy_to_testflight do
+        match_appstore
+
+        settings_to_override = {
+          :BUNDLE_IDENTIFIER => "io.getstream.flutter",
+          :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.flutter"
+        }
+
+        gym(
+            workspace: "./Runner.xcworkspace",
+            scheme: "Runner",
+            export_method: "app-store",
+            export_options: "./fastlane/testflight_gym_export_options.plist",
+            silent: true,
+            clean: true,
+            xcargs: settings_to_override,
+            include_symbols: true,
+            output_directory: "./dist",
+        )
+
+        message = changelog_from_git_commits(commits_count: 10)
+
+        upload_to_testflight(
+            groups: ['Public'],
+            distribute_external: true,
+            changelog: message,
+            reject_build_waiting_for_review: true
         )
     end
 end

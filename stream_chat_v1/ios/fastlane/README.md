@@ -20,6 +20,11 @@ or alternatively using `brew install fastlane`
 fastlane match_me
 ```
 Installs all Certs and Profiles necessary for development and ad-hoc
+### match_appstore
+```
+fastlane match_appstore
+```
+Installs all Certs and Profiles necessary for appstore
 
 ----
 
@@ -29,6 +34,11 @@ Installs all Certs and Profiles necessary for development and ad-hoc
 fastlane ios deploy_to_firebase
 ```
 Deploy build to Firebase
+### ios deploy_to_testflight
+```
+fastlane ios deploy_to_testflight
+```
+Deploy build to TestFlight
 
 ----
 
