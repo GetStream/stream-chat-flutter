@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -25,8 +26,8 @@ class StreamChannel extends StatefulWidget {
     @required this.channel,
     this.showLoading = true,
     this.initialMessageId,
-  })  : assert(child != null),
-        assert(channel != null),
+  })  : assert(child != null, 'Child should not be null'),
+        assert(channel != null, 'Channel should not be null'),
         super(key: key);
 
   // ignore: public_member_api_docs
@@ -49,7 +50,8 @@ class StreamChannel extends StatefulWidget {
 
     if (streamChannelState == null) {
       throw Exception(
-          'You must have a StreamChannel widget at the top of your widget tree');
+        'You must have a StreamChannel widget at the top of your widget tree',
+      );
     }
 
     return streamChannelState;
@@ -204,14 +206,13 @@ class StreamChannelState extends State<StreamChannel> {
     int before = 20,
     int after = 20,
     bool preferOffline = false,
-  }) {
-    return queryAtMessage(
-      messageId: messageId,
-      before: before,
-      after: after,
-      preferOffline: preferOffline,
-    );
-  }
+  }) =>
+      queryAtMessage(
+        messageId: messageId,
+        before: before,
+        after: after,
+        preferOffline: preferOffline,
+      );
 
   ///
   Future<void> queryAtMessage({
@@ -254,15 +255,14 @@ class StreamChannelState extends State<StreamChannel> {
     String messageId, {
     int limit = 20,
     bool preferOffline = false,
-  }) {
-    return channel.query(
-      messagesPagination: PaginationParams(
-        lessThan: messageId,
-        limit: limit,
-      ),
-      preferOffline: preferOffline,
-    );
-  }
+  }) =>
+      channel.query(
+        messagesPagination: PaginationParams(
+          lessThan: messageId,
+          limit: limit,
+        ),
+        preferOffline: preferOffline,
+      );
 
   ///
   Future<ChannelState> queryAfterMessage(
@@ -366,9 +366,10 @@ class StreamChannelState extends State<StreamChannel> {
           );
         }
         final initialized = snapshot.data[0];
+        // ignore: avoid_bool_literals_in_conditional_expressions
         final dataLoaded = initialMessageId == null ? true : snapshot.data[1];
         if (widget.showLoading && (!initialized || !dataLoaded)) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }

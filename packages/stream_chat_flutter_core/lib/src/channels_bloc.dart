@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -16,26 +17,29 @@ import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 ///
 /// API docs: https://getstream.io/chat/docs/flutter-dart/query_channels/
 class ChannelsBloc extends StatefulWidget {
-  /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and not null.
+  /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and
+  /// not null.
   const ChannelsBloc({
     Key key,
     @required this.child,
     this.lockChannelsOrder = false,
     this.channelsComparator,
     this.shouldAddChannel,
-  })  : assert(child != null),
+  })  : assert(child != null, 'Parameter child should not be null.'),
         super(key: key);
 
   /// The widget child
   final Widget child;
 
-  /// Set this to true to prevent channels to be brought to the top of the list when a new message arrives
+  /// Set this to true to prevent channels to be brought to the top of the list
+  /// when a new message arrives
   final bool lockChannelsOrder;
 
   /// Comparator used to sort the channels when a message.new event is received
   final Comparator<Channel> channelsComparator;
 
-  /// Function used to evaluate if a channel should be added to the list when a message.new event is received
+  /// Function used to evaluate if a channel should be added to the list when a
+  /// message.new event is received
   final bool Function(Event) shouldAddChannel;
 
   @override
@@ -170,13 +174,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
         _channelsController.add(newChannels);
       }
     }));
-
+    // ignore: cascade_invocations
     _subscriptions.add(client
         .on(
       EventType.channelDeleted,
       EventType.notificationRemovedFromChannel,
     )
         .listen((e) {
+      // ignore: cascade_invocations
       final channel = e.channel;
       _channelsController.add(List.from(
           (channels ?? [])..removeWhere((c) => c.cid == channel.cid)));

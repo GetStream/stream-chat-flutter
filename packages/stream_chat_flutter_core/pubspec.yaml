@@ -10,19 +10,20 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  flutter:
+    sdk: flutter
+  rxdart: ^0.25.0
   stream_chat:
     git: 
       url: https://github.com/GetStream/stream-chat-flutter.git
       ref: develop
       path: packages/stream_chat
-  flutter:
-    sdk: flutter
-  rxdart: ^0.25.0
+
 
 dev_dependencies:
-  mockito: ^4.1.4
+  fake_async: ^1.1.0
   flutter_test:
     sdk: flutter
-  fake_async: ^1.1.0
+  mockito: ^4.1.4
   pedantic: ^1.9.2
   
