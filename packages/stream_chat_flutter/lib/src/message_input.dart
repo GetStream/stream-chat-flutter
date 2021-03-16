@@ -440,7 +440,7 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildExpandActionsButton() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: AnimatedCrossFade(
         crossFadeState: _actionsShrunk
             ? CrossFadeState.showFirst
