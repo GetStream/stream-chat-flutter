@@ -5,6 +5,8 @@ import 'package:stream_chat_persistence/src/dao/channel_query_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
+import '../utils/date_matcher.dart';
+
 void main() {
   MoorChatDatabase database;
   ChannelQueryDao channelQueryDao;
@@ -24,7 +26,7 @@ void main() {
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
     final cachedCids = await channelQueryDao.getCachedChannelCids(filter);
-    expect(cachedCids, []);
+    expect(cachedCids, isEmpty);
 
     // Updating channel queries
     await channelQueryDao.updateChannelQueries(filter, cids);
@@ -43,7 +45,7 @@ void main() {
     const cids = ['testCid1', 'testCid2', 'testCid3'];
 
     final cachedCids = await channelQueryDao.getCachedChannelCids(filter);
-    expect(cachedCids, []);
+    expect(cachedCids, isEmpty);
 
     // Updating channel queries
     await channelQueryDao.updateChannelQueries(filter, cids);
@@ -91,7 +93,7 @@ void main() {
 
     test('should return empty list of channels', () async {
       final channels = await channelQueryDao.getChannels(filter: filter);
-      expect(channels, []);
+      expect(channels, isEmpty);
     });
 
     test('should return all the inserted channels', () async {
@@ -113,30 +115,14 @@ void main() {
 
         // Should match createdAt date
         expect(
-          updatedChannel.createdAt.hour,
-          insertedChannel.createdAt.hour,
-        );
-        expect(
-          updatedChannel.createdAt.minute,
-          insertedChannel.createdAt.minute,
-        );
-        expect(
-          updatedChannel.createdAt.second,
-          insertedChannel.createdAt.second,
+          updatedChannel.createdAt,
+          isSameDateAs(insertedChannel.createdAt),
         );
 
         // Should match lastMessageAt date
         expect(
-          updatedChannel.lastMessageAt.hour,
-          insertedChannel.lastMessageAt.hour,
-        );
-        expect(
-          updatedChannel.lastMessageAt.minute,
-          insertedChannel.lastMessageAt.minute,
-        );
-        expect(
-          updatedChannel.lastMessageAt.second,
-          insertedChannel.lastMessageAt.second,
+          updatedChannel.lastMessageAt,
+          isSameDateAs(insertedChannel.lastMessageAt),
         );
       }
     });
@@ -168,30 +154,14 @@ void main() {
 
         // Should match createdAt date
         expect(
-          updatedChannel.createdAt.hour,
-          insertedChannel.createdAt.hour,
-        );
-        expect(
-          updatedChannel.createdAt.minute,
-          insertedChannel.createdAt.minute,
-        );
-        expect(
-          updatedChannel.createdAt.second,
-          insertedChannel.createdAt.second,
+          updatedChannel.createdAt,
+          isSameDateAs(insertedChannel.createdAt),
         );
 
         // Should match lastMessageAt date
         expect(
-          updatedChannel.lastMessageAt.hour,
-          insertedChannel.lastMessageAt.hour,
-        );
-        expect(
-          updatedChannel.lastMessageAt.minute,
-          insertedChannel.lastMessageAt.minute,
-        );
-        expect(
-          updatedChannel.lastMessageAt.second,
-          insertedChannel.lastMessageAt.second,
+          updatedChannel.lastMessageAt,
+          isSameDateAs(insertedChannel.lastMessageAt),
         );
       }
     });
@@ -235,30 +205,14 @@ void main() {
 
         // Should match createdAt date
         expect(
-          updatedChannel.createdAt.hour,
-          insertedChannel.createdAt.hour,
-        );
-        expect(
-          updatedChannel.createdAt.minute,
-          insertedChannel.createdAt.minute,
-        );
-        expect(
-          updatedChannel.createdAt.second,
-          insertedChannel.createdAt.second,
+          updatedChannel.createdAt,
+          isSameDateAs(insertedChannel.createdAt),
         );
 
         // Should match lastMessageAt date
         expect(
-          updatedChannel.lastMessageAt.hour,
-          insertedChannel.lastMessageAt.hour,
-        );
-        expect(
-          updatedChannel.lastMessageAt.minute,
-          insertedChannel.lastMessageAt.minute,
-        );
-        expect(
-          updatedChannel.lastMessageAt.second,
-          insertedChannel.lastMessageAt.second,
+          updatedChannel.lastMessageAt,
+          isSameDateAs(insertedChannel.lastMessageAt),
         );
       }
     });

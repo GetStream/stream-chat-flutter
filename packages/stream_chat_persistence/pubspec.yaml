@@ -22,8 +22,11 @@ dependencies:
       ref: develop
       path: packages/stream_chat
 
+dependency_overrides:
+  stream_chat:
+    path: ../stream_chat
+
 dev_dependencies:
   test: ^1.15.7
   build_runner: ^1.11.0
   moor_generator: ^3.4.1
-  pedantic: ^1.9.2
