@@ -22,6 +22,8 @@ It supports several advanced features like:
 - Markdown message formatting
 - Count for unread messages
 
+![Features iOS](https://user-images.githubusercontent.com/20601437/110333493-eb023a80-8021-11eb-8fb1-b74f9ef37897.gif)
+
 ## Getting Started
 
 Before running this project please ensure Flutter is installed and configured on your machine. If you're new to Flutter, please checkout the [official guide](https://flutter.dev/docs/get-started/install) with installation instructions for your OS. 
