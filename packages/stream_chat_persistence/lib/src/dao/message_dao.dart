@@ -72,7 +72,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// [Messages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async =>
       Future.wait(await (select(messages).join([
-        leftOuterJoin(users, messages.userId.equalsExp(_users.id)),
+        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
         leftOuterJoin(_pinnedByUsers,
             messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
       ])
@@ -89,10 +89,11 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     PaginationParams options,
   }) async {
     final msgList = await Future.wait(await (select(messages).join([
-      innerJoin(_users, messages.userId.equalsExp(_users.id)),
-      innerJoin(
+      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+      leftOuterJoin(
           _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
+          ..where(isNotNull(messages.parentId))
           ..where(messages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(messages.createdAt)]))
         .map(_messageFromJoinRow)
