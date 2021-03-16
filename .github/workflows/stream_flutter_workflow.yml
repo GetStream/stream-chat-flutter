@@ -13,7 +13,6 @@ on:
 
 jobs:
   analyze:
-    if: github.base_ref == 'master'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
