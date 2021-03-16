@@ -13,6 +13,7 @@ import 'attachment_widget.dart';
 class FileAttachment extends AttachmentWidget {
   final Widget title;
   final Widget trailing;
+  final VoidCallback onAttachmentTap;
 
   const FileAttachment({
     Key key,
@@ -21,6 +22,7 @@ class FileAttachment extends AttachmentWidget {
     Size size,
     this.title,
     this.trailing,
+    this.onAttachmentTap,
   }) : super(key: key, message: message, attachment: attachment, size: size);
 
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
@@ -30,45 +32,48 @@ class FileAttachment extends AttachmentWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Container(
-        width: size?.width ?? 100,
-        height: 56.0,
-        decoration: BoxDecoration(
-          color: StreamChatTheme.of(context).colorTheme.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+      child: GestureDetector(
+        onTap: onAttachmentTap,
+        child: Container(
+          width: size?.width ?? 100,
+          height: 56.0,
+          decoration: BoxDecoration(
+            color: StreamChatTheme.of(context).colorTheme.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+            ),
           ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 40.0,
-              width: 33.33,
-              margin: EdgeInsets.all(8.0),
-              child: _getFileTypeImage(context),
-            ),
-            SizedBox(width: 8.0),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    attachment?.title ?? 'File',
-                    style: StreamChatTheme.of(context).textTheme.bodyBold,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 3.0),
-                  _buildSubtitle(context),
-                ],
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 40.0,
+                width: 33.33,
+                margin: EdgeInsets.all(8.0),
+                child: _getFileTypeImage(context),
               ),
-            ),
-            SizedBox(width: 8.0),
-            _buildTrailing(context),
-          ],
+              SizedBox(width: 8.0),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      attachment?.title ?? 'File',
+                      style: StreamChatTheme.of(context).textTheme.bodyBold,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 3.0),
+                    _buildSubtitle(context),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.0),
+              _buildTrailing(context),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+
 import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
@@ -8,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
-import '../moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
 /// A Helper class to construct new instances of [MoorChatDatabase] specifically
 /// for native platform applications
@@ -20,28 +21,29 @@ class SharedDB {
   static Future<VmDatabase> constructDatabase(
     String userId, {
     bool logStatements = false,
+    bool persistOnDisk = true,
   }) async {
     final dbName = 'db_$userId';
-    if (Platform.isIOS || Platform.isAndroid) {
-      final dir = await getApplicationDocumentsDirectory();
-      final path = join(dir.path, '$dbName.sqlite');
-      final file = File(path);
-      return VmDatabase(file, logStatements: logStatements);
-    }
-    if (Platform.isMacOS || Platform.isLinux) {
-      final file = File('$dbName.sqlite');
-      return VmDatabase(file, logStatements: logStatements);
+    if (persistOnDisk) {
+      if (Platform.isIOS || Platform.isAndroid) {
+        final dir = await getApplicationDocumentsDirectory();
+        final path = join(dir.path, '$dbName.sqlite');
+        final file = File(path);
+        return VmDatabase(file, logStatements: logStatements);
+      }
+      if (Platform.isMacOS || Platform.isLinux) {
+        final file = File('$dbName.sqlite');
+        return VmDatabase(file, logStatements: logStatements);
+      }
     }
     return VmDatabase.memory(logStatements: logStatements);
   }
 
   static void _startBackground(_IsolateStartRequest request) {
-    final executor = LazyDatabase(() async {
-      return VmDatabase(
-        File(request.targetPath),
-        logStatements: request.logStatements,
-      );
-    });
+    final executor = LazyDatabase(() async => VmDatabase(
+          File(request.targetPath),
+          logStatements: request.logStatements,
+        ));
     final moorIsolate = MoorIsolate.inCurrent(
       () => DatabaseConnection.fromExecutor(executor),
     );
@@ -65,35 +67,39 @@ class SharedDB {
       ),
     );
 
-    return (await receivePort.first as MoorIsolate);
+    return await receivePort.first as MoorIsolate;
   }
 
   /// Returns a new instance of [MoorChatDatabase] using the factory constructor
   /// [MoorChatDatabase.connect] created on a background isolate.
   ///
   /// Generally used with [ConnectionMode.background].
-  static Future<MoorChatDatabase> constructMoorChatDatabase(
+  static MoorChatDatabase constructMoorChatDatabase(
     String userId, {
     bool logStatements = false,
-  }) async {
+  }) {
     final dbName = 'db_$userId';
-    final isolate = await _createMoorIsolate(
-      dbName,
-      logStatements: logStatements,
+    return MoorChatDatabase.connect(
+      userId,
+      DatabaseConnection.delayed(Future(() async {
+        final isolate = await _createMoorIsolate(
+          dbName,
+          logStatements: logStatements,
+        );
+        return isolate.connect();
+      })),
     );
-    final connection = await isolate.connect();
-    return MoorChatDatabase.connect(userId, isolate, connection);
   }
 }
 
 class _IsolateStartRequest {
-  final SendPort sendMoorIsolate;
-  final String targetPath;
-  final bool logStatements;
-
   const _IsolateStartRequest(
     this.sendMoorIsolate,
     this.targetPath, {
     this.logStatements = false,
   });
+
+  final SendPort sendMoorIsolate;
+  final String targetPath;
+  final bool logStatements;
 }

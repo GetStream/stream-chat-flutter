@@ -1,16 +1,16 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+import 'extension.dart';
 import 'message_widget.dart';
 import 'stream_chat_theme.dart';
-import 'extension.dart';
 
 class MessageReactionsModal extends StatelessWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
@@ -23,6 +23,7 @@ class MessageReactionsModal extends StatelessWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final void Function(User) onUserAvatarTap;
+  final BorderRadius attachmentBorderRadiusGeometry;
 
   const MessageReactionsModal({
     Key key,
@@ -36,6 +37,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.reverse = false,
     this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
+    this.attachmentBorderRadiusGeometry,
   }) : super(key: key);
 
   @override
@@ -132,6 +134,8 @@ class MessageReactionsModal extends StatelessWidget {
                               shape: messageShape,
                               attachmentShape: attachmentShape,
                               padding: const EdgeInsets.all(0),
+                              attachmentBorderRadiusGeometry:
+                                  attachmentBorderRadiusGeometry,
                               attachmentPadding: EdgeInsets.all(
                                 hasFileAttachment ? 4 : 2,
                               ),

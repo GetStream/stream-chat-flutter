@@ -20,7 +20,11 @@ import 'extension.dart';
 import 'image_group.dart';
 import 'message_text.dart';
 
-typedef AttachmentBuilder = Widget Function(BuildContext, Message, Attachment);
+typedef AttachmentBuilder = Widget Function(
+  BuildContext,
+  Message,
+  List<Attachment>,
+);
 typedef OnQuotedMessageTap = void Function(String);
 
 /// The display behaviour of a widget
@@ -205,63 +209,152 @@ class MessageWidget extends StatefulWidget {
     this.customActions = const [],
     this.onAttachmentTap,
   })  : attachmentBuilders = {
-          'image': (context, message, attachment) {
-            return ImageAttachment(
-              attachment: attachment,
-              message: message,
-              messageTheme: messageTheme,
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
+          'image': (context, message, attachments) {
+            var border = RoundedRectangleBorder(
+              side: BorderSide.none,
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            if (attachments.length > 1) {
+              return Padding(
+                padding: attachmentPadding,
+                child: wrapAttachmentWidget(
+                  context,
+                  Material(
+                    color: messageTheme.messageBackgroundColor,
+                    child: ImageGroup(
+                      size: Size(
+                        MediaQuery.of(context).size.width * 0.8,
+                        MediaQuery.of(context).size.height * 0.3,
+                      ),
+                      images: attachments,
+                      message: message,
+                      messageTheme: messageTheme,
+                      onShowMessage: onShowMessage,
+                    ),
+                  ),
+                  border,
+                  reverse,
+                  attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+                ),
+              );
+            }
+
+            return wrapAttachmentWidget(
+              context,
+              ImageAttachment(
+                attachment: attachments[0],
+                message: message,
+                messageTheme: messageTheme,
+                size: Size(
+                  MediaQuery.of(context).size.width * 0.8,
+                  MediaQuery.of(context).size.height * 0.3,
+                ),
+                onShowMessage: onShowMessage,
+                onReturnAction: onReturnAction,
+                onAttachmentTap: onAttachmentTap != null
+                    ? () {
+                        onAttachmentTap?.call(message, attachments[0]);
+                      }
+                    : null,
               ),
-              onShowMessage: onShowMessage,
-              onReturnAction: onReturnAction,
-              onAttachmentTap: onAttachmentTap != null
-                  ? () {
-                      onAttachmentTap?.call(message, attachment);
-                    }
-                  : null,
+              border,
+              reverse,
+              attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
           },
-          'video': (context, message, attachment) {
-            return VideoAttachment(
-              attachment: attachment,
-              messageTheme: messageTheme,
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
+          'video': (context, message, attachments) {
+            var border = RoundedRectangleBorder(
+              side: BorderSide.none,
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            return wrapAttachmentWidget(
+              context,
+              Column(
+                children: attachments.map((attachment) {
+                  return VideoAttachment(
+                    attachment: attachment,
+                    messageTheme: messageTheme,
+                    size: Size(
+                      MediaQuery.of(context).size.width * 0.8,
+                      MediaQuery.of(context).size.height * 0.3,
+                    ),
+                    message: message,
+                    onShowMessage: onShowMessage,
+                    onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap?.call(message, attachment);
+                          }
+                        : null,
+                  );
+                }).toList(),
               ),
-              message: message,
-              onShowMessage: onShowMessage,
-              onReturnAction: onReturnAction,
-              onAttachmentTap: onAttachmentTap != null
-                  ? () {
-                      onAttachmentTap?.call(message, attachment);
-                    }
-                  : null,
+              border,
+              reverse,
+              attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
           },
-          'giphy': (context, message, attachment) {
-            return GiphyAttachment(
-              attachment: attachment,
-              messageTheme: messageTheme,
-              message: message,
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
+          'giphy': (context, message, attachments) {
+            var border = RoundedRectangleBorder(
+              side: BorderSide.none,
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            return wrapAttachmentWidget(
+              context,
+              Column(
+                children: attachments.map((attachment) {
+                  return GiphyAttachment(
+                    attachment: attachment,
+                    messageTheme: messageTheme,
+                    message: message,
+                    size: Size(
+                      MediaQuery.of(context).size.width * 0.8,
+                      MediaQuery.of(context).size.height * 0.3,
+                    ),
+                    onShowMessage: onShowMessage,
+                    onReturnAction: onReturnAction,
+                  );
+                }).toList(),
               ),
-              onShowMessage: onShowMessage,
-              onReturnAction: onReturnAction,
+              border,
+              reverse,
+              attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
           },
-          'file': (context, message, attachment) {
-            return FileAttachment(
-              message: message,
-              attachment: attachment,
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
-              ),
+          'file': (context, message, attachments) {
+            var border = RoundedRectangleBorder(
+              side: attachmentBorderSide ??
+                  BorderSide(
+                    color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+                  ),
+              borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+            );
+
+            return Column(
+              children: attachments
+                  .map<Widget>((attachment) {
+                    return wrapAttachmentWidget(
+                      context,
+                      FileAttachment(
+                        message: message,
+                        attachment: attachment,
+                        size: Size(
+                          MediaQuery.of(context).size.width * 0.8,
+                          MediaQuery.of(context).size.height * 0.3,
+                        ),
+                      ),
+                      border,
+                      reverse,
+                      attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+                    );
+                  })
+                  .insertBetween(SizedBox(
+                    height: attachmentPadding.vertical / 2,
+                  ))
+                  .toList(),
             );
           },
         }..addAll(customAttachmentBuilders ?? {}),
@@ -739,6 +832,8 @@ class _MessageWidgetState extends State<MessageWidget>
           return StreamChannel(
             channel: channel,
             child: MessageActionsModal(
+              attachmentBorderRadiusGeometry:
+                  widget.attachmentBorderRadiusGeometry,
               showUserAvatar:
                   widget.message.user.id == channel.client.state.user.id
                       ? DisplayWidget.gone
@@ -786,6 +881,8 @@ class _MessageWidgetState extends State<MessageWidget>
           return StreamChannel(
             channel: channel,
             child: MessageReactionsModal(
+              attachmentBorderRadiusGeometry:
+                  widget.attachmentBorderRadiusGeometry,
               showUserAvatar:
                   widget.message.user.id == channel.client.state.user.id
                       ? DisplayWidget.gone
@@ -830,76 +927,40 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _parseAttachments() {
-    final images = widget.message.attachments
-            ?.where((element) =>
-                element.type == 'image' && element.ogScrapeUrl == null)
-            ?.toList() ??
-        [];
+    final attachmentGroups = <String, List<Attachment>>{};
 
-    if (images.length > 1) {
-      return Padding(
-        padding: widget.attachmentPadding,
-        child: wrapAttachmentWidget(
-          context,
-          Material(
-            color: widget.messageTheme.messageBackgroundColor,
-            child: ImageGroup(
-              size: Size(
-                MediaQuery.of(context).size.width * 0.8,
-                MediaQuery.of(context).size.height * 0.3,
-              ),
-              images: images,
-              message: widget.message,
-              messageTheme: widget.messageTheme,
-              onShowMessage: widget.onShowMessage,
-            ),
-          ),
-        ),
+    widget.message.attachments
+        .where((element) => element.ogScrapeUrl == null)
+        .forEach((e) {
+      if (attachmentGroups[e.type] == null) {
+        attachmentGroups[e.type] = [];
+      }
+
+      attachmentGroups[e.type].add(e);
+    });
+
+    final attachmentList = <Widget>[];
+
+    attachmentGroups.forEach((type, attachments) {
+      final attachmentBuilder = widget.attachmentBuilders[type];
+
+      if (attachmentBuilder == null) return SizedBox();
+      final attachmentWidget = attachmentBuilder(
+        context,
+        widget.message,
+        attachments,
       );
-    }
+      attachmentList.add(attachmentWidget);
+    });
 
     return Padding(
       padding: widget.attachmentPadding,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: widget.message.attachments
-                ?.where((element) => element.ogScrapeUrl == null)
-                ?.map((attachment) {
-              final attachmentBuilder =
-                  widget.attachmentBuilders[attachment.type];
-
-              if (attachmentBuilder == null) return SizedBox();
-              final attachmentWidget = attachmentBuilder(
-                context,
-                widget.message,
-                attachment,
-              );
-              return wrapAttachmentWidget(
-                context,
-                attachmentWidget,
-              );
-            })?.insertBetween(SizedBox(
+        children: attachmentList?.insertBetween(SizedBox(
               height: widget.attachmentPadding.vertical / 2,
             )) ??
             [],
-      ),
-    );
-  }
-
-  Widget wrapAttachmentWidget(
-    BuildContext context,
-    Widget attachmentWidget,
-  ) {
-    final attachmentShape =
-        widget.attachmentShape ?? _getDefaultAttachmentShape(context);
-    return Material(
-      clipBehavior: Clip.antiAlias,
-      shape: attachmentShape,
-      type: MaterialType.transparency,
-      child: Transform(
-        transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-        alignment: Alignment.center,
-        child: attachmentWidget,
       ),
     );
   }

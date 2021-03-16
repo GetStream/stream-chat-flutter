@@ -1,7 +1,7 @@
 name: stream_chat_persistence
 homepage: https://github.com/GetStream/stream-chat-flutter
 description: Official Stream Chat Persistence library. Build your own chat experience using Dart and Flutter.
-version: 1.4.0-beta
+version: 1.5.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
@@ -11,14 +11,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  logging: ^0.11.4
+  meta: ^1.2.4
   moor: ^3.4.0
+  mutex: ^2.0.0
   path: ^1.7.0
   path_provider: ^1.6.27
   sqlite3_flutter_libs: ^0.4.0+1
-  stream_chat: ^1.4.0-beta
+  stream_chat: ^1.5.0
 
 dev_dependencies:
-  test: ^1.15.7
   build_runner: ^1.11.0
   moor_generator: ^3.4.1
   pedantic: ^1.9.2
+  test: ^1.15.7

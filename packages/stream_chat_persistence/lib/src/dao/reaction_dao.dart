@@ -3,7 +3,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/reactions.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-import '../mapper/mapper.dart';
+import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'reaction_dao.g.dart';
 
@@ -16,18 +16,17 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Returns all the reactions of a particular message by matching
   /// [Reactions.messageId] with [messageId]
-  Future<List<Reaction>> getReactions(String messageId) {
-    return (select(reactions).join([
-      leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
-    ])
-          ..where(reactions.messageId.equals(messageId))
-          ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
-        .map((rows) {
-      final userEntity = rows.readTable(users);
-      final reactionEntity = rows.readTable(reactions);
-      return reactionEntity.toReaction(user: userEntity?.toUser());
-    }).get();
-  }
+  Future<List<Reaction>> getReactions(String messageId) =>
+      (select(reactions).join([
+        leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
+      ])
+            ..where(reactions.messageId.equals(messageId))
+            ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
+          .map((rows) {
+        final userEntity = rows.readTable(users);
+        final reactionEntity = rows.readTable(reactions);
+        return reactionEntity.toReaction(user: userEntity?.toUser());
+      }).get();
 
   /// Returns all the reactions of a particular message
   /// added by a particular user by matching
@@ -42,23 +41,21 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Updates the reactions data with the new [reactionList] data
-  Future<void> updateReactions(List<Reaction> reactionList) {
-    return batch((it) {
-      it.insertAll(
-        reactions,
-        reactionList.map((r) => r.toEntity()).toList(),
-        mode: InsertMode.insertOrReplace,
-      );
-    });
-  }
+  Future<void> updateReactions(List<Reaction> reactionList) => batch((it) {
+        it.insertAll(
+          reactions,
+          reactionList.map((r) => r.toEntity()).toList(),
+          mode: InsertMode.insertOrReplace,
+        );
+      });
 
-  /// Deletes all the reactions whose [Reactions.messageId] is present in [messageIds]
-  Future<void> deleteReactionsByMessageIds(List<String> messageIds) {
-    return batch((it) {
-      it.deleteWhere<Reactions, ReactionEntity>(
-        reactions,
-        (r) => r.messageId.isIn(messageIds),
-      );
-    });
-  }
+  /// Deletes all the reactions whose [Reactions.messageId] is
+  /// present in [messageIds]
+  Future<void> deleteReactionsByMessageIds(List<String> messageIds) =>
+      batch((it) {
+        it.deleteWhere<Reactions, ReactionEntity>(
+          reactions,
+          (r) => r.messageId.isIn(messageIds),
+        );
+      });
 }

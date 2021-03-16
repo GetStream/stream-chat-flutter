@@ -1,3 +1,11 @@
+## 1.5.0
+
+- Fixed swipeable visible on navigation back
+- Fixed video upload
+- `MessageInput`: added more actions locations, merge actions and add `showCommandsButton` property
+- 🛑 **BREAKING** Updated AttachmentBuilder signature
+- Fixed image reloading on reaction.new
+
 ## 1.4.0-beta
 
 - Unfocus `MessageInput` only when sending commands
@@ -10,7 +18,7 @@
 - Added `MessageListView.onAttachmentTap` callback
 - Fixed message newline issue
 - Fixed `MessageListView` scroll keyboard behaviour
-- Minor fixes and improveqments
+- Minor fixes and improvements
 
 ## 1.3.2-beta
 

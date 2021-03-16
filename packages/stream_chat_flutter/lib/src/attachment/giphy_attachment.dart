@@ -12,6 +12,7 @@ class GiphyAttachment extends AttachmentWidget {
   final MessageTheme messageTheme;
   final ShowMessageCallback onShowMessage;
   final ValueChanged<ReturnActionType> onReturnAction;
+  final VoidCallback onAttachmentTap;
 
   const GiphyAttachment({
     Key key,
@@ -21,6 +22,7 @@ class GiphyAttachment extends AttachmentWidget {
     this.messageTheme,
     this.onShowMessage,
     this.onReturnAction,
+    this.onAttachmentTap,
   }) : super(key: key, message: message, attachment: attachment, size: size);
 
   @override
@@ -62,7 +64,7 @@ class GiphyAttachment extends AttachmentWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GestureDetector(
-                      onTap: () => _onImageTap(context),
+                      onTap: () => onAttachmentTap ?? _onImageTap(context),
                       child: ClipRRect(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(8),

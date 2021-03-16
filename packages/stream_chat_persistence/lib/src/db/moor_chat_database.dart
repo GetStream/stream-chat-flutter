@@ -1,25 +1,22 @@
-import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import '../entity/entity.dart';
-import '../dao/dao.dart';
-import '../converter/converter.dart';
-import 'shared/shared_db.dart';
+import 'package:stream_chat_persistence/src/converter/converter.dart';
+import 'package:stream_chat_persistence/src/dao/dao.dart';
+import 'package:stream_chat_persistence/src/db/shared/shared_db.dart';
+import 'package:stream_chat_persistence/src/entity/entity.dart';
 
 part 'moor_chat_database.g.dart';
 
 LazyDatabase _openConnection(
   String userId, {
-  logStatements = false,
-}) {
-  return LazyDatabase(() async {
-    return await SharedDB.constructDatabase(
-      userId,
-      logStatements: logStatements,
-    );
-  });
-}
+  bool logStatements = false,
+  bool persistOnDisk = true,
+}) =>
+    LazyDatabase(() async => SharedDB.constructDatabase(
+          userId,
+          logStatements: logStatements,
+          persistOnDisk: persistOnDisk,
+        ));
 
 /// A chat database implemented using moor
 @UseMoor(tables: [
@@ -48,15 +45,16 @@ class MoorChatDatabase extends _$MoorChatDatabase {
   MoorChatDatabase(
     this._userId, {
     logStatements = false,
+    bool persistOnDisk = true,
   }) : super(_openConnection(
           _userId,
           logStatements: logStatements,
+          persistOnDisk: persistOnDisk,
         ));
 
   /// Instantiate a new database instance
   MoorChatDatabase.connect(
     this._userId,
-    this._isolate,
     DatabaseConnection connection,
   ) : super.connect(connection);
 
@@ -64,8 +62,6 @@ class MoorChatDatabase extends _$MoorChatDatabase {
 
   /// User id to which the database is connected
   String get userId => _userId;
-
-  MoorIsolate _isolate;
 
   // you should bump this number whenever you change or add a table definition.
   @override
@@ -85,8 +81,5 @@ class MoorChatDatabase extends _$MoorChatDatabase {
       );
 
   /// Closes the database instance
-  Future<void> disconnect() async {
-    await _isolate?.shutdownAll();
-    await close();
-  }
+  Future<void> disconnect() => close();
 }

@@ -6,7 +6,8 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-import '../mapper/mapper.dart';
+
+import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
 
@@ -30,29 +31,31 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
-    List<String> cids,
+    List<String> cids, {
     bool clearQueryCache,
-  ) async {
-    final hash = _computeHash(filter);
-    if (clearQueryCache) {
-      await batch((it) {
-        it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
-          channelQueries,
-          (c) => c.queryHash.equals(hash),
-        );
-      });
-    }
+  }) async =>
+      transaction(() async {
+        final hash = _computeHash(filter);
+        if (clearQueryCache) {
+          await batch((it) {
+            it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
+              channelQueries,
+              (c) => c.queryHash.equals(hash),
+            );
+          });
+        }
 
-    return batch((it) {
-      it.insertAll(
-        channelQueries,
-        cids.map((cid) {
-          return ChannelQueryEntity(queryHash: hash, channelCid: cid);
-        }).toList(),
-        mode: InsertMode.insertOrReplace,
-      );
-    });
-  }
+        await batch((it) {
+          it.insertAll(
+            channelQueries,
+            cids
+                .map((cid) =>
+                    ChannelQueryEntity(queryHash: hash, channelCid: cid))
+                .toList(),
+            mode: InsertMode.insertOrReplace,
+          );
+        });
+      });
 
   /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelModel>> getChannels({
@@ -67,7 +70,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         );
       }
       return true;
-    }());
+    }(), '');
 
     final hash = _computeHash(filter);
     final cachedChannelCids = await (select(channelQueries)
@@ -86,10 +89,11 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     })).get();
 
     final possibleSortingFields = cachedChannels.fold<List<String>>(
-        ChannelModel.topLevelFields, (previousValue, element) {
-      return {...previousValue, ...element.extraData.keys}.toList();
-    });
+        ChannelModel.topLevelFields,
+        (previousValue, element) =>
+            {...previousValue, ...element.extraData.keys}.toList());
 
+    // ignore: parameter_assignments
     sort = sort
         ?.where((s) => possibleSortingFields.contains(s.field))
         ?.toList(growable: false);
@@ -117,7 +121,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
 
     cachedChannels.sort(chainedComparator);
 
-    if (paginationParams?.offset != null) {
+    if (paginationParams?.offset != null && cachedChannels.isNotEmpty) {
       cachedChannels.removeRange(0, paginationParams.offset);
     }
 

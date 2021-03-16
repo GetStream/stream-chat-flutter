@@ -7,11 +7,11 @@ import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/extensions/rate_limit.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat/src/extensions/rate_limit.dart';
 
 /// This a the class that manages a specific channel.
 class Channel {
@@ -1209,9 +1209,10 @@ class ChannelClientState {
   ChannelClientState(
     this._channel,
     ChannelState channelState,
-  ) : _debouncedUpdatePersistenceChannelState = _channel
-            ?._client?.chatPersistenceClient?.updateChannelState
-            ?.debounced(const Duration(seconds: 1)) {
+    //ignore: unnecessary_parenthesis
+  ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) {
+          _channel?._client?.chatPersistenceClient?.updateChannelState(state);
+        }).debounced(const Duration(seconds: 1)) {
     retryQueue = RetryQueue(
       channel: _channel,
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
@@ -1463,10 +1464,16 @@ class ChannelClientState {
   void addMessage(Message message) {
     if (message.parentId == null || message.showInChannel == true) {
       final newMessages = List<Message>.from(_channelState.messages);
-
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        newMessages[oldIndex] = message;
+        Message m;
+        if (message.quotedMessageId != null && message.quotedMessage == null) {
+          final oldMessage = newMessages[oldIndex];
+          m = message.copyWith(
+            quotedMessage: oldMessage.quotedMessage,
+          );
+        }
+        newMessages[oldIndex] = m ?? message;
       } else {
         newMessages.add(message);
       }
