@@ -20,4 +20,10 @@ class UserDao extends DatabaseAccessor<MoorChatDatabase> with _$UserDaoMixin {
           mode: InsertMode.insertOrReplace,
         ),
       );
+
+  /// Returns the list of all the users stored in db
+  Future<List<User>> getUsers() =>
+      (select(users)..orderBy([(u) => OrderingTerm.desc(u.createdAt)]))
+          .map((it) => it.toUser())
+          .get();
 }

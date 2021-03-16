@@ -100,4 +100,28 @@ class User {
   /// Serialize to json
   Map<String, dynamic> toJson() =>
       Serialization.moveFromExtraDataToRoot(_$UserToJson(this), topLevelFields);
+
+  /// Creates a copy of [User] with specified attributes overridden.
+  User copyWith({
+    String id,
+    String role,
+    DateTime createdAt,
+    DateTime updatedAt,
+    DateTime lastActive,
+    bool online,
+    Map<String, dynamic> extraData,
+    bool banned,
+    List<String> teams,
+  }) =>
+      User(
+        id: id ?? this.id,
+        role: role ?? this.role,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        lastActive: lastActive ?? this.lastActive,
+        online: online ?? this.online,
+        extraData: extraData ?? this.extraData,
+        banned: banned ?? this.banned,
+        teams: teams ?? this.teams,
+      );
 }
