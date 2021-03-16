@@ -4,7 +4,7 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/messages.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 
-import '../mapper/mapper.dart';
+import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'message_dao.g.dart';
 
@@ -25,17 +25,15 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   ///
   /// This will automatically delete the following linked records
   /// 1. Message Reactions
-  Future<void> deleteMessageByIds(List<String> messageIds) {
-    return (delete(messages)..where((tbl) => tbl.id.isIn(messageIds))).go();
-  }
+  Future<void> deleteMessageByIds(List<String> messageIds) =>
+      (delete(messages)..where((tbl) => tbl.id.isIn(messageIds))).go();
 
   /// Removes all the messages by matching [Messages.channelCid] in [cids]
   ///
   /// This will automatically delete the following linked records
   /// 1. Message Reactions
-  Future<void> deleteMessageByCids(List<String> cids) async {
-    return (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
-  }
+  Future<void> deleteMessageByCids(List<String> cids) async =>
+      (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   Future<Message> _messageFromJoinRow(TypedResult rows) async {
     final userEntity = rows.readTable(_users);
@@ -60,31 +58,29 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Returns a single message by matching the [Messages.id] with [id]
-  Future<Message> getMessageById(String id) async {
-    return await (select(messages).join([
-      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-          _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
-    ])
-          ..where(messages.id.equals(id)))
-        .map(_messageFromJoinRow)
-        .getSingle();
-  }
+  Future<Message> getMessageById(String id) async =>
+      await (select(messages).join([
+        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+        leftOuterJoin(_pinnedByUsers,
+            messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+      ])
+            ..where(messages.id.equals(id)))
+          .map(_messageFromJoinRow)
+          .getSingle();
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
-  Future<List<Message>> getThreadMessages(String cid) async {
-    return Future.wait(await (select(messages).join([
-      leftOuterJoin(users, messages.userId.equalsExp(_users.id)),
-      leftOuterJoin(
-          _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
-    ])
-          ..where(messages.channelCid.equals(cid))
-          ..where(isNotNull(messages.parentId))
-          ..orderBy([OrderingTerm.asc(messages.createdAt)]))
-        .map(_messageFromJoinRow)
-        .get());
-  }
+  Future<List<Message>> getThreadMessages(String cid) async =>
+      Future.wait(await (select(messages).join([
+        leftOuterJoin(users, messages.userId.equalsExp(_users.id)),
+        leftOuterJoin(_pinnedByUsers,
+            messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
+      ])
+            ..where(messages.channelCid.equals(cid))
+            ..where(isNotNull(messages.parentId))
+            ..orderBy([OrderingTerm.asc(messages.createdAt)]))
+          .map(_messageFromJoinRow)
+          .get());
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.parentId] with [parentId]

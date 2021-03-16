@@ -29,34 +29,31 @@ extension ChannelEntityX on ChannelEntity {
     List<Read> reads,
     List<Message> messages,
     List<Message> pinnedMessages,
-  }) {
-    return ChannelState(
-      members: members,
-      read: reads,
-      messages: messages,
-      pinnedMessages: pinnedMessages,
-      channel: toChannelModel(createdBy: createdBy),
-    );
-  }
+  }) =>
+      ChannelState(
+        members: members,
+        read: reads,
+        messages: messages,
+        pinnedMessages: pinnedMessages,
+        channel: toChannelModel(createdBy: createdBy),
+      );
 }
 
 /// Useful mapping functions for [ChannelModel]
 extension ChannelModelX on ChannelModel {
   /// Maps a [ChannelModel] into [ChannelEntity]
-  ChannelEntity toEntity() {
-    return ChannelEntity(
-      id: id,
-      type: type,
-      cid: cid,
-      config: config.toJson(),
-      frozen: frozen,
-      lastMessageAt: lastMessageAt,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      deletedAt: deletedAt,
-      memberCount: memberCount,
-      createdById: createdBy.id,
-      extraData: extraData,
-    );
-  }
+  ChannelEntity toEntity() => ChannelEntity(
+        id: id,
+        type: type,
+        cid: cid,
+        config: config.toJson(),
+        frozen: frozen,
+        lastMessageAt: lastMessageAt,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        deletedAt: deletedAt,
+        memberCount: memberCount,
+        createdById: createdBy.id,
+        extraData: extraData,
+      );
 }

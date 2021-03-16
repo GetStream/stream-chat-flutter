@@ -7,7 +7,7 @@ import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
 
-import '../mapper/mapper.dart';
+import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
 
@@ -31,31 +31,31 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
-    List<String> cids,
+    List<String> cids, {
     bool clearQueryCache,
-  ) async {
-    return transaction(() async {
-      final hash = _computeHash(filter);
-      if (clearQueryCache) {
+  }) async =>
+      transaction(() async {
+        final hash = _computeHash(filter);
+        if (clearQueryCache) {
+          await batch((it) {
+            it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
+              channelQueries,
+              (c) => c.queryHash.equals(hash),
+            );
+          });
+        }
+
         await batch((it) {
-          it.deleteWhere<ChannelQueries, ChannelQueryEntity>(
+          it.insertAll(
             channelQueries,
-            (c) => c.queryHash.equals(hash),
+            cids
+                .map((cid) =>
+                    ChannelQueryEntity(queryHash: hash, channelCid: cid))
+                .toList(),
+            mode: InsertMode.insertOrReplace,
           );
         });
-      }
-
-      await batch((it) {
-        it.insertAll(
-          channelQueries,
-          cids.map((cid) {
-            return ChannelQueryEntity(queryHash: hash, channelCid: cid);
-          }).toList(),
-          mode: InsertMode.insertOrReplace,
-        );
       });
-    });
-  }
 
   /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelModel>> getChannels({
@@ -70,7 +70,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         );
       }
       return true;
-    }());
+    }(), '');
 
     final hash = _computeHash(filter);
     final cachedChannelCids = await (select(channelQueries)
@@ -89,10 +89,11 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     })).get();
 
     final possibleSortingFields = cachedChannels.fold<List<String>>(
-        ChannelModel.topLevelFields, (previousValue, element) {
-      return {...previousValue, ...element.extraData.keys}.toList();
-    });
+        ChannelModel.topLevelFields,
+        (previousValue, element) =>
+            {...previousValue, ...element.extraData.keys}.toList());
 
+    // ignore: parameter_assignments
     sort = sort
         ?.where((s) => possibleSortingFields.contains(s.field))
         ?.toList(growable: false);

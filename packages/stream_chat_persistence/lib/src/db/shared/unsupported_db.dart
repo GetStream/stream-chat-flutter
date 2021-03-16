@@ -12,7 +12,8 @@ class SharedDB {
     bool logStatements = false,
     bool persistOnDisk = true,
   }) {
-    throw 'Unsupported Platform';
+    throw UnsupportedError(
+        'No implementation of the constructDatabase api provided');
   }
 
   /// Return a new instance of moor chat database.
@@ -22,6 +23,7 @@ class SharedDB {
     String userId, {
     bool logStatements = false,
   }) {
-    throw 'Unsupported Platform';
+    throw UnsupportedError(
+        'No implementation of the constructMoorChatDatabase api provided');
   }
 }
