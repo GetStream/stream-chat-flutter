@@ -128,7 +128,8 @@ void main() {
     );
     expect(
       fetchedReactions
-          .where((it) => it.userId == 'testUserId3' && it.type == 'testType3')
+          .where((it) =>
+              it.userId == newReaction.userId && it.type == newReaction.type)
           .isNotEmpty,
       true,
     );

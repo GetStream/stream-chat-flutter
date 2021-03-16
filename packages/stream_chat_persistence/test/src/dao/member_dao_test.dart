@@ -94,15 +94,40 @@ void main() {
       );
     }
 
-    // Updating the last added member
-    final updatedMember = fetchedMembers.last.copyWith(banned: true);
-    await memberDao.updateMembers(cid, [updatedMember]);
+    // Modifying one of the member and also adding one new
+    final copyMember = fetchedMembers.first.copyWith(banned: true);
+    final newUser = User(id: 'testUserId3');
+    final newMember = Member(
+      user: newUser,
+      banned: math.Random().nextBool(),
+      shadowBanned: math.Random().nextBool(),
+      createdAt: DateTime.now(),
+      isModerator: math.Random().nextBool(),
+      invited: math.Random().nextBool(),
+      inviteAcceptedAt: DateTime.now(),
+      role: 'testRole',
+      updatedAt: DateTime.now(),
+    );
+    await database.userDao.updateUsers([newUser]);
+    await memberDao.updateMembers(cid, [copyMember, newMember]);
 
-    // Last member banned field should match the previous updated user
+    // Fetched member length should be one more than inserted members.
+    // copyMember `banned` modified field should be true.
+    // Fetched members should contain the newMember.
     final newFetchedMembers = await memberDao.getMembersByCid(cid);
-    expect(newFetchedMembers.length, fetchedMembers.length);
-    final lastMember = newFetchedMembers.last;
-    expect(lastMember.banned, true);
+    expect(newFetchedMembers.length, fetchedMembers.length + 1);
+    expect(
+      newFetchedMembers
+          .firstWhere((it) => it.user.id == copyMember.user.id)
+          .banned,
+      true,
+    );
+    expect(
+      newFetchedMembers
+          .where((it) => it.user.id == newMember.user.id)
+          .isNotEmpty,
+      true,
+    );
   });
 
   test('deleteMemberByCids', () async {

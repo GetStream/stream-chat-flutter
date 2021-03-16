@@ -242,7 +242,7 @@ void main() {
       false,
     );
     expect(
-      fetchedMessages.map((it) => it.id).contains('testMessageId${cid}4'),
+      fetchedMessages.map((it) => it.id).contains(newMessage.id),
       true,
     );
   });
