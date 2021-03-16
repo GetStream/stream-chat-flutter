@@ -1,4 +1,3 @@
-import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 
