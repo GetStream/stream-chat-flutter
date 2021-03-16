@@ -89,10 +89,11 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
     PaginationParams options,
   }) async {
     final msgList = await Future.wait(await (select(pinnedMessages).join([
-      innerJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      innerJoin(_pinnedByUsers,
+      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      leftOuterJoin(_pinnedByUsers,
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
+          ..where(isNotNull(pinnedMessages.parentId))
           ..where(pinnedMessages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
