@@ -7,7 +7,6 @@ on:
       - synchronize
     branch:
       - develop
-      - master
 
 jobs:
   main:
