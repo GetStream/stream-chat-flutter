@@ -1209,6 +1209,7 @@ class ChannelClientState {
   ChannelClientState(
     this._channel,
     ChannelState channelState,
+    // ignore: unnecessary_parenthesis
   ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) {
           _channel?._client?.chatPersistenceClient?.updateChannelState(state);
         }).debounced(const Duration(seconds: 1)) {

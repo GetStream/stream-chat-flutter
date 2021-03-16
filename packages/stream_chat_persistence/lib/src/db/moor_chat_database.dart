@@ -1,10 +1,9 @@
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import '../converter/converter.dart';
-import '../dao/dao.dart';
-import '../entity/entity.dart';
-import 'shared/shared_db.dart';
+import 'package:stream_chat_persistence/src/converter/converter.dart';
+import 'package:stream_chat_persistence/src/dao/dao.dart';
+import 'package:stream_chat_persistence/src/db/shared/shared_db.dart';
+import 'package:stream_chat_persistence/src/entity/entity.dart';
 
 part 'moor_chat_database.g.dart';
 
