@@ -749,7 +749,7 @@ class _MessageListViewState extends State<MessageListView> {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
-        key: ValueKey<String>('BOTTOM-MESSAGE'),
+        key: ValueKey<String>('BOTTOM-MESSAGE-${message.id}'),
         builder: (_) => widget.messageBuilder(
           context,
           MessageDetails(
@@ -766,7 +766,7 @@ class _MessageListViewState extends State<MessageListView> {
     }
 
     return VisibilityDetector(
-      key: ValueKey<String>('BOTTOM-MESSAGE'),
+      key: ValueKey<String>('BOTTOM-MESSAGE-${message.id}'),
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible) {
