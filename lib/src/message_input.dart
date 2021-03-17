@@ -19,7 +19,7 @@ import 'stream_channel.dart';
 typedef FileUploader = Future<String> Function(PlatformFile, Channel);
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
-  _SendingAttachment,
+  SendingAttachment,
 );
 
 enum ActionsLocation {
@@ -183,7 +183,7 @@ class MessageInput extends StatefulWidget {
 }
 
 class MessageInputState extends State<MessageInput> {
-  final List<_SendingAttachment> _attachments = [];
+  final List<SendingAttachment> sendingAttachments = [];
   final _focusNode = FocusNode();
   final List<User> _mentionedUsers = [];
 
@@ -256,8 +256,8 @@ class MessageInputState extends State<MessageInput> {
       return _buildSendButton(context);
     }
     return AnimatedCrossFade(
-      crossFadeState: ((_messageIsPresent || _attachments.isNotEmpty) &&
-              _attachments.every((a) => a.uploaded == true))
+      crossFadeState: ((_messageIsPresent || sendingAttachments.isNotEmpty) &&
+              sendingAttachments.every((a) => a.uploaded == true))
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: _buildSendButton(context),
@@ -523,7 +523,7 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildAttachments() {
     return Wrap(
       direction: Axis.horizontal,
-      children: _attachments
+      children: sendingAttachments
           .map(
             (attachment) => Padding(
               padding: const EdgeInsets.all(8.0),
@@ -556,7 +556,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Positioned _buildRemoveButton(_SendingAttachment attachment) {
+  Positioned _buildRemoveButton(SendingAttachment attachment) {
     return Positioned(
       height: 16,
       width: 16,
@@ -573,7 +573,7 @@ class MessageInputState extends State<MessageInput> {
         hoverElevation: 0,
         onPressed: () {
           setState(() {
-            _attachments.remove(attachment);
+            sendingAttachments.remove(attachment);
           });
         },
         fillColor: Colors.white.withOpacity(.5),
@@ -587,7 +587,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildAttachment(_SendingAttachment attachment) {
+  Widget _buildAttachment(SendingAttachment attachment) {
     if (widget.attachmentThumbnailBuilders
             ?.containsKey(attachment.attachment.type) ==
         true) {
@@ -723,7 +723,7 @@ class MessageInputState extends State<MessageInput> {
   /// Use this to add custom type attachments
   void addAttachment(Attachment attachment) {
     setState(() {
-      _attachments.add(_SendingAttachment(
+      sendingAttachments.add(SendingAttachment(
         attachment: attachment,
         uploaded: true,
       ));
@@ -788,7 +788,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     final channel = StreamChannel.of(context).channel;
-    final attachment = _SendingAttachment(
+    final attachment = SendingAttachment(
       file: file,
       attachment: Attachment(
         localUri: file.path != null ? Uri.parse(file.path) : null,
@@ -797,7 +797,7 @@ class MessageInputState extends State<MessageInput> {
     );
 
     setState(() {
-      _attachments.add(attachment);
+      sendingAttachments.add(attachment);
     });
 
     final url = await _uploadAttachment(file, fileType, channel);
@@ -878,7 +878,7 @@ class MessageInputState extends State<MessageInput> {
         child: IconButton(
           key: Key('sendButton'),
           onPressed: (textEditingController.text.trim().isEmpty &&
-                  _attachments.isEmpty)
+                  sendingAttachments.isEmpty)
               ? null
               : () {
                   sendMessage();
@@ -894,14 +894,14 @@ class MessageInputState extends State<MessageInput> {
   /// Sends the current message
   void sendMessage() async {
     final text = textEditingController.text.trim();
-    if (text.isEmpty && _attachments.isEmpty) {
+    if (text.isEmpty && sendingAttachments.isEmpty) {
       return;
     }
 
-    final attachments = List<_SendingAttachment>.from(_attachments);
+    final attachments = List<SendingAttachment>.from(sendingAttachments);
 
     textEditingController.clear();
-    _attachments.clear();
+    sendingAttachments.clear();
 
     setState(() {
       _messageIsPresent = false;
@@ -959,7 +959,7 @@ class MessageInputState extends State<MessageInput> {
     });
   }
 
-  Iterable<Attachment> _getAttachments(List<_SendingAttachment> attachments) {
+  Iterable<Attachment> _getAttachments(List<SendingAttachment> attachments) {
     return attachments.map((attachment) {
       return attachment.attachment;
     });
@@ -1045,7 +1045,7 @@ class MessageInputState extends State<MessageInput> {
     _messageIsPresent = true;
 
     message.attachments?.forEach((attachment) {
-      _attachments.add(_SendingAttachment(
+      sendingAttachments.add(SendingAttachment(
         attachment: attachment,
         uploaded: true,
       ));
@@ -1071,12 +1071,12 @@ class MessageInputState extends State<MessageInput> {
   }
 }
 
-class _SendingAttachment {
+class SendingAttachment {
   PlatformFile file;
   Attachment attachment;
   bool uploaded;
 
-  _SendingAttachment({
+  SendingAttachment({
     this.file,
     this.attachment,
     this.uploaded = false,
