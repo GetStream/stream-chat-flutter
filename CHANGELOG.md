@@ -1,3 +1,7 @@
+## 0.2.21+1
+
+- Made MessageInput.sendingAttachments and SendingAttachment public
+
 ## 0.2.21
 
 - Add `loadingBuilder` in `MessageListView`
