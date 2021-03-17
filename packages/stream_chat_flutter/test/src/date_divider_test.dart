@@ -11,7 +11,6 @@ void main() {
         (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
-      final channel = MockChannel();
 
       when(client.state).thenReturn(clientState);
       when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
