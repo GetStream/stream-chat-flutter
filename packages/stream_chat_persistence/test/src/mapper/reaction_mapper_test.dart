@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:test/test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
