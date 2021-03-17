@@ -1,3 +1,7 @@
+## 1.5.1
+
+- Fixed unread count not updating while the chat is open
+
 ## 1.5.0
 
 - Fixed swipeable visible on navigation back
