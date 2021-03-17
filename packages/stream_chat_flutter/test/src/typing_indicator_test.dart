@@ -7,7 +7,7 @@ import 'mocks.dart';
 
 void main() {
   testWidgets(
-    'it should show basic channel information',
+    'it should show channel typing',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -28,8 +28,6 @@ void main() {
       when(channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
@@ -42,6 +40,26 @@ void main() {
           user: User(id: 'user-id'),
         ),
       ]);
+      when(channelState.messages).thenReturn([
+        Message(
+          text: 'hello',
+          user: User(id: 'other-user'),
+        )
+      ]);
+      when(channelState.messagesStream).thenAnswer((i) => Stream.value([
+            Message(
+              text: 'hello',
+              user: User(id: 'other-user'),
+            )
+          ]));
+
+      when(channelState.typingEvents).thenAnswer((i) => [
+            User(id: 'other-user', extraData: {'name': 'demo'})
+          ]);
+      when(channelState.typingEventsStream).thenAnswer((i) => Stream.value([
+            User(id: 'other-user', extraData: {'name': 'demo'}),
+            User(id: 'other-user', extraData: {'name': 'demo'}),
+          ]));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -49,14 +67,13 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: ChannelHeader(),
+              body: TypingIndicator(),
             ),
           ),
         ),
       ));
 
-      expect(find.text('test'), findsOneWidget);
-      expect(find.byType(ChannelImage), findsOneWidget);
+      expect(find.byKey(Key('typings')), findsOneWidget);
     },
   );
 }

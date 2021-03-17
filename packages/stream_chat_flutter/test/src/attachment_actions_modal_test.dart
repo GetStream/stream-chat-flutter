@@ -10,7 +10,7 @@ import 'mocks.dart';
 void main() {
   testWidgets(
     'it should show the all actions',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
 
@@ -28,20 +28,19 @@ void main() {
             child: Container(
               child: AttachmentActionsModal(
                 message: Message(
-                  text: 'test',
-                  user: User(
-                    id: 'user-id',
-                  ),
-                  attachments: [
-                    Attachment(
-                      type: 'file',
-                      title: 'example.pdf',
-                      extraData: {
-                        'mime_type': 'pdf',
-                      },
+                    text: 'test',
+                    user: User(
+                      id: 'user-id',
                     ),
-                  ]
-                ),
+                    attachments: [
+                      Attachment(
+                        type: 'file',
+                        title: 'example.pdf',
+                        extraData: {
+                          'mime_type': 'pdf',
+                        },
+                      ),
+                    ]),
                 currentIndex: 0,
               ),
             ),

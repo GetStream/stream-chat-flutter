@@ -30,8 +30,7 @@ void main() {
                     300.0,
                     300.0,
                   ),
-                  message: Message(
-                  ),
+                  message: Message(),
                   attachment: Attachment(
                     type: 'file',
                     title: 'example.pdf',
