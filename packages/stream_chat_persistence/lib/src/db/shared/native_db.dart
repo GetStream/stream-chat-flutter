@@ -14,15 +14,40 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 /// A Helper class to construct new instances of [MoorChatDatabase] specifically
 /// for native platform applications
 class SharedDB {
-  /// Returns a new instance of [VmDatabase] created using [userId]
-  /// on a regular isolate.
-  ///
-  /// Generally used with [ConnectionMode.regular].
-  static Future<VmDatabase> constructDatabase(
+  /// Returns a new instance of [MoorChatDatabase].
+  static MoorChatDatabase constructDatabase(
     String userId, {
     bool logStatements = false,
-  }) async {
+    ConnectionMode connectionMode = ConnectionMode.regular,
+  }) {
     final dbName = 'db_$userId';
+    if (connectionMode == ConnectionMode.background) {
+      return MoorChatDatabase.connect(
+        userId,
+        DatabaseConnection.delayed(Future(() async {
+          final isolate = await _createMoorIsolate(
+            dbName,
+            logStatements: logStatements,
+          );
+          return isolate.connect();
+        })),
+      );
+    }
+    return MoorChatDatabase(
+      userId,
+      LazyDatabase(
+        () async => _constructDatabase(
+          dbName,
+          logStatements: logStatements,
+        ),
+      ),
+    );
+  }
+
+  static Future<VmDatabase> _constructDatabase(
+    String dbName, {
+    bool logStatements = false,
+  }) async {
     if (Platform.isIOS || Platform.isAndroid) {
       final dir = await getApplicationDocumentsDirectory();
       final path = join(dir.path, '$dbName.sqlite');
@@ -65,27 +90,6 @@ class SharedDB {
     );
 
     return await receivePort.first as MoorIsolate;
-  }
-
-  /// Returns a new instance of [MoorChatDatabase] using the factory constructor
-  /// [MoorChatDatabase.connect] created on a background isolate.
-  ///
-  /// Generally used with [ConnectionMode.background].
-  static MoorChatDatabase constructMoorChatDatabase(
-    String userId, {
-    bool logStatements = false,
-  }) {
-    final dbName = 'db_$userId';
-    return MoorChatDatabase.connect(
-      userId,
-      DatabaseConnection.delayed(Future(() async {
-        final isolate = await _createMoorIsolate(
-          dbName,
-          logStatements: logStatements,
-        );
-        return isolate.connect();
-      })),
-    );
   }
 }
 

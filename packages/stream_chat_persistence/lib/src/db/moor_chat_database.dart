@@ -6,18 +6,10 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/converter/converter.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
-import 'package:stream_chat_persistence/src/db/shared/shared_db.dart';
+
+export 'shared/shared_db.dart';
 
 part 'moor_chat_database.g.dart';
-
-LazyDatabase _openConnection(
-  String userId, {
-  bool logStatements = false,
-}) =>
-    LazyDatabase(() async => SharedDB.constructDatabase(
-          userId,
-          logStatements: logStatements,
-        ));
 
 /// A chat database implemented using moor
 @UseMoor(tables: [
@@ -44,12 +36,9 @@ LazyDatabase _openConnection(
 class MoorChatDatabase extends _$MoorChatDatabase {
   /// Creates a new moor chat database instance
   MoorChatDatabase(
-    this._userId, {
-    logStatements = false,
-  }) : super(_openConnection(
-          _userId,
-          logStatements: logStatements,
-        ));
+    this._userId,
+    QueryExecutor executor,
+  ) : super(executor);
 
   /// Instantiate a new database instance
   MoorChatDatabase.connect(
