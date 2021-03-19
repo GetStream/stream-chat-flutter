@@ -10,6 +10,22 @@ MoorChatDatabase _testDatabaseProvider(String userId, ConnectionMode mode) =>
     MoorChatDatabase.testable(userId);
 
 void main() {
+  group('client constructor', () {
+    test('throws assertion error if null connectionMode is provided', () {
+      expect(
+        () => StreamChatPersistenceClient(connectionMode: null),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('throws assertion error if null logLevel is provided', () {
+      expect(
+        () => StreamChatPersistenceClient(logLevel: null),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
   group('connect', () {
     const userId = 'testUserId';
     test('successfully connects with the Database', () async {
