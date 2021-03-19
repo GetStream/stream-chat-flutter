@@ -17,6 +17,7 @@ void main() {
   Future<List<Message>> _prepareTestData(
     String cid, {
     bool threads = false,
+    bool mapAllThreadToFirstMessage = false,
     int count = 3,
   }) async {
     final messages = List.generate(
@@ -43,7 +44,8 @@ void main() {
         id: 'testThreadMessageId$cid$index',
         type: 'testType',
         user: User(id: 'testUserId$index'),
-        parentId: messages[index].id,
+        parentId:
+            mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
         showInChannel: math.Random().nextBool(),
@@ -182,6 +184,40 @@ void main() {
     final threadMessages =
         await pinnedMessageDao.getThreadMessagesByParentId(parentId);
     expect(threadMessages.length, 1);
+    expect(threadMessages.first.parentId, parentId);
+  });
+
+  test('getThreadMessagesByParentId along with pagination', () async {
+    const cid = 'testCid';
+    const parentId = 'testMessageId${cid}0';
+    const options = PaginationParams(
+      limit: 15,
+      lessThan: 'testThreadMessageId${cid}25',
+      greaterThanOrEqual: 'testThreadMessageId${cid}5',
+    );
+
+    // Messages should be empty initially
+    final messages = await pinnedMessageDao.getThreadMessagesByParentId(
+      parentId,
+      options: options,
+    );
+    expect(messages, isEmpty);
+
+    // Preparing test data
+    final insertedMessages = await _prepareTestData(
+      cid,
+      threads: true,
+      mapAllThreadToFirstMessage: true,
+      count: 30,
+    );
+    expect(insertedMessages, isNotEmpty);
+
+    // Should fetch all the thread messages of parentId and apply the pagination
+    final threadMessages = await pinnedMessageDao.getThreadMessagesByParentId(
+      parentId,
+      options: options,
+    );
+    expect(threadMessages.length, 15);
     expect(threadMessages.first.parentId, parentId);
   });
 
