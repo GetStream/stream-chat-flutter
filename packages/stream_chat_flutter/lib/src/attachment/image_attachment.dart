@@ -4,9 +4,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_upload_state_builder.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'attachment_title.dart';
 import '../full_screen_media.dart';
 import '../stream_chat_theme.dart';
+import 'attachment_title.dart';
 import 'attachment_widget.dart';
 
 class ImageAttachment extends AttachmentWidget {
@@ -81,6 +81,7 @@ class ImageAttachment extends AttachmentWidget {
         return _buildImageAttachment(
           context,
           CachedNetworkImage(
+            cacheKey: imageUri.path,
             height: size?.height,
             width: size?.width,
             placeholder: (_, __) {

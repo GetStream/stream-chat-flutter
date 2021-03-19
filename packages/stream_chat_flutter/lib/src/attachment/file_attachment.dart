@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 import '../upload_progress_indicator.dart';
 import 'attachment_widget.dart';
