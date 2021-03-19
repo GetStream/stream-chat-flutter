@@ -16,23 +16,42 @@ void main() {
 
   Future<List<Message>> _prepareTestData(
     String cid, {
+    bool quoted = false,
     bool threads = false,
     bool mapAllThreadToFirstMessage = false,
     int count = 3,
   }) async {
+    final users = List.generate(count, (index) => User(id: 'testUserId$index'));
     final messages = List.generate(
       count,
       (index) => Message(
         id: 'testMessageId$cid$index',
         type: 'testType',
-        user: User(id: 'testUserId$index'),
+        user: users[index],
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
-        showInChannel: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
         extraData: {'extra_test_field': 'extraTestData'},
         text: 'Dummy text #$index',
+        pinned: math.Random().nextBool(),
+        pinnedAt: DateTime.now(),
+        pinnedBy: User(id: 'testUserId$index'),
+      ),
+    );
+    final quotedMessages = List.generate(
+      count,
+      (index) => Message(
+        id: 'testQuotedMessageId$cid$index',
+        type: 'testType',
+        user: users[index],
+        createdAt: DateTime.now(),
+        shadowed: math.Random().nextBool(),
+        replyCount: index,
+        updatedAt: DateTime.now(),
+        extraData: {'extra_test_field': 'extraTestData'},
+        text: 'Dummy text #$index',
+        quotedMessageId: messages[index].id,
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
         pinnedBy: User(id: 'testUserId$index'),
@@ -43,12 +62,11 @@ void main() {
       (index) => Message(
         id: 'testThreadMessageId$cid$index',
         type: 'testType',
-        user: User(id: 'testUserId$index'),
+        user: users[index],
         parentId:
             mapAllThreadToFirstMessage ? messages[0].id : messages[index].id,
         createdAt: DateTime.now(),
         shadowed: math.Random().nextBool(),
-        showInChannel: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
         extraData: {'extra_test_field': 'extraTestData'},
@@ -58,7 +76,12 @@ void main() {
         pinnedBy: User(id: 'testUserId$index'),
       ),
     );
-    final allMessages = [...messages, if (threads) ...threadMessages];
+    final allMessages = [
+      ...messages,
+      if (quoted) ...quotedMessages,
+      if (threads) ...threadMessages
+    ];
+    await database.userDao.updateUsers(users);
     await pinnedMessageDao.updateMessages(cid, allMessages);
     return allMessages;
   }
@@ -240,6 +263,24 @@ void main() {
       final insertedMessage = insertedMessages[i];
       expect(fetchedMessage.id, insertedMessage.id);
     }
+  });
+
+  test('getMessagesByCid along with quotedMessage', () async {
+    const cid = 'testCid';
+
+    // Should be empty initially
+    final messages = await pinnedMessageDao.getMessagesByCid(cid);
+    expect(messages, isEmpty);
+
+    // Preparing test data
+    final insertedMessages = await _prepareTestData(cid, quoted: true);
+    expect(insertedMessages, isNotEmpty);
+
+    // Fetched message should match the inserted messages
+    final fetchedMessages = await pinnedMessageDao.getMessagesByCid(cid);
+    expect(fetchedMessages.length, insertedMessages.length);
+    final quoted = fetchedMessages.where((it) => it.quotedMessage != null);
+    expect(quoted.length, insertedMessages.length / 2);
   });
 
   test('getMessagesByCid along with pagination', () async {
