@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:test/test.dart';
@@ -21,9 +22,17 @@ void main() {
         score: math.Random().nextInt(50),
       ),
     );
+    final attachments = List.generate(
+      3,
+      (index) => Attachment(
+        id: 'testAttachmentId',
+        type: 'testAttachmentType',
+        assetUrl: 'testAssetUrl',
+      ),
+    );
     final entity = PinnedMessageEntity(
       id: 'testMessageId',
-      attachments: [],
+      attachments: attachments?.map((it) => jsonEncode(it.toData()))?.toList(),
       channelCid: 'testCid',
       type: 'testType',
       parentId: 'testParentId',
@@ -60,7 +69,6 @@ void main() {
 
     expect(message, isA<Message>());
     expect(message.id, entity.id);
-    expect(message.attachments, entity.attachments);
     expect(message.type, entity.type);
     expect(message.parentId, entity.parentId);
     expect(message.quotedMessageId, entity.quotedMessageId);
@@ -83,6 +91,14 @@ void main() {
     expect(message.pinnedBy.id, entity.pinnedByUserId);
     expect(message.reactionCounts, entity.reactionCounts);
     expect(message.reactionScores, entity.reactionScores);
+    for (var i = 0; i < message.attachments.length; i++) {
+      final messageAttachment = message.attachments[i];
+      final entityAttachmentData = jsonDecode(entity.attachments[i]);
+      final entityAttachment = Attachment.fromData(entityAttachmentData);
+      expect(messageAttachment.id, entityAttachment.id);
+      expect(messageAttachment.type, entityAttachment.type);
+      expect(messageAttachment.assetUrl, entityAttachment.assetUrl);
+    }
   });
 
   test('toPinnedEntity should map message into PinnedMessageEntity', () {
@@ -99,9 +115,17 @@ void main() {
         score: math.Random().nextInt(50),
       ),
     );
+    final attachments = List.generate(
+      3,
+      (index) => Attachment(
+        id: 'testAttachmentId',
+        type: 'testAttachmentType',
+        assetUrl: 'testAssetUrl',
+      ),
+    );
     final message = Message(
       id: 'testMessageId',
-      attachments: [],
+      attachments: attachments,
       type: 'testType',
       parentId: 'testParentId',
       quotedMessageId: quotedMessage.id,
@@ -130,7 +154,6 @@ void main() {
     final entity = message.toPinnedEntity(cid: cid);
     expect(entity, isA<PinnedMessageEntity>());
     expect(entity.id, message.id);
-    expect(entity.attachments, message.attachments);
     expect(entity.type, message.type);
     expect(entity.parentId, message.parentId);
     expect(entity.quotedMessageId, message.quotedMessageId);
@@ -153,5 +176,9 @@ void main() {
     expect(entity.pinnedByUserId, message.pinnedBy.id);
     expect(entity.reactionCounts, message.reactionCounts);
     expect(entity.reactionScores, message.reactionScores);
+    expect(
+      entity.attachments,
+      message.attachments?.map((it) => jsonEncode(it.toData()))?.toList(),
+    );
   });
 }
