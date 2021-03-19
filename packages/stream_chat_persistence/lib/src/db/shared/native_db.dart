@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'dart:io';
 import 'dart:isolate';
 

@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
