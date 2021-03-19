@@ -242,6 +242,33 @@ void main() {
     }
   });
 
+  test('getMessagesByCid along with pagination', () async {
+    const cid = 'testCid';
+    const pagination = PaginationParams(
+      limit: 15,
+      lessThan: 'testMessageId${cid}25',
+      greaterThanOrEqual: 'testMessageId${cid}5',
+    );
+
+    // Should be empty initially
+    final messages = await pinnedMessageDao.getMessagesByCid(
+      cid,
+      messagePagination: pagination,
+    );
+    expect(messages, isEmpty);
+
+    // Preparing test data
+    final insertedMessages = await _prepareTestData(cid, count: 30);
+    expect(insertedMessages, isNotEmpty);
+
+    // Fetched message should match the inserted messages
+    final fetchedMessages = await pinnedMessageDao.getMessagesByCid(
+      cid,
+      messagePagination: pagination,
+    );
+    expect(fetchedMessages.length, 15);
+  });
+
   test('updateMessages', () async {
     const cid = 'testCid';
 
