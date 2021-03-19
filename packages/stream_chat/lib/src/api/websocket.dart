@@ -6,9 +6,6 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/connection_status.dart';
-import 'package:stream_chat/src/api/web_socket_channel_stub.dart'
-    if (dart.library.html) 'web_socket_channel_html.dart'
-    if (dart.library.io) 'web_socket_channel_io.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -36,7 +33,7 @@ class WebSocket {
     this.connectPayload,
     this.handler,
     this.logger,
-    this.connectFunc = connectWebSocket,
+    this.connectFunc,
     this.reconnectionMonitorInterval = 1,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
@@ -121,9 +118,9 @@ class WebSocket {
   WebSocketChannel _channel;
   Timer _healthCheck, _reconnectionMonitor;
   DateTime _lastEventAt;
-  bool _manuallyDisconnected = false,
-      _connecting = false,
-      _reconnecting = false;
+  bool _manuallyDisconnected = false;
+  bool _connecting = false;
+  bool _reconnecting = false;
 
   Event _decodeEvent(String source) => Event.fromJson(json.decode(source));
 
@@ -143,7 +140,8 @@ class WebSocket {
 
     logger.info('connecting to $_path');
 
-    _channel = connectFunc(_path);
+    _channel =
+        connectFunc?.call(_path) ?? WebSocketChannel.connect(Uri.parse(_path));
     _channel.stream.listen(
       (data) {
         final jsonData = json.decode(data);
@@ -177,6 +175,10 @@ class WebSocket {
   }
 
   void _onData(data) {
+    if (_manuallyDisconnected) {
+      return;
+    }
+
     final event = _decodeEvent(data);
     logger.info('received new event: $data');
 
@@ -302,6 +304,10 @@ class WebSocket {
 
   /// Disconnects the WS and releases eventual resources
   Future<void> disconnect() async {
+    _connecting = false;
+    if (!_connectionCompleter.isCompleted) {
+      _connectionCompleter.complete();
+    }
     if (_manuallyDisconnected) {
       return;
     }
