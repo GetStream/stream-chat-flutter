@@ -33,6 +33,7 @@ jobs:
           melos exec -c 3 --ignore="*example*" -- \
             tuneup check
       - name: 'Pub Check'
+        if: github.ref == 'refs/heads/master'
         run: |
           melos exec -c 1 --no-private --ignore="*example*" -- \
             pub publish --dry-run
@@ -89,7 +90,7 @@ jobs:
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
-          min_coverage: 0.2
+          min_coverage: 95
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
