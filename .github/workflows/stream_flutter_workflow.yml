@@ -89,7 +89,7 @@ jobs:
           bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
-          path: packages/stream_chat/lcov.info
+          path: packages/stream_chat/coverage/lcov.info
           min_coverage: 50
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
