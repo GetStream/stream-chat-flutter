@@ -35,6 +35,29 @@ void main() {
     expect(updatedCids, cids);
   });
 
+  test('clear queryCache before updateChannelQueries', () async {
+    const filter = {
+      'members': {
+        r'$in': ['testUserId'],
+      },
+    };
+
+    const cids = ['testCid1', 'testCid2', 'testCid3'];
+
+    final cachedCids = await channelQueryDao.getCachedChannelCids(filter);
+    expect(cachedCids, isEmpty);
+
+    // Updating channel queries
+    await channelQueryDao.updateChannelQueries(
+      filter,
+      cids,
+      clearQueryCache: true,
+    );
+
+    final updatedCids = await channelQueryDao.getCachedChannelCids(filter);
+    expect(updatedCids, cids);
+  });
+
   test('getCachedChannelCids', () async {
     const filter = {
       'members': {
