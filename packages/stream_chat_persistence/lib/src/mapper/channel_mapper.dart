@@ -46,14 +46,14 @@ extension ChannelModelX on ChannelModel {
         id: id,
         type: type,
         cid: cid,
-        config: config.toJson(),
+        config: config?.toJson(),
         frozen: frozen,
         lastMessageAt: lastMessageAt,
         createdAt: createdAt,
         updatedAt: updatedAt,
         deletedAt: deletedAt,
         memberCount: memberCount,
-        createdById: createdBy.id,
+        createdById: createdBy?.id,
         extraData: extraData,
       );
 }

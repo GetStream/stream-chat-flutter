@@ -1,22 +1,15 @@
+import 'package:meta/meta.dart';
+import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
+
 import 'package:stream_chat_persistence/src/converter/converter.dart';
 import 'package:stream_chat_persistence/src/dao/dao.dart';
-import 'package:stream_chat_persistence/src/db/shared/shared_db.dart';
 import 'package:stream_chat_persistence/src/entity/entity.dart';
 
-part 'moor_chat_database.g.dart';
+export 'shared/shared_db.dart';
 
-LazyDatabase _openConnection(
-  String userId, {
-  bool logStatements = false,
-  bool persistOnDisk = true,
-}) =>
-    LazyDatabase(() async => SharedDB.constructDatabase(
-          userId,
-          logStatements: logStatements,
-          persistOnDisk: persistOnDisk,
-        ));
+part 'moor_chat_database.g.dart';
 
 /// A chat database implemented using moor
 @UseMoor(tables: [
@@ -43,20 +36,19 @@ LazyDatabase _openConnection(
 class MoorChatDatabase extends _$MoorChatDatabase {
   /// Creates a new moor chat database instance
   MoorChatDatabase(
-    this._userId, {
-    logStatements = false,
-    bool persistOnDisk = true,
-  }) : super(_openConnection(
-          _userId,
-          logStatements: logStatements,
-          persistOnDisk: persistOnDisk,
-        ));
+    this._userId,
+    QueryExecutor executor,
+  ) : super(executor);
 
   /// Instantiate a new database instance
   MoorChatDatabase.connect(
     this._userId,
     DatabaseConnection connection,
   ) : super.connect(connection);
+
+  /// Custom constructor used only for testing
+  @visibleForTesting
+  MoorChatDatabase.testable(this._userId) : super(VmDatabase.memory());
 
   final String _userId;
 
