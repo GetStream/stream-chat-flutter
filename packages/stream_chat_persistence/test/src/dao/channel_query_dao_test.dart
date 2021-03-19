@@ -78,15 +78,17 @@ void main() {
   });
 
   Future<List<ChannelModel>> _insertTestDataForGetChannel(
-      Map<String, Object> filter) async {
+    Map<String, Object> filter, {
+    int count = 3,
+  }) async {
     final now = DateTime.now();
     final userDao = database.userDao;
     final channelDao = database.channelDao;
 
-    const cids = ['testCid0', 'testCid1', 'testCid2'];
-    final users = List.generate(3, (index) => User(id: 'testId$index'));
+    final cids = List.generate(count, (index) => 'testCid$index');
+    final users = List.generate(count, (index) => User(id: 'testId$index'));
     final channels = List.generate(
-      3,
+      count,
       (index) => ChannelModel(
         id: 'testId$index',
         type: 'testType$index',
@@ -149,6 +151,30 @@ void main() {
         );
       }
     });
+
+    test(
+      'should return all the inserted channels along with pagination applied',
+      () async {
+        const offset = 5;
+        const limit = 15;
+        const pagination = PaginationParams(offset: offset, limit: limit);
+
+        // Inserting test data for get channels
+        final insertedChannels = await _insertTestDataForGetChannel(
+          filter,
+          count: 30,
+        );
+
+        // Should match with the inserted channels
+        final updatedChannels = await channelQueryDao.getChannels(
+          filter: filter,
+          paginationParams: pagination,
+        );
+        expect(updatedChannels.length, limit);
+        expect(updatedChannels.first.id, 'testId24');
+        expect(updatedChannels.first.cid, 'testCid24');
+      },
+    );
 
     test('should return sorted channels using member count', () async {
       int sortComparator(ChannelModel a, ChannelModel b) =>
