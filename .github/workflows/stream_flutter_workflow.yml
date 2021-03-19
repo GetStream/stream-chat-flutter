@@ -70,6 +70,7 @@ jobs:
         run: |
           ./.github/workflows/scripts/install-tools.sh
           flutter pub global activate coverage
+          flutter pub global activate remove_from_coverage
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
       - name: 'Dart Test'
@@ -82,7 +83,9 @@ jobs:
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
             flutter test --coverage
       - name: CodeCov
-        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          melos exec  -c 3 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/coverage.sh"
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat/lcov.info
