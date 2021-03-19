@@ -20,5 +20,4 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   fake_async: ^1.1.0
-  pedantic: ^1.9.2
   
