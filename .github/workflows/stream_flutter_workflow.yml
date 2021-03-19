@@ -77,7 +77,7 @@ jobs:
         run: |
           cd packages/stream_chat
           flutter pub run test --coverage coverage/
-          format_coverage --lcov --in=coverage/ --out=lcov.info --packages=.packages --report-on=lib
+          format_coverage --lcov --in=coverage/ --out=coverage/lcov.info --packages=.packages --report-on=lib
       - name: 'Flutter Test'
         run: |
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
