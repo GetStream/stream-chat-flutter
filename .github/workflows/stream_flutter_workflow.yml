@@ -84,7 +84,8 @@ jobs:
             flutter test --coverage
       - name: CodeCov
         run: |
-          melos exec  -c 3 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/coverage.sh"
+          melos exec  -c 3 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
+          "\$MELOS_ROOT_PATH/.github/workflows/scripts/coverage.sh"
           bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
