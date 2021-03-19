@@ -284,10 +284,13 @@ void main() {
 
   test('getMessagesByCid along with pagination', () async {
     const cid = 'testCid';
+    const limit = 15;
+    const lessThan = 'testMessageId${cid}25';
+    const greaterThanOrEqual = 'testMessageId${cid}5';
     const pagination = PaginationParams(
-      limit: 15,
-      lessThan: 'testMessageId${cid}25',
-      greaterThanOrEqual: 'testMessageId${cid}5',
+      limit: limit,
+      lessThan: lessThan,
+      greaterThanOrEqual: greaterThanOrEqual,
     );
 
     // Should be empty initially
@@ -306,7 +309,9 @@ void main() {
       cid,
       messagePagination: pagination,
     );
-    expect(fetchedMessages.length, 15);
+    expect(fetchedMessages.length, limit);
+    expect(fetchedMessages.first.id, greaterThanOrEqual);
+    expect(fetchedMessages.last.id != lessThan, true);
   });
 
   test('updateMessages', () async {
