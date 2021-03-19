@@ -28,14 +28,14 @@ class DateDivider extends StatelessWidget {
       now.subtract(Duration(days: 7)),
       Units.DAY,
     )) {
-      dayInfo = createdAt.format('EEEE');
+      dayInfo = createdAt.EEEE;
     } else if (Jiffy(createdAt).isAfter(
       Jiffy(now).subtract(years: 1),
       Units.DAY,
     )) {
-      dayInfo = createdAt.format('MMMM d');
+      dayInfo = createdAt.MMMd;
     } else {
-      dayInfo = createdAt.format('MMMM d');
+      dayInfo = createdAt.MMMd;
     }
 
     if (uppercase) dayInfo = dayInfo.toUpperCase();
