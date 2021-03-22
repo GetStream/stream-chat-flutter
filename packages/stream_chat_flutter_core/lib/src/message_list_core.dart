@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
-import 'stream_channel.dart';
 
-/// [MessageListCore] is a simplified class that allows fetching a list of messages while exposing UI builders.
+/// [MessageListCore] is a simplified class that allows fetching a list of
+/// messages while exposing UI builders.
+///
 /// A [MessageListController] is used to paginate data.
 ///
 /// ```dart
@@ -50,12 +53,14 @@ import 'stream_channel.dart';
 /// ```
 ///
 ///
-/// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channels.
+/// Make sure to have a [StreamChannel] ancestor in order to provide the
+/// information about the channels.
+///
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
 class MessageListCore extends StatefulWidget {
   /// Instantiate a new [MessageListView].
-  MessageListCore({
+  const MessageListCore({
     Key key,
     @required this.loadingBuilder,
     @required this.emptyBuilder,
@@ -65,10 +70,16 @@ class MessageListCore extends StatefulWidget {
     this.parentMessage,
     this.messageListController,
     this.messageFilter,
-  })  : assert(loadingBuilder != null),
-        assert(emptyBuilder != null),
-        assert(messageListBuilder != null),
-        assert(errorWidgetBuilder != null),
+  })  : assert(loadingBuilder != null, 'loadingBuilder should not be null'),
+        assert(emptyBuilder != null, 'emptyBuilder should not be null'),
+        assert(
+          messageListBuilder != null,
+          'messageListBuilder should not be null',
+        ),
+        assert(
+          errorWidgetBuilder != null,
+          'errorWidgetBuilder should not be null',
+        ),
         super(key: key);
 
   /// A [MessageListController] allows pagination.
@@ -84,12 +95,15 @@ class MessageListCore extends StatefulWidget {
   /// Function used to build an empty widget
   final WidgetBuilder emptyBuilder;
 
-  /// Callback triggered when an error occurs while performing the given request.
-  /// This parameter can be used to display an error message to users in the event
-  /// of a connection failure.
+  /// Callback triggered when an error occurs while performing the given
+  /// request.
+  ///
+  /// This parameter can be used to display an error message to users in the
+  /// event of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
 
-  /// If true will show a scroll to bottom message when there are new messages and the scroll offset is not zero
+  /// If true will show a scroll to bottom message when there are new messages
+  /// and the scroll offset is not zero.
   final bool showScrollToBottom;
 
   /// If the current message belongs to a `thread`, this property represents the
@@ -112,11 +126,7 @@ class _MessageListCoreState extends State<MessageListCore> {
 
   OwnUser get _currentUser => streamChannel.channel.client.state.user;
 
-  int initialIndex;
-  double initialAlignment;
-
   List<Message> messages = <Message>[];
-
   bool initialMessageHighlightComplete = false;
 
   @override

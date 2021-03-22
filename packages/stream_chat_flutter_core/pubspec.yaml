@@ -10,14 +10,13 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  stream_chat: ^1.5.0
   flutter:
     sdk: flutter
   rxdart: ^0.25.0
+  stream_chat: ^1.5.0
 
 dev_dependencies:
-  mockito: ^4.1.4
+  fake_async: ^1.1.0
   flutter_test:
     sdk: flutter
-  fake_async: ^1.1.0
-  
+  mockito: ^4.1.4

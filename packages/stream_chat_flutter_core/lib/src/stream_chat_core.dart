@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import 'typedef.dart';
+import 'package:stream_chat_flutter_core/src/typedef.dart';
 
 /// Widget used to provide information about the chat to the widget tree.
 /// This Widget is used to react to life cycle changes and system updates.
-/// When the app goes into the background, the websocket connection is kept alive
-/// for two minutes before being terminated.
+/// When the app goes into the background, the websocket connection is kept
+/// alive for two minutes before being terminated.
 ///
 /// Conversely, when app is resumed or restarted, a new connection is initiated.
 ///
@@ -36,16 +35,16 @@ import 'typedef.dart';
 class StreamChatCore extends StatefulWidget {
   /// Constructor used for creating a new instance of [StreamChatCore].
   ///
-  /// [StreamChatCore] is a stateful widget which reacts to system events and updates
-  /// Stream's connection status accordingly.
-  StreamChatCore({
+  /// [StreamChatCore] is a stateful widget which reacts to system events and
+  /// updates Stream's connection status accordingly.
+  const StreamChatCore({
     Key key,
     @required this.client,
     @required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
-  })  : assert(client != null),
-        assert(child != null),
+  })  : assert(client != null, 'Stream Chat Client should not be null'),
+        assert(child != null, 'Child should not be null'),
         super(key: key);
 
   /// Instance of Stream Chat Client containing information about the current
@@ -55,7 +54,8 @@ class StreamChatCore extends StatefulWidget {
   /// Widget descendant.
   final Widget child;
 
-  /// The amount of time that will pass before disconnecting the client in the background
+  /// The amount of time that will pass before disconnecting the client in
+  /// the background
   final Duration backgroundKeepAlive;
 
   /// Handler called whenever the [client] receives a new [Event] while the app
@@ -90,9 +90,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   Timer _disconnectTimer;
 
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 
   /// The current user
   User get user => widget.client.state.user;

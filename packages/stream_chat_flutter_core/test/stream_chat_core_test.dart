@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:mockito/mockito.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
@@ -110,17 +110,14 @@ void main() {
             onBackgroundEventReceived: showLocalNotificationMock,
             backgroundKeepAlive: const Duration(seconds: 4),
             child: Builder(
-              builder: (context) {
-                return Container();
-              },
+              builder: (context) => Container(),
             ),
           ),
         );
 
-        final sc = scKey.currentState;
-        sc.didChangeAppLifecycleState(AppLifecycleState.paused);
+        scKey.currentState.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-        _async.elapse(Duration(seconds: 5));
+        _async.elapse(const Duration(seconds: 5));
 
         verify(client.disconnect()).called(1);
         eventStreamController.close();
@@ -129,7 +126,8 @@ void main() {
   );
 
   testWidgets(
-    'StreamChatCore should handle notifications when on background and connected',
+    'StreamChatCore should handle notifications when on background and '
+    'connected',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -154,15 +152,12 @@ void main() {
           onBackgroundEventReceived: showLocalNotificationMock,
           backgroundKeepAlive: const Duration(seconds: 4),
           child: Builder(
-            builder: (context) {
-              return Container();
-            },
+            builder: (context) => Container(),
           ),
         ),
       );
 
-      final sc = scKey.currentState;
-      sc.didChangeAppLifecycleState(AppLifecycleState.paused);
+      scKey.currentState.didChangeAppLifecycleState(AppLifecycleState.paused);
       final event = Event(
         type: EventType.messageNew,
         message: Message(text: 'hey'),
