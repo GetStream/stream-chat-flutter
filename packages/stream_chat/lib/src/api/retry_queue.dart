@@ -74,7 +74,7 @@ class RetryQueue {
       } catch (error) {
         ApiError apiError;
         if (error is DioError) {
-          if (error.type == DioErrorType.RESPONSE) {
+          if (error.type == DioErrorType.response) {
             _messageQueue.remove(message);
             return;
           }

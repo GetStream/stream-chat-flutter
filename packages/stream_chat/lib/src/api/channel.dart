@@ -352,7 +352,7 @@ class Channel {
       state?.addMessage(response.message);
       return response;
     } catch (error) {
-      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+      if (error is DioError && error.type != DioErrorType.response) {
         state?.retryQueue?.add([message]);
       }
       rethrow;
@@ -405,7 +405,7 @@ class Channel {
       ));
       return response;
     } catch (error) {
-      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+      if (error is DioError && error.type != DioErrorType.response) {
         state?.retryQueue?.add([message]);
       }
       rethrow;
@@ -446,7 +446,7 @@ class Channel {
 
       return response;
     } catch (error) {
-      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+      if (error is DioError && error.type != DioErrorType.response) {
         state?.retryQueue?.add([message]);
       }
       rethrow;

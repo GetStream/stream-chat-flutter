@@ -17,19 +17,19 @@ void main() {
 
     test('should parse json correctly', () {
       final channel = ChannelModel.fromJson(json.decode(jsonExample));
-      expect(channel.id, equals("test"));
-      expect(channel.type, equals("livestream"));
-      expect(channel.cid, equals("test:livestream"));
-      expect(channel.extraData["cats"], equals(true));
-      expect(channel.extraData["fruit"], equals(["bananas", "apples"]));
+      expect(channel.id, equals('test'));
+      expect(channel.type, equals('livestream'));
+      expect(channel.cid, equals('test:livestream'));
+      expect(channel.extraData['cats'], equals(true));
+      expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
     });
 
     test('should serialize to json correctly', () {
       final channel = ChannelModel(
-        type: "type",
-        id: "id",
-        cid: "a:a",
-        extraData: {"name": "cool"},
+        type: 'type',
+        id: 'id',
+        cid: 'a:a',
+        extraData: {'name': 'cool'},
       );
 
       expect(
@@ -40,10 +40,10 @@ void main() {
 
     test('should serialize to json correctly when frozen is provided', () {
       final channel = ChannelModel(
-        type: "type",
-        id: "id",
-        cid: "a:a",
-        extraData: {"name": "cool"},
+        type: 'type',
+        id: 'id',
+        cid: 'a:a',
+        extraData: {'name': 'cool'},
         frozen: false,
       );
 
