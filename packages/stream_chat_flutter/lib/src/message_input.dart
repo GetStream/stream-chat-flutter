@@ -314,7 +314,7 @@ class MessageInputState extends State<MessageInput> {
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: _buildTextField(context),
               ),
               if (widget.parentMessage != null && !widget.hideSendAsDm)
@@ -2233,7 +2233,7 @@ class MessageInputState extends State<MessageInput> {
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
     _messageIsPresent = true;
-    for (final attachment in message.attachments) {
+    for (final attachment in message?.attachments) {
       _attachments[attachment.id] = attachment.copyWith(
         uploadState: attachment.uploadState ?? UploadState.success(),
       );

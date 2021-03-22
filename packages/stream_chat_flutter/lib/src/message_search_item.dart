@@ -84,9 +84,9 @@ class MessageSearchItem extends StatelessWidget {
     if (now.year != createdAt.year ||
         now.month != createdAt.month ||
         now.day != createdAt.day) {
-      stringDate = Jiffy(createdAt.toLocal()).format('dd/MM/yyyy');
+      stringDate = Jiffy(createdAt.toLocal()).yMd;
     } else {
-      stringDate = Jiffy(createdAt.toLocal()).format('HH:mm');
+      stringDate = Jiffy(createdAt.toLocal()).jm;
     }
 
     return Text(

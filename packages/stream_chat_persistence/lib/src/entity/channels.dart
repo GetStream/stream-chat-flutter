@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'package:moor/moor.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 
@@ -17,7 +18,7 @@ class Channels extends Table {
   TextColumn get config => text().map(MapConverter<Object>())();
 
   /// True if this channel entity is frozen
-  BoolColumn get frozen => boolean().withDefault(Constant(false))();
+  BoolColumn get frozen => boolean().withDefault(const Constant(false))();
 
   /// The date of the last message
   DateTimeColumn get lastMessageAt => dateTime().nullable()();

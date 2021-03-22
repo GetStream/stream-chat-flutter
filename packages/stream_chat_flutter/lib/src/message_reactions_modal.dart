@@ -23,6 +23,7 @@ class MessageReactionsModal extends StatelessWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final void Function(User) onUserAvatarTap;
+  final BorderRadius attachmentBorderRadiusGeometry;
 
   const MessageReactionsModal({
     Key key,
@@ -36,6 +37,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.reverse = false,
     this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
+    this.attachmentBorderRadiusGeometry,
   }) : super(key: key);
 
   @override
@@ -132,6 +134,8 @@ class MessageReactionsModal extends StatelessWidget {
                               shape: messageShape,
                               attachmentShape: attachmentShape,
                               padding: const EdgeInsets.all(0),
+                              attachmentBorderRadiusGeometry:
+                                  attachmentBorderRadiusGeometry,
                               attachmentPadding: EdgeInsets.all(
                                 hasFileAttachment ? 4 : 2,
                               ),

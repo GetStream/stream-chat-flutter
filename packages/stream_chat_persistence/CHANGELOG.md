@@ -1,3 +1,8 @@
+## 1.5.0
+
+* Update llc dependency
+* Wait for all operations to finish before disconnecting
+
 ## 1.4.0-beta
 
 * Update llc dependency

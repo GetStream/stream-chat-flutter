@@ -89,18 +89,36 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
     PaginationParams options,
   }) async {
     final msgList = await Future.wait(await (select(pinnedMessages).join([
-      innerJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
-      innerJoin(_pinnedByUsers,
+      leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
+      leftOuterJoin(_pinnedByUsers,
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
+          ..where(isNotNull(pinnedMessages.parentId))
           ..where(pinnedMessages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
 
-    if (options?.lessThan != null) {
-      final lessThanIndex = msgList.indexWhere((m) => m.id == options.lessThan);
-      msgList.removeRange(lessThanIndex, msgList.length);
+    if (msgList.isNotEmpty) {
+      if (options?.lessThan != null) {
+        final lessThanIndex = msgList.indexWhere(
+          (m) => m.id == options.lessThan,
+        );
+        if (lessThanIndex != -1) {
+          msgList.removeRange(lessThanIndex, msgList.length);
+        }
+      }
+      if (options?.greaterThanOrEqual != null) {
+        final greaterThanIndex = msgList.indexWhere(
+          (m) => m.id == options.greaterThanOrEqual,
+        );
+        if (greaterThanIndex != -1) {
+          msgList.removeRange(0, greaterThanIndex);
+        }
+      }
+      if (options?.limit != null) {
+        return msgList.take(options.limit).toList();
+      }
     }
     return msgList;
   }
@@ -123,24 +141,26 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
         .map(_messageFromJoinRow)
         .get());
 
-    if (messagePagination?.lessThan != null) {
-      final lessThanIndex = msgList.indexWhere(
-        (m) => m.id == messagePagination.lessThan,
-      );
-      if (lessThanIndex != -1) {
-        msgList.removeRange(lessThanIndex, msgList.length);
+    if (msgList.isNotEmpty) {
+      if (messagePagination?.lessThan != null) {
+        final lessThanIndex = msgList.indexWhere(
+          (m) => m.id == messagePagination.lessThan,
+        );
+        if (lessThanIndex != -1) {
+          msgList.removeRange(lessThanIndex, msgList.length);
+        }
       }
-    }
-    if (messagePagination?.greaterThanOrEqual != null) {
-      final greaterThanIndex = msgList.indexWhere(
-        (m) => m.id == messagePagination.greaterThanOrEqual,
-      );
-      if (greaterThanIndex != -1) {
-        msgList.removeRange(0, greaterThanIndex);
+      if (messagePagination?.greaterThanOrEqual != null) {
+        final greaterThanIndex = msgList.indexWhere(
+          (m) => m.id == messagePagination.greaterThanOrEqual,
+        );
+        if (greaterThanIndex != -1) {
+          msgList.removeRange(0, greaterThanIndex);
+        }
       }
-    }
-    if (messagePagination?.limit != null) {
-      return msgList.take(messagePagination.limit).toList();
+      if (messagePagination?.limit != null) {
+        return msgList.take(messagePagination.limit).toList();
+      }
     }
     return msgList;
   }
