@@ -656,6 +656,7 @@ class MessageInputState extends State<MessageInput> {
   Timer _debounce;
 
   String _previousValue;
+
   void _onChanged(BuildContext context, String s) {
     if (s == _previousValue) {
       return;
@@ -1961,12 +1962,6 @@ class MessageInputState extends State<MessageInput> {
     final mimeType = file.name?.mimeType ?? file.path.split('/').last.mimeType;
 
     final extraDataMap = <String, dynamic>{};
-
-    if (mimeType?.type == 'video' || mimeType?.type == 'image') {
-      attachmentType = mimeType.type;
-    } else {
-      attachmentType = 'file';
-    }
 
     if (mimeType?.subtype != null) {
       extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();
