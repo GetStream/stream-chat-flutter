@@ -220,7 +220,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
         24) {
       return 'yesterday';
     } else {
-      return 'on ${Jiffy(dateTime).format("MMM do")}';
+      return 'on ${Jiffy(dateTime).MMMd}';
     }
   }
 

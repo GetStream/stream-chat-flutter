@@ -235,6 +235,7 @@ class MessageWidget extends StatefulWidget {
                   ),
                   border,
                   reverse,
+                  attachmentBorderRadiusGeometry ?? BorderRadius.zero,
                 ),
               );
             }
@@ -259,6 +260,7 @@ class MessageWidget extends StatefulWidget {
               ),
               border,
               reverse,
+              attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
           },
           'video': (context, message, attachments) {
@@ -291,6 +293,7 @@ class MessageWidget extends StatefulWidget {
               ),
               border,
               reverse,
+              attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
           },
           'giphy': (context, message, attachments) {
@@ -318,6 +321,7 @@ class MessageWidget extends StatefulWidget {
               ),
               border,
               reverse,
+              attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
           },
           'file': (context, message, attachments) {
@@ -329,22 +333,28 @@ class MessageWidget extends StatefulWidget {
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
-            return wrapAttachmentWidget(
-              context,
-              Column(
-                children: attachments.map((attachment) {
-                  return FileAttachment(
-                    message: message,
-                    attachment: attachment,
-                    size: Size(
-                      MediaQuery.of(context).size.width * 0.8,
-                      MediaQuery.of(context).size.height * 0.3,
-                    ),
-                  );
-                }).toList(),
-              ),
-              border,
-              reverse,
+            return Column(
+              children: attachments
+                  .map<Widget>((attachment) {
+                    return wrapAttachmentWidget(
+                      context,
+                      FileAttachment(
+                        message: message,
+                        attachment: attachment,
+                        size: Size(
+                          MediaQuery.of(context).size.width * 0.8,
+                          MediaQuery.of(context).size.height * 0.3,
+                        ),
+                      ),
+                      border,
+                      reverse,
+                      attachmentBorderRadiusGeometry ?? BorderRadius.zero,
+                    );
+                  })
+                  .insertBetween(SizedBox(
+                    height: attachmentPadding.vertical / 2,
+                  ))
+                  .toList(),
             );
           },
         }..addAll(customAttachmentBuilders ?? {}),
@@ -822,6 +832,8 @@ class _MessageWidgetState extends State<MessageWidget>
           return StreamChannel(
             channel: channel,
             child: MessageActionsModal(
+              attachmentBorderRadiusGeometry:
+                  widget.attachmentBorderRadiusGeometry,
               showUserAvatar:
                   widget.message.user.id == channel.client.state.user.id
                       ? DisplayWidget.gone
@@ -869,6 +881,8 @@ class _MessageWidgetState extends State<MessageWidget>
           return StreamChannel(
             channel: channel,
             child: MessageReactionsModal(
+              attachmentBorderRadiusGeometry:
+                  widget.attachmentBorderRadiusGeometry,
               showUserAvatar:
                   widget.message.user.id == channel.client.state.user.id
                       ? DisplayWidget.gone
@@ -913,7 +927,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _parseAttachments() {
-    Map<String, List<Attachment>> attachmentGroups = {};
+    final attachmentGroups = <String, List<Attachment>>{};
 
     widget.message.attachments
         .where((element) => element.ogScrapeUrl == null)
@@ -925,7 +939,7 @@ class _MessageWidgetState extends State<MessageWidget>
       attachmentGroups[e.type].add(e);
     });
 
-    List<Widget> attachmentList = [];
+    final attachmentList = <Widget>[];
 
     attachmentGroups.forEach((type, attachments) {
       final attachmentBuilder = widget.attachmentBuilders[type];

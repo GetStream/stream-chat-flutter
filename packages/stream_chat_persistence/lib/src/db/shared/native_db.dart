@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'dart:io';
 import 'dart:isolate';
 
@@ -9,43 +10,63 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
-import '../moor_chat_database.dart';
+import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 
 /// A Helper class to construct new instances of [MoorChatDatabase] specifically
 /// for native platform applications
 class SharedDB {
-  /// Returns a new instance of [VmDatabase] created using [userId]
-  /// on a regular isolate.
-  ///
-  /// Generally used with [ConnectionMode.regular].
-  static Future<VmDatabase> constructDatabase(
+  /// Returns a new instance of [MoorChatDatabase].
+  static MoorChatDatabase constructDatabase(
     String userId, {
     bool logStatements = false,
-    bool persistOnDisk = true,
-  }) async {
+    ConnectionMode connectionMode = ConnectionMode.regular,
+  }) {
     final dbName = 'db_$userId';
-    if (persistOnDisk) {
-      if (Platform.isIOS || Platform.isAndroid) {
-        final dir = await getApplicationDocumentsDirectory();
-        final path = join(dir.path, '$dbName.sqlite');
-        final file = File(path);
-        return VmDatabase(file, logStatements: logStatements);
-      }
-      if (Platform.isMacOS || Platform.isLinux) {
-        final file = File('$dbName.sqlite');
-        return VmDatabase(file, logStatements: logStatements);
-      }
+    if (connectionMode == ConnectionMode.background) {
+      return MoorChatDatabase.connect(
+        userId,
+        DatabaseConnection.delayed(Future(() async {
+          final isolate = await _createMoorIsolate(
+            dbName,
+            logStatements: logStatements,
+          );
+          return isolate.connect();
+        })),
+      );
+    }
+    return MoorChatDatabase(
+      userId,
+      LazyDatabase(
+        () async => _constructDatabase(
+          dbName,
+          logStatements: logStatements,
+        ),
+      ),
+    );
+  }
+
+  static Future<VmDatabase> _constructDatabase(
+    String dbName, {
+    bool logStatements = false,
+  }) async {
+    if (Platform.isIOS || Platform.isAndroid) {
+      final dir = await getApplicationDocumentsDirectory();
+      final path = join(dir.path, '$dbName.sqlite');
+      final file = File(path);
+      return VmDatabase(file, logStatements: logStatements);
+    }
+    if (Platform.isMacOS || Platform.isLinux) {
+      final file = File('$dbName.sqlite');
+      return VmDatabase(file, logStatements: logStatements);
     }
     return VmDatabase.memory(logStatements: logStatements);
   }
 
   static void _startBackground(_IsolateStartRequest request) {
-    final executor = LazyDatabase(() async {
-      return VmDatabase(
-        File(request.targetPath),
-        logStatements: request.logStatements,
-      );
-    });
+    final executor = LazyDatabase(() async => VmDatabase(
+          File(request.targetPath),
+          logStatements: request.logStatements,
+        ));
     final moorIsolate = MoorIsolate.inCurrent(
       () => DatabaseConnection.fromExecutor(executor),
     );
@@ -69,39 +90,18 @@ class SharedDB {
       ),
     );
 
-    return (await receivePort.first as MoorIsolate);
-  }
-
-  /// Returns a new instance of [MoorChatDatabase] using the factory constructor
-  /// [MoorChatDatabase.connect] created on a background isolate.
-  ///
-  /// Generally used with [ConnectionMode.background].
-  static MoorChatDatabase constructMoorChatDatabase(
-    String userId, {
-    bool logStatements = false,
-  }) {
-    final dbName = 'db_$userId';
-    return MoorChatDatabase.connect(
-      userId,
-      DatabaseConnection.delayed(Future(() async {
-        MoorIsolate isolate = await _createMoorIsolate(
-          dbName,
-          logStatements: logStatements,
-        );
-        return isolate.connect();
-      })),
-    );
+    return await receivePort.first as MoorIsolate;
   }
 }
 
 class _IsolateStartRequest {
-  final SendPort sendMoorIsolate;
-  final String targetPath;
-  final bool logStatements;
-
   const _IsolateStartRequest(
     this.sendMoorIsolate,
     this.targetPath, {
     this.logStatements = false,
   });
+
+  final SendPort sendMoorIsolate;
+  final String targetPath;
+  final bool logStatements;
 }

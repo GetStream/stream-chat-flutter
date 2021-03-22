@@ -1,3 +1,7 @@
+## 1.5.0
+
+* Minor fixes and improvements
+
 ## 1.4.0-beta
 
 * Added `MessageListCore.messageFilter` to filter messages locally

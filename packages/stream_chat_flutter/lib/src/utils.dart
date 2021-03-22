@@ -356,15 +356,19 @@ Widget wrapAttachmentWidget(
   Widget attachmentWidget,
   ShapeBorder attachmentShape,
   bool reverse,
+  BorderRadius borderRadius,
 ) {
-  return Material(
-    clipBehavior: Clip.antiAlias,
-    shape: attachmentShape,
-    type: MaterialType.transparency,
-    child: Transform(
-      transform: Matrix4.rotationY(reverse ? pi : 0),
-      alignment: Alignment.center,
-      child: attachmentWidget,
+  return ClipRRect(
+    borderRadius: borderRadius,
+    child: Material(
+      clipBehavior: Clip.antiAlias,
+      shape: attachmentShape,
+      type: MaterialType.transparency,
+      child: Transform(
+        transform: Matrix4.rotationY(reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: attachmentWidget,
+      ),
     ),
   );
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat/src/api/connection_status.dart';
@@ -8,6 +7,7 @@ import 'package:stream_chat/src/api/websocket.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class Functions {
@@ -47,10 +47,9 @@ void main() {
 
       final mockWSChannel = MockWSChannel();
 
-      final StreamController<String> streamController =
-          StreamController<String>.broadcast();
+      final streamController = StreamController<String>.broadcast();
 
-      final computedUrl =
+      const computedUrl =
           'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
 
       when(connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
@@ -60,7 +59,7 @@ void main() {
       });
 
       final timer = Timer.periodic(
-        Duration(milliseconds: 100),
+        const Duration(milliseconds: 100),
         (_) => streamController.sink.add('{}'),
       );
 
@@ -159,6 +158,42 @@ void main() {
     streamController.sink.add('{}');
 
     return connect;
+  });
+  test('should close correctly the controller while connecting', () async {
+    final handleFunc = MockFunctions().handleFunc;
+
+    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+
+    final ws = WebSocket(
+      baseUrl: 'baseurl',
+      user: User(id: 'testid'),
+      logger: Logger('ws'),
+      connectParams: {'test': 'true'},
+      connectPayload: {'payload': 'test'},
+      handler: handleFunc,
+      connectFunc: connectFunc,
+    );
+
+    final mockWSChannel = MockWSChannel();
+
+    final StreamController<String> streamController =
+        StreamController<String>.broadcast();
+
+    final computedUrl =
+        'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
+
+    when(connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
+    when(mockWSChannel.sink).thenAnswer((_) => MockWSSink());
+    when(mockWSChannel.stream).thenAnswer((_) {
+      return streamController.stream;
+    });
+
+    ws.connect();
+    await ws.disconnect();
+    streamController.add('{}');
+
+    verify(connectFunc(computedUrl)).called(1);
+    verifyNever(handleFunc(any));
   });
 
   test('should run correctly health check', () async {

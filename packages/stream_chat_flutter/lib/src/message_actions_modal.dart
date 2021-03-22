@@ -5,10 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'extension.dart';
 import 'message_input.dart';
@@ -34,6 +34,7 @@ class MessageActionsModal extends StatefulWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final DisplayWidget showUserAvatar;
+  final BorderRadius attachmentBorderRadiusGeometry;
 
   /// List of custom actions
   final List<MessageAction> customActions;
@@ -58,6 +59,7 @@ class MessageActionsModal extends StatefulWidget {
     this.attachmentShape,
     this.reverse = false,
     this.customActions = const [],
+    this.attachmentBorderRadiusGeometry,
   }) : super(key: key);
 
   @override
@@ -153,6 +155,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               child: MessageWidget(
                                 key: Key('MessageWidget'),
                                 reverse: widget.reverse,
+                                attachmentBorderRadiusGeometry:
+                                    widget.attachmentBorderRadiusGeometry,
                                 message: widget.message.copyWith(
                                   text: widget.message.text.length > 200
                                       ? '${widget.message.text.substring(0, 200)}...'

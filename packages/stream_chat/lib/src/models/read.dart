@@ -27,4 +27,16 @@ class Read {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ReadToJson(this);
+
+  /// Creates a copy of [Read] with specified attributes overridden.
+  Read copyWith({
+    DateTime lastRead,
+    User user,
+    int unreadMessages,
+  }) =>
+      Read(
+        lastRead: lastRead ?? this.lastRead,
+        user: user ?? this.user,
+        unreadMessages: unreadMessages ?? this.unreadMessages,
+      );
 }
