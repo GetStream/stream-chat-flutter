@@ -14,7 +14,6 @@ void main() {
       final channel = MockChannel();
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
-      final themeData = ThemeData();
 
       when(client.state).thenReturn(clientState);
       when(clientState.user).thenReturn(OwnUser(id: 'user-id'));

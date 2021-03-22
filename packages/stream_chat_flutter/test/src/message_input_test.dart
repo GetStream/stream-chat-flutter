@@ -8,7 +8,7 @@ import 'mocks.dart';
 void main() {
   testWidgets(
     'checks message input features',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
@@ -23,17 +23,17 @@ void main() {
       when(channel.isMuted).thenReturn(false);
       when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(channel.extraDataStream).thenAnswer((i) => Stream.value({
-        'name': 'test',
-      }));
+            'name': 'test',
+          }));
       when(channel.extraData).thenReturn({
         'name': 'test',
       });
       when(channelState.membersStream).thenAnswer((i) => Stream.value([
-        Member(
-          userId: 'user-id',
-          user: User(id: 'user-id'),
-        )
-      ]));
+            Member(
+              userId: 'user-id',
+              user: User(id: 'user-id'),
+            )
+          ]));
       when(channelState.members).thenReturn([
         Member(
           userId: 'user-id',
@@ -47,19 +47,19 @@ void main() {
         )
       ]);
       when(channelState.messagesStream).thenAnswer((i) => Stream.value([
-        Message(
-          text: 'hello',
-          user: User(id: 'other-user'),
-        )
-      ]));
+            Message(
+              text: 'hello',
+              user: User(id: 'other-user'),
+            )
+          ]));
 
       when(channelState.typingEvents).thenAnswer((i) => [
-        User(id: 'other-user', extraData: {'name': 'demo'})
-      ]);
+            User(id: 'other-user', extraData: {'name': 'demo'})
+          ]);
       when(channelState.typingEventsStream).thenAnswer((i) => Stream.value([
-        User(id: 'other-user', extraData: {'name': 'demo'}),
-        User(id: 'other-user', extraData: {'name': 'demo'}),
-      ]));
+            User(id: 'other-user', extraData: {'name': 'demo'}),
+            User(id: 'other-user', extraData: {'name': 'demo'}),
+          ]));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(

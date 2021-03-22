@@ -9,7 +9,7 @@ import 'mocks.dart';
 void main() {
   testWidgets(
     'it should show correct message text',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
       final channel = MockChannel();
@@ -26,8 +26,8 @@ void main() {
       when(channel.isMuted).thenReturn(false);
       when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(channel.extraDataStream).thenAnswer((i) => Stream.value({
-        'name': 'test',
-      }));
+            'name': 'test',
+          }));
       when(channel.extraData).thenReturn({
         'name': 'test',
       });
@@ -38,7 +38,11 @@ void main() {
           child: StreamChannel(
             channel: channel,
             child: Scaffold(
-              body: MessageText(message: Message(text: 'demo',), messageTheme: streamTheme.otherMessageTheme),
+              body: MessageText(
+                  message: Message(
+                    text: 'demo',
+                  ),
+                  messageTheme: streamTheme.otherMessageTheme),
             ),
           ),
         ),
