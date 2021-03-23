@@ -146,7 +146,7 @@ class Channel {
 
   /// Channel extra data
   Map<String, dynamic> get extraData =>
-      state?._channelState?.channel?.extraData;
+      state?._channelState?.channel?.extraData ?? _extraData;
 
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>> get extraDataStream =>

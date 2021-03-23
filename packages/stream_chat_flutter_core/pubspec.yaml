@@ -15,8 +15,12 @@ dependencies:
     sdk: flutter
   rxdart: ^0.25.0
 
+dependency_overrides:
+  stream_chat:
+    path: ../stream_chat
+
 dev_dependencies:
-  mockito: ^4.1.4
+  mockito: ^4.1.3
   flutter_test:
     sdk: flutter
   fake_async: ^1.1.0

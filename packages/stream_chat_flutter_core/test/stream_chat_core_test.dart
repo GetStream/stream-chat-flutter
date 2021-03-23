@@ -50,19 +50,12 @@ void main() {
     'StreamChatCore.of(context).client should return the client',
     (WidgetTester tester) async {
       final client = MockClient();
-      final clientState = MockClientState();
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(
-        OwnUser(
-          id: 'test',
-        ),
-      );
       final userStream = Stream<OwnUser>.value(
         OwnUser(
           id: 'test',
         ),
       );
-      when(clientState.userStream).thenAnswer(
+      when(client.state.userStream).thenAnswer(
         (_) => userStream,
       );
 
@@ -88,14 +81,7 @@ void main() {
     (WidgetTester tester) async {
       fakeAsync((_async) {
         final client = MockClient();
-        final clientState = MockClientState();
         final channel = MockChannel();
-        when(client.state).thenReturn(clientState);
-        when(clientState.user).thenReturn(
-          OwnUser(
-            id: 'test',
-          ),
-        );
         final showLocalNotificationMock = MockShowLocalNotifications().call;
         final eventStreamController = StreamController<Event>();
         when(client.on()).thenAnswer((_) => eventStreamController.stream);
@@ -132,14 +118,7 @@ void main() {
     'StreamChatCore should handle notifications when on background and connected',
     (WidgetTester tester) async {
       final client = MockClient();
-      final clientState = MockClientState();
       final channel = MockChannel();
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(
-        OwnUser(
-          id: 'test',
-        ),
-      );
       final showLocalNotificationMock = MockShowLocalNotifications().call;
       final eventStreamController = StreamController<Event>();
       when(client.on()).thenAnswer((_) => eventStreamController.stream);

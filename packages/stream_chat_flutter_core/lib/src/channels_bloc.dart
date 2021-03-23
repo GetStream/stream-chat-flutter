@@ -70,10 +70,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
   /// The current channel list as a stream
   Stream<List<Channel>> get channelsStream => _channelsController.stream;
 
-  final BehaviorSubject<bool> _queryChannelsLoadingController =
-      BehaviorSubject.seeded(false);
+  final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
-  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
+  final _channelsController = BehaviorSubject<List<Channel>>();
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -117,8 +116,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
         _queryChannelsLoadingController.sink.add(false);
       }
     } catch (err, stackTrace) {
-      print(err);
-      print(stackTrace);
       _queryChannelsLoadingController.addError(err, stackTrace);
     }
   }
@@ -135,15 +132,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {
         final newChannels = List<Channel>.from(channels ?? []);
         final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index > -1) {
+        if (index != -1) {
           if (index > 0) {
             final channel = newChannels.removeAt(index);
             newChannels.insert(0, channel);
           }
-        } else if (widget.shouldAddChannel != null &&
-            widget.shouldAddChannel(e)) {
+        } else if (widget.shouldAddChannel?.call(e) == true) {
           final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
-          if (hiddenIndex > -1) {
+          if (hiddenIndex != -1) {
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
           } else {
