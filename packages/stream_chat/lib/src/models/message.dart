@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/src/models/reaction.dart';
@@ -41,7 +42,7 @@ enum MessageSendingStatus {
 
 /// The class that contains the information about a message
 @JsonSerializable()
-class Message {
+class Message extends Equatable {
   /// Constructor used for json serialization
   Message({
     String id,
@@ -345,6 +346,39 @@ class Message {
       pinnedBy: other.pinnedBy,
     );
   }
+
+  @override
+  List<Object> get props => [
+        id,
+        text,
+        type,
+        attachments,
+        mentionedUsers,
+        reactionCounts,
+        reactionScores,
+        latestReactions,
+        ownReactions,
+        parentId,
+        quotedMessage,
+        quotedMessageId,
+        replyCount,
+        threadParticipants,
+        showInChannel,
+        shadowed,
+        silent,
+        command,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        user,
+        pinned,
+        pinnedAt,
+        pinExpires,
+        pinnedBy,
+        extraData,
+        status,
+        skipPush,
+      ];
 }
 
 /// A translated message
