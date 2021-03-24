@@ -2,14 +2,13 @@ import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/connection_events.dart';
-import 'package:stream_chat_persistence/src/entity/users.dart';
 
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'connection_event_dao.g.dart';
 
 /// The Data Access Object for operations in [ConnectionEvents] table.
-@UseDao(tables: [ConnectionEvents, Users])
+@UseDao(tables: [ConnectionEvents])
 class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
     with _$ConnectionEventDaoMixin {
   /// Creates a new connection event dao instance
@@ -18,16 +17,16 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
   /// Get the latest stored connection event
   Future<Event> get connectionEvent => select(connectionEvents)
       .map((eventEntity) => eventEntity.toEvent())
-      .getSingle();
+      .getSingleOrNull();
 
   /// Get the latest stored lastSyncAt
   Future<DateTime> get lastSyncAt =>
-      select(connectionEvents).getSingle().then((r) => r?.lastSyncAt);
+      select(connectionEvents).getSingleOrNull().then((r) => r?.lastSyncAt);
 
   /// Update stored connection event with latest data
   Future<void> updateConnectionEvent(Event event) async =>
       transaction(() async {
-        final connectionInfo = await select(connectionEvents).getSingle();
+        final connectionInfo = await select(connectionEvents).getSingleOrNull();
         await into(connectionEvents).insert(
           ConnectionEventEntity(
             id: 1,

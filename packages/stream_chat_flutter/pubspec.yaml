@@ -36,11 +36,9 @@ dependencies:
   lottie: ^1.0.0
   substring_highlight: ^0.1.2
   flutter_slidable: ^0.5.7
-  clipboard: ^0.1.2+8
   image_gallery_saver: ^1.6.7
   share_plus: ^2.0.0
   photo_manager: ^1.0.0
-  transparent_image: ^1.0.0
   ezanimation: ^0.4.1
   synchronized: ^3.0.0
   characters: ^1.0.0

@@ -23,8 +23,8 @@ class ReactionDao extends DatabaseAccessor<MoorChatDatabase>
             ..where(reactions.messageId.equals(messageId))
             ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
           .map((rows) {
-        final userEntity = rows.readTable(users);
-        final reactionEntity = rows.readTable(reactions);
+        final userEntity = rows.readTableOrNull(users);
+        final reactionEntity = rows.readTableOrNull(reactions);
         return reactionEntity.toReaction(user: userEntity?.toUser());
       }).get();
 

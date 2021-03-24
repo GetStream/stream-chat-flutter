@@ -19,10 +19,10 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
       (select(channels)..where((c) => c.cid.equals(cid))).join([
         leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
       ]).map((rows) {
-        final channel = rows.readTable(channels);
-        final createdBy = rows.readTable(users);
+        final channel = rows.readTableOrNull(channels);
+        final createdBy = rows.readTableOrNull(users);
         return channel.toChannelModel(createdBy: createdBy?.toUser());
-      }).getSingle();
+      }).getSingleOrNull();
 
   /// Delete all channels by matching cid in [cids]
   ///

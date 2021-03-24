@@ -121,6 +121,46 @@ class Event {
         _$EventToJson(this),
         topLevelFields,
       );
+
+  /// Creates a copy of [Event] with specified attributes overridden.
+  Event copyWith({
+    String type,
+    String cid,
+    String channelId,
+    String channelType,
+    String connectionId,
+    DateTime createdAt,
+    OwnUser me,
+    User user,
+    Message message,
+    EventChannel channel,
+    Member member,
+    Reaction reaction,
+    int totalUnreadCount,
+    int unreadChannels,
+    bool online,
+    String parentId,
+    Map<String, dynamic> extraData,
+  }) =>
+      Event(
+        type: type ?? this.type,
+        cid: cid ?? this.cid,
+        connectionId: connectionId ?? this.connectionId,
+        createdAt: createdAt ?? this.createdAt,
+        me: me ?? this.me,
+        user: user ?? this.user,
+        message: message ?? this.message,
+        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+        unreadChannels: unreadChannels ?? this.unreadChannels,
+        reaction: reaction ?? this.reaction,
+        online: online ?? this.online,
+        channel: channel ?? this.channel,
+        member: member ?? this.member,
+        channelId: channelId ?? this.channelId,
+        channelType: channelType ?? this.channelType,
+        parentId: parentId ?? this.parentId,
+        extraData: extraData ?? this.extraData,
+      );
 }
 
 /// The channel embedded in the event object

@@ -21,8 +21,13 @@ dependencies:
   stream_chat:
     path: ../stream_chat
 
+dependency_overrides:
+  stream_chat:
+    path: ../stream_chat
+
 dev_dependencies:
   build_runner: ^1.11.0
+  mocktail: ^0.1.0
   moor_generator: ^4.2.0
   pedantic: ^1.11.0
   test: ^1.16.0

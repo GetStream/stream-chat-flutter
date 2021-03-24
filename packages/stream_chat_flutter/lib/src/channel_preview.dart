@@ -170,14 +170,14 @@ class ChannelPreview extends StatelessWidget {
 
         if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay.millisecondsSinceEpoch) {
-          stringDate = Jiffy(lastMessageAt.toLocal()).format('HH:mm');
+          stringDate = Jiffy(lastMessageAt.toLocal()).jm;
         } else if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay.subtract(Duration(days: 1)).millisecondsSinceEpoch) {
           stringDate = 'Yesterday';
         } else if (startOfDay.difference(lastMessageAt).inDays < 7) {
           stringDate = Jiffy(lastMessageAt.toLocal()).EEEE;
         } else {
-          stringDate = Jiffy(lastMessageAt.toLocal()).format('dd/MM/yyyy');
+          stringDate = Jiffy(lastMessageAt.toLocal()).yMd;
         }
 
         return Text(
