@@ -4,7 +4,6 @@ import 'package:mutex/mutex.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
-import 'package:stream_chat_persistence/src/db/shared/shared_db.dart';
 
 /// Various connection modes on which [StreamChatPersistenceClient] can work
 enum ConnectionMode {
@@ -14,6 +13,9 @@ enum ConnectionMode {
   /// Connects the [StreamChatPersistenceClient] on a background isolate
   background,
 }
+
+/// Signature for a function which provides instance of [MoorChatDatabase]
+typedef DatabaseProvider = MoorChatDatabase Function(String, ConnectionMode);
 
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
@@ -35,26 +37,6 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
-
-  /// A function that has a parameter of type [LogRecord].
-  /// This is called on every new log record.
-  /// By default the client will use the handler returned by
-  /// [_getDefaultLogHandler].
-  /// Setting it you can handle the log messages directly instead of have them
-  /// written to stdout,
-  /// this is very convenient if you use an error tracking tool or if you want
-  /// to centralize your logs into one facility.
-  ///
-  /// ```dart
-  /// myLogHandlerFunction = (LogRecord record) {
-  ///  // do something with the record (ie. send it to Sentry or Fabric)
-  /// }
-  ///
-  /// final client = StreamChatPersistenceClient(
-  ///   logHandlerFunction: myLogHandlerFunction,
-  /// );
-  ///```
-  LogHandlerFunction logHandlerFunction;
 
   /// [MoorChatDatabase] instance used by this client.
   @visibleForTesting
@@ -84,24 +66,25 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return ret;
   }
 
+  MoorChatDatabase _defaultDatabaseProvider(
+    String userId,
+    ConnectionMode mode,
+  ) =>
+      SharedDB.constructDatabase(userId, connectionMode: mode);
+
   @override
-  Future<void> connect(String userId) async {
+  Future<void> connect(
+    String userId, {
+    DatabaseProvider databaseProvider, // Used only for testing
+  }) async {
     if (db != null) {
       throw Exception(
         'An instance of StreamChatDatabase is already connected.\n'
         'disconnect the previous instance before connecting again.',
       );
     }
-    switch (_connectionMode) {
-      case ConnectionMode.regular:
-        _logger.info('Connecting on a regular isolate');
-        db = MoorChatDatabase(userId);
-        return;
-      case ConnectionMode.background:
-        _logger.info('Connecting on background isolate');
-        db = SharedDB.constructMoorChatDatabase(userId);
-        return;
-    }
+    db = databaseProvider?.call(userId, _connectionMode) ??
+        _defaultDatabaseProvider(userId, _connectionMode);
   }
 
   @override
@@ -259,9 +242,9 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
-    List<String> cids,
-    bool clearQueryCache,
-  ) =>
+    List<String> cids, {
+    bool clearQueryCache = false,
+  }) =>
       _readProtected(() async {
         _logger.info('updateChannelQueries');
         return db.channelQueryDao.updateChannelQueries(

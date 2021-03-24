@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - master
+      - develop
     paths-ignore:
       - 'docs/**'
 
@@ -32,6 +33,7 @@ jobs:
           melos exec -c 3 --ignore="*example*" -- \
             tuneup check
       - name: 'Pub Check'
+        if: github.ref == 'refs/heads/master'
         run: |
           melos exec -c 1 --no-private --ignore="*example*" -- \
             pub publish --dry-run
@@ -68,27 +70,31 @@ jobs:
         run: |
           ./.github/workflows/scripts/install-tools.sh
           flutter pub global activate coverage
+          flutter pub global activate remove_from_coverage
       - name: 'Bootstrap Workspace'
         run: melos bootstrap
       - name: 'Dart Test'
         run: |
           cd packages/stream_chat
           flutter pub run test --coverage coverage/
-          format_coverage --lcov --in=coverage/ --out=lcov.info --packages=.packages --report-on=lib
+          format_coverage --lcov --in=coverage/ --out=coverage/lcov.info --packages=.packages --report-on=lib
       - name: 'Flutter Test'
         run: |
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
             flutter test --coverage
       - name: CodeCov
-        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          melos exec  -c 3 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
+          "\$MELOS_ROOT_PATH/.github/workflows/scripts/coverage.sh"
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
-          path: packages/stream_chat/lcov.info
-          min_coverage: 50
+          path: packages/stream_chat/coverage/lcov.info
+          min_coverage: 40
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_persistence/coverage/lcov.info
-          min_coverage: 0.2
+          min_coverage: 95
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info

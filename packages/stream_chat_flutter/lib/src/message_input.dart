@@ -2233,7 +2233,7 @@ class MessageInputState extends State<MessageInput> {
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
     _messageIsPresent = true;
-    for (final attachment in message.attachments) {
+    for (final attachment in message?.attachments) {
       _attachments[attachment.id] = attachment.copyWith(
         uploadState: attachment.uploadState ?? UploadState.success(),
       );

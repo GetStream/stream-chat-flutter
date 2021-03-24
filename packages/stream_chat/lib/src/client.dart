@@ -758,7 +758,8 @@ class StreamChatClient {
     await _chatPersistenceClient?.updateChannelQueries(
       filter,
       channels.map((c) => c.channel.cid).toList(),
-      paginationParams?.offset == null || paginationParams.offset == 0,
+      clearQueryCache:
+          paginationParams?.offset == null || paginationParams.offset == 0,
     );
 
     state.channels = updateData.key;

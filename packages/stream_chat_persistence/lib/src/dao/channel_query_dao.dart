@@ -32,7 +32,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
     List<String> cids, {
-    bool clearQueryCache,
+    bool clearQueryCache = false,
   }) async =>
       transaction(() async {
         final hash = _computeHash(filter);
@@ -57,6 +57,14 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         });
       });
 
+  ///
+  Future<List<String>> getCachedChannelCids(Map<String, dynamic> filter) {
+    final hash = _computeHash(filter);
+    return (select(channelQueries)..where((c) => c.queryHash.equals(hash)))
+        .map((c) => c.channelCid)
+        .get();
+  }
+
   /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelModel>> getChannels({
     Map<String, dynamic> filter,
@@ -72,12 +80,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
       return true;
     }(), '');
 
-    final hash = _computeHash(filter);
-    final cachedChannelCids = await (select(channelQueries)
-          ..where((c) => c.queryHash.equals(hash)))
-        .map((c) => c.channelCid)
-        .get();
-
+    final cachedChannelCids = await getCachedChannelCids(filter);
     final query = select(channels)..where((c) => c.cid.isIn(cachedChannelCids));
 
     final cachedChannels = await (query.join([
