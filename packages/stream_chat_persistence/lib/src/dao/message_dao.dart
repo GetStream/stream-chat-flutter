@@ -77,7 +77,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
             messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
       ])
             ..where(messages.channelCid.equals(cid))
-            ..where(isNotNull(messages.parentId))
+            ..where(messages.parentId.isNotNull())
             ..orderBy([OrderingTerm.asc(messages.createdAt)]))
           .map(_messageFromJoinRow)
           .get());
@@ -93,7 +93,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
       leftOuterJoin(
           _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(isNotNull(messages.parentId))
+          ..where(messages.parentId.isNotNull())
           ..where(messages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(messages.createdAt)]))
         .map(_messageFromJoinRow)
@@ -135,8 +135,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
           _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
           ..where(messages.channelCid.equals(cid))
-          ..where(
-              isNull(messages.parentId) | messages.showInChannel.equals(true))
+          ..where(messages.parentId.isNotNull() |
+              messages.showInChannel.equals(true))
           ..orderBy([OrderingTerm.asc(messages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
