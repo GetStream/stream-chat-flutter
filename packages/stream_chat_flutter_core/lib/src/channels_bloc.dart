@@ -86,7 +86,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
     List<SortOption<ChannelModel>> sortOptions,
     PaginationParams paginationParams,
     Map<String, dynamic> options,
-    bool onlyOffline = false,
   }) async {
     final client = StreamChatCore.of(context).client;
 
@@ -94,7 +93,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
         _queryChannelsLoadingController.value == true) {
       return;
     }
-    _queryChannelsLoadingController.sink.add(true);
+
+    if (_channelsController.hasValue) {
+      _queryChannelsLoadingController.add(true);
+    }
 
     try {
       final clear = paginationParams == null ||
@@ -110,13 +112,20 @@ class ChannelsBlocState extends State<ChannelsBloc>
         if (clear) {
           _channelsController.add(channels);
         } else {
-          final l = oldChannels + channels;
-          _channelsController.add(l);
+          final temp = oldChannels + channels;
+          _channelsController.add(temp);
         }
-        _queryChannelsLoadingController.sink.add(false);
+        if (_channelsController.hasValue &&
+            _queryChannelsLoadingController.value == true) {
+          _queryChannelsLoadingController.sink.add(false);
+        }
       }
-    } catch (err, stackTrace) {
-      _queryChannelsLoadingController.addError(err, stackTrace);
+    } catch (e, stk) {
+      if (_channelsController.hasValue) {
+        _queryChannelsLoadingController.addError(e, stk);
+      } else {
+        _channelsController.addError(e, stk);
+      }
     }
   }
 

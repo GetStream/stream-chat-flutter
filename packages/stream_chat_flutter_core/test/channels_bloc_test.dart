@@ -168,19 +168,13 @@ void main() {
 
       channelsBlocState.queryChannels();
 
-      await Future.wait([
-        expectLater(
-          channelsBlocState.queryChannelsLoading,
-          emitsInOrder([true, false]),
-        ),
-        expectLater(
-          channelsBlocState.channelsStream,
-          emitsInOrder([
-            isSameChannelListAs(offlineChannels),
-            isSameChannelListAs(onlineChannels),
-          ]),
-        ),
-      ]);
+      await expectLater(
+        channelsBlocState.channelsStream,
+        emitsInOrder([
+          isSameChannelListAs(offlineChannels),
+          isSameChannelListAs(onlineChannels),
+        ]),
+      );
 
       verify(mockClient.queryChannels(
         filter: anyNamed('filter'),
@@ -192,7 +186,7 @@ void main() {
   );
 
   testWidgets(
-    'channelsBlocState.queryChannelsLoading should emit error '
+    'channelsBlocState.channelsStream should emit error '
     'if client.queryChannels() throws',
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
@@ -234,7 +228,7 @@ void main() {
       channelsBlocState.queryChannels();
 
       await expectLater(
-        channelsBlocState.queryChannelsLoading,
+        channelsBlocState.channelsStream,
         emitsError(error),
       );
 
@@ -249,7 +243,8 @@ void main() {
 
   testWidgets(
     'calling channelsBlocState.queryChannels() again with an offset '
-    'should emit new data through channelsStream',
+    'should emit new data through channelsStream and also emit loading state '
+    'through queryChannelsLoading',
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
       final channelsBloc = ChannelsBloc(
@@ -279,22 +274,14 @@ void main() {
         sort: anyNamed('sort'),
         options: anyNamed('options'),
         paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
-        (_) => Stream.value(channels),
-      );
+      )).thenAnswer((_) => Stream.value(channels));
 
       channelsBlocState.queryChannels();
 
-      await Future.wait([
-        expectLater(
-          channelsBlocState.queryChannelsLoading,
-          emitsInOrder([true, false]),
-        ),
-        expectLater(
-          channelsBlocState.channelsStream,
-          emits(isSameChannelListAs(channels)),
-        ),
-      ]);
+      await expectLater(
+        channelsBlocState.channelsStream,
+        emits(isSameChannelListAs(channels)),
+      );
 
       verify(mockClient.queryChannels(
         filter: anyNamed('filter'),
@@ -329,6 +316,83 @@ void main() {
           emits(isSameChannelListAs(channels + newChannels)),
         ),
       ]);
+
+      verify(mockClient.queryChannels(
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        options: anyNamed('options'),
+        paginationParams: paginationParams,
+      )).called(1);
+    },
+  );
+
+  testWidgets(
+    'calling channelsBlocState.queryChannels() again with an offset '
+    'should emit error through queryChannelsLoading if '
+    'client.queryChannels() throws',
+    (tester) async {
+      const channelsBlocKey = Key('channelsBloc');
+      final channelsBloc = ChannelsBloc(
+        key: channelsBlocKey,
+        child: Offstage(),
+      );
+
+      final mockClient = MockClient();
+
+      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+
+      await tester.pumpWidget(
+        StreamChatCore(
+          client: mockClient,
+          child: channelsBloc,
+        ),
+      );
+
+      final channelsBlocState = tester.state<ChannelsBlocState>(
+        find.byKey(channelsBlocKey),
+      );
+
+      final channels = _generateChannels(mockClient);
+
+      when(mockClient.queryChannels(
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        options: anyNamed('options'),
+        paginationParams: anyNamed('paginationParams'),
+      )).thenAnswer((_) => Stream.value(channels));
+
+      channelsBlocState.queryChannels();
+
+      await expectLater(
+        channelsBlocState.channelsStream,
+        emits(isSameChannelListAs(channels)),
+      );
+
+      verify(mockClient.queryChannels(
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        options: anyNamed('options'),
+        paginationParams: anyNamed('paginationParams'),
+      )).called(1);
+
+      final offset = channels.length;
+      final paginationParams = PaginationParams(offset: offset);
+
+      final error = 'Error! Error! Error!';
+
+      when(mockClient.queryChannels(
+        filter: anyNamed('filter'),
+        sort: anyNamed('sort'),
+        options: anyNamed('options'),
+        paginationParams: paginationParams,
+      )).thenThrow(error);
+
+      channelsBlocState.queryChannels(paginationParams: paginationParams);
+
+      await expectLater(
+        channelsBlocState.queryChannelsLoading,
+        emitsError(error),
+      );
 
       verify(mockClient.queryChannels(
         filter: anyNamed('filter'),
