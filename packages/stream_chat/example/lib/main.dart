@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 Future<void> main() async {
-  /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
-  /// project dashboard.
-  final client = StreamChatClient(
-    'b67pax5b2wdq',
-    logLevel: Level.INFO,
-  );
+  /// Create a new instance of [StreamChatClient]
+  /// by passing the apikey obtained from your project dashboard.
+  final client = StreamChatClient('b67pax5b2wdq', logLevel: Level.INFO);
 
   /// Set the current user. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -21,7 +18,7 @@ Future<void> main() async {
             'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
       },
     ),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
+    '''eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo''',
   );
 
   /// Creates a channel using the type `messaging` and `godevs`.
@@ -44,15 +41,16 @@ Future<void> main() async {
 
 /// Example using Stream's Low Level Dart client.
 class StreamExample extends StatelessWidget {
-  /// To initialize this example, an instance of [client] and [channel] is required.
+  /// To initialize this example, an instance of
+  /// [client] and [channel] is required.
   const StreamExample({
     Key key,
     @required this.client,
     @required this.channel,
   }) : super(key: key);
 
-  /// Instance of [StreamChatClient] we created earlier. This contains information about
-  /// our application and connection state.
+  /// Instance of [StreamChatClient] we created earlier.
+  /// This contains information about our application and connection state.
   final StreamChatClient client;
 
   /// The channel we'd like to observe and participate.
@@ -104,8 +102,8 @@ class HomeScreen extends StatelessWidget {
             }
             return const Center(
               child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+                width: 100,
+                height: 100,
                 child: CircularProgressIndicator(),
               ),
             );
@@ -180,7 +178,7 @@ class _MessageViewState extends State<MessageView> {
                 return Align(
                   alignment: Alignment.centerRight,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8),
                     child: Text(item.text),
                   ),
                 );
@@ -188,7 +186,7 @@ class _MessageViewState extends State<MessageView> {
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8),
                     child: Text(item.text),
                   ),
                 );
@@ -197,7 +195,7 @@ class _MessageViewState extends State<MessageView> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Row(
             children: [
               Expanded(
@@ -245,7 +243,8 @@ class _MessageViewState extends State<MessageView> {
   }
 }
 
-/// Helper extension for quickly retrieving the current user id from a [StreamChatClient].
+/// Helper extension for quickly retrieving
+/// the current user id from a [StreamChatClient].
 extension on StreamChatClient {
   String get uid => state.user.id;
 }

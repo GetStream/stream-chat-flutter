@@ -280,8 +280,7 @@ class StreamChatClient {
           data: $stringData
     
         ''');
-
-              return options;
+              handler.next(options);
             },
             onError: _tokenExpiredInterceptor,
           ),
@@ -315,33 +314,35 @@ class StreamChatClient {
         await connectUser(User(id: userId), newToken);
 
         try {
-          return await httpClient.request(
-            err.requestOptions.path,
-            cancelToken: err.requestOptions.cancelToken,
-            data: err.requestOptions.data,
-            onReceiveProgress: err.requestOptions.onReceiveProgress,
-            onSendProgress: err.requestOptions.onSendProgress,
-            queryParameters: err.requestOptions.queryParameters,
-            options: Options(
-              method: err.requestOptions.method,
-              sendTimeout: err.requestOptions.sendTimeout,
-              receiveTimeout: err.requestOptions.receiveTimeout,
-              extra: err.requestOptions.extra,
-              headers: err.requestOptions.headers,
-              responseType: err.requestOptions.responseType,
-              contentType: err.requestOptions.contentType,
-              validateStatus: err.requestOptions.validateStatus,
-              receiveDataWhenStatusError:
-                  err.requestOptions.receiveDataWhenStatusError,
-              followRedirects: err.requestOptions.followRedirects,
-              maxRedirects: err.requestOptions.maxRedirects,
-              requestEncoder: err.requestOptions.requestEncoder,
-              responseDecoder: err.requestOptions.responseDecoder,
-              listFormat: err.requestOptions.listFormat,
+          handler.resolve(
+            await httpClient.request(
+              err.requestOptions.path,
+              cancelToken: err.requestOptions.cancelToken,
+              data: err.requestOptions.data,
+              onReceiveProgress: err.requestOptions.onReceiveProgress,
+              onSendProgress: err.requestOptions.onSendProgress,
+              queryParameters: err.requestOptions.queryParameters,
+              options: Options(
+                method: err.requestOptions.method,
+                sendTimeout: err.requestOptions.sendTimeout,
+                receiveTimeout: err.requestOptions.receiveTimeout,
+                extra: err.requestOptions.extra,
+                headers: err.requestOptions.headers,
+                responseType: err.requestOptions.responseType,
+                contentType: err.requestOptions.contentType,
+                validateStatus: err.requestOptions.validateStatus,
+                receiveDataWhenStatusError:
+                    err.requestOptions.receiveDataWhenStatusError,
+                followRedirects: err.requestOptions.followRedirects,
+                maxRedirects: err.requestOptions.maxRedirects,
+                requestEncoder: err.requestOptions.requestEncoder,
+                responseDecoder: err.requestOptions.responseDecoder,
+                listFormat: err.requestOptions.listFormat,
+              ),
             ),
           );
         } catch (err) {
-          return err;
+          handler.reject(err);
         }
       }
     }

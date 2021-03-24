@@ -871,7 +871,7 @@ void main() {
       expect(channelState.messages[0], isNotNull);
       expect(
         channelState.messages[0].createdAt,
-        DateTime.parse('2,020-01-29T03:23:02.843948Z'),
+        DateTime.parse('2020-01-29T03:23:02.843948Z'),
       );
       expect(channelState.messages[0].user, isA<User>());
       expect(channelState.watcherCount, 5);
