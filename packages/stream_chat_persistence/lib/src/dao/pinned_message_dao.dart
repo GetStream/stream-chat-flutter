@@ -135,7 +135,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
           ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(pinnedMessages.parentId.isNotNull() |
+          ..where(pinnedMessages.parentId.isNull() |
               pinnedMessages.showInChannel.equals(true))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
