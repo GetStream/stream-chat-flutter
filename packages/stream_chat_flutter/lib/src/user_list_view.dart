@@ -210,7 +210,7 @@ class _UserListViewState extends State<UserListView>
     var message = error.toString();
     if (error is DioError) {
       final dioError = error as DioError;
-      if (dioError.type == DioErrorType.RESPONSE) {
+      if (dioError.type == DioErrorType.response) {
         message = dioError.message;
       } else {
         message = 'Check your connection and retry';
