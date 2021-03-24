@@ -38,12 +38,11 @@ class Attachment extends Equatable {
     UploadState uploadState,
   })  : id = id ?? Uuid().v4(),
         title = title ?? file?.name,
-        localUri = file?.path != null ? Uri.parse(file.path) : null {
-    this.uploadState = uploadState ??
-        ((assetUrl != null || imageUrl != null)
-            ? const UploadState.success()
-            : const UploadState.preparing());
-  }
+        localUri = file?.path != null ? Uri.parse(file.path) : null,
+        uploadState = uploadState ??
+            ((assetUrl != null || imageUrl != null)
+                ? const UploadState.success()
+                : const UploadState.preparing());
 
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
@@ -105,7 +104,7 @@ class Attachment extends Equatable {
   final AttachmentFile file;
 
   /// The current upload state of the attachment
-  UploadState uploadState;
+  final UploadState uploadState;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
