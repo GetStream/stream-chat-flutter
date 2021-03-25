@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
@@ -105,15 +106,7 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void initState() {
     super.initState();
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    messageSearchBloc.search(
-      filter: widget.filters,
-      sort: widget.sortOptions,
-      query: widget.messageQuery,
-      pagination: widget.paginationParams,
-      messageFilter: widget.messageFilters,
-    );
-
+    loadData();
     if (widget.messageSearchListController != null) {
       widget.messageSearchListController.loadData = loadData;
       widget.messageSearchListController.paginateData = paginateData;
@@ -131,32 +124,23 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
       stream: messageSearchBloc.messagesStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          if (snapshot.error is Error) {
-            print((snapshot.error as Error).stackTrace);
-          }
-
           return widget.errorBuilder(context, snapshot.error);
         }
-
         if (!snapshot.hasData) {
           return widget.loadingBuilder(context);
         }
-
         final items = snapshot.data;
-
         if (items.isEmpty) {
           return widget.emptyBuilder(context);
         }
-
         return widget.childBuilder(snapshot.data);
       },
     );
   }
 
-  void loadData() {
+  Future<void> loadData() {
     final messageSearchBloc = MessageSearchBloc.of(context);
-
-    messageSearchBloc.search(
+    return messageSearchBloc.search(
       filter: widget.filters,
       sort: widget.sortOptions,
       query: widget.messageQuery,
@@ -165,10 +149,9 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
     );
   }
 
-  void paginateData() {
+  Future<void> paginateData() {
     final messageSearchBloc = MessageSearchBloc.of(context);
-
-    messageSearchBloc.loadMore(
+    return messageSearchBloc.search(
       filter: widget.filters,
       sort: widget.sortOptions,
       pagination: widget.paginationParams.copyWith(
@@ -189,14 +172,7 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
         widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
         widget.messageFilters?.toString() !=
             oldWidget.messageFilters?.toString()) {
-      final messageSearchBloc = MessageSearchBloc.of(context);
-      messageSearchBloc.search(
-        filter: widget.filters,
-        sort: widget.sortOptions,
-        query: widget.messageQuery,
-        pagination: widget.paginationParams,
-        messageFilter: widget.messageFilters,
-      );
+      loadData();
     }
   }
 }
@@ -204,8 +180,8 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageSearchListController {
   /// Call this function to reload data
-  VoidCallback loadData;
+  AsyncCallback loadData;
 
   /// Call this function to load further data
-  VoidCallback paginateData;
+  AsyncCallback paginateData;
 }
