@@ -29,6 +29,7 @@ void main() {
         ),
       );
 
+      // ignore: unawaited_futures
       tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
       await tester.pumpAndSettle();
@@ -93,6 +94,7 @@ void main() {
         ),
       );
 
+      // ignore: unawaited_futures
       tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
       await tester.pumpAndSettle();
