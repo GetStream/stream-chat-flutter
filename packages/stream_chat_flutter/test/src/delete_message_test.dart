@@ -7,7 +7,7 @@ import 'mocks.dart';
 
 void main() {
   testWidgets(
-    'it should show basic channel information',
+    'control test',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();

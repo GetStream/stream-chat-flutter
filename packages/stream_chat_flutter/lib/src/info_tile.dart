@@ -11,14 +11,15 @@ class InfoTile extends StatelessWidget {
   final TextStyle textStyle;
   final Color backgroundColor;
 
-  InfoTile(
-      {this.message,
-      this.child,
-      this.showMessage,
-      this.tileAnchor,
-      this.childAnchor,
-      this.textStyle,
-      this.backgroundColor});
+  InfoTile({
+    this.message,
+    this.child,
+    this.showMessage,
+    this.tileAnchor,
+    this.childAnchor,
+    this.textStyle,
+    this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
