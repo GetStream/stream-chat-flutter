@@ -83,8 +83,6 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
-
       await tester.pumpWidget(
         StreamChatCore(
           client: mockClient,
@@ -133,8 +131,6 @@ void main() {
       );
 
       final mockClient = MockClient();
-
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -185,8 +181,6 @@ void main() {
       );
 
       final mockClient = MockClient();
-
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -268,8 +262,6 @@ void main() {
       );
 
       final mockClient = MockClient();
-
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(

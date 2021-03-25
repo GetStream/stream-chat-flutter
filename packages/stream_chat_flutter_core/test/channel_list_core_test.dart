@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat_flutter_core/src/channel_list_core.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'matchers/channel_matcher.dart';
 import 'mocks.dart';
 
 void main() {
@@ -172,8 +171,6 @@ void main() {
   testWidgets(
     'should build error widget if channelsBlocState.channelsStream emits error',
     (tester) async {
-      final channelsController = StreamController<List<Channel>>();
-
       const channelListCoreKey = Key('channelListCore');
       const errorWidgetKey = Key('errorWidget');
       final channelListCore = ChannelListCore(
@@ -216,18 +213,12 @@ void main() {
         options: anyNamed('options'),
         paginationParams: pagination,
       )).called(1);
-
-      addTearDown(() {
-        channelsController.close();
-      });
     },
   );
 
   testWidgets(
     'should build empty widget if channelsBlocState.channelsStream emits empty data',
     (tester) async {
-      final channelsController = StreamController<List<Channel>>();
-
       const channelListCoreKey = Key('channelListCore');
       const emptyWidgetKey = Key('emptyWidget');
       final channelListCore = ChannelListCore(
@@ -269,18 +260,12 @@ void main() {
         options: anyNamed('options'),
         paginationParams: pagination,
       )).called(1);
-
-      addTearDown(() {
-        channelsController.close();
-      });
     },
   );
 
   testWidgets(
     'should build list widget if channelsBlocState.channelsStream emits some data',
     (tester) async {
-      final channelsController = StreamController<List<Channel>>();
-
       const channelListCoreKey = Key('channelListCore');
       const listWidgetKey = Key('listWidget');
       final channelListCore = ChannelListCore(
@@ -322,10 +307,6 @@ void main() {
         options: anyNamed('options'),
         paginationParams: pagination,
       )).called(1);
-
-      addTearDown(() {
-        channelsController.close();
-      });
     },
   );
 
@@ -333,8 +314,6 @@ void main() {
     'should build list widget with paginated data '
     'on calling channelListCoreState.paginateData',
     (tester) async {
-      final channelsController = StreamController<List<Channel>>();
-
       const channelListCoreKey = Key('channelListCore');
       const listWidgetKey = Key('listWidget');
       final channelListCore = ChannelListCore(
@@ -365,8 +344,9 @@ void main() {
       )).thenAnswer((_) => Stream.value(channels));
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChatCore(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StreamChatCore(
             client: mockClient,
             child: ChannelsBloc(
               child: channelListCore,
@@ -420,10 +400,6 @@ void main() {
         options: anyNamed('options'),
         paginationParams: updatedPagination,
       )).called(1);
-
-      addTearDown(() {
-        channelsController.close();
-      });
     },
   );
 
@@ -431,15 +407,13 @@ void main() {
     'should rebuild ChannelListCore with updated widget data '
     'on calling setState()',
     (tester) async {
-      final channelsController = StreamController<List<Channel>>();
-
       StateSetter _stateSetter;
       int limit = pagination.limit;
 
       const channelListCoreKey = Key('channelListCore');
       const listWidgetKey = Key('listWidget');
 
-      ChannelListCore channelListCoreBuilder(limit) => ChannelListCore(
+      ChannelListCore channelListCoreBuilder(int limit) => ChannelListCore(
             key: channelListCoreKey,
             listBuilder: (_, channels) {
               return Container(
@@ -468,8 +442,9 @@ void main() {
       )).thenAnswer((_) => Stream.value(channels));
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: StreamChatCore(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StreamChatCore(
             client: mockClient,
             child: ChannelsBloc(
               child: StatefulBuilder(builder: (context, stateSetter) {
@@ -520,10 +495,6 @@ void main() {
         options: anyNamed('options'),
         paginationParams: updatedPagination,
       )).called(1);
-
-      addTearDown(() {
-        channelsController.close();
-      });
     },
   );
 }

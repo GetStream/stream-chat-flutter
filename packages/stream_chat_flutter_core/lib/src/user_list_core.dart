@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
@@ -77,7 +78,7 @@ class UserListCore extends StatefulWidget {
   final UserListController userListController;
 
   /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
+  final Widget Function(Object error) errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
@@ -117,22 +118,15 @@ class UserListCore extends StatefulWidget {
   final bool groupAlphabetically;
 
   @override
-  _UserListCoreState createState() => _UserListCoreState();
+  UserListCoreState createState() => UserListCoreState();
 }
 
-class _UserListCoreState extends State<UserListCore>
+class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    final usersBloc = UsersBloc.of(context);
-    usersBloc.queryUsers(
-      filter: widget.filter,
-      sort: widget.sort,
-      pagination: widget.pagination,
-      options: widget.options,
-    );
-
+    loadData();
     if (widget.userListController != null) {
       widget.userListController.loadData = loadData;
       widget.userListController.paginateData = paginateData;
@@ -142,7 +136,6 @@ class _UserListCoreState extends State<UserListCore>
   @override
   Widget build(BuildContext context) {
     final _usersBloc = UsersBloc.of(context);
-
     return _buildListView(_usersBloc);
   }
 
@@ -183,36 +176,23 @@ class _UserListCoreState extends State<UserListCore>
       stream: _buildUserStream(usersBlocState),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          if (snapshot.error is Error) {
-            print((snapshot.error as Error).stackTrace);
-          }
-
           return widget.errorBuilder(snapshot.error);
         }
-
         if (!snapshot.hasData) {
           return widget.loadingBuilder(context);
         }
-
         final items = snapshot.data;
-
         if (items.isEmpty) {
           return widget.emptyBuilder(context);
         }
-
-        if (items.isEmpty) {
-          return widget.emptyBuilder(context);
-        }
-
         return widget.listBuilder(context, items);
       },
     );
   }
 
-  void loadData() {
+  Future<void> loadData() {
     final _usersBloc = UsersBloc.of(context);
-
-    _usersBloc.queryUsers(
+    return _usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
       pagination: widget.pagination,
@@ -220,10 +200,9 @@ class _UserListCoreState extends State<UserListCore>
     );
   }
 
-  void paginateData() {
+  Future<void> paginateData() {
     final _usersBloc = UsersBloc.of(context);
-
-    _usersBloc.queryUsers(
+    return _usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
       pagination: widget.pagination.copyWith(
@@ -238,16 +217,10 @@ class _UserListCoreState extends State<UserListCore>
     super.didUpdateWidget(oldWidget);
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
+        widget.options?.toString() != oldWidget.options?.toString() ||
         widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString() ||
-        widget.options?.toString() != oldWidget.options?.toString()) {
-      final usersBloc = UsersBloc.of(context);
-      usersBloc.queryUsers(
-        filter: widget.filter,
-        sort: widget.sort,
-        pagination: widget.pagination,
-        options: widget.options,
-      );
+            oldWidget.pagination?.toJson()?.toString()) {
+      loadData();
     }
   }
 }
@@ -260,7 +233,7 @@ abstract class ListItem {
   String get key {
     if (this is ListHeaderItem) {
       final header = (this as ListHeaderItem).heading;
-      return 'HEADER-$header';
+      return 'HEADER-${header.toLowerCase()}';
     }
     if (this is ListUserItem) {
       final user = (this as ListUserItem).user;
@@ -269,7 +242,7 @@ abstract class ListItem {
     return null;
   }
 
-  // ignore: public_member_api_docs
+  // ignore: public_member_api_docs, missing_return
   Widget when({
     @required Widget Function(String heading) headerItem,
     @required Widget Function(User user) userItem,
@@ -280,7 +253,6 @@ abstract class ListItem {
     if (this is ListUserItem) {
       return userItem((this as ListUserItem).user);
     }
-    return SizedBox();
   }
 }
 
@@ -305,8 +277,8 @@ class ListUserItem extends ListItem {
 /// Controller used for paginating data in [ChannelListView]
 class UserListController {
   /// Call this function to reload data
-  VoidCallback loadData;
+  AsyncCallback loadData;
 
   /// Call this function to load further data
-  VoidCallback paginateData;
+  AsyncCallback paginateData;
 }
