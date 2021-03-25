@@ -89,10 +89,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }) async {
     final client = StreamChatCore.of(context).client;
 
-    if (client.state?.user == null ||
-        _queryChannelsLoadingController.value == true) {
-      return;
-    }
+    if (_queryChannelsLoadingController.value == true) return;
 
     if (_channelsController.hasValue) {
       _queryChannelsLoadingController.add(true);

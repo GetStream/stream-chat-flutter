@@ -85,46 +85,6 @@ void main() {
   );
 
   testWidgets(
-    'should return ChannelBlocState when called using ChannelsBloc.of(context)',
-    (tester) async {
-      ChannelsBlocState channelsBlocState;
-
-      const channelsBlocKey = Key('channelsBloc');
-      const childKey = Key('child');
-      final channelsBloc = ChannelsBloc(
-        key: channelsBlocKey,
-        child: Builder(
-          key: childKey,
-          builder: (context) {
-            channelsBlocState = ChannelsBloc.of(context);
-            return Offstage();
-          },
-        ),
-      );
-
-      final mockClient = MockClient();
-
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
-
-      await tester.pumpWidget(
-        StreamChatCore(
-          client: mockClient,
-          child: channelsBloc,
-        ),
-      );
-
-      final state = tester.state<ChannelsBlocState>(
-        find.byKey(channelsBlocKey),
-      );
-
-      expect(find.byKey(channelsBlocKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
-      expect(channelsBlocState, isNotNull);
-      expect(channelsBlocState, state);
-    },
-  );
-
-  testWidgets(
     'channelsBlocState.queryChannels() should emit data through channelsStream',
     (tester) async {
       const channelsBlocKey = Key('channelsBloc');
