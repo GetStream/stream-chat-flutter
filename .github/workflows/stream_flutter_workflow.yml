@@ -81,7 +81,7 @@ jobs:
       - name: 'Flutter Test'
         run: |
           melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-            flutter test --coverage
+            exec flutter test --coverage
       - name: CodeCov
         run: |
           melos exec  -c 3 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
