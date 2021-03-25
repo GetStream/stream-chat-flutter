@@ -495,9 +495,12 @@ class MessageInputState extends State<MessageInput> {
       child: Center(
         child: Container(
           clipBehavior: Clip.antiAlias,
-          margin: widget.sendButtonLocation == SendButtonLocation.inside
-              ? const EdgeInsets.only(right: 8.0)
-              : EdgeInsets.zero,
+          margin: (widget.sendButtonLocation == SendButtonLocation.inside
+                  ? const EdgeInsets.only(right: 8.0)
+                  : EdgeInsets.zero) +
+              (widget.actionsLocation != ActionsLocation.left
+                  ? const EdgeInsets.only(left: 8.0)
+                  : EdgeInsets.zero),
           decoration: BoxDecoration(
             borderRadius: theme.messageInputTheme.borderRadius,
             gradient: _focusNode.hasFocus
