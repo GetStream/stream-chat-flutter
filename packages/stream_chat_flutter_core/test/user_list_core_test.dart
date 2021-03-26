@@ -168,7 +168,7 @@ void main() {
   );
 
   testWidgets(
-    'should build error widget if channelsBlocState.channelsStream emits error',
+    'should build error widget if usersBlocState.usersStream emits error',
     (tester) async {
       const userListCoreKey = Key('userListCore');
       const errorWidgetKey = Key('errorWidget');

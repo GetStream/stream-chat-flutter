@@ -207,7 +207,7 @@ class StreamChannelState extends State<StreamChannel> {
     int after = 20,
     bool preferOffline = false,
   }) =>
-      queryAtMessage(
+      _queryAtMessage(
         messageId: messageId,
         before: before,
         after: after,

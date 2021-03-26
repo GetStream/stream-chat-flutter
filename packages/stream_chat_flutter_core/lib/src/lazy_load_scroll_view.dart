@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-// ignore: constant_identifier_names
 enum _LoadingStatus { loading, stable }
 
 /// Wrapper around a [Scrollable] which triggers [onEndOfPage]/[onStartOfPage] the Scrollable
@@ -50,7 +49,8 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   _LoadingStatus _loadMoreStatus = _LoadingStatus.stable;
 
   @override
-  Widget build(BuildContext context) => NotificationListener<ScrollNotification>(
+  Widget build(BuildContext context) =>
+      NotificationListener<ScrollNotification>(
         onNotification: _onNotification,
         child: widget.child,
       );

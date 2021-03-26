@@ -123,20 +123,12 @@ class UserListCore extends StatefulWidget {
   UserListCoreState createState() => UserListCoreState();
 }
 
+// ignore: public_member_api_docs
 class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    loadData();
-    if (widget.userListController != null) {
-      widget.userListController.loadData = loadData;
-      widget.userListController.paginateData = paginateData;
-    }
-  }
-
-  void initState() {
-    super.initState();
     loadData();
     if (widget.userListController != null) {
       widget.userListController.loadData = loadData;
@@ -150,7 +142,7 @@ class UserListCoreState extends State<UserListCore>
     return _buildListView(_usersBloc);
   }
 
-  bool get isListAlreadySorted =>
+  bool get _isListAlreadySorted =>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
   Stream<List<ListItem>> _buildUserStream(
@@ -160,7 +152,7 @@ class UserListCoreState extends State<UserListCore>
         (users) {
           if (widget.groupAlphabetically) {
             var temp = users;
-            if (!isListAlreadySorted) {
+            if (!_isListAlreadySorted) {
               temp = users
                 ..sort((curr, next) => curr.name.compareTo(next.name));
             }
@@ -184,24 +176,24 @@ class UserListCoreState extends State<UserListCore>
   StreamBuilder<List<ListItem>> _buildListView(
     UsersBlocState usersBlocState,
   ) =>
-     StreamBuilder(
-      stream: _buildUserStream(usersBlocState),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return widget.errorBuilder(snapshot.error);
-        }
-        if (!snapshot.hasData) {
-          return widget.loadingBuilder(context);
-        }
-        final items = snapshot.data;
-        if (items.isEmpty) {
-          return widget.emptyBuilder(context);
-        }
-        return widget.listBuilder(context, items);
-      },
-    );
-  }
+      StreamBuilder(
+        stream: _buildUserStream(usersBlocState),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return widget.errorBuilder(snapshot.error);
+          }
+          if (!snapshot.hasData) {
+            return widget.loadingBuilder(context);
+          }
+          final items = snapshot.data;
+          if (items.isEmpty) {
+            return widget.emptyBuilder(context);
+          }
+          return widget.listBuilder(context, items);
+        },
+      );
 
+  // ignore: public_member_api_docs
   Future<void> loadData() {
     final _usersBloc = UsersBloc.of(context);
     return _usersBloc.queryUsers(
@@ -212,6 +204,7 @@ class UserListCoreState extends State<UserListCore>
     );
   }
 
+  // ignore: public_member_api_docs
   Future<void> paginateData() {
     final _usersBloc = UsersBloc.of(context);
     return _usersBloc.queryUsers(
