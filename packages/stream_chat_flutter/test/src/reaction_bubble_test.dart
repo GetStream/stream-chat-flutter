@@ -33,11 +33,47 @@ void main() {
   );
 
   testGoldens(
-    'it should show a like',
+    'it should show a like - light theme',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
-      final themeData = ThemeData();
+      final themeData = ThemeData.light();
+
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
+      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+      await tester.pumpWidgetBuilder(
+        StreamChat(
+          client: client,
+          streamChatThemeData: theme,
+          child: Container(
+            child: ReactionBubble(
+              reactions: [
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'test'),
+                ),
+              ],
+              borderColor: theme.ownMessageTheme.reactionsBorderColor,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+            ),
+          ),
+        ),
+        surfaceSize: Size(100, 100),
+      );
+      await screenMatchesGolden(tester, 'reaction_bubble_like_light');
+    },
+  );
+
+  testGoldens(
+    'it should show a like - dark theme',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final themeData = ThemeData.dark();
+      final theme = StreamChatThemeData.getDefaultTheme(themeData);
 
       when(client.state).thenReturn(clientState);
       when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
@@ -47,6 +83,7 @@ void main() {
           client: client,
           streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
           child: Container(
+            color: Colors.black,
             child: ReactionBubble(
               reactions: [
                 Reaction(
@@ -54,15 +91,103 @@ void main() {
                   user: User(id: 'test'),
                 ),
               ],
-              borderColor: Colors.black,
-              backgroundColor: Colors.white,
-              maskColor: Colors.white,
+              borderColor: theme.ownMessageTheme.reactionsBorderColor,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor,
             ),
           ),
         ),
         surfaceSize: Size(100, 100),
       );
-      await screenMatchesGolden(tester, 'reaction_bubble_like');
+      await screenMatchesGolden(tester, 'reaction_bubble_like_dark');
+    },
+  );
+
+  testGoldens(
+    'it should show three reactions - light theme',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final themeData = ThemeData.light();
+      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
+      await tester.pumpWidgetBuilder(
+        StreamChat(
+          client: client,
+          streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
+          child: Container(
+            color: Colors.black,
+            child: ReactionBubble(
+              reactions: [
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'test'),
+                ),
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'user-id'),
+                ),
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'test'),
+                ),
+              ],
+              borderColor: theme.ownMessageTheme.reactionsBorderColor,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+            ),
+          ),
+        ),
+        surfaceSize: Size(140, 140),
+      );
+      await screenMatchesGolden(tester, 'reaction_bubble_3_light');
+    },
+  );
+
+  testGoldens(
+    'it should show three reactions - dark theme',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final themeData = ThemeData.dark();
+      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+
+      when(client.state).thenReturn(clientState);
+      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+
+      await tester.pumpWidgetBuilder(
+        StreamChat(
+          client: client,
+          streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
+          child: Container(
+            color: Colors.black,
+            child: ReactionBubble(
+              reactions: [
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'test'),
+                ),
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'user-id'),
+                ),
+                Reaction(
+                  type: 'like',
+                  user: User(id: 'test'),
+                ),
+              ],
+              borderColor: theme.ownMessageTheme.reactionsBorderColor,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+            ),
+          ),
+        ),
+        surfaceSize: Size(140, 140),
+      );
+      await screenMatchesGolden(tester, 'reaction_bubble_3_dark');
     },
   );
 
