@@ -15,6 +15,7 @@ export './src/attachment_file_uploader.dart' show AttachmentFileUploader;
 export './src/client.dart';
 export './src/db/chat_persistence_client.dart';
 export './src/event_type.dart';
+export './src/exceptions.dart';
 export './src/extensions/rate_limit.dart';
 export './src/extensions/string_extension.dart';
 export './src/models/action.dart';

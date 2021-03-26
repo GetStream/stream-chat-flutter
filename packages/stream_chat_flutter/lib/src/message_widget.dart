@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
@@ -832,6 +833,8 @@ class _MessageWidgetState extends State<MessageWidget>
           return StreamChannel(
             channel: channel,
             child: MessageActionsModal(
+              onCopyTap: (message) =>
+                  Clipboard.setData(ClipboardData(text: message.text)),
               attachmentBorderRadiusGeometry:
                   widget.attachmentBorderRadiusGeometry,
               showUserAvatar:
