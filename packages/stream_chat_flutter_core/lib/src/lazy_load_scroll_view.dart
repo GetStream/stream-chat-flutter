@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+// ignore: constant_identifier_names
 enum _LoadingStatus { loading, stable }
 
 /// Wrapper around a [Scrollable] which triggers [onEndOfPage]/[onStartOfPage] the Scrollable
 /// reaches to the start or end of the view extent.
 class LazyLoadScrollView extends StatefulWidget {
-  /// Creates a new instance of [LazyLoadScrollView]. The parameter [child] must be
-  /// supplied and not null.
+  /// Creates a new instance of [LazyLoadScrollView]. The parameter [child]
+  /// must be supplied and not null.
   const LazyLoadScrollView({
     Key key,
     @required this.child,
@@ -17,7 +18,7 @@ class LazyLoadScrollView extends StatefulWidget {
     this.onPageScrollEnd,
     this.onInBetweenOfPage,
     this.scrollOffset = 100,
-  })  : assert(child != null),
+  })  : assert(child != null, 'Parameter child should not be null'),
         super(key: key);
 
   /// The [Widget] that this widget watches for changes on
@@ -49,12 +50,10 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   _LoadingStatus _loadMoreStatus = _LoadingStatus.stable;
 
   @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      child: widget.child,
-      onNotification: _onNotification,
-    );
-  }
+  Widget build(BuildContext context) => NotificationListener<ScrollNotification>(
+        onNotification: _onNotification,
+        child: widget.child,
+      );
 
   bool _onNotification(ScrollNotification notification) {
     if (notification is ScrollStartNotification) {

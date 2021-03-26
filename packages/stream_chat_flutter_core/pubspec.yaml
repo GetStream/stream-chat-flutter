@@ -10,10 +10,10 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  stream_chat: ^1.5.0
   flutter:
     sdk: flutter
   rxdart: ^0.25.0
+  stream_chat: ^1.5.0
 
 dependency_overrides:
   stream_chat:

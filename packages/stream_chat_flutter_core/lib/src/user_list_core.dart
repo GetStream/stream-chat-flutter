@@ -6,7 +6,8 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 
 ///
-/// [UserListCore] is a simplified class that allows fetching users while exposing UI builders.
+/// [UserListCore] is a simplified class that allows fetching users while
+/// exposing UI builders.
 /// A [UserListController] is used to load and paginate data.
 ///
 /// ```dart
@@ -51,30 +52,31 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 /// [UsersBloc] must be the ancestor of this widget. This is necessary since
 /// [UserListCore] depends on functionality contained within [UsersBloc].
 ///
-/// The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and [errorBuilder] must all be supplied
-/// and not null.
+/// The parameters [listBuilder], [loadingBuilder], [emptyBuilder] and
+/// [errorBuilder] must all be supplied and not null.
 class UserListCore extends StatefulWidget {
   /// Instantiate a new [UserListCore]
   const UserListCore({
-    Key key,
     @required this.errorBuilder,
     @required this.emptyBuilder,
     @required this.loadingBuilder,
     @required this.listBuilder,
+    Key key,
     this.filter,
     this.options,
     this.sort,
     this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
-  })  : assert(errorBuilder != null),
-        assert(emptyBuilder != null),
-        assert(loadingBuilder != null),
-        assert(listBuilder != null),
+  })  : assert(errorBuilder != null, ''),
+        assert(emptyBuilder != null, ''),
+        assert(loadingBuilder != null, ''),
+        assert(listBuilder != null, ''),
         super(key: key);
 
   /// A [UserListController] allows reloading and pagination.
-  /// Use [UserListController.loadData] and [UserListController.paginateData] respectively for reloading and pagination.
+  /// Use [UserListController.loadData] and [UserListController.paginateData]
+  /// respectively for reloading and pagination.
   final UserListController userListController;
 
   /// The builder that will be used in case of error
@@ -101,9 +103,9 @@ class UserListCore extends StatefulWidget {
   final Map<String, dynamic> options;
 
   /// The sorting used for the channels matching the filters.
-  /// Sorting is based on field and direction, multiple sorting options can be provided.
-  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
-  /// Direction can be ascending or descending.
+  /// Sorting is based on field and direction, multiple sorting options can be
+  /// provided. You can sort based on last_updated, last_message_at, updated_at,
+  /// created_at or member_count. Direction can be ascending or descending.
   final List<SortOption> sort;
 
   /// Pagination parameters
@@ -124,6 +126,15 @@ class UserListCore extends StatefulWidget {
 class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadData();
+    if (widget.userListController != null) {
+      widget.userListController.loadData = loadData;
+      widget.userListController.paginateData = paginateData;
+    }
+  }
+
   void initState() {
     super.initState();
     loadData();
@@ -144,35 +155,36 @@ class UserListCoreState extends State<UserListCore>
 
   Stream<List<ListItem>> _buildUserStream(
     UsersBlocState usersBlocState,
-  ) {
-    return usersBlocState.usersStream.map(
-      (users) {
-        if (widget.groupAlphabetically) {
-          var temp = users;
-          if (!isListAlreadySorted) {
-            temp = users..sort((curr, next) => curr.name.compareTo(next.name));
+  ) =>
+      usersBlocState.usersStream.map(
+        (users) {
+          if (widget.groupAlphabetically) {
+            var temp = users;
+            if (!isListAlreadySorted) {
+              temp = users
+                ..sort((curr, next) => curr.name.compareTo(next.name));
+            }
+            final groupedUsers = <String, List<User>>{};
+            for (final e in temp) {
+              final alphabet = e.name[0]?.toUpperCase();
+              groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
+            }
+            final items = <ListItem>[];
+            for (final key in groupedUsers.keys) {
+              items
+                ..add(ListHeaderItem(key))
+                ..addAll(groupedUsers[key].map((e) => ListUserItem(e)));
+            }
+            return items;
           }
-          final groupedUsers = <String, List<User>>{};
-          for (final e in temp) {
-            final alphabet = e.name[0]?.toUpperCase();
-            groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
-          }
-          final items = <ListItem>[];
-          for (final key in groupedUsers.keys) {
-            items.add(ListHeaderItem(key));
-            items.addAll(groupedUsers[key].map((e) => ListUserItem(e)));
-          }
-          return items;
-        }
-        return users.map((e) => ListUserItem(e)).toList();
-      },
-    );
-  }
+          return users.map((e) => ListUserItem(e)).toList();
+        },
+      );
 
   StreamBuilder<List<ListItem>> _buildListView(
     UsersBlocState usersBlocState,
-  ) {
-    return StreamBuilder(
+  ) =>
+     StreamBuilder(
       stream: _buildUserStream(usersBlocState),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -226,8 +238,8 @@ class UserListCoreState extends State<UserListCore>
 }
 
 /// Represents an item in a the user stream list.
-/// Header items are prefixed with the key `HEADER` While users are prefixed with
-/// `USER`.
+/// Header items are prefixed with the key `HEADER` While users are prefixed
+/// with `USER`.
 abstract class ListItem {
   // ignore: public_member_api_docs
   String get key {
@@ -259,19 +271,19 @@ abstract class ListItem {
 // ignore: public_member_api_docs
 class ListHeaderItem extends ListItem {
   // ignore: public_member_api_docs
-  final String heading;
+  ListHeaderItem(this.heading);
 
   // ignore: public_member_api_docs
-  ListHeaderItem(this.heading);
+  final String heading;
 }
 
 // ignore: public_member_api_docs
 class ListUserItem extends ListItem {
   // ignore: public_member_api_docs
-  final User user;
+  ListUserItem(this.user);
 
   // ignore: public_member_api_docs
-  ListUserItem(this.user);
+  final User user;
 }
 
 /// Controller used for paginating data in [ChannelListView]

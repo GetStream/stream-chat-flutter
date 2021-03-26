@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import 'stream_chat_core.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget dedicated to the management of a users list with pagination.
 ///
@@ -14,9 +14,12 @@ class UsersBloc extends StatefulWidget {
   /// Instantiate a new [UsersBloc]. The parameter [child] must be supplied and
   /// not null.
   const UsersBloc({
-    Key key,
     @required this.child,
-  })  : assert(child != null),
+    Key key,
+  })  : assert(
+            child != null,
+            'When constructing a UsersBloc, the parameter '
+            'child should not be null.'),
         super(key: key);
 
   /// The widget child

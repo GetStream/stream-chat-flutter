@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import 'stream_chat_core.dart';
+import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 
 /// [MessageSearchBloc] is used to manage a list of messages with pagination.
 /// This class can be used to load messages, perform queries, etc.
@@ -16,7 +15,7 @@ class MessageSearchBloc extends StatefulWidget {
   const MessageSearchBloc({
     Key key,
     @required this.child,
-  })  : assert(child != null),
+  })  : assert(child != null, 'Parameter child should not be null.'),
         super(key: key);
 
   /// The widget child
