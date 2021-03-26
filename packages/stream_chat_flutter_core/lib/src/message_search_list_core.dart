@@ -130,14 +130,14 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return widget.errorBuilder(context, snapshot.error);
-        }
-        if (!snapshot.hasData) {
-          return widget.loadingBuilder(context);
-        }
-        final items = snapshot.data;
-        if (items.isEmpty) {
-          return widget.emptyBuilder(context);
-        }
+          }
+          if (!snapshot.hasData) {
+            return widget.loadingBuilder(context);
+          }
+          final items = snapshot.data;
+          if (items.isEmpty) {
+            return widget.emptyBuilder(context);
+          }
           return widget.childBuilder(snapshot.data);
         },
       );
