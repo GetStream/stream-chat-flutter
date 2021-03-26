@@ -100,10 +100,10 @@ class MessageListCore extends StatefulWidget {
   final bool Function(Message) messageFilter;
 
   @override
-  _MessageListCoreState createState() => _MessageListCoreState();
+  MessageListCoreState createState() => MessageListCoreState();
 }
 
-class _MessageListCoreState extends State<MessageListCore> {
+class MessageListCoreState extends State<MessageListCore> {
   StreamChannelState streamChannel;
 
   bool get _upToDate => streamChannel.channel.state.isUpToDate;
@@ -138,10 +138,10 @@ class _MessageListCoreState extends State<MessageListCore> {
       stream: messagesStream?.map((messages) =>
           messages?.where(widget.messageFilter ?? defaultFilter)?.toList()),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return widget.loadingBuilder(context);
-        } else if (snapshot.hasError) {
+        if (snapshot.hasError) {
           return widget.errorWidgetBuilder(context, snapshot.error);
+        } else if (!snapshot.hasData) {
+          return widget.loadingBuilder(context);
         } else {
           final messageList = snapshot.data?.reversed?.toList() ?? [];
           if (messageList.isEmpty && !_isThreadConversation) {
@@ -193,5 +193,5 @@ class _MessageListCoreState extends State<MessageListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageListController {
   /// Call this function to load further data
-  Function({QueryDirection direction}) paginateData;
+  Future<void> Function({QueryDirection direction}) paginateData;
 }
