@@ -894,8 +894,6 @@ class _MessageWidgetState extends State<MessageWidget>
                   widget.attachmentShape ?? _getDefaultAttachmentShape(context),
               reverse: widget.reverse,
               message: widget.message,
-              editMessageInputBuilder: widget.editMessageInputBuilder,
-              onThreadTap: widget.onThreadTap,
               showReactions: widget.showReactions,
             ),
           );

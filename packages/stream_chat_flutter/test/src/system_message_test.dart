@@ -31,6 +31,8 @@ void main() {
       when(clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(10));
 
+      var tapped = false;
+
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
@@ -38,6 +40,7 @@ void main() {
             channel: channel,
             child: Scaffold(
               body: SystemMessage(
+                onMessageTap: (m) => tapped = true,
                 message: Message(
                   text: 'demo message',
                 ),
@@ -47,7 +50,10 @@ void main() {
         ),
       ));
 
+      await tester.tap(find.byType(SystemMessage));
+
       expect(find.text('demo message'), findsOneWidget);
+      expect(tapped, true);
     },
   );
 }
