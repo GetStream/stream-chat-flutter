@@ -258,7 +258,7 @@ void main() {
   );
 
   testWidgets(
-    'should build empty widget if usersBlocState.usersStream emits some data',
+    'should build list widget if usersBlocState.usersStream emits some data',
     (tester) async {
       const userListCoreKey = Key('userListCore');
       const listWidgetKey = Key('listWidget');

@@ -99,10 +99,10 @@ class MessageSearchListCore extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   @override
-  _MessageSearchListCoreState createState() => _MessageSearchListCoreState();
+  MessageSearchListCoreState createState() => MessageSearchListCoreState();
 }
 
-class _MessageSearchListCoreState extends State<MessageSearchListCore> {
+class MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void initState() {
     super.initState();
@@ -167,11 +167,11 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
     super.didUpdateWidget(oldWidget);
     if (widget.filters?.toString() != oldWidget.filters?.toString() ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
-        widget.paginationParams?.toJson()?.toString() !=
-            oldWidget.paginationParams?.toJson()?.toString() ||
         widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
         widget.messageFilters?.toString() !=
-            oldWidget.messageFilters?.toString()) {
+            oldWidget.messageFilters?.toString() ||
+        widget.paginationParams?.toJson()?.toString() !=
+            oldWidget.paginationParams?.toJson()?.toString()) {
       loadData();
     }
   }
