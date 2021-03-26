@@ -2,7 +2,7 @@ import 'package:mockito/mockito.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 class MockClient extends Mock implements StreamChatClient {
-  final Logger logger = Logger.detached('📡');
+  final Logger logger = MockLogger();
 
   ClientState _state;
 
@@ -24,6 +24,11 @@ class MockClientState extends Mock implements ClientState {
       );
 }
 
-class MockChannel extends Mock implements Channel {}
+class MockChannel extends Mock implements Channel {
+  ChannelClientState _state;
+
+  @override
+  ChannelClientState get state => _state ??= MockChannelState();
+}
 
 class MockChannelState extends Mock implements ChannelClientState {}
