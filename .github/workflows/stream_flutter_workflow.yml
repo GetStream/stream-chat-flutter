@@ -58,7 +58,7 @@ jobs:
           ./.github/workflows/scripts/validate-formatting.sh
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v2
