@@ -6,7 +6,6 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../stream_chat_flutter.dart';
 import 'channel_name.dart';
-import 'channel_unread_indicator.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_preview_paint.png)
@@ -98,19 +97,20 @@ class ChannelPreview extends StatelessWidget {
                         ),
                   ),
                   StreamBuilder<List<Member>>(
-                      stream: channel.state.membersStream,
-                      initialData: channel.state.members,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData ||
-                            snapshot.data.isEmpty ||
-                            !snapshot.data.any((Member e) =>
-                                e.user.id == channel.client.state.user.id)) {
-                          return SizedBox();
-                        }
-                        return ChannelUnreadIndicator(
-                          channel: channel,
-                        );
-                      }),
+                    stream: channel.state.membersStream,
+                    initialData: channel.state.members,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData ||
+                          snapshot.data.isEmpty ||
+                          !snapshot.data.any((Member e) =>
+                              e.user.id == channel.client.state.user.id)) {
+                        return SizedBox();
+                      }
+                      return UnreadIndicator(
+                        cid: channel.cid,
+                      );
+                    },
+                  ),
                 ],
               ),
               subtitle: Row(
