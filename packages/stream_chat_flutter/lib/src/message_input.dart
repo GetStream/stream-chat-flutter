@@ -491,10 +491,17 @@ class MessageInputState extends State<MessageInput> {
 
   Expanded _buildTextInput(BuildContext context) {
     final theme = StreamChatTheme.of(context);
+    final margin = (widget.sendButtonLocation == SendButtonLocation.inside
+            ? const EdgeInsets.only(right: 8.0)
+            : EdgeInsets.zero) +
+        (widget.actionsLocation != ActionsLocation.left
+            ? const EdgeInsets.only(left: 8.0)
+            : EdgeInsets.zero);
     return Expanded(
       child: Center(
         child: Container(
           clipBehavior: Clip.antiAlias,
+          margin: margin,
           decoration: BoxDecoration(
             borderRadius: theme.messageInputTheme.borderRadius,
             gradient: _focusNode.hasFocus
