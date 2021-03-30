@@ -20,6 +20,6 @@ dependency_overrides:
     path: ../stream_chat
 
 dev_dependencies:
-  mockito: ^4.1.3
   flutter_test:
     sdk: flutter
+  mockito: ^4.1.3

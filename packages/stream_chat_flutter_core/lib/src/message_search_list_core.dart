@@ -107,6 +107,7 @@ class MessageSearchListCore extends StatefulWidget {
   MessageSearchListCoreState createState() => MessageSearchListCoreState();
 }
 
+/// The current state of the [MessageSearchListCore].
 class MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void didChangeDependencies() {
@@ -142,6 +143,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         },
       );
 
+  /// Fetches initial messages and updates the widget
   Future<void> loadData() {
     final messageSearchBloc = MessageSearchBloc.of(context);
     return messageSearchBloc.search(
@@ -153,6 +155,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
     );
   }
 
+  /// Fetches more messages with updated pagination and updates the widget
   Future<void> paginateData() {
     final messageSearchBloc = MessageSearchBloc.of(context);
     return messageSearchBloc.search(

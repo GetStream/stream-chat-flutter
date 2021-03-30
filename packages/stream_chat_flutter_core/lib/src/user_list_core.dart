@@ -123,7 +123,7 @@ class UserListCore extends StatefulWidget {
   UserListCoreState createState() => UserListCoreState();
 }
 
-// ignore: public_member_api_docs
+/// The current state of the [UserListCore].
 class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
   @override
@@ -234,7 +234,7 @@ class UserListCoreState extends State<UserListCore>
 /// Header items are prefixed with the key `HEADER` While users are prefixed
 /// with `USER`.
 abstract class ListItem {
-  // ignore: public_member_api_docs
+  /// Unique key per list item
   String get key {
     if (this is ListHeaderItem) {
       final header = (this as ListHeaderItem).heading;
@@ -247,7 +247,8 @@ abstract class ListItem {
     return null;
   }
 
-  // ignore: public_member_api_docs, missing_return
+  /// Helper function to build widget based on ListItem type
+  // ignore: missing_return
   Widget when({
     @required Widget Function(String heading) headerItem,
     @required Widget Function(User user) userItem,
@@ -261,21 +262,21 @@ abstract class ListItem {
   }
 }
 
-// ignore: public_member_api_docs
+/// Header Item
 class ListHeaderItem extends ListItem {
-  // ignore: public_member_api_docs
+  /// Constructs a new [ListHeaderItem]
   ListHeaderItem(this.heading);
 
-  // ignore: public_member_api_docs
+  /// Heading used to build the item.
   final String heading;
 }
 
-// ignore: public_member_api_docs
+/// User Item
 class ListUserItem extends ListItem {
-  // ignore: public_member_api_docs
+  /// Constructs a new [ListUserItem]
   ListUserItem(this.user);
 
-  // ignore: public_member_api_docs
+  /// [User] used to build the item.
   final User user;
 }
 

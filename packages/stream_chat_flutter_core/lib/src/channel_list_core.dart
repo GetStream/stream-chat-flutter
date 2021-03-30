@@ -133,6 +133,7 @@ class ChannelListCore extends StatefulWidget {
   ChannelListCoreState createState() => ChannelListCoreState();
 }
 
+/// The current state of the [ChannelListCore].
 class ChannelListCoreState extends State<ChannelListCore> {
   @override
   Widget build(BuildContext context) {
@@ -161,6 +162,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
         },
       );
 
+  /// Fetches initial channels and updates the widget
   Future<void> loadData() {
     final channelsBloc = ChannelsBloc.of(context);
     return channelsBloc.queryChannels(
@@ -171,6 +173,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
     );
   }
 
+  /// Fetches more channels with updated pagination and updates the widget
   Future<void> paginateData() {
     final channelsBloc = ChannelsBloc.of(context);
     return channelsBloc.queryChannels(

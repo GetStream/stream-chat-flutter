@@ -117,7 +117,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           _channelsController.add(temp);
         }
         if (_channelsController.hasValue &&
-            _queryChannelsLoadingController.value == true) {
+            _queryChannelsLoadingController.value) {
           _queryChannelsLoadingController.sink.add(false);
         }
       }

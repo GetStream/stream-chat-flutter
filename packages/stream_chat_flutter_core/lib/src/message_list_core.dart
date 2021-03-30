@@ -117,25 +117,25 @@ class MessageListCore extends StatefulWidget {
   MessageListCoreState createState() => MessageListCoreState();
 }
 
+/// The current state of the [MessageListCore].
 class MessageListCoreState extends State<MessageListCore> {
-  StreamChannelState streamChannel;
+  StreamChannelState _streamChannel;
 
-  bool get _upToDate => streamChannel.channel.state.isUpToDate;
+  bool get _upToDate => _streamChannel.channel.state.isUpToDate;
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser get _currentUser => streamChannel.channel.client.state.user;
+  OwnUser get _currentUser => _streamChannel.channel.client.state.user;
 
-  List<Message> messages = <Message>[];
-  bool initialMessageHighlightComplete = false;
+  var _messages = <Message>[];
 
   @override
   Widget build(BuildContext context) {
     final messagesStream = _isThreadConversation
-        ? streamChannel.channel.state.threadsStream
+        ? _streamChannel.channel.state.threadsStream
             .where((threads) => threads.containsKey(widget.parentMessage.id))
             .map((threads) => threads[widget.parentMessage.id])
-        : streamChannel.channel.state?.messagesStream;
+        : _streamChannel.channel.state?.messagesStream;
 
     bool defaultFilter(Message m) {
       final isMyMessage = m.user.id == _currentUser.id;
@@ -159,29 +159,32 @@ class MessageListCoreState extends State<MessageListCore> {
               return widget.emptyBuilder(context);
             }
           } else {
-            messages = messageList;
+            _messages = messageList;
           }
-          return widget.messageListBuilder(context, messages);
+          return widget.messageListBuilder(context, _messages);
         }
       },
     );
   }
 
+  /// Fetches more messages with updated pagination and updates the widget.
+  ///
+  /// Optionally pass the fetch direction, defaults to [QueryDirection.bottom]
   Future<void> paginateData(
       {QueryDirection direction = QueryDirection.bottom}) {
     if (!_isThreadConversation) {
-      return streamChannel.queryMessages(direction: direction);
+      return _streamChannel.queryMessages(direction: direction);
     } else {
-      return streamChannel.getReplies(widget.parentMessage.id);
+      return _streamChannel.getReplies(widget.parentMessage.id);
     }
   }
 
   @override
   void initState() {
-    streamChannel = StreamChannel.of(context);
+    _streamChannel = StreamChannel.of(context);
 
     if (_isThreadConversation) {
-      streamChannel.getReplies(widget.parentMessage.id);
+      _streamChannel.getReplies(widget.parentMessage.id);
     }
 
     if (widget.messageListController != null) {
@@ -194,7 +197,7 @@ class MessageListCoreState extends State<MessageListCore> {
   @override
   void dispose() {
     if (!_upToDate) {
-      streamChannel.reloadChannel();
+      _streamChannel.reloadChannel();
     }
     super.dispose();
   }
