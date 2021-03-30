@@ -1,5 +1,3 @@
-import 'package:example/channel_file_display_screen.dart';
-import 'package:example/channel_media_display_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
