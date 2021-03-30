@@ -71,13 +71,17 @@ class GiphyAttachment extends AttachmentWidget {
                     ),
                     SizedBox(width: 8),
                     if (attachment.title != null)
-                      Text(
-                        attachment.title,
-                        style: TextStyle(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .black
-                              .withOpacity(0.5),
+                      Flexible(
+                        child: Text(
+                          attachment.title,
+                          style: TextStyle(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(0.5),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                   ],
