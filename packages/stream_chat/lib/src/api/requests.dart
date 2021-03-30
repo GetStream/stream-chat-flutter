@@ -104,4 +104,25 @@ class PaginationParams {
         lessThan: lessThan ?? this.lessThan,
         lessThanOrEqual: lessThanOrEqual ?? this.lessThanOrEqual,
       );
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      limit.hashCode ^
+      offset.hashCode ^
+      greaterThan.hashCode ^
+      greaterThanOrEqual.hashCode ^
+      lessThan.hashCode ^
+      lessThanOrEqual.hashCode;
+
+  @override
+  bool operator ==(covariant PaginationParams other) =>
+      identical(this, other) ||
+      runtimeType == other.runtimeType &&
+          limit == other.limit &&
+          offset == other.offset &&
+          greaterThan == other.greaterThan &&
+          greaterThanOrEqual == other.greaterThanOrEqual &&
+          lessThan == other.lessThan &&
+          lessThanOrEqual == other.lessThanOrEqual;
 }

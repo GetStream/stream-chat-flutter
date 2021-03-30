@@ -74,10 +74,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
   /// The current channel list as a stream
   Stream<List<Channel>> get channelsStream => _channelsController.stream;
 
-  final BehaviorSubject<bool> _queryChannelsLoadingController =
-      BehaviorSubject.seeded(false);
+  final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
-  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
+  final _channelsController = BehaviorSubject<List<Channel>>();
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -91,15 +90,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
     List<SortOption<ChannelModel>> sortOptions,
     PaginationParams paginationParams,
     Map<String, dynamic> options,
-    bool onlyOffline = false,
   }) async {
     final client = StreamChatCore.of(context).client;
 
-    if (client.state?.user == null ||
-        _queryChannelsLoadingController.value == true) {
-      return;
+    if (_queryChannelsLoadingController.value == true) return;
+
+    if (_channelsController.hasValue) {
+      _queryChannelsLoadingController.add(true);
     }
-    _queryChannelsLoadingController.sink.add(true);
 
     try {
       final clear = paginationParams == null ||
@@ -115,15 +113,20 @@ class ChannelsBlocState extends State<ChannelsBloc>
         if (clear) {
           _channelsController.add(channels);
         } else {
-          final l = oldChannels + channels;
-          _channelsController.add(l);
+          final temp = oldChannels + channels;
+          _channelsController.add(temp);
         }
-        _queryChannelsLoadingController.sink.add(false);
+        if (_channelsController.hasValue &&
+            _queryChannelsLoadingController.value) {
+          _queryChannelsLoadingController.sink.add(false);
+        }
       }
-    } catch (err, stackTrace) {
-      print(err);
-      print(stackTrace);
-      _queryChannelsLoadingController.addError(err, stackTrace);
+    } catch (e, stk) {
+      if (_channelsController.hasValue) {
+        _queryChannelsLoadingController.addError(e, stk);
+      } else {
+        _channelsController.addError(e, stk);
+      }
     }
   }
 
@@ -139,15 +142,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {
         final newChannels = List<Channel>.from(channels ?? []);
         final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index > -1) {
+        if (index != -1) {
           if (index > 0) {
             final channel = newChannels.removeAt(index);
             newChannels.insert(0, channel);
           }
-        } else if (widget.shouldAddChannel != null &&
-            widget.shouldAddChannel(e)) {
+        } else if (widget.shouldAddChannel?.call(e) == true) {
           final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
-          if (hiddenIndex > -1) {
+          if (hiddenIndex != -1) {
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
           } else {

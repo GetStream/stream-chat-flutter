@@ -193,9 +193,7 @@ class _UserListViewState extends State<UserListView>
       return child;
     } else {
       return RefreshIndicator(
-        onRefresh: () async {
-          _userListController.loadData();
-        },
+        onRefresh: () => _userListController.loadData(),
         child: child,
       );
     }

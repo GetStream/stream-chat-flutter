@@ -104,21 +104,15 @@ class MessageSearchListCore extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   @override
-  _MessageSearchListCoreState createState() => _MessageSearchListCoreState();
+  MessageSearchListCoreState createState() => MessageSearchListCoreState();
 }
 
-class _MessageSearchListCoreState extends State<MessageSearchListCore> {
+/// The current state of the [MessageSearchListCore].
+class MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    MessageSearchBloc.of(context).search(
-      filter: widget.filters,
-      sort: widget.sortOptions,
-      query: widget.messageQuery,
-      pagination: widget.paginationParams,
-      messageFilter: widget.messageFilters,
-    );
-
+    loadData();
     if (widget.messageSearchListController != null) {
       widget.messageSearchListController.loadData = loadData;
       widget.messageSearchListController.paginateData = paginateData;
@@ -136,29 +130,23 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
         stream: messageSearchBloc.messagesStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            if (snapshot.error is Error) {
-              print((snapshot.error as Error).stackTrace);
-            }
-
             return widget.errorBuilder(context, snapshot.error);
           }
-
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
           }
-
           final items = snapshot.data;
-
           if (items.isEmpty) {
             return widget.emptyBuilder(context);
           }
-
           return widget.childBuilder(snapshot.data);
         },
       );
 
-  void loadData() {
-    MessageSearchBloc.of(context).search(
+  /// Fetches initial messages and updates the widget
+  Future<void> loadData() {
+    final messageSearchBloc = MessageSearchBloc.of(context);
+    return messageSearchBloc.search(
       filter: widget.filters,
       sort: widget.sortOptions,
       query: widget.messageQuery,
@@ -167,10 +155,10 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
     );
   }
 
-  void paginateData() {
+  /// Fetches more messages with updated pagination and updates the widget
+  Future<void> paginateData() {
     final messageSearchBloc = MessageSearchBloc.of(context);
-
-    messageSearchBloc.loadMore(
+    return messageSearchBloc.search(
       filter: widget.filters,
       sort: widget.sortOptions,
       pagination: widget.paginationParams.copyWith(
@@ -186,18 +174,12 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
     super.didUpdateWidget(oldWidget);
     if (widget.filters?.toString() != oldWidget.filters?.toString() ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
-        widget.paginationParams?.toJson()?.toString() !=
-            oldWidget.paginationParams?.toJson()?.toString() ||
         widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
         widget.messageFilters?.toString() !=
-            oldWidget.messageFilters?.toString()) {
-      MessageSearchBloc.of(context).search(
-        filter: widget.filters,
-        sort: widget.sortOptions,
-        query: widget.messageQuery,
-        pagination: widget.paginationParams,
-        messageFilter: widget.messageFilters,
-      );
+            oldWidget.messageFilters?.toString() ||
+        widget.paginationParams?.toJson()?.toString() !=
+            oldWidget.paginationParams?.toJson()?.toString()) {
+      loadData();
     }
   }
 }
@@ -205,8 +187,8 @@ class _MessageSearchListCoreState extends State<MessageSearchListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageSearchListController {
   /// Call this function to reload data
-  VoidCallback loadData;
+  AsyncCallback loadData;
 
   /// Call this function to load further data
-  VoidCallback paginateData;
+  AsyncCallback paginateData;
 }

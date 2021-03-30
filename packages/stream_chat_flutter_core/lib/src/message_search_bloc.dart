@@ -48,17 +48,16 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   Stream<List<GetMessageResponse>> get messagesStream =>
       _messageResponses.stream;
 
-  final BehaviorSubject<List<GetMessageResponse>> _messageResponses =
-      BehaviorSubject();
+  final _messageResponses = BehaviorSubject<List<GetMessageResponse>>();
 
-  final BehaviorSubject<bool> _queryMessagesLoadingController =
-      BehaviorSubject.seeded(false);
+  final _queryMessagesLoadingController = BehaviorSubject.seeded(false);
 
   /// The stream notifying the state of queryUsers call
   Stream<bool> get queryMessagesLoading =>
       _queryMessagesLoadingController.stream;
 
-  /// Calls [StreamChatClient.search] updating [messageResponses] stream
+  /// Calls [StreamChatClient.search] updating
+  /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
     Map<String, dynamic> filter,
     Map<String, dynamic> messageFilter,
@@ -66,33 +65,13 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     String query,
     PaginationParams pagination,
   }) async {
-    _messageResponses.add(null);
-    try {
-      final messages = await _search(
-        filter: filter,
-        messageFilter: messageFilter,
-        sort: sort,
-        query: query,
-        pagination: pagination,
-      );
-      _messageResponses.add(messages.results);
-    } catch (err, stk) {
-      _messageResponses.addError(err, stk);
-    }
-  }
+    final client = StreamChatCore.of(context).client;
 
-  /// Calls [StreamChatClient.search] updating [queryMessagesLoading] stream
-  Future<void> loadMore({
-    Map<String, dynamic> filter,
-    Map<String, dynamic> messageFilter,
-    List<SortOption> sort,
-    String query,
-    PaginationParams pagination,
-  }) async {
-    if (_queryMessagesLoadingController.value == true) {
-      return;
+    if (_queryMessagesLoadingController.value == true) return;
+
+    if (_messageResponses.hasValue) {
+      _queryMessagesLoadingController.add(true);
     }
-    _queryMessagesLoadingController.add(true);
     try {
       final clear = pagination == null ||
           pagination.offset == null ||
@@ -100,12 +79,12 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
 
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
-      final messages = await _search(
-        filter: filter,
-        messageFilter: messageFilter,
+      final messages = await client.search(
+        filter,
         sort: sort,
         query: query,
-        pagination: pagination,
+        paginationParams: pagination,
+        messageFilters: messageFilter,
       );
 
       if (clear) {
@@ -114,28 +93,16 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         final temp = oldMessages + messages.results;
         _messageResponses.add(temp);
       }
-
-      _queryMessagesLoadingController.add(false);
-    } catch (err, stackTrace) {
-      _queryMessagesLoadingController.addError(err, stackTrace);
+      if (_messageResponses.hasValue && _queryMessagesLoadingController.value) {
+        _queryMessagesLoadingController.add(false);
+      }
+    } catch (e, stk) {
+      if (_messageResponses.hasValue) {
+        _queryMessagesLoadingController.addError(e, stk);
+      } else {
+        _messageResponses.addError(e, stk);
+      }
     }
-  }
-
-  Future<SearchMessagesResponse> _search({
-    Map<String, dynamic> filter,
-    Map<String, dynamic> messageFilter,
-    List<SortOption> sort,
-    String query,
-    PaginationParams pagination,
-  }) {
-    final client = StreamChatCore.of(context).client;
-    return client.search(
-      filter,
-      sort: sort,
-      query: query,
-      paginationParams: pagination,
-      messageFilters: messageFilter,
-    );
   }
 
   @override

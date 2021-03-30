@@ -262,9 +262,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
     if (widget.pullToRefresh) {
       child = RefreshIndicator(
-        onRefresh: () async {
-          _messageSearchListController.loadData();
-        },
+        onRefresh: () => _messageSearchListController.loadData(),
         child: child,
       );
     }

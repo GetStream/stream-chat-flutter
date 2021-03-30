@@ -207,15 +207,14 @@ class StreamChannelState extends State<StreamChannel> {
     int after = 20,
     bool preferOffline = false,
   }) =>
-      queryAtMessage(
+      _queryAtMessage(
         messageId: messageId,
         before: before,
         after: after,
         preferOffline: preferOffline,
       );
 
-  ///
-  Future<void> queryAtMessage({
+  Future<void> _queryAtMessage({
     String messageId,
     int before = 20,
     int after = 20,
@@ -297,7 +296,7 @@ class StreamChannelState extends State<StreamChannel> {
   }
 
   /// Reloads the channel with latest message
-  Future<void> reloadChannel() => queryAtMessage(before: 30);
+  Future<void> reloadChannel() => _queryAtMessage(before: 30);
 
   List<Future<bool>> _futures;
 
@@ -305,8 +304,7 @@ class StreamChannelState extends State<StreamChannel> {
     try {
       await loadChannelAtMessage(initialMessageId);
       return true;
-    } catch (e, stk) {
-      print('Error: $e\nStack: $stk');
+    } catch (_) {
       rethrow;
     }
   }
@@ -349,9 +347,6 @@ class StreamChannelState extends State<StreamChannel> {
       ],
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          if (snapshot.error is Error) {
-            print((snapshot.error as Error).stackTrace);
-          }
           var message = snapshot.error.toString();
           if (snapshot.error is DioError) {
             final dioError = snapshot.error as DioError;
@@ -361,9 +356,7 @@ class StreamChannelState extends State<StreamChannel> {
               message = 'Check your connection and retry';
             }
           }
-          return Center(
-            child: Text(message),
-          );
+          return Center(child: Text(message));
         }
         final initialized = snapshot.data[0];
         // ignore: avoid_bool_literals_in_conditional_expressions

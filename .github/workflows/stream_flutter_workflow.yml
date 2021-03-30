@@ -59,7 +59,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v2
         with:
@@ -98,7 +98,7 @@ jobs:
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter_core/coverage/lcov.info
-          min_coverage: 4.5
+          min_coverage: 90
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info

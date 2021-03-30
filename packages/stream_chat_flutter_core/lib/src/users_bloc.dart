@@ -51,10 +51,9 @@ class UsersBlocState extends State<UsersBloc>
   /// The current users list as a stream
   Stream<List<User>> get usersStream => _usersController.stream;
 
-  final BehaviorSubject<List<User>> _usersController = BehaviorSubject();
+  final _usersController = BehaviorSubject<List<User>>();
 
-  final BehaviorSubject<bool> _queryUsersLoadingController =
-      BehaviorSubject.seeded(false);
+  final _queryUsersLoadingController = BehaviorSubject.seeded(false);
 
   /// The stream notifying the state of queryUsers call
   Stream<bool> get queryUsersLoading => _queryUsersLoadingController.stream;
@@ -70,11 +69,12 @@ class UsersBlocState extends State<UsersBloc>
   }) async {
     final client = StreamChatCore.of(context).client;
 
-    if (client.state?.user == null ||
-        _queryUsersLoadingController.value == true) {
-      return;
+    if (_queryUsersLoadingController.value == true) return;
+
+    if (_usersController.hasValue) {
+      _queryUsersLoadingController.add(true);
     }
-    _queryUsersLoadingController.add(true);
+
     try {
       final clear = pagination == null ||
           pagination.offset == null ||
@@ -95,10 +95,15 @@ class UsersBlocState extends State<UsersBloc>
         final temp = oldUsers + usersResponse.users;
         _usersController.add(temp);
       }
-
-      _queryUsersLoadingController.add(false);
-    } catch (err, stackTrace) {
-      _queryUsersLoadingController.addError(err, stackTrace);
+      if (_usersController.hasValue && _queryUsersLoadingController.value) {
+        _queryUsersLoadingController.add(false);
+      }
+    } catch (e, stk) {
+      if (_usersController.hasValue) {
+        _queryUsersLoadingController.addError(e, stk);
+      } else {
+        _usersController.addError(e, stk);
+      }
     }
   }
 

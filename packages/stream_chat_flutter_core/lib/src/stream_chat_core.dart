@@ -93,10 +93,10 @@ class StreamChatCoreState extends State<StreamChatCore>
   Widget build(BuildContext context) => widget.child;
 
   /// The current user
-  User get user => widget.client.state.user;
+  User get user => client.state?.user;
 
   /// The current user as a stream
-  Stream<User> get userStream => widget.client.state.userStream;
+  Stream<User> get userStream => client.state?.userStream;
 
   @override
   void initState() {
@@ -108,21 +108,25 @@ class StreamChatCoreState extends State<StreamChatCore>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (client.state?.user != null) {
+    if (user != null) {
       if (state == AppLifecycleState.paused) {
-        if (widget.onBackgroundEventReceived != null) {
-          _eventSubscription =
-              client.on().listen(widget.onBackgroundEventReceived);
-          _disconnectTimer = Timer(
-            widget.backgroundKeepAlive,
-            client.disconnect,
-          );
-        } else {
+        if (widget.onBackgroundEventReceived == null) {
+          client.disconnect();
+          return;
+        }
+        _eventSubscription = client.on().listen(
+              widget.onBackgroundEventReceived,
+            );
+
+        void onTimerComplete() {
+          _eventSubscription.cancel();
           client.disconnect();
         }
+
+        _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
       } else if (state == AppLifecycleState.resumed) {
-        _eventSubscription?.cancel();
         if (_disconnectTimer?.isActive == true) {
+          _eventSubscription.cancel();
           _disconnectTimer.cancel();
         } else {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected) {

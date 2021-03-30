@@ -44,6 +44,11 @@ dependencies:
   path_provider: ^1.6.27
   video_thumbnail: ^0.2.5+1
 
+
+dependency_overrides:
+  stream_chat_flutter_core:
+    path: ../stream_chat_flutter_core
+
 flutter:
   assets:
     - images/
