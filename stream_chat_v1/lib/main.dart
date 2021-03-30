@@ -15,6 +15,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
+import 'app_config.dart';
 import 'notifications_service.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
