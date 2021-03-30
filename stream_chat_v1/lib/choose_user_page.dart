@@ -1,4 +1,4 @@
-import 'package:example/default_users.dart';
+import 'package:example/app_config.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
