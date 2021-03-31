@@ -262,13 +262,13 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
     if (widget.pullToRefresh) {
       child = RefreshIndicator(
-        onRefresh: _messageSearchListController.loadData,
+        onRefresh: () => _messageSearchListController.loadData(),
         child: child,
       );
     }
 
     child = LazyLoadScrollView(
-      onEndOfPage: _messageSearchListController.paginateData,
+      onEndOfPage: () => _messageSearchListController.paginateData(),
       child: child,
     );
 

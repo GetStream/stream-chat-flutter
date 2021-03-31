@@ -193,7 +193,7 @@ class _UserListViewState extends State<UserListView>
       return child;
     } else {
       return RefreshIndicator(
-        onRefresh: _userListController.loadData,
+        onRefresh: () => _userListController.loadData(),
         child: child,
       );
     }
@@ -296,7 +296,7 @@ class _UserListViewState extends State<UserListView>
           );
 
     return LazyLoadScrollView(
-      onEndOfPage: _userListController.paginateData,
+      onEndOfPage: () => _userListController.paginateData(),
       child: child,
     );
   }
