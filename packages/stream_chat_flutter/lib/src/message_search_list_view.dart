@@ -268,9 +268,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     }
 
     child = LazyLoadScrollView(
-      onEndOfPage: () async {
-        return _messageSearchListController.paginateData();
-      },
+      onEndOfPage: () => _messageSearchListController.paginateData(),
       child: child,
     );
 

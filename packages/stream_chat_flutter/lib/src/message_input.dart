@@ -319,7 +319,11 @@ class MessageInputState extends State<MessageInput> {
               ),
               if (widget.parentMessage != null && !widget.hideSendAsDm)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.only(
+                    right: 12.0,
+                    left: 12.0,
+                    bottom: 12.0,
+                  ),
                   child: _buildDmCheckbox(),
                 ),
               _buildFilePickerSection(),
@@ -354,68 +358,68 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildDmCheckbox() {
-    return Container(
-      height: 36,
-      padding: const EdgeInsets.only(
-        left: 12,
-        bottom: 12,
-        top: 8,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            height: 16,
-            width: 16,
-            foregroundDecoration: BoxDecoration(
-              border: _sendAsDm
-                  ? null
-                  : Border.all(
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(.5),
-                      width: 2,
-                    ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          height: 16,
+          width: 16,
+          foregroundDecoration: BoxDecoration(
+            border: _sendAsDm
+                ? null
+                : Border.all(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5),
+                    width: 2,
+                  ),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Center(
+            child: Material(
               borderRadius: BorderRadius.circular(3),
-            ),
-            child: Center(
-              child: Material(
-                borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
-                    ? StreamChatTheme.of(context).colorTheme.accentBlue
-                    : StreamChatTheme.of(context).colorTheme.white,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _sendAsDm = !_sendAsDm;
-                    });
-                  },
-                  child: AnimatedCrossFade(
-                    duration: Duration(milliseconds: 300),
-                    reverseDuration: Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    firstChild: StreamSvgIcon.check(
-                      size: 16.0,
-                      color: StreamChatTheme.of(context).colorTheme.white,
-                    ),
-                    secondChild: SizedBox(
-                      height: 16,
-                      width: 16,
-                    ),
+              color: _sendAsDm
+                  ? StreamChatTheme.of(context).colorTheme.accentBlue
+                  : StreamChatTheme.of(context).colorTheme.white,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _sendAsDm = !_sendAsDm;
+                  });
+                },
+                child: AnimatedCrossFade(
+                  duration: Duration(milliseconds: 300),
+                  reverseDuration: Duration(milliseconds: 300),
+                  crossFadeState: _sendAsDm
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: StreamSvgIcon.check(
+                    size: 16.0,
+                    color: StreamChatTheme.of(context).colorTheme.white,
+                  ),
+                  secondChild: SizedBox(
+                    height: 16,
+                    width: 16,
                   ),
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text('Also send as direct message'),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Text(
+            'Also send as direct message',
+            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5),
+                ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

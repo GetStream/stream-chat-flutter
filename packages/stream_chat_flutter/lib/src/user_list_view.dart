@@ -241,9 +241,7 @@ class _UserListViewState extends State<UserListView>
             child: Text(message),
           ),
           TextButton(
-            onPressed: () {
-              _userListController.loadData();
-            },
+            onPressed: () => _userListController.loadData(),
             child: Text('Retry'),
           ),
         ],
@@ -298,9 +296,7 @@ class _UserListViewState extends State<UserListView>
           );
 
     return LazyLoadScrollView(
-      onEndOfPage: () async {
-        return _userListController.paginateData();
-      },
+      onEndOfPage: () => _userListController.paginateData(),
       child: child,
     );
   }
