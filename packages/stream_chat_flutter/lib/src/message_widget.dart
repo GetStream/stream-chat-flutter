@@ -586,9 +586,7 @@ class _MessageWidgetState extends State<MessageWidget>
                               ],
                             ),
                             if (showBottomRow)
-                              SizedBox(
-                                height: context.textScaleFactor * 20.0,
-                              ),
+                              SizedBox(height: context.textScaleFactor * 18.0),
                           ],
                         ),
                         if (showBottomRow)
@@ -685,6 +683,8 @@ class _MessageWidgetState extends State<MessageWidget>
       }
     };
 
+    const usernameKey = Key('username');
+
     children.addAll([
       if (showInChannel || showThreadReplyIndicator) ...[
         if (showThreadParticipants)
@@ -700,7 +700,10 @@ class _MessageWidgetState extends State<MessageWidget>
       if (showUsername)
         Text(
           widget.message.user.name,
+          maxLines: 1,
+          key: usernameKey,
           style: widget.messageTheme.messageAuthor,
+          overflow: TextOverflow.ellipsis,
         ),
       if (showTimeStamp)
         Text(
@@ -713,18 +716,17 @@ class _MessageWidgetState extends State<MessageWidget>
     final showThreadTail = !(hasUrlAttachments || isGiphy || isOnlyEmoji) &&
         (showThreadReplyIndicator || showInChannel);
 
-    return Flex(
-      direction: Axis.horizontal,
-      clipBehavior: Clip.none,
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (showThreadTail)
           Container(
             margin: EdgeInsets.only(
-              bottom: widget.messageTheme.replies.fontSize / 2,
+              bottom: context.textScaleFactor *
+                  (widget.messageTheme.replies.fontSize / 2),
             ),
             child: CustomPaint(
-              size: const Size(16, 32),
+              size: Size(16, 32) * context.textScaleFactor,
               painter: _ThreadReplyPainter(
                 context: context,
                 color: widget.messageTheme.messageBorderColor,
@@ -732,16 +734,20 @@ class _MessageWidgetState extends State<MessageWidget>
             ),
           ),
         ...children.map(
-          (child) => Transform(
-            transform: Matrix4.rotationY(widget.reverse ? pi : 0),
-            alignment: Alignment.center,
-            child: Container(
-              height: context.textScaleFactor * 16,
-              child: Center(
+          (child) {
+            Widget mappedChild = Transform(
+              transform: Matrix4.rotationY(widget.reverse ? pi : 0),
+              alignment: Alignment.center,
+              child: Container(
+                height: context.textScaleFactor * 14,
                 child: child,
               ),
-            ),
-          ),
+            );
+            if (child.key == usernameKey) {
+              mappedChild = Flexible(child: mappedChild);
+            }
+            return mappedChild;
+          },
         ),
       ].insertBetween(const SizedBox(width: 8.0)),
     );
