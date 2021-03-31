@@ -843,6 +843,7 @@ class _MessageListViewState extends State<MessageListView> {
         }
         FocusScope.of(context).unfocus();
       },
+      textBuilder: widget.textBuilder,
     );
   }
 
