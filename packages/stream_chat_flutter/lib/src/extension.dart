@@ -97,3 +97,8 @@ extension InputDecorationX on InputDecoration {
     );
   }
 }
+
+extension BuildContextX on BuildContext {
+  double get textScaleFactor =>
+      MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
+}
