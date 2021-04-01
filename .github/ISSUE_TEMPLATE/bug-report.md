@@ -12,6 +12,14 @@ A clear and concise description of what the bug is.
 
 **What package are you using? What version?**
 
+**What platform is it about?**
+- [ ] Android
+- [ ] iOS
+- [ ] Web
+- [ ] Windows
+- [ ] MacOS
+- [ ] Linux
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
