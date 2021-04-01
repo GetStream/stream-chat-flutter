@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'mocks.dart';
 
 void main() {
-  const pagination = PaginationParams(offset: 0, limit: 25);
+  const pagination = PaginationParams(offset: 0, limit: 3);
 
   List<Channel> _generateChannels(
     StreamChatClient client, {
@@ -180,6 +180,7 @@ void main() {
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object error) =>
             Container(key: errorWidgetKey),
+        pagination: pagination,
       );
 
       final mockClient = MockClient();
@@ -227,6 +228,7 @@ void main() {
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
+        pagination: pagination,
       );
 
       final mockClient = MockClient();
@@ -274,6 +276,7 @@ void main() {
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
+        pagination: pagination,
       );
 
       final mockClient = MockClient();
@@ -329,6 +332,7 @@ void main() {
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
+        pagination: pagination,
       );
 
       final mockClient = MockClient();

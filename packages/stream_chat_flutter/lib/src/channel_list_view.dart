@@ -628,13 +628,14 @@ class _ChannelListViewState extends State<ChannelListView> {
               ),
             );
           }
-          return Container(
-            height: 100,
-            padding: EdgeInsets.all(32),
-            child: Center(
-              child: snapshot.data ? CircularProgressIndicator() : Container(),
-            ),
-          );
+          return snapshot.data
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: const CircularProgressIndicator(),
+                  ),
+                )
+              : Offstage();
         });
   }
 
