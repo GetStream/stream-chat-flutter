@@ -63,38 +63,43 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
       actions: <Widget>[
-        IconButton(
-          icon: StreamSvgIcon.iconMenuPoint(
-            color: StreamChatTheme.of(context).colorTheme.black,
+        if (message.type != 'ephemeral')
+          IconButton(
+            icon: StreamSvgIcon.iconMenuPoint(
+              color: StreamChatTheme.of(context).colorTheme.black,
+            ),
+            onPressed: () {
+              _showMessageActionModalBottomSheet(context);
+            },
           ),
-          onPressed: () {
-            _showMessageActionModalBottomSheet(context);
-          },
-        ),
       ],
       centerTitle: true,
-      title: InkWell(
-        onTap: onTitleTap,
-        child: Container(
-          height: preferredSize.height,
-          width: preferredSize.width,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                userName,
-                style: StreamChatTheme.of(context).textTheme.headlineBold,
+      title: message.type != 'ephemeral'
+          ? InkWell(
+              onTap: onTitleTap,
+              child: Container(
+                height: preferredSize.height,
+                width: preferredSize.width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      userName,
+                      style: StreamChatTheme.of(context).textTheme.headlineBold,
+                    ),
+                    Text(
+                      sentAt,
+                      style: StreamChatTheme.of(context)
+                          .channelPreviewTheme
+                          .subtitle,
+                    ),
+                  ],
+                ),
               ),
-              Text(
-                sentAt,
-                style: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : SizedBox(),
     );
   }
 
