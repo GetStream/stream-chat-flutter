@@ -84,6 +84,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   final List<Channel> _hiddenChannels = [];
 
+  bool _paginationEnded = false;
+
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
     Map<String, dynamic> filter,
@@ -93,7 +95,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }) async {
     final client = StreamChatCore.of(context).client;
 
-    if (_queryChannelsLoadingController.value == true) return;
+    if (_paginationEnded || _queryChannelsLoadingController.value == true) {
+      return;
+    }
 
     if (_channelsController.hasValue) {
       _queryChannelsLoadingController.add(true);
@@ -104,12 +108,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
           paginationParams.offset == null ||
           paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
+      var newChannels = <Channel>[];
       await for (final channels in client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
       )) {
+        newChannels = channels;
         if (clear) {
           _channelsController.add(channels);
         } else {
@@ -120,6 +126,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
             _queryChannelsLoadingController.value) {
           _queryChannelsLoadingController.sink.add(false);
         }
+      }
+      if (newChannels.isEmpty || newChannels.length < paginationParams.limit) {
+        _paginationEnded = true;
       }
     } catch (e, stk) {
       if (_channelsController.hasValue) {

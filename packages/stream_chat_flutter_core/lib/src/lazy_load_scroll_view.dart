@@ -47,6 +47,7 @@ class LazyLoadScrollView extends StatefulWidget {
 
 class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   _LoadingStatus _loadMoreStatus = _LoadingStatus.stable;
+  double _scrollPosition = 0;
 
   @override
   Widget build(BuildContext context) =>
@@ -84,15 +85,21 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
 
       final extentBefore = notification.metrics.extentBefore;
       final extentAfter = notification.metrics.extentAfter;
+      final scrollingDown = _scrollPosition < pixels;
 
-      if (extentAfter <= scrollOffset) {
-        _onEndOfPage();
-        return true;
+      if (scrollingDown) {
+        if (extentAfter <= scrollOffset) {
+          _onEndOfPage();
+          return true;
+        }
+      } else {
+        if (extentBefore <= scrollOffset) {
+          _onStartOfPage();
+          return true;
+        }
       }
-      if (extentBefore <= scrollOffset) {
-        _onStartOfPage();
-        return true;
-      }
+
+      _scrollPosition = pixels;
     }
     if (notification is OverscrollNotification) {
       if (notification.overscroll > 0) {
@@ -108,8 +115,8 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
 
   void _onEndOfPage() {
     if (_loadMoreStatus != null && _loadMoreStatus == _LoadingStatus.stable) {
-      _loadMoreStatus = _LoadingStatus.loading;
       if (widget.onEndOfPage != null) {
+        _loadMoreStatus = _LoadingStatus.loading;
         widget.onEndOfPage().whenComplete(() {
           _loadMoreStatus = _LoadingStatus.stable;
         });
@@ -119,8 +126,8 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
 
   void _onStartOfPage() {
     if (_loadMoreStatus != null && _loadMoreStatus == _LoadingStatus.stable) {
-      _loadMoreStatus = _LoadingStatus.loading;
       if (widget.onStartOfPage != null) {
+        _loadMoreStatus = _LoadingStatus.loading;
         widget.onStartOfPage().whenComplete(() {
           _loadMoreStatus = _LoadingStatus.stable;
         });
