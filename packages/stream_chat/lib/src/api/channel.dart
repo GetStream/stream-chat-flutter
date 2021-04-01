@@ -1598,7 +1598,7 @@ class ChannelClientState {
 
   bool _countMessageAsUnread(Message message) {
     final userId = _channel.client.state?.user?.id;
-    final userIsMuted = _channel.client.state.user.mutes.firstWhere(
+    final userIsMuted = _channel.client.state.user?.mutes?.firstWhere(
           (m) => m.user?.id == message.user.id,
           orElse: () => null,
         ) !=
