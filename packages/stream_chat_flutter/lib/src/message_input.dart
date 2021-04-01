@@ -1125,6 +1125,7 @@ class MessageInputState extends State<MessageInput> {
         _showErrorAlert(
           'The file is too large to upload. The file size limit is 20MB.',
         );
+        return;
       }
     }
 
