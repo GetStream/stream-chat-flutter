@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/utils/MainAppColorHelper.dart';
 
 import '../stream_chat_flutter.dart';
 import 'extension.dart';
@@ -94,6 +95,49 @@ class _ReactionPickerState extends State<ReactionPicker>
                               height: 24,
                               width: 24,
                             ),
+                            child: AnimatedBuilder(
+                                animation: animations[index],
+                                builder: (context, val) {
+                                  return Transform.scale(
+                                    alignment: Alignment.center,
+                                    scale: animations[index].value,
+                                    child: reactionIcon.emoji == null
+                                        ? StreamSvgIcon(
+                                            assetName: reactionIcon.assetName,
+                                            width: 18,
+                                            height: 18,
+                                            color: MainAppColorHelper.orange(),
+                                            // (!highlightOwnReactions ||
+                                            //         reaction.user.id == StreamChat.of(context).user.id)
+                                            //     ? StreamChatTheme.of(context).colorTheme.accentBlue
+                                            //     : StreamChatTheme.of(context)
+                                            //         .colorTheme
+                                            //         .black
+                                            //         .withOpacity(.5),
+                                          )
+                                        : Text(
+                                            reactionIcon.emoji,
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                    // child: StreamSvgIcon(
+                                    //   assetName: reactionIcon.assetName,
+                                    //   height: max(
+                                    //     0,
+                                    //     animations[index].value * 24.0,
+                                    //   ),
+                                    //   width: max(
+                                    //     0,
+                                    //     animations[index].value * 24.0,
+                                    //   ),
+                                    //   color: ownReactionIndex != -1
+                                    //       ? MainAppColorHelper.orange()
+                                    //       : Theme.of(context)
+                                    //           .iconTheme
+                                    //           .color
+                                    //           .withOpacity(.5),
+                                    // ),
+                                  );
+                                }),
                             onPressed: () {
                               if (ownReactionIndex != -1) {
                                 removeReaction(
@@ -107,33 +151,6 @@ class _ReactionPickerState extends State<ReactionPicker>
                                 );
                               }
                             },
-                            child: AnimatedBuilder(
-                                animation: animations[index],
-                                builder: (context, val) {
-                                  return Transform.scale(
-                                    alignment: Alignment.center,
-                                    scale: animations[index].value,
-                                    child: StreamSvgIcon(
-                                      assetName: reactionIcon.assetName,
-                                      height: max(
-                                        0,
-                                        animations[index].value * 24.0,
-                                      ),
-                                      width: max(
-                                        0,
-                                        animations[index].value * 24.0,
-                                      ),
-                                      color: ownReactionIndex != -1
-                                          ? StreamChatTheme.of(context)
-                                              .colorTheme
-                                              .accentBlue
-                                          : Theme.of(context)
-                                              .iconTheme
-                                              .color
-                                              .withOpacity(.5),
-                                    ),
-                                  );
-                                }),
                           ),
                         );
                       })

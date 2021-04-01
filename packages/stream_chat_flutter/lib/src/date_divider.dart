@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/src/utils/MainAppColorHelper.dart';
 
 /// It shows a date divider depending on the date difference
 class DateDivider extends StatelessWidget {
@@ -43,14 +44,14 @@ class DateDivider extends StatelessWidget {
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-        decoration: BoxDecoration(
-          color: StreamChatTheme.of(context).colorTheme.overlayDark,
-          borderRadius: BorderRadius.circular(8),
-        ),
+        // decoration: BoxDecoration(
+        //   color: StreamChatTheme.of(context).colorTheme.overlayDark,
+        //   borderRadius: BorderRadius.circular(8),
+        // ),
         child: Text(
           dayInfo,
           style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.white,
+                color: MainAppColorHelper.greyNeutral5(), fontWeight: FontWeight.w500, fontSize: 12
               ),
         ),
       ),

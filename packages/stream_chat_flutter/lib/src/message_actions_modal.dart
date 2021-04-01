@@ -4,11 +4,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_chat_flutter/src/message_action.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'extension.dart';
 import 'message_input.dart';
@@ -34,10 +33,6 @@ class MessageActionsModal extends StatefulWidget {
   final ShapeBorder messageShape;
   final ShapeBorder attachmentShape;
   final DisplayWidget showUserAvatar;
-  final BorderRadius attachmentBorderRadiusGeometry;
-
-  /// List of custom actions
-  final List<MessageAction> customActions;
 
   const MessageActionsModal({
     Key key,
@@ -58,8 +53,6 @@ class MessageActionsModal extends StatefulWidget {
     this.messageShape,
     this.attachmentShape,
     this.reverse = false,
-    this.customActions = const [],
-    this.attachmentBorderRadiusGeometry,
   }) : super(key: key);
 
   @override
@@ -155,8 +148,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               child: MessageWidget(
                                 key: Key('MessageWidget'),
                                 reverse: widget.reverse,
-                                attachmentBorderRadiusGeometry:
-                                    widget.attachmentBorderRadiusGeometry,
                                 message: widget.message.copyWith(
                                   text: widget.message.text.length > 200
                                       ? '${widget.message.text.substring(0, 200)}...'
@@ -232,12 +223,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                         _buildFlagButton(context),
                                       if (widget.showDeleteMessage)
                                         _buildDeleteButton(context),
-                                      ...widget.customActions.map((action) {
-                                        return _buildCustomAction(
-                                          context,
-                                          action,
-                                        );
-                                      })
+                                     // _buildPinButton(context)
                                     ].insertBetween(
                                       Container(
                                         height: 1,
@@ -263,69 +249,27 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  InkWell _buildCustomAction(
-    BuildContext context,
-    MessageAction messageAction,
-  ) {
-    return InkWell(
-      onTap: () {
-        messageAction.onTap?.call(widget.message);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
-        child: Row(
-          children: [
-            messageAction.leading ?? Offstage(),
-            const SizedBox(width: 16),
-            messageAction.title ?? Offstage(),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showFlagDialog() async {
     final client = StreamChat.of(context).client;
 
-    final answer = await showConfirmationDialog(
-      context,
-      title: 'Flag Message',
-      icon: StreamSvgIcon.flag(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
-        size: 24.0,
-      ),
-      question:
-          'Do you want to send a copy of this message to a\nmoderator for further investigation?',
-      okText: 'FLAG',
-      cancelText: 'CANCEL',
-    );
+    var answer = await showConfirmationDialog(context,
+        title: 'Flag Message',
+        icon: StreamSvgIcon.flag(
+          color: StreamChatTheme.of(context).colorTheme.accentRed,
+          size: 24.0,
+        ),
+        question:
+            'Do you want to send a copy of this message to a\nmoderator for further investigation?',
+        okText: 'FLAG',
+        cancelText: 'CANCEL');
 
-    final theme = StreamChatTheme.of(context);
-    if (answer == true) {
+    if (answer) {
       try {
         await client.flagMessage(widget.message.id);
-        await showInfoDialog(
-          context,
-          icon: StreamSvgIcon.flag(
-            color: theme.colorTheme.accentRed,
-            size: 24.0,
-          ),
-          details: 'The message has been reported to a moderator.',
-          title: 'Message flagged',
-          okText: 'OK',
-        );
+        _showDismissAlert();
       } catch (err) {
         if (json.decode(err?.body ?? {})['code'] == 4) {
-          await showInfoDialog(
-            context,
-            icon: StreamSvgIcon.flag(
-              color: theme.colorTheme.accentRed,
-              size: 24.0,
-            ),
-            details: 'The message has been reported to a moderator.',
-            title: 'Message flagged',
-            okText: 'OK',
-          );
+          _showDismissAlert();
         } else {
           _showErrorAlert();
         }
@@ -363,16 +307,133 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     }
   }
 
+  void _showDismissAlert() {
+    showModalBottomSheet(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.0),
+        topRight: Radius.circular(16.0),
+      )),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26.0,
+            ),
+            StreamSvgIcon.flag(
+              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              size: 24.0,
+            ),
+            SizedBox(
+              height: 26.0,
+            ),
+            Text(
+              'Message flagged',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+            Text('The message has been reported to a moderator.'),
+            SizedBox(
+              height: 36.0,
+            ),
+            Container(
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              height: 1.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FlatButton(
+                  child: Text(
+                    'OK',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showErrorAlert() {
-    showInfoDialog(
-      context,
-      icon: StreamSvgIcon.error(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
-        size: 24.0,
-      ),
-      details: 'The operation couldn\'t be completed.',
-      title: 'Something went wrong',
-      okText: 'OK',
+    showModalBottomSheet(
+      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.0),
+        topRight: Radius.circular(16.0),
+      )),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26.0,
+            ),
+            StreamSvgIcon.error(
+              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              size: 24.0,
+            ),
+            SizedBox(
+              height: 26.0,
+            ),
+            Text(
+              'Something went wrong',
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+            Text('The operation couldn\'t be completed.'),
+            SizedBox(
+              height: 36.0,
+            ),
+            Container(
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              height: 1.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FlatButton(
+                  child: Text(
+                    'OK',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -438,6 +499,35 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             const SizedBox(width: 16),
             Text(
               isDeleteFailed ? 'Retry Deleting Message' : 'Delete Message',
+              style: StreamChatTheme.of(context)
+                  .textTheme
+                  .body
+                  .copyWith(color: Colors.red),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPinButton(BuildContext context) {
+    return InkWell(
+      onTap: () => (){
+        StreamChat.of(context).client.pinMessage(
+          widget.message,
+          Duration(days: 1),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        child: Row(
+          children: [
+            StreamSvgIcon.delete(
+              color: Colors.red,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Pin Message',
               style: StreamChatTheme.of(context)
                   .textTheme
                   .body
@@ -577,16 +667,21 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   ],
                 ),
               ),
-              widget.editMessageInputBuilder != null
-                  ? widget.editMessageInputBuilder(context, widget.message)
-                  : MessageInput(
-                      editMessage: widget.message,
-                      preMessageSending: (m) {
-                        FocusScope.of(context).unfocus();
-                        Navigator.pop(context);
-                        return m;
-                      },
-                    ),
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: widget.editMessageInputBuilder != null
+                    ? widget.editMessageInputBuilder(context, widget.message)
+                    : MessageInput(
+                        editMessage: widget.message,
+                        preMessageSending: (m) {
+                          FocusScope.of(context).unfocus();
+                          Navigator.pop(context);
+                          return m;
+                        },
+                      ),
+              ),
             ],
           ),
         );

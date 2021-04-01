@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/utils/MainAppColorHelper.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_player/video_player.dart';
 
@@ -55,7 +56,7 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
     return Container(
         height: widget.size.height,
         width: widget.size.width,
-        child: _controller.value.isInitialized
+        child: _controller.value.initialized
             ? VideoPlayer(_controller)
             : CircularProgressIndicator());
   }
@@ -118,8 +119,7 @@ class QuotedMessageWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(child: _buildMessage(context)),
-            SizedBox(width: 8),
-            _buildUserAvatar(),
+            //_buildUserAvatar()
           ],
         ),
       ),
@@ -144,15 +144,17 @@ class QuotedMessageWidget extends StatelessWidget {
             alignment: Alignment.center,
             child: MessageText(
               message: msg,
-              messageTheme: isOnlyEmoji && _containsText
-                  ? messageTheme.copyWith(
-                      messageText: messageTheme.messageText.copyWith(
-                      fontSize: 32,
-                    ))
-                  : messageTheme.copyWith(
-                      messageText: messageTheme.messageText.copyWith(
-                      fontSize: 12,
-                    )),
+              messageTheme: messageTheme
+              // isOnlyEmoji && _containsText
+              //     ? messageTheme.copyWith(
+              //         messageText: messageTheme.messageText.copyWith(
+              //         fontSize: 32,
+              //       ))
+              //     : messageTheme.copyWith(
+              //         messageText: messageTheme.messageText.copyWith(
+              //         fontSize: 12,
+              //       )
+              // ),
             ),
           ),
         ),
@@ -170,6 +172,7 @@ class QuotedMessageWidget extends StatelessWidget {
           topRight: Radius.circular(12),
           topLeft: Radius.circular(12),
           bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
         ),
       ),
       padding: const EdgeInsets.all(8),
@@ -310,6 +313,6 @@ class QuotedMessageWidget extends StatelessWidget {
     if (_containsScrapeUrl) {
       return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
-    return messageTheme.messageBackgroundColor;
+    return MainAppColorHelper.greyNeutral6();
   }
 }

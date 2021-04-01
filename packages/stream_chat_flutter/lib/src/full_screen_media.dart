@@ -81,129 +81,126 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          AnimatedBuilder(
-              animation: _controller,
-              builder: (context, snapshot) {
-                return PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (val) {
-                    setState(() {
-                      _currentPage = val;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    final attachment = widget.mediaAttachments[index];
-                    if (attachment.type == 'image' ||
-                        attachment.type == 'giphy') {
-                      final imageUrl = attachment.imageUrl ??
-                          attachment.assetUrl ??
-                          attachment.thumbUrl;
-                      return PhotoView(
-                        imageProvider:
-                            imageUrl == null && attachment.localUri != null
+      body: AnimatedOpacity(
+        opacity: _optionsShown ? 1.0 : 0.0,
+        duration: Duration(milliseconds: 300),
+        child: Column(
+          children: [
+            ImageHeader(
+              userName: widget.userName,
+              sentAt: widget.message.createdAt == null
+                  ? ''
+                  : 'Sent ${getDay(widget.message.createdAt)} at ${Jiffy(widget.sentAt.toLocal()).format('HH:mm')}',
+              onBackPressed: () {
+                Navigator.of(context).pop();
+              },
+              message: widget.message,
+              urls: widget.mediaAttachments,
+              currentIndex: _currentPage,
+              onShowMessage: () {
+                widget.onShowMessage(
+                    widget.message, StreamChannel.of(context).channel);
+              },
+            ),
+            Expanded(
+              child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, snapshot) {
+                    return PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (val) {
+                        setState(() {
+                          _currentPage = val;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        final attachment = widget.mediaAttachments[index];
+                        if (attachment.type == 'image' ||
+                            attachment.type == 'giphy') {
+                          final imageUrl = attachment.imageUrl ??
+                              attachment.assetUrl ??
+                              attachment.thumbUrl;
+                          return PhotoView(
+                            imageProvider: imageUrl == null &&
+                                    attachment.localUri != null
                                 ? Image.memory(attachment.file.bytes).image
                                 : CachedNetworkImageProvider(imageUrl),
-                        maxScale: PhotoViewComputedScale.covered,
-                        minScale: PhotoViewComputedScale.contained,
-                        heroAttributes: PhotoViewHeroAttributes(
-                          tag: widget.mediaAttachments,
-                        ),
-                        backgroundDecoration: BoxDecoration(
-                          color: ColorTween(
-                                  begin: StreamChatTheme.of(context)
-                                      .channelTheme
-                                      .channelHeaderTheme
-                                      .color,
-                                  end: Colors.black)
-                              .lerp(_controller.value),
-                        ),
-                        onTapUp: (a, b, c) {
-                          setState(() {
-                            _optionsShown = !_optionsShown;
-                          });
-                          if (_controller.isCompleted) {
-                            _controller.reverse();
-                          } else {
-                            _controller.forward();
+                            maxScale: PhotoViewComputedScale.covered,
+                            minScale: PhotoViewComputedScale.contained,
+                            heroAttributes: PhotoViewHeroAttributes(
+                              tag: widget.mediaAttachments,
+                            ),
+                            backgroundDecoration: BoxDecoration(
+                              color: ColorTween(
+                                      begin: StreamChatTheme.of(context)
+                                          .channelTheme
+                                          .channelHeaderTheme
+                                          .color,
+                                      end: Colors.black)
+                                  .lerp(_controller.value),
+                            ),
+                            onTapUp: (a, b, c) {
+                              setState(() {
+                                _optionsShown = !_optionsShown;
+                              });
+                              if (_controller.isCompleted) {
+                                _controller.reverse();
+                              } else {
+                                _controller.forward();
+                              }
+                            },
+                          );
+                        } else if (attachment.type == 'video') {
+                          final controller = videoPackages[attachment.id];
+                          if (!controller.initialized) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
                           }
-                        },
-                      );
-                    } else if (attachment.type == 'video') {
-                      final controller = videoPackages[attachment.id];
-                      if (!controller.initialized) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            _optionsShown = !_optionsShown;
-                          });
-                          if (_controller.isCompleted) {
-                            _controller.reverse();
-                          } else {
-                            _controller.forward();
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 50.0,
-                          ),
-                          child: Chewie(
-                            controller: controller.chewieController,
-                          ),
-                        ),
-                      );
-                    }
-                    return Container();
-                  },
-                  itemCount: widget.mediaAttachments.length,
-                );
-              }),
-          AnimatedOpacity(
-            opacity: _optionsShown ? 1.0 : 0.0,
-            duration: Duration(milliseconds: 300),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ImageHeader(
-                  userName: widget.userName,
-                  sentAt: widget.message.createdAt == null
-                      ? ''
-                      : 'Sent ${getDay(widget.message.createdAt)} at ${Jiffy(widget.sentAt.toLocal()).format('HH:mm')}',
-                  onBackPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  message: widget.message,
-                  urls: widget.mediaAttachments,
-                  currentIndex: _currentPage,
-                  onShowMessage: () {
-                    widget.onShowMessage(
-                        widget.message, StreamChannel.of(context).channel);
-                  },
-                ),
-                ImageFooter(
-                  currentPage: _currentPage,
-                  totalPages: widget.mediaAttachments.length,
-                  mediaAttachments: widget.mediaAttachments,
-                  message: widget.message,
-                  mediaSelectedCallBack: (val) {
-                    setState(() {
-                      _currentPage = val;
-                      _pageController.animateToPage(val,
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut);
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-              ],
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                _optionsShown = !_optionsShown;
+                              });
+                              if (_controller.isCompleted) {
+                                _controller.reverse();
+                              } else {
+                                _controller.forward();
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 50.0,
+                              ),
+                              child: Chewie(
+                                controller: controller.chewieController,
+                              ),
+                            ),
+                          );
+                        }
+                        return Container();
+                      },
+                      itemCount: widget.mediaAttachments.length,
+                    );
+                  }),
             ),
-          ),
-        ],
+            ImageFooter(
+              currentPage: _currentPage,
+              totalPages: widget.mediaAttachments.length,
+              mediaAttachments: widget.mediaAttachments,
+              message: widget.message,
+              mediaSelectedCallBack: (val) {
+                setState(() {
+                  _currentPage = val;
+                  _pageController.animateToPage(val,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut);
+                  Navigator.pop(context);
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -243,7 +240,7 @@ class VideoPackage {
 
   ChewieController get chewieController => _chewieController;
 
-  bool get initialized => _videoPlayerController.value.isInitialized;
+  bool get initialized => _videoPlayerController.value.initialized;
 
   VideoPackage(
     Attachment attachment, {

@@ -1,8 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import 'stream_svg_icon.dart';
@@ -67,27 +65,17 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
             builder: (_) {
               if (snapshot.hasError) {
                 return widget.errorBuilder?.call(context, snapshot.error) ??
-                    Center(
-                      child: StreamSvgIcon.error(),
-                    );
+                    Center(child: StreamSvgIcon.error());
               }
               if (!snapshot.hasData) {
-                return Container(
-                  constraints: BoxConstraints.expand(),
-                  child: widget.placeholderBuilder?.call(context) ??
-                      Shimmer.fromColors(
-                        baseColor: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
-                        highlightColor:
-                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                        child: Image.asset(
-                          'images/placeholder.png',
-                          fit: BoxFit.cover,
-                          package: 'stream_chat_flutter',
-                        ),
-                      ),
-                );
+                return widget.placeholderBuilder?.call(context) ??
+                    Image.asset(
+                      'images/placeholder.png',
+                      package: 'stream_chat_flutter',
+                      fit: widget.fit,
+                      height: widget.height,
+                      width: widget.width,
+                    );
               }
               return Image.memory(
                 snapshot.data,

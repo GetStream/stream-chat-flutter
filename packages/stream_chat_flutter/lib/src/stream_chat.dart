@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -92,9 +93,9 @@ class StreamChatState extends State<StreamChat> {
               ),
               child: StreamChatCore(
                 client: client,
+                child: widget.child,
                 onBackgroundEventReceived: widget.onBackgroundEventReceived,
                 backgroundKeepAlive: widget.backgroundKeepAlive,
-                child: widget.child,
               ),
             );
           },
@@ -120,5 +121,12 @@ class StreamChatState extends State<StreamChat> {
   @override
   void initState() {
     super.initState();
+    client.state?.totalUnreadCountStream?.listen((count) {
+      if (count > 0) {
+        FlutterAppBadger.updateBadgeCount(count);
+      } else {
+        FlutterAppBadger.removeBadge();
+      }
+    });
   }
 }

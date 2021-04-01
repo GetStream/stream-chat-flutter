@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import '../full_screen_media.dart';
@@ -12,7 +11,6 @@ class GiphyAttachment extends AttachmentWidget {
   final MessageTheme messageTheme;
   final ShowMessageCallback onShowMessage;
   final ValueChanged<ReturnActionType> onReturnAction;
-  final VoidCallback onAttachmentTap;
 
   const GiphyAttachment({
     Key key,
@@ -22,7 +20,6 @@ class GiphyAttachment extends AttachmentWidget {
     this.messageTheme,
     this.onShowMessage,
     this.onReturnAction,
-    this.onAttachmentTap,
   }) : super(key: key, message: message, attachment: attachment, size: size);
 
   @override
@@ -64,7 +61,7 @@ class GiphyAttachment extends AttachmentWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: GestureDetector(
-                      onTap: () => onAttachmentTap ?? _onImageTap(context),
+                      onTap: () => _onImageTap(context),
                       child: ClipRRect(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(8),
@@ -142,7 +139,6 @@ class GiphyAttachment extends AttachmentWidget {
                         Card(
                           color: Colors.white,
                           elevation: 2,
-                          shape: CircleBorder(),
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
@@ -156,6 +152,7 @@ class GiphyAttachment extends AttachmentWidget {
                               });
                             },
                           ),
+                          shape: CircleBorder(),
                         ),
                         Expanded(
                           child: Center(
@@ -170,7 +167,6 @@ class GiphyAttachment extends AttachmentWidget {
                         Card(
                           color: Colors.white,
                           elevation: 2,
-                          shape: CircleBorder(),
                           child: IconButton(
                             padding: const EdgeInsets.all(0),
                             constraints: BoxConstraints.tight(Size(32, 32)),
@@ -184,6 +180,7 @@ class GiphyAttachment extends AttachmentWidget {
                               });
                             },
                           ),
+                          shape: CircleBorder(),
                         ),
                       ],
                     ),
@@ -205,26 +202,24 @@ class GiphyAttachment extends AttachmentWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Container(
+                    child: FlatButton(
                       height: 50,
-                      child: TextButton(
-                        onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'cancel',
-                          });
-                        },
-                        child: Text(
-                          'Cancel',
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .black
-                                    .withOpacity(0.5),
-                              ),
-                        ),
+                      onPressed: () {
+                        streamChannel.channel.sendAction(message, {
+                          'image_action': 'cancel',
+                        });
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: StreamChatTheme.of(context)
+                            .textTheme
+                            .bodyBold
+                            .copyWith(
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .black
+                                  .withOpacity(0.5),
+                            ),
                       ),
                     ),
                   ),
@@ -237,22 +232,20 @@ class GiphyAttachment extends AttachmentWidget {
                     height: 50.0,
                   ),
                   Expanded(
-                    child: Container(
+                    child: FlatButton(
                       height: 50,
-                      child: TextButton(
-                        onPressed: () {
-                          streamChannel.channel.sendAction(message, {
-                            'image_action': 'send',
-                          });
-                        },
-                        child: Text(
-                          'Send',
-                          style: TextStyle(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .accentBlue,
-                              fontWeight: FontWeight.bold),
-                        ),
+                      onPressed: () {
+                        streamChannel.channel.sendAction(message, {
+                          'image_action': 'send',
+                        });
+                      },
+                      child: Text(
+                        'Send',
+                        style: TextStyle(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -348,15 +341,11 @@ class GiphyAttachment extends AttachmentWidget {
               height: size?.height,
               width: size?.width,
               placeholder: (_, __) {
-                return Shimmer.fromColors(
-                  baseColor:
-                      StreamChatTheme.of(context).colorTheme.greyGainsboro,
-                  highlightColor:
-                      StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                  child: Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
+                return Container(
+                  width: size?.width,
+                  height: size?.height,
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
                 );
               },

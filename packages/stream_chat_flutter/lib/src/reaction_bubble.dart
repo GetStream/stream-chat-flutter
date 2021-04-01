@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/utils/MainAppColorHelper.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ReactionBubble extends StatelessWidget {
@@ -17,6 +18,7 @@ class ReactionBubble extends StatelessWidget {
     this.flipTail = false,
     this.highlightOwnReactions = true,
     this.tailCirclesSpacing = 0,
+    this.reactionScores,
   }) : super(key: key);
 
   final List<Reaction> reactions;
@@ -27,6 +29,7 @@ class ReactionBubble extends StatelessWidget {
   final bool flipTail;
   final bool highlightOwnReactions;
   final double tailCirclesSpacing;
+  final Map<String, int> reactionScores;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +94,7 @@ class ReactionBubble extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 2,
+            bottom: 0,
             left: reverse ? null : 13,
             right: !reverse ? null : 13,
             child: _buildReactionsTail(context),
@@ -99,6 +102,13 @@ class ReactionBubble extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  int getReactionScore(String type) {
+    if (reactionScores != null && reactionScores.isNotEmpty) {
+      return reactionScores[type] ?? 0;
+    }
+    return 0;
   }
 
   Widget _buildReaction(
@@ -111,29 +121,58 @@ class ReactionBubble extends StatelessWidget {
       orElse: () => null,
     );
 
+    int count = getReactionScore(reaction.type);
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 4.0,
       ),
       child: reactionIcon != null
-          ? StreamSvgIcon(
-              assetName: reactionIcon.assetName,
-              width: 16,
-              height: 16,
-              color: (!highlightOwnReactions ||
-                      reaction.user.id == StreamChat.of(context).user.id)
-                  ? StreamChatTheme.of(context).colorTheme.accentBlue
-                  : StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(.5),
-            )
+          ? Stack(children: [
+              reactionIcon.emoji == null
+                  ? StreamSvgIcon(
+                      assetName: reactionIcon.assetName,
+                      width: 18,
+                      height: 18,
+                      color: MainAppColorHelper.orange(),
+                      // (!highlightOwnReactions ||
+                      //         reaction.user.id == StreamChat.of(context).user.id)
+                      //     ? StreamChatTheme.of(context).colorTheme.accentBlue
+                      //     : StreamChatTheme.of(context)
+                      //         .colorTheme
+                      //         .black
+                      //         .withOpacity(.5),
+                    )
+                  : Text(
+                      reactionIcon.emoji,
+                      style: TextStyle(fontSize: 16),
+                    ),
+              Visibility(
+                visible: count > 1 ? true : false,
+                child: Positioned(
+                    left: 10,
+                    top: 9,
+                    child: Container(
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.white),
+                        child: Padding(
+                          padding: EdgeInsets.all(1.5),
+                          child: Text(
+                            count.toString(),
+                            style: TextStyle(
+                                fontSize: 8,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ))),
+              ),
+            ])
           : Icon(
               Icons.help_outline_rounded,
               size: 16,
               color: (!highlightOwnReactions ||
                       reaction.user.id == StreamChat.of(context).user.id)
-                  ? StreamChatTheme.of(context).colorTheme.accentBlue
+                  ? MainAppColorHelper.orange()
                   : StreamChatTheme.of(context)
                       .colorTheme
                       .black

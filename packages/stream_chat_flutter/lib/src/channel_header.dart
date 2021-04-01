@@ -71,19 +71,6 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   final bool showConnectionStateTile;
 
-  /// Title widget
-  final Widget title;
-
-  /// Subtitle widget
-  final Widget subtitle;
-
-  /// Leading widget
-  final Widget leading;
-
-  /// AppBar actions
-  /// By default it shows the [ChannelImage]
-  final List<Widget> actions;
-
   /// Creates a channel header
   ChannelHeader({
     Key key,
@@ -93,24 +80,12 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
     this.showTypingIndicator = true,
     this.onImageTap,
     this.showConnectionStateTile = false,
-    this.title,
-    this.subtitle,
-    this.leading,
-    this.actions,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
-
-    final leadingWidget = leading ??
-        (showBackButton
-            ? StreamBackButton(
-                onPressed: onBackPressed,
-                showUnreads: true,
-              )
-            : SizedBox());
 
     return ConnectionStatusBuilder(
       statusBuilder: (context, status) {
@@ -136,32 +111,26 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
           child: AppBar(
             brightness: Theme.of(context).brightness,
             elevation: 1,
-            leading: leadingWidget,
+            leading: showBackButton
+                ? StreamBackButton(
+                    onPressed: onBackPressed,
+                    showUnreads: true,
+                  )
+                : SizedBox(),
             backgroundColor: StreamChatTheme.of(context)
                 .channelTheme
                 .channelHeaderTheme
                 .color,
-            actions: actions ??
-                <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: Center(
-                      child: ChannelImage(
-                        borderRadius: StreamChatTheme.of(context)
-                            .channelTheme
-                            .channelHeaderTheme
-                            .avatarTheme
-                            .borderRadius,
-                        constraints: StreamChatTheme.of(context)
-                            .channelTheme
-                            .channelHeaderTheme
-                            .avatarTheme
-                            .constraints,
-                        onTap: onImageTap,
-                      ),
-                    ),
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Center(
+                  child: ChannelImage(
+                    onTap: onImageTap,
                   ),
-                ],
+                ),
+              ),
+            ],
             centerTitle: true,
             title: InkWell(
               onTap: onTitleTap,
@@ -172,23 +141,20 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    title ??
-                        ChannelName(
-                          textStyle: StreamChatTheme.of(context)
-                              .channelTheme
-                              .channelHeaderTheme
-                              .title,
-                        ),
+                    ChannelName(
+                      textStyle: StreamChatTheme.of(context)
+                          .channelTheme
+                          .channelHeaderTheme
+                          .title,
+                    ),
                     SizedBox(height: 2),
-                    subtitle ??
-                        ChannelInfo(
-                          showTypingIndicator: showTypingIndicator,
-                          channel: channel,
-                          textStyle: StreamChatTheme.of(context)
-                              .channelTheme
-                              .channelHeaderTheme
-                              .subtitle,
-                        ),
+                    ChannelInfo(
+                      showTypingIndicator: showTypingIndicator,
+                      channel: channel,
+                      textStyle: StreamChatTheme.of(context)
+                          .channelPreviewTheme
+                          .subtitle,
+                    ),
                   ],
                 ),
               ),

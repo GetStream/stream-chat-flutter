@@ -223,8 +223,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     }
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
       child: child,
+      duration: const Duration(milliseconds: 500),
     );
   }
 
@@ -284,7 +284,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   left: 0,
                   bottom: 32,
                   child: Center(
-                    child: TextButton(
+                    child: FlatButton(
                       onPressed: widget.onStartChatPressed,
                       child: Text(
                         'Start a chat',
@@ -393,17 +393,16 @@ class _ChannelListViewState extends State<ChannelListView> {
           subtitle: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: StreamChatTheme.of(context).colorTheme.white,
-                      borderRadius: BorderRadius.circular(11),
-                    ),
-                    constraints: BoxConstraints.expand(
-                      height: 16,
-                    ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: StreamChatTheme.of(context).colorTheme.white,
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  constraints: BoxConstraints.tightFor(
+                    height: 16,
+                    width: 238,
                   ),
                 ),
               ),
@@ -446,7 +445,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             ),
             style: Theme.of(context).textTheme.headline6,
           ),
-          TextButton(
+          FlatButton(
             onPressed: () => _channelListController.loadData(),
             child: Text('Retry'),
           ),
@@ -469,8 +468,8 @@ class _ChannelListViewState extends State<ChannelListView> {
             MaterialPageRoute(
               builder: (context) {
                 return StreamChannel(
-                  channel: client,
                   child: widget.channelWidget,
+                  channel: client,
                 );
               },
             ),
@@ -506,12 +505,12 @@ class _ChannelListViewState extends State<ChannelListView> {
                       context: context,
                       builder: (context) {
                         return StreamChannel(
-                          channel: channel,
                           child: ChannelBottomSheet(
                             onViewInfoTap: () {
                               widget.onViewInfoTap(channel);
                             },
                           ),
+                          channel: channel,
                         );
                       },
                     );
@@ -554,7 +553,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ChannelPreview(
                       onLongPress: widget.onChannelLongPress,
                       channel: channel,
-                      onImageTap: () => widget.onImageTap?.call(channel),
+                      onImageTap: widget.onImageTap?.call(channel),
                       onTap: (channel) => onTap(channel, widget.channelWidget),
                     ),
               ),
@@ -592,13 +591,13 @@ class _ChannelListViewState extends State<ChannelListView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: StreamChannel(
-              channel: channel,
               child: ChannelName(
                 textStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              channel: channel,
             ),
           ),
         ],

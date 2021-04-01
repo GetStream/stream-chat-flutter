@@ -96,11 +96,7 @@ class ChannelImage extends StatelessWidget {
                 initialData: otherMember.user,
                 builder: (context, snapshot) {
                   return UserAvatar(
-                    borderRadius: borderRadius ??
-                        StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .avatarTheme
-                            .borderRadius,
+                    borderRadius: borderRadius,
                     user: snapshot.data ?? otherMember.user,
                     constraints: constraints ??
                         StreamChatTheme.of(context)
@@ -124,11 +120,7 @@ class ChannelImage extends StatelessWidget {
                 .toList();
             return GroupImage(
               images: images,
-              borderRadius: borderRadius ??
-                  StreamChatTheme.of(context)
-                      .channelPreviewTheme
-                      .avatarTheme
-                      .borderRadius,
+              borderRadius: borderRadius,
               constraints: constraints ??
                   StreamChatTheme.of(context)
                       .channelPreviewTheme

@@ -23,7 +23,7 @@ class SendingIndicator extends StatelessWidget {
       );
     }
     if (message.status == MessageSendingStatus.sent || message.status == null) {
-      return StreamSvgIcon.check(
+      return StreamSvgIcon.checkAll(
         size: size,
         color: IconTheme.of(context).color.withOpacity(0.5),
       );

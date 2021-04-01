@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,74 +36,63 @@ Future<bool> showConfirmationDialog(
       )),
       builder: (context) {
         final effect = StreamChatTheme.of(context).colorTheme.borderTop;
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 26.0),
-              if (icon != null) icon,
-              SizedBox(height: 26.0),
-              Text(
-                title,
-                style: StreamChatTheme.of(context).textTheme.headlineBold,
-              ),
-              SizedBox(height: 7.0),
-              Text(
-                question,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 36.0),
-              Container(
-                color: effect.color.withOpacity(effect.alpha ?? 1),
-                height: 1,
-              ),
-              Row(
-                children: [
-                  Flexible(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: Text(
-                          cancelText,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .black
-                                      .withOpacity(0.5)),
-                        ),
-                      ),
-                    ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 26.0),
+            if (icon != null) icon,
+            SizedBox(height: 26.0),
+            Text(
+              title,
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            SizedBox(height: 7.0),
+            Text(
+              question,
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 36.0),
+            Container(
+              color: effect.color.withOpacity(effect.alpha ?? 1),
+              height: 1,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                FlatButton(
+                  child: Text(
+                    cancelText,
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(0.5)),
                   ),
-                  Flexible(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context, true);
-                        },
-                        child: Text(
-                          okText,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .accentRed),
-                        ),
-                      ),
-                    ),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                FlatButton(
+                  child: Text(
+                    okText,
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .bodyBold
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentRed),
                   ),
-                ],
-              ),
-            ],
-          ),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                ),
+              ],
+            ),
+          ],
         );
       });
 }
@@ -114,13 +101,13 @@ Future<bool> showInfoDialog(
   BuildContext context, {
   String title,
   Widget icon,
-  String details,
+  String question,
   String okText,
   StreamChatThemeData theme,
 }) {
   return showModalBottomSheet(
-    backgroundColor: theme?.colorTheme?.white ??
-        StreamChatTheme.of(context).colorTheme.white,
+    backgroundColor:
+        theme.colorTheme.white ?? StreamChatTheme.of(context).colorTheme.white,
     context: context,
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -128,51 +115,54 @@ Future<bool> showInfoDialog(
       topRight: Radius.circular(16.0),
     )),
     builder: (context) {
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 26.0,
-            ),
-            if (icon != null) icon,
-            SizedBox(
-              height: 26.0,
-            ),
-            Text(
-              title,
-              style: theme?.textTheme?.headlineBold ??
-                  StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-            SizedBox(
-              height: 7.0,
-            ),
-            Text(details),
-            SizedBox(
-              height: 36.0,
-            ),
-            Container(
-              color: theme?.colorTheme?.black?.withOpacity(.08) ??
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
-              height: 1.0,
-            ),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 26.0,
+          ),
+          if (icon != null) icon,
+          SizedBox(
+            height: 26.0,
+          ),
+          Text(
+            title,
+            style: theme.textTheme.headlineBold ??
+                StreamChatTheme.of(context).textTheme.headlineBold,
+          ),
+          SizedBox(
+            height: 7.0,
+          ),
+          Text(question),
+          SizedBox(
+            height: 36.0,
+          ),
+          Container(
+            color: theme.colorTheme.black.withOpacity(.08) ??
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+            height: 1.0,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FlatButton(
                 child: Text(
                   okText,
                   style: TextStyle(
-                    color: theme?.colorTheme?.black?.withOpacity(0.5) ??
-                        StreamChatTheme.of(context).colorTheme.accentBlue,
-                    fontWeight: FontWeight.w400,
-                  ),
+                      color: theme.colorTheme.black.withOpacity(0.5) ??
+                          StreamChatTheme.of(context)
+                              .colorTheme
+                              .black
+                              .withOpacity(0.5),
+                      fontWeight: FontWeight.w400),
                 ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       );
     },
   );
@@ -349,26 +339,4 @@ StreamSvgIcon getFileTypeImage(String type) {
       return StreamSvgIcon.filetypeGeneric();
       break;
   }
-}
-
-Widget wrapAttachmentWidget(
-  BuildContext context,
-  Widget attachmentWidget,
-  ShapeBorder attachmentShape,
-  bool reverse,
-  BorderRadius borderRadius,
-) {
-  return ClipRRect(
-    borderRadius: borderRadius,
-    child: Material(
-      clipBehavior: Clip.antiAlias,
-      shape: attachmentShape,
-      type: MaterialType.transparency,
-      child: Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
-        alignment: Alignment.center,
-        child: attachmentWidget,
-      ),
-    ),
-  );
 }

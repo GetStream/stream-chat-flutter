@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'attachment_actions_modal.dart';
+import 'image_actions_modal.dart';
 
 class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   /// True if this header shows the leading back button
@@ -62,37 +62,33 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
           : SizedBox(),
       backgroundColor:
           StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-      actions: <Widget>[
-        IconButton(
-          icon: StreamSvgIcon.iconMenuPoint(
-            color: StreamChatTheme.of(context).colorTheme.black,
-          ),
-          onPressed: () {
-            _showMessageActionModalBottomSheet(context);
-          },
-        ),
-      ],
+      // actions: <Widget>[
+      //   IconButton(
+      //     icon: StreamSvgIcon.iconMenuPoint(
+      //       color: StreamChatTheme.of(context).colorTheme.black,
+      //     ),
+      //     onPressed: () {
+      //       _showMessageActionModalBottomSheet(context);
+      //     },
+      //   ),
+      // ],
       centerTitle: true,
       title: InkWell(
         onTap: onTitleTap,
-        child: Container(
-          height: preferredSize.height,
-          width: preferredSize.width,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                userName,
-                style: StreamChatTheme.of(context).textTheme.headlineBold,
-              ),
-              Text(
-                sentAt,
-                style: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              userName,
+              style: StreamChatTheme.of(context).textTheme.headlineBold,
+            ),
+            Text(
+              sentAt,
+              style: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+            ),
+          ],
         ),
       ),
     );
@@ -110,10 +106,12 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
       builder: (context) {
         return StreamChannel(
           channel: channel,
-          child: AttachmentActionsModal(
+          child: ImageActionsModal(
+            userName: userName,
+            sentAt: sentAt,
             message: message,
+            urls: urls,
             currentIndex: currentIndex,
-            onShowMessage: onShowMessage,
           ),
         );
       },
