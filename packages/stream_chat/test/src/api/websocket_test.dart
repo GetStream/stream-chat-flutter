@@ -162,24 +162,23 @@ void main() {
 
     final mockWSChannel = MockWSChannel();
 
-    final StreamController<String> streamController =
-        StreamController<String>.broadcast();
+    final streamController = StreamController<String>.broadcast();
 
-    final computedUrl =
+    const computedUrl =
         'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
 
-    when(connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
-    when(mockWSChannel.sink).thenAnswer((_) => MockWSSink());
-    when(mockWSChannel.stream).thenAnswer((_) {
-      return streamController.stream;
-    });
+    when(() => connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
+    when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
+    when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
     ws.connect();
     await ws.disconnect();
     streamController.add('{}');
 
-    verify(connectFunc(computedUrl)).called(1);
-    verifyNever(handleFunc(any));
+    verify(() => connectFunc(computedUrl)).called(1);
+    verifyNever(() => handleFunc(any()));
+
+    addTearDown(streamController.close);
   });
 
   test('should run correctly health check', () async {

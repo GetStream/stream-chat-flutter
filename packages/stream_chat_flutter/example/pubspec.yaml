@@ -25,11 +25,6 @@ dependencies:
     sdk: flutter
   stream_chat_flutter:
     path: ../
-  stream_chat_persistence: 
-    git: 
-      url: https://github.com/GetStream/stream-chat-flutter.git
-      ref: develop
-      path: packages/stream_chat_persistence
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

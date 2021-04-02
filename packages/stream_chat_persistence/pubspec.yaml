@@ -20,8 +20,7 @@ dependencies:
   path: ^1.8.0
   path_provider: ^2.0.0
   sqlite3_flutter_libs: ^0.4.0+1
-  stream_chat:
-    path: ../stream_chat
+  stream_chat: ^1.5.0
 
 dependency_overrides:
   stream_chat:

@@ -121,7 +121,7 @@ void main() {
       );
 
       final errorMessage = 'Error! Error! Error!';
-      final error = DioError(type: DioErrorType.RESPONSE, error: errorMessage);
+      final error = DioError(type: DioErrorType.response, error: errorMessage);
       when(mockChannel.initialized).thenAnswer((_) => Future.error(error));
 
       await tester.pumpWidget(
