@@ -1125,6 +1125,7 @@ class MessageInputState extends State<MessageInput> {
         _showErrorAlert(
           'The file is too large to upload. The file size limit is 20MB.',
         );
+        return;
       }
     }
 
@@ -1988,8 +1989,6 @@ class MessageInputState extends State<MessageInput> {
       extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
     );
 
-    _attachments[attachment.id] = attachment;
-
     if (file.size > _kMaxAttachmentSize) {
       if (attachmentType == 'Video') {
         final mediaInfo = await VideoService.compressVideo(file.path);
@@ -1998,7 +1997,6 @@ class MessageInputState extends State<MessageInput> {
           _showErrorAlert(
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
           );
-          _attachments.remove(attachment.id);
           return;
         }
         file = AttachmentFile(
@@ -2011,8 +2009,11 @@ class MessageInputState extends State<MessageInput> {
         _showErrorAlert(
           'The file is too large to upload. The file size limit is 20MB.',
         );
+        return;
       }
     }
+
+    _attachments[attachment.id] = attachment;
 
     setState(() {
       _attachments.update(attachment.id, (it) {
