@@ -32,6 +32,8 @@ typedef AttachmentThumbnailBuilder = Widget Function(
   Attachment,
 );
 
+typedef MentionsSuffixBuilder = Widget Function(Member);
+
 enum ActionsLocation {
   left,
   right,
@@ -125,6 +127,7 @@ class MessageInput extends StatefulWidget {
     this.idleSendButton,
     this.activeSendButton,
     this.showCommandsButton = true,
+    this.mentionsSuffixBuilder,
   }) : super(key: key);
 
   /// Message to edit
@@ -190,6 +193,9 @@ class MessageInput extends StatefulWidget {
 
   /// Send button widget in an active state
   final Widget activeSendButton;
+
+  /// Customize the suffix icon for the mentions overlay
+  final MentionsSuffixBuilder mentionsSuffixBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -1376,15 +1382,20 @@ class MessageInputState extends State<MessageInput> {
                                               ),
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 18.0, left: 8.0),
-                                            child: StreamSvgIcon.mentions(
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .accentBlue,
-                                            ),
-                                          ),
+                                          widget.mentionsSuffixBuilder != null
+                                              ? widget.mentionsSuffixBuilder(m)
+                                              : Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 18.0,
+                                                          left: 8.0),
+                                                  child: StreamSvgIcon.mentions(
+                                                    color: StreamChatTheme.of(
+                                                            context)
+                                                        .colorTheme
+                                                        .accentBlue,
+                                                  ),
+                                                ),
                                         ],
                                       ),
                                     ),
