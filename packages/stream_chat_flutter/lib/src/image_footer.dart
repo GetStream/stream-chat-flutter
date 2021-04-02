@@ -78,6 +78,7 @@ class _ImageFooterState extends State<ImageFooter> {
 
   @override
   Widget build(BuildContext context) {
+    final showShareButton = !kIsWeb;
     return SizedBox.fromSize(
       size: Size(
         MediaQuery.of(context).size.width,
@@ -91,8 +92,10 @@ class _ImageFooterState extends State<ImageFooter> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              kIsWeb
-                  ? SizedBox()
+              !showShareButton
+                  ? Container(
+                      width: 48,
+                    )
                   : IconButton(
                       icon: StreamSvgIcon.iconShare(
                         size: 24.0,

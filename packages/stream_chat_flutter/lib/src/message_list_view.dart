@@ -141,6 +141,7 @@ class MessageListView extends StatefulWidget {
     this.onMessageTap,
     this.onSystemMessageTap,
     this.onAttachmentTap,
+    this.textBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -232,6 +233,9 @@ class MessageListView extends StatefulWidget {
 
   // Customize onTap on attachment
   final void Function(Message message, Attachment attachment) onAttachmentTap;
+
+  // Customize the MessageWidget textBuilder
+  final void Function(BuildContext context, Message message) textBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -839,6 +843,7 @@ class _MessageListViewState extends State<MessageListView> {
         }
         FocusScope.of(context).unfocus();
       },
+      textBuilder: widget.textBuilder,
     );
   }
 
@@ -1015,6 +1020,7 @@ class _MessageListViewState extends State<MessageListView> {
         FocusScope.of(context).unfocus();
       },
       onAttachmentTap: widget.onAttachmentTap,
+      textBuilder: widget.textBuilder,
     );
 
     if (!message.isDeleted &&
