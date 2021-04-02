@@ -272,6 +272,7 @@ class StreamChatThemeData {
         sendAnimationDuration: Duration(milliseconds: 300),
         actionButtonColor: colorTheme.accentBlue,
         actionButtonIdleColor: colorTheme.grey,
+        expandButtonColor: colorTheme.accentBlue,
         sendButtonColor: colorTheme.accentBlue,
         sendButtonIdleColor: colorTheme.greyGainsboro,
         inputBackground: colorTheme.white,
@@ -935,6 +936,9 @@ class MessageInputTheme {
   /// Background color of [MessageInput] action buttons
   final Color actionButtonIdleColor;
 
+  /// Background color of [MessageInput] expand button
+  final Color expandButtonColor;
+
   /// Background color of [MessageInput]
   final Color inputBackground;
 
@@ -966,6 +970,7 @@ class MessageInputTheme {
     this.activeBorderGradient,
     this.idleBorderGradient,
     this.borderRadius,
+    this.expandButtonColor,
   });
 
   /// Returns a new [MessageInputTheme] replacing some of its properties
@@ -976,6 +981,7 @@ class MessageInputTheme {
     Color sendButtonColor,
     Color actionButtonIdleColor,
     Color sendButtonIdleColor,
+    Color expandButtonColor,
     TextStyle inputTextStyle,
     InputDecoration inputDecoration,
     Gradient activeBorderGradient,
@@ -990,6 +996,7 @@ class MessageInputTheme {
         sendButtonColor: sendButtonColor ?? this.sendButtonColor,
         actionButtonIdleColor:
             actionButtonIdleColor ?? this.actionButtonIdleColor,
+        expandButtonColor: expandButtonColor ?? this.expandButtonColor,
         inputTextStyle: inputTextStyle ?? this.inputTextStyle,
         sendButtonIdleColor: sendButtonIdleColor ?? this.sendButtonIdleColor,
         inputDecoration: inputDecoration ?? this.inputDecoration,
@@ -1014,6 +1021,7 @@ class MessageInputTheme {
       activeBorderGradient: other.activeBorderGradient,
       idleBorderGradient: other.idleBorderGradient,
       borderRadius: other.borderRadius,
+      expandButtonColor: other.expandButtonColor,
     );
   }
 }

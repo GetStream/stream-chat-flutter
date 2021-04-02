@@ -33,6 +33,9 @@ typedef AttachmentThumbnailBuilder = Widget Function(
 );
 
 typedef MentionsSuffixBuilder = Widget Function(Member);
+typedef MentionsTitleBuilder = Widget Function(Member);
+typedef MentionsSubtitleBuilder = Widget Function(Member);
+typedef MentionsTileBuilder = Widget Function(Member);
 
 enum ActionsLocation {
   left,
@@ -128,6 +131,9 @@ class MessageInput extends StatefulWidget {
     this.activeSendButton,
     this.showCommandsButton = true,
     this.mentionsSuffixBuilder,
+    this.mentionsTitleBuilder,
+    this.mentionsSubtitleBuilder,
+    this.mentionsTileBuilder,
   }) : super(key: key);
 
   /// Message to edit
@@ -196,6 +202,15 @@ class MessageInput extends StatefulWidget {
 
   /// Customize the suffix icon for the mentions overlay
   final MentionsSuffixBuilder mentionsSuffixBuilder;
+
+  /// Customize the title for the mentions overlay
+  final MentionsTitleBuilder mentionsTitleBuilder;
+
+  /// Customize the subtitle for the mentions overlay
+  final MentionsSubtitleBuilder mentionsSubtitleBuilder;
+
+  /// Customize the tile for the mentions overlay
+  final MentionsSubtitleBuilder mentionsTileBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -464,7 +479,9 @@ class MessageInputState extends State<MessageInput> {
                 ? pi
                 : 0,
             child: StreamSvgIcon.emptyCircleLeft(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              color: StreamChatTheme.of(context)
+                  .messageInputTheme
+                  .expandButtonColor,
             ),
           ),
           padding: const EdgeInsets.all(0),
@@ -1320,85 +1337,107 @@ class MessageInputState extends State<MessageInput> {
                                       _mentionsOverlay?.remove();
                                       _mentionsOverlay = null;
                                     },
-                                    child: Container(
-                                      height: 56.0,
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 16.0,
-                                          ),
-                                          UserAvatar(
-                                            constraints: BoxConstraints.tight(
-                                              Size(
-                                                40,
-                                                40,
-                                              ),
-                                            ),
-                                            user: m.user,
-                                          ),
-                                          SizedBox(
-                                            width: 8.0,
-                                          ),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    '${m.user.name}',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: StreamChatTheme.of(
-                                                            context)
-                                                        .textTheme
-                                                        .bodyBold,
+                                    child: widget.mentionsTileBuilder != null
+                                        ? widget.mentionsTileBuilder(m)
+                                        : Container(
+                                            height: 56.0,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  width: 16.0,
+                                                ),
+                                                UserAvatar(
+                                                  constraints:
+                                                      BoxConstraints.tight(
+                                                    Size(
+                                                      40,
+                                                      40,
+                                                    ),
                                                   ),
-                                                  SizedBox(
-                                                    height: 2.0,
-                                                  ),
-                                                  Text(
-                                                    '@${m.userId}',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: StreamChatTheme.of(
-                                                            context)
-                                                        .textTheme
-                                                        .footnoteBold
-                                                        .copyWith(
-                                                            color: StreamChatTheme
-                                                                    .of(context)
-                                                                .colorTheme
-                                                                .grey),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          widget.mentionsSuffixBuilder != null
-                                              ? widget.mentionsSuffixBuilder(m)
-                                              : Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 18.0,
-                                                          left: 8.0),
-                                                  child: StreamSvgIcon.mentions(
-                                                    color: StreamChatTheme.of(
-                                                            context)
-                                                        .colorTheme
-                                                        .accentBlue,
+                                                  user: m.user,
+                                                ),
+                                                SizedBox(
+                                                  width: 8.0,
+                                                ),
+                                                Expanded(
+                                                  child: Align(
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        widget.mentionsTitleBuilder !=
+                                                                null
+                                                            ? widget
+                                                                .mentionsTitleBuilder(
+                                                                    m)
+                                                            : Text(
+                                                                '${m.user.name}',
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: StreamChatTheme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .bodyBold,
+                                                              ),
+                                                        SizedBox(
+                                                          height: 2.0,
+                                                        ),
+                                                        widget.mentionsSubtitleBuilder !=
+                                                                null
+                                                            ? widget
+                                                                .mentionsSubtitleBuilder(
+                                                                    m)
+                                                            : Text(
+                                                                '@${m.userId}',
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: StreamChatTheme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .footnoteBold
+                                                                    .copyWith(
+                                                                        color: StreamChatTheme.of(context)
+                                                                            .colorTheme
+                                                                            .grey),
+                                                              ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
-                                        ],
-                                      ),
-                                    ),
+                                                widget.mentionsSuffixBuilder !=
+                                                        null
+                                                    ? widget
+                                                        .mentionsSuffixBuilder(
+                                                            m)
+                                                    : Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                right: 18.0,
+                                                                left: 8.0),
+                                                        child: StreamSvgIcon
+                                                            .mentions(
+                                                          color: StreamChatTheme
+                                                                  .of(context)
+                                                              .colorTheme
+                                                              .accentBlue,
+                                                        ),
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
                                   ),
                                 );
                               },
