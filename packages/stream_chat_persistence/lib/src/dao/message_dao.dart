@@ -36,9 +36,9 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   Future<Message> _messageFromJoinRow(TypedResult rows) async {
-    final userEntity = rows.readTable(_users);
-    final pinnedByEntity = rows.readTable(_pinnedByUsers);
-    final msgEntity = rows.readTable(messages);
+    final userEntity = rows.readTableOrNull(_users);
+    final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
+    final msgEntity = rows.readTableOrNull(messages);
     final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
     final ownReactions = await _db.reactionDao.getReactionsByUserId(
       msgEntity.id,
@@ -66,7 +66,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
       ])
             ..where(messages.id.equals(id)))
           .map(_messageFromJoinRow)
-          .getSingle();
+          .getSingleOrNull();
 
   /// Returns all the messages of a particular thread by matching
   /// [Messages.channelCid] with [cid]
@@ -77,7 +77,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
             messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
       ])
             ..where(messages.channelCid.equals(cid))
-            ..where(isNotNull(messages.parentId))
+            ..where(messages.parentId.isNotNull())
             ..orderBy([OrderingTerm.asc(messages.createdAt)]))
           .map(_messageFromJoinRow)
           .get());
@@ -93,7 +93,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
       leftOuterJoin(
           _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(isNotNull(messages.parentId))
+          ..where(messages.parentId.isNotNull())
           ..where(messages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(messages.createdAt)]))
         .map(_messageFromJoinRow)
@@ -136,7 +136,8 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     ])
           ..where(messages.channelCid.equals(cid))
           ..where(
-              isNull(messages.parentId) | messages.showInChannel.equals(true))
+            messages.parentId.isNull() | messages.showInChannel.equals(true),
+          )
           ..orderBy([OrderingTerm.asc(messages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());

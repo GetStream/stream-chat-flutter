@@ -1,6 +1,6 @@
-import 'package:stream_chat/src/models/command.dart';
 import 'dart:convert';
 
+import 'package:stream_chat/src/models/command.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -30,9 +30,9 @@ void main() {
       expect(
         command.toJson(),
         {
-          "name": "giphy",
-          "description": "Post a random gif to the channel",
-          "args": "[text]",
+          'name': 'giphy',
+          'description': 'Post a random gif to the channel',
+          'args': '[text]',
         },
       );
     });

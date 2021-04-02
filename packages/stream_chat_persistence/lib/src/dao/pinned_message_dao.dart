@@ -36,9 +36,9 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   Future<Message> _messageFromJoinRow(TypedResult rows) async {
-    final userEntity = rows.readTable(users);
-    final pinnedByEntity = rows.readTable(_pinnedByUsers);
-    final msgEntity = rows.readTable(pinnedMessages);
+    final userEntity = rows.readTableOrNull(users);
+    final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
+    final msgEntity = rows.readTableOrNull(pinnedMessages);
     final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
     final ownReactions = await _db.reactionDao.getReactionsByUserId(
       msgEntity.id,
@@ -66,7 +66,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       ])
             ..where(pinnedMessages.id.equals(id)))
           .map(_messageFromJoinRow)
-          .getSingle();
+          .getSingleOrNull();
 
   /// Returns all the messages of a particular thread by matching
   /// [PinnedMessages.channelCid] with [cid]
@@ -77,7 +77,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
             pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
       ])
             ..where(pinnedMessages.channelCid.equals(cid))
-            ..where(isNotNull(pinnedMessages.parentId))
+            ..where(pinnedMessages.parentId.isNotNull())
             ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
           .map(_messageFromJoinRow)
           .get());
@@ -93,7 +93,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       leftOuterJoin(_pinnedByUsers,
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(isNotNull(pinnedMessages.parentId))
+          ..where(pinnedMessages.parentId.isNotNull())
           ..where(pinnedMessages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
@@ -135,7 +135,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
           ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(isNull(pinnedMessages.parentId) |
+          ..where(pinnedMessages.parentId.isNull() |
               pinnedMessages.showInChannel.equals(true))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)

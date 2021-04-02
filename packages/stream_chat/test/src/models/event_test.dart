@@ -55,7 +55,7 @@ void main() {
         type: 'type',
         cid: 'cid',
         connectionId: 'connectionId',
-        createdAt: DateTime.parse("2020-01-29T03:22:47.63613Z"),
+        createdAt: DateTime.parse('2020-01-29T03:22:47.63613Z'),
         me: OwnUser(id: 'id2'),
         totalUnreadCount: 1,
         unreadChannels: 1,

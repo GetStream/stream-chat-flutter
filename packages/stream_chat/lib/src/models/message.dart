@@ -73,7 +73,7 @@ class Message {
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
     this.skipPush,
-  })  : id = id ?? Uuid().v4(),
+  })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc();
 
   /// Create a new instance from a json

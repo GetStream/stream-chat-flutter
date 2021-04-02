@@ -3284,7 +3284,7 @@ void main() {
     });
 
     test('QueryReactionsResponse', () {
-      const jsonExample = r'''
+      const jsonExample = '''
       {"reactions": [{"message_id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f","user_id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680","user": {"id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680","role": "user","created_at": "2020-01-28T22:17:30.83015Z","updated_at": "2020-01-28T22:17:31.19435Z","banned": false,"online": false,"image": "https://randomuser.me/api/portraits/women/2.jpg","name": "Mia Denys"},"type": "love","score": 1,"created_at": "2020-01-28T22:17:31.128376Z","updated_at": "2020-01-28T22:17:31.128376Z"}]}
       ''';
       final response =
@@ -3402,31 +3402,31 @@ void main() {
 
     test('ListDevicesResponse', () {
       const jsonExample =
-          r'''{"devices":[{"push_provider":"firebase","id":"test"}],"duration":"0.35ms"}''';
+          '''{"devices":[{"push_provider":"firebase","id":"test"}],"duration":"0.35ms"}''';
       final response = ListDevicesResponse.fromJson(json.decode(jsonExample));
       expect(response.devices, isA<List<Device>>());
     });
 
     test('SendFileResponse', () {
-      const jsonExample = r'''{"file": "file-url","duration":"0.35ms"}''';
+      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = SendFileResponse.fromJson(json.decode(jsonExample));
       expect(response.file, isA<String>());
     });
 
     test('SendImageResponse', () {
-      const jsonExample = r'''{"file": "file-url","duration":"0.35ms"}''';
+      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = SendImageResponse.fromJson(json.decode(jsonExample));
       expect(response.file, isA<String>());
     });
 
     test('SendImageResponse', () {
-      const jsonExample = r'''{"file": "file-url","duration":"0.35ms"}''';
+      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = SendImageResponse.fromJson(json.decode(jsonExample));
       expect(response.file, isA<String>());
     });
 
     test('EmptyResponse', () {
-      const jsonExample = r'''{"file": "file-url","duration":"0.35ms"}''';
+      const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = EmptyResponse.fromJson(json.decode(jsonExample));
       expect(response.duration, isA<String>());
     });
@@ -3481,8 +3481,7 @@ void main() {
     });
 
     test('UpdateUsersResponse', () {
-      const jsonExample =
-          r'''{"users": {"bbb19d9a-ee50-45bc-84e5-0584e79d0c9e":{
+      const jsonExample = '''{"users": {"bbb19d9a-ee50-45bc-84e5-0584e79d0c9e":{
                         "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
                         "role": "user",
                         "created_at": "2020-01-28T22:17:30.826259Z",
@@ -3498,7 +3497,7 @@ void main() {
 
     test('ConnectGuestUserResponse', () {
       const jsonExample =
-          r'{"user":{"id":"guest-ac612aee-25fe-49fb-b1af-969e41f452a0-wild-breeze-7","role":"guest","created_at":"2020-02-03T10:19:01.538434Z","updated_at":"2020-02-03T10:19:01.539543Z","banned":false,"online":false},"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ3Vlc3QtYWM2MTJhZWUtMjVmZS00OWZiLWIxYWYtOTY5ZTQxZjQ1MmEwLXdpbGQtYnJlZXplLTcifQ.mmoFGu7oJjpFsp7nFN78UbIpO7gowbuIbyoppsuvbXA","duration":"4.66ms"}';
+          '''{"user":{"id":"guest-ac612aee-25fe-49fb-b1af-969e41f452a0-wild-breeze-7","role":"guest","created_at":"2020-02-03T10:19:01.538434Z","updated_at":"2020-02-03T10:19:01.539543Z","banned":false,"online":false},"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ3Vlc3QtYWM2MTJhZWUtMjVmZS00OWZiLWIxYWYtOTY5ZTQxZjQ1MmEwLXdpbGQtYnJlZXplLTcifQ.mmoFGu7oJjpFsp7nFN78UbIpO7gowbuIbyoppsuvbXA","duration":"4.66ms"}''';
       final response =
           ConnectGuestUserResponse.fromJson(json.decode(jsonExample));
       expect(response.user, isA<User>());

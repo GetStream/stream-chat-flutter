@@ -35,7 +35,7 @@ class Attachment {
     this.extraData,
     this.file,
     UploadState uploadState,
-  })  : id = id ?? Uuid().v4(),
+  })  : id = id ?? const Uuid().v4(),
         title = title ?? file?.name,
         localUri = file?.path != null ? Uri.parse(file.path) : null {
     this.uploadState = uploadState ??

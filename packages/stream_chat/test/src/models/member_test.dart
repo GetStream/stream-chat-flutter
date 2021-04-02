@@ -28,8 +28,8 @@ void main() {
       final member = Member.fromJson(json.decode(jsonExample));
       expect(member.user, isA<User>());
       expect(member.role, 'member');
-      expect(member.createdAt, DateTime.parse("2020-01-28T22:17:30.95443Z"));
-      expect(member.updatedAt, DateTime.parse("2020-01-28T22:17:30.95443Z"));
+      expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
+      expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
     });
   });
 }

@@ -31,8 +31,8 @@ void main() {
       );
 
       expect(read.toJson(), {
-        "user": {"id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e"},
-        "last_read": "2020-01-28T22:17:30.966485Z",
+        'user': {'id': 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e'},
+        'last_read': '2020-01-28T22:17:30.966485Z',
         'unread_messages': 10,
       });
     });

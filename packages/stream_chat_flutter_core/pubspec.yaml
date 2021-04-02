@@ -5,6 +5,8 @@ version: 1.5.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
+publish_to: none
+
 environment:
   sdk: ">=2.7.0 <3.0.0"
   flutter: ">=1.17.0"
@@ -12,7 +14,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  rxdart: ^0.25.0
+  rxdart: ^0.26.0
   stream_chat: ^1.5.0
 
 dependency_overrides:
@@ -22,4 +24,6 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  fake_async: ^1.1.0
   mockito: ^4.1.3
+
