@@ -5,10 +5,19 @@ import '../stream_chat_flutter.dart';
 /// This widget is used for showing user tiles for mentions
 /// Use [title], [subtitle], [leading], [trailing] for substituting widgets in respective positions
 class MentionTile extends StatelessWidget {
+  /// Member to display in the tile
   final Member member;
+
+  /// Widget to display as title
   final Widget title;
+
+  /// Widget to display below [title]
   final Widget subtitle;
+
+  /// Widget at the start of the tile
   final Widget leading;
+
+  /// Widget at the end of tile
   final Widget trailing;
 
   MentionTile(
