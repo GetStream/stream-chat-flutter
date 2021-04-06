@@ -32,7 +32,9 @@ typedef AttachmentThumbnailBuilder = Widget Function(
 );
 
 typedef MentionTileBuilder = Widget Function(
-    BuildContext context, Member member);
+  BuildContext context,
+  Member member,
+);
 
 enum ActionsLocation {
   left,
@@ -1324,7 +1326,7 @@ class MessageInputState extends State<MessageInput> {
                                     },
                                     child: widget.mentionsTileBuilder != null
                                         ? widget.mentionsTileBuilder(context, m)
-                                        : DefaultMentionTile(m),
+                                        : MentionTile(m),
                                   ),
                                 );
                               },

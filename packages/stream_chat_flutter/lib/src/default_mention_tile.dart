@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../stream_chat_flutter.dart';
 
-class DefaultMentionTile extends StatelessWidget {
+class MentionTile extends StatelessWidget {
   final Member member;
   final Widget title;
   final Widget subtitle;
   final Widget leading;
   final Widget trailing;
 
-  DefaultMentionTile(this.member,
-      {this.title, this.subtitle, this.leading, this.trailing});
+  MentionTile(
+    this.member, {
+    this.title,
+    this.subtitle,
+    this.leading,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +66,9 @@ class DefaultMentionTile extends StatelessWidget {
                             .textTheme
                             .footnoteBold
                             .copyWith(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .grey),
+                              color:
+                                  StreamChatTheme.of(context).colorTheme.grey,
+                            ),
                       ),
                 ],
               ),
