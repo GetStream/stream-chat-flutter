@@ -31,6 +31,8 @@ typedef AttachmentThumbnailBuilder = Widget Function(
   Attachment,
 );
 
+/// Builder function for building a mention tile
+/// Use [MentionTile] for the default implementation
 typedef MentionTileBuilder = Widget Function(
   BuildContext context,
   Member member,
