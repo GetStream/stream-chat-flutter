@@ -16,7 +16,6 @@ import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
@@ -30,6 +29,13 @@ import 'video_thumbnail_image.dart';
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   Attachment,
+);
+
+/// Builder function for building a mention tile
+/// Use [MentionTile] for the default implementation
+typedef MentionTileBuilder = Widget Function(
+  BuildContext context,
+  Member member,
 );
 
 enum ActionsLocation {
@@ -125,6 +131,7 @@ class MessageInput extends StatefulWidget {
     this.idleSendButton,
     this.activeSendButton,
     this.showCommandsButton = true,
+    this.mentionsTileBuilder,
   }) : super(key: key);
 
   /// Message to edit
@@ -190,6 +197,9 @@ class MessageInput extends StatefulWidget {
 
   /// Send button widget in an active state
   final Widget activeSendButton;
+
+  /// Customize the tile for the mentions overlay
+  final MentionTileBuilder mentionsTileBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -319,7 +329,11 @@ class MessageInputState extends State<MessageInput> {
               ),
               if (widget.parentMessage != null && !widget.hideSendAsDm)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.only(
+                    right: 12.0,
+                    left: 12.0,
+                    bottom: 12.0,
+                  ),
                   child: _buildDmCheckbox(),
                 ),
               _buildFilePickerSection(),
@@ -354,68 +368,68 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildDmCheckbox() {
-    return Container(
-      height: 36,
-      padding: const EdgeInsets.only(
-        left: 12,
-        bottom: 12,
-        top: 8,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            height: 16,
-            width: 16,
-            foregroundDecoration: BoxDecoration(
-              border: _sendAsDm
-                  ? null
-                  : Border.all(
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(.5),
-                      width: 2,
-                    ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          height: 16,
+          width: 16,
+          foregroundDecoration: BoxDecoration(
+            border: _sendAsDm
+                ? null
+                : Border.all(
+                    color: StreamChatTheme.of(context)
+                        .colorTheme
+                        .black
+                        .withOpacity(.5),
+                    width: 2,
+                  ),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Center(
+            child: Material(
               borderRadius: BorderRadius.circular(3),
-            ),
-            child: Center(
-              child: Material(
-                borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
-                    ? StreamChatTheme.of(context).colorTheme.accentBlue
-                    : StreamChatTheme.of(context).colorTheme.white,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _sendAsDm = !_sendAsDm;
-                    });
-                  },
-                  child: AnimatedCrossFade(
-                    duration: Duration(milliseconds: 300),
-                    reverseDuration: Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    firstChild: StreamSvgIcon.check(
-                      size: 16.0,
-                      color: StreamChatTheme.of(context).colorTheme.white,
-                    ),
-                    secondChild: SizedBox(
-                      height: 16,
-                      width: 16,
-                    ),
+              color: _sendAsDm
+                  ? StreamChatTheme.of(context).colorTheme.accentBlue
+                  : StreamChatTheme.of(context).colorTheme.white,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _sendAsDm = !_sendAsDm;
+                  });
+                },
+                child: AnimatedCrossFade(
+                  duration: Duration(milliseconds: 300),
+                  reverseDuration: Duration(milliseconds: 300),
+                  crossFadeState: _sendAsDm
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: StreamSvgIcon.check(
+                    size: 16.0,
+                    color: StreamChatTheme.of(context).colorTheme.white,
+                  ),
+                  secondChild: SizedBox(
+                    height: 16,
+                    width: 16,
                   ),
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text('Also send as direct message'),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Text(
+            'Also send as direct message',
+            style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(0.5),
+                ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -454,7 +468,9 @@ class MessageInputState extends State<MessageInput> {
                 ? pi
                 : 0,
             child: StreamSvgIcon.emptyCircleLeft(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              color: StreamChatTheme.of(context)
+                  .messageInputTheme
+                  .expandButtonColor,
             ),
           ),
           padding: const EdgeInsets.all(0),
@@ -491,10 +507,17 @@ class MessageInputState extends State<MessageInput> {
 
   Expanded _buildTextInput(BuildContext context) {
     final theme = StreamChatTheme.of(context);
+    final margin = (widget.sendButtonLocation == SendButtonLocation.inside
+            ? const EdgeInsets.only(right: 8.0)
+            : EdgeInsets.zero) +
+        (widget.actionsLocation != ActionsLocation.left
+            ? const EdgeInsets.only(left: 8.0)
+            : EdgeInsets.zero);
     return Expanded(
       child: Center(
         child: Container(
           clipBehavior: Clip.antiAlias,
+          margin: margin,
           decoration: BoxDecoration(
             borderRadius: theme.messageInputTheme.borderRadius,
             gradient: _focusNode.hasFocus
@@ -656,6 +679,7 @@ class MessageInputState extends State<MessageInput> {
   Timer _debounce;
 
   String _previousValue;
+
   void _onChanged(BuildContext context, String s) {
     if (s == _previousValue) {
       return;
@@ -1113,6 +1137,7 @@ class MessageInputState extends State<MessageInput> {
         _showErrorAlert(
           'The file is too large to upload. The file size limit is 20MB.',
         );
+        return;
       }
     }
 
@@ -1301,80 +1326,9 @@ class MessageInputState extends State<MessageInput> {
                                       _mentionsOverlay?.remove();
                                       _mentionsOverlay = null;
                                     },
-                                    child: Container(
-                                      height: 56.0,
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 16.0,
-                                          ),
-                                          UserAvatar(
-                                            constraints: BoxConstraints.tight(
-                                              Size(
-                                                40,
-                                                40,
-                                              ),
-                                            ),
-                                            user: m.user,
-                                          ),
-                                          SizedBox(
-                                            width: 8.0,
-                                          ),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    '${m.user.name}',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: StreamChatTheme.of(
-                                                            context)
-                                                        .textTheme
-                                                        .bodyBold,
-                                                  ),
-                                                  SizedBox(
-                                                    height: 2.0,
-                                                  ),
-                                                  Text(
-                                                    '@${m.userId}',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: StreamChatTheme.of(
-                                                            context)
-                                                        .textTheme
-                                                        .footnoteBold
-                                                        .copyWith(
-                                                            color: StreamChatTheme
-                                                                    .of(context)
-                                                                .colorTheme
-                                                                .grey),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 18.0, left: 8.0),
-                                            child: StreamSvgIcon.mentions(
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .accentBlue,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    child: widget.mentionsTileBuilder != null
+                                        ? widget.mentionsTileBuilder(context, m)
+                                        : MentionTile(m),
                                   ),
                                 );
                               },
@@ -1962,12 +1916,6 @@ class MessageInputState extends State<MessageInput> {
 
     final extraDataMap = <String, dynamic>{};
 
-    if (mimeType?.type == 'video' || mimeType?.type == 'image') {
-      attachmentType = mimeType.type;
-    } else {
-      attachmentType = 'file';
-    }
-
     if (mimeType?.subtype != null) {
       extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();
     }
@@ -1982,8 +1930,6 @@ class MessageInputState extends State<MessageInput> {
       extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
     );
 
-    _attachments[attachment.id] = attachment;
-
     if (file.size > _kMaxAttachmentSize) {
       if (attachmentType == 'Video') {
         final mediaInfo = await VideoService.compressVideo(file.path);
@@ -1992,7 +1938,6 @@ class MessageInputState extends State<MessageInput> {
           _showErrorAlert(
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
           );
-          _attachments.remove(attachment.id);
           return;
         }
         file = AttachmentFile(
@@ -2005,8 +1950,11 @@ class MessageInputState extends State<MessageInput> {
         _showErrorAlert(
           'The file is too large to upload. The file size limit is 20MB.',
         );
+        return;
       }
     }
+
+    _attachments[attachment.id] = attachment;
 
     setState(() {
       _attachments.update(attachment.id, (it) {
@@ -2233,7 +2181,7 @@ class MessageInputState extends State<MessageInput> {
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
     _messageIsPresent = true;
-    for (final attachment in message.attachments) {
+    for (final attachment in message?.attachments) {
       _attachments[attachment.id] = attachment.copyWith(
         uploadState: attachment.uploadState ?? UploadState.success(),
       );

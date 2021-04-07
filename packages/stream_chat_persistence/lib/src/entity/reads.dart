@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'package:moor/moor.dart';
 
 /// Represents a [Reads] table in [MoorChatDatabase].

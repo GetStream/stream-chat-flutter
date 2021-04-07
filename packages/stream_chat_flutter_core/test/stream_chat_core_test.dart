@@ -1,181 +1,289 @@
 import 'dart:async';
 
-import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:mockito/mockito.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
-class MockShowLocalNotifications extends Mock {
+class MockOnBackgroundEventReceived extends Mock {
   void call(Event event);
 }
 
 void main() {
-  testWidgets(
-    'StreamChatCore.of(context) should throw an exception',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Builder(
-          builder: (context) {
-            expect(() => StreamChatCore.of(context), throwsException);
-            return Container();
-          },
-        ),
-      );
+  test(
+    'should throw assertion error in case client is null',
+    () {
+      final streamChatCore = () => StreamChatCore(
+            client: null,
+            child: Offstage(),
+          );
+      expect(streamChatCore, throwsA(isA<AssertionError>()));
+    },
+  );
+
+  test(
+    'should throw assertion error in case child is null',
+    () {
+      final mockClient = MockClient();
+      final streamChatCore = () => StreamChatCore(
+            client: mockClient,
+            child: null,
+          );
+      expect(streamChatCore, throwsA(isA<AssertionError>()));
     },
   );
 
   testWidgets(
-    'StreamChatCore.of(context) should return the StreamChatCore ancestor',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      await tester.pumpWidget(
-        StreamChatCore(
-          client: client,
-          child: Builder(
-            builder: (context) {
-              final sc = StreamChatCore.of(context);
-              expect(sc, isNotNull);
-              return Container();
-            },
-          ),
-        ),
+    'should render StreamChatCore if both client and child is provided',
+    (tester) async {
+      final mockClient = MockClient();
+      const streamChatCoreKey = Key('streamChatCore');
+      const childKey = Key('child');
+      final streamChatCore = StreamChatCore(
+        key: streamChatCoreKey,
+        client: mockClient,
+        child: Offstage(key: childKey),
       );
+
+      await tester.pumpWidget(streamChatCore);
+
+      expect(find.byKey(streamChatCoreKey), findsOneWidget);
+      expect(find.byKey(childKey), findsOneWidget);
     },
   );
 
   testWidgets(
-    'StreamChatCore.of(context).client should return the client',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(
-        OwnUser(
-          id: 'test',
-        ),
-      );
-      final userStream = Stream<OwnUser>.value(
-        OwnUser(
-          id: 'test',
-        ),
-      );
-      when(clientState.userStream).thenAnswer(
-        (_) => userStream,
+    'should render StreamChatCore if both client and child is provided',
+    (tester) async {
+      final mockClient = MockClient();
+      const streamChatCoreKey = Key('streamChatCore');
+      const childKey = Key('child');
+      final streamChatCore = StreamChatCore(
+        key: streamChatCoreKey,
+        client: mockClient,
+        child: Offstage(key: childKey),
       );
 
-      await tester.pumpWidget(
-        StreamChatCore(
-          client: client,
-          child: Builder(
-            builder: (context) {
-              final sc = StreamChatCore.of(context);
-              expect(sc.client, client);
-              expect(sc.user, client.state.user);
-              expect(sc.userStream, userStream);
-              return Container();
-            },
-          ),
-        ),
-      );
+      await tester.pumpWidget(streamChatCore);
+
+      expect(find.byKey(streamChatCoreKey), findsOneWidget);
+      expect(find.byKey(childKey), findsOneWidget);
     },
   );
 
   testWidgets(
-    'StreamChatCore should disconnect on background',
-    (WidgetTester tester) async {
-      fakeAsync((_async) {
-        final client = MockClient();
-        final clientState = MockClientState();
-        final channel = MockChannel();
-        when(client.state).thenReturn(clientState);
-        when(clientState.user).thenReturn(
-          OwnUser(
-            id: 'test',
-          ),
+    'didChangeAppLifecycleState should call client.disconnect() and return '
+    'if onBackgroundEventReceived is null and the widget lifestyle changes to '
+    'AppLifecycleState.paused',
+    (tester) async {
+      final mockClient = MockClient();
+      const streamChatCoreKey = Key('streamChatCore');
+      const childKey = Key('child');
+      final streamChatCore = StreamChatCore(
+        key: streamChatCoreKey,
+        client: mockClient,
+        child: Offstage(key: childKey),
+      );
+
+      await tester.pumpWidget(streamChatCore);
+
+      expect(find.byKey(streamChatCoreKey), findsOneWidget);
+      expect(find.byKey(childKey), findsOneWidget);
+
+      when(mockClient.disconnect()).thenAnswer((_) async {
+        return;
+      });
+
+      final streamChatCoreState = tester.state<StreamChatCoreState>(
+        find.byKey(streamChatCoreKey),
+      );
+
+      streamChatCoreState.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      verify(mockClient.disconnect()).called(1);
+    },
+  );
+
+  testWidgets(
+    'didChangeAppLifecycleState should subscribe to client events for '
+    'backgroundKeepAlive duration if onBackgroundEventReceived is provided '
+    'and the widget lifestyle changes to AppLifecycleState.paused',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        final mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
+        const backgroundKeepAlive = const Duration(seconds: 3);
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+          onBackgroundEventReceived: mockOnBackgroundEventReceived,
+          backgroundKeepAlive: backgroundKeepAlive,
         );
-        final showLocalNotificationMock = MockShowLocalNotifications().call;
-        final eventStreamController = StreamController<Event>();
-        when(client.on()).thenAnswer((_) => eventStreamController.stream);
 
-        when(client.channel('test', id: 'testid')).thenReturn(channel);
+        await tester.pumpWidget(streamChatCore);
 
-        final scKey = GlobalKey<StreamChatCoreState>();
-        tester.pumpWidget(
-          StreamChatCore(
-            key: scKey,
-            client: client,
-            onBackgroundEventReceived: showLocalNotificationMock,
-            backgroundKeepAlive: const Duration(seconds: 4),
-            child: Builder(
-              builder: (context) {
-                return Container();
-              },
-            ),
-          ),
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        final event = Event();
+        when(mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(mockClient.disconnect()).thenAnswer((_) async {
+          return;
+        });
+
+        final streamChatCoreState = tester.state<StreamChatCoreState>(
+          find.byKey(streamChatCoreKey),
         );
 
-        final sc = scKey.currentState;
-        sc.didChangeAppLifecycleState(AppLifecycleState.paused);
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.paused);
 
-        _async.elapse(Duration(seconds: 5));
+        await untilCalled(mockOnBackgroundEventReceived.call(event));
 
-        verify(client.disconnect()).called(1);
-        eventStreamController.close();
+        verify(mockOnBackgroundEventReceived.call(event)).called(1);
+
+        await Future.delayed(backgroundKeepAlive);
+
+        verify(mockClient.disconnect()).called(1);
+        verifyNever(mockOnBackgroundEventReceived.call(event));
       });
     },
   );
 
   testWidgets(
-    'StreamChatCore should handle notifications when on background and connected',
-    (WidgetTester tester) async {
-      final client = MockClient();
-      final clientState = MockClientState();
-      final channel = MockChannel();
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(
-        OwnUser(
-          id: 'test',
-        ),
-      );
-      final showLocalNotificationMock = MockShowLocalNotifications().call;
-      final eventStreamController = StreamController<Event>();
-      when(client.on()).thenAnswer((_) => eventStreamController.stream);
+    'didChangeAppLifecycleState should cancel the backgroundKeepAlive timer '
+    'if it is currently running in case the widget lifestyle changes to '
+    'AppLifecycleState.resume',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        final mockOnBackgroundEventReceived = MockOnBackgroundEventReceived();
+        const backgroundKeepAlive = const Duration(seconds: 3);
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+          onBackgroundEventReceived: mockOnBackgroundEventReceived,
+          backgroundKeepAlive: backgroundKeepAlive,
+        );
 
-      when(client.channel('test', id: 'testid')).thenReturn(channel);
+        await tester.pumpWidget(streamChatCore);
 
-      final scKey = GlobalKey<StreamChatCoreState>();
-      await tester.pumpWidget(
-        StreamChatCore(
-          key: scKey,
-          client: client,
-          onBackgroundEventReceived: showLocalNotificationMock,
-          backgroundKeepAlive: const Duration(seconds: 4),
-          child: Builder(
-            builder: (context) {
-              return Container();
-            },
-          ),
-        ),
-      );
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
 
-      final sc = scKey.currentState;
-      sc.didChangeAppLifecycleState(AppLifecycleState.paused);
-      final event = Event(
-        type: EventType.messageNew,
-        message: Message(text: 'hey'),
-        channelType: 'test',
-        channelId: 'testid',
-        user: User(id: 'other user'),
-      );
-      eventStreamController.add(event);
+        final event = Event();
+        when(mockClient.on()).thenAnswer((_) => Stream.value(event));
 
-      await untilCalled(showLocalNotificationMock(event));
+        final streamChatCoreState = tester.state<StreamChatCoreState>(
+          find.byKey(streamChatCoreKey),
+        );
 
-      verify(showLocalNotificationMock(event)).called(1);
-      eventStreamController.close();
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.paused);
+
+        await untilCalled(mockOnBackgroundEventReceived.call(event));
+
+        verify(mockOnBackgroundEventReceived.call(event)).called(1);
+
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+        verifyNever(mockOnBackgroundEventReceived.call(event));
+      });
+    },
+  );
+
+  testWidgets(
+    'didChangeAppLifecycleState should call client.connect() '
+    'if the connectionStatus is ConnectionStatus.disconnected in case the '
+    'widget lifestyle changes to AppLifecycleState.resume',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+        );
+
+        await tester.pumpWidget(streamChatCore);
+
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        final event = Event();
+        when(mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(mockClient.connect()).thenAnswer((_) async => event);
+        when(mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
+        final streamChatCoreState = tester.state<StreamChatCoreState>(
+          find.byKey(streamChatCoreKey),
+        );
+
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.paused);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+        verify(mockClient.connect()).called(1);
+      });
+    },
+  );
+
+  testWidgets(
+    'streamChatCoreState.userStream should emit all the user events '
+    'provided by client',
+    (tester) async {
+      await tester.runAsync(() async {
+        final userController = StreamController<OwnUser>();
+
+        final mockClient = MockClient();
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+        );
+
+        await tester.pumpWidget(streamChatCore);
+
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        when(mockClient.state.userStream)
+            .thenAnswer((_) => userController.stream);
+
+        final streamChatCoreState = tester.state<StreamChatCoreState>(
+          find.byKey(streamChatCoreKey),
+        );
+
+        final ownUser = OwnUser(id: 'testUserId');
+        userController.add(ownUser);
+
+        await expectLater(
+          streamChatCoreState.userStream,
+          emits(ownUser),
+        );
+
+        addTearDown(() {
+          userController.close();
+        });
+      });
     },
   );
 }

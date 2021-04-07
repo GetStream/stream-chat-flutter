@@ -72,7 +72,7 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// [Messages.channelCid] with [cid]
   Future<List<Message>> getThreadMessages(String cid) async =>
       Future.wait(await (select(messages).join([
-        leftOuterJoin(users, messages.userId.equalsExp(_users.id)),
+        leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
         leftOuterJoin(_pinnedByUsers,
             messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
       ])
@@ -89,18 +89,36 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
     PaginationParams options,
   }) async {
     final msgList = await Future.wait(await (select(messages).join([
-      innerJoin(_users, messages.userId.equalsExp(_users.id)),
-      innerJoin(
+      leftOuterJoin(_users, messages.userId.equalsExp(_users.id)),
+      leftOuterJoin(
           _pinnedByUsers, messages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
+          ..where(isNotNull(messages.parentId))
           ..where(messages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(messages.createdAt)]))
         .map(_messageFromJoinRow)
         .get());
 
-    if (options?.lessThan != null && msgList.isNotEmpty) {
-      final lessThanIndex = msgList.indexWhere((m) => m.id == options.lessThan);
-      msgList.removeRange(lessThanIndex, msgList.length);
+    if (msgList.isNotEmpty) {
+      if (options?.lessThan != null) {
+        final lessThanIndex = msgList.indexWhere(
+          (m) => m.id == options.lessThan,
+        );
+        if (lessThanIndex != -1) {
+          msgList.removeRange(lessThanIndex, msgList.length);
+        }
+      }
+      if (options?.greaterThanOrEqual != null) {
+        final greaterThanIndex = msgList.indexWhere(
+          (m) => m.id == options.greaterThanOrEqual,
+        );
+        if (greaterThanIndex != -1) {
+          msgList.removeRange(0, greaterThanIndex);
+        }
+      }
+      if (options?.limit != null) {
+        return msgList.take(options.limit).toList();
+      }
     }
     return msgList;
   }
@@ -123,24 +141,26 @@ class MessageDao extends DatabaseAccessor<MoorChatDatabase>
         .map(_messageFromJoinRow)
         .get());
 
-    if (messagePagination?.lessThan != null) {
-      final lessThanIndex = msgList.indexWhere(
-        (m) => m.id == messagePagination.lessThan,
-      );
-      if (lessThanIndex != -1) {
-        msgList.removeRange(lessThanIndex, msgList.length);
+    if (msgList.isNotEmpty) {
+      if (messagePagination?.lessThan != null) {
+        final lessThanIndex = msgList.indexWhere(
+          (m) => m.id == messagePagination.lessThan,
+        );
+        if (lessThanIndex != -1) {
+          msgList.removeRange(lessThanIndex, msgList.length);
+        }
       }
-    }
-    if (messagePagination?.greaterThanOrEqual != null) {
-      final greaterThanIndex = msgList.indexWhere(
-        (m) => m.id == messagePagination.greaterThanOrEqual,
-      );
-      if (greaterThanIndex != -1) {
-        msgList.removeRange(0, greaterThanIndex);
+      if (messagePagination?.greaterThanOrEqual != null) {
+        final greaterThanIndex = msgList.indexWhere(
+          (m) => m.id == messagePagination.greaterThanOrEqual,
+        );
+        if (greaterThanIndex != -1) {
+          msgList.removeRange(0, greaterThanIndex);
+        }
       }
-    }
-    if (messagePagination?.limit != null) {
-      return msgList.take(messagePagination.limit).toList();
+      if (messagePagination?.limit != null) {
+        return msgList.take(messagePagination.limit).toList();
+      }
     }
     return msgList;
   }

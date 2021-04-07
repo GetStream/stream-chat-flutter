@@ -100,10 +100,9 @@ abstract class ChatPersistenceClient {
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
-    List<String> cids,
-    // ignore: avoid_positional_boolean_parameters
-    bool clearQueryCache,
-  );
+    List<String> cids, {
+    bool clearQueryCache = false,
+  });
 
   /// Remove a message by [messageId]
   Future<void> deleteMessageById(String messageId) =>

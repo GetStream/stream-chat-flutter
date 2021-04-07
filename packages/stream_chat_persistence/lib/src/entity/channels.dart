@@ -1,3 +1,4 @@
+// coverage:ignore-file
 import 'package:moor/moor.dart';
 import 'package:stream_chat_persistence/src/converter/map_converter.dart';
 

@@ -185,21 +185,22 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         widget.message, StreamChannel.of(context).channel);
                   },
                 ),
-                ImageFooter(
-                  currentPage: _currentPage,
-                  totalPages: widget.mediaAttachments.length,
-                  mediaAttachments: widget.mediaAttachments,
-                  message: widget.message,
-                  mediaSelectedCallBack: (val) {
-                    setState(() {
-                      _currentPage = val;
-                      _pageController.animateToPage(val,
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut);
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
+                if (widget.message.type != 'ephemeral')
+                  ImageFooter(
+                    currentPage: _currentPage,
+                    totalPages: widget.mediaAttachments.length,
+                    mediaAttachments: widget.mediaAttachments,
+                    message: widget.message,
+                    mediaSelectedCallBack: (val) {
+                      setState(() {
+                        _currentPage = val;
+                        _pageController.animateToPage(val,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.easeInOut);
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
               ],
             ),
           ),
@@ -220,7 +221,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
         24) {
       return 'yesterday';
     } else {
-      return 'on ${Jiffy(dateTime).format("MMM do")}';
+      return 'on ${Jiffy(dateTime).MMMd}';
     }
   }
 

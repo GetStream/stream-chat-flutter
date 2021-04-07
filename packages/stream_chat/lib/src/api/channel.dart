@@ -146,7 +146,7 @@ class Channel {
 
   /// Channel extra data
   Map<String, dynamic> get extraData =>
-      state?._channelState?.channel?.extraData;
+      state?._channelState?.channel?.extraData ?? _extraData;
 
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>> get extraDataStream =>
@@ -1210,9 +1210,10 @@ class ChannelClientState {
     this._channel,
     ChannelState channelState,
     //ignore: unnecessary_parenthesis
-  ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) {
-          _channel?._client?.chatPersistenceClient?.updateChannelState(state);
-        }).debounced(const Duration(seconds: 1)) {
+  ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) =>
+                _channel?._client?.chatPersistenceClient
+                    ?.updateChannelState(state))
+            .debounced(const Duration(seconds: 1)) {
     retryQueue = RetryQueue(
       channel: _channel,
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
@@ -1597,7 +1598,7 @@ class ChannelClientState {
 
   bool _countMessageAsUnread(Message message) {
     final userId = _channel.client.state?.user?.id;
-    final userIsMuted = _channel.client.state.user.mutes.firstWhere(
+    final userIsMuted = _channel.client.state?.user?.mutes?.firstWhere(
           (m) => m.user?.id == message.user.id,
           orElse: () => null,
         ) !=

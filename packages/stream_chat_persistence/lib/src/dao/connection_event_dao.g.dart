@@ -9,5 +9,4 @@ part of 'connection_event_dao.dart';
 mixin _$ConnectionEventDaoMixin on DatabaseAccessor<MoorChatDatabase> {
   $ConnectionEventsTable get connectionEvents =>
       attachedDatabase.connectionEvents;
-  $UsersTable get users => attachedDatabase.users;
 }

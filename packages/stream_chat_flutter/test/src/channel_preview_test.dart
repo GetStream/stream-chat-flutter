@@ -69,7 +69,7 @@ void main() {
         ),
       ));
 
-      expect(find.text('22/06/2020'), findsOneWidget);
+      expect(find.text('6/22/2020'), findsOneWidget);
       expect(find.text('test name'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       expect(find.text('hello'), findsOneWidget);

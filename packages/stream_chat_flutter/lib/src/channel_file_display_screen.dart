@@ -143,7 +143,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
         }
 
         return LazyLoadScrollView(
-          onEndOfPage: () => messageSearchBloc.loadMore(
+          onEndOfPage: () => messageSearchBloc.search(
             filter: {
               'cid': {
                 r'$in': [StreamChannel.of(context).channel.cid]

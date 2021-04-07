@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-
-import 'stream_chat_core.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget dedicated to the management of a users list with pagination.
 ///
@@ -14,9 +14,12 @@ class UsersBloc extends StatefulWidget {
   /// Instantiate a new [UsersBloc]. The parameter [child] must be supplied and
   /// not null.
   const UsersBloc({
-    Key key,
     @required this.child,
-  })  : assert(child != null),
+    Key key,
+  })  : assert(
+            child != null,
+            'When constructing a UsersBloc, the parameter '
+            'child should not be null.'),
         super(key: key);
 
   /// The widget child
@@ -48,10 +51,9 @@ class UsersBlocState extends State<UsersBloc>
   /// The current users list as a stream
   Stream<List<User>> get usersStream => _usersController.stream;
 
-  final BehaviorSubject<List<User>> _usersController = BehaviorSubject();
+  final _usersController = BehaviorSubject<List<User>>();
 
-  final BehaviorSubject<bool> _queryUsersLoadingController =
-      BehaviorSubject.seeded(false);
+  final _queryUsersLoadingController = BehaviorSubject.seeded(false);
 
   /// The stream notifying the state of queryUsers call
   Stream<bool> get queryUsersLoading => _queryUsersLoadingController.stream;
@@ -67,11 +69,12 @@ class UsersBlocState extends State<UsersBloc>
   }) async {
     final client = StreamChatCore.of(context).client;
 
-    if (client.state?.user == null ||
-        _queryUsersLoadingController.value == true) {
-      return;
+    if (_queryUsersLoadingController.value == true) return;
+
+    if (_usersController.hasValue) {
+      _queryUsersLoadingController.add(true);
     }
-    _queryUsersLoadingController.add(true);
+
     try {
       final clear = pagination == null ||
           pagination.offset == null ||
@@ -92,10 +95,15 @@ class UsersBlocState extends State<UsersBloc>
         final temp = oldUsers + usersResponse.users;
         _usersController.add(temp);
       }
-
-      _queryUsersLoadingController.add(false);
-    } catch (err, stackTrace) {
-      _queryUsersLoadingController.addError(err, stackTrace);
+      if (_usersController.hasValue && _queryUsersLoadingController.value) {
+        _queryUsersLoadingController.add(false);
+      }
+    } catch (e, stk) {
+      if (_usersController.hasValue) {
+        _queryUsersLoadingController.addError(e, stk);
+      } else {
+        _usersController.addError(e, stk);
+      }
     }
   }
 
