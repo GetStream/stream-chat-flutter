@@ -12,9 +12,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  meta: ^1.2.4
   rxdart: ^0.25.0
   stream_chat: ^1.5.1
-  meta: ^1.2.4
 
 dev_dependencies:
   flutter_test:
