@@ -15,6 +15,7 @@ export 'src/full_screen_media.dart';
 export 'src/image_footer.dart';
 export 'src/image_header.dart';
 export 'src/info_tile.dart';
+export 'src/mention_tile.dart';
 export 'src/message_action.dart';
 export 'src/message_input.dart';
 export 'src/message_list_view.dart';

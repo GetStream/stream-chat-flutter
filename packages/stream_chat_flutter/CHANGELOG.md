@@ -1,3 +1,9 @@
+## 1.5.2
+
+- Fix accessibility text size overflows
+- Updated Giphy attachment ui
+- Minor fixes and improvements
+
 ## 1.5.1
 
 - Fixed unread count not updating while the chat is open

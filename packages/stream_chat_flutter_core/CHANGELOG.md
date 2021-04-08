@@ -1,3 +1,8 @@
+## 1.5.1
+
+* Improved test coverage to > 90%
+* Minor fixes and improvements
+
 ## 1.5.0
 
 * Minor fixes and improvements
