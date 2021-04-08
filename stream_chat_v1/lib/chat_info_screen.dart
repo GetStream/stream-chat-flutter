@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'channel_file_display_screen.dart';
+import 'channel_media_display_screen.dart';
 import 'main.dart';
 import 'routes/routes.dart';
 
