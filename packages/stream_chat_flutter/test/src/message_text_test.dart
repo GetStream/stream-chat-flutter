@@ -48,7 +48,6 @@ void main() {
         ),
       ));
 
-      // TODO: Add better test
       expect(find.byType(MarkdownBody), findsOneWidget);
     },
   );

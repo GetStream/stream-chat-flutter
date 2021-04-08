@@ -253,7 +253,7 @@ void main() {
   );
 
   testWidgets(
-    'shoBackButton: false should hide the StreamBackButton and '
+    'showBackButton: false should hide the StreamBackButton and '
     'showTypingIndicator: false should hide the typing indicator and '
     'showConnectionStateTile: false should be passed to the infotile',
     (WidgetTester tester) async {

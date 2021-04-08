@@ -151,12 +151,14 @@ class AttachmentActionsModal extends StatelessWidget {
                           channel.updateMessage(message.copyWith(
                             attachments: remainingAttachments,
                           ));
-                          Navigator.pop(context);
-                          Navigator.maybePop(context);
+                          Navigator.of(context)
+                            ..pop()
+                            ..maybePop();
                         } else {
                           channel.deleteMessage(message);
-                          Navigator.pop(context);
-                          Navigator.maybePop(context);
+                          Navigator.of(context)
+                            ..pop()
+                            ..maybePop();
                         }
                       },
                       color: theme.colorTheme.accentRed,
