@@ -643,11 +643,15 @@ class Channel {
 
     final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
     if (reactionCounts.containsKey(type)) {
-      reactionCounts.update(type, (value) => value - 1);
+      if (type != null) {
+        reactionCounts.update(type, (value) => value - 1);
+      }
     }
     final reactionScores = {...message.reactionScores ?? <String, int>{}};
     if (reactionScores.containsKey(type)) {
-      reactionScores.update(type, (value) => value - 1);
+      if (type != null) {
+        reactionScores.update(type, (value) => value - 1);
+      }
     }
 
     final latestReactions = [...message.latestReactions ?? <Reaction>[]]
