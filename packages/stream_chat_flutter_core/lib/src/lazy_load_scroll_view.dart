@@ -9,8 +9,8 @@ class LazyLoadScrollView extends StatefulWidget {
   /// Creates a new instance of [LazyLoadScrollView]. The parameter [child]
   /// must be supplied and not null.
   const LazyLoadScrollView({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.onStartOfPage,
     this.onEndOfPage,
     this.onPageScrollStart,
@@ -24,19 +24,19 @@ class LazyLoadScrollView extends StatefulWidget {
   final Widget child;
 
   /// Called when the [child] reaches the start of the list
-  final AsyncCallback onStartOfPage;
+  final AsyncCallback? onStartOfPage;
 
   /// Called when the [child] reaches the end of the list
-  final AsyncCallback onEndOfPage;
+  final AsyncCallback? onEndOfPage;
 
   /// Called when the list scrolling starts
-  final VoidCallback onPageScrollStart;
+  final VoidCallback? onPageScrollStart;
 
   /// Called when the list scrolling ends
-  final VoidCallback onPageScrollEnd;
+  final VoidCallback? onPageScrollEnd;
 
   /// Called every time the [child] is in-between the list
-  final VoidCallback onInBetweenOfPage;
+  final VoidCallback? onInBetweenOfPage;
 
   /// The offset to take into account when triggering [onEndOfPage]/[onStartOfPage] in pixels
   final double scrollOffset;
@@ -59,13 +59,13 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
   bool _onNotification(ScrollNotification notification) {
     if (notification is ScrollStartNotification) {
       if (widget.onPageScrollStart != null) {
-        widget.onPageScrollStart();
+        widget.onPageScrollStart!();
         return true;
       }
     }
     if (notification is ScrollEndNotification) {
       if (widget.onPageScrollEnd != null) {
-        widget.onPageScrollEnd();
+        widget.onPageScrollEnd!();
         return true;
       }
     }
@@ -78,7 +78,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
       if (pixels > (minScrollExtent + scrollOffset) &&
           pixels < (maxScrollExtent - scrollOffset)) {
         if (widget.onInBetweenOfPage != null) {
-          widget.onInBetweenOfPage();
+          widget.onInBetweenOfPage!();
           return true;
         }
       }
@@ -117,7 +117,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
     if (_loadMoreStatus != null && _loadMoreStatus == _LoadingStatus.stable) {
       if (widget.onEndOfPage != null) {
         _loadMoreStatus = _LoadingStatus.loading;
-        widget.onEndOfPage().whenComplete(() {
+        widget.onEndOfPage!().whenComplete(() {
           _loadMoreStatus = _LoadingStatus.stable;
         });
       }
@@ -128,7 +128,7 @@ class _LazyLoadScrollViewState extends State<LazyLoadScrollView> {
     if (_loadMoreStatus != null && _loadMoreStatus == _LoadingStatus.stable) {
       if (widget.onStartOfPage != null) {
         _loadMoreStatus = _LoadingStatus.loading;
-        widget.onStartOfPage().whenComplete(() {
+        widget.onStartOfPage!().whenComplete(() {
           _loadMoreStatus = _LoadingStatus.stable;
         });
       }

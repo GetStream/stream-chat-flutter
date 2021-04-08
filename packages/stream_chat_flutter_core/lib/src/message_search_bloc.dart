@@ -13,9 +13,9 @@ import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 class MessageSearchBloc extends StatefulWidget {
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
-    Key key,
-    @required this.child,
-  })  : assert(child != null, 'Parameter child should not be null.'),
+    Key? key,
+    required this.child,
+  })   : assert(child != null, 'Parameter child should not be null.'),
         super(key: key);
 
   /// The widget child
@@ -26,7 +26,7 @@ class MessageSearchBloc extends StatefulWidget {
 
   /// Use this method to get the current [MessageSearchBlocState] instance
   static MessageSearchBlocState of(BuildContext context) {
-    MessageSearchBlocState state;
+    MessageSearchBlocState? state;
 
     state = context.findAncestorStateOfType<MessageSearchBlocState>();
 
@@ -42,7 +42,7 @@ class MessageSearchBloc extends StatefulWidget {
 class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
   /// The current messages list
-  List<GetMessageResponse> get messageResponses => _messageResponses.value;
+  List<GetMessageResponse>? get messageResponses => _messageResponses.value;
 
   /// The current messages list as a stream
   Stream<List<GetMessageResponse>> get messagesStream =>
@@ -59,11 +59,11 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   /// Calls [StreamChatClient.search] updating
   /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
-    Map<String, dynamic> filter,
-    Map<String, dynamic> messageFilter,
-    List<SortOption> sort,
-    String query,
-    PaginationParams pagination,
+    Map<String, dynamic>? filter,
+    Map<String, dynamic>? messageFilter,
+    List<SortOption>? sort,
+    String? query,
+    PaginationParams? pagination,
   }) async {
     final client = StreamChatCore.of(context).client;
 
@@ -80,11 +80,11 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
       final messages = await client.search(
-        filter,
-        sort: sort,
-        query: query,
-        paginationParams: pagination,
-        messageFilters: messageFilter,
+        filter!,
+        sort: sort!,
+        query: query!,
+        paginationParams: pagination!,
+        messageFilters: messageFilter!,
       );
 
       if (clear) {
@@ -93,7 +93,8 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         final temp = oldMessages + messages.results;
         _messageResponses.add(temp);
       }
-      if (_messageResponses.hasValue && _queryMessagesLoadingController.value) {
+      if (_messageResponses.hasValue &&
+          _queryMessagesLoadingController.value!) {
         _queryMessagesLoadingController.add(false);
       }
     } catch (e, stk) {

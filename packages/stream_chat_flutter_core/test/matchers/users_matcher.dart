@@ -6,7 +6,7 @@ Matcher isSameUserAs(User targetUser) => _IsSameUserAs(targetUser: targetUser);
 
 class _IsSameUserAs extends Matcher {
   const _IsSameUserAs({
-    @required this.targetUser,
+    required this.targetUser,
   }) : assert(targetUser != null, '');
 
   final User targetUser;
@@ -24,7 +24,7 @@ Matcher isSameUserListAs(List<User> targetUserList) =>
 
 class _IsSameUserListAs extends Matcher {
   const _IsSameUserListAs({
-    @required this.targetUserList,
+    required this.targetUserList,
   }) : assert(targetUserList != null, '');
 
   final List<User> targetUserList;

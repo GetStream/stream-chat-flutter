@@ -20,8 +20,8 @@ class ChannelsBloc extends StatefulWidget {
   /// Creates a new [ChannelsBloc]. The parameter [child] must be supplied and
   /// not null.
   const ChannelsBloc({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.lockChannelsOrder = false,
     this.channelsComparator,
     this.shouldAddChannel,
@@ -36,18 +36,18 @@ class ChannelsBloc extends StatefulWidget {
   final bool lockChannelsOrder;
 
   /// Comparator used to sort the channels when a message.new event is received
-  final Comparator<Channel> channelsComparator;
+  final Comparator<Channel?>? channelsComparator;
 
   /// Function used to evaluate if a channel should be added to the list when a
   /// message.new event is received
-  final bool Function(Event) shouldAddChannel;
+  final bool Function(Event)? shouldAddChannel;
 
   @override
   ChannelsBlocState createState() => ChannelsBlocState();
 
   /// Use this method to get the current [ChannelsBlocState] instance
   static ChannelsBlocState of(BuildContext context) {
-    ChannelsBlocState streamChatState;
+    ChannelsBlocState? streamChatState;
 
     streamChatState = context.findAncestorStateOfType<ChannelsBlocState>();
 
@@ -69,14 +69,15 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }
 
   /// The current channel list
-  List<Channel> get channels => _channelsController.value;
+  List<Channel>? get channels => _channelsController.value as List<Channel>?;
 
   /// The current channel list as a stream
-  Stream<List<Channel>> get channelsStream => _channelsController.stream;
+  Stream<List<Channel?>> get channelsStream => _channelsController.stream;
 
   final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
-  final _channelsController = BehaviorSubject<List<Channel>>();
+  final BehaviorSubject<List<Channel?>> _channelsController =
+      BehaviorSubject<List<Channel>>();
 
   /// The stream notifying the state of queryChannel call
   Stream<bool> get queryChannelsLoading =>
@@ -88,10 +89,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
-    Map<String, dynamic> filter,
-    List<SortOption<ChannelModel>> sortOptions,
-    PaginationParams paginationParams,
-    Map<String, dynamic> options,
+    Map<String, dynamic>? filter,
+    List<SortOption<ChannelModel>>? sortOptions,
+    PaginationParams? paginationParams,
+    Map<String, dynamic>? options,
   }) async {
     final client = StreamChatCore.of(context).client;
 
@@ -110,10 +111,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
       final oldChannels = List<Channel>.from(channels ?? []);
       var newChannels = <Channel>[];
       await for (final channels in client.queryChannels(
-        filter: filter,
-        sort: sortOptions,
-        options: options,
-        paginationParams: paginationParams,
+        filter: filter!,
+        sort: sortOptions!,
+        options: options!,
+        paginationParams: paginationParams!,
       )) {
         newChannels = channels;
         if (clear) {
@@ -123,7 +124,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           _channelsController.add(temp);
         }
         if (_channelsController.hasValue &&
-            _queryChannelsLoadingController.value) {
+            _queryChannelsLoadingController.value!) {
           _queryChannelsLoadingController.sink.add(false);
         }
       }
@@ -149,8 +150,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
     if (!widget.lockChannelsOrder) {
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {
-        final newChannels = List<Channel>.from(channels ?? []);
-        final index = newChannels.indexWhere((c) => c.cid == e.cid);
+        final newChannels = List<Channel?>.from(channels ?? []);
+        final index = newChannels.indexWhere((c) => c!.cid == e.cid);
         if (index != -1) {
           if (index > 0) {
             final channel = newChannels.removeAt(index);

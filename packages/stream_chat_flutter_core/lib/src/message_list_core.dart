@@ -61,11 +61,11 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 class MessageListCore extends StatefulWidget {
   /// Instantiate a new [MessageListView].
   const MessageListCore({
-    Key key,
-    @required this.loadingBuilder,
-    @required this.emptyBuilder,
-    @required this.messageListBuilder,
-    @required this.errorWidgetBuilder,
+    Key? key,
+    required this.loadingBuilder,
+    required this.emptyBuilder,
+    required this.messageListBuilder,
+    required this.errorWidgetBuilder,
     this.showScrollToBottom = true,
     this.parentMessage,
     this.messageListController,
@@ -84,7 +84,7 @@ class MessageListCore extends StatefulWidget {
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.
-  final MessageListController messageListController;
+  final MessageListController? messageListController;
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>) messageListBuilder;
@@ -108,10 +108,10 @@ class MessageListCore extends StatefulWidget {
 
   /// If the current message belongs to a `thread`, this property represents the
   /// first message or the parent of the conversation.
-  final Message parentMessage;
+  final Message? parentMessage;
 
   /// Predicate used to filter messages
-  final bool Function(Message) messageFilter;
+  final bool Function(Message)? messageFilter;
 
   @override
   MessageListCoreState createState() => MessageListCoreState();
@@ -119,7 +119,7 @@ class MessageListCore extends StatefulWidget {
 
 /// The current state of the [MessageListCore].
 class MessageListCoreState extends State<MessageListCore> {
-  StreamChannelState _streamChannel;
+  late StreamChannelState _streamChannel;
 
   bool get _upToDate => _streamChannel.channel.state.isUpToDate;
 
@@ -133,8 +133,8 @@ class MessageListCoreState extends State<MessageListCore> {
   Widget build(BuildContext context) {
     final messagesStream = _isThreadConversation
         ? _streamChannel.channel.state.threadsStream
-            .where((threads) => threads.containsKey(widget.parentMessage.id))
-            .map((threads) => threads[widget.parentMessage.id])
+            .where((threads) => threads.containsKey(widget.parentMessage!.id))
+            .map((threads) => threads[widget.parentMessage!.id])
         : _streamChannel.channel.state?.messagesStream;
 
     bool defaultFilter(Message m) {
@@ -144,7 +144,7 @@ class MessageListCoreState extends State<MessageListCore> {
       return true;
     }
 
-    return StreamBuilder<List<Message>>(
+    return StreamBuilder<List<Message>?>(
       stream: messagesStream?.map((messages) =>
           messages?.where(widget.messageFilter ?? defaultFilter)?.toList()),
       builder: (context, snapshot) {
@@ -171,11 +171,11 @@ class MessageListCoreState extends State<MessageListCore> {
   ///
   /// Optionally pass the fetch direction, defaults to [QueryDirection.bottom]
   Future<void> paginateData(
-      {QueryDirection direction = QueryDirection.bottom}) {
+      {QueryDirection? direction = QueryDirection.bottom}) {
     if (!_isThreadConversation) {
       return _streamChannel.queryMessages(direction: direction);
     } else {
-      return _streamChannel.getReplies(widget.parentMessage.id);
+      return _streamChannel.getReplies(widget.parentMessage!.id);
     }
   }
 
@@ -184,11 +184,11 @@ class MessageListCoreState extends State<MessageListCore> {
     _streamChannel = StreamChannel.of(context);
 
     if (_isThreadConversation) {
-      _streamChannel.getReplies(widget.parentMessage.id);
+      _streamChannel.getReplies(widget.parentMessage!.id);
     }
 
     if (widget.messageListController != null) {
-      widget.messageListController.paginateData = paginateData;
+      widget.messageListController!.paginateData = paginateData;
     }
 
     super.initState();
@@ -206,5 +206,5 @@ class MessageListCoreState extends State<MessageListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageListController {
   /// Call this function to load further data
-  Future<void> Function({QueryDirection direction}) paginateData;
+  Future<void> Function({QueryDirection? direction})? paginateData;
 }

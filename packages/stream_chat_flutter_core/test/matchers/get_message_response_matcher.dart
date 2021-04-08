@@ -7,7 +7,7 @@ Matcher isSameMessageResponseAs(GetMessageResponse targetResponse) =>
 
 class _IsSameMessageResponseAs extends Matcher {
   const _IsSameMessageResponseAs({
-    @required this.targetResponse,
+    required this.targetResponse,
   }) : assert(targetResponse != null, '');
 
   final GetMessageResponse targetResponse;
@@ -28,7 +28,7 @@ Matcher isSameMessageResponseListAs(
 
 class _IsSameMessageResponseListAs extends Matcher {
   const _IsSameMessageResponseListAs({
-    @required this.targetResponseList,
+    required this.targetResponseList,
   }) : assert(targetResponseList != null, '');
 
   final List<GetMessageResponse> targetResponseList;

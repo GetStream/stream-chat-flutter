@@ -57,11 +57,11 @@ import 'package:stream_chat_flutter_core/src/users_bloc.dart';
 class UserListCore extends StatefulWidget {
   /// Instantiate a new [UserListCore]
   const UserListCore({
-    @required this.errorBuilder,
-    @required this.emptyBuilder,
-    @required this.loadingBuilder,
-    @required this.listBuilder,
-    Key key,
+    required this.errorBuilder,
+    required this.emptyBuilder,
+    required this.loadingBuilder,
+    required this.listBuilder,
+    Key? key,
     this.filter,
     this.options,
     this.sort,
@@ -77,10 +77,10 @@ class UserListCore extends StatefulWidget {
   /// A [UserListController] allows reloading and pagination.
   /// Use [UserListController.loadData] and [UserListController.paginateData]
   /// respectively for reloading and pagination.
-  final UserListController userListController;
+  final UserListController? userListController;
 
   /// The builder that will be used in case of error
-  final Widget Function(Object error) errorBuilder;
+  final Widget Function(Object? error) errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
@@ -94,25 +94,25 @@ class UserListCore extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic> filter;
+  final Map<String, dynamic>? filter;
 
   /// Query channels options.
   ///
   /// state: if true returns the Channel state
   /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic> options;
+  final Map<String, dynamic>? options;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
   /// provided. You can sort based on last_updated, last_message_at, updated_at,
   /// created_at or member_count. Direction can be ascending or descending.
-  final List<SortOption> sort;
+  final List<SortOption>? sort;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  final PaginationParams? pagination;
 
   /// Set it to true to group users by their first character
   ///
@@ -131,8 +131,8 @@ class UserListCoreState extends State<UserListCore>
     super.didChangeDependencies();
     loadData();
     if (widget.userListController != null) {
-      widget.userListController.loadData = loadData;
-      widget.userListController.paginateData = paginateData;
+      widget.userListController!.loadData = loadData;
+      widget.userListController!.paginateData = paginateData;
     }
   }
 
@@ -158,14 +158,14 @@ class UserListCoreState extends State<UserListCore>
             }
             final groupedUsers = <String, List<User>>{};
             for (final e in temp) {
-              final alphabet = e.name[0]?.toUpperCase();
+              final alphabet = e.name[0].toUpperCase();
               groupedUsers[alphabet] = [...groupedUsers[alphabet] ?? [], e];
             }
             final items = <ListItem>[];
             for (final key in groupedUsers.keys) {
               items
                 ..add(ListHeaderItem(key))
-                ..addAll(groupedUsers[key].map((e) => ListUserItem(e)));
+                ..addAll(groupedUsers[key]!.map((e) => ListUserItem(e)));
             }
             return items;
           }
@@ -185,7 +185,7 @@ class UserListCoreState extends State<UserListCore>
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
           }
-          final items = snapshot.data;
+          final items = snapshot.data!;
           if (items.isEmpty) {
             return widget.emptyBuilder(context);
           }
@@ -210,7 +210,7 @@ class UserListCoreState extends State<UserListCore>
     return _usersBloc.queryUsers(
       filter: widget.filter,
       sort: widget.sort,
-      pagination: widget.pagination.copyWith(
+      pagination: widget.pagination!.copyWith(
         offset: _usersBloc.users?.length ?? 0,
       ),
       options: widget.options,
@@ -235,7 +235,7 @@ class UserListCoreState extends State<UserListCore>
 /// with `USER`.
 abstract class ListItem {
   /// Unique key per list item
-  String get key {
+  String? get key {
     if (this is ListHeaderItem) {
       final header = (this as ListHeaderItem).heading;
       return 'HEADER-${header.toLowerCase()}';
@@ -250,8 +250,8 @@ abstract class ListItem {
   /// Helper function to build widget based on ListItem type
   // ignore: missing_return
   Widget when({
-    @required Widget Function(String heading) headerItem,
-    @required Widget Function(User user) userItem,
+    required Widget Function(String heading) headerItem,
+    required Widget Function(User user) userItem,
   }) {
     if (this is ListHeaderItem) {
       return headerItem((this as ListHeaderItem).heading);
@@ -259,6 +259,7 @@ abstract class ListItem {
     if (this is ListUserItem) {
       return userItem((this as ListUserItem).user);
     }
+    return Container();
   }
 }
 
@@ -283,8 +284,8 @@ class ListUserItem extends ListItem {
 /// Controller used for paginating data in [ChannelListView]
 class UserListController {
   /// Call this function to reload data
-  AsyncCallback loadData;
+  AsyncCallback? loadData;
 
   /// Call this function to load further data
-  AsyncCallback paginateData;
+  AsyncCallback? paginateData;
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -21,9 +22,9 @@ class StreamChannel extends StatefulWidget {
   /// Creates a new instance of [StreamChannel]. Both [child] and [client] must
   /// be supplied and not null.
   const StreamChannel({
-    Key key,
-    @required this.child,
-    @required this.channel,
+    Key? key,
+    required this.child,
+    required this.channel,
     this.showLoading = true,
     this.initialMessageId,
   })  : assert(child != null, 'Child should not be null'),
@@ -40,11 +41,11 @@ class StreamChannel extends StatefulWidget {
   final bool showLoading;
 
   /// If passed the channel will load from this particular message.
-  final String initialMessageId;
+  final String? initialMessageId;
 
   /// Use this method to get the current [StreamChannelState] instance
   static StreamChannelState of(BuildContext context) {
-    StreamChannelState streamChannelState;
+    StreamChannelState? streamChannelState;
 
     streamChannelState = context.findAncestorStateOfType<StreamChannelState>();
 
@@ -67,7 +68,7 @@ class StreamChannelState extends State<StreamChannel> {
   Channel get channel => widget.channel;
 
   /// InitialMessageId
-  String get initialMessageId => widget.initialMessageId;
+  String? get initialMessageId => widget.initialMessageId;
 
   /// Current channel state stream
   Stream<ChannelState> get channelStateStream =>
@@ -146,7 +147,7 @@ class StreamChannelState extends State<StreamChannel> {
   }
 
   /// Calls [channel.query] updating [queryMessage] stream
-  Future<void> queryMessages({QueryDirection direction = QueryDirection.top}) {
+  Future<void> queryMessages({QueryDirection? direction = QueryDirection.top}) {
     if (direction == QueryDirection.top) return _queryTopMessages();
     return _queryBottomMessages();
   }
@@ -157,12 +158,12 @@ class StreamChannelState extends State<StreamChannel> {
     int limit = 50,
     bool preferOffline = false,
   }) async {
-    if (_topPaginationEnded || _queryTopMessagesController.value) return;
+    if (_topPaginationEnded || _queryTopMessagesController.value!) return;
     _queryTopMessagesController.add(true);
 
-    Message message;
+    late Message message;
     if (channel.state.threads.containsKey(parentId)) {
-      final thread = channel.state.threads[parentId];
+      final thread = channel.state.threads[parentId]!;
       if (thread.isNotEmpty) {
         message = thread.first;
       }
@@ -202,7 +203,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Loads channel at specific message
   Future<void> loadChannelAtMessage(
-    String messageId, {
+    String? messageId, {
     int before = 20,
     int after = 20,
     bool preferOffline = false,
@@ -214,13 +215,13 @@ class StreamChannelState extends State<StreamChannel> {
         preferOffline: preferOffline,
       );
 
-  Future<void> _queryAtMessage({
-    String messageId,
+  Future<List<ChannelState>> _queryAtMessage({
+    String? messageId,
     int before = 20,
     int after = 20,
     bool preferOffline = false,
   }) async {
-    if (channel.state == null) return;
+    if (channel.state == null) return [];
     channel.state.isUpToDate = false;
     channel.state.truncate();
 
@@ -232,7 +233,7 @@ class StreamChannelState extends State<StreamChannel> {
         preferOffline: preferOffline,
       );
       channel.state.isUpToDate = true;
-      return;
+      return [];
     }
 
     return Future.wait([
@@ -284,9 +285,8 @@ class StreamChannelState extends State<StreamChannel> {
 
   ///
   Future<Message> getMessage(String messageId) async {
-    var message = channel.state.messages.firstWhere(
+    var message = channel.state.messages.firstWhereOrNull(
       (it) => it.id == messageId,
-      orElse: () => null,
     );
     if (message == null) {
       final response = await channel.getMessagesById([messageId]);
@@ -298,7 +298,7 @@ class StreamChannelState extends State<StreamChannel> {
   /// Reloads the channel with latest message
   Future<void> reloadChannel() => _queryAtMessage(before: 30);
 
-  List<Future<bool>> _futures;
+  late List<Future<bool>> _futures;
 
   Future<bool> get _loadChannelAtMessage async {
     try {
@@ -358,9 +358,9 @@ class StreamChannelState extends State<StreamChannel> {
           }
           return Center(child: Text(message));
         }
-        final initialized = snapshot.data[0];
+        final initialized = snapshot.data![0];
         // ignore: avoid_bool_literals_in_conditional_expressions
-        final dataLoaded = initialMessageId == null ? true : snapshot.data[1];
+        final dataLoaded = initialMessageId == null ? true : snapshot.data![1];
         if (widget.showLoading && (!initialized || !dataLoaded)) {
           return const Center(
             child: CircularProgressIndicator(),

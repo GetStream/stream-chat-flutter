@@ -42,11 +42,11 @@ class MessageSearchListCore extends StatefulWidget {
   /// * [loadingBuilder]
   /// * [childBuilder]
   const MessageSearchListCore({
-    Key key,
-    @required this.emptyBuilder,
-    @required this.errorBuilder,
-    @required this.loadingBuilder,
-    @required this.childBuilder,
+    Key? key,
+    required this.emptyBuilder,
+    required this.errorBuilder,
+    required this.loadingBuilder,
+    required this.childBuilder,
     this.messageQuery,
     this.filters,
     this.sortOptions,
@@ -63,36 +63,36 @@ class MessageSearchListCore extends StatefulWidget {
   /// Use [MessageSearchListController.loadData] and
   /// [MessageSearchListController.paginateData] respectively for reloading and
   /// pagination.
-  final MessageSearchListController messageSearchListController;
+  final MessageSearchListController? messageSearchListController;
 
   /// Message String to search on
-  final String messageQuery;
+  final String? messageQuery;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic> filters;
+  final Map<String, dynamic>? filters;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
   /// provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_
   /// at or member_count. Direction can be ascending or descending.
-  final List<SortOption> sortOptions;
+  final List<SortOption>? sortOptions;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams paginationParams;
+  final PaginationParams? paginationParams;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic> messageFilters;
+  final Map<String, dynamic>? messageFilters;
 
   /// The builder that is used when the search messages are fetched
-  final Widget Function(List<GetMessageResponse>) childBuilder;
+  final Widget Function(List<GetMessageResponse>?) childBuilder;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -114,8 +114,8 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
     super.didChangeDependencies();
     loadData();
     if (widget.messageSearchListController != null) {
-      widget.messageSearchListController.loadData = loadData;
-      widget.messageSearchListController.paginateData = paginateData;
+      widget.messageSearchListController!.loadData = loadData;
+      widget.messageSearchListController!.paginateData = paginateData;
     }
   }
 
@@ -135,7 +135,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
           }
-          final items = snapshot.data;
+          final items = snapshot.data!;
           if (items.isEmpty) {
             return widget.emptyBuilder(context);
           }
@@ -161,7 +161,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
     return messageSearchBloc.search(
       filter: widget.filters,
       sort: widget.sortOptions,
-      pagination: widget.paginationParams.copyWith(
+      pagination: widget.paginationParams!.copyWith(
         offset: messageSearchBloc.messageResponses?.length ?? 0,
       ),
       query: widget.messageQuery,
@@ -187,8 +187,8 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageSearchListController {
   /// Call this function to reload data
-  AsyncCallback loadData;
+  AsyncCallback? loadData;
 
   /// Call this function to load further data
-  AsyncCallback paginateData;
+  AsyncCallback? paginateData;
 }

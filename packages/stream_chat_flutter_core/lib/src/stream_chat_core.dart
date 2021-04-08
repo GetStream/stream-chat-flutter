@@ -38,9 +38,9 @@ class StreamChatCore extends StatefulWidget {
   /// [StreamChatCore] is a stateful widget which reacts to system events and
   /// updates Stream's connection status accordingly.
   const StreamChatCore({
-    Key key,
-    @required this.client,
-    @required this.child,
+    Key? key,
+    required this.client,
+    required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
   })  : assert(client != null, 'Stream Chat Client should not be null'),
@@ -61,14 +61,14 @@ class StreamChatCore extends StatefulWidget {
   /// Handler called whenever the [client] receives a new [Event] while the app
   /// is in background. Can be used to display various notifications depending
   /// upon the [Event.type]
-  final EventHandler onBackgroundEventReceived;
+  final EventHandler? onBackgroundEventReceived;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
 
   /// Use this method to get the current [StreamChatCoreState] instance
   static StreamChatCoreState of(BuildContext context) {
-    StreamChatCoreState streamChatState;
+    StreamChatCoreState? streamChatState;
 
     streamChatState = context.findAncestorStateOfType<StreamChatCoreState>();
 
@@ -87,24 +87,24 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// Initialized client used throughout the application.
   StreamChatClient get client => widget.client;
 
-  Timer _disconnectTimer;
+  Timer? _disconnectTimer;
 
   @override
   Widget build(BuildContext context) => widget.child;
 
   /// The current user
-  User get user => client.state?.user;
+  User? get user => client.state?.user;
 
   /// The current user as a stream
-  Stream<User> get userStream => client.state?.userStream;
+  Stream<User>? get userStream => client.state?.userStream;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
-  StreamSubscription _eventSubscription;
+  StreamSubscription? _eventSubscription;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -119,15 +119,15 @@ class StreamChatCoreState extends State<StreamChatCore>
             );
 
         void onTimerComplete() {
-          _eventSubscription.cancel();
+          _eventSubscription!.cancel();
           client.disconnect();
         }
 
         _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
       } else if (state == AppLifecycleState.resumed) {
         if (_disconnectTimer?.isActive == true) {
-          _eventSubscription.cancel();
-          _disconnectTimer.cancel();
+          _eventSubscription!.cancel();
+          _disconnectTimer!.cancel();
         } else {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
             client.connect();
@@ -139,7 +139,7 @@ class StreamChatCoreState extends State<StreamChatCore>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
     super.dispose();

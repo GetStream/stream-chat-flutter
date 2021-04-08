@@ -14,8 +14,8 @@ class UsersBloc extends StatefulWidget {
   /// Instantiate a new [UsersBloc]. The parameter [child] must be supplied and
   /// not null.
   const UsersBloc({
-    @required this.child,
-    Key key,
+    required this.child,
+    Key? key,
   })  : assert(
             child != null,
             'When constructing a UsersBloc, the parameter '
@@ -30,7 +30,7 @@ class UsersBloc extends StatefulWidget {
 
   /// Use this method to get the current [UsersBlocState] instance
   static UsersBlocState of(BuildContext context) {
-    UsersBlocState state;
+    UsersBlocState? state;
 
     state = context.findAncestorStateOfType<UsersBlocState>();
 
@@ -46,7 +46,7 @@ class UsersBloc extends StatefulWidget {
 class UsersBlocState extends State<UsersBloc>
     with AutomaticKeepAliveClientMixin {
   /// The current users list
-  List<User> get users => _usersController.value;
+  List<User>? get users => _usersController.value;
 
   /// The current users list as a stream
   Stream<List<User>> get usersStream => _usersController.stream;
@@ -62,10 +62,10 @@ class UsersBlocState extends State<UsersBloc>
   /// online/offline.
   /// [API Reference](https://getstream.io/chat/docs/flutter-dart/query_users/?language=dart)
   Future<void> queryUsers({
-    Map<String, dynamic> filter,
-    List<SortOption> sort,
-    Map<String, dynamic> options,
-    PaginationParams pagination,
+    Map<String, dynamic>? filter,
+    List<SortOption>? sort,
+    Map<String, dynamic>? options,
+    PaginationParams? pagination,
   }) async {
     final client = StreamChatCore.of(context).client;
 
@@ -83,10 +83,10 @@ class UsersBlocState extends State<UsersBloc>
       final oldUsers = List<User>.from(users ?? []);
 
       final usersResponse = await client.queryUsers(
-        filter: filter,
-        sort: sort,
-        options: options,
-        pagination: pagination,
+        filter: filter!,
+        sort: sort!,
+        options: options!,
+        pagination: pagination!,
       );
 
       if (clear) {
@@ -95,7 +95,7 @@ class UsersBlocState extends State<UsersBloc>
         final temp = oldUsers + usersResponse.users;
         _usersController.add(temp);
       }
-      if (_usersController.hasValue && _queryUsersLoadingController.value) {
+      if (_usersController.hasValue && _queryUsersLoadingController.value!) {
         _queryUsersLoadingController.add(false);
       }
     } catch (e, stk) {
