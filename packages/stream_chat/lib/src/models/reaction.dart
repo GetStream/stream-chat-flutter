@@ -13,39 +13,39 @@ class Reaction {
     this.createdAt,
     this.type,
     this.user,
-    String userId,
+    String? userId,
     this.score,
     this.extraData,
   }) : userId = userId ?? user?.id;
 
   /// Create a new instance from a json
-  factory Reaction.fromJson(Map<String, dynamic> json) => _$ReactionFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+  factory Reaction.fromJson(Map<String, dynamic>? json) => _$ReactionFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
 
   /// The messageId to which the reaction belongs
-  final String messageId;
+  final String? messageId;
 
   /// The type of the reaction
-  final String type;
+  final String? type;
 
   /// The date of the reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// The user that sent the reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User user;
+  final User? user;
 
   /// The score of the reaction (ie. number of reactions sent)
-  final int score;
+  final int? score;
 
   /// The userId that sent the reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String userId;
+  final String? userId;
 
   /// Reaction custom extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  final Map<String, dynamic>? extraData;
 
   /// Map of custom user extraData
   static const topLevelFields = [
@@ -63,13 +63,13 @@ class Reaction {
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({
-    String messageId,
-    DateTime createdAt,
-    String type,
-    User user,
-    String userId,
-    int score,
-    Map<String, dynamic> extraData,
+    String? messageId,
+    DateTime? createdAt,
+    String? type,
+    User? user,
+    String? userId,
+    int? score,
+    Map<String, dynamic>? extraData,
   }) =>
       Reaction(
         messageId: messageId ?? this.messageId,

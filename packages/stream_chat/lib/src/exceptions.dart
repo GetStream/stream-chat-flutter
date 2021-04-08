@@ -4,25 +4,25 @@ import 'dart:convert';
 class ApiError extends Error {
   /// Creates a new ApiError instance using the response body and status code
   ApiError(this.body, this.status) : jsonData = _decode(body) {
-    if (jsonData != null && jsonData.containsKey('code')) {
-      _code = jsonData['code'];
+    if (jsonData != null && jsonData!.containsKey('code')) {
+      _code = jsonData!['code'];
     }
   }
 
   /// Raw body of the response
-  final String body;
+  final String? body;
 
   /// Json parsed body
-  final Map<String, dynamic> jsonData;
+  final Map<String, dynamic>? jsonData;
 
   /// Http status code of the response
-  final int status;
+  final int? status;
 
   /// Stream specific error code
-  int get code => _code;
-  int _code;
+  int? get code => _code;
+  int? _code;
 
-  static Map<String, dynamic> _decode(String body) {
+  static Map<String, dynamic>? _decode(String? body) {
     try {
       if (body == null) {
         return null;

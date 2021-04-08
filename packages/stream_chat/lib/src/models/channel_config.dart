@@ -30,52 +30,52 @@ class ChannelConfig {
       _$ChannelConfigFromJson(json);
 
   /// Moderation configuration
-  final String automod;
+  final String? automod;
 
   /// List of available commands
-  final List<Command> commands;
+  final List<Command>? commands;
 
   /// True if the channel should send connect events
-  final bool connectEvents;
+  final bool? connectEvents;
 
   /// Date of channel creation
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// Date of last channel update
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   /// Max channel message length
-  final int maxMessageLength;
+  final int? maxMessageLength;
 
   /// Duration of message retention
-  final String messageRetention;
+  final String? messageRetention;
 
   /// True if users can be muted
-  final bool mutes;
+  final bool? mutes;
 
   /// Name of the channel
-  final String name;
+  final String? name;
 
   /// True if reaction are active for this channel
-  final bool reactions;
+  final bool? reactions;
 
   /// True if readEvents are active for this channel
-  final bool readEvents;
+  final bool? readEvents;
 
   /// True if reply message are active for this channel
-  final bool replies;
+  final bool? replies;
 
   /// True if it's possible to perform a search in this channel
-  final bool search;
+  final bool? search;
 
   /// True if typing events should be sent for this channel
-  final bool typingEvents;
+  final bool? typingEvents;
 
   /// True if it's possible to upload files to this channel
-  final bool uploads;
+  final bool? uploads;
 
   /// True if urls appears as attachments
-  final bool urlEnrichment;
+  final bool? urlEnrichment;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);

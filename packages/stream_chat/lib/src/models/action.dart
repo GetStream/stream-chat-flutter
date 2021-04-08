@@ -12,19 +12,19 @@ class Action {
   factory Action.fromJson(Map<String, dynamic> json) => _$ActionFromJson(json);
 
   /// The name of the action
-  final String name;
+  final String? name;
 
   /// The style of the action
-  final String style;
+  final String? style;
 
   /// The test of the action
-  final String text;
+  final String? text;
 
   /// The type of the action
-  final String type;
+  final String? type;
 
   /// The value of the action
-  final String value;
+  final String? value;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ActionToJson(this);

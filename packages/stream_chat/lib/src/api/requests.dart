@@ -34,7 +34,7 @@ class SortOption<T> {
 
   /// Sorting field Comparator required for offline sorting
   @JsonKey(ignore: true)
-  final Comparator<T> comparator;
+  final Comparator<T>? comparator;
 
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
@@ -70,31 +70,31 @@ class PaginationParams {
 
   /// Filter on ids greater than the given value.
   @JsonKey(name: 'id_gt')
-  final String greaterThan;
+  final String? greaterThan;
 
   /// Filter on ids greater than or equal to the given value.
   @JsonKey(name: 'id_gte')
-  final String greaterThanOrEqual;
+  final String? greaterThanOrEqual;
 
   /// Filter on ids smaller than the given value.
   @JsonKey(name: 'id_lt')
-  final String lessThan;
+  final String? lessThan;
 
   /// Filter on ids smaller than or equal to the given value.
   @JsonKey(name: 'id_lte')
-  final String lessThanOrEqual;
+  final String? lessThanOrEqual;
 
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$PaginationParamsToJson(this);
 
   /// Creates a copy of [PaginationParams] with specified attributes overridden.
   PaginationParams copyWith({
-    int limit,
-    int offset,
-    String greaterThan,
-    String greaterThanOrEqual,
-    String lessThan,
-    String lessThanOrEqual,
+    int? limit,
+    int? offset,
+    String? greaterThan,
+    String? greaterThanOrEqual,
+    String? lessThan,
+    String? lessThanOrEqual,
   }) =>
       PaginationParams(
         limit: limit ?? this.limit,

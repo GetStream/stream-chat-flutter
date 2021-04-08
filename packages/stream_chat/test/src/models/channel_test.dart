@@ -20,8 +20,8 @@ void main() {
       expect(channel.id, equals('test'));
       expect(channel.type, equals('livestream'));
       expect(channel.cid, equals('test:livestream'));
-      expect(channel.extraData['cats'], equals(true));
-      expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
+      expect(channel.extraData!['cats'], equals(true));
+      expect(channel.extraData!['fruit'], equals(['bananas', 'apples']));
     });
 
     test('should serialize to json correctly', () {

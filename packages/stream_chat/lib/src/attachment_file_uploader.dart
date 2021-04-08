@@ -11,12 +11,12 @@ abstract class AttachmentFileUploader {
   ///
   /// Optionally, access upload progress using [onSendProgress]
   /// and cancel the request using [cancelToken]
-  Future<SendImageResponse> sendImage(
-    AttachmentFile image,
-    String channelId,
-    String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+  Future<SendImageResponse?> sendImage(
+    AttachmentFile? image,
+    String? channelId,
+    String? channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   });
 
   /// Uploads a [file] to the given channel.
@@ -24,34 +24,34 @@ abstract class AttachmentFileUploader {
   ///
   /// Optionally, access upload progress using [onSendProgress]
   /// and cancel the request using [cancelToken]
-  Future<SendFileResponse> sendFile(
-    AttachmentFile file,
-    String channelId,
-    String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+  Future<SendFileResponse?> sendFile(
+    AttachmentFile? file,
+    String? channelId,
+    String? channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   });
 
   /// Deletes a image using its [url] from the given channel.
   /// Returns [EmptyResponse] once deleted successfully.
   ///
   /// Optionally, cancel the request using [cancelToken]
-  Future<EmptyResponse> deleteImage(
+  Future<EmptyResponse?> deleteImage(
     String url,
-    String channelId,
-    String channelType, {
-    CancelToken cancelToken,
+    String? channelId,
+    String? channelType, {
+    CancelToken? cancelToken,
   });
 
   /// Deletes a file using its [url] from the given channel.
   /// Returns [EmptyResponse] once deleted successfully.
   ///
   /// Optionally, cancel the request using [cancelToken]
-  Future<EmptyResponse> deleteFile(
+  Future<EmptyResponse?> deleteFile(
     String url,
-    String channelId,
-    String channelType, {
-    CancelToken cancelToken,
+    String? channelId,
+    String? channelType, {
+    CancelToken? cancelToken,
   });
 }
 
@@ -63,26 +63,26 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   final StreamChatClient _client;
 
   @override
-  Future<SendImageResponse> sendImage(
-    AttachmentFile file,
-    String channelId,
-    String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+  Future<SendImageResponse?> sendImage(
+    AttachmentFile? file,
+    String? channelId,
+    String? channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
-    final filename = file.path?.split('/')?.last ?? file.name;
+    final filename = file!.path?.split('/')?.last ?? file.name;
     final mimeType = filename.mimeType;
 
-    MultipartFile multiPartFile;
+    MultipartFile? multiPartFile;
     if (file.path != null) {
       multiPartFile = await MultipartFile.fromFile(
-        file.path,
+        file.path!,
         filename: filename,
         contentType: mimeType,
       );
     } else if (file.bytes != null) {
       multiPartFile = MultipartFile.fromBytes(
-        file.bytes,
+        file.bytes!,
         filename: filename,
         contentType: mimeType,
       );
@@ -100,26 +100,26 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   }
 
   @override
-  Future<SendFileResponse> sendFile(
-    AttachmentFile file,
-    String channelId,
-    String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+  Future<SendFileResponse?> sendFile(
+    AttachmentFile? file,
+    String? channelId,
+    String? channelType, {
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
-    final filename = file.path?.split('/')?.last ?? file.name;
+    final filename = file!.path?.split('/')?.last ?? file.name;
     final mimeType = filename.mimeType;
 
-    MultipartFile multiPartFile;
+    MultipartFile? multiPartFile;
     if (file.path != null) {
       multiPartFile = await MultipartFile.fromFile(
-        file.path,
+        file.path!,
         filename: filename,
         contentType: mimeType,
       );
     } else if (file.bytes != null) {
       multiPartFile = MultipartFile.fromBytes(
-        file.bytes,
+        file.bytes!,
         filename: filename,
         contentType: mimeType,
       );
@@ -137,11 +137,11 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   }
 
   @override
-  Future<EmptyResponse> deleteImage(
+  Future<EmptyResponse?> deleteImage(
     String url,
-    String channelId,
-    String channelType, {
-    CancelToken cancelToken,
+    String? channelId,
+    String? channelType, {
+    CancelToken? cancelToken,
   }) async {
     final response = await _client.delete(
       '/channels/$channelType/$channelId/image',
@@ -152,11 +152,11 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   }
 
   @override
-  Future<EmptyResponse> deleteFile(
+  Future<EmptyResponse?> deleteFile(
     String url,
-    String channelId,
-    String channelType, {
-    CancelToken cancelToken,
+    String? channelId,
+    String? channelType, {
+    CancelToken? cancelToken,
   }) async {
     final response = await _client.delete(
       '/channels/$channelType/$channelId/file',

@@ -17,14 +17,14 @@ class OwnUser extends User {
     this.totalUnreadCount,
     this.unreadChannels,
     this.channelMutes,
-    String id,
-    String role,
-    DateTime createdAt,
-    DateTime updatedAt,
-    DateTime lastActive,
-    bool online,
-    Map<String, dynamic> extraData,
-    bool banned,
+    String? id,
+    String? role,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastActive,
+    bool? online,
+    Map<String, dynamic>? extraData,
+    bool? banned,
   }) : super(
           id: id,
           role: role,
@@ -37,28 +37,28 @@ class OwnUser extends User {
         );
 
   /// Create a new instance from a json
-  factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+  factory OwnUser.fromJson(Map<String, dynamic>? json) => _$OwnUserFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
 
   /// List of user devices
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Device> devices;
+  final List<Device>? devices;
 
   /// List of users muted by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Mute> mutes;
+  final List<Mute>? mutes;
 
   /// List of users muted by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Mute> channelMutes;
+  final List<Mute>? channelMutes;
 
   /// Total unread messages by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final int totalUnreadCount;
+  final int? totalUnreadCount;
 
   /// Total unread channels by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final int unreadChannels;
+  final int? unreadChannels;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.

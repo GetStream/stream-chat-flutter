@@ -12,12 +12,10 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 class Functions {
   WebSocketChannel connectFunc(
-    String url, {
-    Iterable<String> protocols,
-    Map<String, dynamic> headers,
-    Duration pingInterval,
+    String? url, {
+    Iterable<String>? protocols,
   }) =>
-      null;
+      WebSocketChannel.connect(Uri());
 
   void handleFunc(Event event) {}
 }
@@ -94,7 +92,7 @@ void main() {
     when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
-    final connect = ws.connect().then((_) {
+    final connect = ws.connect()?.then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) {
@@ -130,7 +128,7 @@ void main() {
     when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
-    final connect = ws.connect().then((_) {
+    final connect = ws.connect()?.then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) {
@@ -208,7 +206,7 @@ void main() {
       (_) => streamController.sink.add('{}'),
     );
 
-    final connect = ws.connect().then((_) {
+    final connect = ws.connect()?.then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) async {
@@ -249,7 +247,7 @@ void main() {
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
     when(() => mockWSChannel.sink).thenReturn(mockWSSink);
 
-    final connect = ws.connect().then((_) {
+    final connect = ws.connect()?.then((_) {
       streamController.sink.add('{}');
       streamController.close();
       streamController = StreamController<String>.broadcast();
@@ -292,7 +290,7 @@ void main() {
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
     when(() => mockWSChannel.sink).thenReturn(mockWSSink);
 
-    final connect = ws.connect().then((_) {
+    final connect = ws.connect()?.then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) async {

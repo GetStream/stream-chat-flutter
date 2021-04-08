@@ -15,10 +15,10 @@ class Device {
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
 
   /// The id of the device
-  final String id;
+  final String? id;
 
   /// The notification push provider
-  final String pushProvider;
+  final String? pushProvider;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$DeviceToJson(this);

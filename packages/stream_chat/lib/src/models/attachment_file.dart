@@ -19,7 +19,7 @@ abstract class UploadState with _$UploadState {
   const factory UploadState.success() = Success;
 
   /// Failed state of the union
-  const factory UploadState.failed({@required String error}) = Failed;
+  const factory UploadState.failed({required String error}) = Failed;
 
   /// Creates a new instance from a json
   factory UploadState.fromJson(Map<String, dynamic> json) =>
@@ -27,7 +27,7 @@ abstract class UploadState with _$UploadState {
 }
 
 /// Helper extension for UploadState
-extension UploadStateX on UploadState {
+extension UploadStateX on UploadState? {
   /// Returns true if state is [Preparing]
   bool get isPreparing => this is Preparing;
 
@@ -65,21 +65,21 @@ class AttachmentFile {
   /// ```
   /// final File myFile = File(platformFile.path);
   /// ```
-  final String path;
+  final String? path;
 
   /// File name including its extension.
-  final String name;
+  final String? name;
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
   @JsonKey(toJson: _toString, fromJson: _fromString)
-  final Uint8List bytes;
+  final Uint8List? bytes;
 
   /// The file size in bytes.
-  final int size;
+  final int? size;
 
   /// File extension for this file.
-  String get extension => name?.split('.')?.last;
+  String? get extension => name?.split('.')?.last;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);

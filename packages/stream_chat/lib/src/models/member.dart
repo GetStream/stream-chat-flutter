@@ -31,51 +31,51 @@ class Member {
   }
 
   /// The interested user
-  final User user;
+  final User? user;
 
   /// The date in which the user accepted the invite to the channel
-  final DateTime inviteAcceptedAt;
+  final DateTime? inviteAcceptedAt;
 
   /// The date in which the user rejected the invite to the channel
-  final DateTime inviteRejectedAt;
+  final DateTime? inviteRejectedAt;
 
   /// True if the user has been invited to the channel
-  final bool invited;
+  final bool? invited;
 
   /// The role of the user in the channel
-  final String role;
+  final String? role;
 
   /// The id of the interested user
-  final String userId;
+  final String? userId;
 
   /// True if the user is a moderator of the channel
-  final bool isModerator;
+  final bool? isModerator;
 
   /// True if the member is banned from the channel
-  final bool banned;
+  final bool? banned;
 
   /// True if the member is shadow banned from the channel
-  final bool shadowBanned;
+  final bool? shadowBanned;
 
   /// The date of creation
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// The last date of update
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
-    User user,
-    DateTime inviteAcceptedAt,
-    DateTime inviteRejectedAt,
-    bool invited,
-    String role,
-    String userId,
-    bool isModerator,
-    DateTime createdAt,
-    DateTime updatedAt,
-    bool banned,
-    bool shadowBanned,
+    User? user,
+    DateTime? inviteAcceptedAt,
+    DateTime? inviteRejectedAt,
+    bool? invited,
+    String? role,
+    String? userId,
+    bool? isModerator,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? banned,
+    bool? shadowBanned,
   }) =>
       Member(
         user: user ?? this.user,

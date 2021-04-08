@@ -26,59 +26,59 @@ class ChannelModel {
   });
 
   /// Create a new instance from a json
-  factory ChannelModel.fromJson(Map<String, dynamic> json) =>
+  factory ChannelModel.fromJson(Map<String, dynamic>? json) =>
       _$ChannelModelFromJson(
-          Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+          Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
 
   /// The id of this channel
-  final String id;
+  final String? id;
 
   /// The type of this channel
-  final String type;
+  final String? type;
 
   /// The cid of this channel
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String cid;
+  final String? cid;
 
   /// The channel configuration data
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final ChannelConfig config;
+  final ChannelConfig? config;
 
   /// The user that created this channel
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User createdBy;
+  final User? createdBy;
 
   /// True if this channel is frozen
   @JsonKey(includeIfNull: false)
-  final bool frozen;
+  final bool? frozen;
 
   /// The date of the last message
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime lastMessageAt;
+  final DateTime? lastMessageAt;
 
   /// The date of channel creation
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// The date of the last channel update
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   /// The date of channel deletion
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime deletedAt;
+  final DateTime? deletedAt;
 
   /// The count of this channel members
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final int memberCount;
+  final int? memberCount;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  final Map<String, dynamic>? extraData;
 
   /// The team the channel belongs to
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String team;
+  final String? team;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -98,8 +98,8 @@ class ChannelModel {
   ];
 
   /// Shortcut for channel name
-  String get name =>
-      extraData?.containsKey('name') == true ? extraData['name'] : cid;
+  String? get name =>
+      extraData?.containsKey('name') == true ? extraData!['name'] : cid;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
@@ -109,19 +109,19 @@ class ChannelModel {
 
   /// Creates a copy of [ChannelModel] with specified attributes overridden.
   ChannelModel copyWith({
-    String id,
-    String type,
-    String cid,
-    ChannelConfig config,
-    User createdBy,
-    bool frozen,
-    DateTime lastMessageAt,
-    DateTime createdAt,
-    DateTime updatedAt,
-    DateTime deletedAt,
-    int memberCount,
-    Map<String, dynamic> extraData,
-    String team,
+    String? id,
+    String? type,
+    String? cid,
+    ChannelConfig? config,
+    User? createdBy,
+    bool? frozen,
+    DateTime? lastMessageAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+    int? memberCount,
+    Map<String, dynamic>? extraData,
+    String? team,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -141,7 +141,7 @@ class ChannelModel {
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
   /// and the given [other] channelModel.
-  ChannelModel merge(ChannelModel other) {
+  ChannelModel merge(ChannelModel? other) {
     if (other == null) return this;
     return copyWith(
       id: other.id,

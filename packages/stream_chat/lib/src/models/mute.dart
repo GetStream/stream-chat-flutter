@@ -16,19 +16,19 @@ class Mute {
 
   /// The user that performed the muting action
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User user;
+  final User? user;
 
   /// The target user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final ChannelModel channel;
+  final ChannelModel? channel;
 
   /// The date in which the use was muted
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// The date of the last update
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$MuteToJson(this);

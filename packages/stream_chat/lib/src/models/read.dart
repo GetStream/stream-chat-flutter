@@ -17,22 +17,22 @@ class Read {
   factory Read.fromJson(Map<String, dynamic> json) => _$ReadFromJson(json);
 
   /// Date of the read event
-  final DateTime lastRead;
+  final DateTime? lastRead;
 
   /// User who sent the event
-  final User user;
+  final User? user;
 
   /// Number of unread messages
-  final int unreadMessages;
+  final int? unreadMessages;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ReadToJson(this);
 
   /// Creates a copy of [Read] with specified attributes overridden.
   Read copyWith({
-    DateTime lastRead,
-    User user,
-    int unreadMessages,
+    DateTime? lastRead,
+    User? user,
+    int? unreadMessages,
   }) =>
       Read(
         lastRead: lastRead ?? this.lastRead,

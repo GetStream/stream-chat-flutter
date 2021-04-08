@@ -10,7 +10,7 @@ extension RateLimit on Function {
     Duration wait, {
     bool leading = false,
     bool trailing = true,
-    Duration maxWait,
+    Duration? maxWait,
   }) =>
       Debounce(
         this,
@@ -40,7 +40,7 @@ Debounce debounce(
   Duration wait, {
   bool leading = false,
   bool trailing = true,
-  Duration maxWait,
+  Duration? maxWait,
 }) =>
     Debounce(
       func,
@@ -121,13 +121,13 @@ class Debounce {
     Duration wait, {
     bool leading = false,
     bool trailing = true,
-    Duration maxWait,
+    Duration? maxWait,
   })  : _leading = leading,
         _trailing = trailing,
         _wait = wait?.inMilliseconds ?? 0,
         _maxing = maxWait != null {
     if (_maxing) {
-      _maxWait = math.max(maxWait.inMilliseconds, _wait);
+      _maxWait = math.max(maxWait!.inMilliseconds, _wait);
     }
   }
 
@@ -137,15 +137,15 @@ class Debounce {
   final int _wait;
   final bool _maxing;
 
-  int _maxWait;
-  List<Object> _lastArgs;
-  Map<Symbol, Object> _lastNamedArgs;
-  Timer _timer;
-  int _lastCallTime;
-  Object _result;
-  int _lastInvokeTime = 0;
+  late int _maxWait;
+  List<Object?>? _lastArgs;
+  Map<Symbol, Object>? _lastNamedArgs;
+  Timer? _timer;
+  int? _lastCallTime;
+  Object? _result;
+  int? _lastInvokeTime = 0;
 
-  Object _invokeFunc(int time) {
+  Object? _invokeFunc(int? time) {
     final args = _lastArgs;
     final namedArgs = _lastNamedArgs;
     _lastArgs = _lastNamedArgs = null;
@@ -154,11 +154,11 @@ class Debounce {
   }
 
   Timer _startTimer(Function pendingFunc, int wait) =>
-      Timer(Duration(milliseconds: wait), pendingFunc);
+      Timer(Duration(milliseconds: wait), pendingFunc as void Function());
 
   bool _shouldInvoke(int time) {
     final timeSinceLastCall = time - (_lastCallTime ?? double.nan);
-    final timeSinceLastInvoke = time - _lastInvokeTime;
+    final timeSinceLastInvoke = time - _lastInvokeTime!;
 
     // Either this is the first call, activity has stopped and we're at the
     // trailing edge, the system time has gone backwards and we're treating
@@ -169,7 +169,7 @@ class Debounce {
         (_maxing && timeSinceLastInvoke >= _maxWait);
   }
 
-  Object _trailingEdge(int time) {
+  Object? _trailingEdge(int time) {
     _timer = null;
 
     // Only invoke if we have `lastArgs` which means `func` has been
@@ -182,8 +182,8 @@ class Debounce {
   }
 
   int _remainingWait(int time) {
-    final timeSinceLastCall = time - _lastCallTime;
-    final timeSinceLastInvoke = time - _lastInvokeTime;
+    final timeSinceLastCall = time - _lastCallTime!;
+    final timeSinceLastInvoke = time - _lastInvokeTime!;
     final timeWaiting = _wait - timeSinceLastCall;
 
     return _maxing
@@ -201,7 +201,7 @@ class Debounce {
     }
   }
 
-  Object _leadingEdge(int time) {
+  Object? _leadingEdge(int? time) {
     // Reset any `maxWait` timer.
     _lastInvokeTime = time;
     // Start the timer for the trailing edge.
@@ -218,7 +218,7 @@ class Debounce {
   }
 
   /// Immediately invokes all the remaining delayed functions.
-  Object flush() {
+  Object? flush() {
     final now = DateTime.now().millisecondsSinceEpoch;
     return _timer == null ? _result : _trailingEdge(now);
   }
@@ -228,15 +228,15 @@ class Debounce {
 
   /// Calls/invokes this class like a function.
   /// Pass [args] and [namedArgs] to be used while invoking [_func].
-  Object call(
+  Object? call(
     List<dynamic> args, {
-    Map<Symbol, dynamic> namedArgs,
+    Map<Symbol, dynamic>? namedArgs,
   }) {
     final time = DateTime.now().millisecondsSinceEpoch;
     final isInvoking = _shouldInvoke(time);
 
     _lastArgs = args;
-    _lastNamedArgs = namedArgs;
+    _lastNamedArgs = namedArgs as Map<Symbol, Object>?;
     _lastCallTime = time;
 
     if (isInvoking) {
@@ -323,13 +323,13 @@ class Throttle {
   void cancel() => _debounce.cancel();
 
   /// Immediately invokes all the remaining delayed functions.
-  Object flush() => _debounce.flush();
+  Object? flush() => _debounce.flush();
 
   /// True if there are functions remaining to get invoked.
   bool get isPending => _debounce.isPending;
 
   /// Calls/invokes this class like a function.
   /// Pass [args] and [namedArgs] to be used while invoking `func`.
-  Object call(List<dynamic> args, {Map<Symbol, dynamic> namedArgs}) =>
+  Object? call(List<dynamic> args, {Map<Symbol, dynamic>? namedArgs}) =>
       _debounce.call(args, namedArgs: namedArgs);
 }

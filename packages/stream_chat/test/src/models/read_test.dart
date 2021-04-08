@@ -19,7 +19,7 @@ void main() {
     test('should parse json correctly', () {
       final read = Read.fromJson(json.decode(jsonExample));
       expect(read.lastRead, DateTime.parse('2020-01-28T22:17:30.966485504Z'));
-      expect(read.user.id, 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e');
+      expect(read.user?.id, 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e');
       expect(read.unreadMessages, 10);
     });
 
