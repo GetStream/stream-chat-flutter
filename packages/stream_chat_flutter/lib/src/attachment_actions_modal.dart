@@ -34,12 +34,12 @@ class AttachmentActionsModal extends StatelessWidget {
 
   /// Returns a new [AttachmentActionsModal]
   const AttachmentActionsModal({
+    @required this.currentIndex,
     this.message,
-    this.currentIndex,
     this.onShowMessage,
     this.imageDownloader,
     this.fileDownloader,
-  });
+  }) : assert(currentIndex != null, 'currentIndex cannot be null');
 
   @override
   Widget build(BuildContext context) {
@@ -145,19 +145,20 @@ class AttachmentActionsModal extends StatelessWidget {
                       () {
                         final channel = StreamChannel.of(context).channel;
                         if (message.attachments.length > 1 ||
-                            message.text.isNotEmpty) {
+                            message.text?.isNotEmpty == true) {
                           final remainingAttachments = [...message.attachments]
                             ..removeAt(currentIndex);
                           channel.updateMessage(message.copyWith(
                             attachments: remainingAttachments,
                           ));
-                          Navigator.pop(context);
-                          Navigator.pop(context);
+                          Navigator.of(context)
+                            ..pop()
+                            ..maybePop();
                         } else {
-                          channel.deleteMessage(message).then((value) {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          });
+                          channel.deleteMessage(message);
+                          Navigator.of(context)
+                            ..pop()
+                            ..maybePop();
                         }
                       },
                       color: theme.colorTheme.accentRed,
@@ -185,8 +186,10 @@ class AttachmentActionsModal extends StatelessWidget {
     StreamSvgIcon icon,
     VoidCallback onTap, {
     Color color,
+    Key key,
   }) {
     return Material(
+      key: key,
       color: StreamChatTheme.of(context).colorTheme.white,
       child: InkWell(
         onTap: onTap,
@@ -224,7 +227,7 @@ class AttachmentActionsModal extends StatelessWidget {
           if (progress == null || progress?.toProgressIndicatorValue == 1.0) {
             Future.delayed(
               const Duration(milliseconds: 500),
-              Navigator.of(context).pop,
+              Navigator.of(context).maybePop,
             );
           }
           return Material(
@@ -248,6 +251,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         )
                       : progress.toProgressIndicatorValue == 1.0
                           ? Container(
+                              key: Key('completedIcon'),
                               height: 160,
                               width: 160,
                               child: StreamSvgIcon.check(

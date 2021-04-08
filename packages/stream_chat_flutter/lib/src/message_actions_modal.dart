@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
@@ -18,11 +17,12 @@ import 'stream_chat_theme.dart';
 
 class MessageActionsModal extends StatefulWidget {
   final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  final void Function(Message) onThreadReplyTap;
-  final void Function(Message) onReplyTap;
+  final OnMessageTap onThreadReplyTap;
+  final OnMessageTap onReplyTap;
   final Message message;
   final MessageTheme messageTheme;
   final bool showReactions;
+  final OnMessageTap onCopyTap;
   final bool showDeleteMessage;
   final bool showCopyMessage;
   final bool showEditMessage;
@@ -60,6 +60,7 @@ class MessageActionsModal extends StatefulWidget {
     this.reverse = false,
     this.customActions = const [],
     this.attachmentBorderRadiusGeometry,
+    this.onCopyTap,
   }) : super(key: key);
 
   @override
@@ -211,10 +212,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                         CrossAxisAlignment.stretch,
                                     children: [
                                       if (widget.showReplyMessage &&
-                                          (widget.message.status ==
+                                              widget.message.status ==
                                                   MessageSendingStatus.sent ||
-                                              widget.message.status == null) &&
-                                          widget.message.parentId == null)
+                                          widget.message.status == null)
                                         _buildReplyButton(context),
                                       if (widget.showThreadReplyMessage &&
                                           (widget.message.status ==
@@ -452,7 +452,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   Widget _buildCopyButton(BuildContext context) {
     return InkWell(
       onTap: () async {
-        await Clipboard.setData(ClipboardData(text: widget.message.text));
+        widget.onCopyTap?.call(widget.message);
         Navigator.pop(context);
       },
       child: Padding(

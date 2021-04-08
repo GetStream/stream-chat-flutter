@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
 
 void main() {
   testWidgets(
-    'it should show basic channel information',
+    'it should show channel typing',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
@@ -15,7 +16,6 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(channel.cid).thenReturn('cid');
       when(client.state).thenReturn(clientState);
       when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
       when(channel.lastMessageAt).thenReturn(lastMessageAt);
@@ -24,16 +24,11 @@ void main() {
       when(channel.isMuted).thenReturn(false);
       when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
       when(channel.extraDataStream).thenAnswer((i) => Stream.value({
-            'name': 'test name',
+            'name': 'test',
           }));
       when(channel.extraData).thenReturn({
-        'name': 'test name',
+        'name': 'test',
       });
-      when(clientState.channels).thenReturn({
-        channel.cid: channel,
-      });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
       when(channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
@@ -59,25 +54,38 @@ void main() {
             )
           ]));
 
+      when(channelState.typingEvents).thenAnswer((i) => [
+            User(id: 'other-user', extraData: {'name': 'demo'})
+          ]);
+      when(channelState.typingEventsStream).thenAnswer((i) => Stream.value([
+            User(id: 'other-user', extraData: {'name': 'demo'}),
+            User(id: 'other-user', extraData: {'name': 'demo'}),
+          ]));
+
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
-              body: ChannelPreview(
-                channel: channel,
+            child: FullScreenMedia(
+              mediaAttachments: [
+                Attachment(
+                  type: 'image',
+                  title: 'demo image',
+                  imageUrl: '',
+                ),
+              ],
+              message: Message(
+                createdAt: DateTime.now(),
               ),
+              sentAt: DateTime.now(),
             ),
           ),
         ),
       ));
 
-      expect(find.text('6/22/2020'), findsOneWidget);
-      expect(find.text('test name'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('hello'), findsOneWidget);
-      expect(find.byType(ChannelImage), findsOneWidget);
+      expect(find.byType(PhotoView), findsOneWidget);
+      expect(find.byType(StreamSvgIcon), findsNWidgets(4));
     },
   );
 }

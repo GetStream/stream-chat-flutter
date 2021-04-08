@@ -693,7 +693,7 @@ class MessageInputState extends State<MessageInput> {
         if (!mounted) {
           return;
         }
-        StreamChannel.of(context).channel.keyStroke().catchError((e) {});
+        StreamChannel.of(context).channel.keyStroke()?.catchError((e) {});
 
         setState(() {
           _messageIsPresent = s.trim().isNotEmpty;
@@ -2181,10 +2181,12 @@ class MessageInputState extends State<MessageInput> {
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
     _messageIsPresent = true;
-    for (final attachment in message?.attachments) {
-      _attachments[attachment.id] = attachment.copyWith(
-        uploadState: attachment.uploadState ?? UploadState.success(),
-      );
+    if (message.attachments != null) {
+      for (final attachment in message.attachments) {
+        _attachments[attachment.id] = attachment.copyWith(
+          uploadState: attachment.uploadState ?? UploadState.success(),
+        );
+      }
     }
   }
 
