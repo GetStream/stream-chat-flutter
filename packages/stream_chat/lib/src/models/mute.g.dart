@@ -10,12 +10,12 @@ Mute _$MuteFromJson(Map json) {
   return Mute(
     user: json['user'] == null
         ? null
-        : User.fromJson((json['user'] as Map)?.map(
+        : User.fromJson((json['user'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
     channel: json['channel'] == null
         ? null
-        : ChannelModel.fromJson((json['channel'] as Map)?.map(
+        : ChannelModel.fromJson((json['channel'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
     createdAt: json['created_at'] == null

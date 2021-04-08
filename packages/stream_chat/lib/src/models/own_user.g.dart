@@ -8,31 +8,19 @@ part of 'own_user.dart';
 
 OwnUser _$OwnUserFromJson(Map json) {
   return OwnUser(
-    devices: (json['devices'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Device.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    mutes: (json['mutes'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Mute.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    totalUnreadCount: json['total_unread_count'] as int,
-    unreadChannels: json['unread_channels'] as int,
-    channelMutes: (json['channel_mutes'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Mute.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    id: json['id'] as String,
-    role: json['role'] as String,
+    devices: (json['devices'] as List<dynamic>?)
+        ?.map((e) => Device.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    mutes: (json['mutes'] as List<dynamic>?)
+        ?.map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    totalUnreadCount: json['total_unread_count'] as int?,
+    unreadChannels: json['unread_channels'] as int?,
+    channelMutes: (json['channel_mutes'] as List<dynamic>?)
+        ?.map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    id: json['id'] as String?,
+    role: json['role'] as String?,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -42,11 +30,11 @@ OwnUser _$OwnUserFromJson(Map json) {
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool,
-    extraData: (json['extra_data'] as Map)?.map(
+    online: json['online'] as bool?,
+    extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
-    banned: json['banned'] as bool,
+    banned: json['banned'] as bool?,
   );
 }
 

@@ -13,10 +13,10 @@ Read _$ReadFromJson(Map json) {
         : DateTime.parse(json['last_read'] as String),
     user: json['user'] == null
         ? null
-        : User.fromJson((json['user'] as Map)?.map(
+        : User.fromJson((json['user'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    unreadMessages: json['unread_messages'] as int,
+    unreadMessages: json['unread_messages'] as int?,
   );
 }
 

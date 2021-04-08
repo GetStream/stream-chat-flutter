@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides
 
 part of 'attachment_file.dart';
 
@@ -8,6 +8,10 @@ part of 'attachment_file.dart';
 // **************************************************************************
 
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+
 UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
   switch (json['runtimeType'] as String) {
     case 'preparing':
@@ -28,74 +32,72 @@ UploadState _$UploadStateFromJson(Map<String, dynamic> json) {
 class _$UploadStateTearOff {
   const _$UploadStateTearOff();
 
-// ignore: unused_element
   Preparing preparing() {
     return const Preparing();
   }
 
-// ignore: unused_element
-  InProgress inProgress({int uploaded, int total}) {
+  InProgress inProgress({required int uploaded, required int total}) {
     return InProgress(
       uploaded: uploaded,
       total: total,
     );
   }
 
-// ignore: unused_element
   Success success() {
     return const Success();
   }
 
-// ignore: unused_element
-  Failed failed({@required String error}) {
+  Failed failed({required String error}) {
     return Failed(
       error: error,
     );
   }
 
-// ignore: unused_element
   UploadState fromJson(Map<String, Object> json) {
     return UploadState.fromJson(json);
   }
 }
 
 /// @nodoc
-// ignore: unused_element
 const $UploadState = _$UploadStateTearOff();
 
 /// @nodoc
 mixin _$UploadState {
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult preparing(),
-    @required TResult inProgress(int uploaded, int total),
-    @required TResult success(),
-    @required TResult failed(String error),
-  });
+  TResult when<TResult extends Object?>({
+    required TResult Function() preparing,
+    required TResult Function(int uploaded, int total) inProgress,
+    required TResult Function() success,
+    required TResult Function(String error) failed,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult preparing(),
-    TResult inProgress(int uploaded, int total),
-    TResult success(),
-    TResult failed(String error),
-    @required TResult orElse(),
-  });
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult preparing(Preparing value),
-    @required TResult inProgress(InProgress value),
-    @required TResult success(Success value),
-    @required TResult failed(Failed value),
-  });
+  TResult map<TResult extends Object?>({
+    required TResult Function(Preparing value) preparing,
+    required TResult Function(InProgress value) inProgress,
+    required TResult Function(Success value) success,
+    required TResult Function(Failed value) failed,
+  }) =>
+      throw _privateConstructorUsedError;
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult preparing(Preparing value),
-    TResult inProgress(InProgress value),
-    TResult success(Success value),
-    TResult failed(Failed value),
-    @required TResult orElse(),
-  });
-  Map<String, dynamic> toJson();
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+    required TResult orElse(),
+  }) =>
+      throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -154,29 +156,24 @@ class _$Preparing implements Preparing {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult preparing(),
-    @required TResult inProgress(int uploaded, int total),
-    @required TResult success(),
-    @required TResult failed(String error),
+  TResult when<TResult extends Object?>({
+    required TResult Function() preparing,
+    required TResult Function(int uploaded, int total) inProgress,
+    required TResult Function() success,
+    required TResult Function(String error) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return preparing();
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult preparing(),
-    TResult inProgress(int uploaded, int total),
-    TResult success(),
-    TResult failed(String error),
-    @required TResult orElse(),
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (preparing != null) {
       return preparing();
     }
@@ -185,29 +182,24 @@ class _$Preparing implements Preparing {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult preparing(Preparing value),
-    @required TResult inProgress(InProgress value),
-    @required TResult success(Success value),
-    @required TResult failed(Failed value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(Preparing value) preparing,
+    required TResult Function(InProgress value) inProgress,
+    required TResult Function(Success value) success,
+    required TResult Function(Failed value) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return preparing(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult preparing(Preparing value),
-    TResult inProgress(InProgress value),
-    TResult success(Success value),
-    TResult failed(Failed value),
-    @required TResult orElse(),
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (preparing != null) {
       return preparing(this);
     }
@@ -245,12 +237,18 @@ class _$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object uploaded = freezed,
-    Object total = freezed,
+    Object? uploaded = freezed,
+    Object? total = freezed,
   }) {
     return _then(InProgress(
-      uploaded: uploaded == freezed ? _value.uploaded : uploaded as int,
-      total: total == freezed ? _value.total : total as int,
+      uploaded: uploaded == freezed
+          ? _value.uploaded
+          : uploaded // ignore: cast_nullable_to_non_nullable
+              as int,
+      total: total == freezed
+          ? _value.total
+          : total // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -259,7 +257,7 @@ class _$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
 /// @nodoc
 class _$InProgress implements InProgress {
-  const _$InProgress({this.uploaded, this.total});
+  const _$InProgress({required this.uploaded, required this.total});
 
   factory _$InProgress.fromJson(Map<String, dynamic> json) =>
       _$_$InProgressFromJson(json);
@@ -298,29 +296,24 @@ class _$InProgress implements InProgress {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult preparing(),
-    @required TResult inProgress(int uploaded, int total),
-    @required TResult success(),
-    @required TResult failed(String error),
+  TResult when<TResult extends Object?>({
+    required TResult Function() preparing,
+    required TResult Function(int uploaded, int total) inProgress,
+    required TResult Function() success,
+    required TResult Function(String error) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return inProgress(uploaded, total);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult preparing(),
-    TResult inProgress(int uploaded, int total),
-    TResult success(),
-    TResult failed(String error),
-    @required TResult orElse(),
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (inProgress != null) {
       return inProgress(uploaded, total);
     }
@@ -329,29 +322,24 @@ class _$InProgress implements InProgress {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult preparing(Preparing value),
-    @required TResult inProgress(InProgress value),
-    @required TResult success(Success value),
-    @required TResult failed(Failed value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(Preparing value) preparing,
+    required TResult Function(InProgress value) inProgress,
+    required TResult Function(Success value) success,
+    required TResult Function(Failed value) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return inProgress(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult preparing(Preparing value),
-    TResult inProgress(InProgress value),
-    TResult success(Success value),
-    TResult failed(Failed value),
-    @required TResult orElse(),
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (inProgress != null) {
       return inProgress(this);
     }
@@ -365,15 +353,17 @@ class _$InProgress implements InProgress {
 }
 
 abstract class InProgress implements UploadState {
-  const factory InProgress({int uploaded, int total}) = _$InProgress;
+  const factory InProgress({required int uploaded, required int total}) =
+      _$InProgress;
 
   factory InProgress.fromJson(Map<String, dynamic> json) =
       _$InProgress.fromJson;
 
-  int get uploaded;
-  int get total;
+  int get uploaded => throw _privateConstructorUsedError;
+  int get total => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $InProgressCopyWith<InProgress> get copyWith;
+  $InProgressCopyWith<InProgress> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -416,29 +406,24 @@ class _$Success implements Success {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult preparing(),
-    @required TResult inProgress(int uploaded, int total),
-    @required TResult success(),
-    @required TResult failed(String error),
+  TResult when<TResult extends Object?>({
+    required TResult Function() preparing,
+    required TResult Function(int uploaded, int total) inProgress,
+    required TResult Function() success,
+    required TResult Function(String error) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return success();
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult preparing(),
-    TResult inProgress(int uploaded, int total),
-    TResult success(),
-    TResult failed(String error),
-    @required TResult orElse(),
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (success != null) {
       return success();
     }
@@ -447,29 +432,24 @@ class _$Success implements Success {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult preparing(Preparing value),
-    @required TResult inProgress(InProgress value),
-    @required TResult success(Success value),
-    @required TResult failed(Failed value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(Preparing value) preparing,
+    required TResult Function(InProgress value) inProgress,
+    required TResult Function(Success value) success,
+    required TResult Function(Failed value) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return success(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult preparing(Preparing value),
-    TResult inProgress(InProgress value),
-    TResult success(Success value),
-    TResult failed(Failed value),
-    @required TResult orElse(),
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (success != null) {
       return success(this);
     }
@@ -506,10 +486,13 @@ class _$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object error = freezed,
+    Object? error = freezed,
   }) {
     return _then(Failed(
-      error: error == freezed ? _value.error : error as String,
+      error: error == freezed
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -518,7 +501,7 @@ class _$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
 
 /// @nodoc
 class _$Failed implements Failed {
-  const _$Failed({@required this.error}) : assert(error != null);
+  const _$Failed({required this.error});
 
   factory _$Failed.fromJson(Map<String, dynamic> json) =>
       _$_$FailedFromJson(json);
@@ -550,29 +533,24 @@ class _$Failed implements Failed {
 
   @override
   @optionalTypeArgs
-  TResult when<TResult extends Object>({
-    @required TResult preparing(),
-    @required TResult inProgress(int uploaded, int total),
-    @required TResult success(),
-    @required TResult failed(String error),
+  TResult when<TResult extends Object?>({
+    required TResult Function() preparing,
+    required TResult Function(int uploaded, int total) inProgress,
+    required TResult Function() success,
+    required TResult Function(String error) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return failed(error);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object>({
-    TResult preparing(),
-    TResult inProgress(int uploaded, int total),
-    TResult success(),
-    TResult failed(String error),
-    @required TResult orElse(),
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? preparing,
+    TResult Function(int uploaded, int total)? inProgress,
+    TResult Function()? success,
+    TResult Function(String error)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (failed != null) {
       return failed(error);
     }
@@ -581,29 +559,24 @@ class _$Failed implements Failed {
 
   @override
   @optionalTypeArgs
-  TResult map<TResult extends Object>({
-    @required TResult preparing(Preparing value),
-    @required TResult inProgress(InProgress value),
-    @required TResult success(Success value),
-    @required TResult failed(Failed value),
+  TResult map<TResult extends Object?>({
+    required TResult Function(Preparing value) preparing,
+    required TResult Function(InProgress value) inProgress,
+    required TResult Function(Success value) success,
+    required TResult Function(Failed value) failed,
   }) {
-    assert(preparing != null);
-    assert(inProgress != null);
-    assert(success != null);
-    assert(failed != null);
     return failed(this);
   }
 
   @override
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object>({
-    TResult preparing(Preparing value),
-    TResult inProgress(InProgress value),
-    TResult success(Success value),
-    TResult failed(Failed value),
-    @required TResult orElse(),
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Preparing value)? preparing,
+    TResult Function(InProgress value)? inProgress,
+    TResult Function(Success value)? success,
+    TResult Function(Failed value)? failed,
+    required TResult orElse(),
   }) {
-    assert(orElse != null);
     if (failed != null) {
       return failed(this);
     }
@@ -617,11 +590,11 @@ class _$Failed implements Failed {
 }
 
 abstract class Failed implements UploadState {
-  const factory Failed({@required String error}) = _$Failed;
+  const factory Failed({required String error}) = _$Failed;
 
   factory Failed.fromJson(Map<String, dynamic> json) = _$Failed.fromJson;
 
-  String get error;
+  String get error => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $FailedCopyWith<Failed> get copyWith;
+  $FailedCopyWith<Failed> get copyWith => throw _privateConstructorUsedError;
 }

@@ -8,20 +8,19 @@ part of 'channel_model.dart';
 
 ChannelModel _$ChannelModelFromJson(Map json) {
   return ChannelModel(
-    id: json['id'] as String,
-    type: json['type'] as String,
-    cid: json['cid'] as String,
+    id: json['id'] as String?,
+    type: json['type'] as String?,
+    cid: json['cid'] as String?,
     config: json['config'] == null
         ? null
-        : ChannelConfig.fromJson((json['config'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
+        : ChannelConfig.fromJson(
+            Map<String, dynamic>.from(json['config'] as Map)),
     createdBy: json['created_by'] == null
         ? null
-        : User.fromJson((json['created_by'] as Map)?.map(
+        : User.fromJson((json['created_by'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    frozen: json['frozen'] as bool,
+    frozen: json['frozen'] as bool?,
     lastMessageAt: json['last_message_at'] == null
         ? null
         : DateTime.parse(json['last_message_at'] as String),
@@ -34,11 +33,11 @@ ChannelModel _$ChannelModelFromJson(Map json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    memberCount: json['member_count'] as int,
-    extraData: (json['extra_data'] as Map)?.map(
+    memberCount: json['member_count'] as int?,
+    extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
-    team: json['team'] as String,
+    team: json['team'] as String?,
   );
 }
 

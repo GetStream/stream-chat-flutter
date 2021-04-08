@@ -8,10 +8,10 @@ part of 'attachment_file.dart';
 
 AttachmentFile _$AttachmentFileFromJson(Map json) {
   return AttachmentFile(
-    path: json['path'] as String,
-    name: json['name'] as String,
-    bytes: _fromString(json['bytes'] as String),
-    size: json['size'] as int,
+    path: json['path'] as String?,
+    name: json['name'] as String?,
+    bytes: _fromString(json['bytes'] as String?),
+    size: json['size'] as int?,
   );
 }
 

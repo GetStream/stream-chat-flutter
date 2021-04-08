@@ -8,52 +8,50 @@ part of 'event.dart';
 
 Event _$EventFromJson(Map json) {
   return Event(
-    type: json['type'] as String,
-    cid: json['cid'] as String,
-    connectionId: json['connection_id'] as String,
+    type: json['type'] as String?,
+    cid: json['cid'] as String?,
+    connectionId: json['connection_id'] as String?,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
     me: json['me'] == null
         ? null
-        : OwnUser.fromJson((json['me'] as Map)?.map(
+        : OwnUser.fromJson((json['me'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
     user: json['user'] == null
         ? null
-        : User.fromJson((json['user'] as Map)?.map(
+        : User.fromJson((json['user'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
     message: json['message'] == null
         ? null
-        : Message.fromJson((json['message'] as Map)?.map(
+        : Message.fromJson((json['message'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    totalUnreadCount: json['total_unread_count'] as int,
-    unreadChannels: json['unread_channels'] as int,
+    totalUnreadCount: json['total_unread_count'] as int?,
+    unreadChannels: json['unread_channels'] as int?,
     reaction: json['reaction'] == null
         ? null
-        : Reaction.fromJson((json['reaction'] as Map)?.map(
+        : Reaction.fromJson((json['reaction'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    online: json['online'] as bool,
+    online: json['online'] as bool?,
     channel: json['channel'] == null
         ? null
-        : EventChannel.fromJson((json['channel'] as Map)?.map(
+        : EventChannel.fromJson((json['channel'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
     member: json['member'] == null
         ? null
-        : Member.fromJson((json['member'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
-    channelId: json['channel_id'] as String,
-    channelType: json['channel_type'] as String,
-    parentId: json['parent_id'] as String,
-    extraData: (json['extra_data'] as Map)?.map(
+        : Member.fromJson(Map<String, dynamic>.from(json['member'] as Map)),
+    channelId: json['channel_id'] as String?,
+    channelType: json['channel_type'] as String?,
+    parentId: json['parent_id'] as String?,
+    extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
-  )..isLocal = json['is_local'] as bool;
+  )..isLocal = json['is_local'] as bool?;
 }
 
 Map<String, dynamic> _$EventToJson(Event instance) {
@@ -89,27 +87,22 @@ Map<String, dynamic> _$EventToJson(Event instance) {
 
 EventChannel _$EventChannelFromJson(Map json) {
   return EventChannel(
-    members: (json['members'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Member.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    id: json['id'] as String,
-    type: json['type'] as String,
-    cid: json['cid'] as String,
+    members: (json['members'] as List<dynamic>?)
+        ?.map((e) => Member.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    id: json['id'] as String?,
+    type: json['type'] as String?,
+    cid: json['cid'] as String?,
     config: json['config'] == null
         ? null
-        : ChannelConfig.fromJson((json['config'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
+        : ChannelConfig.fromJson(
+            Map<String, dynamic>.from(json['config'] as Map)),
     createdBy: json['created_by'] == null
         ? null
-        : User.fromJson((json['created_by'] as Map)?.map(
+        : User.fromJson((json['created_by'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    frozen: json['frozen'] as bool,
+    frozen: json['frozen'] as bool?,
     lastMessageAt: json['last_message_at'] == null
         ? null
         : DateTime.parse(json['last_message_at'] as String),
@@ -122,8 +115,8 @@ EventChannel _$EventChannelFromJson(Map json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    memberCount: json['member_count'] as int,
-    extraData: (json['extra_data'] as Map)?.map(
+    memberCount: json['member_count'] as int?,
+    extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
   );
@@ -151,6 +144,6 @@ Map<String, dynamic> _$EventChannelToJson(EventChannel instance) {
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('member_count', readonly(instance.memberCount));
   writeNotNull('extra_data', instance.extraData);
-  val['members'] = instance.members?.map((e) => e?.toJson())?.toList();
+  val['members'] = instance.members?.map((e) => e.toJson()).toList();
   return val;
 }

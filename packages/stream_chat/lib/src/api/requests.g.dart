@@ -13,7 +13,10 @@ Map<String, dynamic> _$SortOptionToJson<T>(SortOption<T> instance) =>
     };
 
 Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'limit': instance.limit,
+    'offset': instance.offset,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -21,11 +24,10 @@ Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
     }
   }
 
-  writeNotNull('limit', instance.limit);
-  writeNotNull('offset', instance.offset);
   writeNotNull('id_gt', instance.greaterThan);
   writeNotNull('id_gte', instance.greaterThanOrEqual);
   writeNotNull('id_lt', instance.lessThan);
   writeNotNull('id_lte', instance.lessThanOrEqual);
+  val['hash_code'] = instance.hashCode;
   return val;
 }

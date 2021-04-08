@@ -8,11 +8,11 @@ part of 'action.dart';
 
 Action _$ActionFromJson(Map json) {
   return Action(
-    name: json['name'] as String,
-    style: json['style'] as String,
-    text: json['text'] as String,
-    type: json['type'] as String,
-    value: json['value'] as String,
+    name: json['name'] as String?,
+    style: json['style'] as String?,
+    text: json['text'] as String?,
+    type: json['type'] as String?,
+    value: json['value'] as String?,
   );
 }
 

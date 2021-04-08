@@ -8,62 +8,50 @@ part of 'message.dart';
 
 Message _$MessageFromJson(Map json) {
   return Message(
-    id: json['id'] as String,
-    text: json['text'] as String,
-    type: json['type'] as String,
-    attachments: (json['attachments'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Attachment.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    mentionedUsers: (json['mentioned_users'] as List)
-        ?.map((e) => e == null
-            ? null
-            : User.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    silent: json['silent'] as bool,
-    shadowed: json['shadowed'] as bool,
-    reactionCounts: (json['reaction_counts'] as Map)?.map(
+    id: json['id'] as String?,
+    text: json['text'] as String?,
+    type: json['type'] as String?,
+    attachments: (json['attachments'] as List<dynamic>?)
+        ?.map((e) => Attachment.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    mentionedUsers: (json['mentioned_users'] as List<dynamic>?)
+        ?.map((e) => User.fromJson((e as Map?)?.map(
+              (k, e) => MapEntry(k as String, e),
+            )))
+        .toList(),
+    silent: json['silent'] as bool?,
+    shadowed: json['shadowed'] as bool?,
+    reactionCounts: (json['reaction_counts'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e as int),
     ),
-    reactionScores: (json['reaction_scores'] as Map)?.map(
+    reactionScores: (json['reaction_scores'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e as int),
     ),
-    latestReactions: (json['latest_reactions'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Reaction.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    ownReactions: (json['own_reactions'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Reaction.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    parentId: json['parent_id'] as String,
+    latestReactions: (json['latest_reactions'] as List<dynamic>?)
+        ?.map((e) => Reaction.fromJson((e as Map?)?.map(
+              (k, e) => MapEntry(k as String, e),
+            )))
+        .toList(),
+    ownReactions: (json['own_reactions'] as List<dynamic>?)
+        ?.map((e) => Reaction.fromJson((e as Map?)?.map(
+              (k, e) => MapEntry(k as String, e),
+            )))
+        .toList(),
+    parentId: json['parent_id'] as String?,
     quotedMessage: json['quoted_message'] == null
         ? null
-        : Message.fromJson((json['quoted_message'] as Map)?.map(
+        : Message.fromJson((json['quoted_message'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    quotedMessageId: json['quoted_message_id'] as String,
-    replyCount: json['reply_count'] as int,
-    threadParticipants: (json['thread_participants'] as List)
-        ?.map((e) => e == null
-            ? null
-            : User.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
-    showInChannel: json['show_in_channel'] as bool,
-    command: json['command'] as String,
+    quotedMessageId: json['quoted_message_id'] as String?,
+    replyCount: json['reply_count'] as int?,
+    threadParticipants: (json['thread_participants'] as List<dynamic>?)
+        ?.map((e) => User.fromJson((e as Map?)?.map(
+              (k, e) => MapEntry(k as String, e),
+            )))
+        .toList(),
+    showInChannel: json['show_in_channel'] as bool?,
+    command: json['command'] as String?,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -72,10 +60,10 @@ Message _$MessageFromJson(Map json) {
         : DateTime.parse(json['updated_at'] as String),
     user: json['user'] == null
         ? null
-        : User.fromJson((json['user'] as Map)?.map(
+        : User.fromJson((json['user'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    pinned: json['pinned'] as bool,
+    pinned: json['pinned'] as bool?,
     pinnedAt: json['pinned_at'] == null
         ? null
         : DateTime.parse(json['pinned_at'] as String),
@@ -84,16 +72,16 @@ Message _$MessageFromJson(Map json) {
         : DateTime.parse(json['pin_expires'] as String),
     pinnedBy: json['pinned_by'] == null
         ? null
-        : User.fromJson((json['pinned_by'] as Map)?.map(
+        : User.fromJson((json['pinned_by'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    extraData: (json['extra_data'] as Map)?.map(
+    extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    skipPush: json['skip_push'] as bool,
+    skipPush: json['skip_push'] as bool?,
   );
 }
 
@@ -111,7 +99,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
 
   writeNotNull('type', readonly(instance.type));
   writeNotNull(
-      'attachments', instance.attachments?.map((e) => e?.toJson())?.toList());
+      'attachments', instance.attachments?.map((e) => e.toJson()).toList());
   val['mentioned_users'] = Serialization.userIds(instance.mentionedUsers);
   writeNotNull('reaction_counts', readonly(instance.reactionCounts));
   writeNotNull('reaction_scores', readonly(instance.reactionScores));
@@ -141,7 +129,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
 
 TranslatedMessage _$TranslatedMessageFromJson(Map json) {
   return TranslatedMessage(
-    (json['i18n'] as Map)?.map(
+    (json['i18n'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e as String),
     ),
   );

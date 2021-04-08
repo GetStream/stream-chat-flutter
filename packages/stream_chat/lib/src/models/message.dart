@@ -106,11 +106,11 @@ class Message {
 
   /// A map describing the count of number of every reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final Map<String?, int>? reactionCounts;
+  final Map<String, int>? reactionCounts;
 
   /// A map describing the count of score of every reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final Map<String?, int>? reactionScores;
+  final Map<String, int>? reactionScores;
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)

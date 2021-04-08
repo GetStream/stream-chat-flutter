@@ -8,19 +8,19 @@ part of 'reaction.dart';
 
 Reaction _$ReactionFromJson(Map json) {
   return Reaction(
-    messageId: json['message_id'] as String,
+    messageId: json['message_id'] as String?,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
-    type: json['type'] as String,
+    type: json['type'] as String?,
     user: json['user'] == null
         ? null
-        : User.fromJson((json['user'] as Map)?.map(
+        : User.fromJson((json['user'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    userId: json['user_id'] as String,
-    score: json['score'] as int,
-    extraData: (json['extra_data'] as Map)?.map(
+    userId: json['user_id'] as String?,
+    score: json['score'] as int?,
+    extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
   );

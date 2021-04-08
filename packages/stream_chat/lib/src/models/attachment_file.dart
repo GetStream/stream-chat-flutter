@@ -4,16 +4,18 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meta/meta.dart';
 
 part 'attachment_file.freezed.dart';
+
 part 'attachment_file.g.dart';
 
 /// Union class to hold various [UploadState] of a attachment.
 @freezed
-abstract class UploadState with _$UploadState {
+class UploadState with _$UploadState {
   /// Preparing state of the union
   const factory UploadState.preparing() = Preparing;
 
   /// InProgress state of the union
-  const factory UploadState.inProgress({int uploaded, int total}) = InProgress;
+  const factory UploadState.inProgress(
+      {required int uploaded, required int total}) = InProgress;
 
   /// Success state of the union
   const factory UploadState.success() = Success;
@@ -41,9 +43,15 @@ extension UploadStateX on UploadState? {
   bool get isFailed => this is Failed;
 }
 
-Uint8List _fromString(String bytes) => Uint8List.fromList(bytes.codeUnits);
+Uint8List? _fromString(String? bytes) {
+  if (bytes == null) return null;
+  return Uint8List.fromList(bytes.codeUnits);
+}
 
-String _toString(Uint8List bytes) => String.fromCharCodes(bytes);
+String? _toString(Uint8List? bytes) {
+  if (bytes == null) return null;
+  return String.fromCharCodes(bytes);
+}
 
 /// The class that contains the information about an attachment file
 @JsonSerializable()
