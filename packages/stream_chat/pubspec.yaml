@@ -12,6 +12,7 @@ dependencies:
   async: ^2.5.0
   collection: ^1.15.0
   dio: ">=4.0.0-prev3 <4.0.0"
+  equatable: ^2.0.0
   freezed_annotation: ^0.14.0
   http_parser: ^4.0.0
   json_annotation: ^4.0.0
