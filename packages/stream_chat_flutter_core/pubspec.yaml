@@ -14,9 +14,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  meta: ^1.2.4
   rxdart: ^0.26.0
   stream_chat: ^1.5.0
-  meta: ^1.2.4
 
 dependency_overrides:
   stream_chat:
