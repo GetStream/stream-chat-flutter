@@ -18,7 +18,7 @@ dependencies:
   rxdart: ^0.26.0
   scrollable_positioned_list: ^0.1.8
   jiffy: ^3.0.1
-  flutter_svg: ">=0.21.0-nullsafety.0 <0.21.0"
+  flutter_svg: ^0.21.0
   flutter_portal: ^0.3.0
   cached_network_image: ">=3.0.0-nullsafety <3.0.0"
   shimmer: ^1.1.2
