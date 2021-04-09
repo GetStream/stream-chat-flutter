@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/action.dart';
 import 'package:stream_chat/src/models/attachment_file.dart';
@@ -10,7 +11,7 @@ part 'attachment.g.dart';
 
 /// The class that contains the information about an attachment
 @JsonSerializable(includeIfNull: false)
-class Attachment {
+class Attachment extends Equatable {
   /// Constructor used for json serialization
   Attachment({
     String id,
@@ -37,12 +38,11 @@ class Attachment {
     UploadState uploadState,
   })  : id = id ?? const Uuid().v4(),
         title = title ?? file?.name,
-        localUri = file?.path != null ? Uri.parse(file.path) : null {
-    this.uploadState = uploadState ??
-        ((assetUrl != null || imageUrl != null)
-            ? const UploadState.success()
-            : const UploadState.preparing());
-  }
+        localUri = file?.path != null ? Uri.parse(file.path) : null,
+        uploadState = uploadState ??
+            ((assetUrl != null || imageUrl != null)
+                ? const UploadState.success()
+                : const UploadState.preparing());
 
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
@@ -104,7 +104,7 @@ class Attachment {
   final AttachmentFile file;
 
   /// The current upload state of the attachment
-  UploadState uploadState;
+  final UploadState uploadState;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
@@ -205,49 +205,28 @@ class Attachment {
       );
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Attachment &&
-          runtimeType == other.runtimeType &&
-          type == other.type &&
-          titleLink == other.titleLink &&
-          title == other.title &&
-          thumbUrl == other.thumbUrl &&
-          text == other.text &&
-          pretext == other.pretext &&
-          ogScrapeUrl == other.ogScrapeUrl &&
-          imageUrl == other.imageUrl &&
-          footerIcon == other.footerIcon &&
-          footer == other.footer &&
-          fields == other.fields &&
-          fallback == other.fallback &&
-          color == other.color &&
-          authorName == other.authorName &&
-          authorLink == other.authorLink &&
-          authorIcon == other.authorIcon &&
-          assetUrl == other.assetUrl &&
-          actions == other.actions &&
-          extraData == other.extraData;
-
-  @override
-  int get hashCode =>
-      type.hashCode ^
-      titleLink.hashCode ^
-      title.hashCode ^
-      thumbUrl.hashCode ^
-      text.hashCode ^
-      pretext.hashCode ^
-      ogScrapeUrl.hashCode ^
-      imageUrl.hashCode ^
-      footerIcon.hashCode ^
-      footer.hashCode ^
-      fields.hashCode ^
-      fallback.hashCode ^
-      color.hashCode ^
-      authorName.hashCode ^
-      authorLink.hashCode ^
-      authorIcon.hashCode ^
-      assetUrl.hashCode ^
-      actions.hashCode ^
-      extraData.hashCode;
+  List<Object> get props => [
+        id,
+        type,
+        titleLink,
+        title,
+        thumbUrl,
+        text,
+        pretext,
+        ogScrapeUrl,
+        imageUrl,
+        footerIcon,
+        footer,
+        fields,
+        fallback,
+        color,
+        authorName,
+        authorLink,
+        authorIcon,
+        assetUrl,
+        actions,
+        file,
+        uploadState,
+        extraData,
+      ];
 }

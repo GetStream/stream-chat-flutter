@@ -50,7 +50,6 @@ class ChannelImage extends StatelessWidget {
     this.channel,
     this.constraints,
     this.onTap,
-    this.showOnlineStatus = true,
     this.borderRadius,
     this.selected = false,
     this.selectionColor,
@@ -68,8 +67,6 @@ class ChannelImage extends StatelessWidget {
   /// The function called when the image is tapped
   final VoidCallback onTap;
 
-  final bool showOnlineStatus;
-
   final bool selected;
 
   final Color selectionColor;
@@ -81,142 +78,144 @@ class ChannelImage extends StatelessWidget {
     final streamChat = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
     return StreamBuilder<Map<String, dynamic>>(
-        stream: channel.extraDataStream,
-        initialData: channel.extraData,
-        builder: (context, snapshot) {
-          String image;
-          if (snapshot.data?.containsKey('image') == true) {
-            image = snapshot.data['image'];
-          } else if (channel.state.members?.length == 2) {
-            final otherMember = channel.state.members
-                .firstWhere((member) => member.user.id != streamChat.user.id);
-            return StreamBuilder<User>(
-                stream: streamChat.client.state.usersStream
-                    .map((users) => users[otherMember.userId]),
-                initialData: otherMember.user,
-                builder: (context, snapshot) {
-                  return UserAvatar(
-                    borderRadius: borderRadius ??
-                        StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .avatarTheme
-                            .borderRadius,
-                    user: snapshot.data ?? otherMember.user,
-                    constraints: constraints ??
-                        StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .avatarTheme
-                            .constraints,
-                    onTap: onTap != null ? (_) => onTap() : null,
-                    selected: selected,
-                    selectionColor: selectionColor ??
-                        StreamChatTheme.of(context).colorTheme.accentBlue,
-                    selectionThickness: selectionThickness,
-                  );
-                });
-          } else {
-            final images = channel.state.members
-                .where((member) =>
-                    member.user.id != streamChat.user.id &&
-                    member.user.extraData['image'] != null)
-                .take(4)
-                .map((e) => e.user.extraData['image'] as String)
-                .toList();
-            return GroupImage(
-              images: images,
-              borderRadius: borderRadius ??
-                  StreamChatTheme.of(context)
-                      .channelPreviewTheme
-                      .avatarTheme
-                      .borderRadius,
-              constraints: constraints ??
-                  StreamChatTheme.of(context)
-                      .channelPreviewTheme
-                      .avatarTheme
-                      .constraints,
-              onTap: onTap,
-              selected: selected,
-              selectionColor: selectionColor ??
-                  StreamChatTheme.of(context).colorTheme.accentBlue,
-              selectionThickness: selectionThickness,
-            );
-          }
-
-          Widget child = ClipRRect(
+      stream: channel.extraDataStream,
+      initialData: channel.extraData,
+      builder: (context, snapshot) {
+        String image;
+        if (snapshot.data?.containsKey('image') == true) {
+          image = snapshot.data['image'];
+        } else if (channel.state.members?.length == 2) {
+          final otherMember = channel.state.members
+              .firstWhere((member) => member.user.id != streamChat.user.id);
+          return StreamBuilder<User>(
+              stream: streamChat.client.state.usersStream
+                  .map((users) => users[otherMember.userId]),
+              initialData: otherMember.user,
+              builder: (context, snapshot) {
+                return UserAvatar(
+                  borderRadius: borderRadius ??
+                      StreamChatTheme.of(context)
+                          .channelPreviewTheme
+                          .avatarTheme
+                          .borderRadius,
+                  user: snapshot.data ?? otherMember.user,
+                  constraints: constraints ??
+                      StreamChatTheme.of(context)
+                          .channelPreviewTheme
+                          .avatarTheme
+                          .constraints,
+                  onTap: onTap != null ? (_) => onTap() : null,
+                  selected: selected,
+                  selectionColor: selectionColor ??
+                      StreamChatTheme.of(context).colorTheme.accentBlue,
+                  selectionThickness: selectionThickness,
+                );
+              });
+        } else {
+          final images = channel.state.members
+              .where((member) =>
+                  member.user.id != streamChat.user.id &&
+                  member.user.extraData['image'] != null)
+              .take(4)
+              .map((e) => e.user.extraData['image'] as String)
+              .toList();
+          return GroupImage(
+            images: images,
             borderRadius: borderRadius ??
                 StreamChatTheme.of(context)
                     .channelPreviewTheme
                     .avatarTheme
                     .borderRadius,
-            child: Container(
-              constraints: constraints ??
-                  StreamChatTheme.of(context)
-                      .channelPreviewTheme
-                      .avatarTheme
-                      .constraints,
-              decoration: BoxDecoration(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                fit: StackFit.expand,
-                children: <Widget>[
-                  image != null
-                      ? CachedNetworkImage(
-                          imageUrl: image,
-                          errorWidget: (_, __, ___) {
-                            return Center(
-                              child: Text(
-                                snapshot.data?.containsKey('name') ?? false
-                                    ? snapshot.data['name'][0]
-                                    : '',
-                                style: TextStyle(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            );
-                          },
-                          fit: BoxFit.cover,
-                        )
-                      : StreamChatTheme.of(context)
-                          .defaultChannelImage(context, channel),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onTap,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            constraints: constraints ??
+                StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .avatarTheme
+                    .constraints,
+            onTap: onTap,
+            selected: selected,
+            selectionColor: selectionColor ??
+                StreamChatTheme.of(context).colorTheme.accentBlue,
+            selectionThickness: selectionThickness,
           );
-          if (selected) {
-            child = ClipRRect(
-              borderRadius: (borderRadius ??
-                      StreamChatTheme.of(context)
-                          .ownMessageTheme
-                          .avatarTheme
-                          .borderRadius) +
-                  BorderRadius.circular(selectionThickness),
-              child: Container(
-                constraints: constraints ??
+        }
+
+        Widget child = ClipRRect(
+          borderRadius: borderRadius ??
+              StreamChatTheme.of(context)
+                  .channelPreviewTheme
+                  .avatarTheme
+                  .borderRadius,
+          child: Container(
+            constraints: constraints ??
+                StreamChatTheme.of(context)
+                    .channelPreviewTheme
+                    .avatarTheme
+                    .constraints,
+            decoration: BoxDecoration(
+              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              fit: StackFit.expand,
+              children: <Widget>[
+                image != null
+                    ? CachedNetworkImage(
+                        imageUrl: image,
+                        errorWidget: (_, __, ___) {
+                          return Center(
+                            child: Text(
+                              snapshot.data?.containsKey('name') ?? false
+                                  ? snapshot.data['name'][0]
+                                  : '',
+                              style: TextStyle(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
+                        fit: BoxFit.cover,
+                      )
+                    : StreamChatTheme.of(context)
+                        .defaultChannelImage(context, channel),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onTap,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        if (selected) {
+          child = ClipRRect(
+            key: Key('selectedImage'),
+            borderRadius: (borderRadius ??
                     StreamChatTheme.of(context)
                         .ownMessageTheme
                         .avatarTheme
-                        .constraints,
-                color: selectionColor ??
-                    StreamChatTheme.of(context).colorTheme.accentBlue,
-                child: Padding(
-                  padding: EdgeInsets.all(selectionThickness),
-                  child: child,
-                ),
+                        .borderRadius) +
+                BorderRadius.circular(selectionThickness),
+            child: Container(
+              constraints: constraints ??
+                  StreamChatTheme.of(context)
+                      .ownMessageTheme
+                      .avatarTheme
+                      .constraints,
+              color: selectionColor ??
+                  StreamChatTheme.of(context).colorTheme.accentBlue,
+              child: Padding(
+                padding: EdgeInsets.all(selectionThickness),
+                child: child,
               ),
-            );
-          }
-          return child;
-        });
+            ),
+          );
+        }
+        return child;
+      },
+    );
   }
 }

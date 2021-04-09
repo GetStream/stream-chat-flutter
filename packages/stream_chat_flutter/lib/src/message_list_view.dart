@@ -231,10 +231,10 @@ class MessageListView extends StatefulWidget {
   /// Called when system message is tapped
   final OnMessageTap onSystemMessageTap;
 
-  // Customize onTap on attachment
+  /// Customize onTap on attachment
   final void Function(Message message, Attachment attachment) onAttachmentTap;
 
-  // Customize the MessageWidget textBuilder
+  /// Customize the MessageWidget textBuilder
   final void Function(BuildContext context, Message message) textBuilder;
 
   @override
