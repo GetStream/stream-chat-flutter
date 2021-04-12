@@ -105,7 +105,7 @@ class Attachment extends Equatable {
   final AttachmentFile? file;
 
   /// The current upload state of the attachment
-  final UploadState? uploadState;
+  late final UploadState? uploadState;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
@@ -206,7 +206,7 @@ class Attachment extends Equatable {
       );
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         type,
         titleLink,
