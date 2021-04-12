@@ -403,11 +403,11 @@ class StreamChatClient {
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   @Deprecated('Use `connectUser` instead. Will be removed in Future releases')
-  Future<Event> setUser(User user, String token) => connectUser(user, token);
+  Future<Event?> setUser(User user, String token) => connectUser(user, token);
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectUser(User? user, String? token) async {
+  Future<Event?> connectUser(User? user, String? token) async {
     if (_connectCompleter != null && !_connectCompleter!.isCompleted) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
@@ -442,11 +442,12 @@ class StreamChatClient {
   @Deprecated(
     'Use `connectUserWithProvider` instead. Will be removed in Future releases',
   )
-  Future<Event> setUserWithProvider(User user) => connectUserWithProvider(user);
+  Future<Event?> setUserWithProvider(User user) =>
+      connectUserWithProvider(user);
 
   /// Connects the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectUserWithProvider(User user) async {
+  Future<Event?> connectUserWithProvider(User user) async {
     if (tokenProvider == null) {
       throw Exception('''
       TokenProvider must be provided in the constructor in order to use `connectUserWithProvider` method.
@@ -500,7 +501,7 @@ class StreamChatClient {
   Completer<Event>? _connectCompleter;
 
   /// Connect the client websocket
-  Future<Event> connect() async {
+  Future<Event?> connect() async {
     logger.info('connecting');
     if (wsConnectionStatus == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
@@ -570,7 +571,7 @@ class StreamChatClient {
     _connectionStatusSubscription =
         _ws.connectionStatusStream.listen(_connectionStatusHandler);
 
-    var event = (await _chatPersistenceClient?.getConnectionInfo())!;
+    var event = await _chatPersistenceClient?.getConnectionInfo();
 
     await _ws.connect()!.then((e) async {
       await _chatPersistenceClient?.updateConnectionInfo(e);
@@ -589,7 +590,7 @@ class StreamChatClient {
 
   /// Get the events missed while offline to sync the offline storage
   Future<void> resync([List<String>? cids]) async {
-    final lastSyncAt = (await _chatPersistenceClient?.getLastSyncAt())!;
+    final lastSyncAt = await _chatPersistenceClient?.getLastSyncAt();
 
     if (lastSyncAt == null) {
       _synced = true;
@@ -943,12 +944,12 @@ class StreamChatClient {
   /// the API. It returns a [Future] that resolves when the connection is setup.
   @Deprecated(
       'Use `connectAnonymousUser` instead. Will be removed in Future releases')
-  Future<Event> setAnonymousUser() => connectAnonymousUser();
+  Future<Event?> setAnonymousUser() => connectAnonymousUser();
 
   /// Connects the current user with an anonymous id, this triggers a connection
   /// to the API. It returns a [Future] that resolves when the connection is
   /// setup.
-  Future<Event> connectAnonymousUser() async {
+  Future<Event?> connectAnonymousUser() async {
     if (_connectCompleter != null && !_connectCompleter!.isCompleted) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
@@ -973,11 +974,11 @@ class StreamChatClient {
   /// It returns a [Future] that resolves when the connection is setup.
   @Deprecated(
       'Use `connectGuestUser` instead. Will be removed in Future releases')
-  Future<Event> setGuestUser(User user) => connectGuestUser(user);
+  Future<Event?> setGuestUser(User user) => connectGuestUser(user);
 
   /// Connects the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectGuestUser(User user) async {
+  Future<Event?> connectGuestUser(User user) async {
     _anonymous = true;
     final response = await post('/guest', data: {'user': user.toJson()})
         .then((res) => decode<ConnectGuestUserResponse>(
