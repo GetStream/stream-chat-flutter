@@ -34,7 +34,7 @@ import 'package:uuid/uuid.dart';
 typedef LogHandlerFunction = void Function(LogRecord record);
 
 /// Used for decoding [Map] data to a generic type `T`.
-typedef DecoderFunction<T> = T Function(Map<String, dynamic>?);
+typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 
 /// A function which can be used to request a Stream Chat API token from your
 /// own backend server. Function requires a single [userId].
@@ -268,9 +268,8 @@ class StreamChatClient {
               var stringData = options.data.toString();
 
               if (options.data is FormData) {
-                final multiPart = (options.data as FormData).files[0]?.value;
-                stringData =
-                    '${multiPart?.filename} - ${multiPart?.contentType}';
+                final multiPart = (options.data as FormData).files[0].value;
+                stringData = '${multiPart.filename} - ${multiPart.contentType}';
               }
 
               logger.info('''
@@ -408,7 +407,7 @@ class StreamChatClient {
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectUser(User user, String? token) async {
+  Future<Event> connectUser(User? user, String? token) async {
     if (_connectCompleter != null && !_connectCompleter!.isCompleted) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
@@ -417,6 +416,14 @@ class StreamChatClient {
     _connectCompleter = Completer();
 
     logger.info('connect user');
+
+    if (user == null) {
+      final e = Error();
+      _connectCompleter!
+          .completeError(e, StackTrace.fromString('No user provided.'));
+      throw e;
+    }
+
     state!.user = OwnUser.fromJson(user.toJson());
     this.token = token;
     _anonymous = false;
@@ -638,7 +645,7 @@ class StreamChatClient {
     bool waitForConnect = true,
   }) async* {
     final hash = base64.encode(utf8.encode(
-      '$filter${_asMap(sort)}$options${paginationParams?.toJson()}'
+      '$filter${_asMap(sort)}$options${paginationParams.toJson()}'
       '$messageLimit',
     ));
 
@@ -731,7 +738,7 @@ class StreamChatClient {
       QueryChannelsResponse.fromJson,
     )!;
 
-    if ((res.channels ?? []).isEmpty && (paginationParams?.offset ?? 0) == 0) {
+    if ((res.channels ?? []).isEmpty && (paginationParams.offset) == 0) {
       logger.warning(
         '''
         We could not find any channel for this query.
@@ -758,7 +765,7 @@ class StreamChatClient {
       filter,
       channels.map((c) => c.channel!.cid).toList(),
       clearQueryCache:
-          paginationParams?.offset == null || paginationParams.offset == 0,
+          paginationParams.offset == null || paginationParams.offset == 0,
     );
 
     state!.channels = updateData.key;
@@ -976,8 +983,9 @@ class StreamChatClient {
         .then((res) => decode<ConnectGuestUserResponse>(
             res.data, ConnectGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
+
     return connectUser(
-      (response?.user)!,
+      response?.user,
       response?.accessToken,
     );
   }
@@ -1008,7 +1016,7 @@ class StreamChatClient {
   Future<void> _disconnect() async {
     logger.info('Client disconnecting');
 
-    await _ws?.disconnect();
+    await _ws.disconnect();
     await _connectionStatusSubscription?.cancel();
   }
 
@@ -1427,7 +1435,7 @@ class ClientState {
 
   /// Used internally for optimistic update of unread count
   set totalUnreadCount(int? unreadCount) {
-    _totalUnreadCountController?.add(unreadCount ?? 0);
+    _totalUnreadCountController.add(unreadCount ?? 0);
   }
 
   void _listenChannelHidden() {
@@ -1473,7 +1481,7 @@ class ClientState {
 
   void _updateUsers(List<User?> userList) {
     final newUsers = {
-      ...users ?? {},
+      ...users,
       for (var user in userList) user!.id: user,
     };
     _usersController.add(newUsers);
@@ -1488,7 +1496,8 @@ class ClientState {
   Stream<OwnUser?> get userStream => _userController.stream;
 
   /// The current user
-  Map<String, User>? get users => _usersController.value as Map<String, User>?;
+  Map<String?, User?> get users =>
+      _usersController.value as Map<String?, User?>;
 
   /// The current user as a stream
   Stream<Map<String?, User?>> get usersStream => _usersController.stream;

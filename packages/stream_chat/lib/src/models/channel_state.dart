@@ -43,8 +43,8 @@ class ChannelState {
   final List<Read>? read;
 
   /// Create a new instance from a json
-  static ChannelState fromJson(Map<String, dynamic>? json) =>
-      _$ChannelStateFromJson(json!);
+  static ChannelState fromJson(Map<String, dynamic> json) =>
+      _$ChannelStateFromJson(json);
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelStateToJson(this);

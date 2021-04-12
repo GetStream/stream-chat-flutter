@@ -50,7 +50,7 @@ void main() {
           ),
         );
 
-        await channelClient?.sendMessage(message);
+        await channelClient.sendMessage(message);
 
         verify(() =>
             mockDio.post<String>('/channels/messaging/testid/message', data: {
@@ -80,7 +80,7 @@ void main() {
               statusCode: 200,
               requestOptions: FakeRequestOptions(),
             ));
-        await channelClient?.watch();
+        await channelClient.watch();
 
         when(
           () => mockDio.post<String>(
@@ -95,7 +95,7 @@ void main() {
           ),
         );
 
-        await channelClient?.markRead();
+        await channelClient.markRead();
 
         verify(() => mockDio.post<String>('/channels/messaging/testid/read',
             data: {})).called(1);
@@ -124,7 +124,7 @@ void main() {
           ),
         );
 
-        await channelClient?.getReplies('messageid', pagination);
+        await channelClient.getReplies('messageid', pagination);
 
         verify(() => mockDio.get<String>('/messages/messageid/replies',
             queryParameters: pagination.toJson())).called(1);
@@ -141,7 +141,7 @@ void main() {
           httpClient: mockDio,
           tokenProvider: (_) async => '',
         );
-        Channel channelClient = client.channel('messaging', id: 'testid');
+        final channelClient = client.channel('messaging', id: 'testid');
 
         when(() => mockDio.post<String>(
               any(),
@@ -566,9 +566,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        if (client != null) {
-          client.state?.user = OwnUser(id: 'test-id');
-        }
+        client.state?.user = OwnUser(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
         const reactionType = 'test';
@@ -623,9 +621,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        if (client != null) {
-          client.state?.user = OwnUser(id: 'test-id');
-        }
+        client.state?.user = OwnUser(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
 

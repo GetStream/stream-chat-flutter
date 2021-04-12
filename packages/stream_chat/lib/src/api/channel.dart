@@ -78,63 +78,63 @@ class Channel {
 
   /// Channel configuration as a stream
   Stream<ChannelConfig?>? get configStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.config);
+      state?.channelStateStream.map((cs) => cs!.channel?.config);
 
   /// Channel user creator
   User? get createdBy => state?._channelState?.channel?.createdBy;
 
   /// Channel user creator as a stream
   Stream<User?>? get createdByStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.createdBy);
+      state?.channelStateStream.map((cs) => cs!.channel?.createdBy);
 
   /// Channel frozen status
   bool? get frozen => state?._channelState?.channel?.frozen;
 
   /// Channel frozen status as a stream
   Stream<bool?>? get frozenStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.frozen);
+      state?.channelStateStream.map((cs) => cs!.channel?.frozen);
 
   /// Channel creation date
   DateTime? get createdAt => state?._channelState?.channel?.createdAt;
 
   /// Channel creation date as a stream
   Stream<DateTime?>? get createdAtStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.createdAt);
+      state?.channelStateStream.map((cs) => cs!.channel?.createdAt);
 
   /// Channel last message date
   DateTime? get lastMessageAt => state?._channelState?.channel?.lastMessageAt;
 
   /// Channel last message date as a stream
   Stream<DateTime?>? get lastMessageAtStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.lastMessageAt);
+      state?.channelStateStream.map((cs) => cs!.channel?.lastMessageAt);
 
   /// Channel updated date
   DateTime? get updatedAt => state?._channelState?.channel?.updatedAt;
 
   /// Channel updated date as a stream
   Stream<DateTime?>? get updatedAtStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.updatedAt);
+      state?.channelStateStream.map((cs) => cs!.channel?.updatedAt);
 
   /// Channel deletion date
   DateTime? get deletedAt => state?._channelState?.channel?.deletedAt;
 
   /// Channel deletion date as a stream
   Stream<DateTime?>? get deletedAtStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.deletedAt);
+      state?.channelStateStream.map((cs) => cs!.channel?.deletedAt);
 
   /// Channel member count
   int? get memberCount => state?._channelState?.channel?.memberCount;
 
   /// Channel member count as a stream
   Stream<int?>? get memberCountStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.memberCount);
+      state?.channelStateStream.map((cs) => cs!.channel?.memberCount);
 
   /// Channel id
   String? get id => state?._channelState?.channel?.id ?? _id;
 
   /// Channel id as a stream
   Stream<String?>? get idStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.id ?? _id);
+      state?.channelStateStream.map((cs) => cs!.channel?.id ?? _id);
 
   /// Channel cid
   String? get cid => state?._channelState?.channel?.cid ?? _cid;
@@ -144,7 +144,7 @@ class Channel {
 
   /// Channel cid as a stream
   Stream<String?>? get cidStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.cid ?? _cid);
+      state?.channelStateStream.map((cs) => cs!.channel?.cid ?? _cid);
 
   /// Channel extra data
   Map<String, dynamic>? get extraData =>
@@ -152,7 +152,7 @@ class Channel {
 
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>?>? get extraDataStream =>
-      state?.channelStateStream?.map((cs) => cs!.channel?.extraData);
+      state?.channelStateStream.map((cs) => cs!.channel?.extraData);
 
   /// The main Stream chat client
   StreamChatClient get client => _client;
@@ -284,7 +284,7 @@ class Channel {
           it.copyWith(uploadState: UploadState.failed(error: e.toString())),
         );
       }).whenComplete(() {
-        throttledUpdateAttachment?.cancel();
+        throttledUpdateAttachment.cancel();
         _cancelableAttachmentUploadRequest.remove(it.id);
       });
     })).whenComplete(() {
@@ -297,7 +297,7 @@ class Channel {
   /// Send a [message] to this channel.
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually sending the message.
-  Future<SendMessageResponse> sendMessage(Message message) async {
+  Future<SendMessageResponse?> sendMessage(Message message) async {
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
@@ -305,7 +305,7 @@ class Channel {
         ?.completeError('Message Cancelled');
 
     final quotedMessage = state?.messages?.firstWhereOrNull(
-      (m) => m.id == message?.quotedMessageId,
+      (m) => m.id == message.quotedMessageId,
     );
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -318,7 +318,7 @@ class Channel {
           if (it.uploadState.isSuccess) return it;
           return it.copyWith(uploadState: const UploadState.preparing());
         },
-      )?.toList(),
+      ).toList(),
     );
 
     if (message.parentId != null && message.id == null) {
@@ -348,9 +348,8 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await (_client.sendMessage(message, id, type)
-          as FutureOr<SendMessageResponse>);
-      state?.addMessage(response.message!);
+      final response = await (_client.sendMessage(message, id, type));
+      state?.addMessage(response!.message!);
       return response;
     } catch (error) {
       if (error is DioError && error.type != DioErrorType.response) {
@@ -379,7 +378,7 @@ class Channel {
           if (it.uploadState.isSuccess) return it;
           return it.copyWith(uploadState: const UploadState.preparing());
         },
-      )?.toList(),
+      ).toList(),
     );
 
     state?.addMessage(message);
@@ -596,7 +595,7 @@ class Channel {
       ..removeWhere((it) => it.userId != user!.id);
 
     final newMessage = message.copyWith(
-      reactionCounts: {...message?.reactionCounts ?? <String, int>{}}
+      reactionCounts: {...message.reactionCounts ?? <String, int>{}}
         ..update(type, (value) {
           if (enforceUnique) return value;
           return value + 1;
@@ -660,7 +659,7 @@ class Channel {
           r.type == reaction.type &&
           r.messageId == reaction.messageId);
 
-    final ownReactions = [...latestReactions ?? <Reaction>[]]
+    final ownReactions = [...latestReactions]
       ..removeWhere((it) => it.userId != user!.id);
 
     final newMessage = message.copyWith(
@@ -867,7 +866,7 @@ class Channel {
       '$_channelURL/stop-watching',
       data: {},
     );
-    return _client.decode(response?.data, EmptyResponse.fromJson);
+    return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   /// List the message replies for a parent message
@@ -878,10 +877,10 @@ class Channel {
     PaginationParams options, {
     bool preferOffline = false,
   }) async {
-    final cachedReplies = (await _client.chatPersistenceClient?.getReplies(
+    final cachedReplies = await _client.chatPersistenceClient?.getReplies(
       parentId,
       options: options,
-    ))!;
+    );
     if (cachedReplies != null && cachedReplies.isNotEmpty) {
       state?.updateThreadInfo(parentId, cachedReplies);
       if (preferOffline) {
@@ -1049,7 +1048,7 @@ class Channel {
 
     if (id != null) {
       payload['id'] = id;
-    } else if (state?.members?.isNotEmpty == true) {
+    } else if (state?.members.isNotEmpty == true) {
       payload['members'] = state!.members;
     }
 
@@ -1222,7 +1221,7 @@ class ChannelClientState {
     ChannelState channelState,
     //ignore: unnecessary_parenthesis
   ) : _debouncedUpdatePersistenceChannelState = ((ChannelState state) =>
-                _channel?._client?.chatPersistenceClient
+                _channel._client.chatPersistenceClient
                     ?.updateChannelState(state))
             .debounced(const Duration(seconds: 1)) {
     retryQueue = RetryQueue(
@@ -1264,12 +1263,12 @@ class ChannelClientState {
 
     _channel._client.chatPersistenceClient
         ?.getChannelThreads(_channel.cid)
-        ?.then((threads) {
+        .then((threads) {
       _threads = threads;
-    })?.then((_) {
+    }).then((_) {
       _channel._client.chatPersistenceClient
           ?.getChannelStateByCid(_channel.cid)
-          ?.then((state) {
+          .then((state) {
         // Replacing the persistence state members with the latest
         // `channelState.members` as they may have changes over the time.
         updateChannelState(state.copyWith(members: channelState.members));
@@ -1309,8 +1308,8 @@ class ChannelClientState {
                   return expiration.isBefore(DateTime.now());
                 }) ==
                 true)
-        ?.map((e) => e.id)
-        ?.toList();
+        .map((e) => e.id)
+        .toList();
     if (expiredAttachmentMessagesId?.isNotEmpty == true) {
       _channel.getMessagesById(expiredAttachmentMessagesId!);
       _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
@@ -1560,7 +1559,7 @@ class ChannelClientState {
 
   /// Channel members list
   List<Member> get members => _channelState!.members!
-      .map((e) => e!.copyWith(user: _channel.client.state!.users![e.user!.id!]))
+      .map((e) => e!.copyWith(user: _channel.client.state!.users[e.user!.id!]))
       .toList();
 
   /// Channel members list as a stream
@@ -1581,7 +1580,7 @@ class ChannelClientState {
 
   /// Channel watchers list
   List<User> get watchers => _channelState!.watchers!
-      .map((e) => _channel.client.state!.users![e.id!] ?? e)
+      .map((e) => _channel.client.state!.users[e.id!] ?? e)
       .toList();
 
   /// Channel watchers list as a stream
@@ -1628,7 +1627,7 @@ class ChannelClientState {
         ...newThreads[parentId]
                 ?.where((newMessage) =>
                     !messages!.any((m) => m.id == newMessage.id))
-                ?.toList() ??
+                .toList() ??
             [],
         ...messages!,
       ];
@@ -1654,39 +1653,39 @@ class ChannelClientState {
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
     final newMessages = <Message>[
-      ...updatedState?.messages ?? [],
+      ...updatedState.messages ?? [],
       ..._channelState?.messages
               ?.where((m) =>
                   updatedState.messages
                       ?.any((newMessage) => newMessage.id == m.id) !=
                   true)
-              ?.toList() ??
+              .toList() ??
           [],
     ]..sort(_sortByCreatedAt as int Function(Message, Message)?);
 
     final newWatchers = <User>[
-      ...updatedState?.watchers ?? [],
+      ...updatedState.watchers ?? [],
       ..._channelState?.watchers
               ?.where((w) =>
                   updatedState.watchers
                       ?.any((newWatcher) => newWatcher.id == w.id) !=
                   true)
-              ?.toList() ??
+              .toList() ??
           [],
     ];
 
     final newMembers = <Member?>[
-      ...updatedState?.members ?? [],
+      ...updatedState.members ?? [],
     ];
 
     final newReads = <Read>[
-      ...updatedState?.read ?? [],
+      ...updatedState.read ?? [],
       ..._channelState?.read
               ?.where((r) =>
                   updatedState.read
                       ?.any((newRead) => newRead.user!.id == r.user!.id) !=
                   true)
-              ?.toList() ??
+              .toList() ??
           [],
     ];
 
@@ -1730,12 +1729,12 @@ class ChannelClientState {
 
   set _channelState(ChannelState? v) {
     _channelStateController.add(v);
-    _debouncedUpdatePersistenceChannelState?.call([v]);
+    _debouncedUpdatePersistenceChannelState.call([v]);
   }
 
   /// The channel threads related to this channel
-  Map<String, List<Message>>? get threads =>
-      _threadsController.value as Map<String, List<Message>>?;
+  Map<String, List<Message>>? get threads => _threadsController.value
+      ?.map((key, value) => MapEntry(key ?? '', value ?? []));
 
   /// The channel threads related to this channel as a stream
   Stream<Map<String?, List<Message>?>> get threadsStream =>
@@ -1793,7 +1792,7 @@ class ChannelClientState {
             .on()
             .where((event) =>
                 event.user != null &&
-                members?.any((m) => m.userId == event.user!.id) == true)
+                members.any((m) => m.userId == event.user!.id) == true)
             .listen(
           (event) {
             final newMembers = List<Member>.from(members);
@@ -1841,7 +1840,7 @@ class ChannelClientState {
       final now = DateTime.now();
       var expiredMessages = channelState!.pinnedMessages
               ?.where((m) => m.pinExpires?.isBefore(now) == true)
-              ?.toList() ??
+              .toList() ??
           [];
       if (expiredMessages.isNotEmpty) {
         expiredMessages = expiredMessages
@@ -1876,7 +1875,7 @@ class ChannelClientState {
 
   /// Call this method to dispose this object
   void dispose() {
-    _debouncedUpdatePersistenceChannelState?.cancel();
+    _debouncedUpdatePersistenceChannelState.cancel();
     _unreadCountController.close();
     retryQueue!.dispose();
     _subscriptions.forEach((s) => s.cancel());

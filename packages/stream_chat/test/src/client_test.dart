@@ -21,7 +21,7 @@ class FakeRequestOptions extends Fake implements RequestOptions {}
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
 
 class Functions {
-  Future<String> tokenProvider(String userId) => null;
+  Future<String> tokenProvider(String userId) async => '';
 }
 
 class MockFunctions extends Mock implements Functions {}
@@ -155,7 +155,9 @@ void main() {
             'sort': sortOptions,
           }
             ..addAll(options)
-            ..addAll(paginationParams.toJson())),
+            ..addAll(paginationParams
+                .toJson()
+                .map((key, value) => MapEntry(key, value as Object)))),
         };
 
         when(

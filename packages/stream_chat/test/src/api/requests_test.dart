@@ -12,7 +12,9 @@ void main() {
     test('PaginationParams', () {
       const option = PaginationParams();
       final j = option.toJson();
-      expect(j, {'limit': 10, 'offset': 0});
+      expect(j, containsPair('limit', 10));
+      expect(j, containsPair('offset', 0));
+      expect(j, contains('hash_code'));
     });
   });
 }

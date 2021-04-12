@@ -87,7 +87,7 @@ class AttachmentFile {
   final int? size;
 
   /// File extension for this file.
-  String? get extension => name?.split('.')?.last;
+  String? get extension => name?.split('.').last;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);

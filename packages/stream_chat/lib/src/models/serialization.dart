@@ -11,7 +11,7 @@ class Serialization {
 
   /// List of users to list of userIds
   static List<String?>? userIds(List<User>? users) =>
-      users?.map((u) => u.id)?.toList();
+      users?.map((u) => u.id).toList();
 
   /// Takes unknown json keys and puts them in the `extra_data` key
   static Map<String, dynamic>? moveToExtraDataFromRoot(

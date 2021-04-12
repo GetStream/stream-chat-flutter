@@ -124,7 +124,7 @@ class Debounce {
     Duration? maxWait,
   })  : _leading = leading,
         _trailing = trailing,
-        _wait = wait?.inMilliseconds ?? 0,
+        _wait = wait.inMilliseconds,
         _maxing = maxWait != null {
     if (_maxing) {
       _maxWait = math.max(maxWait!.inMilliseconds, _wait);

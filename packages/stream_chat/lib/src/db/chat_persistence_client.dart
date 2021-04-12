@@ -213,7 +213,7 @@ abstract class ChatPersistenceClient {
                         if (m.ownReactions != null)
                           ...m.ownReactions!.map((r) => r.user),
                       ])
-                  ?.expand((v) => v),
+                  .expand((v) => v),
               if (cs.read != null) ...cs.read!.map((r) => r.user),
               if (cs.members != null) ...cs.members!.map((m) => m!.user),
             ])

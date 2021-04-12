@@ -20,7 +20,7 @@ QueryChannelsResponse _$QueryChannelsResponseFromJson(Map json) {
   return QueryChannelsResponse()
     ..duration = json['duration'] as String?
     ..channels = (json['channels'] as List<dynamic>?)
-        ?.map((e) => ChannelState.fromJson(e as Map))
+        ?.map((e) => ChannelState.fromJson(e as Map<String, dynamic>))
         .toList();
 }
 
@@ -169,7 +169,7 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(Map json) {
   return SearchMessagesResponse()
     ..duration = json['duration'] as String?
     ..results = (json['results'] as List<dynamic>?)
-        ?.map((e) => GetMessageResponse.fromJson(e as Map))
+        ?.map((e) => GetMessageResponse.fromJson(e as Map<String, dynamic>))
         .toList();
 }
 

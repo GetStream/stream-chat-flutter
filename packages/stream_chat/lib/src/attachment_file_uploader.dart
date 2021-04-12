@@ -70,7 +70,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
-    final filename = file!.path?.split('/')?.last ?? file.name;
+    final filename = file!.path?.split('/').last ?? file.name;
     final mimeType = filename.mimeType;
 
     MultipartFile? multiPartFile;
@@ -107,7 +107,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
-    final filename = file!.path?.split('/')?.last ?? file.name;
+    final filename = file!.path?.split('/').last ?? file.name;
     final mimeType = filename.mimeType;
 
     MultipartFile? multiPartFile;

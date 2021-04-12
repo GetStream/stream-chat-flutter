@@ -153,9 +153,7 @@ class WebSocket {
       onError: (error, stacktrace) {
         _onConnectionError(error, stacktrace);
       },
-      onDone: () {
-        _onDone();
-      },
+      onDone: _onDone,
     );
     return _connectionCompleter.future;
   }
