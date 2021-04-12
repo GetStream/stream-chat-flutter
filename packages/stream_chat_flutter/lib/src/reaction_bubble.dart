@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -38,6 +39,7 @@ class ReactionBubble extends StatelessWidget {
       alignment: Alignment.center,
       child: Stack(
         alignment: Alignment.center,
+        fit: StackFit.loose,
         children: [
           Transform.translate(
             offset: Offset(reverse ? offset : -offset, 0),

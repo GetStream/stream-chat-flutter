@@ -58,7 +58,7 @@ jobs:
           ./.github/workflows/scripts/validate-formatting.sh
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v2
@@ -102,4 +102,4 @@ jobs:
       - uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
-          min_coverage: 16
+          min_coverage: 35

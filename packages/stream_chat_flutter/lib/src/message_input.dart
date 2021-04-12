@@ -16,7 +16,6 @@ import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
@@ -30,6 +29,13 @@ import 'video_thumbnail_image.dart';
 typedef AttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   Attachment,
+);
+
+/// Builder function for building a mention tile
+/// Use [MentionTile] for the default implementation
+typedef MentionTileBuilder = Widget Function(
+  BuildContext context,
+  Member member,
 );
 
 enum ActionsLocation {
@@ -125,6 +131,7 @@ class MessageInput extends StatefulWidget {
     this.idleSendButton,
     this.activeSendButton,
     this.showCommandsButton = true,
+    this.mentionsTileBuilder,
   }) : super(key: key);
 
   /// Message to edit
@@ -190,6 +197,9 @@ class MessageInput extends StatefulWidget {
 
   /// Send button widget in an active state
   final Widget activeSendButton;
+
+  /// Customize the tile for the mentions overlay
+  final MentionTileBuilder mentionsTileBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
@@ -458,7 +468,9 @@ class MessageInputState extends State<MessageInput> {
                 ? pi
                 : 0,
             child: StreamSvgIcon.emptyCircleLeft(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              color: StreamChatTheme.of(context)
+                  .messageInputTheme
+                  .expandButtonColor,
             ),
           ),
           padding: const EdgeInsets.all(0),
@@ -681,7 +693,7 @@ class MessageInputState extends State<MessageInput> {
         if (!mounted) {
           return;
         }
-        StreamChannel.of(context).channel.keyStroke().catchError((e) {});
+        StreamChannel.of(context).channel.keyStroke()?.catchError((e) {});
 
         setState(() {
           _messageIsPresent = s.trim().isNotEmpty;
@@ -1314,80 +1326,9 @@ class MessageInputState extends State<MessageInput> {
                                       _mentionsOverlay?.remove();
                                       _mentionsOverlay = null;
                                     },
-                                    child: Container(
-                                      height: 56.0,
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 16.0,
-                                          ),
-                                          UserAvatar(
-                                            constraints: BoxConstraints.tight(
-                                              Size(
-                                                40,
-                                                40,
-                                              ),
-                                            ),
-                                            user: m.user,
-                                          ),
-                                          SizedBox(
-                                            width: 8.0,
-                                          ),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    '${m.user.name}',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: StreamChatTheme.of(
-                                                            context)
-                                                        .textTheme
-                                                        .bodyBold,
-                                                  ),
-                                                  SizedBox(
-                                                    height: 2.0,
-                                                  ),
-                                                  Text(
-                                                    '@${m.userId}',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: StreamChatTheme.of(
-                                                            context)
-                                                        .textTheme
-                                                        .footnoteBold
-                                                        .copyWith(
-                                                            color: StreamChatTheme
-                                                                    .of(context)
-                                                                .colorTheme
-                                                                .grey),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 18.0, left: 8.0),
-                                            child: StreamSvgIcon.mentions(
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .accentBlue,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    child: widget.mentionsTileBuilder != null
+                                        ? widget.mentionsTileBuilder(context, m)
+                                        : MentionTile(m),
                                   ),
                                 );
                               },
@@ -2240,10 +2181,12 @@ class MessageInputState extends State<MessageInput> {
   void _parseExistingMessage(Message message) {
     textEditingController.text = message.text;
     _messageIsPresent = true;
-    for (final attachment in message?.attachments) {
-      _attachments[attachment.id] = attachment.copyWith(
-        uploadState: attachment.uploadState ?? UploadState.success(),
-      );
+    if (message.attachments != null) {
+      for (final attachment in message.attachments) {
+        _attachments[attachment.id] = attachment.copyWith(
+          uploadState: attachment.uploadState ?? UploadState.success(),
+        );
+      }
     }
   }
 

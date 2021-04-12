@@ -40,7 +40,7 @@ class UnreadIndicator extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  '${snapshot.data}',
+                  '${snapshot.data > 99 ? '99+' : snapshot.data}',
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.white,

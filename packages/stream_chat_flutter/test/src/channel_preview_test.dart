@@ -15,6 +15,7 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
+      when(channel.cid).thenReturn('cid');
       when(client.state).thenReturn(clientState);
       when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
       when(channel.lastMessageAt).thenReturn(lastMessageAt);
@@ -27,6 +28,9 @@ void main() {
           }));
       when(channel.extraData).thenReturn({
         'name': 'test name',
+      });
+      when(clientState.channels).thenReturn({
+        channel.cid: channel,
       });
       when(channelState.unreadCount).thenReturn(1);
       when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));

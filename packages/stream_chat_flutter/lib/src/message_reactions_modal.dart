@@ -13,8 +13,6 @@ import 'message_widget.dart';
 import 'stream_chat_theme.dart';
 
 class MessageReactionsModal extends StatelessWidget {
-  final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  final void Function(Message) onThreadTap;
   final Message message;
   final MessageTheme messageTheme;
   final bool reverse;
@@ -30,8 +28,6 @@ class MessageReactionsModal extends StatelessWidget {
     @required this.message,
     @required this.messageTheme,
     this.showReactions = true,
-    this.onThreadTap,
-    this.editMessageInputBuilder,
     this.messageShape,
     this.attachmentShape,
     this.reverse = false,
