@@ -314,39 +314,36 @@ class Message extends Equatable {
 
   /// Returns a new [Message] that is a combination of this message and the
   /// given [other] message.
-  Message merge(Message other) {
-    if (other == null) return this;
-    return copyWith(
-      id: other.id,
-      text: other.text,
-      type: other.type,
-      attachments: other.attachments,
-      mentionedUsers: other.mentionedUsers,
-      reactionCounts: other.reactionCounts,
-      reactionScores: other.reactionScores,
-      latestReactions: other.latestReactions,
-      ownReactions: other.ownReactions,
-      parentId: other.parentId,
-      quotedMessage: other.quotedMessage,
-      quotedMessageId: other.quotedMessageId,
-      replyCount: other.replyCount,
-      threadParticipants: other.threadParticipants,
-      showInChannel: other.showInChannel,
-      command: other.command,
-      createdAt: other.createdAt,
-      silent: other.silent,
-      extraData: other.extraData,
-      user: other.user,
-      shadowed: other.shadowed,
-      updatedAt: other.updatedAt,
-      deletedAt: other.deletedAt,
-      status: other.status,
-      pinned: other.pinned,
-      pinnedAt: other.pinnedAt,
-      pinExpires: other.pinExpires,
-      pinnedBy: other.pinnedBy,
-    );
-  }
+  Message merge(Message other) => copyWith(
+        id: other.id,
+        text: other.text,
+        type: other.type,
+        attachments: other.attachments,
+        mentionedUsers: other.mentionedUsers,
+        reactionCounts: other.reactionCounts,
+        reactionScores: other.reactionScores,
+        latestReactions: other.latestReactions,
+        ownReactions: other.ownReactions,
+        parentId: other.parentId,
+        quotedMessage: other.quotedMessage,
+        quotedMessageId: other.quotedMessageId,
+        replyCount: other.replyCount,
+        threadParticipants: other.threadParticipants,
+        showInChannel: other.showInChannel,
+        command: other.command,
+        createdAt: other.createdAt,
+        silent: other.silent,
+        extraData: other.extraData,
+        user: other.user,
+        shadowed: other.shadowed,
+        updatedAt: other.updatedAt,
+        deletedAt: other.deletedAt,
+        status: other.status,
+        pinned: other.pinned,
+        pinnedAt: other.pinnedAt,
+        pinExpires: other.pinExpires,
+        pinnedBy: other.pinnedBy,
+      );
 
   @override
   List<Object?> get props => [

@@ -321,15 +321,6 @@ class Channel {
       ).toList(),
     );
 
-    if (message.parentId != null && message.id == null) {
-      final parentMessage =
-          state!.messages!.firstWhere((m) => m.id == message.parentId);
-
-      state?.addMessage(parentMessage.copyWith(
-        replyCount: parentMessage.replyCount! + 1,
-      ));
-    }
-
     state?.addMessage(message);
 
     try {
@@ -348,7 +339,7 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await (_client.sendMessage(message, id, type));
+      final response = await _client.sendMessage(message, id, type);
       state?.addMessage(response!.message!);
       return response;
     } catch (error) {
@@ -466,8 +457,7 @@ class Channel {
   ) {
     assert(() {
       if (timeoutOrExpirationDate is! DateTime &&
-          timeoutOrExpirationDate is! num &&
-          timeoutOrExpirationDate != null) {
+          timeoutOrExpirationDate is! num) {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
@@ -997,7 +987,7 @@ class Channel {
         cid,
         messagePagination: messagesPagination,
       ))!;
-      if (updatedState != null && updatedState.messages!.isNotEmpty) {
+      if (updatedState.messages!.isNotEmpty) {
         if (state == null) {
           _initState(updatedState);
         } else {
@@ -1382,7 +1372,6 @@ class ChannelClientState {
         <Message>[...messages!, ...threads!.values.expand((v) => v)]
             .where(
               (message) =>
-                  message.status != null &&
                   message.status != MessageSendingStatus.sent &&
                   message.createdAt!.isBefore(
                     DateTime.now().subtract(

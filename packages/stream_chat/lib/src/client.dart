@@ -723,9 +723,7 @@ class StreamChatClient {
       payload.addAll(options);
     }
 
-    if (paginationParams != null) {
-      payload.addAll(paginationParams.toJson());
-    }
+    payload.addAll(paginationParams.toJson());
 
     final response = await get(
       '/channels',
@@ -765,8 +763,7 @@ class StreamChatClient {
     await _chatPersistenceClient?.updateChannelQueries(
       filter,
       channels.map((c) => c.channel!.cid).toList(),
-      clearQueryCache:
-          paginationParams.offset == null || paginationParams.offset == 0,
+      clearQueryCache: paginationParams.offset == 0,
     );
 
     state!.channels = updateData.key;
@@ -794,17 +791,15 @@ class StreamChatClient {
   ) {
     final channels = {...state!.channels ?? {}};
     final newChannels = <Channel>[];
-    if (channelStates != null) {
-      for (final channelState in channelStates) {
-        final channel = channels[channelState.channel!.cid];
-        if (channel != null) {
-          channel.state?.updateChannelState(channelState);
-          newChannels.add(channel);
-        } else {
-          final newChannel = Channel.fromState(this, channelState);
-          channels[newChannel.cid] = newChannel;
-          newChannels.add(newChannel);
-        }
+    for (final channelState in channelStates) {
+      final channel = channels[channelState.channel!.cid];
+      if (channel != null) {
+        channel.state?.updateChannelState(channelState);
+        newChannels.add(channel);
+      } else {
+        final newChannel = Channel.fromState(this, channelState);
+        channels[newChannel.cid] = newChannel;
+        newChannels.add(newChannel);
       }
     }
     return MapEntry(channels, newChannels);
@@ -1071,7 +1066,7 @@ class StreamChatClient {
     Map<String, dynamic>? messageFilters,
   }) async {
     assert(() {
-      if (filters == null || filters.isEmpty) {
+      if (filters.isEmpty) {
         throw ArgumentError('`filters` cannot be set as null or empty');
       }
       if (query == null && messageFilters == null) {
@@ -1199,9 +1194,7 @@ class StreamChatClient {
     String? id,
     Map<String, dynamic>? extraData,
   }) {
-    if (type != null &&
-        id != null &&
-        state!.channels?.containsKey('$type:$id') == true) {
+    if (id != null && state!.channels?.containsKey('$type:$id') == true) {
       if (state!.channels!['$type:$id'] != null) {
         return state!.channels!['$type:$id'] as Channel;
       }
@@ -1369,8 +1362,7 @@ class StreamChatClient {
   ) {
     assert(() {
       if (timeoutOrExpirationDate is! DateTime &&
-          timeoutOrExpirationDate is! num &&
-          timeoutOrExpirationDate != null) {
+          timeoutOrExpirationDate is! num) {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;

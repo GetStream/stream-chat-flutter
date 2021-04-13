@@ -83,16 +83,13 @@ class Reaction {
 
   /// Returns a new [Reaction] that is a combination of this reaction and the
   /// given [other] reaction.
-  Reaction merge(Reaction other) {
-    if (other == null) return this;
-    return copyWith(
-      messageId: other.messageId,
-      createdAt: other.createdAt,
-      type: other.type,
-      user: other.user,
-      userId: other.userId,
-      score: other.score,
-      extraData: other.extraData,
-    );
-  }
+  Reaction merge(Reaction other) => copyWith(
+        messageId: other.messageId,
+        createdAt: other.createdAt,
+        type: other.type,
+        user: other.user,
+        userId: other.userId,
+        score: other.score,
+        extraData: other.extraData,
+      );
 }
