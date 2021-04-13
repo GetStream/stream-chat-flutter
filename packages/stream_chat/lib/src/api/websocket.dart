@@ -124,10 +124,10 @@ class WebSocket {
 
   Event _decodeEvent(String source) => Event.fromJson(json.decode(source));
 
-  Completer<Event> _connectionCompleter = Completer<Event>();
+  Completer<Event?> _connectionCompleter = Completer<Event?>();
 
   /// Connect the WS using the parameters passed in the constructor
-  Future<Event>? connect() {
+  Future<Event?> connect() async {
     _manuallyDisconnected = false;
 
     if (_connecting) {

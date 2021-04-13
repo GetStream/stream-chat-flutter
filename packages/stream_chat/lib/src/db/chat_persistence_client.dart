@@ -192,14 +192,12 @@ abstract class ChatPersistenceClient {
     final channels =
         channelStates.map((it) => it.channel).where((it) => it != null);
 
-    final reactions = channelStates
-        .expand((it) => it.messages)
-        .expand((it) => [
-              if (it.ownReactions != null)
-                ...it.ownReactions!.where((r) => r.userId != null),
-              if (it.latestReactions != null)
-                ...it.latestReactions!.where((r) => r.userId != null)
-            ]);
+    final reactions = channelStates.expand((it) => it.messages).expand((it) => [
+          if (it.ownReactions != null)
+            ...it.ownReactions!.where((r) => r.userId != null),
+          if (it.latestReactions != null)
+            ...it.latestReactions!.where((r) => r.userId != null)
+        ]);
 
     final users = channelStates
         .map((cs) => [

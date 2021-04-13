@@ -6,13 +6,11 @@ part of 'member.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Member _$MemberFromJson(Map json) {
+Member _$MemberFromJson(Map<String, dynamic> json) {
   return Member(
     user: json['user'] == null
         ? null
-        : User.fromJson((json['user'] as Map?)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
+        : User.fromJson(json['user'] as Map<String, dynamic>?),
     inviteAcceptedAt: json['invite_accepted_at'] == null
         ? null
         : DateTime.parse(json['invite_accepted_at'] as String),

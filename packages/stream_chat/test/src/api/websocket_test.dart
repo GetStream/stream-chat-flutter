@@ -35,7 +35,7 @@ void main() {
     });
 
     test('should connect with correct parameters', () async {
-      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+      final connectFunc = MockFunctions().connectFunc;
       final ws = WebSocket(
         baseUrl: 'baseurl',
         user: User.temp(id: 'testid'),
@@ -73,7 +73,7 @@ void main() {
 
   test('should connect with correct parameters and handle events', () async {
     final handleFunc = MockFunctions().handleFunc;
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User.temp(id: 'testid'),
@@ -92,7 +92,7 @@ void main() {
     when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
-    final connect = ws.connect()?.then((_) {
+    final connect = ws.connect().then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) {
@@ -109,7 +109,7 @@ void main() {
 
   test('should close correctly the controller', () async {
     final handleFunc = MockFunctions().handleFunc;
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User.temp(id: 'testid'),
@@ -128,7 +128,7 @@ void main() {
     when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
-    final connect = ws.connect()?.then((_) {
+    final connect = ws.connect().then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) {
@@ -146,7 +146,7 @@ void main() {
   test('should close correctly the controller while connecting', () async {
     final handleFunc = MockFunctions().handleFunc;
 
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
 
     final ws = WebSocket(
       baseUrl: 'baseurl',
@@ -181,7 +181,7 @@ void main() {
 
   test('should run correctly health check', () async {
     final handleFunc = MockFunctions().handleFunc;
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User.temp(id: 'testid'),
@@ -206,7 +206,7 @@ void main() {
       (_) => streamController.sink.add('{}'),
     );
 
-    final connect = ws.connect()?.then((_) {
+    final connect = ws.connect().then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) async {
@@ -225,7 +225,7 @@ void main() {
 
   test('should run correctly reconnection check', () async {
     final handleFunc = MockFunctions().handleFunc;
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
     Logger.root.level = Level.ALL;
     final ws = WebSocket(
       baseUrl: 'baseurl',
@@ -247,7 +247,7 @@ void main() {
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
     when(() => mockWSChannel.sink).thenReturn(mockWSSink);
 
-    final connect = ws.connect()?.then((_) {
+    final connect = ws.connect().then((_) {
       streamController.sink.add('{}');
       streamController.close();
       streamController = StreamController<String>.broadcast();
@@ -270,7 +270,7 @@ void main() {
 
   test('should close correctly the controller', () async {
     final handleFunc = MockFunctions().handleFunc;
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User.temp(id: 'testid'),
@@ -290,7 +290,7 @@ void main() {
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
     when(() => mockWSChannel.sink).thenReturn(mockWSSink);
 
-    final connect = ws.connect()?.then((_) {
+    final connect = ws.connect().then((_) {
       streamController.sink.add('{}');
       return Future.delayed(const Duration(milliseconds: 200));
     }).then((value) async {
@@ -307,7 +307,7 @@ void main() {
   });
 
   test('should throw an error', () async {
-    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+    final connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User.temp(id: 'testid'),

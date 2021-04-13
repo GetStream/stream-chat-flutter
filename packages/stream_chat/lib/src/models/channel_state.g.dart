@@ -6,36 +6,27 @@ part of 'channel_state.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ChannelState _$ChannelStateFromJson(Map json) {
+ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
   return ChannelState(
     channel: json['channel'] == null
         ? null
-        : ChannelModel.fromJson((json['channel'] as Map?)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
+        : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>?),
     messages: (json['messages'] as List<dynamic>)
-        .map((e) => Message.fromJson((e as Map?)?.map(
-              (k, e) => MapEntry(k as String, e),
-            )))
+        .map((e) => Message.fromJson(e as Map<String, dynamic>?))
         .toList(),
     members: (json['members'] as List<dynamic>)
-        .map((e) => e == null
-            ? null
-            : Member.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
         .toList(),
     pinnedMessages: (json['pinned_messages'] as List<dynamic>)
-        .map((e) => Message.fromJson((e as Map?)?.map(
-              (k, e) => MapEntry(k as String, e),
-            )))
+        .map((e) => Message.fromJson(e as Map<String, dynamic>?))
         .toList(),
     watcherCount: json['watcher_count'] as int?,
     watchers: (json['watchers'] as List<dynamic>)
-        .map((e) => User.fromJson((e as Map?)?.map(
-              (k, e) => MapEntry(k as String, e),
-            )))
+        .map((e) => User.fromJson(e as Map<String, dynamic>?))
         .toList(),
     read: (json['read'] as List<dynamic>)
-        .map((e) => Read.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map((e) => Read.fromJson(e as Map<String, dynamic>))
         .toList(),
   );
 }

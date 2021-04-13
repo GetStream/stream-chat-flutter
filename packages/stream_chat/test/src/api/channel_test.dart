@@ -168,7 +168,8 @@ void main() {
               requestOptions: FakeRequestOptions(),
             ));
 
-        await channelClient.sendAction(Message.temp(id: 'messageid', text: ''), data);
+        await channelClient.sendAction(
+            Message.temp(id: 'messageid', text: ''), data);
 
         verify(() => mockDio.post<String>('/messages/messageid/action', data: {
               'id': 'testid',

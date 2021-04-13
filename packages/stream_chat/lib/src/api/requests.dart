@@ -106,6 +106,7 @@ class PaginationParams {
       );
 
   @override
+  @JsonKey(ignore: true)
   int get hashCode =>
       runtimeType.hashCode ^
       limit.hashCode ^

@@ -6,11 +6,11 @@ part of 'channel_config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ChannelConfig _$ChannelConfigFromJson(Map json) {
+ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) {
   return ChannelConfig(
     automod: json['automod'] as String?,
     commands: (json['commands'] as List<dynamic>?)
-        ?.map((e) => Command.fromJson(Map<String, dynamic>.from(e as Map)))
+        ?.map((e) => Command.fromJson(e as Map<String, dynamic>))
         .toList(),
     connectEvents: json['connect_events'] as bool?,
     createdAt: json['created_at'] == null

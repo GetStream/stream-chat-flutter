@@ -6,7 +6,7 @@ part of 'attachment_file.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AttachmentFile _$AttachmentFileFromJson(Map json) {
+AttachmentFile _$AttachmentFileFromJson(Map<String, dynamic> json) {
   return AttachmentFile(
     path: json['path'] as String?,
     name: json['name'] as String?,
@@ -23,14 +23,14 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) =>
       'size': instance.size,
     };
 
-_$Preparing _$_$PreparingFromJson(Map json) {
+_$Preparing _$_$PreparingFromJson(Map<String, dynamic> json) {
   return _$Preparing();
 }
 
 Map<String, dynamic> _$_$PreparingToJson(_$Preparing instance) =>
     <String, dynamic>{};
 
-_$InProgress _$_$InProgressFromJson(Map json) {
+_$InProgress _$_$InProgressFromJson(Map<String, dynamic> json) {
   return _$InProgress(
     uploaded: json['uploaded'] as int,
     total: json['total'] as int,
@@ -43,14 +43,14 @@ Map<String, dynamic> _$_$InProgressToJson(_$InProgress instance) =>
       'total': instance.total,
     };
 
-_$Success _$_$SuccessFromJson(Map json) {
+_$Success _$_$SuccessFromJson(Map<String, dynamic> json) {
   return _$Success();
 }
 
 Map<String, dynamic> _$_$SuccessToJson(_$Success instance) =>
     <String, dynamic>{};
 
-_$Failed _$_$FailedFromJson(Map json) {
+_$Failed _$_$FailedFromJson(Map<String, dynamic> json) {
   return _$Failed(
     error: json['error'] as String,
   );

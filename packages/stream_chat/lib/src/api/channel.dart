@@ -1830,7 +1830,7 @@ class ChannelClientState {
       final now = DateTime.now();
       var expiredMessages = channelState!.pinnedMessages
           .where((m) => m.pinExpires?.isBefore(now) == true)
-              .toList();
+          .toList();
       if (expiredMessages.isNotEmpty) {
         expiredMessages = expiredMessages
             .map((m) => m.copyWith(

@@ -6,7 +6,7 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-User _$UserFromJson(Map json) {
+User _$UserFromJson(Map<String, dynamic> json) {
   return User(
     id: json['id'] as String,
     role: json['role'] as String,
@@ -16,7 +16,7 @@ User _$UserFromJson(Map json) {
         ? null
         : DateTime.parse(json['last_active'] as String),
     online: json['online'] as bool,
-    extraData: Map<String, dynamic>.from(json['extra_data'] as Map),
+    extraData: json['extra_data'] as Map<String, dynamic>,
     banned: json['banned'] as bool,
     teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
   );

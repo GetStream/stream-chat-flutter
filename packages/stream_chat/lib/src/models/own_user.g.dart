@@ -6,19 +6,18 @@ part of 'own_user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OwnUser _$OwnUserFromJson(Map json) {
-  print(json);
+OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
   return OwnUser(
     devices: (json['devices'] as List<dynamic>)
-        .map((e) => Device.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map((e) => Device.fromJson(e as Map<String, dynamic>))
         .toList(),
     mutes: (json['mutes'] as List<dynamic>)
-        .map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map((e) => Mute.fromJson(e as Map<String, dynamic>))
         .toList(),
     totalUnreadCount: json['total_unread_count'] as int,
     unreadChannels: json['unread_channels'] as int?,
     channelMutes: (json['channel_mutes'] as List<dynamic>)
-        .map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map((e) => Mute.fromJson(e as Map<String, dynamic>))
         .toList(),
     id: json['id'] as String,
     role: json['role'] as String,
@@ -28,7 +27,7 @@ OwnUser _$OwnUserFromJson(Map json) {
         ? null
         : DateTime.parse(json['last_active'] as String),
     online: json['online'] as bool,
-    extraData: Map<String, dynamic>.from(json['extra_data'] as Map),
+    extraData: json['extra_data'] as Map<String, dynamic>,
     banned: json['banned'] as bool,
   );
 }

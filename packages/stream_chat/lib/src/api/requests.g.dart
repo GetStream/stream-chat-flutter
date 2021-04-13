@@ -28,6 +28,5 @@ Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
   writeNotNull('id_gte', instance.greaterThanOrEqual);
   writeNotNull('id_lt', instance.lessThan);
   writeNotNull('id_lte', instance.lessThanOrEqual);
-  val['hash_code'] = instance.hashCode;
   return val;
 }

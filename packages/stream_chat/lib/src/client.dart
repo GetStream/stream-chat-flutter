@@ -573,9 +573,11 @@ class StreamChatClient {
 
     var event = await _chatPersistenceClient?.getConnectionInfo();
 
-    await _ws.connect()!.then((e) async {
-      await _chatPersistenceClient?.updateConnectionInfo(e);
-      event = e;
+    await _ws.connect().then((e) async {
+      if (e != null) {
+        await _chatPersistenceClient?.updateConnectionInfo(e);
+        event = e;
+      }
       await resync();
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
@@ -737,7 +739,7 @@ class StreamChatClient {
       QueryChannelsResponse.fromJson,
     )!;
 
-    if ((res.channels ?? []).isEmpty && (paginationParams.offset) == 0) {
+    if ((res.channels ?? []).isEmpty && paginationParams.offset == 0) {
       logger.warning(
         '''
         We could not find any channel for this query.

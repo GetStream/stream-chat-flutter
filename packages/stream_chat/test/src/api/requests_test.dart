@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/api/requests', () {
@@ -14,7 +14,6 @@ void main() {
       final j = option.toJson();
       expect(j, containsPair('limit', 10));
       expect(j, containsPair('offset', 0));
-      expect(j, contains('hash_code'));
     });
   });
 }
