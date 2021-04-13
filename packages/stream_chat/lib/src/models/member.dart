@@ -12,14 +12,14 @@ class Member {
     this.user,
     this.inviteAcceptedAt,
     this.inviteRejectedAt,
-    this.invited,
-    this.role,
+    this.invited = false,
+    required this.role,
     this.userId,
     this.isModerator,
-    this.createdAt,
-    this.updatedAt,
-    this.banned,
-    this.shadowBanned,
+    required this.createdAt,
+    required this.updatedAt,
+    this.banned = false,
+    this.shadowBanned = false,
   });
 
   /// Create a new instance from a json
@@ -40,10 +40,10 @@ class Member {
   final DateTime? inviteRejectedAt;
 
   /// True if the user has been invited to the channel
-  final bool? invited;
+  final bool invited;
 
   /// The role of the user in the channel
-  final String? role;
+  final String role;
 
   /// The id of the interested user
   final String? userId;
@@ -52,16 +52,16 @@ class Member {
   final bool? isModerator;
 
   /// True if the member is banned from the channel
-  final bool? banned;
+  final bool banned;
 
   /// True if the member is shadow banned from the channel
-  final bool? shadowBanned;
+  final bool shadowBanned;
 
   /// The date of creation
-  final DateTime? createdAt;
+  final DateTime createdAt;
 
   /// The last date of update
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({

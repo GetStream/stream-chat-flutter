@@ -7,34 +7,29 @@ part of 'own_user.dart';
 // **************************************************************************
 
 OwnUser _$OwnUserFromJson(Map json) {
+  print(json);
   return OwnUser(
-    devices: (json['devices'] as List<dynamic>?)
-        ?.map((e) => Device.fromJson(Map<String, dynamic>.from(e as Map)))
+    devices: (json['devices'] as List<dynamic>)
+        .map((e) => Device.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList(),
-    mutes: (json['mutes'] as List<dynamic>?)
-        ?.map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
+    mutes: (json['mutes'] as List<dynamic>)
+        .map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList(),
-    totalUnreadCount: json['total_unread_count'] as int?,
+    totalUnreadCount: json['total_unread_count'] as int,
     unreadChannels: json['unread_channels'] as int?,
-    channelMutes: (json['channel_mutes'] as List<dynamic>?)
-        ?.map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
+    channelMutes: (json['channel_mutes'] as List<dynamic>)
+        .map((e) => Mute.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList(),
-    id: json['id'] as String?,
-    role: json['role'] as String?,
-    createdAt: json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    updatedAt: json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
+    id: json['id'] as String,
+    role: json['role'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool?,
-    extraData: (json['extra_data'] as Map?)?.map(
-      (k, e) => MapEntry(k as String, e),
-    ),
-    banned: json['banned'] as bool?,
+    online: json['online'] as bool,
+    extraData: Map<String, dynamic>.from(json['extra_data'] as Map),
+    banned: json['banned'] as bool,
   );
 }
 
@@ -55,7 +50,7 @@ Map<String, dynamic> _$OwnUserToJson(OwnUser instance) {
   writeNotNull('last_active', readonly(instance.lastActive));
   writeNotNull('online', readonly(instance.online));
   writeNotNull('banned', readonly(instance.banned));
-  writeNotNull('extra_data', instance.extraData);
+  val['extra_data'] = instance.extraData;
   writeNotNull('devices', readonly(instance.devices));
   writeNotNull('mutes', readonly(instance.mutes));
   writeNotNull('channel_mutes', readonly(instance.channelMutes));

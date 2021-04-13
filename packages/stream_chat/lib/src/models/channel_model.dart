@@ -12,18 +12,33 @@ class ChannelModel {
   ChannelModel({
     this.id,
     this.type,
-    this.cid,
-    this.config,
+    required this.cid,
+    required this.config,
     this.createdBy,
-    this.frozen,
+    this.frozen = false,
     this.lastMessageAt,
-    this.createdAt,
-    this.updatedAt,
+    required this.createdAt,
+    required this.updatedAt,
     this.deletedAt,
-    this.memberCount,
+    this.memberCount = 0,
     this.extraData,
     this.team,
   });
+
+  ChannelModel.temp({
+    this.id,
+    this.type,
+    required this.cid,
+    this.createdBy,
+    this.frozen = false,
+    this.lastMessageAt,
+    this.deletedAt,
+    this.memberCount = 0,
+    this.extraData,
+    this.team,
+  })  : createdAt = DateTime.now(),
+        updatedAt = DateTime.now(),
+        config = ChannelConfig();
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic>? json) =>
@@ -38,11 +53,11 @@ class ChannelModel {
 
   /// The cid of this channel
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String? cid;
+  final String cid;
 
   /// The channel configuration data
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final ChannelConfig? config;
+  final ChannelConfig config;
 
   /// The user that created this channel
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -50,7 +65,7 @@ class ChannelModel {
 
   /// True if this channel is frozen
   @JsonKey(includeIfNull: false)
-  final bool? frozen;
+  final bool frozen;
 
   /// The date of the last message
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -58,11 +73,11 @@ class ChannelModel {
 
   /// The date of channel creation
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime? createdAt;
+  final DateTime createdAt;
 
   /// The date of the last channel update
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   /// The date of channel deletion
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -70,7 +85,7 @@ class ChannelModel {
 
   /// The count of this channel members
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final int? memberCount;
+  final int memberCount;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)

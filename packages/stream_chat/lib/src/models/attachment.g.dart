@@ -9,7 +9,7 @@ part of 'attachment.dart';
 Attachment _$AttachmentFromJson(Map json) {
   return Attachment(
     id: json['id'] as String?,
-    type: json['type'] as String?,
+    type: json['type'] as String,
     titleLink: json['title_link'] as String?,
     title: json['title'] as String?,
     thumbUrl: json['thumb_url'] as String?,
@@ -44,7 +44,9 @@ Attachment _$AttachmentFromJson(Map json) {
 }
 
 Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'type': instance.type,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -52,7 +54,6 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
     }
   }
 
-  writeNotNull('type', instance.type);
   writeNotNull('title_link', instance.titleLink);
   writeNotNull('title', instance.title);
   writeNotNull('thumb_url', instance.thumbUrl);

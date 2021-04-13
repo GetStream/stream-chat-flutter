@@ -35,7 +35,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'hey', id: 'test');
+        final message = Message.temp(text: 'hey', id: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -168,7 +168,7 @@ void main() {
               requestOptions: FakeRequestOptions(),
             ));
 
-        await channelClient.sendAction(Message(id: 'messageid'), data);
+        await channelClient.sendAction(Message.temp(id: 'messageid', text: ''), data);
 
         verify(() => mockDio.post<String>('/messages/messageid/action', data: {
               'id': 'testid',
@@ -334,7 +334,7 @@ void main() {
 
         final channelClient = client.channel('messaging', id: 'testid');
 
-        final message = Message(text: 'Hello');
+        final message = Message.temp(text: 'Hello');
 
         expect(
           () => channelClient.pinMessage(message, 'InvalidType'),
@@ -354,7 +354,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'Hello', id: 'test');
+        final message = Message.temp(text: 'Hello', id: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -388,7 +388,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'Hello', id: 'test');
+        final message = Message.temp(text: 'Hello', id: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -566,7 +566,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        client.state?.user = OwnUser(id: 'test-id');
+        client.state?.user = OwnUser.temp(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
         const reactionType = 'test';
@@ -590,8 +590,9 @@ void main() {
         );
 
         await channelClient.sendReaction(
-          Message(
+          Message.temp(
             id: 'messageid',
+            text: '',
             reactionCounts: const <String, int>{},
             reactionScores: const <String, int>{},
             latestReactions: const <Reaction>[],
@@ -621,7 +622,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        client.state?.user = OwnUser(id: 'test-id');
+        client.state?.user = OwnUser.temp(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
 
@@ -636,14 +637,22 @@ void main() {
         );
 
         await channelClient.deleteReaction(
-          Message(
+          Message.temp(
             id: 'messageid',
+            text: '',
             reactionCounts: const <String, int>{},
             reactionScores: const <String, int>{},
             latestReactions: const <Reaction>[],
             ownReactions: const <Reaction>[],
           ),
-          Reaction(type: 'test'),
+          Reaction(
+            type: 'test',
+            createdAt: DateTime.now(),
+            score: 0,
+            user: User.temp(
+              id: client.state?.user?.id ?? '',
+            ),
+          ),
         );
 
         verify(() =>
@@ -699,7 +708,7 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
         final members = ['vishal'];
-        final message = Message(text: 'test');
+        final message = Message.temp(text: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -733,7 +742,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'test');
+        final message = Message.temp(text: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -2081,7 +2090,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'test');
+        final message = Message.temp(text: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -2180,7 +2189,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'test');
+        final message = Message.temp(text: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -2215,7 +2224,7 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
         final members = ['vishal'];
-        final message = Message(text: 'test');
+        final message = Message.temp(text: 'test');
 
         when(
           () => mockDio.post<String>(
@@ -2249,7 +2258,7 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
         final members = ['vishal'];
-        final message = Message(text: 'test');
+        final message = Message.temp(text: 'test');
 
         when(
           () => mockDio.post<String>(

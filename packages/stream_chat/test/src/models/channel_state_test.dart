@@ -1330,10 +1330,10 @@ void main() {
         members: [],
         messages:
             (j['messages'] as List).map((m) => Message.fromJson(m)).toList(),
-        read: null,
+        read: [],
         watcherCount: 5,
         pinnedMessages: [],
-        watchers: null,
+        watchers: [],
       );
 
       expect(

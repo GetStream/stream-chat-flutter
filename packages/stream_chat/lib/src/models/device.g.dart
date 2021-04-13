@@ -8,7 +8,7 @@ part of 'device.dart';
 
 Device _$DeviceFromJson(Map json) {
   return Device(
-    id: json['id'] as String?,
+    id: json['id'] as String,
     pushProvider: json['push_provider'] as String?,
   );
 }

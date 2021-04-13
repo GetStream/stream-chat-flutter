@@ -76,11 +76,11 @@ abstract class ChatPersistenceClient {
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
     return ChannelState(
-      members: data[0] as List<Member?>?,
-      read: data[1] as List<Read>?,
+      members: (data[0] as List<Member?>?)!,
+      read: (data[1] as List<Read>?)!,
       channel: data[2] as ChannelModel?,
-      messages: data[3] as List<Message>?,
-      pinnedMessages: data[4] as List<Message>?,
+      messages: (data[3] as List<Message>?)!,
+      pinnedMessages: (data[4] as List<Message>?)!,
     );
   }
 
@@ -176,7 +176,7 @@ abstract class ChatPersistenceClient {
   /// Update list of channel states
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {
     final deleteReactions = deleteReactionsByMessageId(channelStates
-        .expand((it) => it.messages!)
+        .expand((it) => it.messages)
         .map((m) => m.id)
         .toList(growable: false));
 
@@ -193,20 +193,19 @@ abstract class ChatPersistenceClient {
         channelStates.map((it) => it.channel).where((it) => it != null);
 
     final reactions = channelStates
-        .expand((it) => it.messages!)
+        .expand((it) => it.messages)
         .expand((it) => [
               if (it.ownReactions != null)
                 ...it.ownReactions!.where((r) => r.userId != null),
               if (it.latestReactions != null)
                 ...it.latestReactions!.where((r) => r.userId != null)
-            ])
-        .where((it) => it != null);
+            ]);
 
     final users = channelStates
         .map((cs) => [
               cs.channel?.createdBy,
-              ...?cs.messages
-                  ?.map((m) => [
+              ...cs.messages
+                  .map((m) => [
                         m.user,
                         if (m.latestReactions != null)
                           ...m.latestReactions!.map((r) => r.user),
@@ -214,33 +213,33 @@ abstract class ChatPersistenceClient {
                           ...m.ownReactions!.map((r) => r.user),
                       ])
                   .expand((v) => v),
-              if (cs.read != null) ...cs.read!.map((r) => r.user),
-              if (cs.members != null) ...cs.members!.map((m) => m!.user),
+              ...cs.read.map((r) => r.user),
+              ...cs.members.map((m) => m!.user),
             ])
         .expand((it) => it)
         .where((it) => it != null);
 
     final updateMessagesFuture = channelStates.map((it) {
       final cid = it.channel!.cid;
-      final messages = it.messages!.where((it) => it != null);
+      final messages = it.messages;
       return updateMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
     final updatePinnedMessagesFuture = channelStates.map((it) {
       final cid = it.channel!.cid;
-      final messages = it.pinnedMessages!.where((it) => it != null);
+      final messages = it.pinnedMessages;
       return updatePinnedMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
     final updateReadsFuture = channelStates.map((it) {
       final cid = it.channel!.cid;
-      final reads = it.read?.where((it) => it != null) ?? [];
+      final reads = it.read;
       return updateReads(cid, reads.toList(growable: false));
     }).toList(growable: false);
 
     final updateMembersFuture = channelStates.map((it) {
       final cid = it.channel!.cid;
-      final members = it.members!.where((it) => it != null);
+      final members = it.members.where((it) => it != null);
       return updateMembers(cid, members.toList(growable: false));
     }).toList(growable: false);
 

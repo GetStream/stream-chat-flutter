@@ -59,12 +59,12 @@ class Channel {
   /// Returns true if the channel is muted
   bool get isMuted =>
       _client.state!.user?.channelMutes
-          ?.any((element) => element.channel!.cid == cid) ==
+          .any((element) => element.channel!.cid == cid) ==
       true;
 
   /// Returns true if the channel is muted as a stream
   Stream<bool>? get isMutedStream => _client.state!.userStream.map((event) =>
-      event!.channelMutes?.any((element) => element.channel!.cid == cid) ==
+      event!.channelMutes.any((element) => element.channel!.cid == cid) ==
       true);
 
   /// True if the channel is a group
@@ -309,7 +309,7 @@ class Channel {
     );
     // ignore: parameter_assignments
     message = message.copyWith(
-      createdAt: message.createdAt ?? DateTime.now(),
+      createdAt: message.createdAt,
       user: _client.state!.user,
       quotedMessage: quotedMessage,
       status: MessageSendingStatus.sending,
@@ -363,7 +363,7 @@ class Channel {
     // ignore: parameter_assignments
     message = message.copyWith(
       status: MessageSendingStatus.updating,
-      updatedAt: message.updatedAt ?? DateTime.now(),
+      updatedAt: message.updatedAt,
       attachments: message.attachments?.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
@@ -574,7 +574,7 @@ class Channel {
       messageId: messageId,
       createdAt: now,
       type: type,
-      user: user,
+      user: user!,
       score: 1,
       extraData: extraData,
     );
@@ -582,7 +582,7 @@ class Channel {
     // Inserting at the 0th index as it's the latest reaction
     latestReactions.insert(0, newReaction);
     final ownReactions = [...latestReactions]
-      ..removeWhere((it) => it.userId != user!.id);
+      ..removeWhere((it) => it.userId != user.id);
 
     final newMessage = message.copyWith(
       reactionCounts: {...message.reactionCounts ?? <String, int>{}}
@@ -632,15 +632,11 @@ class Channel {
 
     final reactionCounts = {...message.reactionCounts ?? <String, int>{}};
     if (reactionCounts.containsKey(type)) {
-      if (type != null) {
-        reactionCounts.update(type, (value) => value - 1);
-      }
+      reactionCounts.update(type, (value) => value - 1);
     }
     final reactionScores = {...message.reactionScores ?? <String, int>{}};
     if (reactionScores.containsKey(type)) {
-      if (type != null) {
-        reactionScores.update(type, (value) => value - 1);
-      }
+      reactionScores.update(type, (value) => value - 1);
     }
 
     final latestReactions = [...message.latestReactions ?? <Reaction>[]]
@@ -917,7 +913,11 @@ class Channel {
       GetMessagesByIdResponse.fromJson,
     )!;
 
-    state?.updateChannelState(ChannelState(messages: res.messages));
+    final messages = res.messages;
+
+    if (messages != null) {
+      state?.updateChannelState(ChannelState(messages: messages));
+    }
 
     return res;
   }
@@ -987,7 +987,7 @@ class Channel {
         cid,
         messagePagination: messagesPagination,
       ))!;
-      if (updatedState.messages!.isNotEmpty) {
+      if (updatedState.messages.isNotEmpty) {
         if (state == null) {
           _initState(updatedState);
         } else {
@@ -1270,17 +1270,17 @@ class ChannelClientState {
   final _subscriptions = <StreamSubscription>[];
 
   void _computeInitialUnread() {
-    final userRead = channelState?.read?.firstWhereOrNull(
-      (r) => r.user!.id == _channel._client.state?.user?.id,
+    final userRead = channelState?.read.firstWhereOrNull(
+      (r) => r.user.id == _channel._client.state?.user?.id,
     );
     if (userRead != null) {
-      _unreadCountController.add(userRead.unreadMessages ?? 0);
+      _unreadCountController.add(userRead.unreadMessages);
     }
   }
 
   void _checkExpiredAttachmentMessages(ChannelState channelState) {
     final expiredAttachmentMessagesId = channelState.messages
-        ?.where((m) =>
+        .where((m) =>
             !_updatedMessagesIds.contains(m.id) &&
             m.attachments?.isNotEmpty == true &&
             m.attachments?.any((e) {
@@ -1300,8 +1300,8 @@ class ChannelClientState {
                 true)
         .map((e) => e.id)
         .toList();
-    if (expiredAttachmentMessagesId?.isNotEmpty == true) {
-      _channel.getMessagesById(expiredAttachmentMessagesId!);
+    if (expiredAttachmentMessagesId.isNotEmpty == true) {
+      _channel.getMessagesById(expiredAttachmentMessagesId);
       _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
     }
   }
@@ -1311,7 +1311,7 @@ class ChannelClientState {
       final member = e.member;
       updateChannelState(channelState!.copyWith(
         members: [
-          ...channelState!.members!,
+          ...channelState!.members,
           member,
         ],
       ));
@@ -1323,7 +1323,7 @@ class ChannelClientState {
       final user = e.user;
       updateChannelState(channelState!.copyWith(
         members: List.from(
-            channelState!.members!..removeWhere((m) => m!.userId == user!.id)),
+            channelState!.members..removeWhere((m) => m!.userId == user!.id)),
       ));
     }));
   }
@@ -1373,7 +1373,7 @@ class ChannelClientState {
             .where(
               (message) =>
                   message.status != MessageSendingStatus.sent &&
-                  message.createdAt!.isBefore(
+                  message.createdAt.isBefore(
                     DateTime.now().subtract(
                       const Duration(
                         seconds: 1,
@@ -1425,7 +1425,7 @@ class ChannelClientState {
       if (message.pinned == true) {
         _channelState = _channelState!.copyWith(
           pinnedMessages: [
-            ..._channelState!.pinnedMessages ?? [],
+            ..._channelState!.pinnedMessages,
             message,
           ],
         );
@@ -1462,7 +1462,7 @@ class ChannelClientState {
   /// Add a message to this channel
   void addMessage(Message message) {
     if (message.parentId == null || message.showInChannel == true) {
-      final newMessages = List<Message>.from(_channelState!.messages!);
+      final newMessages = List<Message>.from(_channelState!.messages);
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
         Message? m;
@@ -1505,16 +1505,17 @@ class ChannelClientState {
         (event) {
           final readList = List<Read>.from(_channelState?.read ?? []);
           final userReadIndex =
-              read?.indexWhere((r) => r.user!.id == event.user!.id);
+              read?.indexWhere((r) => r.user.id == event.user!.id);
 
           if (userReadIndex != null && userReadIndex != -1) {
             final userRead = readList.removeAt(userReadIndex);
-            if (userRead.user?.id == _channel._client.state!.user!.id) {
+            if (userRead.user.id == _channel._client.state!.user!.id) {
               _unreadCountController.add(0);
             }
             readList.add(Read(
-              user: event.user,
-              lastRead: event.createdAt,
+              user: event.user!,
+              lastRead: event.createdAt!,
+              unreadMessages: event.totalUnreadCount!,
             ));
             _channelState = _channelState!.copyWith(read: readList);
           }
@@ -1531,15 +1532,15 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs!.messages);
 
   /// Channel pinned message list
-  List<Message>? get pinnedMessages => _channelState!.pinnedMessages?.toList();
+  List<Message>? get pinnedMessages => _channelState!.pinnedMessages.toList();
 
   /// Channel pinned message list as a stream
   Stream<List<Message>?> get pinnedMessagesStream =>
-      channelStateStream.map((cs) => cs!.pinnedMessages?.toList());
+      channelStateStream.map((cs) => cs!.pinnedMessages.toList());
 
   /// Get channel last message
-  Message? get lastMessage => _channelState!.messages?.isNotEmpty == true
-      ? _channelState!.messages!.last
+  Message? get lastMessage => _channelState!.messages.isNotEmpty == true
+      ? _channelState!.messages.last
       : null;
 
   /// Get channel last message
@@ -1547,8 +1548,8 @@ class ChannelClientState {
       .map((event) => event?.isNotEmpty == true ? event!.last : null);
 
   /// Channel members list
-  List<Member> get members => _channelState!.members!
-      .map((e) => e!.copyWith(user: _channel.client.state!.users[e.user!.id!]))
+  List<Member> get members => _channelState!.members
+      .map((e) => e!.copyWith(user: _channel.client.state!.users[e.user!.id]))
       .toList();
 
   /// Channel members list as a stream
@@ -1568,8 +1569,8 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs!.watcherCount);
 
   /// Channel watchers list
-  List<User> get watchers => _channelState!.watchers!
-      .map((e) => _channel.client.state!.users[e.id!] ?? e)
+  List<User> get watchers => _channelState!.watchers
+      .map((e) => _channel.client.state!.users[e.id] ?? e)
       .toList();
 
   /// Channel watchers list as a stream
@@ -1597,7 +1598,7 @@ class ChannelClientState {
 
   bool _countMessageAsUnread(Message message) {
     final userId = _channel.client.state?.user?.id;
-    final userIsMuted = _channel.client.state?.user?.mutes?.firstWhereOrNull(
+    final userIsMuted = _channel.client.state?.user?.mutes.firstWhereOrNull(
           (m) => m.user?.id == message.user!.id,
         ) !=
         null;
@@ -1642,37 +1643,37 @@ class ChannelClientState {
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
     final newMessages = <Message>[
-      ...updatedState.messages ?? [],
+      ...updatedState.messages,
       ..._channelState?.messages
-              ?.where((m) =>
+              .where((m) =>
                   updatedState.messages
-                      ?.any((newMessage) => newMessage.id == m.id) !=
+                      .any((newMessage) => newMessage.id == m.id) !=
                   true)
               .toList() ??
           [],
     ]..sort(_sortByCreatedAt as int Function(Message, Message)?);
 
     final newWatchers = <User>[
-      ...updatedState.watchers ?? [],
+      ...updatedState.watchers,
       ..._channelState?.watchers
-              ?.where((w) =>
+              .where((w) =>
                   updatedState.watchers
-                      ?.any((newWatcher) => newWatcher.id == w.id) !=
+                      .any((newWatcher) => newWatcher.id == w.id) !=
                   true)
               .toList() ??
           [],
     ];
 
     final newMembers = <Member?>[
-      ...updatedState.members ?? [],
+      ...updatedState.members,
     ];
 
     final newReads = <Read>[
-      ...updatedState.read ?? [],
+      ...updatedState.read,
       ..._channelState?.read
-              ?.where((r) =>
+              .where((r) =>
                   updatedState.read
-                      ?.any((newRead) => newRead.user!.id == r.user!.id) !=
+                      .any((newRead) => newRead.user.id == r.user.id) !=
                   true)
               .toList() ??
           [],
@@ -1828,9 +1829,8 @@ class ChannelClientState {
     _pinnedMessagesTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       final now = DateTime.now();
       var expiredMessages = channelState!.pinnedMessages
-              ?.where((m) => m.pinExpires?.isBefore(now) == true)
-              .toList() ??
-          [];
+          .where((m) => m.pinExpires?.isBefore(now) == true)
+              .toList();
       if (expiredMessages.isNotEmpty) {
         expiredMessages = expiredMessages
             .map((m) => m.copyWith(

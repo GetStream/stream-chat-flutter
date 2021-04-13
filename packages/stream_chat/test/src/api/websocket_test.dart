@@ -38,7 +38,7 @@ void main() {
       final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
       final ws = WebSocket(
         baseUrl: 'baseurl',
-        user: User(id: 'testid'),
+        user: User.temp(id: 'testid'),
         logger: Logger('ws'),
         connectParams: {'test': 'true'},
         connectPayload: {'payload': 'test'},
@@ -76,7 +76,7 @@ void main() {
     final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
@@ -112,7 +112,7 @@ void main() {
     final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
@@ -150,7 +150,7 @@ void main() {
 
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
@@ -184,7 +184,7 @@ void main() {
     final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
@@ -229,7 +229,7 @@ void main() {
     Logger.root.level = Level.ALL;
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
@@ -273,7 +273,7 @@ void main() {
     final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
@@ -310,7 +310,7 @@ void main() {
     final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
     final ws = WebSocket(
       baseUrl: 'baseurl',
-      user: User(id: 'testid'),
+      user: User.temp(id: 'testid'),
       logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},

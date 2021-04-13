@@ -8,23 +8,17 @@ part of 'user.dart';
 
 User _$UserFromJson(Map json) {
   return User(
-    id: json['id'] as String?,
-    role: json['role'] as String?,
-    createdAt: json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    updatedAt: json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
+    id: json['id'] as String,
+    role: json['role'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool?,
-    extraData: (json['extra_data'] as Map?)?.map(
-      (k, e) => MapEntry(k as String, e),
-    ),
-    banned: json['banned'] as bool?,
-    teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    online: json['online'] as bool,
+    extraData: Map<String, dynamic>.from(json['extra_data'] as Map),
+    banned: json['banned'] as bool,
+    teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
   );
 }
 
@@ -46,6 +40,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
   writeNotNull('last_active', readonly(instance.lastActive));
   writeNotNull('online', readonly(instance.online));
   writeNotNull('banned', readonly(instance.banned));
-  writeNotNull('extra_data', instance.extraData);
+  val['extra_data'] = instance.extraData;
   return val;
 }

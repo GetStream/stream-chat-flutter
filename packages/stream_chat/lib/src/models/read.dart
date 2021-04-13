@@ -8,22 +8,22 @@ part 'read.g.dart';
 class Read {
   /// Constructor used for json serialization
   Read({
-    this.lastRead,
-    this.user,
-    this.unreadMessages,
+    required this.lastRead,
+    required this.user,
+    required this.unreadMessages,
   });
 
   /// Create a new instance from a json
   factory Read.fromJson(Map<String, dynamic> json) => _$ReadFromJson(json);
 
   /// Date of the read event
-  final DateTime? lastRead;
+  final DateTime lastRead;
 
   /// User who sent the event
-  final User? user;
+  final User user;
 
   /// Number of unread messages
-  final int? unreadMessages;
+  final int unreadMessages;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ReadToJson(this);

@@ -25,7 +25,7 @@ void main() {
     });
 
     test('should serialize to json correctly', () {
-      final channel = ChannelModel(
+      final channel = ChannelModel.temp(
         type: 'type',
         id: 'id',
         cid: 'a:a',
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('should serialize to json correctly when frozen is provided', () {
-      final channel = ChannelModel(
+      final channel = ChannelModel.temp(
         type: 'type',
         id: 'id',
         cid: 'a:a',

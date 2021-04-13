@@ -51,12 +51,12 @@ void main() {
 
     test('should serialize to json correctly', () {
       final event = Event(
-        user: User(id: 'id'),
+        user: User.temp(id: 'id'),
         type: 'type',
         cid: 'cid',
         connectionId: 'connectionId',
         createdAt: DateTime.parse('2020-01-29T03:22:47.63613Z'),
-        me: OwnUser(id: 'id2'),
+        me: OwnUser.temp(id: 'id2'),
         totalUnreadCount: 1,
         unreadChannels: 1,
         online: true,

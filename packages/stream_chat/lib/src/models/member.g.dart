@@ -19,18 +19,14 @@ Member _$MemberFromJson(Map json) {
     inviteRejectedAt: json['invite_rejected_at'] == null
         ? null
         : DateTime.parse(json['invite_rejected_at'] as String),
-    invited: json['invited'] as bool?,
-    role: json['role'] as String?,
+    invited: json['invited'] as bool,
+    role: json['role'] as String,
     userId: json['user_id'] as String?,
     isModerator: json['is_moderator'] as bool?,
-    createdAt: json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    updatedAt: json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
-    banned: json['banned'] as bool?,
-    shadowBanned: json['shadow_banned'] as bool?,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
+    banned: json['banned'] as bool,
+    shadowBanned: json['shadow_banned'] as bool,
   );
 }
 
@@ -44,6 +40,6 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'is_moderator': instance.isModerator,
       'banned': instance.banned,
       'shadow_banned': instance.shadowBanned,
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
     };

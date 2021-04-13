@@ -15,7 +15,7 @@ class Attachment extends Equatable {
   /// Constructor used for json serialization
   Attachment({
     String? id,
-    this.type,
+    required this.type,
     this.titleLink,
     String? title,
     this.thumbUrl,
@@ -57,7 +57,7 @@ class Attachment extends Equatable {
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
-  final String? type;
+  final String type;
 
   ///The link to which the attachment message points to.
   final String? titleLink;

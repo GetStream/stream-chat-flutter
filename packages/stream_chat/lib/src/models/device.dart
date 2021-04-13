@@ -7,7 +7,7 @@ part 'device.g.dart';
 class Device {
   /// Constructor used for json serialization
   Device({
-    this.id,
+    required this.id,
     this.pushProvider,
   });
 
@@ -15,7 +15,7 @@ class Device {
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
 
   /// The id of the device
-  final String? id;
+  final String id;
 
   /// The notification push provider
   final String? pushProvider;

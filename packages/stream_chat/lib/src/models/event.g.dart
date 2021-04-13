@@ -92,30 +92,24 @@ EventChannel _$EventChannelFromJson(Map json) {
         .toList(),
     id: json['id'] as String?,
     type: json['type'] as String?,
-    cid: json['cid'] as String?,
-    config: json['config'] == null
-        ? null
-        : ChannelConfig.fromJson(
-            Map<String, dynamic>.from(json['config'] as Map)),
+    cid: json['cid'] as String,
+    config: ChannelConfig.fromJson(
+        Map<String, dynamic>.from(json['config'] as Map)),
     createdBy: json['created_by'] == null
         ? null
         : User.fromJson((json['created_by'] as Map?)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    frozen: json['frozen'] as bool?,
+    frozen: json['frozen'] as bool,
     lastMessageAt: json['last_message_at'] == null
         ? null
         : DateTime.parse(json['last_message_at'] as String),
-    createdAt: json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    updatedAt: json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    memberCount: json['member_count'] as int?,
+    memberCount: json['member_count'] as int,
     extraData: (json['extra_data'] as Map?)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
@@ -137,7 +131,7 @@ Map<String, dynamic> _$EventChannelToJson(EventChannel instance) {
   writeNotNull('cid', readonly(instance.cid));
   writeNotNull('config', readonly(instance.config));
   writeNotNull('created_by', readonly(instance.createdBy));
-  writeNotNull('frozen', instance.frozen);
+  val['frozen'] = instance.frozen;
   writeNotNull('last_message_at', readonly(instance.lastMessageAt));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));

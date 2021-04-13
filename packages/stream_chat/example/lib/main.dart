@@ -11,7 +11,7 @@ Future<void> main() async {
   /// Please see the following for more information:
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
   await client.connectUser(
-    User(
+    User.temp(
       id: 'cool-shadow-7',
       extraData: {
         'image':

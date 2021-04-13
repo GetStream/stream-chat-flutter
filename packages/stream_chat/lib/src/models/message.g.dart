@@ -9,8 +9,8 @@ part of 'message.dart';
 Message _$MessageFromJson(Map json) {
   return Message(
     id: json['id'] as String?,
-    text: json['text'] as String?,
-    type: json['type'] as String?,
+    text: json['text'] as String,
+    type: json['type'] as String,
     attachments: (json['attachments'] as List<dynamic>?)
         ?.map((e) => Attachment.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList(),
@@ -52,12 +52,8 @@ Message _$MessageFromJson(Map json) {
         .toList(),
     showInChannel: json['show_in_channel'] as bool?,
     command: json['command'] as String?,
-    createdAt: json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    updatedAt: json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
     user: json['user'] == null
         ? null
         : User.fromJson((json['user'] as Map?)?.map(

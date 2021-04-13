@@ -12,24 +12,44 @@ part 'own_user.g.dart';
 class OwnUser extends User {
   /// Constructor used for json serialization
   OwnUser({
-    this.devices,
-    this.mutes,
-    this.totalUnreadCount,
+    this.devices = const [],
+    this.mutes = const [],
+    this.totalUnreadCount = 0,
     this.unreadChannels,
-    this.channelMutes,
-    String? id,
-    String? role,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    this.channelMutes = const [],
+    required String id,
+    required String role,
+    required DateTime createdAt,
+    required DateTime updatedAt,
     DateTime? lastActive,
-    bool? online,
-    Map<String, dynamic>? extraData,
-    bool? banned,
+    bool online = false,
+    Map<String, dynamic> extraData = const {},
+    bool banned = false,
   }) : super(
           id: id,
           role: role,
           createdAt: createdAt,
           updatedAt: updatedAt,
+          lastActive: lastActive,
+          online: online,
+          extraData: extraData,
+          banned: banned,
+        );
+
+  /// Create a temporary/throwaway user with an ID
+  OwnUser.temp({
+    required String id,
+    this.devices = const [],
+    this.mutes = const [],
+    this.totalUnreadCount = 0,
+    this.unreadChannels,
+    this.channelMutes = const [],
+    DateTime? lastActive,
+    bool online = false,
+    Map<String, dynamic> extraData = const {},
+    bool banned = false,
+  }) : super.temp(
+          id: id,
           lastActive: lastActive,
           online: online,
           extraData: extraData,
@@ -42,19 +62,19 @@ class OwnUser extends User {
 
   /// List of user devices
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Device>? devices;
+  final List<Device> devices;
 
   /// List of users muted by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Mute>? mutes;
+  final List<Mute> mutes;
 
   /// List of users muted by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Mute>? channelMutes;
+  final List<Mute> channelMutes;
 
   /// Total unread messages by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final int? totalUnreadCount;
+  final int totalUnreadCount;
 
   /// Total unread channels by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)

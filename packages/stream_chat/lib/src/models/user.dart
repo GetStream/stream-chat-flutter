@@ -8,16 +8,28 @@ part 'user.g.dart';
 class User {
   /// Constructor used for json serialization
   User({
-    this.id,
-    this.role,
-    this.createdAt,
-    this.updatedAt,
+    required this.id,
+    required this.role,
+    required this.createdAt,
+    required this.updatedAt,
     this.lastActive,
-    this.online,
-    this.extraData,
-    this.banned,
-    this.teams,
+    this.online = false,
+    this.extraData = const {},
+    this.banned = false,
+    this.teams = const [],
   });
+
+  /// Use constructor for a temporary/throwaway user with an ID
+  User.temp({
+    required this.id,
+    this.role = '',
+    this.lastActive,
+    this.online = false,
+    this.extraData = const {},
+    this.banned = false,
+    this.teams = const [],
+  })  : createdAt = DateTime.now(),
+        updatedAt = DateTime.now();
 
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic>? json) => _$UserFromJson(
@@ -26,14 +38,14 @@ class User {
   /// Use this named constructor to create a new user instance
   User.init(
     this.id, {
-    this.online,
-    this.extraData,
-  })  : createdAt = null,
-        updatedAt = null,
-        lastActive = null,
-        banned = null,
-        teams = null,
-        role = null;
+    this.online = false,
+    this.extraData = const {},
+    required this.createdAt,
+    required this.updatedAt,
+    this.teams = const [],
+    required this.role,
+  })   : lastActive = null,
+        banned = false;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -49,23 +61,23 @@ class User {
   ];
 
   /// User id
-  final String? id;
+  final String id;
 
   /// User role
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String? role;
+  final String role;
 
   /// User role
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<String>? teams;
+  final List<String> teams;
 
   /// Date of user creation
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime? createdAt;
+  final DateTime createdAt;
 
   /// Date of last user update
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   /// Date of last user connection
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -73,23 +85,23 @@ class User {
 
   /// True if user is online
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final bool? online;
+  final bool online;
 
   /// True if user is banned from the chat
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final bool? banned;
+  final bool banned;
 
   /// Map of custom user extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic>? extraData;
+  final Map<String, dynamic> extraData;
 
   @override
   int get hashCode => id.hashCode;
 
   /// Shortcut for user name
   String? get name =>
-      (extraData?.containsKey('name') == true && extraData!['name'] != '')
-          ? extraData!['name']
+      (extraData.containsKey('name') == true && extraData['name'] != '')
+          ? extraData['name']
           : id;
 
   @override

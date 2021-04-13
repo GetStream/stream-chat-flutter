@@ -46,8 +46,8 @@ class Message extends Equatable {
   /// Constructor used for json serialization
   Message({
     String? id,
-    this.text,
-    this.type,
+    required this.text,
+    required this.type,
     this.attachments,
     this.mentionedUsers,
     this.silent,
@@ -63,8 +63,8 @@ class Message extends Equatable {
     this.threadParticipants,
     this.showInChannel,
     this.command,
-    this.createdAt,
-    this.updatedAt,
+    required this.createdAt,
+    required this.updatedAt,
     this.user,
     this.pinned = false,
     this.pinnedAt,
@@ -77,6 +77,40 @@ class Message extends Equatable {
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc();
 
+  /// Constructor for creating temporary/throwaway message with id and text
+  Message.temp({
+    String? id,
+    required this.text,
+    this.attachments,
+    this.mentionedUsers,
+    this.silent,
+    this.shadowed,
+    this.reactionCounts,
+    this.reactionScores,
+    this.latestReactions,
+    this.ownReactions,
+    this.parentId,
+    this.quotedMessage,
+    this.quotedMessageId,
+    this.replyCount = 0,
+    this.threadParticipants,
+    this.showInChannel,
+    this.command,
+    this.user,
+    this.pinned = false,
+    this.pinnedAt,
+    DateTime? pinExpires,
+    this.pinnedBy,
+    this.extraData,
+    this.deletedAt,
+    this.status = MessageSendingStatus.sent,
+    this.skipPush,
+  })  : id = id ?? const Uuid().v4(),
+        pinExpires = pinExpires?.toUtc(),
+        createdAt = DateTime.now(),
+        updatedAt = DateTime.now(),
+        type = '';
+
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic>? json) => _$MessageFromJson(
       Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
@@ -86,7 +120,7 @@ class Message extends Equatable {
   final String id;
 
   /// The text of this message
-  final String? text;
+  final String text;
 
   /// The status of a sending message
   @JsonKey(ignore: true)
@@ -94,7 +128,7 @@ class Message extends Equatable {
 
   /// The message type
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String? type;
+  final String type;
 
   /// The list of attachments, either provided by the user or generated from a
   /// command or as a result of URL scraping.
@@ -158,11 +192,11 @@ class Message extends Equatable {
 
   /// Reserved field indicating when the message was created.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime? createdAt;
+  final DateTime createdAt;
 
   /// Reserved field indicating when the message was updated last time.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   /// User who sent the message
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -384,7 +418,12 @@ class Message extends Equatable {
 @JsonSerializable()
 class TranslatedMessage extends Message {
   /// Constructor used for json serialization
-  TranslatedMessage(this.i18n);
+  TranslatedMessage(this.i18n)
+      : super(
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            text: '',
+            type: '');
 
   /// Create a new instance from a json
   factory TranslatedMessage.fromJson(Map<String, dynamic>? json) =>
