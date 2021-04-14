@@ -1,3 +1,7 @@
+## 1.5.2
+
+- fix: `queryChannels` should throw exception if client is not yet connected.
+
 ## 1.5.1
 
 - Minor fixes and improvements
