@@ -23,6 +23,7 @@ class Read {
   final User user;
 
   /// Number of unread messages
+  @JsonKey(defaultValue: 0)
   final int unreadMessages;
 
   /// Serialize to json

@@ -9,7 +9,7 @@ part of 'attachment.dart';
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
   return Attachment(
     id: json['id'] as String?,
-    type: json['type'] as String,
+    type: json['type'] as String?,
     titleLink: json['title_link'] as String?,
     title: json['title'] as String?,
     thumbUrl: json['thumb_url'] as String?,

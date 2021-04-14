@@ -8,28 +8,17 @@ part 'user.g.dart';
 class User {
   /// Constructor used for json serialization
   User({
-    required this.id,
-    required this.role,
-    required this.createdAt,
-    required this.updatedAt,
-    this.lastActive,
-    this.online = false,
-    this.extraData = const {},
-    this.banned = false,
-    this.teams = const [],
-  });
-
-  /// Use constructor for a temporary/throwaway user with an ID
-  User.temp({
-    required this.id,
+    this.id = '',
     this.role = '',
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.lastActive,
     this.online = false,
     this.extraData = const {},
     this.banned = false,
     this.teams = const [],
-  })  : createdAt = DateTime.now(),
-        updatedAt = DateTime.now();
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic>? json) => _$UserFromJson(
@@ -64,11 +53,15 @@ class User {
   final String id;
 
   /// User role
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: '')
   final String role;
 
   /// User role
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+      includeIfNull: false,
+      toJson: Serialization.readOnly,
+      defaultValue: <String>[])
   final List<String> teams;
 
   /// Date of user creation
@@ -84,11 +77,13 @@ class User {
   final DateTime? lastActive;
 
   /// True if user is online
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: false)
   final bool online;
 
   /// True if user is banned from the chat
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: false)
   final bool banned;
 
   /// Map of custom user extraData

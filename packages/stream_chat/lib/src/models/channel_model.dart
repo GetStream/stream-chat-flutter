@@ -12,33 +12,20 @@ class ChannelModel {
   ChannelModel({
     this.id,
     this.type,
-    required this.cid,
-    required this.config,
+    this.cid = '',
+    ChannelConfig? config,
     this.createdBy,
     this.frozen = false,
     this.lastMessageAt,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.deletedAt,
     this.memberCount = 0,
     this.extraData,
     this.team,
-  });
-
-  ChannelModel.temp({
-    this.id,
-    this.type,
-    required this.cid,
-    this.createdBy,
-    this.frozen = false,
-    this.lastMessageAt,
-    this.deletedAt,
-    this.memberCount = 0,
-    this.extraData,
-    this.team,
-  })  : createdAt = DateTime.now(),
-        updatedAt = DateTime.now(),
-        config = ChannelConfig();
+  })  : config = config ?? ChannelConfig(),
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic>? json) =>
@@ -64,7 +51,7 @@ class ChannelModel {
   final User? createdBy;
 
   /// True if this channel is frozen
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeIfNull: false, defaultValue: false)
   final bool frozen;
 
   /// The date of the last message
@@ -84,7 +71,8 @@ class ChannelModel {
   final DateTime? deletedAt;
 
   /// The count of this channel members
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: 0)
   final int memberCount;
 
   /// Map of custom channel extraData

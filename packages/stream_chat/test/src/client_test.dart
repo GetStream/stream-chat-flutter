@@ -479,7 +479,7 @@ void main() {
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
 
-        expect(() => client.connectUserWithProvider(User.temp(id: 'test-id')),
+        expect(() => client.connectUserWithProvider(User(id: 'test-id')),
             throwsA(isA<Exception>()));
       });
 
@@ -517,7 +517,7 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final user = User.temp(id: 'test-id');
+        final user = User(id: 'test-id');
         final data = {
           'users': {user.id: user.toJson()},
         };
@@ -542,8 +542,8 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final user = User.temp(id: 'test-id');
-        final user2 = User.temp(id: 'test-id2');
+        final user = User(id: 'test-id');
+        final user2 = User(id: 'test-id2');
 
         final data = {
           'users': {
@@ -739,10 +739,6 @@ void main() {
         final client = StreamChatClient('api-key', httpClient: mockDio);
         final message = Message(
           id: 'test',
-          updatedAt: DateTime.now(),
-          createdAt: DateTime.now(),
-          text: '',
-          type: '',
         );
 
         when(
@@ -781,7 +777,7 @@ void main() {
           ),
         );
 
-        await client.deleteMessage(Message.temp(id: messageId, text: ''));
+        await client.deleteMessage(Message(id: messageId, text: ''));
 
         verify(() => mockDio.delete<String>('/messages/$messageId')).called(1);
       });
@@ -1101,7 +1097,7 @@ void main() {
         );
 
         test('should throw argument error', () {
-          final message = Message.temp(text: 'Hello');
+          final message = Message(text: 'Hello');
           expect(
             () => client.pinMessage(message, 'InvalidType'),
             throwsArgumentError,
@@ -1110,7 +1106,7 @@ void main() {
 
         test('should complete successfully', () async {
           const timeout = 30;
-          final message = Message.temp(text: 'Hello');
+          final message = Message(text: 'Hello');
 
           when(
             () => mockDio.post<String>(
@@ -1132,7 +1128,7 @@ void main() {
         });
 
         test('should unpin message successfully', () async {
-          final message = Message.temp(text: 'Hello');
+          final message = Message(text: 'Hello');
 
           when(
             () => mockDio.post<String>(

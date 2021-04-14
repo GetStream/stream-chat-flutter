@@ -1312,7 +1312,7 @@ class ChannelClientState {
       updateChannelState(channelState!.copyWith(
         members: [
           ...channelState!.members,
-          member,
+          member!,
         ],
       ));
     }));
@@ -1323,7 +1323,7 @@ class ChannelClientState {
       final user = e.user;
       updateChannelState(channelState!.copyWith(
         members: List.from(
-            channelState!.members..removeWhere((m) => m!.userId == user!.id)),
+            channelState!.members..removeWhere((m) => m.userId == user!.id)),
       ));
     }));
   }
@@ -1549,7 +1549,7 @@ class ChannelClientState {
 
   /// Channel members list
   List<Member> get members => _channelState!.members
-      .map((e) => e!.copyWith(user: _channel.client.state!.users[e.user!.id]))
+      .map((e) => e.copyWith(user: _channel.client.state!.users[e.user!.id]))
       .toList();
 
   /// Channel members list as a stream
@@ -1664,7 +1664,7 @@ class ChannelClientState {
           [],
     ];
 
-    final newMembers = <Member?>[
+    final newMembers = <Member>[
       ...updatedState.members,
     ];
 

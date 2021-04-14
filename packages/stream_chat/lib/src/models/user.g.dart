@@ -9,16 +9,22 @@ part of 'user.dart';
 User _$UserFromJson(Map<String, dynamic> json) {
   return User(
     id: json['id'] as String,
-    role: json['role'] as String,
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
+    role: json['role'] as String? ?? '',
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+    updatedAt: json['updated_at'] == null
+        ? null
+        : DateTime.parse(json['updated_at'] as String),
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool,
+    online: json['online'] as bool? ?? false,
     extraData: json['extra_data'] as Map<String, dynamic>,
-    banned: json['banned'] as bool,
-    teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
+    banned: json['banned'] as bool? ?? false,
+    teams:
+        (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+            [],
   );
 }
 

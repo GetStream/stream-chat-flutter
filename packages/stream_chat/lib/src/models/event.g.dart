@@ -85,7 +85,7 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) {
     createdBy: json['created_by'] == null
         ? null
         : User.fromJson(json['created_by'] as Map<String, dynamic>?),
-    frozen: json['frozen'] as bool,
+    frozen: json['frozen'] as bool? ?? false,
     lastMessageAt: json['last_message_at'] == null
         ? null
         : DateTime.parse(json['last_message_at'] as String),
@@ -94,7 +94,7 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    memberCount: json['member_count'] as int,
+    memberCount: json['member_count'] as int? ?? 0,
     extraData: json['extra_data'] as Map<String, dynamic>?,
   );
 }

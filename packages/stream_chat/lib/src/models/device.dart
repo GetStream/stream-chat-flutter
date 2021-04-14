@@ -7,7 +7,7 @@ part 'device.g.dart';
 class Device {
   /// Constructor used for json serialization
   Device({
-    required this.id,
+    this.id = '',
     this.pushProvider,
   });
 

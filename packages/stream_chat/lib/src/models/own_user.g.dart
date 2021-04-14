@@ -8,27 +8,34 @@ part of 'own_user.dart';
 
 OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
   return OwnUser(
-    devices: (json['devices'] as List<dynamic>)
-        .map((e) => Device.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    mutes: (json['mutes'] as List<dynamic>)
-        .map((e) => Mute.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    totalUnreadCount: json['total_unread_count'] as int,
+    devices: (json['devices'] as List<dynamic>?)
+            ?.map((e) => Device.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
+    mutes: (json['mutes'] as List<dynamic>?)
+            ?.map((e) => Mute.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
+    totalUnreadCount: json['total_unread_count'] as int? ?? 0,
     unreadChannels: json['unread_channels'] as int?,
-    channelMutes: (json['channel_mutes'] as List<dynamic>)
-        .map((e) => Mute.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    channelMutes: (json['channel_mutes'] as List<dynamic>?)
+            ?.map((e) => Mute.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
     id: json['id'] as String,
-    role: json['role'] as String,
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
+    role: json['role'] as String? ?? '',
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+    updatedAt: json['updated_at'] == null
+        ? null
+        : DateTime.parse(json['updated_at'] as String),
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool,
+    online: json['online'] as bool? ?? false,
     extraData: json['extra_data'] as Map<String, dynamic>,
-    banned: json['banned'] as bool,
+    banned: json['banned'] as bool? ?? false,
   );
 }
 

@@ -851,8 +851,8 @@ void main() {
       expect(channelState.channel?.type, 'team');
       expect(channelState.channel?.config, isA<ChannelConfig>());
       expect(channelState.channel?.config, isNotNull);
-      expect(channelState.channel?.config?.commands, hasLength(1));
-      expect(channelState.channel?.config?.commands![0], isA<Command>());
+      expect(channelState.channel?.config.commands, hasLength(1));
+      expect(channelState.channel?.config.commands![0], isA<Command>());
       expect(channelState.channel?.lastMessageAt,
           DateTime.parse('2020-01-30T13:43:41.062362Z'));
       expect(channelState.channel?.createdAt,
@@ -868,13 +868,13 @@ void main() {
         'https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png',
       );
       expect(channelState.messages, hasLength(25));
-      expect(channelState.messages![0], isA<Message>());
-      expect(channelState.messages![0], isNotNull);
+      expect(channelState.messages[0], isA<Message>());
+      expect(channelState.messages[0], isNotNull);
       expect(
-        channelState.messages![0].createdAt,
+        channelState.messages[0].createdAt,
         DateTime.parse('2020-01-29T03:23:02.843948Z'),
       );
-      expect(channelState.messages![0].user, isA<User>());
+      expect(channelState.messages[0].user, isA<User>());
       expect(channelState.watcherCount, 5);
     });
 
@@ -889,8 +889,8 @@ void main() {
               "image": "https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png",
               "example": 1
             },
-            "watchers": null,
-            "read": null,
+            "watchers": [],
+            "read": [],
             "messages": [
               {
                 "id": "dry-meadow-0-2b73cc8b-cd86-4a01-8d40-bd82ad07a030",

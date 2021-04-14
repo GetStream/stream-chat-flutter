@@ -25,7 +25,7 @@ void main() {
     });
 
     test('should serialize to json correctly', () {
-      final channel = ChannelModel.temp(
+      final channel = ChannelModel(
         type: 'type',
         id: 'id',
         cid: 'a:a',
@@ -34,12 +34,12 @@ void main() {
 
       expect(
         channel.toJson(),
-        {'id': 'id', 'type': 'type', 'name': 'cool'},
+        {'id': 'id', 'type': 'type', 'frozen': false, 'name': 'cool'},
       );
     });
 
     test('should serialize to json correctly when frozen is provided', () {
-      final channel = ChannelModel.temp(
+      final channel = ChannelModel(
         type: 'type',
         id: 'id',
         cid: 'a:a',

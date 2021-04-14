@@ -76,7 +76,7 @@ abstract class ChatPersistenceClient {
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
     return ChannelState(
-      members: (data[0] as List<Member?>?)!,
+      members: (data[0] as List<Member>?)!,
       read: (data[1] as List<Read>?)!,
       channel: data[2] as ChannelModel?,
       messages: (data[3] as List<Message>?)!,
@@ -212,7 +212,7 @@ abstract class ChatPersistenceClient {
                       ])
                   .expand((v) => v),
               ...cs.read.map((r) => r.user),
-              ...cs.members.map((m) => m!.user),
+              ...cs.members.map((m) => m.user),
             ])
         .expand((it) => it)
         .where((it) => it != null);

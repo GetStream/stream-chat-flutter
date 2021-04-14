@@ -11,20 +11,26 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
     id: json['id'] as String?,
     type: json['type'] as String?,
     cid: json['cid'] as String,
-    config: ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
+    config: json['config'] == null
+        ? null
+        : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
     createdBy: json['created_by'] == null
         ? null
         : User.fromJson(json['created_by'] as Map<String, dynamic>?),
-    frozen: json['frozen'] as bool,
+    frozen: json['frozen'] as bool? ?? false,
     lastMessageAt: json['last_message_at'] == null
         ? null
         : DateTime.parse(json['last_message_at'] as String),
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+    updatedAt: json['updated_at'] == null
+        ? null
+        : DateTime.parse(json['updated_at'] as String),
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    memberCount: json['member_count'] as int,
+    memberCount: json['member_count'] as int? ?? 0,
     extraData: json['extra_data'] as Map<String, dynamic>?,
     team: json['team'] as String?,
   );

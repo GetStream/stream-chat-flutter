@@ -15,7 +15,7 @@ class Attachment extends Equatable {
   /// Constructor used for json serialization
   Attachment({
     String? id,
-    required this.type,
+    String? type,
     this.titleLink,
     String? title,
     this.thumbUrl,
@@ -38,6 +38,7 @@ class Attachment extends Equatable {
     UploadState? uploadState,
   })  : id = id ?? const Uuid().v4(),
         title = title ?? file?.name,
+        type = type ?? '',
         localUri = file?.path != null ? Uri.parse(file!.path!) : null {
     this.uploadState = uploadState ??
         ((assetUrl != null || imageUrl != null)

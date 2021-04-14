@@ -46,8 +46,8 @@ class Message extends Equatable {
   /// Constructor used for json serialization
   Message({
     String? id,
-    required this.text,
-    required this.type,
+    this.text = '',
+    this.type = '',
     this.attachments,
     this.mentionedUsers,
     this.silent,
@@ -63,39 +63,8 @@ class Message extends Equatable {
     this.threadParticipants,
     this.showInChannel,
     this.command,
-    required this.createdAt,
-    required this.updatedAt,
-    this.user,
-    this.pinned = false,
-    this.pinnedAt,
-    DateTime? pinExpires,
-    this.pinnedBy,
-    this.extraData,
-    this.deletedAt,
-    this.status = MessageSendingStatus.sent,
-    this.skipPush,
-  })  : id = id ?? const Uuid().v4(),
-        pinExpires = pinExpires?.toUtc();
-
-  /// Constructor for creating temporary/throwaway message with id and text
-  Message.temp({
-    String? id,
-    required this.text,
-    this.attachments,
-    this.mentionedUsers,
-    this.silent,
-    this.shadowed,
-    this.reactionCounts,
-    this.reactionScores,
-    this.latestReactions,
-    this.ownReactions,
-    this.parentId,
-    this.quotedMessage,
-    this.quotedMessageId,
-    this.replyCount = 0,
-    this.threadParticipants,
-    this.showInChannel,
-    this.command,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.user,
     this.pinned = false,
     this.pinnedAt,
@@ -107,9 +76,8 @@ class Message extends Equatable {
     this.skipPush,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
-        createdAt = DateTime.now(),
-        updatedAt = DateTime.now(),
-        type = '';
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic>? json) => _$MessageFromJson(
@@ -418,12 +386,7 @@ class Message extends Equatable {
 @JsonSerializable()
 class TranslatedMessage extends Message {
   /// Constructor used for json serialization
-  TranslatedMessage(this.i18n)
-      : super(
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-            text: '',
-            type: '');
+  TranslatedMessage(this.i18n) : super();
 
   /// Create a new instance from a json
   factory TranslatedMessage.fromJson(Map<String, dynamic>? json) =>

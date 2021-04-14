@@ -13,14 +13,15 @@ class Member {
     this.inviteAcceptedAt,
     this.inviteRejectedAt,
     this.invited = false,
-    required this.role,
+    this.role = '',
     this.userId,
     this.isModerator,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.banned = false,
     this.shadowBanned = false,
-  });
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) {
@@ -40,9 +41,11 @@ class Member {
   final DateTime? inviteRejectedAt;
 
   /// True if the user has been invited to the channel
+  @JsonKey(defaultValue: false)
   final bool invited;
 
   /// The role of the user in the channel
+  @JsonKey(defaultValue: '')
   final String role;
 
   /// The id of the interested user
@@ -52,9 +55,11 @@ class Member {
   final bool? isModerator;
 
   /// True if the member is banned from the channel
+  @JsonKey(defaultValue: false)
   final bool banned;
 
   /// True if the member is shadow banned from the channel
+  @JsonKey(defaultValue: false)
   final bool shadowBanned;
 
   /// The date of creation

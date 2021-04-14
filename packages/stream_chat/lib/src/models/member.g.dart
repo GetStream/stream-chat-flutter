@@ -17,14 +17,18 @@ Member _$MemberFromJson(Map<String, dynamic> json) {
     inviteRejectedAt: json['invite_rejected_at'] == null
         ? null
         : DateTime.parse(json['invite_rejected_at'] as String),
-    invited: json['invited'] as bool,
-    role: json['role'] as String,
+    invited: json['invited'] as bool? ?? false,
+    role: json['role'] as String? ?? '',
     userId: json['user_id'] as String?,
     isModerator: json['is_moderator'] as bool?,
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
-    banned: json['banned'] as bool,
-    shadowBanned: json['shadow_banned'] as bool,
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+    updatedAt: json['updated_at'] == null
+        ? null
+        : DateTime.parse(json['updated_at'] as String),
+    banned: json['banned'] as bool? ?? false,
+    shadowBanned: json['shadow_banned'] as bool? ?? false,
   );
 }
 

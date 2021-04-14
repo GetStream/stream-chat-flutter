@@ -311,7 +311,7 @@ class StreamChatClient {
 
         httpClient.unlock();
 
-        await connectUser(User.temp(id: userId), newToken);
+        await connectUser(User(id: userId), newToken);
 
         try {
           handler.resolve(
@@ -753,7 +753,7 @@ class StreamChatClient {
 
     final users = channels
         .expand((it) => it.members)
-        .map((it) => it!.user)
+        .map((it) => it.user)
         .toList(growable: false);
 
     state!._updateUsers(users);
@@ -956,7 +956,7 @@ class StreamChatClient {
 
     _anonymous = true;
     const uuid = Uuid();
-    state!.user = OwnUser.temp(id: uuid.v4());
+    state!.user = OwnUser(id: uuid.v4());
 
     return connect().then((event) {
       _connectCompleter!.complete(event);
