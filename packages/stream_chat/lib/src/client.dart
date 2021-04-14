@@ -626,15 +626,14 @@ class StreamChatClient {
     if (_queryChannelsStreams.containsKey(hash)) {
       yield await _queryChannelsStreams[hash];
     } else {
-      final isConnected = wsConnectionStatus == ConnectionStatus.connected;
       final channels = await queryChannelsOffline(
         filter: filter,
         sort: sort,
         paginationParams: paginationParams,
       );
-      if (!isConnected || channels.isNotEmpty) yield channels;
+      if (channels.isNotEmpty) yield channels;
 
-      if (isConnected || !persistenceEnabled) {
+      try {
         final newQueryChannelsFuture = queryChannelsOnline(
           filter: filter,
           sort: sort,
@@ -649,6 +648,8 @@ class StreamChatClient {
         _queryChannelsStreams[hash] = newQueryChannelsFuture;
 
         yield await newQueryChannelsFuture;
+      } catch (_) {
+        if (channels.isEmpty) rethrow;
       }
     }
   }
