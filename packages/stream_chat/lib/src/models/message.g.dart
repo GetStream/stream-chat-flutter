@@ -15,7 +15,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
         .toList(),
     mentionedUsers: (json['mentioned_users'] as List<dynamic>?)
-        ?.map((e) => User.fromJson(e as Map<String, dynamic>?))
+        ?.map((e) => User.fromJson(e as Map<String, dynamic>))
         .toList(),
     silent: json['silent'] as bool?,
     shadowed: json['shadowed'] as bool?,
@@ -26,19 +26,19 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
       (k, e) => MapEntry(k, e as int),
     ),
     latestReactions: (json['latest_reactions'] as List<dynamic>?)
-        ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>?))
+        ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
         .toList(),
     ownReactions: (json['own_reactions'] as List<dynamic>?)
-        ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>?))
+        ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
         .toList(),
     parentId: json['parent_id'] as String?,
     quotedMessage: json['quoted_message'] == null
         ? null
-        : Message.fromJson(json['quoted_message'] as Map<String, dynamic>?),
+        : Message.fromJson(json['quoted_message'] as Map<String, dynamic>),
     quotedMessageId: json['quoted_message_id'] as String?,
     replyCount: json['reply_count'] as int?,
     threadParticipants: (json['thread_participants'] as List<dynamic>?)
-        ?.map((e) => User.fromJson(e as Map<String, dynamic>?))
+        ?.map((e) => User.fromJson(e as Map<String, dynamic>))
         .toList(),
     showInChannel: json['show_in_channel'] as bool?,
     command: json['command'] as String?,
@@ -50,7 +50,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         : DateTime.parse(json['updated_at'] as String),
     user: json['user'] == null
         ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>?),
+        : User.fromJson(json['user'] as Map<String, dynamic>),
     pinned: json['pinned'] as bool?,
     pinnedAt: json['pinned_at'] == null
         ? null
@@ -60,7 +60,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         : DateTime.parse(json['pin_expires'] as String),
     pinnedBy: json['pinned_by'] == null
         ? null
-        : User.fromJson(json['pinned_by'] as Map<String, dynamic>?),
+        : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
     extraData: json['extra_data'] as Map<String, dynamic>?,
     deletedAt: json['deleted_at'] == null
         ? null

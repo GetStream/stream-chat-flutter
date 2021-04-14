@@ -9,11 +9,13 @@ part of 'reaction.dart';
 Reaction _$ReactionFromJson(Map<String, dynamic> json) {
   return Reaction(
     messageId: json['message_id'] as String?,
-    createdAt: DateTime.parse(json['created_at'] as String),
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
     type: json['type'] as String,
-    user: User.fromJson(json['user'] as Map<String, dynamic>?),
+    user: User.fromJson(json['user'] as Map<String, dynamic>),
     userId: json['user_id'] as String?,
-    score: json['score'] as int,
+    score: json['score'] as int? ?? 0,
     extraData: json['extra_data'] as Map<String, dynamic>?,
   );
 }

@@ -10,13 +10,14 @@ class Reaction {
   /// Constructor used for json serialization
   Reaction({
     this.messageId,
-    required this.createdAt,
-    required this.type,
+    DateTime? createdAt,
+    this.type = '',
     required this.user,
     String? userId,
-    required this.score,
+    this.score = 0,
     this.extraData,
-  }) : userId = userId ?? user.id;
+  })  : userId = userId ?? user.id,
+        createdAt = createdAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Reaction.fromJson(Map<String, dynamic> json) =>
@@ -40,6 +41,7 @@ class Reaction {
   final User user;
 
   /// The score of the reaction (ie. number of reactions sent)
+  @JsonKey(defaultValue: 0)
   final int score;
 
   /// The userId that sent the reaction

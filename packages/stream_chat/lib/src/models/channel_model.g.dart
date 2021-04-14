@@ -16,7 +16,7 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
         : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
     createdBy: json['created_by'] == null
         ? null
-        : User.fromJson(json['created_by'] as Map<String, dynamic>?),
+        : User.fromJson(json['created_by'] as Map<String, dynamic>),
     frozen: json['frozen'] as bool? ?? false,
     lastMessageAt: json['last_message_at'] == null
         ? null

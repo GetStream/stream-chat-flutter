@@ -49,12 +49,12 @@ void main() {
     });
 
     test('should return null', () {
-      final result = Serialization.moveToExtraDataFromRoot(null, [
+      final result = Serialization.moveToExtraDataFromRoot({}, [
         'prop1',
         'prop2',
       ]);
 
-      expect(result, null);
+      expect(result, {'extra_data': {}});
     });
   });
 }

@@ -10,9 +10,9 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
   return ChannelState(
     channel: json['channel'] == null
         ? null
-        : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>?),
+        : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
     messages: (json['messages'] as List<dynamic>?)
-            ?.map((e) => Message.fromJson(e as Map<String, dynamic>?))
+            ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
     members: (json['members'] as List<dynamic>?)
@@ -20,12 +20,12 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
             .toList() ??
         [],
     pinnedMessages: (json['pinned_messages'] as List<dynamic>?)
-            ?.map((e) => Message.fromJson(e as Map<String, dynamic>?))
+            ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
     watcherCount: json['watcher_count'] as int?,
     watchers: (json['watchers'] as List<dynamic>?)
-            ?.map((e) => User.fromJson(e as Map<String, dynamic>?))
+            ?.map((e) => User.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
     read: (json['read'] as List<dynamic>?)

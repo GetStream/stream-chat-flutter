@@ -9,7 +9,7 @@ part of 'read.dart';
 Read _$ReadFromJson(Map<String, dynamic> json) {
   return Read(
     lastRead: DateTime.parse(json['last_read'] as String),
-    user: User.fromJson(json['user'] as Map<String, dynamic>?),
+    user: User.fromJson(json['user'] as Map<String, dynamic>),
     unreadMessages: json['unread_messages'] as int? ?? 0,
   );
 }
