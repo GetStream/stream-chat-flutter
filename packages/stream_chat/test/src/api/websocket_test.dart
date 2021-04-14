@@ -124,8 +124,10 @@ void main() {
     const computedUrl =
         'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
 
+    final mockWSSink = MockWSSink();
+    when(() => mockWSChannel.sink).thenAnswer((_) => mockWSSink);
+    when(() => mockWSSink.close(any(), any())).thenAnswer((_) async => null);
     when(() => connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
-    when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
     final connect = ws.connect().then((_) {
@@ -165,8 +167,10 @@ void main() {
     const computedUrl =
         'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
 
+    final mockWSSink = MockWSSink();
+    when(() => mockWSChannel.sink).thenAnswer((_) => mockWSSink);
+    when(() => mockWSSink.close(any(), any())).thenAnswer((_) async => null);
     when(() => connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
-    when(() => mockWSChannel.sink).thenAnswer((_) => MockWSSink());
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
 
     ws.connect();
@@ -199,7 +203,8 @@ void main() {
 
     when(() => connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
-    when(() => mockWSChannel.sink).thenReturn(mockWSSink);
+    when(() => mockWSChannel.sink).thenAnswer((_) => mockWSSink);
+    when(() => mockWSSink.close(any(), any())).thenAnswer((_) async => null);
 
     final timer = Timer.periodic(
       const Duration(milliseconds: 1000),
@@ -245,7 +250,8 @@ void main() {
 
     when(() => connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
-    when(() => mockWSChannel.sink).thenReturn(mockWSSink);
+    when(() => mockWSChannel.sink).thenAnswer((_) => mockWSSink);
+    when(() => mockWSSink.close(any(), any())).thenAnswer((_) async => null);
 
     final connect = ws.connect().then((_) {
       streamController.sink.add('{}');
@@ -288,7 +294,8 @@ void main() {
 
     when(() => connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
     when(() => mockWSChannel.stream).thenAnswer((_) => streamController.stream);
-    when(() => mockWSChannel.sink).thenReturn(mockWSSink);
+    when(() => mockWSChannel.sink).thenAnswer((_) => mockWSSink);
+    when(() => mockWSSink.close(any(), any())).thenAnswer((_) async => null);
 
     final connect = ws.connect().then((_) {
       streamController.sink.add('{}');

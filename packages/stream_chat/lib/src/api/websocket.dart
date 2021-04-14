@@ -316,6 +316,6 @@ class WebSocket {
     _manuallyDisconnected = true;
     _connectionStatus = ConnectionStatus.disconnected;
     await _connectionStatusController.close();
-    return _channel.sink.close();
+    await _channel.sink.close();
   }
 }
