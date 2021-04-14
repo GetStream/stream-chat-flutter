@@ -19,8 +19,11 @@ class Reaction {
   }) : userId = userId ?? user.id;
 
   /// Create a new instance from a json
-  factory Reaction.fromJson(Map<String, dynamic>? json) => _$ReactionFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
+  factory Reaction.fromJson(Map<String, dynamic> json) =>
+      _$ReactionFromJson(Serialization.moveToExtraDataFromRoot(
+        json,
+        topLevelFields,
+      ));
 
   /// The messageId to which the reaction belongs
   final String? messageId;

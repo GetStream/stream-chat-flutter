@@ -31,11 +31,11 @@ class Event {
   }) : isLocal = true;
 
   /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic>? json) =>
+  factory Event.fromJson(Map<String, dynamic> json) =>
       _$EventFromJson(Serialization.moveToExtraDataFromRoot(
         json,
         topLevelFields,
-      )!)
+      ))
         ..isLocal = false;
 
   /// The type of the event
@@ -197,11 +197,11 @@ class EventChannel extends ChannelModel {
         );
 
   /// Create a new instance from a json
-  factory EventChannel.fromJson(Map<String, dynamic>? json) =>
+  factory EventChannel.fromJson(Map<String, dynamic> json) =>
       _$EventChannelFromJson(Serialization.moveToExtraDataFromRoot(
         json,
         topLevelFields,
-      )!);
+      ));
 
   /// A paginated list of channel members
   final List<Member>? members;

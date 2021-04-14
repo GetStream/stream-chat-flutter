@@ -237,7 +237,7 @@ abstract class ChatPersistenceClient {
 
     final updateMembersFuture = channelStates.map((it) {
       final cid = it.channel!.cid;
-      final members = it.members.where((it) => it != null);
+      final members = it.members;
       return updateMembers(cid, members.toList(growable: false));
     }).toList(growable: false);
 

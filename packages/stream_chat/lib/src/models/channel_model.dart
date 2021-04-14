@@ -28,9 +28,9 @@ class ChannelModel {
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory ChannelModel.fromJson(Map<String, dynamic>? json) =>
+  factory ChannelModel.fromJson(Map<String, dynamic> json) =>
       _$ChannelModelFromJson(
-          Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
+          Serialization.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// The id of this channel
   final String? id;

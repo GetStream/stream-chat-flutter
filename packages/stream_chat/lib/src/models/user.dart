@@ -21,8 +21,8 @@ class User {
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory User.fromJson(Map<String, dynamic>? json) => _$UserFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Use this named constructor to create a new user instance
   User.init(

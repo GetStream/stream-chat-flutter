@@ -14,12 +14,10 @@ class Serialization {
       users?.map((u) => u.id).toList();
 
   /// Takes unknown json keys and puts them in the `extra_data` key
-  static Map<String, dynamic>? moveToExtraDataFromRoot(
-    Map<String, dynamic>? json,
+  static Map<String, dynamic> moveToExtraDataFromRoot(
+    Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    if (json == null) return null;
-
     final jsonClone = Map<String, dynamic>.from(json);
 
     final extraDataMap = Map<String, dynamic>.from(json)

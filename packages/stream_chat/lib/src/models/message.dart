@@ -80,8 +80,8 @@ class Message extends Equatable {
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory Message.fromJson(Map<String, dynamic>? json) => _$MessageFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
+  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// The message ID. This is either created by Stream or set client side when
   /// the message is added.
@@ -389,9 +389,9 @@ class TranslatedMessage extends Message {
   TranslatedMessage(this.i18n) : super();
 
   /// Create a new instance from a json
-  factory TranslatedMessage.fromJson(Map<String, dynamic>? json) =>
+  factory TranslatedMessage.fromJson(Map<String, dynamic> json) =>
       _$TranslatedMessageFromJson(
-        Serialization.moveToExtraDataFromRoot(json, topLevelFields)!,
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields),
       );
 
   /// A Map of

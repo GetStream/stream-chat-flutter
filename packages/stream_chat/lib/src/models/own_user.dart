@@ -37,8 +37,8 @@ class OwnUser extends User {
         );
 
   /// Create a new instance from a json
-  factory OwnUser.fromJson(Map<String, dynamic>? json) => _$OwnUserFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields)!);
+  factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// List of user devices
   @JsonKey(
