@@ -626,27 +626,30 @@ class StreamChatClient {
     if (_queryChannelsStreams.containsKey(hash)) {
       yield await _queryChannelsStreams[hash];
     } else {
+      final isConnected = wsConnectionStatus == ConnectionStatus.connected;
       final channels = await queryChannelsOffline(
         filter: filter,
         sort: sort,
         paginationParams: paginationParams,
       );
-      if (channels.isNotEmpty) yield channels;
+      if (!isConnected || channels.isNotEmpty) yield channels;
 
-      final newQueryChannelsFuture = queryChannelsOnline(
-        filter: filter,
-        sort: sort,
-        options: options,
-        paginationParams: paginationParams,
-        messageLimit: messageLimit,
-        waitForConnect: waitForConnect,
-      ).whenComplete(() {
-        _queryChannelsStreams.remove(hash);
-      });
+      if (isConnected || !persistenceEnabled) {
+        final newQueryChannelsFuture = queryChannelsOnline(
+          filter: filter,
+          sort: sort,
+          options: options,
+          paginationParams: paginationParams,
+          messageLimit: messageLimit,
+          waitForConnect: waitForConnect,
+        ).whenComplete(() {
+          _queryChannelsStreams.remove(hash);
+        });
 
-      _queryChannelsStreams[hash] = newQueryChannelsFuture;
+        _queryChannelsStreams[hash] = newQueryChannelsFuture;
 
-      yield await newQueryChannelsFuture;
+        yield await newQueryChannelsFuture;
+      }
     }
   }
 
