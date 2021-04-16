@@ -72,9 +72,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       _queryMessagesLoadingController.add(true);
     }
     try {
-      final clear = pagination == null ||
-          pagination.offset == null ||
-          pagination.offset == 0;
+      final clear = pagination == null || pagination.offset == 0;
 
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
@@ -86,11 +84,13 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         messageFilters: messageFilter!,
       );
 
-      if (clear) {
-        _messageResponses.add(messages.results);
-      } else {
-        final temp = oldMessages + messages.results;
-        _messageResponses.add(temp);
+      if (messages.results != null) {
+        if (clear) {
+          _messageResponses.add(messages.results!);
+        } else {
+          final temp = oldMessages + messages.results!;
+          _messageResponses.add(temp);
+        }
       }
       if (_messageResponses.hasValue &&
           _queryMessagesLoadingController.value!) {
