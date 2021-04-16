@@ -566,7 +566,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        client.state?.user = OwnUser(id: 'test-id');
+        client.state.user = OwnUser(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
         const reactionType = 'test';
@@ -617,7 +617,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        client.state?.user = OwnUser(id: 'test-id');
+        client.state.user = OwnUser(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
 
@@ -639,7 +639,7 @@ void main() {
             type: 'test',
             createdAt: DateTime.now(),
             user: User(
-              id: client.state?.user?.id ?? '',
+              id: client.state.user?.id ?? '',
             ),
           ),
         );

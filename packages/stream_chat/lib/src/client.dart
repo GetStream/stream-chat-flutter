@@ -134,7 +134,7 @@ class StreamChatClient {
   RetryPolicy? get retryPolicy => _retryPolicy;
 
   /// This client state
-  ClientState? state;
+  late final ClientState state;
 
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
@@ -301,7 +301,7 @@ class StreamChatClient {
 
       if (tokenProvider != null) {
         httpClient.lock();
-        final userId = state!.user!.id;
+        final userId = state.user!.id;
 
         await _disconnect();
 
@@ -389,7 +389,7 @@ class StreamChatClient {
     await _disconnect();
     httpClient.close();
     await _controller.close();
-    state!.dispose();
+    state.dispose();
     await _wsConnectionStatusController.close();
   }
 
@@ -424,7 +424,7 @@ class StreamChatClient {
       throw e;
     }
 
-    state!.user = OwnUser.fromJson(user.toJson());
+    state.user = OwnUser.fromJson(user.toJson());
     this.token = token;
     _anonymous = false;
 
@@ -490,11 +490,11 @@ class StreamChatClient {
     }
 
     if (event.user != null) {
-      state!._updateUser(event.user);
+      state._updateUser(event.user);
     }
 
     if (event.me != null) {
-      state!.user = event.me;
+      state.user = event.me;
     }
     _controller.add(event);
   }
@@ -518,12 +518,12 @@ class StreamChatClient {
 
     if (_originalChatPersistenceClient != null) {
       _chatPersistenceClient = _originalChatPersistenceClient;
-      await _chatPersistenceClient!.connect(state!.user!.id);
+      await _chatPersistenceClient!.connect(state.user!.id);
     }
 
     _ws = WebSocket(
       baseUrl: baseURL,
-      user: state!.user,
+      user: state.user,
       connectParams: {
         'api_key': apiKey,
         'authorization': token,
@@ -531,7 +531,7 @@ class StreamChatClient {
         'X-Stream-Client': _userAgent,
       },
       connectPayload: {
-        'user_id': state!.user!.id,
+        'user_id': state.user!.id,
         'server_determines_connection_id': true,
       },
       handler: handleEvent,
@@ -552,11 +552,11 @@ class StreamChatClient {
           type: EventType.connectionRecovered,
           online: true,
         ));
-        if (state!.channels?.isNotEmpty == true) {
+        if (state.channels?.isNotEmpty == true) {
           // ignore: unawaited_futures
           queryChannelsOnline(filter: {
             'cid': {
-              '\$in': state!.channels!.keys.toList(),
+              '\$in': state.channels!.keys.toList(),
             },
           }).then(
             (_) async {
@@ -757,7 +757,7 @@ class StreamChatClient {
         .map((it) => it.user)
         .toList(growable: false);
 
-    state!._updateUsers(users);
+    state._updateUsers(users);
 
     logger.info('Got ${res.channels?.length} channels from api');
 
@@ -769,7 +769,7 @@ class StreamChatClient {
       clearQueryCache: paginationParams.offset == 0,
     );
 
-    state!.channels = updateData.key;
+    state.channels = updateData.key;
     return updateData.value;
   }
 
@@ -785,19 +785,19 @@ class StreamChatClient {
       paginationParams: paginationParams,
     ))!;
     final updatedData = _mapChannelStateToChannel(offlineChannels);
-    state!.channels = updatedData.key;
+    state.channels = updatedData.key;
     return updatedData.value;
   }
 
   MapEntry<Map<String?, Channel>, List<Channel>> _mapChannelStateToChannel(
     List<ChannelState> channelStates,
   ) {
-    final channels = {...state!.channels ?? {}};
+    final channels = {...state.channels ?? {}};
     final newChannels = <Channel>[];
     for (final channelState in channelStates) {
       final channel = channels[channelState.channel!.cid];
       if (channel != null) {
-        channel.state?.updateChannelState(channelState);
+        channel.state!.updateChannelState(channelState);
         newChannels.add(channel);
       } else {
         final newChannel = Channel.fromState(this, channelState);
@@ -931,7 +931,7 @@ class StreamChatClient {
       '${PACKAGE_VERSION.split('+')[0]}';
 
   Map<String, String?> get _commonQueryParams => {
-        'user_id': state!.user?.id,
+        'user_id': state.user?.id,
         'api_key': apiKey,
         'connection_id': _connectionId,
       };
@@ -955,7 +955,7 @@ class StreamChatClient {
 
     _anonymous = true;
     const uuid = Uuid();
-    state!.user = OwnUser(id: uuid.v4());
+    state.user = OwnUser(id: uuid.v4());
 
     return connect().then((event) {
       _connectCompleter!.complete(event);
@@ -1003,7 +1003,7 @@ class StreamChatClient {
     _connectCompleter = null;
 
     if (clearUser == true) {
-      state!.dispose();
+      state.dispose();
       state = ClientState(this);
     }
 
@@ -1053,7 +1053,7 @@ class StreamChatClient {
       QueryUsersResponse.fromJson,
     );
 
-    state?._updateUsers(response.users!);
+    state._updateUsers(response.users!);
 
     return response;
   }
@@ -1195,9 +1195,9 @@ class StreamChatClient {
     String? id,
     Map<String, dynamic>? extraData,
   }) {
-    if (id != null && state!.channels?.containsKey('$type:$id') == true) {
-      if (state!.channels!['$type:$id'] != null) {
-        return state!.channels!['$type:$id'] as Channel;
+    if (id != null && state.channels?.containsKey('$type:$id') == true) {
+      if (state.channels!['$type:$id'] != null) {
+        return state.channels!['$type:$id'] as Channel;
       }
     }
 
