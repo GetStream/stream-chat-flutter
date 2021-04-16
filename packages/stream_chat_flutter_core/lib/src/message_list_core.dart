@@ -128,7 +128,7 @@ class MessageListCoreState extends State<MessageListCore> {
         : _streamChannel.channel.state?.messagesStream;
 
     bool defaultFilter(Message m) {
-      final isMyMessage = m.user.id == _currentUser.id;
+      final isMyMessage = m.user?.id == _currentUser?.id;
       final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
       if (isDeletedOrShadowed && !isMyMessage) return false;
       return true;
@@ -136,14 +136,17 @@ class MessageListCoreState extends State<MessageListCore> {
 
     return StreamBuilder<List<Message>?>(
       stream: messagesStream?.map((messages) =>
-          messages?.where(widget.messageFilter ?? defaultFilter)?.toList()),
+          messages?.where(widget.messageFilter ?? defaultFilter).toList(
+                growable: false,
+              )),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return widget.errorWidgetBuilder(context, snapshot.error);
         } else if (!snapshot.hasData) {
           return widget.loadingBuilder(context);
         } else {
-          final messageList = snapshot.data?.reversed?.toList() ?? [];
+          final messageList =
+              snapshot.data?.reversed.toList(growable: false) ?? [];
           if (messageList.isEmpty && !_isThreadConversation) {
             if (_upToDate) {
               return widget.emptyBuilder(context);
