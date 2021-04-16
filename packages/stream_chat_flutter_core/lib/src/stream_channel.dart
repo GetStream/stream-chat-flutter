@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -27,9 +26,7 @@ class StreamChannel extends StatefulWidget {
     required this.channel,
     this.showLoading = true,
     this.initialMessageId,
-  })  : assert(child != null, 'Child should not be null'),
-        assert(channel != null, 'Channel should not be null'),
-        super(key: key);
+  }) : super(key: key);
 
   // ignore: public_member_api_docs
   final Widget child;
@@ -189,16 +186,21 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Query the channel members and watchers
   Future<void> queryMembersAndWatchers() async {
-    await widget.channel.query(
-      membersPagination: PaginationParams(
-        offset: channel.state.members?.length,
-        limit: 100,
-      ),
-      watchersPagination: PaginationParams(
-        offset: channel.state.watchers?.length,
-        limit: 100,
-      ),
-    );
+    final _members = channel.state?.members;
+    if (_members != null) {
+      await widget.channel.query(
+        membersPagination: PaginationParams(
+          offset: _members.length,
+          limit: 100,
+        ),
+        watchersPagination: PaginationParams(
+          offset: _members.length,
+          limit: 100,
+        ),
+      );
+    } else {
+      return;
+    }
   }
 
   /// Loads channel at specific message
