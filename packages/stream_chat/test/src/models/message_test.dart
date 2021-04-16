@@ -8,7 +8,8 @@ import 'package:stream_chat/src/models/user.dart';
 
 void main() {
   group('src/models/message', () {
-    const jsonExample = r'''{
+    const jsonExample = r'''
+    {
       "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
       "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
       "type": "regular",
@@ -103,7 +104,7 @@ void main() {
             'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
         silent: false,
         attachments: [
-          Attachment.fromJson({
+          Attachment.fromJson(const {
             'type': 'video',
             'author_name': 'GIPHY',
             'title': 'The Lion King Disney GIF - Find \u0026 Share on GIPHY',
@@ -123,7 +124,7 @@ void main() {
         ],
         showInChannel: true,
         parentId: 'parentId',
-        extraData: {'hey': 'test'},
+        extraData: const {'hey': 'test'},
       );
 
       expect(

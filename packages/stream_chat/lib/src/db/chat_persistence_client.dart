@@ -11,7 +11,7 @@ import 'package:stream_chat/src/models/user.dart';
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
   /// Creates a new connection to the client
-  Future<void> connect(String? userId);
+  Future<void> connect(String userId);
 
   /// Closes the client connection
   /// If [flush] is true, the data will also be deleted
@@ -33,7 +33,7 @@ abstract class ChatPersistenceClient {
   Future<void> updateConnectionInfo(Event event);
 
   /// Update stored lastSyncAt
-  Future<void> updateLastSyncAt(DateTime? lastSyncAt);
+  Future<void> updateLastSyncAt(DateTime lastSyncAt);
 
   /// Get the channel cids saved in the offline storage
   Future<List<String>> getChannelCids();

@@ -44,7 +44,6 @@ void main() {
         id: 'id',
         cid: 'a:a',
         extraData: {'name': 'cool'},
-        frozen: false,
       );
 
       expect(

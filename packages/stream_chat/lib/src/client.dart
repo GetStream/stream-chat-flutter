@@ -482,9 +482,10 @@ class StreamChatClient {
     }
 
     if (!event.isLocal!) {
-      if (_synced && event.createdAt != null) {
+      final createdAt = event.createdAt;
+      if (_synced && createdAt != null) {
         await _chatPersistenceClient?.updateConnectionInfo(event);
-        await _chatPersistenceClient?.updateLastSyncAt(event.createdAt);
+        await _chatPersistenceClient?.updateLastSyncAt(createdAt);
       }
     }
 
@@ -615,7 +616,7 @@ class StreamChatClient {
       final res = decode<SyncResponse>(
         rawRes.data,
         SyncResponse.fromJson,
-      )!;
+      );
 
       res.events!.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
 
@@ -737,7 +738,7 @@ class StreamChatClient {
     final res = decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
-    )!;
+    );
 
     if ((res.channels ?? []).isEmpty && paginationParams.offset == 0) {
       logger.warning(
@@ -914,12 +915,10 @@ class StreamChatClient {
   }
 
   /// Used to log errors and stacktrace in case of bad json deserialization
-  T? decode<T>(String? j, DecoderFunction<T> decoderFunction) {
+  T decode<T>(String? j, DecoderFunction<T> decoderFunction) {
     try {
-      if (j == null) {
-        return null;
-      }
-      return decoderFunction(json.decode(j));
+      final data = j ?? '{}';
+      return decoderFunction(json.decode(data));
     } catch (error, stacktrace) {
       logger.severe('Error decoding response', error, stacktrace);
       rethrow;
@@ -983,8 +982,8 @@ class StreamChatClient {
         .whenComplete(() => _anonymous = false);
 
     return connectUser(
-      response?.user,
-      response?.accessToken,
+      response.user,
+      response.accessToken,
     );
   }
 
@@ -1052,7 +1051,7 @@ class StreamChatClient {
     final response = decode<QueryUsersResponse>(
       rawRes.data,
       QueryUsersResponse.fromJson,
-    )!;
+    );
 
     state?._updateUsers(response.users!);
 
@@ -1060,7 +1059,7 @@ class StreamChatClient {
   }
 
   /// A message search.
-  Future<SearchMessagesResponse?> search(
+  Future<SearchMessagesResponse> search(
     Map<String, dynamic> filters, {
     String? query,
     List<SortOption>? sort,
@@ -1099,8 +1098,8 @@ class StreamChatClient {
   }
 
   /// Send a [file] to the [channelId] of type [channelType]
-  Future<SendFileResponse?> sendFile(
-    AttachmentFile? file,
+  Future<SendFileResponse> sendFile(
+    AttachmentFile file,
     String? channelId,
     String? channelType, {
     ProgressCallback? onSendProgress,
@@ -1115,8 +1114,8 @@ class StreamChatClient {
       );
 
   /// Send a [image] to the [channelId] of type [channelType]
-  Future<SendImageResponse?> sendImage(
-    AttachmentFile? image,
+  Future<SendImageResponse> sendImage(
+    AttachmentFile image,
     String? channelId,
     String? channelType, {
     ProgressCallback? onSendProgress,
@@ -1131,7 +1130,7 @@ class StreamChatClient {
       );
 
   /// Delete a file from this channel
-  Future<EmptyResponse?> deleteFile(
+  Future<EmptyResponse> deleteFile(
     String url,
     String? channelId,
     String? channelType, {
@@ -1145,7 +1144,7 @@ class StreamChatClient {
       );
 
   /// Delete an image from this channel
-  Future<EmptyResponse?> deleteImage(
+  Future<EmptyResponse> deleteImage(
     String url,
     String? channelId,
     String? channelType, {
@@ -1159,7 +1158,7 @@ class StreamChatClient {
       );
 
   /// Add a device for Push Notifications.
-  Future<EmptyResponse?> addDevice(String id, PushProvider pushProvider) async {
+  Future<EmptyResponse> addDevice(String id, PushProvider pushProvider) async {
     final response = await post('/devices', data: {
       'id': id,
       'push_provider': pushProvider.name,
@@ -1168,14 +1167,14 @@ class StreamChatClient {
   }
 
   /// Gets a list of user devices.
-  Future<ListDevicesResponse?> getDevices() async {
+  Future<ListDevicesResponse> getDevices() async {
     final response = await get('/devices');
     return decode<ListDevicesResponse>(
         response.data, ListDevicesResponse.fromJson);
   }
 
   /// Remove a user's device.
-  Future<EmptyResponse?> removeDevice(String id) async {
+  Future<EmptyResponse> removeDevice(String id) async {
     final response = await delete('/devices', queryParameters: {
       'id': id,
     });
@@ -1206,11 +1205,11 @@ class StreamChatClient {
   }
 
   /// Update or Create the given user object.
-  Future<UpdateUsersResponse?> updateUser(User user) async =>
+  Future<UpdateUsersResponse> updateUser(User user) async =>
       updateUsers([user]);
 
   /// Batch update a list of users
-  Future<UpdateUsersResponse?> updateUsers(List<User> users) async {
+  Future<UpdateUsersResponse> updateUsers(List<User> users) async {
     final response = await post('/users', data: {
       'users': users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
     });
@@ -1221,7 +1220,7 @@ class StreamChatClient {
   }
 
   /// Bans a user from all channels
-  Future<EmptyResponse?> banUser(
+  Future<EmptyResponse> banUser(
     String targetUserID, [
     Map<String, dynamic> options = const {},
   ]) async {
@@ -1237,7 +1236,7 @@ class StreamChatClient {
   }
 
   /// Remove global ban for a user
-  Future<EmptyResponse?> unbanUser(
+  Future<EmptyResponse> unbanUser(
     String targetUserID, [
     Map<String, dynamic> options = const {},
   ]) async {
@@ -1253,7 +1252,7 @@ class StreamChatClient {
   }
 
   /// Shadow bans a user
-  Future<EmptyResponse?> shadowBan(
+  Future<EmptyResponse> shadowBan(
     String targetID, [
     Map<String, dynamic> options = const {},
   ]) async =>
@@ -1263,7 +1262,7 @@ class StreamChatClient {
       });
 
   /// Removes shadow ban from a user
-  Future<EmptyResponse?> removeShadowBan(
+  Future<EmptyResponse> removeShadowBan(
     String targetID, [
     Map<String, dynamic> options = const {},
   ]) async =>
@@ -1273,7 +1272,7 @@ class StreamChatClient {
       });
 
   /// Mutes a user
-  Future<EmptyResponse?> muteUser(String targetID) async {
+  Future<EmptyResponse> muteUser(String targetID) async {
     final response = await post('/moderation/mute', data: {
       'target_id': targetID,
     });
@@ -1281,7 +1280,7 @@ class StreamChatClient {
   }
 
   /// Unmutes a user
-  Future<EmptyResponse?> unmuteUser(String targetID) async {
+  Future<EmptyResponse> unmuteUser(String targetID) async {
     final response = await post('/moderation/unmute', data: {
       'target_id': targetID,
     });
@@ -1289,7 +1288,7 @@ class StreamChatClient {
   }
 
   /// Flag a message
-  Future<EmptyResponse?> flagMessage(String messageID) async {
+  Future<EmptyResponse> flagMessage(String messageID) async {
     final response = await post('/moderation/flag', data: {
       'target_message_id': messageID,
     });
@@ -1297,7 +1296,7 @@ class StreamChatClient {
   }
 
   /// Unflag a message
-  Future<EmptyResponse?> unflagMessage(String messageId) async {
+  Future<EmptyResponse> unflagMessage(String messageId) async {
     final response = await post('/moderation/unflag', data: {
       'target_message_id': messageId,
     });
@@ -1305,7 +1304,7 @@ class StreamChatClient {
   }
 
   /// Flag a user
-  Future<EmptyResponse?> flagUser(String userId) async {
+  Future<EmptyResponse> flagUser(String userId) async {
     final response = await post('/moderation/flag', data: {
       'target_user_id': userId,
     });
@@ -1313,7 +1312,7 @@ class StreamChatClient {
   }
 
   /// Unflag a message
-  Future<EmptyResponse?> unflagUser(String userId) async {
+  Future<EmptyResponse> unflagUser(String userId) async {
     final response = await post('/moderation/unflag', data: {
       'target_user_id': userId,
     });
@@ -1321,13 +1320,13 @@ class StreamChatClient {
   }
 
   /// Mark all channels for this user as read
-  Future<EmptyResponse?> markAllRead() async {
+  Future<EmptyResponse> markAllRead() async {
     final response = await post('/channels/read');
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Sends the message to the given channel
-  Future<SendMessageResponse?> sendMessage(
+  Future<SendMessageResponse> sendMessage(
       Message message, String? channelId, String? channelType) async {
     final response = await post(
       '/channels/$channelType/$channelId/message',
@@ -1337,7 +1336,7 @@ class StreamChatClient {
   }
 
   /// Update the given message
-  Future<UpdateMessageResponse?> updateMessage(Message message) async {
+  Future<UpdateMessageResponse> updateMessage(Message message) async {
     final response = await post(
       '/messages/${message.id}',
       data: {'message': message.toJson()},
@@ -1346,19 +1345,19 @@ class StreamChatClient {
   }
 
   /// Deletes the given message
-  Future<EmptyResponse?> deleteMessage(Message message) async {
+  Future<EmptyResponse> deleteMessage(Message message) async {
     final response = await delete('/messages/${message.id}');
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Get a message by id
-  Future<GetMessageResponse?> getMessage(String messageId) async {
+  Future<GetMessageResponse> getMessage(String messageId) async {
     final response = await get('/messages/$messageId');
     return decode(response.data, GetMessageResponse.fromJson);
   }
 
   /// Pins provided message
-  Future<UpdateMessageResponse?> pinMessage(
+  Future<UpdateMessageResponse> pinMessage(
     Message message,
     Object timeoutOrExpirationDate,
   ) {
@@ -1384,7 +1383,7 @@ class StreamChatClient {
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse?> unpinMessage(Message message) =>
+  Future<UpdateMessageResponse> unpinMessage(Message message) =>
       updateMessage(message.copyWith(pinned: false));
 }
 

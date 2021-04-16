@@ -638,7 +638,6 @@ void main() {
           Reaction(
             type: 'test',
             createdAt: DateTime.now(),
-            score: 0,
             user: User(
               id: client.state?.user?.id ?? '',
             ),

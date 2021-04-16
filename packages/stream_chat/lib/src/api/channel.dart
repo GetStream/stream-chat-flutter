@@ -249,13 +249,13 @@ class Channel {
       Future<String> future;
       if (isImage) {
         future = sendImage(
-          it.file,
+          it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
         ).then((it) => it!.file!);
       } else {
         future = sendFile(
-          it.file,
+          it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
         ).then((it) => it!.file!);
@@ -340,7 +340,7 @@ class Channel {
       }
 
       final response = await _client.sendMessage(message, id, type);
-      state?.addMessage(response!.message!);
+      state?.addMessage(response.message!);
       return response;
     } catch (error) {
       if (error is DioError && error.type != DioErrorType.response) {
@@ -392,7 +392,7 @@ class Channel {
 
       final response = await _client.updateMessage(message);
 
-      final m = response?.message?.copyWith(
+      final m = response.message?.copyWith(
         ownReactions: message.ownReactions,
       );
 
@@ -453,10 +453,11 @@ class Channel {
   /// Pins provided message
   Future<UpdateMessageResponse?> pinMessage(
     Message message,
-    Object timeoutOrExpirationDate,
+    Object? timeoutOrExpirationDate,
   ) {
     assert(() {
       if (timeoutOrExpirationDate is! DateTime &&
+          timeoutOrExpirationDate != null &&
           timeoutOrExpirationDate is! num) {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
@@ -485,7 +486,7 @@ class Channel {
 
   /// Send a file to this channel
   Future<SendFileResponse?> sendFile(
-    AttachmentFile? file, {
+    AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) =>
@@ -499,7 +500,7 @@ class Channel {
 
   /// Send an image to this channel
   Future<SendImageResponse?> sendImage(
-    AttachmentFile? file, {
+    AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) =>
@@ -765,7 +766,7 @@ class Channel {
       'message_id': messageId,
     });
 
-    final res = _client.decode(response.data, SendActionResponse.fromJson)!;
+    final res = _client.decode(response.data, SendActionResponse.fromJson);
 
     if (res.message != null) {
       state!.addMessage(res.message!);
@@ -880,7 +881,7 @@ class Channel {
     final repliesResponse = _client.decode<QueryRepliesResponse>(
       response.data,
       QueryRepliesResponse.fromJson,
-    )!;
+    );
 
     state?.updateThreadInfo(parentId, repliesResponse.messages);
 
@@ -911,7 +912,7 @@ class Channel {
     final res = _client.decode<GetMessagesByIdResponse>(
       response.data,
       GetMessagesByIdResponse.fromJson,
-    )!;
+    );
 
     final messages = res.messages;
 
@@ -999,8 +1000,7 @@ class Channel {
 
     try {
       final response = await _client.post(path, data: payload);
-      final updatedState =
-          _client.decode(response.data, ChannelState.fromJson)!;
+      final updatedState = _client.decode(response.data, ChannelState.fromJson);
 
       if (_id == null) {
         _id = updatedState.channel!.id;
@@ -1191,7 +1191,7 @@ class Channel {
 
   /// Call this method to dispose the channel client
   void dispose() {
-    state!.dispose();
+    state?.dispose();
   }
 
   void _checkInitialized() {

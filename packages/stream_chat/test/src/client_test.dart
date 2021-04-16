@@ -777,7 +777,7 @@ void main() {
           ),
         );
 
-        await client.deleteMessage(Message(id: messageId, text: ''));
+        await client.deleteMessage(Message(id: messageId));
 
         verify(() => mockDio.delete<String>('/messages/$messageId')).called(1);
       });

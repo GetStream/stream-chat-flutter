@@ -40,16 +40,17 @@ class RetryQueue {
     }));
   }
 
-  final HeapPriorityQueue<Message?> _messageQueue = HeapPriorityQueue(_byDate);
+  final HeapPriorityQueue<Message> _messageQueue = HeapPriorityQueue(_byDate);
   bool _isRetrying = false;
   RetryPolicy? _retryPolicy;
 
   /// Add a list of messages
-  void add(List<Message?> messages) {
+  void add(List<Message> messages) {
     logger?.info('added ${messages.length} messages');
     final messageList = _messageQueue.toList();
+
     _messageQueue.addAll(messages
-        .where((element) => !messageList.any((m) => m!.id == element!.id)));
+        .where((element) => !messageList.any((m) => m.id == element.id)));
 
     if (_messageQueue.isNotEmpty && !_isRetrying) {
       _startRetrying();
@@ -62,7 +63,7 @@ class RetryQueue {
     final retryPolicy = _retryPolicy!.copyWith(attempt: 0);
 
     while (_messageQueue.isNotEmpty) {
-      final message = _messageQueue.first!;
+      final message = _messageQueue.first;
       try {
         logger?.info('retry attempt ${retryPolicy.attempt}');
         await _sendMessage(message);
@@ -141,7 +142,7 @@ class RetryQueue {
       final messageList = _messageQueue.toList();
       if (event.message != null) {
         final messageIndex =
-            messageList.indexWhere((m) => m!.id == event.message!.id);
+            messageList.indexWhere((m) => m.id == event.message!.id);
         if (messageIndex == -1 &&
             [
               MessageSendingStatus.failed_update,
@@ -149,7 +150,11 @@ class RetryQueue {
               MessageSendingStatus.failed_delete,
             ].contains(event.message!.status)) {
           logger?.info('add message from events');
-          add([event.message]);
+          final m = event.message;
+
+          if (m != null) {
+            add([m]);
+          }
         } else if (messageIndex != -1 &&
             [
               MessageSendingStatus.sent,
@@ -167,9 +172,13 @@ class RetryQueue {
     _subscriptions.forEach((s) => s.cancel());
   }
 
-  static int _byDate(Message? m1, Message? m2) {
-    final date1 = _getMessageDate(m1!)!;
-    final date2 = _getMessageDate(m2!)!;
+  static int _byDate(Message m1, Message m2) {
+    final date1 = _getMessageDate(m1);
+    final date2 = _getMessageDate(m2);
+
+    if (date1 == null || date2 == null) {
+      return 0;
+    }
 
     return date1.compareTo(date2);
   }

@@ -6,7 +6,8 @@ import 'package:test/test.dart';
 
 void main() {
   group('src/models/attachment', () {
-    const jsonExample = '''{
+    const jsonExample = '''
+    {
   "type": "giphy",
   "title": "awesome",
   "title_link": "https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti",
