@@ -15,8 +15,7 @@ class MessageSearchBloc extends StatefulWidget {
   const MessageSearchBloc({
     Key? key,
     required this.child,
-  })   : assert(child != null, 'Parameter child should not be null.'),
-        super(key: key);
+  }) : super(key: key);
 
   /// The widget child
   final Widget child;

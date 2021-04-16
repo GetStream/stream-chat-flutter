@@ -70,17 +70,7 @@ class MessageListCore extends StatefulWidget {
     this.parentMessage,
     this.messageListController,
     this.messageFilter,
-  })  : assert(loadingBuilder != null, 'loadingBuilder should not be null'),
-        assert(emptyBuilder != null, 'emptyBuilder should not be null'),
-        assert(
-          messageListBuilder != null,
-          'messageListBuilder should not be null',
-        ),
-        assert(
-          errorWidgetBuilder != null,
-          'errorWidgetBuilder should not be null',
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.

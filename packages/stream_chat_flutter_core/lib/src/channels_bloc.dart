@@ -25,8 +25,7 @@ class ChannelsBloc extends StatefulWidget {
     this.lockChannelsOrder = false,
     this.channelsComparator,
     this.shouldAddChannel,
-  })  : assert(child != null, 'Parameter child should not be null.'),
-        super(key: key);
+  }) : super(key: key);
 
   /// The widget child
   final Widget child;
