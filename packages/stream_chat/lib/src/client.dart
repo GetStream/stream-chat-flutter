@@ -764,7 +764,7 @@ class StreamChatClient {
     final updateData = _mapChannelStateToChannel(channels);
 
     await _chatPersistenceClient?.updateChannelQueries(
-      filter,
+      filter ?? {},
       channels.map((c) => c.channel!.cid).toList(),
       clearQueryCache: paginationParams.offset == 0,
     );
@@ -1434,7 +1434,11 @@ class ClientState {
 
   void _listenChannelHidden() {
     _subscriptions.add(_client.on(EventType.channelHidden).listen((event) {
-      _client.chatPersistenceClient?.deleteChannels([event.cid]);
+      final cid = event.cid;
+
+      if (cid != null) {
+        _client.chatPersistenceClient?.deleteChannels([cid]);
+      }
       if (channels != null) {
         channels = channels?..removeWhere((cid, ch) => cid == event.cid);
       }

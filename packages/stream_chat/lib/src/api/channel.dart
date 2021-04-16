@@ -985,7 +985,7 @@ class Channel {
     if (preferOffline && cid != null) {
       final updatedState =
           (await _client.chatPersistenceClient?.getChannelStateByCid(
-        cid,
+        cid!,
         messagePagination: messagesPagination,
       ))!;
       if (updatedState.messages.isNotEmpty) {
@@ -1014,7 +1014,7 @@ class Channel {
         rethrow;
       }
       return _client.chatPersistenceClient!.getChannelStateByCid(
-        cid,
+        cid!,
         messagePagination: messagesPagination,
       );
     }
@@ -1122,7 +1122,10 @@ class Channel {
 
     if (clearHistory == true) {
       state!.truncate();
-      await _client.chatPersistenceClient?.deleteMessageByCid(_cid);
+      final cid = _cid;
+      if (cid != null) {
+        await _client.chatPersistenceClient?.deleteMessageByCid(cid);
+      }
     }
 
     return _client.decode(response.data, EmptyResponse.fromJson);
@@ -1252,12 +1255,12 @@ class ChannelClientState {
     _startCleaningPinnedMessages();
 
     _channel._client.chatPersistenceClient
-        ?.getChannelThreads(_channel.cid)
+        ?.getChannelThreads(_channel.cid!)
         .then((threads) {
       _threads = threads;
     }).then((_) {
       _channel._client.chatPersistenceClient
-          ?.getChannelStateByCid(_channel.cid)
+          ?.getChannelStateByCid(_channel.cid!)
           .then((state) {
         // Replacing the persistence state members with the latest
         // `channelState.members` as they may have changes over the time.
@@ -1734,7 +1737,7 @@ class ChannelClientState {
 
   set _threads(Map<String?, List<Message>?> v) {
     _channel._client.chatPersistenceClient?.updateMessages(
-      _channel.cid,
+      _channel.cid!,
       v.values.expand((v) => v!).toList(),
     );
     _threadsController.add(v);
