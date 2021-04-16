@@ -104,9 +104,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
 
     try {
-      final clear = paginationParams == null ||
-          paginationParams.offset == null ||
-          paginationParams.offset == 0;
+      final clear = paginationParams == null || paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
       var newChannels = <Channel>[];
       await for (final channels in client.queryChannels(
@@ -162,9 +160,9 @@ class ChannelsBlocState extends State<ChannelsBloc>
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
           } else {
-            if (client.state?.channels != null &&
-                client.state?.channels[e.cid] != null) {
-              newChannels.insert(0, client.state.channels[e.cid]);
+            if (client.state.channels != null &&
+                client.state.channels?[e.cid] != null) {
+              newChannels.insert(0, client.state.channels?[e.cid]);
             }
           }
         }
@@ -195,7 +193,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
       // ignore: cascade_invocations
       final channel = e.channel;
       _channelsController.add(List.from(
-          (channels ?? [])..removeWhere((c) => c.cid == channel.cid)));
+          (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
     }));
   }
 
