@@ -200,7 +200,7 @@ abstract class ChatPersistenceClient {
             ...it.latestReactions!.where((r) => r.userId != null)
         ]);
 
-    var users = channelStates
+    final users = channelStates
         .map((cs) => [
               cs.channel?.createdBy,
               ...cs.messages
