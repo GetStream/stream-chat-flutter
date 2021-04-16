@@ -197,7 +197,7 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    final message = state!.messages!.firstWhereOrNull(
+    final message = state!.messages.firstWhereOrNull(
       (it) => it.id == messageId,
     );
 
@@ -304,7 +304,7 @@ class Channel {
         .remove(message.id)
         ?.completeError('Message Cancelled');
 
-    final quotedMessage = state?.messages?.firstWhereOrNull(
+    final quotedMessage = state?.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
     );
     // ignore: parameter_assignments
@@ -771,11 +771,11 @@ class Channel {
     if (res.message != null) {
       state!.addMessage(res.message!);
     } else {
-      final oldIndex = state!.messages?.indexWhere((m) => m.id == messageId);
+      final oldIndex = state!.messages.indexWhere((m) => m.id == messageId);
 
       Message? oldMessage;
-      if (oldIndex != null && oldIndex != -1) {
-        oldMessage = state!.messages![oldIndex];
+      if (oldIndex != -1) {
+        oldMessage = state!.messages[oldIndex];
         state!.updateChannelState(state!._channelState!.copyWith(
           messages: state?.messages?..remove(oldMessage),
         ));
@@ -784,7 +784,7 @@ class Channel {
             .expand((messages) => messages)
             .firstWhereOrNull((m) => m.id == messageId);
         if (oldMessage?.parentId != null) {
-          final parentMessage = state!.messages!.firstWhereOrNull(
+          final parentMessage = state!.messages.firstWhereOrNull(
             (element) => element.id == oldMessage!.parentId,
           );
           if (parentMessage != null) {
@@ -1372,7 +1372,7 @@ class ChannelClientState {
   /// Retry failed message
   Future<void> retryFailedMessages() async {
     final failedMessages =
-        <Message>[...messages!, ...threads!.values.expand((v) => v)]
+        <Message>[...messages, ...threads!.values.expand((v) => v)]
             .where(
               (message) =>
                   message.status != MessageSendingStatus.sent &&
@@ -1528,7 +1528,7 @@ class ChannelClientState {
   }
 
   /// Channel message list
-  List<Message>? get messages => _channelState!.messages;
+  List<Message> get messages => _channelState!.messages;
 
   /// Channel message list as a stream
   Stream<List<Message>?> get messagesStream =>
