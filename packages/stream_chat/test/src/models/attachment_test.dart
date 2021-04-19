@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:stream_chat/src/models/attachment.dart';
-import 'package:stream_chat/src/models/action.dart';
 
+import 'package:stream_chat/src/models/action.dart';
+import 'package:stream_chat/src/models/attachment.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -50,7 +50,7 @@ void main() {
         'https://media0.giphy.com/media/3o7TKnCdBx5cMg0qti/giphy.gif',
       );
       expect(attachment.actions, hasLength(3));
-      expect(attachment.actions![0], isA<Action>());
+      expect(attachment.actions[0], isA<Action>());
     });
 
     test('should serialize to json correctly', () {
@@ -67,7 +67,8 @@ void main() {
           'type': 'image',
           'title': 'soo',
           'title_link':
-              'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti'
+              'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
+          'actions': [],
         },
       );
     });

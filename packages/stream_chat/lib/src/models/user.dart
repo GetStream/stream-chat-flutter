@@ -105,8 +105,9 @@ class User {
       other is User && runtimeType == other.runtimeType && id == other.id;
 
   /// Serialize to json
-  Map<String, dynamic> toJson() =>
-      Serialization.moveFromExtraDataToRoot(_$UserToJson(this), topLevelFields);
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+        _$UserToJson(this),
+      );
 
   /// Creates a copy of [User] with specified attributes overridden.
   User copyWith({

@@ -119,7 +119,6 @@ class Event {
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$EventToJson(this),
-        topLevelFields,
       );
 
   /// Creates a copy of [Event] with specified attributes overridden.
@@ -217,6 +216,5 @@ class EventChannel extends ChannelModel {
   @override
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$EventChannelToJson(this),
-        topLevelFields,
       );
 }

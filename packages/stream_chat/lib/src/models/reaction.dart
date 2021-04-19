@@ -11,7 +11,7 @@ class Reaction {
   Reaction({
     this.messageId,
     DateTime? createdAt,
-    this.type = '',
+    required this.type,
     required this.user,
     String? userId,
     this.score = 0,
@@ -64,7 +64,8 @@ class Reaction {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$ReactionToJson(this), topLevelFields);
+        _$ReactionToJson(this),
+      );
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({

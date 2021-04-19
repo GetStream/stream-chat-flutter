@@ -4,7 +4,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meta/meta.dart';
 
 part 'attachment_file.freezed.dart';
-
 part 'attachment_file.g.dart';
 
 /// Union class to hold various [UploadState] of a attachment.
@@ -14,8 +13,10 @@ class UploadState with _$UploadState {
   const factory UploadState.preparing() = Preparing;
 
   /// InProgress state of the union
-  const factory UploadState.inProgress(
-      {required int uploaded, required int total}) = InProgress;
+  const factory UploadState.inProgress({
+    required int uploaded,
+    required int total,
+  }) = InProgress;
 
   /// Success state of the union
   const factory UploadState.success() = Success;
@@ -62,7 +63,10 @@ class AttachmentFile {
     this.name,
     this.bytes,
     this.size,
-  });
+  }) : assert(
+          path != null || bytes != null,
+          'Either path or bytes should be != null',
+        );
 
   /// Create a new instance from a json
   factory AttachmentFile.fromJson(Map<String, dynamic> json) =>

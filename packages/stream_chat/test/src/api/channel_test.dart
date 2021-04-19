@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:dio/native_imp.dart';
 import 'package:mocktail/mocktail.dart';
@@ -6,11 +8,10 @@ import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/own_user.dart';
-import 'package:test/test.dart';
-
+import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
 
@@ -76,7 +77,7 @@ void main() {
               any(),
               data: any(named: 'data'),
             )).thenAnswer((_) async => Response(
-              data: '{}',
+              data: jsonEncode(ChannelState()),
               statusCode: 200,
               requestOptions: FakeRequestOptions(),
             ));

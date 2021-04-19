@@ -10,7 +10,7 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
   return ChannelModel(
     id: json['id'] as String?,
     type: json['type'] as String?,
-    cid: json['cid'] as String,
+    cid: json['cid'] as String?,
     config: json['config'] == null
         ? null
         : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),

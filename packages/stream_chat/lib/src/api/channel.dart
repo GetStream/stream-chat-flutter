@@ -59,13 +59,12 @@ class Channel {
   /// Returns true if the channel is muted
   bool get isMuted =>
       _client.state.user?.channelMutes
-          .any((element) => element.channel!.cid == cid) ==
+          .any((element) => element.channel.cid == cid) ==
       true;
 
   /// Returns true if the channel is muted as a stream
   Stream<bool>? get isMutedStream => _client.state.userStream.map((event) =>
-      event!.channelMutes.any((element) => element.channel!.cid == cid) ==
-      true);
+      event!.channelMutes.any((element) => element.channel.cid == cid) == true);
 
   /// True if the channel is a group
   bool get isGroup => memberCount != 2;
@@ -74,85 +73,130 @@ class Channel {
   bool get isDistinct => id?.startsWith('!members') == true;
 
   /// Channel configuration
-  ChannelConfig? get config => state?._channelState?.channel?.config;
+  ChannelConfig? get config {
+    _checkInitialized();
+    return state?._channelState?.channel?.config;
+  }
 
   /// Channel configuration as a stream
-  Stream<ChannelConfig?>? get configStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.config);
+  Stream<ChannelConfig?>? get configStream {
+    _checkInitialized();
+    return state?.channelStateStream.map((cs) => cs!.channel?.config);
+  }
 
   /// Channel user creator
-  User? get createdBy => state?._channelState?.channel?.createdBy;
+  User? get createdBy {
+    _checkInitialized();
+    return state?._channelState?.channel?.createdBy;
+  }
 
   /// Channel user creator as a stream
-  Stream<User?>? get createdByStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.createdBy);
+  Stream<User?>? get createdByStream {
+    _checkInitialized();
+    return state?.channelStateStream.map((cs) => cs!.channel?.createdBy);
+  }
 
   /// Channel frozen status
-  bool? get frozen => state?._channelState?.channel?.frozen;
+  bool? get frozen {
+    _checkInitialized();
+    return state?._channelState?.channel?.frozen;
+  }
 
   /// Channel frozen status as a stream
-  Stream<bool?>? get frozenStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.frozen);
+  Stream<bool?>? get frozenStream {
+    _checkInitialized();
+    return state?.channelStateStream.map((cs) => cs!.channel?.frozen);
+  }
 
   /// Channel creation date
-  DateTime? get createdAt => state?._channelState?.channel?.createdAt;
+  DateTime? get createdAt {
+    _checkInitialized();
+    return state?._channelState?.channel?.createdAt;
+  }
 
   /// Channel creation date as a stream
-  Stream<DateTime?>? get createdAtStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.createdAt);
+  Stream<DateTime?>? get createdAtStream {
+    _checkInitialized();
+    return state?.channelStateStream.map((cs) => cs!.channel?.createdAt);
+  }
 
   /// Channel last message date
-  DateTime? get lastMessageAt => state?._channelState?.channel?.lastMessageAt;
+  DateTime? get lastMessageAt {
+    _checkInitialized();
+
+    return state?._channelState?.channel?.lastMessageAt;
+  }
 
   /// Channel last message date as a stream
-  Stream<DateTime?>? get lastMessageAtStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.lastMessageAt);
+  Stream<DateTime?>? get lastMessageAtStream {
+    _checkInitialized();
+
+    return state?.channelStateStream.map((cs) => cs!.channel?.lastMessageAt);
+  }
 
   /// Channel updated date
-  DateTime? get updatedAt => state?._channelState?.channel?.updatedAt;
+  DateTime? get updatedAt {
+    _checkInitialized();
+
+    return state?._channelState?.channel?.updatedAt;
+  }
 
   /// Channel updated date as a stream
-  Stream<DateTime?>? get updatedAtStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.updatedAt);
+  Stream<DateTime?>? get updatedAtStream {
+    _checkInitialized();
+
+    return state?.channelStateStream.map((cs) => cs!.channel?.updatedAt);
+  }
 
   /// Channel deletion date
-  DateTime? get deletedAt => state?._channelState?.channel?.deletedAt;
+  DateTime? get deletedAt {
+    _checkInitialized();
+
+    return state?._channelState?.channel?.deletedAt;
+  }
 
   /// Channel deletion date as a stream
-  Stream<DateTime?>? get deletedAtStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.deletedAt);
+  Stream<DateTime?>? get deletedAtStream {
+    _checkInitialized();
+
+    return state?.channelStateStream.map((cs) => cs!.channel?.deletedAt);
+  }
 
   /// Channel member count
-  int? get memberCount => state?._channelState?.channel?.memberCount;
+  int? get memberCount {
+    _checkInitialized();
+
+    return state?._channelState?.channel?.memberCount;
+  }
 
   /// Channel member count as a stream
-  Stream<int?>? get memberCountStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.memberCount);
+  Stream<int?>? get memberCountStream {
+    _checkInitialized();
+
+    return state?.channelStateStream.map((cs) => cs!.channel?.memberCount);
+  }
 
   /// Channel id
   String? get id => state?._channelState?.channel?.id ?? _id;
-
-  /// Channel id as a stream
-  Stream<String?>? get idStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.id ?? _id);
 
   /// Channel cid
   String? get cid => state?._channelState?.channel?.cid ?? _cid;
 
   /// Channel team
-  String? get team => state?._channelState?.channel?.team;
-
-  /// Channel cid as a stream
-  Stream<String?>? get cidStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.cid ?? _cid);
+  String? get team {
+    _checkInitialized();
+    return state?._channelState?.channel?.team;
+  }
 
   /// Channel extra data
   Map<String, dynamic>? get extraData =>
       state?._channelState?.channel?.extraData ?? _extraData;
 
   /// Channel extra data as a stream
-  Stream<Map<String, dynamic>?>? get extraDataStream =>
-      state?.channelStateStream.map((cs) => cs!.channel?.extraData);
+  Stream<Map<String, dynamic>?>? get extraDataStream {
+    _checkInitialized();
+    return state?.channelStateStream.map((cs) => cs!.channel?.extraData);
+  }
 
   /// The main Stream chat client
   StreamChatClient get client => _client;
@@ -205,14 +249,14 @@ class Channel {
       throw Exception('Error, Message not found');
     }
 
-    final attachments = message.attachments!.where((it) {
+    final attachments = message.attachments.where((it) {
       if (it.uploadState.isSuccess) return false;
       return attachmentIds.contains(it.id);
     });
 
     if (attachments.isEmpty) {
       client.logger.info('No attachments available to upload');
-      if (message.attachments!.every((it) => it.uploadState.isSuccess)) {
+      if (message.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
       return Future.value();
@@ -222,9 +266,9 @@ class Channel {
 
     void updateAttachment(Attachment attachment) {
       final index =
-          message.attachments!.indexWhere((it) => it.id == attachment.id);
+          message.attachments.indexWhere((it) => it.id == attachment.id);
       if (index != -1) {
-        message.attachments![index] = attachment;
+        message.attachments[index] = attachment;
         state?.addMessage(message);
       }
     }
@@ -252,13 +296,13 @@ class Channel {
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
-        ).then((it) => it!.file!);
+        ).then((it) => it!.file);
       } else {
         future = sendFile(
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
-        ).then((it) => it!.file!);
+        ).then((it) => it!.file);
       }
       _cancelableAttachmentUploadRequest[it.id] = cancelToken;
       return future.then((url) {
@@ -288,7 +332,7 @@ class Channel {
         _cancelableAttachmentUploadRequest.remove(it.id);
       });
     })).whenComplete(() {
-      if (message.attachments!.every((it) => it.uploadState.isSuccess)) {
+      if (message.attachments.every((it) => it.uploadState.isSuccess)) {
         _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
       }
     });
@@ -313,7 +357,7 @@ class Channel {
       user: _client.state.user,
       quotedMessage: quotedMessage,
       status: MessageSendingStatus.sending,
-      attachments: message.attachments?.map(
+      attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
           return it.copyWith(uploadState: const UploadState.preparing());
@@ -324,7 +368,7 @@ class Channel {
     state?.addMessage(message);
 
     try {
-      if (message.attachments?.any((it) => !it.uploadState.isSuccess) == true) {
+      if (message.attachments.any((it) => !it.uploadState.isSuccess) == true) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
@@ -332,15 +376,15 @@ class Channel {
         // ignore: unawaited_futures
         _uploadAttachments(
           message.id,
-          message.attachments!.map((it) => it.id),
+          message.attachments.map((it) => it.id),
         );
 
         // ignore: parameter_assignments
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.sendMessage(message, id, type);
-      state?.addMessage(response.message!);
+      final response = await _client.sendMessage(message, id!, type!);
+      state?.addMessage(response.message);
       return response;
     } catch (error) {
       if (error is DioError && error.type != DioErrorType.response) {
@@ -364,7 +408,7 @@ class Channel {
     message = message.copyWith(
       status: MessageSendingStatus.updating,
       updatedAt: message.updatedAt,
-      attachments: message.attachments?.map(
+      attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
           return it.copyWith(uploadState: const UploadState.preparing());
@@ -375,7 +419,7 @@ class Channel {
     state?.addMessage(message);
 
     try {
-      if (message.attachments?.any((it) => !it.uploadState.isSuccess) == true) {
+      if (message.attachments.any((it) => !it.uploadState.isSuccess) == true) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
@@ -383,7 +427,7 @@ class Channel {
         // ignore: unawaited_futures
         _uploadAttachments(
           message.id,
-          message.attachments!.map((it) => it.id),
+          message.attachments.map((it) => it.id),
         );
 
         // ignore: parameter_assignments
@@ -392,13 +436,11 @@ class Channel {
 
       final response = await _client.updateMessage(message);
 
-      final m = response.message?.copyWith(
+      final m = response.message.copyWith(
         ownReactions: message.ownReactions,
       );
 
-      if (m != null) {
-        state?.addMessage(m);
-      }
+      state?.addMessage(m);
 
       return response;
     } catch (error) {
@@ -489,28 +531,32 @@ class Channel {
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
-  }) =>
-      _client.sendFile(
-        file,
-        id,
-        type,
-        onSendProgress: onSendProgress,
-        cancelToken: cancelToken,
-      );
+  }) {
+    _checkInitialized();
+    return _client.sendFile(
+      file,
+      id!,
+      type!,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+  }
 
   /// Send an image to this channel
   Future<SendImageResponse?> sendImage(
     AttachmentFile file, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
-  }) =>
-      _client.sendImage(
-        file,
-        id,
-        type,
-        onSendProgress: onSendProgress,
-        cancelToken: cancelToken,
-      );
+  }) {
+    _checkInitialized();
+    return _client.sendImage(
+      file,
+      id!,
+      type!,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+    );
+  }
 
   /// A message search.
   Future<SearchMessagesResponse?> search({
@@ -535,15 +581,29 @@ class Channel {
   Future<EmptyResponse?> deleteFile(
     String url, {
     CancelToken? cancelToken,
-  }) =>
-      _client.deleteFile(url, id, type, cancelToken: cancelToken);
+  }) {
+    _checkInitialized();
+    return _client.deleteFile(
+      url,
+      id!,
+      type!,
+      cancelToken: cancelToken,
+    );
+  }
 
   /// Delete an image from this channel
   Future<EmptyResponse?> deleteImage(
     String url, {
     CancelToken? cancelToken,
-  }) =>
-      _client.deleteImage(url, id, type, cancelToken: cancelToken);
+  }) {
+    _checkInitialized();
+    return _client.deleteImage(
+      url,
+      id!,
+      type!,
+      cancelToken: cancelToken,
+    );
+  }
 
   /// Send an event on this channel
   Future<EmptyResponse> sendEvent(Event event) {
@@ -916,9 +976,7 @@ class Channel {
 
     final messages = res.messages;
 
-    if (messages != null) {
-      state?.updateChannelState(ChannelState(messages: messages));
-    }
+    state?.updateChannelState(ChannelState(messages: messages));
 
     return res;
   }
@@ -1198,11 +1256,10 @@ class Channel {
   }
 
   void _checkInitialized() {
-    if (!_initializedCompleter.isCompleted) {
-      throw Exception(
-          "Channel $cid hasn't been initialized yet. Make sure to call .watch()"
-          ' or to instantiate the client using [Channel.fromState]');
-    }
+    assert(
+        !_initializedCompleter.isCompleted,
+        "Channel $cid hasn't been initialized yet. Make sure to call .watch()"
+        ' or to instantiate the client using [Channel.fromState]');
   }
 }
 
@@ -1285,8 +1342,8 @@ class ChannelClientState {
     final expiredAttachmentMessagesId = channelState.messages
         .where((m) =>
             !_updatedMessagesIds.contains(m.id) &&
-            m.attachments?.isNotEmpty == true &&
-            m.attachments?.any((e) {
+            m.attachments.isNotEmpty == true &&
+            m.attachments.any((e) {
                   final url = e.imageUrl ?? e.assetUrl;
                   if (url == null || !url.contains('')) {
                     return false;
@@ -1602,12 +1659,12 @@ class ChannelClientState {
   bool _countMessageAsUnread(Message message) {
     final userId = _channel.client.state.user?.id;
     final userIsMuted = _channel.client.state.user?.mutes.firstWhereOrNull(
-          (m) => m.user?.id == message.user!.id,
+          (m) => m.user.id == message.user?.id,
         ) !=
         null;
     return message.silent != true &&
         message.shadowed != true &&
-        message.user!.id != userId &&
+        message.user?.id != userId &&
         !userIsMuted;
   }
 

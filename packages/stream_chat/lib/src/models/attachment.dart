@@ -15,7 +15,7 @@ class Attachment extends Equatable {
   /// Constructor used for json serialization
   Attachment({
     String? id,
-    String? type,
+    this.type,
     this.titleLink,
     String? title,
     this.thumbUrl,
@@ -32,14 +32,14 @@ class Attachment extends Equatable {
     this.authorLink,
     this.authorIcon,
     this.assetUrl,
-    this.actions,
+    List<Action>? actions,
     this.extraData,
     this.file,
     UploadState? uploadState,
   })  : id = id ?? const Uuid().v4(),
         title = title ?? file?.name,
-        type = type ?? '',
-        localUri = file?.path != null ? Uri.parse(file!.path!) : null {
+        localUri = file?.path != null ? Uri.parse(file!.path!) : null,
+        actions = actions ?? [] {
     this.uploadState = uploadState ??
         ((assetUrl != null || imageUrl != null)
             ? const UploadState.success()
@@ -58,7 +58,7 @@ class Attachment extends Equatable {
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
-  final String type;
+  final String? type;
 
   ///The link to which the attachment message points to.
   final String? titleLink;
@@ -98,7 +98,8 @@ class Attachment extends Equatable {
   final String? assetUrl;
 
   /// Actions from a command
-  final List<Action>? actions;
+  @JsonKey(defaultValue: [])
+  final List<Action> actions;
 
   final Uri? localUri;
 
@@ -106,7 +107,7 @@ class Attachment extends Equatable {
   final AttachmentFile? file;
 
   /// The current upload state of the attachment
-  late final UploadState? uploadState;
+  late final UploadState uploadState;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
@@ -149,13 +150,13 @@ class Attachment extends Equatable {
   ];
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$AttachmentToJson(this), topLevelFields)
-    ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
+  Map<String, dynamic> toJson() =>
+      Serialization.moveFromExtraDataToRoot(_$AttachmentToJson(this))
+        ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
   /// Serialize to db data
-  Map<String, dynamic> toData() => Serialization.moveFromExtraDataToRoot(
-      _$AttachmentToJson(this), topLevelFields + dbSpecificTopLevelFields);
+  Map<String, dynamic> toData() =>
+      Serialization.moveFromExtraDataToRoot(_$AttachmentToJson(this));
 
   Attachment copyWith({
     String? id,

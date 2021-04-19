@@ -10,9 +10,9 @@ part 'channel_model.g.dart';
 class ChannelModel {
   /// Constructor used for json serialization
   ChannelModel({
-    this.id,
-    this.type,
-    this.cid = '',
+    String? id,
+    String? type,
+    String? cid,
     ChannelConfig? config,
     this.createdBy,
     this.frozen = false,
@@ -25,7 +25,14 @@ class ChannelModel {
     this.team,
   })  : config = config ?? ChannelConfig(),
         createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+        updatedAt = updatedAt ?? DateTime.now(),
+        assert(
+          cid != null || (id != null && type != null),
+          'provide either a cid or an id and type',
+        ),
+        id = id ?? cid!.split(':')[1],
+        type = type ?? cid!.split(':')[0],
+        cid = cid ?? '$type:$id';
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) =>
@@ -33,10 +40,10 @@ class ChannelModel {
           Serialization.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// The id of this channel
-  final String? id;
+  final String id;
 
   /// The type of this channel
-  final String? type;
+  final String type;
 
   /// The cid of this channel
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -107,7 +114,6 @@ class ChannelModel {
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$ChannelModelToJson(this),
-        topLevelFields,
       );
 
   /// Creates a copy of [ChannelModel] with specified attributes overridden.

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/api/responses.dart';
 import 'package:stream_chat/src/client.dart';
-import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/extensions/string_extension.dart';
+import 'package:stream_chat/src/models/attachment_file.dart';
 
 /// Class responsible for uploading images and files to a given channel
 abstract class AttachmentFileUploader {
@@ -13,8 +13,8 @@ abstract class AttachmentFileUploader {
   /// and cancel the request using [cancelToken]
   Future<SendImageResponse> sendImage(
     AttachmentFile image,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   });
@@ -26,8 +26,8 @@ abstract class AttachmentFileUploader {
   /// and cancel the request using [cancelToken]
   Future<SendFileResponse> sendFile(
     AttachmentFile file,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   });
@@ -38,8 +38,8 @@ abstract class AttachmentFileUploader {
   /// Optionally, cancel the request using [cancelToken]
   Future<EmptyResponse> deleteImage(
     String url,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     CancelToken? cancelToken,
   });
 
@@ -49,8 +49,8 @@ abstract class AttachmentFileUploader {
   /// Optionally, cancel the request using [cancelToken]
   Future<EmptyResponse> deleteFile(
     String url,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     CancelToken? cancelToken,
   });
 }
@@ -65,8 +65,8 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   @override
   Future<SendImageResponse> sendImage(
     AttachmentFile file,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
@@ -102,8 +102,8 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   @override
   Future<SendFileResponse> sendFile(
     AttachmentFile file,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
@@ -139,8 +139,8 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   @override
   Future<EmptyResponse> deleteImage(
     String url,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     CancelToken? cancelToken,
   }) async {
     final response = await _client.delete(
@@ -154,8 +154,8 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
   @override
   Future<EmptyResponse> deleteFile(
     String url,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     CancelToken? cancelToken,
   }) async {
     final response = await _client.delete(

@@ -46,12 +46,12 @@ class Message extends Equatable {
   /// Constructor used for json serialization
   Message({
     String? id,
-    this.text = '',
-    this.type = '',
-    this.attachments,
-    this.mentionedUsers,
-    this.silent,
-    this.shadowed,
+    this.text,
+    this.type = 'regular',
+    this.attachments = const [],
+    this.mentionedUsers = const [],
+    this.silent = false,
+    this.shadowed = false,
     this.reactionCounts,
     this.reactionScores,
     this.latestReactions,
@@ -70,10 +70,10 @@ class Message extends Equatable {
     this.pinnedAt,
     DateTime? pinExpires,
     this.pinnedBy,
-    this.extraData,
+    this.extraData = const {},
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
-    this.skipPush,
+    this.skipPush = false,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         createdAt = createdAt ?? DateTime.now(),
@@ -88,24 +88,34 @@ class Message extends Equatable {
   final String id;
 
   /// The text of this message
-  final String text;
+  final String? text;
 
   /// The status of a sending message
   @JsonKey(ignore: true)
   final MessageSendingStatus status;
 
   /// The message type
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+    includeIfNull: false,
+    toJson: Serialization.readOnly,
+    defaultValue: 'regular',
+  )
   final String type;
 
   /// The list of attachments, either provided by the user or generated from a
   /// command or as a result of URL scraping.
-  @JsonKey(includeIfNull: false)
-  final List<Attachment>? attachments;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: [],
+  )
+  final List<Attachment> attachments;
 
   /// The list of user mentioned in the message
-  @JsonKey(toJson: Serialization.userIds)
-  final List<User>? mentionedUsers;
+  @JsonKey(
+    toJson: Serialization.userIds,
+    defaultValue: [],
+  )
+  final List<User> mentionedUsers;
 
   /// A map describing the count of number of every reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -145,14 +155,20 @@ class Message extends Equatable {
   final bool? showInChannel;
 
   /// If true the message is silent
-  final bool? silent;
+  @JsonKey(defaultValue: false)
+  final bool silent;
 
   /// If true the message will not send a push notification
-  final bool? skipPush;
+  @JsonKey(defaultValue: false)
+  final bool skipPush;
 
   /// If true the message is shadowed
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final bool? shadowed;
+  @JsonKey(
+    includeIfNull: false,
+    toJson: Serialization.readOnly,
+    defaultValue: false,
+  )
+  final bool shadowed;
 
   /// A used command name.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -171,7 +187,8 @@ class Message extends Equatable {
   final User? user;
 
   /// If true the message is pinned
-  final bool? pinned;
+  @JsonKey(defaultValue: false)
+  final bool pinned;
 
   /// Reserved field indicating when the message was pinned
   @JsonKey(toJson: Serialization.readOnly)
@@ -187,8 +204,11 @@ class Message extends Equatable {
   final User? pinnedBy;
 
   /// Message custom extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, dynamic>? extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, dynamic> extraData;
 
   /// True if the message is a system info
   bool get isSystem => type == 'system';
@@ -238,7 +258,8 @@ class Message extends Equatable {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$MessageToJson(this), topLevelFields);
+        _$MessageToJson(this),
+      );
 
   /// Creates a copy of [Message] with specified attributes overridden.
   Message copyWith({
@@ -408,6 +429,5 @@ class TranslatedMessage extends Message {
   @override
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$TranslatedMessageToJson(this),
-        topLevelFields,
       );
 }

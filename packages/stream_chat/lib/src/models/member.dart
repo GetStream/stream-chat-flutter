@@ -13,9 +13,9 @@ class Member {
     this.inviteAcceptedAt,
     this.inviteRejectedAt,
     this.invited = false,
-    this.role = '',
+    this.role,
     this.userId,
-    this.isModerator,
+    this.isModerator = false,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.banned = false,
@@ -45,14 +45,14 @@ class Member {
   final bool invited;
 
   /// The role of the user in the channel
-  @JsonKey(defaultValue: '')
-  final String role;
+  final String? role;
 
   /// The id of the interested user
   final String? userId;
 
   /// True if the user is a moderator of the channel
-  final bool? isModerator;
+  @JsonKey(defaultValue: false)
+  final bool isModerator;
 
   /// True if the member is banned from the channel
   @JsonKey(defaultValue: false)

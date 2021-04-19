@@ -82,7 +82,7 @@ class StreamChatClient {
     this.tokenProvider,
     this.baseURL = _defaultBaseURL,
     this.logLevel = Level.WARNING,
-    this.logHandlerFunction,
+    LogHandlerFunction? logHandlerFunction,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio? httpClient,
@@ -103,7 +103,7 @@ class StreamChatClient {
 
     state = ClientState(this);
 
-    _setupLogger();
+    _setupLogger(logHandlerFunction);
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
     logger.info('instantiating new client');
@@ -134,7 +134,7 @@ class StreamChatClient {
   RetryPolicy? get retryPolicy => _retryPolicy;
 
   /// This client state
-  late final ClientState state;
+  late ClientState state;
 
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
@@ -170,7 +170,7 @@ class StreamChatClient {
   /// final client = StreamChatClient("stream-chat-api-key",
   /// logHandlerFunction: myLogHandlerFunction);
   ///```
-  LogHandlerFunction? logHandlerFunction;
+  late LogHandlerFunction logHandlerFunction;
 
   /// Your project Stream Chat api key.
   /// Find your API keys here https://getstream.io/dashboard/
@@ -371,14 +371,14 @@ class StreamChatClient {
   ) =>
       Logger.detached(name)
         ..level = logLevel
-        ..onRecord.listen(logHandlerFunction ?? _getDefaultLogHandler());
+        ..onRecord.listen(logHandlerFunction);
 
-  void _setupLogger() {
+  void _setupLogger(LogHandlerFunction? logHandlerFunction) {
     logger.level = logLevel;
 
-    logHandlerFunction ??= _getDefaultLogHandler();
+    this.logHandlerFunction = logHandlerFunction ?? _getDefaultLogHandler();
 
-    logger.onRecord.listen(logHandlerFunction);
+    logger.onRecord.listen(this.logHandlerFunction);
 
     logger.info('logger setup');
   }
@@ -618,15 +618,15 @@ class StreamChatClient {
         SyncResponse.fromJson,
       );
 
-      res.events!.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
+      res.events.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
 
-      res.events!.forEach((element) {
+      res.events.forEach((element) {
         logger
           ..fine('element.type: ${element.type}')
           ..fine('element.message.text: ${element.message?.text}');
       });
 
-      res.events!.forEach(handleEvent);
+      res.events.forEach(handleEvent);
 
       await _chatPersistenceClient?.updateLastSyncAt(DateTime.now());
       _synced = true;
@@ -740,7 +740,7 @@ class StreamChatClient {
       QueryChannelsResponse.fromJson,
     );
 
-    if ((res.channels ?? []).isEmpty && paginationParams.offset == 0) {
+    if (res.channels.isEmpty && paginationParams.offset == 0) {
       logger.warning(
         '''
         We could not find any channel for this query.
@@ -750,7 +750,7 @@ class StreamChatClient {
       return <Channel>[];
     }
 
-    final channels = res.channels!;
+    final channels = res.channels;
 
     final users = channels
         .expand((it) => it.members)
@@ -759,7 +759,7 @@ class StreamChatClient {
 
     state._updateUsers(users);
 
-    logger.info('Got ${res.channels?.length} channels from api');
+    logger.info('Got ${res.channels.length} channels from api');
 
     final updateData = _mapChannelStateToChannel(channels);
 
@@ -1053,7 +1053,7 @@ class StreamChatClient {
       QueryUsersResponse.fromJson,
     );
 
-    state._updateUsers(response.users!);
+    state._updateUsers(response.users);
 
     return response;
   }
@@ -1100,8 +1100,8 @@ class StreamChatClient {
   /// Send a [file] to the [channelId] of type [channelType]
   Future<SendFileResponse> sendFile(
     AttachmentFile file,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) =>
@@ -1116,8 +1116,8 @@ class StreamChatClient {
   /// Send a [image] to the [channelId] of type [channelType]
   Future<SendImageResponse> sendImage(
     AttachmentFile image,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) =>
@@ -1132,8 +1132,8 @@ class StreamChatClient {
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(
     String url,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     CancelToken? cancelToken,
   }) =>
       attachmentFileUploader!.deleteFile(
@@ -1146,8 +1146,8 @@ class StreamChatClient {
   /// Delete an image from this channel
   Future<EmptyResponse> deleteImage(
     String url,
-    String? channelId,
-    String? channelType, {
+    String channelId,
+    String channelType, {
     CancelToken? cancelToken,
   }) =>
       attachmentFileUploader!.deleteImage(
@@ -1327,7 +1327,10 @@ class StreamChatClient {
 
   /// Sends the message to the given channel
   Future<SendMessageResponse> sendMessage(
-      Message message, String? channelId, String? channelType) async {
+    Message message,
+    String channelId,
+    String channelType,
+  ) async {
     final response = await post(
       '/channels/$channelType/$channelId/message',
       data: {'message': message.toJson()},

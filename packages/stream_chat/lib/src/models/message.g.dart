@@ -9,16 +9,18 @@ part of 'message.dart';
 Message _$MessageFromJson(Map<String, dynamic> json) {
   return Message(
     id: json['id'] as String?,
-    text: json['text'] as String,
-    type: json['type'] as String,
+    text: json['text'] as String?,
+    type: json['type'] as String? ?? 'regular',
     attachments: (json['attachments'] as List<dynamic>?)
-        ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
-        .toList(),
+            ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
     mentionedUsers: (json['mentioned_users'] as List<dynamic>?)
-        ?.map((e) => User.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    silent: json['silent'] as bool?,
-    shadowed: json['shadowed'] as bool?,
+            ?.map((e) => User.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
+    silent: json['silent'] as bool? ?? false,
+    shadowed: json['shadowed'] as bool? ?? false,
     reactionCounts: (json['reaction_counts'] as Map<String, dynamic>?)?.map(
       (k, e) => MapEntry(k, e as int),
     ),
@@ -51,7 +53,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     user: json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
-    pinned: json['pinned'] as bool?,
+    pinned: json['pinned'] as bool? ?? false,
     pinnedAt: json['pinned_at'] == null
         ? null
         : DateTime.parse(json['pinned_at'] as String),
@@ -61,11 +63,11 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     pinnedBy: json['pinned_by'] == null
         ? null
         : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
-    extraData: json['extra_data'] as Map<String, dynamic>?,
+    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    skipPush: json['skip_push'] as bool?,
+    skipPush: json['skip_push'] as bool? ?? false,
   );
 }
 
@@ -82,8 +84,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   }
 
   writeNotNull('type', readonly(instance.type));
-  writeNotNull(
-      'attachments', instance.attachments?.map((e) => e.toJson()).toList());
+  val['attachments'] = instance.attachments.map((e) => e.toJson()).toList();
   val['mentioned_users'] = Serialization.userIds(instance.mentionedUsers);
   writeNotNull('reaction_counts', readonly(instance.reactionCounts));
   writeNotNull('reaction_scores', readonly(instance.reactionScores));
@@ -106,7 +107,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['pinned_at'] = readonly(instance.pinnedAt);
   val['pin_expires'] = instance.pinExpires?.toIso8601String();
   val['pinned_by'] = readonly(instance.pinnedBy);
-  writeNotNull('extra_data', instance.extraData);
+  val['extra_data'] = instance.extraData;
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   return val;
 }

@@ -7,8 +7,8 @@ part 'device.g.dart';
 class Device {
   /// Constructor used for json serialization
   Device({
-    this.id = '',
-    this.pushProvider,
+    required this.id,
+    required this.pushProvider,
   });
 
   /// Create a new instance from a json
@@ -18,7 +18,7 @@ class Device {
   final String id;
 
   /// The notification push provider
-  final String? pushProvider;
+  final String pushProvider;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$DeviceToJson(this);

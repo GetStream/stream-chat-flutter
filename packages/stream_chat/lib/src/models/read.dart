@@ -10,7 +10,7 @@ class Read {
   Read({
     required this.lastRead,
     required this.user,
-    required this.unreadMessages,
+    this.unreadMessages = 0,
   });
 
   /// Create a new instance from a json

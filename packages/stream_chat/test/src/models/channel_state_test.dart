@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/channel_config.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/command.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/channel_state', () {
@@ -852,7 +852,7 @@ void main() {
       expect(channelState.channel?.config, isA<ChannelConfig>());
       expect(channelState.channel?.config, isNotNull);
       expect(channelState.channel?.config.commands, hasLength(1));
-      expect(channelState.channel?.config.commands![0], isA<Command>());
+      expect(channelState.channel?.config.commands[0], isA<Command>());
       expect(channelState.channel?.lastMessageAt,
           DateTime.parse('2020-01-30T13:43:41.062362Z'));
       expect(channelState.channel?.createdAt,
@@ -902,7 +902,7 @@ void main() {
                 "show_in_channel": null,
                 "mentioned_users": [],
                 "status": "SENT",
-            "skip_push": null,
+                "skip_push": false,
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
@@ -919,7 +919,7 @@ void main() {
                 "show_in_channel": null,
                 "mentioned_users": [],
                 "status": "SENT",
-            "skip_push": null,
+                "skip_push": false,
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
@@ -929,7 +929,7 @@ void main() {
               {
                 "id": "dry-meadow-0-53e6299f-9b97-4a9c-a27e-7e2dde49b7e0",
                 "text": "test message",
-            "skip_push": null,
+                "skip_push": false,
                 "attachments": [],
                 "parent_id": null,
                 "quoted_message": null,
@@ -952,7 +952,7 @@ void main() {
                 "quoted_message_id": null,
                 "show_in_channel": null,
                 "mentioned_users": [],
-            "skip_push": null,
+                "skip_push": false,
                 "status": "SENT",
                 "silent": false,
                 "pinned": false,
@@ -964,7 +964,7 @@ void main() {
                 "id": "dry-meadow-0-64d7970f-ede8-4b31-9738-1bc1756d2bfe",
                 "text": "test",
                 "attachments": [],
-            "skip_push": null,
+                "skip_push": false,
                 "parent_id": null,
                 "quoted_message": null,
                 "quoted_message_id": null,
@@ -982,7 +982,7 @@ void main() {
                 "text": "hi",
                 "attachments": [],
                 "parent_id": null,
-            "skip_push": null,
+                "skip_push": false,
                 "quoted_message": null,
                 "quoted_message_id": null,
                 "show_in_channel": null,
@@ -1000,7 +1000,7 @@ void main() {
                 "attachments": [],
                 "parent_id": null,
                 "quoted_message": null,
-            "skip_push": null,
+                "skip_push": false,
                 "quoted_message_id": null,
                 "show_in_channel": null,
                 "mentioned_users": [],
@@ -1023,7 +1023,7 @@ void main() {
                 "status": "SENT",
                 "silent": false,
                 "pinned": false,
-            "skip_push": null,
+                "skip_push": false,
                 "pinned_at": null,
                 "pin_expires": null,
                 "pinned_by": null
@@ -1041,7 +1041,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1053,7 +1053,7 @@ void main() {
                 "quoted_message": null,
                 "quoted_message_id": null,
                 "show_in_channel": null,
-            "skip_push": null,
+                "skip_push": false,
                 "mentioned_users": [],
                 "status": "SENT",
                 "silent": false,
@@ -1071,7 +1071,7 @@ void main() {
                 "quoted_message_id": null,
                 "show_in_channel": null,
                 "mentioned_users": [],
-            "skip_push": null,
+                "skip_push": false,
                 "status": "SENT",
                 "silent": false,
                 "pinned": false,
@@ -1090,7 +1090,7 @@ void main() {
                 "mentioned_users": [],
                 "status": "SENT",
                 "silent": false,
-            "skip_push": null,
+                "skip_push": false,
                 "pinned": false,
                 "pinned_at": null,
                 "pin_expires": null,
@@ -1100,7 +1100,7 @@ void main() {
                 "id": "icy-recipe-7-935c396e-ddf8-4a9a-951c-0a12fa5bf055",
                 "text": "what are you doing?",
                 "attachments": [],
-            "skip_push": null,
+                "skip_push": false,
                 "parent_id": null,
                 "quoted_message": null,
                 "quoted_message_id": null,
@@ -1118,7 +1118,7 @@ void main() {
                 "text": "👍",
                 "attachments": [],
                 "parent_id": null,
-            "skip_push": null,
+                "skip_push": false,
                 "quoted_message": null,
                 "quoted_message_id": null,
                 "show_in_channel": null,
@@ -1134,7 +1134,7 @@ void main() {
                 "id": "snowy-credit-3-3e0c1a0d-d22f-42ee-b2a1-f9f49477bf21",
                 "text": "sdasas",
                 "attachments": [],
-            "skip_push": null,
+                "skip_push": false,
                 "parent_id": null,
                 "quoted_message": null,
                 "quoted_message_id": null,
@@ -1155,7 +1155,7 @@ void main() {
                 "quoted_message": null,
                 "quoted_message_id": null,
                 "show_in_channel": null,
-            "skip_push": null,
+                "skip_push": false,
                 "mentioned_users": [],
                 "status": "SENT",
                 "silent": false,
@@ -1168,7 +1168,7 @@ void main() {
                 "id": "snowy-credit-3-cfaf0b46-1daa-49c5-947c-b16d6697487d",
                 "text": "nhisagdhsadz",
                 "attachments": [],
-            "skip_push": null,
+                "skip_push": false,
                 "parent_id": null,
                 "quoted_message": null,
                 "quoted_message_id": null,
@@ -1187,7 +1187,7 @@ void main() {
                 "attachments": [],
                 "parent_id": null,
                 "quoted_message": null,
-            "skip_push": null,
+                "skip_push": false,
                 "quoted_message_id": null,
                 "show_in_channel": null,
                 "mentioned_users": [],
@@ -1204,7 +1204,7 @@ void main() {
                 "attachments": [],
                 "parent_id": null,
                 "quoted_message": null,
-            "skip_push": null,
+                "skip_push": false,
                 "quoted_message_id": null,
                 "show_in_channel": null,
                 "mentioned_users": [],
@@ -1212,7 +1212,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1229,7 +1229,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1246,7 +1246,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1263,7 +1263,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1280,7 +1280,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1297,7 +1297,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               },
@@ -1314,7 +1314,7 @@ void main() {
                 "silent": false,
                 "pinned": false,
                 "pinned_at": null,
-            "skip_push": null,
+                "skip_push": false,
                 "pin_expires": null,
                 "pinned_by": null
               }

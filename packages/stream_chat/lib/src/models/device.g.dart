@@ -9,7 +9,7 @@ part of 'device.dart';
 Device _$DeviceFromJson(Map<String, dynamic> json) {
   return Device(
     id: json['id'] as String,
-    pushProvider: json['push_provider'] as String?,
+    pushProvider: json['push_provider'] as String,
   );
 }
 

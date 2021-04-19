@@ -6,22 +6,29 @@ part 'action.g.dart';
 @JsonSerializable()
 class Action {
   /// Constructor used for json serialization
-  Action({this.name, this.style, this.text, this.type, this.value});
+  Action({
+    required this.name,
+    this.style = 'default',
+    required this.text,
+    required this.type,
+    this.value,
+  });
 
   /// Create a new instance from a json
   factory Action.fromJson(Map<String, dynamic> json) => _$ActionFromJson(json);
 
   /// The name of the action
-  final String? name;
+  final String name;
 
   /// The style of the action
-  final String? style;
+  @JsonKey(defaultValue: 'default')
+  final String style;
 
   /// The test of the action
-  final String? text;
+  final String text;
 
   /// The type of the action
-  final String? type;
+  final String type;
 
   /// The value of the action
   final String? value;

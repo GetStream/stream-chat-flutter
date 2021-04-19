@@ -18,9 +18,9 @@ Member _$MemberFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['invite_rejected_at'] as String),
     invited: json['invited'] as bool? ?? false,
-    role: json['role'] as String? ?? '',
+    role: json['role'] as String?,
     userId: json['user_id'] as String?,
-    isModerator: json['is_moderator'] as bool?,
+    isModerator: json['is_moderator'] as bool? ?? false,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),

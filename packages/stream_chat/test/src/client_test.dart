@@ -9,9 +9,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -748,7 +748,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': message}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -793,7 +793,7 @@ void main() {
 
         when(() => mockDio.get<String>('/messages/$messageId')).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': Message(id: messageId)}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -1115,7 +1115,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => Response(
-              data: '{}',
+              data: jsonEncode({'message': message}),
               statusCode: 200,
               requestOptions: FakeRequestOptions(),
             ),
@@ -1137,7 +1137,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => Response(
-              data: '{}',
+              data: jsonEncode({'message': message}),
               statusCode: 200,
               requestOptions: FakeRequestOptions(),
             ),
@@ -1177,7 +1177,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'channel': ChannelModel(cid: 'messaging:test')}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),

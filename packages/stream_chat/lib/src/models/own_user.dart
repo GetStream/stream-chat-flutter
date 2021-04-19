@@ -84,5 +84,6 @@ class OwnUser extends User {
   /// Serialize to json
   @override
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$OwnUserToJson(this), topLevelFields);
+        _$OwnUserToJson(this),
+      );
 }

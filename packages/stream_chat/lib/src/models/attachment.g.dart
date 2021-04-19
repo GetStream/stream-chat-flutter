@@ -27,8 +27,9 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
     authorIcon: json['author_icon'] as String?,
     assetUrl: json['asset_url'] as String?,
     actions: (json['actions'] as List<dynamic>?)
-        ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
-        .toList(),
+            ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [],
     extraData: json['extra_data'] as Map<String, dynamic>?,
     file: json['file'] == null
         ? null
@@ -40,9 +41,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
 }
 
 Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
-  final val = <String, dynamic>{
-    'type': instance.type,
-  };
+  final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -50,6 +49,7 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
     }
   }
 
+  writeNotNull('type', instance.type);
   writeNotNull('title_link', instance.titleLink);
   writeNotNull('title', instance.title);
   writeNotNull('thumb_url', instance.thumbUrl);
@@ -66,9 +66,9 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
   writeNotNull('author_link', instance.authorLink);
   writeNotNull('author_icon', instance.authorIcon);
   writeNotNull('asset_url', instance.assetUrl);
-  writeNotNull('actions', instance.actions?.map((e) => e.toJson()).toList());
+  val['actions'] = instance.actions.map((e) => e.toJson()).toList();
   writeNotNull('file', instance.file?.toJson());
-  writeNotNull('upload_state', instance.uploadState?.toJson());
+  val['upload_state'] = instance.uploadState.toJson();
   writeNotNull('extra_data', instance.extraData);
   val['id'] = instance.id;
   return val;

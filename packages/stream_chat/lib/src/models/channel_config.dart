@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/command.dart';
+
 part 'channel_config.g.dart';
 
 /// The class that contains the information about the configuration of a channel
@@ -7,75 +8,85 @@ part 'channel_config.g.dart';
 class ChannelConfig {
   /// Constructor used for json serialization
   ChannelConfig({
-    this.automod,
-    this.commands,
-    this.connectEvents,
-    this.createdAt,
-    this.updatedAt,
-    this.maxMessageLength,
-    this.messageRetention,
-    this.mutes,
-    this.name,
-    this.reactions,
-    this.readEvents,
-    this.replies,
-    this.search,
-    this.typingEvents,
-    this.uploads,
-    this.urlEnrichment,
-  });
+    this.automod = 'flag',
+    this.commands = const [],
+    this.connectEvents = false,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    this.maxMessageLength = 0,
+    this.messageRetention = '',
+    this.mutes = false,
+    this.reactions = false,
+    this.readEvents = false,
+    this.replies = false,
+    this.search = false,
+    this.typingEvents = false,
+    this.uploads = false,
+    this.urlEnrichment = false,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory ChannelConfig.fromJson(Map<String, dynamic> json) =>
       _$ChannelConfigFromJson(json);
 
   /// Moderation configuration
-  final String? automod;
+  @JsonKey(defaultValue: 'flag')
+  final String automod;
 
   /// List of available commands
-  final List<Command>? commands;
+  @JsonKey(defaultValue: [])
+  final List<Command> commands;
 
   /// True if the channel should send connect events
-  final bool? connectEvents;
+  @JsonKey(defaultValue: false)
+  final bool connectEvents;
 
   /// Date of channel creation
-  final DateTime? createdAt;
+  final DateTime createdAt;
 
   /// Date of last channel update
-  final DateTime? updatedAt;
+  final DateTime updatedAt;
 
   /// Max channel message length
-  final int? maxMessageLength;
+  @JsonKey(defaultValue: 0)
+  final int maxMessageLength;
 
   /// Duration of message retention
-  final String? messageRetention;
+  @JsonKey(defaultValue: '')
+  final String messageRetention;
 
   /// True if users can be muted
-  final bool? mutes;
-
-  /// Name of the channel
-  final String? name;
+  @JsonKey(defaultValue: false)
+  final bool mutes;
 
   /// True if reaction are active for this channel
-  final bool? reactions;
+  @JsonKey(defaultValue: false)
+  final bool reactions;
 
   /// True if readEvents are active for this channel
-  final bool? readEvents;
+  @JsonKey(defaultValue: false)
+  final bool readEvents;
 
   /// True if reply message are active for this channel
-  final bool? replies;
+  @JsonKey(defaultValue: false)
+  final bool replies;
 
   /// True if it's possible to perform a search in this channel
-  final bool? search;
+  @JsonKey(defaultValue: false)
+  final bool search;
 
   /// True if typing events should be sent for this channel
-  final bool? typingEvents;
+  @JsonKey(defaultValue: false)
+  final bool typingEvents;
 
   /// True if it's possible to upload files to this channel
-  final bool? uploads;
+  @JsonKey(defaultValue: false)
+  final bool uploads;
 
   /// True if urls appears as attachments
-  final bool? urlEnrichment;
+  @JsonKey(defaultValue: false)
+  final bool urlEnrichment;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);
