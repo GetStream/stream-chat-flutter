@@ -13,7 +13,9 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['created_at'] as String),
     type: json['type'] as String,
-    user: User.fromJson(json['user'] as Map<String, dynamic>),
+    user: json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
     userId: json['user_id'] as String?,
     score: json['score'] as int? ?? 0,
     extraData: json['extra_data'] as Map<String, dynamic>?,

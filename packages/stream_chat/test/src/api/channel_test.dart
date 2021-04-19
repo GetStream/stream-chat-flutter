@@ -38,6 +38,17 @@ void main() {
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'hey', id: 'test');
 
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         when(
           () => mockDio.post<String>(
             '/channels/messaging/testid/message',
@@ -45,7 +56,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': message}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -227,6 +238,17 @@ void main() {
         );
         final channelClient = client.channel(channelType, id: channelId);
 
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         when(() => mockUploader.sendFile(file, channelId, channelType))
             .thenAnswer((_) async => SendFileResponse());
 
@@ -255,6 +277,17 @@ void main() {
         );
         final channelClient = client.channel(channelType, id: channelId);
 
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         when(() => mockUploader.sendImage(image, channelId, channelType))
             .thenAnswer((_) async => SendImageResponse());
 
@@ -277,6 +310,17 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
         const url = 'url';
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
 
         when(
           () => mockDio.delete<String>(
@@ -310,6 +354,17 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
         const url = 'url';
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
 
         when(
           () => mockDio.delete<String>(
@@ -357,6 +412,17 @@ void main() {
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'Hello', id: 'test');
 
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         when(
           () => mockDio.post<String>(
             '/messages/${message.id}',
@@ -364,7 +430,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': message}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -391,6 +457,17 @@ void main() {
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'Hello', id: 'test');
 
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         when(
           () => mockDio.post<String>(
             '/messages/${message.id}',
@@ -398,7 +475,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': message}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -567,14 +644,30 @@ void main() {
           tokenProvider: (_) async => '',
         );
 
-        client.state.user = OwnUser(id: 'test-id');
+        final user = OwnUser(id: 'test-id');
 
-        final channelClient = client.channel('messaging', id: 'testid');
+        client.state.user = user;
+
+        final message = Message(id: 'messageid');
         const reactionType = 'test';
+        final reaction = Reaction(type: reactionType);
+        final channelClient = client.channel('messaging', id: 'testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
+        await channelClient.watch();
 
         when(
           () => mockDio.post<String>(
-            '/messages/messageid/reaction',
+            '/messages/${message.id}/reaction',
             data: {
               'reaction': {
                 'type': reactionType,
@@ -584,16 +677,17 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'message': message,
+              'reaction': reaction,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
         );
 
         await channelClient.sendReaction(
-          Message(
-            id: 'messageid',
-          ),
+          message,
           reactionType,
         );
 
@@ -697,26 +791,44 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final members = ['vishal'];
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        final members = [Member(userId: 'vishal')];
+        final memberIds = members.map((e) => e.userId!).toList();
         final message = Message(text: 'test');
 
         when(
           () => mockDio.post<String>(
             '/channels/messaging/testid',
-            data: {'add_members': members, 'message': message.toJson()},
+            data: {'add_members': memberIds, 'message': message.toJson()},
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'members': members,
+              'message': message,
+              'channel': channelModel,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
         );
 
-        await channelClient.addMembers(members, message);
+        await channelClient.addMembers(memberIds, message);
 
         verify(() => mockDio.post<String>('/channels/messaging/testid',
-                data: {'add_members': members, 'message': message.toJson()}))
+                data: {'add_members': memberIds, 'message': message.toJson()}))
             .called(1);
       });
 
@@ -732,6 +844,19 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         final message = Message(text: 'test');
 
         when(
@@ -741,7 +866,10 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'message': message,
+              'channel': channelModel,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -2080,6 +2208,19 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         final message = Message(text: 'test');
 
         when(
@@ -2092,7 +2233,10 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'channel': channelModel,
+              'message': message,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -2179,6 +2323,19 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         final message = Message(text: 'test');
 
         when(
@@ -2188,7 +2345,10 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'message': message,
+              'channel': channelModel,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -2213,26 +2373,45 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final members = ['vishal'];
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        final members = [Member(userId: 'vishal')];
+        final memberIds = members.map((e) => e.userId!).toList();
         final message = Message(text: 'test');
 
         when(
           () => mockDio.post<String>(
             '/channels/messaging/testid',
-            data: {'invites': members, 'message': message.toJson()},
+            data: {'invites': memberIds, 'message': message.toJson()},
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'members': members,
+              'message': message,
+              'channel': channelModel,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
         );
 
-        await channelClient.inviteMembers(members, message);
+        await channelClient.inviteMembers(memberIds, message);
 
         verify(() => mockDio.post<String>('/channels/messaging/testid',
-            data: {'invites': members, 'message': message.toJson()})).called(1);
+                data: {'invites': memberIds, 'message': message.toJson()}))
+            .called(1);
       });
 
       test('removeMembers', () async {
@@ -2247,27 +2426,46 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final members = ['vishal'];
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        final members = [Member(userId: 'vishal')];
+        final memberIds = members.map((e) => e.userId!).toList();
         final message = Message(text: 'test');
 
         when(
           () => mockDio.post<String>(
             '/channels/messaging/testid',
-            data: {'remove_members': members, 'message': message.toJson()},
+            data: {'remove_members': memberIds, 'message': message.toJson()},
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({
+              'members': members,
+              'message': message,
+              'channel': channelModel,
+            }),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
         );
 
-        await channelClient.removeMembers(members, message);
+        await channelClient.removeMembers(memberIds, message);
 
-        verify(() => mockDio.post<String>('/channels/messaging/testid',
-                data: {'remove_members': members, 'message': message.toJson()}))
-            .called(1);
+        verify(() => mockDio.post<String>('/channels/messaging/testid', data: {
+              'remove_members': memberIds,
+              'message': message.toJson()
+            })).called(1);
       });
 
       test('hide', () async {

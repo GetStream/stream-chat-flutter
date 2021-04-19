@@ -12,11 +12,11 @@ class Reaction {
     this.messageId,
     DateTime? createdAt,
     required this.type,
-    required this.user,
+    this.user,
     String? userId,
     this.score = 0,
     this.extraData,
-  })  : userId = userId ?? user.id,
+  })  : userId = userId ?? user?.id,
         createdAt = createdAt ?? DateTime.now();
 
   /// Create a new instance from a json
@@ -38,7 +38,7 @@ class Reaction {
 
   /// The user that sent the reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User user;
+  final User? user;
 
   /// The score of the reaction (ie. number of reactions sent)
   @JsonKey(defaultValue: 0)
