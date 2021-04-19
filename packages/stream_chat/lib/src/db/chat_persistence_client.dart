@@ -180,8 +180,11 @@ abstract class ChatPersistenceClient {
         .map((m) => m.id)
         .toList(growable: false));
 
+    final cleanedChannelStates =
+        channelStates.where((it) => it.channel != null);
+
     final deleteMembers = deleteMembersByCids(
-      channelStates.map((it) => it.channel!.cid).toList(growable: false),
+      cleanedChannelStates.map((it) => it.channel!.cid).toList(growable: false),
     );
 
     await Future.wait([
@@ -189,19 +192,21 @@ abstract class ChatPersistenceClient {
       deleteMembers,
     ]);
 
-    final channels = channelStates
+    final channels = cleanedChannelStates
         .map((it) => it.channel)
         .where((it) => it != null) as Iterable<ChannelModel>;
 
-    final reactions = channelStates.expand((it) => it.messages).expand((it) => [
-          if (it.ownReactions != null)
-            ...it.ownReactions?.where((r) => r.userId != null) ?? <Reaction>[],
-          if (it.latestReactions != null)
-            ...it.latestReactions?.where((r) => r.userId != null) ??
-                <Reaction>[],
-        ]);
+    final reactions =
+        cleanedChannelStates.expand((it) => it.messages).expand((it) => [
+              if (it.ownReactions != null)
+                ...it.ownReactions?.where((r) => r.userId != null) ??
+                    <Reaction>[],
+              if (it.latestReactions != null)
+                ...it.latestReactions?.where((r) => r.userId != null) ??
+                    <Reaction>[],
+            ]);
 
-    final users = channelStates
+    final users = cleanedChannelStates
         .map((cs) => [
               cs.channel?.createdBy,
               ...cs.messages
@@ -219,25 +224,25 @@ abstract class ChatPersistenceClient {
         .expand((it) => it)
         .where((it) => it != null) as Iterable<User>;
 
-    final updateMessagesFuture = channelStates.map((it) {
+    final updateMessagesFuture = cleanedChannelStates.map((it) {
       final cid = it.channel!.cid;
       final messages = it.messages;
       return updateMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
-    final updatePinnedMessagesFuture = channelStates.map((it) {
+    final updatePinnedMessagesFuture = cleanedChannelStates.map((it) {
       final cid = it.channel!.cid;
       final messages = it.pinnedMessages;
       return updatePinnedMessages(cid, messages.toList(growable: false));
     }).toList(growable: false);
 
-    final updateReadsFuture = channelStates.map((it) {
+    final updateReadsFuture = cleanedChannelStates.map((it) {
       final cid = it.channel!.cid;
       final reads = it.read;
       return updateReads(cid, reads.toList(growable: false));
     }).toList(growable: false);
 
-    final updateMembersFuture = channelStates.map((it) {
+    final updateMembersFuture = cleanedChannelStates.map((it) {
       final cid = it.channel!.cid;
       final members = it.members;
       return updateMembers(cid, members.toList(growable: false));
