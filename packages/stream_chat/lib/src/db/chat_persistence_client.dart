@@ -199,11 +199,9 @@ abstract class ChatPersistenceClient {
     final reactions =
         cleanedChannelStates.expand((it) => it.messages).expand((it) => [
               if (it.ownReactions != null)
-                ...it.ownReactions?.where((r) => r.userId != null) ??
-                    <Reaction>[],
+                ...it.ownReactions!.where((r) => r.userId != null),
               if (it.latestReactions != null)
-                ...it.latestReactions?.where((r) => r.userId != null) ??
-                    <Reaction>[],
+                ...it.latestReactions!.where((r) => r.userId != null),
             ]);
 
     final users = cleanedChannelStates
@@ -213,9 +211,9 @@ abstract class ChatPersistenceClient {
                   .map((m) => [
                         m.user,
                         if (m.latestReactions != null)
-                          ...m.latestReactions?.map((r) => r.user) ?? [],
+                          ...m.latestReactions!.map((r) => r.user),
                         if (m.ownReactions != null)
-                          ...m.ownReactions?.map((r) => r.user) ?? [],
+                          ...m.ownReactions!.map((r) => r.user),
                       ])
                   .expand((v) => v),
               ...cs.read.map((r) => r.user),

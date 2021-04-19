@@ -28,32 +28,32 @@ class WebSocket {
   /// To connect the WS call [connect]
   WebSocket({
     required this.baseUrl,
-    this.user,
-    this.connectParams,
-    this.connectPayload,
-    this.handler,
+    required this.user,
+    required this.handler,
+    this.connectParams = const {},
+    this.connectPayload = const {},
     this.logger,
     this.connectFunc,
     this.reconnectionMonitorInterval = 1,
     this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
   }) {
-    final qs = Map<String, String>.from(connectParams!);
+    final qs = Map<String, String>.from(connectParams);
 
-    final data = Map<String, dynamic>.from(connectPayload!);
+    final data = Map<String, dynamic>.from(connectPayload);
 
-    data['user_details'] = user!.toJson();
+    data['user_details'] = user.toJson();
     qs['json'] = json.encode(data);
 
     if (baseUrl.startsWith('https')) {
       _path = baseUrl.replaceFirst('https://', '');
-      _path = Uri.https(_path!, 'connect', qs)
+      _path = Uri.https(_path, 'connect', qs)
           .toString()
           .replaceFirst('https', 'wss');
     } else if (baseUrl.startsWith('http')) {
       _path = baseUrl.replaceFirst('http://', '');
       _path =
-          Uri.http(_path!, 'connect', qs).toString().replaceFirst('http', 'ws');
+          Uri.http(_path, 'connect', qs).toString().replaceFirst('http', 'ws');
     } else {
       _path = Uri.https(baseUrl, 'connect', qs)
           .toString()
@@ -65,17 +65,17 @@ class WebSocket {
   final String baseUrl;
 
   /// User performing the WS connection
-  final User? user;
+  final User user;
 
   /// Querystring connection parameters
-  final Map<String, String?>? connectParams;
+  final Map<String, String> connectParams;
 
   /// WS connection payload
-  final Map<String, dynamic>? connectPayload;
+  final Map<String, dynamic> connectPayload;
 
   /// Functions that will be called every time a new event is received from the
   /// connection
-  final EventHandler? handler;
+  final EventHandler handler;
 
   /// A WS specific logger instance
   final Logger? logger;
@@ -113,7 +113,7 @@ class WebSocket {
   Stream<ConnectionStatus> get connectionStatusStream =>
       _connectionStatusController.stream;
 
-  String? _path;
+  late final String _path;
   int _retryAttempt = 1;
   late WebSocketChannel _channel;
   Timer? _healthCheck, _reconnectionMonitor;
@@ -131,17 +131,17 @@ class WebSocket {
     _manuallyDisconnected = false;
 
     if (_connecting) {
-      logger!.severe('already connecting');
+      logger?.severe('already connecting');
       return null;
     }
 
     _connecting = true;
     _connectionStatus = ConnectionStatus.connecting;
 
-    logger!.info('connecting to $_path');
+    logger?.info('connecting to $_path');
 
     _channel =
-        connectFunc?.call(_path) ?? WebSocketChannel.connect(Uri.parse(_path!));
+        connectFunc?.call(_path) ?? WebSocketChannel.connect(Uri.parse(_path));
     _channel.stream.listen(
       (data) async {
         final jsonData = json.decode(data);
@@ -164,7 +164,7 @@ class WebSocket {
       return;
     }
 
-    logger!.info('connection closed | closeCode: ${_channel.closeCode} | '
+    logger?.info('connection closed | closeCode: ${_channel.closeCode} | '
         'closedReason: ${_channel.closeReason}');
 
     if (!_reconnecting) {
@@ -178,10 +178,10 @@ class WebSocket {
     }
 
     final event = _decodeEvent(data);
-    logger!.info('received new event: $data');
+    logger?.info('received new event: $data');
 
     if (_lastEventAt == null) {
-      logger!.info('connection estabilished');
+      logger?.info('connection estabilished');
       _connecting = false;
       _reconnecting = false;
       _lastEventAt = DateTime.now();
@@ -197,14 +197,14 @@ class WebSocket {
       _startHealthCheck();
     }
 
-    handler!(event);
+    handler(event);
     _lastEventAt = DateTime.now();
   }
 
   Future<void> _onConnectionError(error, [stacktrace]) async {
-    logger!..severe('error connecting')..severe(error);
+    logger?..severe('error connecting')..severe(error);
     if (stacktrace != null) {
-      logger!.severe(stacktrace);
+      logger?.severe(stacktrace);
     }
     _connecting = false;
 
@@ -242,18 +242,18 @@ class WebSocket {
       return;
     }
     if (_connecting) {
-      logger!.info('already connecting');
+      logger?.info('already connecting');
       return;
     }
 
-    logger!.info('reconnecting..');
+    logger?.info('reconnecting..');
 
     _cancelTimers();
 
     try {
       await connect();
     } catch (e) {
-      logger!.log(Level.SEVERE, e.toString());
+      logger?.log(Level.SEVERE, e.toString());
     }
     await Future.delayed(
       Duration(seconds: min(_retryAttempt * 5, 25)),
@@ -265,7 +265,7 @@ class WebSocket {
   }
 
   Future<void> _reconnect() async {
-    logger!.info('reconnect');
+    logger?.info('reconnect');
     if (!_reconnecting) {
       _reconnecting = true;
       _connectionStatus = ConnectionStatus.connecting;
@@ -285,12 +285,12 @@ class WebSocket {
   }
 
   void _healthCheckTimer(_) {
-    logger!.info('sending health.check');
+    logger?.info('sending health.check');
     _channel.sink.add("{'type': 'health.check'}");
   }
 
   void _startHealthCheck() {
-    logger!.info('start health check monitor');
+    logger?.info('start health check monitor');
 
     _healthCheck = Timer.periodic(
       Duration(seconds: healthCheckInterval),
@@ -309,7 +309,7 @@ class WebSocket {
     if (_manuallyDisconnected) {
       return;
     }
-    logger!.info('disconnecting');
+    logger?.info('disconnecting');
     _connectionCompleter = Completer();
     _cancelTimers();
     _reconnecting = false;

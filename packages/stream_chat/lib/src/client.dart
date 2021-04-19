@@ -523,10 +523,10 @@ class StreamChatClient {
 
     _ws = WebSocket(
       baseUrl: baseURL,
-      user: state.user,
+      user: state.user!,
       connectParams: {
         'api_key': apiKey,
-        'authorization': token,
+        'authorization': token!,
         'stream-auth-type': _authType,
         'X-Stream-Client': _userAgent,
       },
