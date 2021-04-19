@@ -296,13 +296,13 @@ class Channel {
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
-        ).then((it) => it!.file);
+        ).then((it) => it.file);
       } else {
         future = sendFile(
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
-        ).then((it) => it!.file);
+        ).then((it) => it.file);
       }
       _cancelableAttachmentUploadRequest[it.id] = cancelToken;
       return future.then((url) {
@@ -886,7 +886,7 @@ class Channel {
     ChannelState response;
 
     try {
-      response = await query(options: watchOptions)!;
+      response = await query(options: watchOptions);
     } catch (error, stackTrace) {
       if (!_initializedCompleter.isCompleted) {
         _initializedCompleter.completeError(error, stackTrace);
@@ -1511,7 +1511,7 @@ class ChannelClientState {
     )
         .listen((event) {
       final message = event.message!;
-      if (isUpToDate! ||
+      if (isUpToDate ||
           (message.parentId != null && message.showInChannel != true)) {
         addMessage(message);
       }

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/reaction', () {
@@ -33,7 +33,7 @@ void main() {
       expect(reaction.createdAt, DateTime.parse('2020-01-28T22:17:31.108742Z'));
       expect(reaction.type, 'wow');
       expect(
-        reaction.user.toJson(),
+        reaction.user?.toJson(),
         User(id: '2de0297c-f3f2-489d-b930-ef77342edccf', extraData: {
           'image': 'https://randomuser.me/api/portraits/women/45.jpg',
           'name': 'Daisy Morgan'

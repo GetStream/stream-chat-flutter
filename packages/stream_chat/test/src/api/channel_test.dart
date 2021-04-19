@@ -1200,8 +1200,8 @@ void main() {
 
           verify(() => mockDio.post<String>('/channels/messaging/query',
               data: options)).called(1);
-          expect(channelClient.id, response?.channel?.id);
-          expect(channelClient.cid, response?.channel?.cid);
+          expect(channelClient.id, response.channel?.id);
+          expect(channelClient.cid, response.channel?.cid);
         });
 
         test('with id', () async {
@@ -1837,8 +1837,8 @@ void main() {
 
         verify(() => mockDio.post<String>('/channels/messaging/query',
             data: options)).called(1);
-        expect(channelClient.id, response?.channel?.id);
-        expect(channelClient.cid, response?.channel?.cid);
+        expect(channelClient.id, response.channel?.id);
+        expect(channelClient.cid, response.channel?.cid);
       });
 
       test('watch', () async {
