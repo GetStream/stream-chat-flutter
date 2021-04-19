@@ -481,7 +481,7 @@ class StreamChatClient {
       _connectionId = event.connectionId;
     }
 
-    if (!event.isLocal!) {
+    if (!event.isLocal) {
       final createdAt = event.createdAt;
       if (_synced && createdAt != null) {
         await _chatPersistenceClient?.updateConnectionInfo(event);
