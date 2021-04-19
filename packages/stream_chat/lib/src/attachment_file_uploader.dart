@@ -71,7 +71,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     CancelToken? cancelToken,
   }) async {
     final filename = file.path?.split('/').last ?? file.name;
-    final mimeType = filename.mimeType;
+    final mimeType = filename?.mimeType;
 
     MultipartFile? multiPartFile;
     if (file.path != null) {
@@ -108,7 +108,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     CancelToken? cancelToken,
   }) async {
     final filename = file.path?.split('/').last ?? file.name;
-    final mimeType = filename.mimeType;
+    final mimeType = filename?.mimeType;
 
     MultipartFile? multiPartFile;
     if (file.path != null) {
