@@ -76,11 +76,11 @@ abstract class ChatPersistenceClient {
       getPinnedMessagesByCid(cid, messagePagination: pinnedMessagePagination),
     ]);
     return ChannelState(
-      members: (data[0] as List<Member>?)!,
-      read: (data[1] as List<Read>?)!,
-      channel: data[2] as ChannelModel?,
-      messages: (data[3] as List<Message>?)!,
-      pinnedMessages: (data[4] as List<Message>?)!,
+      members: data[0] as List<Member>,
+      read: data[1] as List<Read>,
+      channel: data[2] as ChannelModel,
+      messages: data[3] as List<Message>,
+      pinnedMessages: data[4] as List<Message>,
     );
   }
 
@@ -195,9 +195,10 @@ abstract class ChatPersistenceClient {
 
     final reactions = channelStates.expand((it) => it.messages).expand((it) => [
           if (it.ownReactions != null)
-            ...it.ownReactions!.where((r) => r.userId != null),
+            ...it.ownReactions?.where((r) => r.userId != null) ?? <Reaction>[],
           if (it.latestReactions != null)
-            ...it.latestReactions!.where((r) => r.userId != null)
+            ...it.latestReactions?.where((r) => r.userId != null) ??
+                <Reaction>[],
         ]);
 
     final users = channelStates
@@ -207,9 +208,9 @@ abstract class ChatPersistenceClient {
                   .map((m) => [
                         m.user,
                         if (m.latestReactions != null)
-                          ...m.latestReactions!.map((r) => r.user),
+                          ...m.latestReactions?.map((r) => r.user) ?? [],
                         if (m.ownReactions != null)
-                          ...m.ownReactions!.map((r) => r.user),
+                          ...m.ownReactions?.map((r) => r.user) ?? [],
                       ])
                   .expand((v) => v),
               ...cs.read.map((r) => r.user),
