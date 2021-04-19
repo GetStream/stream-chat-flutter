@@ -633,7 +633,7 @@ class StreamChatClient {
       );
       if (channels.isNotEmpty) yield channels;
 
-      if (wsConnectionStatus == ConnectionStatus.connected) {
+      try {
         final newQueryChannelsFuture = queryChannelsOnline(
           filter: filter,
           sort: sort,
@@ -648,6 +648,8 @@ class StreamChatClient {
         _queryChannelsStreams[hash] = newQueryChannelsFuture;
 
         yield await newQueryChannelsFuture;
+      } catch (_) {
+        if (channels.isEmpty) rethrow;
       }
     }
   }
