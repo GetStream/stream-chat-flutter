@@ -35,7 +35,8 @@ void main() {
          "online": false,
          "image": "https://getstream.io/random_svg/?name=Dry+meadow",
          "name": "Dry meadow"
-       }
+       },
+        "is_local": false
       }      
       ''';
 
@@ -47,6 +48,7 @@ void main() {
       expect(event.createdAt, isA<DateTime>());
       expect(event.me, isA<OwnUser>());
       expect(event.user, isA<User>());
+      expect(event.isLocal, false);
     });
 
     test('should serialize to json correctly', () {
@@ -81,6 +83,7 @@ void main() {
           'channel_id': null,
           'channel_type': null,
           'parent_id': null,
+          'is_local': true,
         },
       );
     });
