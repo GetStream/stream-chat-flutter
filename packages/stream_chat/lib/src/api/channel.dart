@@ -1685,8 +1685,7 @@ class ChannelClientState {
         ...messages!,
       ];
 
-      newThreads[parentId]!
-          .sort(_sortByCreatedAt as int Function(Message, Message)?);
+      newThreads[parentId]!.sort(_sortByCreatedAt);
     } else {
       newThreads[parentId] = messages;
     }
@@ -1713,7 +1712,7 @@ class ChannelClientState {
                   .any((newMessage) => newMessage.id == m.id) !=
               true)
           .toList(),
-    ]..sort(_sortByCreatedAt as int Function(Message, Message)?);
+    ]..sort(_sortByCreatedAt);
 
     final newWatchers = <User>[
       ...updatedState.watchers,
@@ -1752,17 +1751,8 @@ class ChannelClientState {
     );
   }
 
-  int? _sortByCreatedAt(a, b) {
-    if (a.createdAt == null) {
-      return 1;
-    }
-
-    if (b.createdAt == null) {
-      return -1;
-    }
-
-    return a.createdAt.compareTo(b.createdAt);
-  }
+  int _sortByCreatedAt(Message a, Message b) =>
+      a.createdAt.compareTo(b.createdAt);
 
   /// The channel state related to this client
   ChannelState get _channelState => _channelStateController.value!;
