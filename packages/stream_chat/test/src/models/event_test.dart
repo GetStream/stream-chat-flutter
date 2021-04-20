@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/event', () {
@@ -77,7 +77,6 @@ void main() {
           'total_unread_count': 1,
           'unread_channels': 1,
           'online': true,
-          'is_local': true,
           'member': null,
           'channel_id': null,
           'channel_type': null,
