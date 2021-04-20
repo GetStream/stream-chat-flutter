@@ -38,39 +38,29 @@ Event _$EventFromJson(Map<String, dynamic> json) {
     channelId: json['channel_id'] as String?,
     channelType: json['channel_type'] as String?,
     parentId: json['parent_id'] as String?,
-    extraData: json['extra_data'] as Map<String, dynamic>?,
+    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
   );
 }
 
-Map<String, dynamic> _$EventToJson(Event instance) {
-  final val = <String, dynamic>{
-    'type': instance.type,
-    'cid': instance.cid,
-    'channel_id': instance.channelId,
-    'channel_type': instance.channelType,
-    'connection_id': instance.connectionId,
-    'created_at': instance.createdAt?.toIso8601String(),
-    'me': instance.me?.toJson(),
-    'user': instance.user?.toJson(),
-    'message': instance.message?.toJson(),
-    'channel': instance.channel?.toJson(),
-    'member': instance.member?.toJson(),
-    'reaction': instance.reaction?.toJson(),
-    'total_unread_count': instance.totalUnreadCount,
-    'unread_channels': instance.unreadChannels,
-    'online': instance.online,
-    'parent_id': instance.parentId,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('extra_data', instance.extraData);
-  return val;
-}
+Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
+      'type': instance.type,
+      'cid': instance.cid,
+      'channel_id': instance.channelId,
+      'channel_type': instance.channelType,
+      'connection_id': instance.connectionId,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'me': instance.me?.toJson(),
+      'user': instance.user?.toJson(),
+      'message': instance.message?.toJson(),
+      'channel': instance.channel?.toJson(),
+      'member': instance.member?.toJson(),
+      'reaction': instance.reaction?.toJson(),
+      'total_unread_count': instance.totalUnreadCount,
+      'unread_channels': instance.unreadChannels,
+      'online': instance.online,
+      'parent_id': instance.parentId,
+      'extra_data': instance.extraData,
+    };
 
 EventChannel _$EventChannelFromJson(Map<String, dynamic> json) {
   return EventChannel(
