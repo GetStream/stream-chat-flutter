@@ -43,7 +43,7 @@ dependencies:
   ezanimation: ^0.4.1
   synchronized: ^3.0.0
   characters: ^1.0.0
-  dio: ">=4.0.0-prev3 <4.0.0"
+  dio: ^4.0.0
   path_provider: ^2.0.0
   video_thumbnail: ^0.2.5+1
 

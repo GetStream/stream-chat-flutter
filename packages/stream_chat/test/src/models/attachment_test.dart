@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'package:stream_chat/src/models/attachment.dart';
-import 'package:stream_chat/src/models/action.dart';
 
+import 'package:stream_chat/src/models/action.dart';
+import 'package:stream_chat/src/models/attachment.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('src/models/attachment', () {
-    const jsonExample = '''{
+    const jsonExample = '''
+    {
   "type": "giphy",
   "title": "awesome",
   "title_link": "https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti",
@@ -66,7 +67,8 @@ void main() {
           'type': 'image',
           'title': 'soo',
           'title_link':
-              'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti'
+              'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
+          'actions': [],
         },
       );
     });

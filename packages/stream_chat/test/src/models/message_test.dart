@@ -1,14 +1,15 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/message', () {
-    const jsonExample = r'''{
+    const jsonExample = r'''
+    {
       "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
       "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
       "type": "regular",
@@ -101,9 +102,8 @@ void main() {
         id: '4637f7e4-a06b-42db-ba5a-8d8270dd926f',
         text:
             'https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA',
-        silent: false,
         attachments: [
-          Attachment.fromJson({
+          Attachment.fromJson(const {
             'type': 'video',
             'author_name': 'GIPHY',
             'title': 'The Lion King Disney GIF - Find \u0026 Share on GIPHY',
@@ -123,7 +123,7 @@ void main() {
         ],
         showInChannel: true,
         parentId: 'parentId',
-        extraData: {'hey': 'test'},
+        extraData: const {'hey': 'test'},
       );
 
       expect(
@@ -133,7 +133,7 @@ void main() {
             "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
             "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
             "silent": false,
-            "skip_push": null,
+            "skip_push": false,
             "attachments": [
               {
                 "type": "video",
@@ -144,10 +144,11 @@ void main() {
                 "og_scrape_url": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
                 "image_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
                 "author_name": "GIPHY",
-                "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4"
+                "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4",
+                "actions": []
               }
             ],
-            "mentioned_users": null,
+            "mentioned_users": [],
             "parent_id": "parentId",
             "quoted_message": null,
             "quoted_message_id": null,

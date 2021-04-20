@@ -7,9 +7,9 @@ part 'command.g.dart';
 class Command {
   /// Constructor used for json serialization
   Command({
-    this.name,
-    this.description,
-    this.args,
+    required this.name,
+    required this.description,
+    required this.args,
   });
 
   /// Create a new instance from a json

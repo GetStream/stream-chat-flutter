@@ -9,9 +9,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -21,7 +21,7 @@ class FakeRequestOptions extends Fake implements RequestOptions {}
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
 
 class Functions {
-  Future<String> tokenProvider(String userId) => null;
+  Future<String> tokenProvider(String userId) async => '';
 }
 
 class MockFunctions extends Mock implements Functions {}
@@ -155,7 +155,9 @@ void main() {
             'sort': sortOptions,
           }
             ..addAll(options)
-            ..addAll(paginationParams.toJson())),
+            ..addAll(paginationParams
+                .toJson()
+                .map((key, value) => MapEntry(key, value as Object)))),
         };
 
         when(
@@ -735,7 +737,9 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final message = Message(id: 'test', updatedAt: DateTime.now());
+        final message = Message(
+          id: 'test',
+        );
 
         when(
           () => mockDio.post<String>(
@@ -744,7 +748,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': message}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -789,7 +793,7 @@ void main() {
 
         when(() => mockDio.get<String>('/messages/$messageId')).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'message': Message(id: messageId)}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),
@@ -1111,7 +1115,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => Response(
-              data: '{}',
+              data: jsonEncode({'message': message}),
               statusCode: 200,
               requestOptions: FakeRequestOptions(),
             ),
@@ -1133,7 +1137,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => Response(
-              data: '{}',
+              data: jsonEncode({'message': message}),
               statusCode: 200,
               requestOptions: FakeRequestOptions(),
             ),
@@ -1173,7 +1177,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => Response(
-            data: '{}',
+            data: jsonEncode({'channel': ChannelModel(cid: 'messaging:test')}),
             statusCode: 200,
             requestOptions: FakeRequestOptions(),
           ),

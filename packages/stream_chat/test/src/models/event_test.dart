@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/event', () {
@@ -47,6 +47,7 @@ void main() {
       expect(event.createdAt, isA<DateTime>());
       expect(event.me, isA<OwnUser>());
       expect(event.user, isA<User>());
+      expect(event.isLocal, false);
     });
 
     test('should serialize to json correctly', () {
@@ -77,11 +78,11 @@ void main() {
           'total_unread_count': 1,
           'unread_channels': 1,
           'online': true,
-          'is_local': true,
           'member': null,
           'channel_id': null,
           'channel_type': null,
           'parent_id': null,
+          'is_local': true,
         },
       );
     });

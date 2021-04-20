@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/channel', () {
@@ -9,7 +9,7 @@ void main() {
       {
         "id": "test",
         "type": "livestream",
-        "cid": "test:livestream",
+        "cid": "livestream:test",
         "cats": true,
         "fruit": ["bananas", "apples"]
       }      
@@ -19,9 +19,9 @@ void main() {
       final channel = ChannelModel.fromJson(json.decode(jsonExample));
       expect(channel.id, equals('test'));
       expect(channel.type, equals('livestream'));
-      expect(channel.cid, equals('test:livestream'));
-      expect(channel.extraData['cats'], equals(true));
-      expect(channel.extraData['fruit'], equals(['bananas', 'apples']));
+      expect(channel.cid, equals('livestream:test'));
+      expect(channel.extraData!['cats'], equals(true));
+      expect(channel.extraData!['fruit'], equals(['bananas', 'apples']));
     });
 
     test('should serialize to json correctly', () {
@@ -34,7 +34,7 @@ void main() {
 
       expect(
         channel.toJson(),
-        {'id': 'id', 'type': 'type', 'name': 'cool'},
+        {'id': 'id', 'type': 'type', 'frozen': false, 'name': 'cool'},
       );
     });
 
@@ -44,7 +44,6 @@ void main() {
         id: 'id',
         cid: 'a:a',
         extraData: {'name': 'cool'},
-        frozen: false,
       );
 
       expect(

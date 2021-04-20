@@ -90,6 +90,7 @@ void main() {
           Reaction(
             messageId: 'test',
             user: User(id: 'testid'),
+            type: 'test',
           ),
         ],
       );

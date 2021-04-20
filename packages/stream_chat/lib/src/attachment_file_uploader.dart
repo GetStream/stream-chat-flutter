@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/api/responses.dart';
 import 'package:stream_chat/src/client.dart';
-import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/extensions/string_extension.dart';
+import 'package:stream_chat/src/models/attachment_file.dart';
 
 /// Class responsible for uploading images and files to a given channel
 abstract class AttachmentFileUploader {
@@ -15,8 +15,8 @@ abstract class AttachmentFileUploader {
     AttachmentFile image,
     String channelId,
     String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   });
 
   /// Uploads a [file] to the given channel.
@@ -28,8 +28,8 @@ abstract class AttachmentFileUploader {
     AttachmentFile file,
     String channelId,
     String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   });
 
   /// Deletes a image using its [url] from the given channel.
@@ -40,7 +40,7 @@ abstract class AttachmentFileUploader {
     String url,
     String channelId,
     String channelType, {
-    CancelToken cancelToken,
+    CancelToken? cancelToken,
   });
 
   /// Deletes a file using its [url] from the given channel.
@@ -51,7 +51,7 @@ abstract class AttachmentFileUploader {
     String url,
     String channelId,
     String channelType, {
-    CancelToken cancelToken,
+    CancelToken? cancelToken,
   });
 }
 
@@ -67,22 +67,22 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     AttachmentFile file,
     String channelId,
     String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
-    final filename = file.path?.split('/')?.last ?? file.name;
-    final mimeType = filename.mimeType;
+    final filename = file.path?.split('/').last ?? file.name;
+    final mimeType = filename?.mimeType;
 
-    MultipartFile multiPartFile;
+    MultipartFile? multiPartFile;
     if (file.path != null) {
       multiPartFile = await MultipartFile.fromFile(
-        file.path,
+        file.path!,
         filename: filename,
         contentType: mimeType,
       );
     } else if (file.bytes != null) {
       multiPartFile = MultipartFile.fromBytes(
-        file.bytes,
+        file.bytes!,
         filename: filename,
         contentType: mimeType,
       );
@@ -104,22 +104,22 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     AttachmentFile file,
     String channelId,
     String channelType, {
-    ProgressCallback onSendProgress,
-    CancelToken cancelToken,
+    ProgressCallback? onSendProgress,
+    CancelToken? cancelToken,
   }) async {
-    final filename = file.path?.split('/')?.last ?? file.name;
-    final mimeType = filename.mimeType;
+    final filename = file.path?.split('/').last ?? file.name;
+    final mimeType = filename?.mimeType;
 
-    MultipartFile multiPartFile;
+    MultipartFile? multiPartFile;
     if (file.path != null) {
       multiPartFile = await MultipartFile.fromFile(
-        file.path,
+        file.path!,
         filename: filename,
         contentType: mimeType,
       );
     } else if (file.bytes != null) {
       multiPartFile = MultipartFile.fromBytes(
-        file.bytes,
+        file.bytes!,
         filename: filename,
         contentType: mimeType,
       );
@@ -141,7 +141,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     String url,
     String channelId,
     String channelType, {
-    CancelToken cancelToken,
+    CancelToken? cancelToken,
   }) async {
     final response = await _client.delete(
       '/channels/$channelType/$channelId/image',
@@ -156,7 +156,7 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     String url,
     String channelId,
     String channelType, {
-    CancelToken cancelToken,
+    CancelToken? cancelToken,
   }) async {
     final response = await _client.delete(
       '/channels/$channelType/$channelId/file',

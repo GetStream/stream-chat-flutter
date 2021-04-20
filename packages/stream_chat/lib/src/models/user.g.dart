@@ -6,10 +6,10 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-User _$UserFromJson(Map json) {
+User _$UserFromJson(Map<String, dynamic> json) {
   return User(
     id: json['id'] as String,
-    role: json['role'] as String,
+    role: json['role'] as String? ?? '',
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -19,12 +19,12 @@ User _$UserFromJson(Map json) {
     lastActive: json['last_active'] == null
         ? null
         : DateTime.parse(json['last_active'] as String),
-    online: json['online'] as bool,
-    extraData: (json['extra_data'] as Map)?.map(
-      (k, e) => MapEntry(k as String, e),
-    ),
-    banned: json['banned'] as bool,
-    teams: (json['teams'] as List)?.map((e) => e as String)?.toList(),
+    online: json['online'] as bool? ?? false,
+    extraData: json['extra_data'] as Map<String, dynamic>,
+    banned: json['banned'] as bool? ?? false,
+    teams:
+        (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+            [],
   );
 }
 
@@ -46,6 +46,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
   writeNotNull('last_active', readonly(instance.lastActive));
   writeNotNull('online', readonly(instance.online));
   writeNotNull('banned', readonly(instance.banned));
-  writeNotNull('extra_data', instance.extraData);
+  val['extra_data'] = instance.extraData;
   return val;
 }

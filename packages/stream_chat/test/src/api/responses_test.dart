@@ -12,7 +12,8 @@ import 'package:stream_chat/stream_chat.dart';
 void main() {
   group('src/api/responses', () {
     test('QueryChannelsResponse', () {
-      const jsonExample = r'''{
+      const jsonExample = r'''
+      {
     "channels": [
         {
             "channel": {
@@ -3432,7 +3433,8 @@ void main() {
     });
 
     test('SendReactionResponse', () {
-      const jsonExample = r'''{"message": {
+      const jsonExample = r'''
+      {"message": {
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3481,7 +3483,8 @@ void main() {
     });
 
     test('UpdateUsersResponse', () {
-      const jsonExample = '''{"users": {"bbb19d9a-ee50-45bc-84e5-0584e79d0c9e":{
+      const jsonExample = '''
+      {"users": {"bbb19d9a-ee50-45bc-84e5-0584e79d0c9e":{
                         "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
                         "role": "user",
                         "created_at": "2020-01-28T22:17:30.826259Z",
@@ -3505,7 +3508,8 @@ void main() {
     });
 
     test('GetMessagesByIdResponse', () {
-      const jsonExample = r'''{"messages":[{
+      const jsonExample = r'''
+      {"messages":[{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3536,7 +3540,8 @@ void main() {
     });
 
     test('SendActionResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3566,7 +3571,8 @@ void main() {
     });
 
     test('UpdateMessageResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3596,7 +3602,8 @@ void main() {
     });
 
     test('SendMessageResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3626,7 +3633,8 @@ void main() {
     });
 
     test('GetMessageResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3656,7 +3664,8 @@ void main() {
     });
 
     test('UpdateChannelResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3769,7 +3778,8 @@ void main() {
     });
 
     test('InviteMembersResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3882,7 +3892,8 @@ void main() {
     });
 
     test('RemoveMembersResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3995,7 +4006,8 @@ void main() {
     });
 
     test('AddMembersResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -4108,7 +4120,8 @@ void main() {
     });
 
     test('AcceptInviteResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -4221,7 +4234,8 @@ void main() {
     });
 
     test('RejectInviteResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''
+      {"message":{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",

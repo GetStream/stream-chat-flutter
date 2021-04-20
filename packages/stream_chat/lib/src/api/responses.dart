@@ -13,14 +13,15 @@ import 'package:stream_chat/src/models/user.dart';
 part 'responses.g.dart';
 
 class _BaseResponse {
-  String duration;
+  String? duration;
 }
 
 /// Model response for [StreamChatClient.resync] api call
 @JsonSerializable(createToJson: false)
 class SyncResponse extends _BaseResponse {
   /// The list of events
-  List<Event> events;
+  @JsonKey(defaultValue: [])
+  late List<Event> events;
 
   /// Create a new instance from a json
   static SyncResponse fromJson(Map<String, dynamic> json) =>
@@ -31,7 +32,8 @@ class SyncResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class QueryChannelsResponse extends _BaseResponse {
   /// List of channels state returned by the query
-  List<ChannelState> channels;
+  @JsonKey(defaultValue: [])
+  late List<ChannelState> channels;
 
   /// Create a new instance from a json
   static QueryChannelsResponse fromJson(Map<String, dynamic> json) =>
@@ -41,8 +43,8 @@ class QueryChannelsResponse extends _BaseResponse {
 /// Model response for [StreamChatClient.queryChannels] api call
 @JsonSerializable(createToJson: false)
 class TranslateMessageResponse extends _BaseResponse {
-  /// List of channels state returned by the query
-  TranslatedMessage message;
+  /// Translated message
+  late TranslatedMessage message;
 
   /// Create a new instance from a json
   static TranslateMessageResponse fromJson(Map<String, dynamic> json) =>
@@ -53,7 +55,8 @@ class TranslateMessageResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class QueryMembersResponse extends _BaseResponse {
   /// List of channels state returned by the query
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Create a new instance from a json
   static QueryMembersResponse fromJson(Map<String, dynamic> json) =>
@@ -64,7 +67,8 @@ class QueryMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class QueryUsersResponse extends _BaseResponse {
   /// List of users returned by the query
-  List<User> users;
+  @JsonKey(defaultValue: [])
+  late List<User> users;
 
   /// Create a new instance from a json
   static QueryUsersResponse fromJson(Map<String, dynamic> json) =>
@@ -75,7 +79,8 @@ class QueryUsersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class QueryReactionsResponse extends _BaseResponse {
   /// List of reactions returned by the query
-  List<Reaction> reactions;
+  @JsonKey(defaultValue: [])
+  late List<Reaction> reactions;
 
   /// Create a new instance from a json
   static QueryReactionsResponse fromJson(Map<String, dynamic> json) =>
@@ -86,7 +91,8 @@ class QueryReactionsResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class QueryRepliesResponse extends _BaseResponse {
   /// List of messages returned by the api call
-  List<Message> messages;
+  @JsonKey(defaultValue: [])
+  late List<Message> messages;
 
   /// Create a new instance from a json
   static QueryRepliesResponse fromJson(Map<String, dynamic> json) =>
@@ -97,7 +103,8 @@ class QueryRepliesResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class ListDevicesResponse extends _BaseResponse {
   /// List of user devices
-  List<Device> devices;
+  @JsonKey(defaultValue: [])
+  late List<Device> devices;
 
   /// Create a new instance from a json
   static ListDevicesResponse fromJson(Map<String, dynamic> json) =>
@@ -108,7 +115,7 @@ class ListDevicesResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendFileResponse extends _BaseResponse {
   /// The url of the uploaded file
-  String file;
+  late String file;
 
   /// Create a new instance from a json
   static SendFileResponse fromJson(Map<String, dynamic> json) =>
@@ -119,7 +126,7 @@ class SendFileResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendImageResponse extends _BaseResponse {
   /// The url of the uploaded file
-  String file;
+  late String file;
 
   /// Create a new instance from a json
   static SendImageResponse fromJson(Map<String, dynamic> json) =>
@@ -130,10 +137,10 @@ class SendImageResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendReactionResponse extends _BaseResponse {
   /// Message returned by the api call
-  Message message;
+  late Message message;
 
   /// The reaction created by the api call
-  Reaction reaction;
+  late Reaction reaction;
 
   /// Create a new instance from a json
   static SendReactionResponse fromJson(Map<String, dynamic> json) =>
@@ -144,10 +151,10 @@ class SendReactionResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class ConnectGuestUserResponse extends _BaseResponse {
   /// Guest user access token
-  String accessToken;
+  late String accessToken;
 
   /// Guest user
-  User user;
+  late User user;
 
   /// Create a new instance from a json
   static ConnectGuestUserResponse fromJson(Map<String, dynamic> json) =>
@@ -158,7 +165,8 @@ class ConnectGuestUserResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class UpdateUsersResponse extends _BaseResponse {
   /// Updated users
-  Map<String, User> users;
+  @JsonKey(defaultValue: {})
+  late Map<String, User> users;
 
   /// Create a new instance from a json
   static UpdateUsersResponse fromJson(Map<String, dynamic> json) =>
@@ -169,7 +177,7 @@ class UpdateUsersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class UpdateMessageResponse extends _BaseResponse {
   /// Message returned by the api call
-  Message message;
+  late Message message;
 
   /// Create a new instance from a json
   static UpdateMessageResponse fromJson(Map<String, dynamic> json) =>
@@ -180,7 +188,7 @@ class UpdateMessageResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendMessageResponse extends _BaseResponse {
   /// Message returned by the api call
-  Message message;
+  late Message message;
 
   /// Create a new instance from a json
   static SendMessageResponse fromJson(Map<String, dynamic> json) =>
@@ -191,15 +199,15 @@ class SendMessageResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class GetMessageResponse extends _BaseResponse {
   /// Message returned by the api call
-  Message message;
+  late Message message;
 
   /// Channel of the message
-  ChannelModel channel;
+  ChannelModel? channel;
 
   /// Create a new instance from a json
   static GetMessageResponse fromJson(Map<String, dynamic> json) {
     final res = _$GetMessageResponseFromJson(json);
-    final jsonChannel = res.message?.extraData?.remove('channel');
+    final jsonChannel = res.message.extraData.remove('channel');
     if (jsonChannel != null) {
       res.channel = ChannelModel.fromJson(jsonChannel);
     }
@@ -211,7 +219,8 @@ class GetMessageResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SearchMessagesResponse extends _BaseResponse {
   /// List of messages returned by the api call
-  List<GetMessageResponse> results;
+  @JsonKey(defaultValue: [])
+  late List<GetMessageResponse> results;
 
   /// Create a new instance from a json
   static SearchMessagesResponse fromJson(Map<String, dynamic> json) =>
@@ -222,7 +231,8 @@ class SearchMessagesResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class GetMessagesByIdResponse extends _BaseResponse {
   /// Message returned by the api call
-  List<Message> messages;
+  @JsonKey(defaultValue: [])
+  late List<Message> messages;
 
   /// Create a new instance from a json
   static GetMessagesByIdResponse fromJson(Map<String, dynamic> json) =>
@@ -233,13 +243,13 @@ class GetMessagesByIdResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class UpdateChannelResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  List<Member>? members;
 
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static UpdateChannelResponse fromJson(Map<String, dynamic> json) =>
@@ -250,10 +260,10 @@ class UpdateChannelResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class PartialUpdateChannelResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  List<Member>? members;
 
   /// Create a new instance from a json
   static PartialUpdateChannelResponse fromJson(Map<String, dynamic> json) =>
@@ -264,13 +274,14 @@ class PartialUpdateChannelResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class InviteMembersResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static InviteMembersResponse fromJson(Map<String, dynamic> json) =>
@@ -281,13 +292,14 @@ class InviteMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class RemoveMembersResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static RemoveMembersResponse fromJson(Map<String, dynamic> json) =>
@@ -298,7 +310,7 @@ class RemoveMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendActionResponse extends _BaseResponse {
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static SendActionResponse fromJson(Map<String, dynamic> json) =>
@@ -309,13 +321,14 @@ class SendActionResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class AddMembersResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static AddMembersResponse fromJson(Map<String, dynamic> json) =>
@@ -326,13 +339,14 @@ class AddMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class AcceptInviteResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static AcceptInviteResponse fromJson(Map<String, dynamic> json) =>
@@ -343,13 +357,14 @@ class AcceptInviteResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class RejectInviteResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// Channel members
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Message returned by the api call
-  Message message;
+  Message? message;
 
   /// Create a new instance from a json
   static RejectInviteResponse fromJson(Map<String, dynamic> json) =>
@@ -368,19 +383,23 @@ class EmptyResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class ChannelStateResponse extends _BaseResponse {
   /// Updated channel
-  ChannelModel channel;
+  late ChannelModel channel;
 
   /// List of messages returned by the api call
-  List<Message> messages;
+  @JsonKey(defaultValue: [])
+  late List<Message> messages;
 
   /// Channel members
-  List<Member> members;
+  @JsonKey(defaultValue: [])
+  late List<Member> members;
 
   /// Number of users watching the channel
-  int watcherCount;
+  @JsonKey(defaultValue: 0)
+  late int watcherCount;
 
   /// List of read states
-  List<Read> read;
+  @JsonKey(defaultValue: [])
+  late List<Read> read;
 
   /// Create a new instance from a json
   static ChannelStateResponse fromJson(Map<String, dynamic> json) =>
