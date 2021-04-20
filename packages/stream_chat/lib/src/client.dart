@@ -548,7 +548,7 @@ class StreamChatClient {
       );
 
       if (status == ConnectionStatus.connected) {
-        handleEvent(Event(
+        handleEvent(const Event(
           type: EventType.connectionRecovered,
           online: true,
         ));
