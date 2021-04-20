@@ -9,7 +9,7 @@ class User {
   /// Constructor used for json serialization
   User({
     required this.id,
-    this.role = '',
+    this.role,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.lastActive,
@@ -41,9 +41,8 @@ class User {
   final String id;
 
   /// User role
-  @JsonKey(
-      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: '')
-  final String role;
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final String? role;
 
   /// User role
   @JsonKey(
