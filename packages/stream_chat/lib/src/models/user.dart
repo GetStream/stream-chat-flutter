@@ -8,7 +8,7 @@ part 'user.g.dart';
 class User {
   /// Constructor used for json serialization
   User({
-    this.id = '',
+    required this.id,
     this.role = '',
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -23,18 +23,6 @@ class User {
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(
       Serialization.moveToExtraDataFromRoot(json, topLevelFields));
-
-  /// Use this named constructor to create a new user instance
-  User.init(
-    this.id, {
-    this.online = false,
-    this.extraData = const {},
-    required this.createdAt,
-    required this.updatedAt,
-    this.teams = const [],
-    required this.role,
-  })   : lastActive = null,
-        banned = false;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -94,7 +82,7 @@ class User {
   int get hashCode => id.hashCode;
 
   /// Shortcut for user name
-  String? get name =>
+  String get name =>
       (extraData.containsKey('name') == true && extraData['name'] != '')
           ? extraData['name']
           : id;
