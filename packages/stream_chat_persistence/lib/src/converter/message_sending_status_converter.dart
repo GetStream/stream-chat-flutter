@@ -6,7 +6,7 @@ import 'package:stream_chat/stream_chat.dart';
 class MessageSendingStatusConverter
     extends TypeConverter<MessageSendingStatus, int> {
   @override
-  MessageSendingStatus mapToDart(int fromDb) {
+  MessageSendingStatus? mapToDart(int? fromDb) {
     switch (fromDb) {
       case 0:
         return MessageSendingStatus.sending;
@@ -28,7 +28,7 @@ class MessageSendingStatusConverter
   }
 
   @override
-  int mapToSql(MessageSendingStatus value) {
+  int? mapToSql(MessageSendingStatus? value) {
     switch (value) {
       case MessageSendingStatus.sending:
         return 0;
