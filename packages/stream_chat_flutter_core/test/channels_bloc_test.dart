@@ -779,8 +779,8 @@ void main() {
         final mockClient = MockClient();
         final channels = _generateChannels(mockClient);
         int channelComparator(Channel a, Channel b) {
-          final aData = a.extraData!['extra_data_key'] as String;
-          final bData = b.extraData!['extra_data_key'] as String;
+          final aData = a.extraData['extra_data_key'] as String;
+          final bData = b.extraData['extra_data_key'] as String;
           return bData.compareTo(aData);
         }
 

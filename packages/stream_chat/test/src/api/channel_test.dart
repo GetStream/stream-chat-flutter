@@ -516,7 +516,7 @@ void main() {
       );
       await channelClient.watch();
 
-      final event = Event(type: EventType.any);
+      final event = const Event(type: EventType.any);
 
       when(
         () => mockDio.post<String>(
@@ -564,7 +564,7 @@ void main() {
       );
       await channelClient.watch();
 
-      final event = Event(type: EventType.typingStart);
+      final event = const Event(type: EventType.typingStart);
 
       when(
         () => mockDio.post<String>(
@@ -610,7 +610,7 @@ void main() {
       );
       await channelClient.watch();
 
-      final event = Event(type: EventType.typingStop);
+      final event = const Event(type: EventType.typingStop);
 
       when(
         () => mockDio.post<String>(
@@ -901,8 +901,10 @@ void main() {
             'presence': true,
           };
 
-          when(() => mockDio.post<String>('/channels/messaging/query',
-              data: options)).thenAnswer(
+          when(() => mockDio.post<String>(
+                '/channels/messaging/query',
+                data: options,
+              )).thenAnswer(
             (_) async => Response(
               data: r'''
             {
@@ -1198,8 +1200,10 @@ void main() {
 
           final response = await channelClient.query(options: options);
 
-          verify(() => mockDio.post<String>('/channels/messaging/query',
-              data: options)).called(1);
+          verify(() => mockDio.post<String>(
+                '/channels/messaging/query',
+                data: options,
+              )).called(1);
           expect(channelClient.id, response.channel?.id);
           expect(channelClient.cid, response.channel?.cid);
         });

@@ -38,8 +38,8 @@ class StreamExample extends StatelessWidget {
   /// If you'd prefer using pre-made UI widgets for your app, please see our other
   /// package, `stream_chat_flutter`.
   const StreamExample({
-    Key key,
-    @required this.client,
+    Key? key,
+    required this.client,
   }) : super(key: key);
 
   /// Instance of Stream Client.
@@ -55,7 +55,7 @@ class StreamExample extends StatelessWidget {
       home: HomeScreen(),
       builder: (context, child) => StreamChatCore(
         client: client,
-        child: child,
+        child: child!,
       ),
     );
   }
@@ -82,7 +82,7 @@ class HomeScreen extends StatelessWidget {
             'type': 'messaging',
             'members': {
               r'$in': [
-                StreamChatCore.of(context).user.id,
+                StreamChatCore.of(context).user!.id,
               ]
             }
           },
@@ -100,10 +100,13 @@ class HomeScreen extends StatelessWidget {
               ),
             );
           },
-          errorBuilder: (BuildContext context, dynamic error) {
+          errorBuilder: (
+            BuildContext context,
+            dynamic error,
+          ) {
             return Center(
               child: Text(
-                  'Oh no, something went wrong. Please check your config.'),
+                  'Oh no, something went wrong. Please check your config. ${error}'),
             );
           },
           listBuilder: (
@@ -112,20 +115,20 @@ class HomeScreen extends StatelessWidget {
           ) =>
               LazyLoadScrollView(
             onEndOfPage: () async {
-              channelListController.paginateData();
+              channelListController.paginateData!();
             },
             child: ListView.builder(
               itemCount: channels.length,
               itemBuilder: (BuildContext context, int index) {
                 final _item = channels[index];
                 return ListTile(
-                  title: Text(_item.name),
-                  subtitle: StreamBuilder<Message>(
-                    stream: _item.state.lastMessageStream,
-                    initialData: _item.state.lastMessage,
+                  title: Text(_item.name!),
+                  subtitle: StreamBuilder<Message?>(
+                    stream: _item.state!.lastMessageStream,
+                    initialData: _item.state!.lastMessage,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        return Text(snapshot.data.text);
+                        return Text(snapshot.data!.text!);
                       }
 
                       return SizedBox();
@@ -169,8 +172,8 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  TextEditingController _controller;
-  ScrollController _scrollController;
+  late final TextEditingController _controller;
+  late final ScrollController _scrollController;
   final messageListController = MessageListController();
 
   @override
@@ -203,11 +206,11 @@ class _MessageScreenState extends State<MessageScreen> {
     return Scaffold(
       appBar: AppBar(
         title: StreamBuilder<List<User>>(
-          initialData: channel.state.typingEvents,
-          stream: channel.state.typingEventsStream,
+          initialData: channel.state?.typingEvents,
+          stream: channel.state?.typingEventsStream,
           builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data.isNotEmpty) {
-              return Text('${snapshot.data.first.name} is typing...');
+            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              return Text('${snapshot.data!.first.name} is typing...');
             }
             return SizedBox();
           },
@@ -219,7 +222,7 @@ class _MessageScreenState extends State<MessageScreen> {
             Expanded(
               child: LazyLoadScrollView(
                 onEndOfPage: () async {
-                  messageListController.paginateData();
+                  messageListController.paginateData!();
                 },
                 child: MessageListCore(
                   emptyBuilder: (BuildContext context) {
@@ -247,12 +250,12 @@ class _MessageScreenState extends State<MessageScreen> {
                       itemBuilder: (BuildContext context, int index) {
                         final item = messages[index];
                         final client = StreamChatCore.of(context).client;
-                        if (item.user.id == client.uid) {
+                        if (item.user!.id == client.uid) {
                           return Align(
                             alignment: Alignment.centerRight,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(item.text),
+                              child: Text(item.text!),
                             ),
                           );
                         } else {
@@ -260,7 +263,7 @@ class _MessageScreenState extends State<MessageScreen> {
                             alignment: Alignment.centerLeft,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(item.text),
+                              child: Text(item.text!),
                             ),
                           );
                         }
@@ -268,7 +271,7 @@ class _MessageScreenState extends State<MessageScreen> {
                     );
                   },
                   errorWidgetBuilder: (BuildContext context, error) {
-                    print(error?.toString());
+                    print(error.toString());
                     return Center(
                       child: SizedBox(
                         height: 100.0,
@@ -282,7 +285,7 @@ class _MessageScreenState extends State<MessageScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: Row(
                 children: [
                   Expanded(
@@ -308,7 +311,7 @@ class _MessageScreenState extends State<MessageScreen> {
                         }
                       },
                       child: const Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8),
                         child: Center(
                           child: Icon(
                             Icons.send,
@@ -332,12 +335,12 @@ class _MessageScreenState extends State<MessageScreen> {
 /// below, we add two simple extensions to the [StreamChatClient] and [Channel].
 extension on StreamChatClient {
   /// Fetches the current user id.
-  String get uid => state.user.id;
+  String get uid => state.user!.id;
 }
 
 extension on Channel {
   /// Fetches the name of the channel by accessing [extraData] or [cid].
-  String get name {
+  String? get name {
     final _channelName = extraData['name'];
     if (_channelName != null) {
       return _channelName;

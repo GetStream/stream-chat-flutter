@@ -27,7 +27,7 @@ class Channel {
   }
 
   /// Create a channel client instance from a [ChannelState] object
-  Channel.fromState(this._client, ChannelState channelState) {
+  Channel.fromState(this._client, ChannelState channelState) : _extraData = {} {
     _cid = channelState.channel!.cid;
     _id = channelState.channel!.id;
     type = channelState.channel!.type;
@@ -45,9 +45,9 @@ class Channel {
 
   String? _id;
   String? _cid;
-  Map<String, dynamic>? _extraData;
+  Map<String, dynamic> _extraData;
 
-  set extraData(Map<String, dynamic>? extraData) {
+  set extraData(Map<String, dynamic> extraData) {
     if (_initializedCompleter.isCompleted) {
       throw Exception(
           'Once the channel is initialized you should use channel.update '
@@ -189,7 +189,7 @@ class Channel {
   }
 
   /// Channel extra data
-  Map<String, dynamic>? get extraData =>
+  Map<String, dynamic> get extraData =>
       state?._channelState.channel?.extraData ?? _extraData;
 
   /// Channel extra data as a stream
@@ -1028,7 +1028,7 @@ class Channel {
     })
       ..addAll(options);
 
-    if (_extraData != null) {
+    if (_extraData.isNotEmpty) {
       payload['data'] = _extraData;
     }
 
@@ -1684,8 +1684,7 @@ class ChannelClientState {
         ...messages,
       ];
 
-      newThreads[parentId]!
-          .sort(_sortByCreatedAt as int Function(Message, Message)?);
+      newThreads[parentId]!.sort(_sortByCreatedAt);
     } else {
       newThreads[parentId] = messages;
     }
@@ -1712,7 +1711,7 @@ class ChannelClientState {
                   .any((newMessage) => newMessage.id == m.id) !=
               true)
           .toList(),
-    ]..sort(_sortByCreatedAt as int Function(Message, Message)?);
+    ]..sort(_sortByCreatedAt);
 
     final newWatchers = <User>[
       ...updatedState.watchers,
@@ -1751,17 +1750,8 @@ class ChannelClientState {
     );
   }
 
-  int? _sortByCreatedAt(a, b) {
-    if (a.createdAt == null) {
-      return 1;
-    }
-
-    if (b.createdAt == null) {
-      return -1;
-    }
-
-    return a.createdAt.compareTo(b.createdAt);
-  }
+  int _sortByCreatedAt(Message a, Message b) =>
+      a.createdAt.compareTo(b.createdAt);
 
   /// The channel state related to this client
   ChannelState get _channelState => _channelStateController.value!;
@@ -1799,15 +1789,15 @@ class ChannelClientState {
   }
 
   /// Channel related typing users last value
-  List<User>? get typingEvents => _typingEventsController.value as List<User>?;
+  List<User> get typingEvents => _typingEventsController.value!;
 
   /// Channel related typing users stream
-  Stream<List<User?>> get typingEventsStream => _typingEventsController.stream;
-  final BehaviorSubject<List<User?>> _typingEventsController =
+  Stream<List<User>> get typingEventsStream => _typingEventsController.stream;
+  final BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 
   final Channel _channel;
-  final Map<User?, DateTime> _typings = {};
+  final Map<User, DateTime> _typings = {};
 
   void _listenTypingEvents() {
     if (_channelState.channel?.config.typingEvents == false) {
@@ -1818,9 +1808,12 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.typingStart).listen(
           (event) {
-            if (event.user!.id != _channel.client.state.user!.id) {
-              _typings[event.user] = DateTime.now();
-              _typingEventsController.add(_typings.keys.toList());
+            if (event.user != null) {
+              final user = event.user!;
+              if (user.id != _channel.client.state.user?.id) {
+                _typings[user] = DateTime.now();
+                _typingEventsController.add(_typings.keys.toList());
+              }
             }
           },
         ),
@@ -1828,9 +1821,12 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.typingStop).listen(
           (event) {
-            if (event.user!.id != _channel.client.state.user!.id) {
-              _typings.remove(event.user);
-              _typingEventsController.add(_typings.keys.toList());
+            if (event.user != null) {
+              final user = event.user!;
+              if (user.id != _channel.client.state.user?.id) {
+                _typings.remove(event.user);
+                _typingEventsController.add(_typings.keys.toList());
+              }
             }
           },
         ),
