@@ -114,6 +114,7 @@ class Event {
     'channel_id',
     'channel_type',
     'parent_id',
+    'is_local',
   ];
 
   /// Serialize to json
