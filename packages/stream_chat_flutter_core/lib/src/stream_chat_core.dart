@@ -43,9 +43,7 @@ class StreamChatCore extends StatefulWidget {
     required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
-  })  : assert(client != null, 'Stream Chat Client should not be null'),
-        assert(child != null, 'Child should not be null'),
-        super(key: key);
+  }) : super(key: key);
 
   /// Instance of Stream Chat Client containing information about the current
   /// application.
@@ -93,15 +91,15 @@ class StreamChatCoreState extends State<StreamChatCore>
   Widget build(BuildContext context) => widget.child;
 
   /// The current user
-  User? get user => client.state?.user;
+  User? get user => client.state.user;
 
   /// The current user as a stream
-  Stream<User>? get userStream => client.state?.userStream;
+  Stream<User?> get userStream => client.state.userStream;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
   }
 
   StreamSubscription? _eventSubscription;
@@ -119,15 +117,15 @@ class StreamChatCoreState extends State<StreamChatCore>
             );
 
         void onTimerComplete() {
-          _eventSubscription!.cancel();
+          _eventSubscription?.cancel();
           client.disconnect();
         }
 
         _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
       } else if (state == AppLifecycleState.resumed) {
         if (_disconnectTimer?.isActive == true) {
-          _eventSubscription!.cancel();
-          _disconnectTimer!.cancel();
+          _eventSubscription?.cancel();
+          _disconnectTimer?.cancel();
         } else {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
             client.connect();
@@ -139,7 +137,7 @@ class StreamChatCoreState extends State<StreamChatCore>
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
     super.dispose();

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -28,7 +29,7 @@ class StreamChannel extends StatefulWidget {
     this.initialMessageId,
   }) : super(key: key);
 
-  // ignore: public_member_api_docs
+  /// The child of the widget
   final Widget child;
 
   /// [channel] specifies the channel with which child should be wrapped
@@ -68,8 +69,8 @@ class StreamChannelState extends State<StreamChannel> {
   String? get initialMessageId => widget.initialMessageId;
 
   /// Current channel state stream
-  Stream<ChannelState> get channelStateStream =>
-      widget.channel.state.channelStateStream;
+  Stream<ChannelState>? get channelStateStream =>
+      widget.channel.state?.channelStateStream;
 
   final _queryTopMessagesController = BehaviorSubject.seeded(false);
   final _queryBottomMessagesController = BehaviorSubject.seeded(false);
@@ -87,16 +88,18 @@ class StreamChannelState extends State<StreamChannel> {
     int limit = 20,
     bool preferOffline = false,
   }) async {
-    if (_topPaginationEnded || _queryTopMessagesController?.value == true) {
+    if (_topPaginationEnded ||
+        _queryTopMessagesController.value == true ||
+        channel.state == null) {
       return;
     }
     _queryTopMessagesController.add(true);
 
-    if (channel.state.messages.isEmpty) {
+    if (channel.state!.messages.isEmpty) {
       return _queryTopMessagesController.add(false);
     }
 
-    final oldestMessage = channel.state.messages.first;
+    final oldestMessage = channel.state!.messages.first;
 
     try {
       final state = await queryBeforeMessage(
@@ -118,15 +121,16 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (_bottomPaginationEnded ||
-        _queryBottomMessagesController?.value == true ||
-        channel?.state?.isUpToDate == true) return;
+        _queryBottomMessagesController.value == true ||
+        channel.state == null ||
+        channel.state!.isUpToDate == true) return;
     _queryBottomMessagesController.add(true);
 
-    if (channel.state.messages.isEmpty) {
+    if (channel.state!.messages.isEmpty) {
       return _queryBottomMessagesController.add(false);
     }
 
-    final recentMessage = channel.state.messages.last;
+    final recentMessage = channel.state!.messages.last;
 
     try {
       final state = await queryAfterMessage(
@@ -155,12 +159,14 @@ class StreamChannelState extends State<StreamChannel> {
     int limit = 50,
     bool preferOffline = false,
   }) async {
-    if (_topPaginationEnded || _queryTopMessagesController.value!) return;
+    if (_topPaginationEnded ||
+        _queryTopMessagesController.value! ||
+        channel.state == null) return;
     _queryTopMessagesController.add(true);
 
     late Message message;
-    if (channel.state.threads.containsKey(parentId)) {
-      final thread = channel.state.threads[parentId]!;
+    if (channel.state!.threads.containsKey(parentId)) {
+      final thread = channel.state!.threads[parentId]!;
       if (thread.isNotEmpty) {
         message = thread.first;
       }
@@ -170,7 +176,7 @@ class StreamChannelState extends State<StreamChannel> {
       final response = await channel.getReplies(
         parentId,
         PaginationParams(
-          lessThan: message?.id,
+          lessThan: message.id,
           limit: limit,
         ),
         preferOffline: preferOffline,
@@ -224,8 +230,8 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (channel.state == null) return [];
-    channel.state.isUpToDate = false;
-    channel.state.truncate();
+    channel.state!.isUpToDate = false;
+    channel.state!.truncate();
 
     if (messageId == null) {
       await channel.query(
@@ -234,7 +240,7 @@ class StreamChannelState extends State<StreamChannel> {
         ),
         preferOffline: preferOffline,
       );
-      channel.state.isUpToDate = true;
+      channel.state!.isUpToDate = true;
       return [];
     }
 
@@ -280,14 +286,14 @@ class StreamChannelState extends State<StreamChannel> {
       preferOffline: preferOffline,
     );
     if (state.messages.isEmpty || state.messages.length < limit) {
-      channel.state.isUpToDate = true;
+      channel.state?.isUpToDate = true;
     }
     return state;
   }
 
   ///
   Future<Message> getMessage(String messageId) async {
-    var message = channel.state.messages.firstWhereOrNull(
+    var message = channel.state?.messages.firstWhereOrNull(
       (it) => it.id == messageId,
     );
     if (message == null) {

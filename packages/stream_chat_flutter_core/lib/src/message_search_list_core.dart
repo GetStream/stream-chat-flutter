@@ -47,17 +47,13 @@ class MessageSearchListCore extends StatefulWidget {
     required this.errorBuilder,
     required this.loadingBuilder,
     required this.childBuilder,
+    required this.filters,
     this.messageQuery,
-    this.filters,
     this.sortOptions,
     this.paginationParams,
     this.messageFilters,
     this.messageSearchListController,
-  })  : assert(emptyBuilder != null, 'emptyBuilder should not be null'),
-        assert(errorBuilder != null, 'errorBuilder should not be null'),
-        assert(loadingBuilder != null, 'loadingBuilder should not be null'),
-        assert(childBuilder != null, 'childBuilder should not be null'),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [MessageSearchListController] allows reloading and pagination.
   /// Use [MessageSearchListController.loadData] and
@@ -71,7 +67,7 @@ class MessageSearchListCore extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic>? filters;
+  final Map<String, dynamic> filters;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
@@ -92,7 +88,7 @@ class MessageSearchListCore extends StatefulWidget {
   final Map<String, dynamic>? messageFilters;
 
   /// The builder that is used when the search messages are fetched
-  final Widget Function(List<GetMessageResponse>?) childBuilder;
+  final Widget Function(List<GetMessageResponse>) childBuilder;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -130,7 +126,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
         stream: messageSearchBloc.messagesStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error);
+            return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
@@ -139,7 +135,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
           if (items.isEmpty) {
             return widget.emptyBuilder(context);
           }
-          return widget.childBuilder(snapshot.data);
+          return widget.childBuilder(items);
         },
       );
 
@@ -172,13 +168,13 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
   @override
   void didUpdateWidget(MessageSearchListCore oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.filters?.toString() != oldWidget.filters?.toString() ||
+    if (widget.filters.toString() != oldWidget.filters.toString() ||
         jsonEncode(widget.sortOptions) != jsonEncode(oldWidget.sortOptions) ||
         widget.messageQuery?.toString() != oldWidget.messageQuery?.toString() ||
         widget.messageFilters?.toString() !=
             oldWidget.messageFilters?.toString() ||
-        widget.paginationParams?.toJson()?.toString() !=
-            oldWidget.paginationParams?.toJson()?.toString()) {
+        widget.paginationParams?.toJson().toString() !=
+            oldWidget.paginationParams?.toJson().toString()) {
       loadData();
     }
   }

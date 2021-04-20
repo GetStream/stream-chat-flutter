@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
@@ -12,29 +12,6 @@ class MockOnBackgroundEventReceived extends Mock {
 }
 
 void main() {
-  test(
-    'should throw assertion error in case client is null',
-    () {
-      final streamChatCore = () => StreamChatCore(
-            client: null,
-            child: Offstage(),
-          );
-      expect(streamChatCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case child is null',
-    () {
-      final mockClient = MockClient();
-      final streamChatCore = () => StreamChatCore(
-            client: mockClient,
-            child: null,
-          );
-      expect(streamChatCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
   testWidgets(
     'should render StreamChatCore if both client and child is provided',
     (tester) async {
@@ -92,7 +69,7 @@ void main() {
       expect(find.byKey(streamChatCoreKey), findsOneWidget);
       expect(find.byKey(childKey), findsOneWidget);
 
-      when(mockClient.disconnect()).thenAnswer((_) async {
+      when(() => mockClient.disconnect()).thenAnswer((_) async {
         return;
       });
 
@@ -102,7 +79,7 @@ void main() {
 
       streamChatCoreState.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      verify(mockClient.disconnect()).called(1);
+      verify(() => mockClient.disconnect()).called(1);
     },
   );
 
@@ -131,8 +108,8 @@ void main() {
         expect(find.byKey(childKey), findsOneWidget);
 
         final event = Event();
-        when(mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(mockClient.disconnect()).thenAnswer((_) async {
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.disconnect()).thenAnswer((_) async {
           return;
         });
 
@@ -143,14 +120,14 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.paused);
 
-        await untilCalled(mockOnBackgroundEventReceived.call(event));
+        await untilCalled(() => mockOnBackgroundEventReceived.call(event));
 
-        verify(mockOnBackgroundEventReceived.call(event)).called(1);
+        verify(() => mockOnBackgroundEventReceived.call(event)).called(1);
 
         await Future.delayed(backgroundKeepAlive);
 
-        verify(mockClient.disconnect()).called(1);
-        verifyNever(mockOnBackgroundEventReceived.call(event));
+        verify(() => mockClient.disconnect()).called(1);
+        verifyNever(() => mockOnBackgroundEventReceived.call(event));
       });
     },
   );
@@ -180,7 +157,7 @@ void main() {
         expect(find.byKey(childKey), findsOneWidget);
 
         final event = Event();
-        when(mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
           find.byKey(streamChatCoreKey),
@@ -189,14 +166,14 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.paused);
 
-        await untilCalled(mockOnBackgroundEventReceived.call(event));
+        await untilCalled(() => mockOnBackgroundEventReceived.call(event));
 
-        verify(mockOnBackgroundEventReceived.call(event)).called(1);
+        verify(() => mockOnBackgroundEventReceived.call(event)).called(1);
 
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.resumed);
 
-        verifyNever(mockOnBackgroundEventReceived.call(event));
+        verifyNever(() => mockOnBackgroundEventReceived.call(event));
       });
     },
   );
@@ -222,9 +199,10 @@ void main() {
         expect(find.byKey(childKey), findsOneWidget);
 
         final event = Event();
-        when(mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(mockClient.connect()).thenAnswer((_) async => event);
-        when(mockClient.wsConnectionStatus)
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
@@ -239,7 +217,7 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.resumed);
 
-        verify(mockClient.connect()).called(1);
+        verify(() => mockClient.connect()).called(1);
       });
     },
   );
@@ -265,7 +243,7 @@ void main() {
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
 
-        when(mockClient.state.userStream)
+        when(() => mockClient.state.userStream)
             .thenAnswer((_) => userController.stream);
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(

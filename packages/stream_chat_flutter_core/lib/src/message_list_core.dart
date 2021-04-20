@@ -111,18 +111,18 @@ class MessageListCore extends StatefulWidget {
 class MessageListCoreState extends State<MessageListCore> {
   late StreamChannelState _streamChannel;
 
-  bool get _upToDate => _streamChannel.channel.state.isUpToDate;
+  bool get _upToDate => _streamChannel.channel.state?.isUpToDate ?? true;
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser get _currentUser => _streamChannel.channel.client.state.user;
+  OwnUser? get _currentUser => _streamChannel.channel.client.state.user;
 
   var _messages = <Message>[];
 
   @override
   Widget build(BuildContext context) {
     final messagesStream = _isThreadConversation
-        ? _streamChannel.channel.state.threadsStream
+        ? _streamChannel.channel.state?.threadsStream
             .where((threads) => threads.containsKey(widget.parentMessage!.id))
             .map((threads) => threads[widget.parentMessage!.id])
         : _streamChannel.channel.state?.messagesStream;
@@ -141,7 +141,7 @@ class MessageListCoreState extends State<MessageListCore> {
               )),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return widget.errorWidgetBuilder(context, snapshot.error);
+          return widget.errorWidgetBuilder(context, snapshot.error!);
         } else if (!snapshot.hasData) {
           return widget.loadingBuilder(context);
         } else {
@@ -163,8 +163,9 @@ class MessageListCoreState extends State<MessageListCore> {
   /// Fetches more messages with updated pagination and updates the widget.
   ///
   /// Optionally pass the fetch direction, defaults to [QueryDirection.bottom]
-  Future<void> paginateData(
-      {QueryDirection? direction = QueryDirection.bottom}) {
+  Future<void> paginateData({
+    QueryDirection direction = QueryDirection.bottom,
+  }) {
     if (!_isThreadConversation) {
       return _streamChannel.queryMessages(direction: direction);
     } else {
@@ -199,5 +200,5 @@ class MessageListCoreState extends State<MessageListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageListController {
   /// Call this function to load further data
-  Future<void> Function({QueryDirection? direction})? paginateData;
+  Future<void> Function({QueryDirection direction})? paginateData;
 }

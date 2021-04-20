@@ -69,23 +69,7 @@ class ChannelListCore extends StatefulWidget {
       limit: 25,
     ),
     this.channelListController,
-  })  : assert(
-          errorBuilder != null,
-          'Parameter errorBuilder should not be null',
-        ),
-        assert(
-          emptyBuilder != null,
-          'Parameter emptyBuilder should not be null',
-        ),
-        assert(
-          loadingBuilder != null,
-          'Parameter loadingBuilder should not be null',
-        ),
-        assert(
-          listBuilder != null,
-          'Parameter listBuilder should not be null',
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and
@@ -100,7 +84,7 @@ class ChannelListCore extends StatefulWidget {
   final WidgetBuilder loadingBuilder;
 
   /// The builder which is used when list of channels loads
-  final Function(BuildContext, List<Channel?>) listBuilder;
+  final Function(BuildContext, List<Channel>) listBuilder;
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder emptyBuilder;
@@ -142,14 +126,14 @@ class ChannelListCoreState extends State<ChannelListCore> {
     return _buildListView(channelsBloc);
   }
 
-  StreamBuilder<List<Channel?>> _buildListView(
+  StreamBuilder<List<Channel>> _buildListView(
     ChannelsBlocState channelsBlocState,
   ) =>
-      StreamBuilder<List<Channel?>>(
+      StreamBuilder<List<Channel>>(
         stream: channelsBlocState.channelsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error);
+            return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
@@ -215,8 +199,8 @@ class ChannelListCoreState extends State<ChannelListCore> {
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.options?.toString() != oldWidget.options?.toString() ||
-        widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString()) {
+        widget.pagination.toJson().toString() !=
+            oldWidget.pagination.toJson().toString()) {
       loadData();
     }
   }

@@ -68,11 +68,7 @@ class UserListCore extends StatefulWidget {
     this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
-  })  : assert(errorBuilder != null, ''),
-        assert(emptyBuilder != null, ''),
-        assert(loadingBuilder != null, ''),
-        assert(listBuilder != null, ''),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [UserListController] allows reloading and pagination.
   /// Use [UserListController.loadData] and [UserListController.paginateData]
@@ -80,7 +76,7 @@ class UserListCore extends StatefulWidget {
   final UserListController? userListController;
 
   /// The builder that will be used in case of error
-  final Widget Function(Object? error) errorBuilder;
+  final Widget Function(Object error) errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
@@ -180,7 +176,7 @@ class UserListCoreState extends State<UserListCore>
         stream: _buildUserStream(usersBlocState),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(snapshot.error);
+            return widget.errorBuilder(snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
@@ -223,8 +219,8 @@ class UserListCoreState extends State<UserListCore>
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.options?.toString() != oldWidget.options?.toString() ||
-        widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString()) {
+        widget.pagination?.toJson().toString() !=
+            oldWidget.pagination?.toJson().toString()) {
       loadData();
     }
   }

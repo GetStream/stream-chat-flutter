@@ -35,7 +35,7 @@ class ChannelsBloc extends StatefulWidget {
   final bool lockChannelsOrder;
 
   /// Comparator used to sort the channels when a message.new event is received
-  final Comparator<Channel?>? channelsComparator;
+  final Comparator<Channel>? channelsComparator;
 
   /// Function used to evaluate if a channel should be added to the list when a
   /// message.new event is received
@@ -68,14 +68,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }
 
   /// The current channel list
-  List<Channel>? get channels => _channelsController.value as List<Channel>?;
+  List<Channel>? get channels => _channelsController.value;
 
   /// The current channel list as a stream
-  Stream<List<Channel?>> get channelsStream => _channelsController.stream;
+  Stream<List<Channel>> get channelsStream => _channelsController.stream;
 
   final _queryChannelsLoadingController = BehaviorSubject.seeded(false);
 
-  final BehaviorSubject<List<Channel?>> _channelsController =
+  final BehaviorSubject<List<Channel>> _channelsController =
       BehaviorSubject<List<Channel>>();
 
   /// The stream notifying the state of queryChannel call
@@ -90,7 +90,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   Future<void> queryChannels({
     Map<String, dynamic>? filter,
     List<SortOption<ChannelModel>>? sortOptions,
-    PaginationParams? paginationParams,
+    PaginationParams paginationParams = const PaginationParams(limit: 30),
     Map<String, dynamic>? options,
   }) async {
     final client = StreamChatCore.of(context).client;
@@ -104,14 +104,14 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
 
     try {
-      final clear = paginationParams == null || paginationParams.offset == 0;
+      final clear = paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
       var newChannels = <Channel>[];
       await for (final channels in client.queryChannels(
-        filter: filter!,
-        sort: sortOptions!,
-        options: options!,
-        paginationParams: paginationParams!,
+        filter: filter,
+        sort: sortOptions,
+        options: options,
+        paginationParams: paginationParams,
       )) {
         newChannels = channels;
         if (clear) {
@@ -147,8 +147,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
     if (!widget.lockChannelsOrder) {
       _subscriptions.add(client.on(EventType.messageNew).listen((e) {
-        final newChannels = List<Channel?>.from(channels ?? []);
-        final index = newChannels.indexWhere((c) => c!.cid == e.cid);
+        final newChannels = List<Channel>.from(channels ?? []);
+        final index = newChannels.indexWhere((c) => c.cid == e.cid);
         if (index != -1) {
           if (index > 0) {
             final channel = newChannels.removeAt(index);
@@ -162,7 +162,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           } else {
             if (client.state.channels != null &&
                 client.state.channels?[e.cid] != null) {
-              newChannels.insert(0, client.state.channels?[e.cid]);
+              newChannels.insert(0, client.state.channels![e.cid]!);
             }
           }
         }

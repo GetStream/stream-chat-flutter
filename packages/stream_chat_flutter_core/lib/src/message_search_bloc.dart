@@ -58,7 +58,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   /// Calls [StreamChatClient.search] updating
   /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
-    Map<String, dynamic>? filter,
+    required Map<String, dynamic> filter,
     Map<String, dynamic>? messageFilter,
     List<SortOption>? sort,
     String? query,
@@ -77,20 +77,18 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
       final oldMessages = List<GetMessageResponse>.from(messageResponses ?? []);
 
       final messages = await client.search(
-        filter!,
-        sort: sort!,
-        query: query!,
-        paginationParams: pagination!,
-        messageFilters: messageFilter!,
+        filter,
+        sort: sort,
+        query: query,
+        paginationParams: pagination,
+        messageFilters: messageFilter,
       );
 
-      if (messages.results != null) {
-        if (clear) {
-          _messageResponses.add(messages.results!);
-        } else {
-          final temp = oldMessages + messages.results!;
-          _messageResponses.add(temp);
-        }
+      if (clear) {
+        _messageResponses.add(messages.results);
+      } else {
+        final temp = oldMessages + messages.results;
+        _messageResponses.add(temp);
       }
       if (_messageResponses.hasValue &&
           _queryMessagesLoadingController.value!) {

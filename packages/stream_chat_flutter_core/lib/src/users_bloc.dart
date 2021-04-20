@@ -16,11 +16,7 @@ class UsersBloc extends StatefulWidget {
   const UsersBloc({
     required this.child,
     Key? key,
-  })  : assert(
-            child != null,
-            'When constructing a UsersBloc, the parameter '
-            'child should not be null.'),
-        super(key: key);
+  }) : super(key: key);
 
   /// The widget child
   final Widget child;
@@ -76,17 +72,15 @@ class UsersBlocState extends State<UsersBloc>
     }
 
     try {
-      final clear = pagination == null ||
-          pagination.offset == null ||
-          pagination.offset == 0;
+      final clear = pagination == null || pagination.offset == 0;
 
       final oldUsers = List<User>.from(users ?? []);
 
       final usersResponse = await client.queryUsers(
-        filter: filter!,
-        sort: sort!,
-        options: options!,
-        pagination: pagination!,
+        filter: filter,
+        sort: sort,
+        options: options,
+        pagination: pagination,
       );
 
       if (clear) {

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
@@ -62,39 +62,13 @@ void main() {
     return threads ? threadMessages : messages;
   }
 
-  test(
-    'should throw assertion error if child is null',
-    () async {
-      final mockChannel = MockChannel();
-      const streamChannelKey = Key('streamChannel');
-      final streamChannel = () => StreamChannel(
-            key: streamChannelKey,
-            channel: mockChannel,
-            child: null,
-          );
-      expect(streamChannel, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error if channel is null',
-    () async {
-      const streamChannelKey = Key('streamChannel');
-      final streamChannel = () => StreamChannel(
-            key: streamChannelKey,
-            child: Offstage(),
-            channel: null,
-          );
-      expect(streamChannel, throwsA(isA<AssertionError>()));
-    },
-  );
-
   testWidgets(
     'should render StreamChannel if both channel and child is provided',
     (tester) async {
       final mockChannel = MockChannel();
       const streamChannelKey = Key('streamChannel');
       const childKey = Key('childKey');
+      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
       final streamChannel = StreamChannel(
         key: streamChannelKey,
         channel: mockChannel,
@@ -121,8 +95,13 @@ void main() {
       );
 
       final errorMessage = 'Error! Error! Error!';
-      final error = DioError(type: DioErrorType.response, error: errorMessage);
-      when(mockChannel.initialized).thenAnswer((_) => Future.error(error));
+      final error = DioError(
+        type: DioErrorType.response,
+        error: errorMessage,
+        requestOptions: RequestOptions(path: ''),
+      );
+      when(() => mockChannel.initialized)
+          .thenAnswer((_) => Future.error(error));
 
       await tester.pumpWidget(
         Directionality(
@@ -135,7 +114,7 @@ void main() {
 
       expect(find.text(errorMessage), findsOneWidget);
 
-      verify(mockChannel.initialized).called(1);
+      verify(() => mockChannel.initialized).called(1);
     },
   );
 
@@ -153,7 +132,7 @@ void main() {
         showLoading: true,
       );
 
-      when(mockChannel.initialized).thenAnswer((_) async => false);
+      when(() => mockChannel.initialized).thenAnswer((_) async => false);
 
       await tester.pumpWidget(
         Directionality(
@@ -166,7 +145,7 @@ void main() {
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      verify(mockChannel.initialized).called(1);
+      verify(() => mockChannel.initialized).called(1);
     },
   );
 
@@ -183,15 +162,15 @@ void main() {
         initialMessageId: 'testInitialMessageId',
       );
 
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
       final messages = _generateMessages();
-      when(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: anyNamed('messagesPagination'),
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).thenAnswer((_) async => ChannelState(messages: messages));
+      when(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).thenAnswer((_) async => ChannelState(messages: messages));
 
       await tester.pumpWidget(
         Directionality(
@@ -202,14 +181,14 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      verify(mockChannel.initialized).called(1);
-      verify(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: anyNamed('messagesPagination'),
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).called(
+      verify(() => mockChannel.initialized).called(1);
+      verify(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: any(named: 'messagesPagination'),
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).called(
         2, // Fetching After messages + Fetching Before messages,
       );
     },
@@ -219,7 +198,7 @@ void main() {
     'should rebuild StreamChannel with updated widget data '
     'on calling setState()',
     (tester) async {
-      StateSetter _stateSetter;
+      StateSetter? _stateSetter;
 
       var initialMessageId = 'testInitialMessageId';
 
@@ -244,25 +223,25 @@ void main() {
         limit: 20,
       );
 
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final messages = _generateMessages();
 
-      when(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: beforePagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).thenAnswer((_) async => ChannelState(messages: messages));
+      when(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: beforePagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).thenAnswer((_) async => ChannelState(messages: messages));
 
-      when(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: afterPagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).thenAnswer((_) async => ChannelState(messages: messages));
+      when(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: afterPagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).thenAnswer((_) async => ChannelState(messages: messages));
 
       await tester.pumpWidget(
         Directionality(
@@ -279,23 +258,23 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      verify(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: beforePagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).called(1);
+      verify(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: beforePagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).called(1);
 
-      verify(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: afterPagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).called(1);
+      verify(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: afterPagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).called(1);
 
-      _stateSetter(() => initialMessageId = 'testInitialMessageId2');
+      _stateSetter?.call(() => initialMessageId = 'testInitialMessageId2');
 
       final updatedBeforePagination = beforePagination.copyWith(
         lessThan: initialMessageId,
@@ -305,39 +284,39 @@ void main() {
         greaterThanOrEqual: initialMessageId,
       );
 
-      when(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: updatedBeforePagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).thenAnswer((_) async => ChannelState(messages: messages));
+      when(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: updatedBeforePagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).thenAnswer((_) async => ChannelState(messages: messages));
 
-      when(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: updatedAfterPagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).thenAnswer((_) async => ChannelState(messages: messages));
+      when(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: updatedAfterPagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).thenAnswer((_) async => ChannelState(messages: messages));
 
       await tester.pumpAndSettle();
 
-      verify(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: updatedBeforePagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).called(1);
+      verify(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: updatedBeforePagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).called(1);
 
-      verify(mockChannel.query(
-        options: anyNamed('options'),
-        messagesPagination: updatedAfterPagination,
-        membersPagination: anyNamed('membersPagination'),
-        watchersPagination: anyNamed('watchersPagination'),
-        preferOffline: anyNamed('preferOffline'),
-      )).called(1);
+      verify(() => mockChannel.query(
+            options: any(named: 'options'),
+            messagesPagination: updatedAfterPagination,
+            membersPagination: any(named: 'membersPagination'),
+            watchersPagination: any(named: 'watchersPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).called(1);
     },
   );
 }
