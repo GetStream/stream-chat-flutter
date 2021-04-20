@@ -225,6 +225,7 @@ class _MessageScreenState extends State<MessageScreen> {
                   messageListController.paginateData!();
                 },
                 child: MessageListCore(
+                  messageListController: messageListController,
                   emptyBuilder: (BuildContext context) {
                     return Center(
                       child: Text('Nothing here yet'),
