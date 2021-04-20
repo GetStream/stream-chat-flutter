@@ -23,7 +23,7 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
             .toList() ??
         [],
     id: json['id'] as String,
-    role: json['role'] as String? ?? '',
+    role: json['role'] as String,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
