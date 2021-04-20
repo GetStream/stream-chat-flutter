@@ -4,7 +4,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 Future<void> main() async {
   /// Create a new instance of [StreamChatClient] passing the apikey obtained from your
   /// project dashboard.
-  final client = StreamChatClient('b67pax5b2wdq');
+  final client = StreamChatClient('kv7mcsxr24p8');
 
   /// Set the current user. In a production scenario, this should be done using
   /// a backend to generate a user token using our server SDK.
@@ -12,13 +12,14 @@ Future<void> main() async {
   /// https://getstream.io/chat/docs/ios_user_setup_and_tokens/
   await client.connectUser(
     User(
-      id: 'cool-shadow-7',
+      id: 'salvatore',
       extraData: {
+        'name': 'Salvatore Giordano',
         'image':
-            'https://getstream.io/random_png/?id=cool-shadow-7&amp;name=Cool+shadow',
+            'https://avatars.githubusercontent.com/u/20601437?s=460&u=3f66c22a7483980624804054ae7f357cf102c784&v=4',
       },
     ),
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiY29vbC1zaGFkb3ctNyJ9.gkOlCRb1qgy4joHPaxFwPOdXcGvSPvp6QY0S4mpRkVo',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoic2FsdmF0b3JlIn0.pgiJz7sIc7iP29BHKFwe3nLm5-OaR_1l2P-SlgiC9a8',
   );
 
   runApp(

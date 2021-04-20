@@ -162,9 +162,9 @@ class MessageListCoreState extends State<MessageListCore> {
 
   /// Fetches more messages with updated pagination and updates the widget.
   ///
-  /// Optionally pass the fetch direction, defaults to [QueryDirection.bottom]
+  /// Optionally pass the fetch direction, defaults to [QueryDirection.top]
   Future<void> paginateData({
-    QueryDirection direction = QueryDirection.bottom,
+    QueryDirection direction = QueryDirection.top,
   }) {
     if (!_isThreadConversation) {
       return _streamChannel.queryMessages(direction: direction);
