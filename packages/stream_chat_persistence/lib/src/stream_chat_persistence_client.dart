@@ -30,17 +30,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// Connection mode on which the client will work
     ConnectionMode connectionMode = ConnectionMode.regular,
     Level logLevel = Level.WARNING,
-    LogHandlerFunction logHandlerFunction,
-  })  : assert(connectionMode != null, 'ConnectionMode cannot be null'),
-        assert(logLevel != null, 'LogLevel cannot be null'),
-        _connectionMode = connectionMode,
+    LogHandlerFunction? logHandlerFunction,
+  })  : _connectionMode = connectionMode,
         _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
 
   /// [MoorChatDatabase] instance used by this client.
   @visibleForTesting
-  MoorChatDatabase db;
+  MoorChatDatabase? db;
 
   final Logger _logger;
   final ConnectionMode _connectionMode;
@@ -75,7 +73,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> connect(
     String userId, {
-    DatabaseProvider databaseProvider, // Used only for testing
+    DatabaseProvider? databaseProvider, // Used only for testing
   }) async {
     if (db != null) {
       throw Exception(
@@ -330,13 +328,13 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
           _logger.info('Disconnecting');
           if (flush) {
             _logger.info('Flushing');
-            await db.batch((batch) {
-              db.allTables.forEach((table) {
-                db.delete(table).go();
+            await db!.batch((batch) {
+              db!.allTables.forEach((table) {
+                db!.delete(table).go();
               });
             });
           }
-          await db.disconnect();
+          await db!.disconnect();
           db = null;
         }
       });

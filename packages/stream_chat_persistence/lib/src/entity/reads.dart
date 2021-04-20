@@ -15,7 +15,7 @@ class Reads extends Table {
       text().customConstraint('REFERENCES channels(cid) ON DELETE CASCADE')();
 
   /// Number of unread messages
-  IntColumn get unreadMessages => integer().nullable()();
+  IntColumn get unreadMessages => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {
