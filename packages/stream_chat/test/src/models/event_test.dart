@@ -35,8 +35,7 @@ void main() {
          "online": false,
          "image": "https://getstream.io/random_svg/?name=Dry+meadow",
          "name": "Dry meadow"
-       },
-        "is_local": false
+       }
       }      
       ''';
 
