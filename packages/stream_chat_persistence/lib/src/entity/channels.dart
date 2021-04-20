@@ -15,7 +15,7 @@ class Channels extends Table {
   TextColumn get cid => text()();
 
   /// The channel configuration data
-  TextColumn get config => text().map(MapConverter<Object>())();
+  TextColumn get config => text().map(MapConverter())();
 
   /// True if this channel entity is frozen
   BoolColumn get frozen => boolean().withDefault(const Constant(false))();

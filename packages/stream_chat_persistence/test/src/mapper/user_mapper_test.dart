@@ -24,7 +24,7 @@ void main() {
     expect(user.role, entity.role);
     expect(user.createdAt, isSameDateAs(entity.createdAt));
     expect(user.updatedAt, isSameDateAs(entity.updatedAt));
-    expect(user.lastActive, isSameDateAs(entity.lastActive));
+    expect(user.lastActive, isSameDateAs(entity.lastActive!));
     expect(user.online, entity.online);
     expect(user.banned, entity.banned);
     expect(user.extraData, entity.extraData);
@@ -47,7 +47,7 @@ void main() {
     expect(entity.role, user.role);
     expect(entity.createdAt, isSameDateAs(user.createdAt));
     expect(entity.updatedAt, isSameDateAs(user.updatedAt));
-    expect(entity.lastActive, isSameDateAs(user.lastActive));
+    expect(entity.lastActive, isSameDateAs(user.lastActive!));
     expect(entity.online, user.online);
     expect(entity.banned, user.banned);
     expect(entity.extraData, user.extraData);

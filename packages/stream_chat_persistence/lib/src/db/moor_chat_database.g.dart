@@ -18,7 +18,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   final String cid;
 
   /// The channel configuration data
-  final Map<String, Object> config;
+  final Map<String, dynamic> config;
 
   /// True if this channel entity is frozen
   final bool frozen;
@@ -125,7 +125,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
       cid: serializer.fromJson<String>(json['cid']),
-      config: serializer.fromJson<Map<String, Object>>(json['config']),
+      config: serializer.fromJson<Map<String, dynamic>>(json['config']),
       frozen: serializer.fromJson<bool>(json['frozen']),
       lastMessageAt: serializer.fromJson<DateTime?>(json['lastMessageAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -143,7 +143,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'id': serializer.toJson<String>(id),
       'type': serializer.toJson<String>(type),
       'cid': serializer.toJson<String>(cid),
-      'config': serializer.toJson<Map<String, Object>>(config),
+      'config': serializer.toJson<Map<String, dynamic>>(config),
       'frozen': serializer.toJson<bool>(frozen),
       'lastMessageAt': serializer.toJson<DateTime?>(lastMessageAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -159,7 +159,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           {String? id,
           String? type,
           String? cid,
-          Map<String, Object>? config,
+          Map<String, dynamic>? config,
           bool? frozen,
           Value<DateTime?> lastMessageAt = const Value.absent(),
           DateTime? createdAt,
@@ -247,7 +247,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<String> id;
   final Value<String> type;
   final Value<String> cid;
-  final Value<Map<String, Object>> config;
+  final Value<Map<String, dynamic>> config;
   final Value<bool> frozen;
   final Value<DateTime?> lastMessageAt;
   final Value<DateTime> createdAt;
@@ -274,7 +274,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     required String id,
     required String type,
     required String cid,
-    required Map<String, Object> config,
+    required Map<String, dynamic> config,
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -291,7 +291,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<String>? id,
     Expression<String>? type,
     Expression<String>? cid,
-    Expression<Map<String, Object>>? config,
+    Expression<Map<String, dynamic>>? config,
     Expression<bool>? frozen,
     Expression<DateTime?>? lastMessageAt,
     Expression<DateTime>? createdAt,
@@ -321,7 +321,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       {Value<String>? id,
       Value<String>? type,
       Value<String>? cid,
-      Value<Map<String, Object>>? config,
+      Value<Map<String, dynamic>>? config,
       Value<bool>? frozen,
       Value<DateTime?>? lastMessageAt,
       Value<DateTime>? createdAt,
@@ -634,8 +634,8 @@ class $ChannelsTable extends Channels
     return $ChannelsTable(_db, alias);
   }
 
-  static TypeConverter<Map<String, Object>, String> $converter0 =
-      MapConverter<Object>();
+  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+      MapConverter();
   static TypeConverter<Map<String, Object>, String> $converter1 =
       MapConverter<Object>();
 }
@@ -3382,7 +3382,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   final bool banned;
 
   /// Map of custom user extraData
-  final Map<String, Object>? extraData;
+  final Map<String, Object> extraData;
   UserEntity(
       {required this.id,
       this.role,
@@ -3391,7 +3391,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       this.lastActive,
       required this.online,
       required this.banned,
-      this.extraData});
+      required this.extraData});
   factory UserEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -3412,7 +3412,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       banned:
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
       extraData: $UsersTable.$converter0.mapToDart(stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
+          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data']))!,
     );
   }
   @override
@@ -3429,9 +3429,9 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     }
     map['online'] = Variable<bool>(online);
     map['banned'] = Variable<bool>(banned);
-    if (!nullToAbsent || extraData != null) {
+    {
       final converter = $UsersTable.$converter0;
-      map['extra_data'] = Variable<String?>(converter.mapToSql(extraData));
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData)!);
     }
     return map;
   }
@@ -3447,7 +3447,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       lastActive: serializer.fromJson<DateTime?>(json['lastActive']),
       online: serializer.fromJson<bool>(json['online']),
       banned: serializer.fromJson<bool>(json['banned']),
-      extraData: serializer.fromJson<Map<String, Object>?>(json['extraData']),
+      extraData: serializer.fromJson<Map<String, Object>>(json['extraData']),
     );
   }
   @override
@@ -3461,7 +3461,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       'lastActive': serializer.toJson<DateTime?>(lastActive),
       'online': serializer.toJson<bool>(online),
       'banned': serializer.toJson<bool>(banned),
-      'extraData': serializer.toJson<Map<String, Object>?>(extraData),
+      'extraData': serializer.toJson<Map<String, Object>>(extraData),
     };
   }
 
@@ -3473,7 +3473,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           Value<DateTime?> lastActive = const Value.absent(),
           bool? online,
           bool? banned,
-          Value<Map<String, Object>?> extraData = const Value.absent()}) =>
+          Map<String, Object>? extraData}) =>
       UserEntity(
         id: id ?? this.id,
         role: role.present ? role.value : this.role,
@@ -3482,7 +3482,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
         lastActive: lastActive.present ? lastActive.value : this.lastActive,
         online: online ?? this.online,
         banned: banned ?? this.banned,
-        extraData: extraData.present ? extraData.value : this.extraData,
+        extraData: extraData ?? this.extraData,
       );
   @override
   String toString() {
@@ -3534,7 +3534,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<DateTime?> lastActive;
   final Value<bool> online;
   final Value<bool> banned;
-  final Value<Map<String, Object>?> extraData;
+  final Value<Map<String, Object>> extraData;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.role = const Value.absent(),
@@ -3553,8 +3553,9 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.lastActive = const Value.absent(),
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
-    this.extraData = const Value.absent(),
-  }) : id = Value(id);
+    required Map<String, Object> extraData,
+  })   : id = Value(id),
+        extraData = Value(extraData);
   static Insertable<UserEntity> custom({
     Expression<String>? id,
     Expression<String?>? role,
@@ -3563,7 +3564,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Expression<DateTime?>? lastActive,
     Expression<bool>? online,
     Expression<bool>? banned,
-    Expression<Map<String, Object>?>? extraData,
+    Expression<Map<String, Object>>? extraData,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3585,7 +3586,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       Value<DateTime?>? lastActive,
       Value<bool>? online,
       Value<bool>? banned,
-      Value<Map<String, Object>?>? extraData}) {
+      Value<Map<String, Object>>? extraData}) {
     return UsersCompanion(
       id: id ?? this.id,
       role: role ?? this.role,
@@ -3625,7 +3626,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     if (extraData.present) {
       final converter = $UsersTable.$converter0;
       map['extra_data'] =
-          Variable<String?>(converter.mapToSql(extraData.value));
+          Variable<String>(converter.mapToSql(extraData.value)!);
     }
     return map;
   }
@@ -3722,7 +3723,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     return GeneratedTextColumn(
       'extra_data',
       $tableName,
-      true,
+      false,
     );
   }
 
@@ -4851,7 +4852,7 @@ class ConnectionEventEntity extends DataClass
   final int id;
 
   /// User object of the current user
-  final Map<String, Object>? ownUser;
+  final Map<String, dynamic>? ownUser;
 
   /// The number of unread messages for current user
   final int? totalUnreadCount;
@@ -4920,7 +4921,7 @@ class ConnectionEventEntity extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return ConnectionEventEntity(
       id: serializer.fromJson<int>(json['id']),
-      ownUser: serializer.fromJson<Map<String, Object>?>(json['ownUser']),
+      ownUser: serializer.fromJson<Map<String, dynamic>?>(json['ownUser']),
       totalUnreadCount: serializer.fromJson<int?>(json['totalUnreadCount']),
       unreadChannels: serializer.fromJson<int?>(json['unreadChannels']),
       lastEventAt: serializer.fromJson<DateTime?>(json['lastEventAt']),
@@ -4932,7 +4933,7 @@ class ConnectionEventEntity extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'ownUser': serializer.toJson<Map<String, Object>?>(ownUser),
+      'ownUser': serializer.toJson<Map<String, dynamic>?>(ownUser),
       'totalUnreadCount': serializer.toJson<int?>(totalUnreadCount),
       'unreadChannels': serializer.toJson<int?>(unreadChannels),
       'lastEventAt': serializer.toJson<DateTime?>(lastEventAt),
@@ -4942,7 +4943,7 @@ class ConnectionEventEntity extends DataClass
 
   ConnectionEventEntity copyWith(
           {int? id,
-          Value<Map<String, Object>?> ownUser = const Value.absent(),
+          Value<Map<String, dynamic>?> ownUser = const Value.absent(),
           Value<int?> totalUnreadCount = const Value.absent(),
           Value<int?> unreadChannels = const Value.absent(),
           Value<DateTime?> lastEventAt = const Value.absent(),
@@ -4994,7 +4995,7 @@ class ConnectionEventEntity extends DataClass
 
 class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   final Value<int> id;
-  final Value<Map<String, Object>?> ownUser;
+  final Value<Map<String, dynamic>?> ownUser;
   final Value<int?> totalUnreadCount;
   final Value<int?> unreadChannels;
   final Value<DateTime?> lastEventAt;
@@ -5017,7 +5018,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   });
   static Insertable<ConnectionEventEntity> custom({
     Expression<int>? id,
-    Expression<Map<String, Object>?>? ownUser,
+    Expression<Map<String, dynamic>?>? ownUser,
     Expression<int?>? totalUnreadCount,
     Expression<int?>? unreadChannels,
     Expression<DateTime?>? lastEventAt,
@@ -5035,7 +5036,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
 
   ConnectionEventsCompanion copyWith(
       {Value<int>? id,
-      Value<Map<String, Object>?>? ownUser,
+      Value<Map<String, dynamic>?>? ownUser,
       Value<int?>? totalUnreadCount,
       Value<int?>? unreadChannels,
       Value<DateTime?>? lastEventAt,
@@ -5222,8 +5223,8 @@ class $ConnectionEventsTable extends ConnectionEvents
     return $ConnectionEventsTable(_db, alias);
   }
 
-  static TypeConverter<Map<String, Object>, String> $converter0 =
-      MapConverter<Object>();
+  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+      MapConverter();
 }
 
 abstract class _$MoorChatDatabase extends GeneratedDatabase {

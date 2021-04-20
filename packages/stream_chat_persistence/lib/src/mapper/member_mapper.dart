@@ -4,7 +4,7 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 /// Useful mapping functions for [MemberEntity]
 extension MemberEntityX on MemberEntity {
   /// Maps a [MemberEntity] into [Member]
-  Member toMember({User user}) => Member(
+  Member toMember({User? user}) => Member(
         user: user,
         userId: userId,
         banned: banned,
@@ -22,8 +22,8 @@ extension MemberEntityX on MemberEntity {
 /// Useful mapping functions for [Member]
 extension MemberX on Member {
   /// Maps a [Member] into [MemberEntity]
-  MemberEntity toEntity({String cid}) => MemberEntity(
-        userId: user?.id,
+  MemberEntity toEntity({required String cid}) => MemberEntity(
+        userId: user!.id,
         banned: banned,
         shadowBanned: shadowBanned,
         channelCid: cid,

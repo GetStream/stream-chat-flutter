@@ -75,16 +75,19 @@ class User {
 
   /// Map of custom user extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  final Map<String, Object> extraData;
 
   @override
   int get hashCode => id.hashCode;
 
   /// Shortcut for user name
-  String? get name =>
-      (extraData.containsKey('name') == true && extraData['name'] != '')
-          ? extraData['name']
-          : id;
+  String get name {
+    if (extraData.containsKey('name')) {
+      final name = extraData['name'] as String;
+      if (name.isNotEmpty) return name;
+    }
+    return id;
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -104,7 +107,7 @@ class User {
     DateTime? updatedAt,
     DateTime? lastActive,
     bool? online,
-    Map<String, dynamic>? extraData,
+    Map<String, Object>? extraData,
     bool? banned,
     List<String>? teams,
   }) =>

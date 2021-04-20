@@ -50,7 +50,7 @@ class Reaction {
 
   /// Reaction custom extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic>? extraData;
+  final Map<String, Object>? extraData;
 
   /// Map of custom user extraData
   static const topLevelFields = [
@@ -75,7 +75,7 @@ class Reaction {
     User? user,
     String? userId,
     int? score,
-    Map<String, dynamic>? extraData,
+    Map<String, Object>? extraData,
   }) =>
       Reaction(
         messageId: messageId ?? this.messageId,

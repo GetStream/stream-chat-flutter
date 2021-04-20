@@ -4,8 +4,8 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
 void main() {
-  ChannelDao channelDao;
-  MoorChatDatabase database;
+  late ChannelDao channelDao;
+  late MoorChatDatabase database;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');
@@ -32,7 +32,8 @@ void main() {
 
     // Should match the dummy channel
     final updatedChannel = await channelDao.getChannelByCid(cid);
-    expect(updatedChannel.id, id);
+    expect(updatedChannel, isNotNull);
+    expect(updatedChannel!.id, id);
     expect(updatedChannel.cid, cid);
     expect(updatedChannel.type, type);
   });
@@ -53,7 +54,8 @@ void main() {
 
     // Should match the dummy channel
     final updatedChannel = await channelDao.getChannelByCid(cid);
-    expect(updatedChannel.id, id);
+    expect(updatedChannel, isNotNull);
+    expect(updatedChannel!.id, id);
     expect(updatedChannel.cid, cid);
     expect(updatedChannel.type, type);
 
@@ -108,7 +110,8 @@ void main() {
 
     // Should match the dummy channel
     final updatedChannel = await channelDao.getChannelByCid(cid);
-    expect(updatedChannel.id, id);
+    expect(updatedChannel, isNotNull);
+    expect(updatedChannel!.id, id);
     expect(updatedChannel.cid, cid);
     expect(updatedChannel.type, type);
 
@@ -119,7 +122,8 @@ void main() {
 
     // Should match the new channel
     final newUpdatedChannel = await channelDao.getChannelByCid(cid);
-    expect(newUpdatedChannel.id, id);
+    expect(newUpdatedChannel, isNotNull);
+    expect(newUpdatedChannel!.id, id);
     expect(newUpdatedChannel.cid, cid);
     expect(newUpdatedChannel.type, newType);
   });

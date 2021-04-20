@@ -10,22 +10,6 @@ MoorChatDatabase _testDatabaseProvider(String userId, ConnectionMode mode) =>
     MoorChatDatabase.testable(userId);
 
 void main() {
-  group('client constructor', () {
-    test('throws assertion error if null connectionMode is provided', () {
-      expect(
-        () => StreamChatPersistenceClient(connectionMode: null),
-        throwsA(isA<AssertionError>()),
-      );
-    });
-
-    test('throws assertion error if null logLevel is provided', () {
-      expect(
-        () => StreamChatPersistenceClient(logLevel: null),
-        throwsA(isA<AssertionError>()),
-      );
-    });
-  });
-
   group('connect', () {
     const userId = 'testUserId';
     test('successfully connects with the Database', () async {
@@ -34,7 +18,7 @@ void main() {
       await client.connect(userId, databaseProvider: _testDatabaseProvider);
       expect(client.db, isNotNull);
       expect(client.db, isA<MoorChatDatabase>());
-      expect(client.db.userId, userId);
+      expect(client.db!.userId, userId);
 
       addTearDown(() async {
         await client.disconnect();
@@ -48,7 +32,7 @@ void main() {
       expect(client.db, isNotNull);
       expect(client.db, isNotNull);
       expect(client.db, isA<MoorChatDatabase>());
-      expect(client.db.userId, userId);
+      expect(client.db!.userId, userId);
       expect(
         () => client.connect(userId, databaseProvider: _testDatabaseProvider),
         throwsException,
@@ -73,7 +57,7 @@ void main() {
     const userId = 'testUserId';
     final mockDatabase = MockChatDatabase();
     MoorChatDatabase _mockDatabaseProvider(_, __) => mockDatabase;
-    StreamChatPersistenceClient client;
+    late StreamChatPersistenceClient client;
 
     setUp(() async {
       client = StreamChatPersistenceClient(logLevel: Level.ALL);
@@ -95,12 +79,13 @@ void main() {
     });
 
     test('getConnectionInfo', () async {
-      final event = Event(type: 'testEvent');
+      const event = Event(type: 'testEvent');
       when(() => mockDatabase.connectionEventDao.connectionEvent)
           .thenAnswer((_) async => event);
 
       final fetchedEvent = await client.getConnectionInfo();
-      expect(fetchedEvent.type, event.type);
+      expect(fetchedEvent, isNotNull);
+      expect(fetchedEvent!.type, event.type);
       verify(() => mockDatabase.connectionEventDao.connectionEvent).called(1);
     });
 
@@ -115,11 +100,9 @@ void main() {
     });
 
     test('updateConnectionInfo', () async {
-      final event = Event(type: 'testEvent');
+      const event = Event(type: 'testEvent');
       when(() => mockDatabase.connectionEventDao.updateConnectionEvent(event))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.updateConnectionInfo(event);
       verify(() => mockDatabase.connectionEventDao.updateConnectionEvent(event))
@@ -129,9 +112,7 @@ void main() {
     test('updateLastSyncAt', () async {
       final lastSync = DateTime.now();
       when(() => mockDatabase.connectionEventDao.updateLastSyncAt(lastSync))
-          .thenAnswer((_) {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.updateLastSyncAt(lastSync);
       verify(() => mockDatabase.connectionEventDao.updateLastSyncAt(lastSync))
@@ -149,13 +130,14 @@ void main() {
     });
 
     test('getChannelByCid', () async {
-      const cid = 'testCid';
+      const cid = 'testType:testId';
       final channelModel = ChannelModel(cid: cid);
       when(() => mockDatabase.channelDao.getChannelByCid(cid))
           .thenAnswer((_) async => channelModel);
 
       final fetchedChannelModel = await client.getChannelByCid(cid);
-      expect(fetchedChannelModel.cid, channelModel.cid);
+      expect(fetchedChannelModel, isNotNull);
+      expect(fetchedChannelModel!.cid, channelModel.cid);
       verify(() => mockDatabase.channelDao.getChannelByCid(cid)).called(1);
     });
 
@@ -172,7 +154,13 @@ void main() {
 
     test('getReadsByCid', () async {
       const cid = 'testCid';
-      final reads = List.generate(3, (index) => Read());
+      final reads = List.generate(
+        3,
+        (index) => Read(
+          user: User(id: 'testUserId$index'),
+          lastRead: DateTime.now(),
+        ),
+      );
       when(() => mockDatabase.readDao.getReadsByCid(cid))
           .thenAnswer((_) async => reads);
 
@@ -205,10 +193,16 @@ void main() {
     });
 
     test('getChannelStateByCid', () async {
-      const cid = 'testCid';
+      const cid = 'testType:testId';
       final messages = List.generate(3, (index) => Message());
       final members = List.generate(3, (index) => Member());
-      final reads = List.generate(3, (index) => Read());
+      final reads = List.generate(
+        3,
+        (index) => Read(
+          user: User(id: 'testUserId$index'),
+          lastRead: DateTime.now(),
+        ),
+      );
       final channel = ChannelModel(cid: cid);
 
       when(() => mockDatabase.memberDao.getMembersByCid(cid))
@@ -227,7 +221,7 @@ void main() {
       expect(fetchedChannelState.pinnedMessages.length, messages.length);
       expect(fetchedChannelState.members.length, members.length);
       expect(fetchedChannelState.read.length, reads.length);
-      expect(fetchedChannelState.channel.cid, channel.cid);
+      expect(fetchedChannelState.channel!.cid, channel.cid);
 
       verify(() => mockDatabase.memberDao.getMembersByCid(cid)).called(1);
       verify(() => mockDatabase.readDao.getReadsByCid(cid)).called(1);
@@ -238,11 +232,17 @@ void main() {
     });
 
     test('getChannelStates', () async {
-      const cid = 'testCid';
+      const cid = 'testType:testId';
       final channels = List.generate(3, (index) => ChannelModel(cid: cid));
       final messages = List.generate(3, (index) => Message());
       final members = List.generate(3, (index) => Member());
-      final reads = List.generate(3, (index) => Read());
+      final reads = List.generate(
+        3,
+        (index) => Read(
+          user: User(id: 'testUserId$index'),
+          lastRead: DateTime.now(),
+        ),
+      );
       final channel = ChannelModel(cid: cid);
       final channelStates = channels
           .map(
@@ -279,7 +279,7 @@ void main() {
         expect(fetched.messages.length, original.messages.length);
         expect(fetched.pinnedMessages.length, original.pinnedMessages.length);
         expect(fetched.read.length, original.read.length);
-        expect(fetched.channel.cid, original.channel.cid);
+        expect(fetched.channel!.cid, original.channel!.cid);
       }
 
       verify(() => mockDatabase.channelQueryDao.getChannels()).called(1);
@@ -296,9 +296,7 @@ void main() {
       const cids = <String>[];
       when(() =>
               mockDatabase.channelQueryDao.updateChannelQueries(filter, cids))
-          .thenAnswer((realInvocation) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updateChannelQueries(filter, cids);
       verify(() =>
@@ -309,9 +307,7 @@ void main() {
     test('deleteMessageById', () async {
       const messageId = 'testMessageId';
       when(() => mockDatabase.messageDao.deleteMessageByIds([messageId]))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deleteMessageById(messageId);
       verify(() => mockDatabase.messageDao.deleteMessageByIds([messageId]))
@@ -321,9 +317,7 @@ void main() {
     test('deletePinnedMessageById', () async {
       const messageId = 'testMessageId';
       when(() => mockDatabase.pinnedMessageDao.deleteMessageByIds([messageId]))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deletePinnedMessageById(messageId);
       verify(() =>
@@ -334,9 +328,7 @@ void main() {
     test('deleteMessageByIds', () async {
       const messageIds = <String>[];
       when(() => mockDatabase.messageDao.deleteMessageByIds(messageIds))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deleteMessageByIds(messageIds);
       verify(() => mockDatabase.messageDao.deleteMessageByIds(messageIds))
@@ -346,9 +338,7 @@ void main() {
     test('deletePinnedMessageByIds', () async {
       const messageIds = <String>[];
       when(() => mockDatabase.pinnedMessageDao.deleteMessageByIds(messageIds))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deletePinnedMessageByIds(messageIds);
       verify(() => mockDatabase.pinnedMessageDao.deleteMessageByIds(messageIds))
@@ -358,9 +348,7 @@ void main() {
     test('deleteMessageByCid', () async {
       const cid = 'testCid';
       when(() => mockDatabase.messageDao.deleteMessageByCids([cid]))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deleteMessageByCid(cid);
       verify(() => mockDatabase.messageDao.deleteMessageByCids([cid]))
@@ -370,9 +358,7 @@ void main() {
     test('deletePinnedMessageByCid', () async {
       const cid = 'testCid';
       when(() => mockDatabase.pinnedMessageDao.deleteMessageByCids([cid]))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deletePinnedMessageByCid(cid);
       verify(() => mockDatabase.pinnedMessageDao.deleteMessageByCids([cid]))
@@ -382,9 +368,7 @@ void main() {
     test('deleteMessageByCids', () async {
       const cids = <String>[];
       when(() => mockDatabase.messageDao.deleteMessageByCids(cids))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deleteMessageByCids(cids);
       verify(() => mockDatabase.messageDao.deleteMessageByCids(cids)).called(1);
@@ -393,9 +377,7 @@ void main() {
     test('deletePinnedMessageByCids', () async {
       const cids = <String>[];
       when(() => mockDatabase.pinnedMessageDao.deleteMessageByCids(cids))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deletePinnedMessageByCids(cids);
       verify(() => mockDatabase.pinnedMessageDao.deleteMessageByCids(cids))
@@ -405,9 +387,7 @@ void main() {
     test('deleteChannels', () async {
       const cids = <String>[];
       when(() => mockDatabase.channelDao.deleteChannelByCids(cids))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) async => 1);
 
       await client.deleteChannels(cids);
       verify(() => mockDatabase.channelDao.deleteChannelByCids(cids)).called(1);
@@ -417,9 +397,7 @@ void main() {
       const cid = 'testCid';
       final messages = List.generate(3, (index) => Message());
       when(() => mockDatabase.messageDao.updateMessages(cid, messages))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updateMessages(cid, messages);
       verify(() => mockDatabase.messageDao.updateMessages(cid, messages))
@@ -430,9 +408,7 @@ void main() {
       const cid = 'testCid';
       final messages = List.generate(3, (index) => Message());
       when(() => mockDatabase.pinnedMessageDao.updateMessages(cid, messages))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updatePinnedMessages(cid, messages);
       verify(() => mockDatabase.pinnedMessageDao.updateMessages(cid, messages))
@@ -445,14 +421,12 @@ void main() {
           List.generate(3, (index) => Message(parentId: 'testParentId$index'));
       final threads = messages.fold<Map<String, List<Message>>>(
         {},
-        (prev, curr) {
-          return prev
-            ..update(
-              curr.parentId,
-              (value) => [...value, curr],
-              ifAbsent: () => [],
-            );
-        },
+        (prev, curr) => prev
+          ..update(
+            curr.parentId!,
+            (value) => [...value, curr],
+            ifAbsent: () => [],
+          ),
       );
       when(() => mockDatabase.messageDao.getThreadMessages(cid))
           .thenAnswer((realInvocation) async => messages);
@@ -469,11 +443,10 @@ void main() {
     });
 
     test('updateChannels', () async {
-      final channels = List.generate(3, (index) => ChannelModel());
+      const cid = 'testType:testId';
+      final channels = List.generate(3, (index) => ChannelModel(cid: cid));
       when(() => mockDatabase.channelDao.updateChannels(channels))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updateChannels(channels);
       verify(() => mockDatabase.channelDao.updateChannels(channels)).called(1);
@@ -483,9 +456,7 @@ void main() {
       const cid = 'testCid';
       final members = List.generate(3, (index) => Member());
       when(() => mockDatabase.memberDao.updateMembers(cid, members))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updateMembers(cid, members);
       verify(() => mockDatabase.memberDao.updateMembers(cid, members))
@@ -494,32 +465,36 @@ void main() {
 
     test('updateReads', () async {
       const cid = 'testCid';
-      final reads = List.generate(3, (index) => Read());
+      final reads = List.generate(
+        3,
+        (index) => Read(
+          user: User(id: 'testUserId$index'),
+          lastRead: DateTime.now(),
+        ),
+      );
       when(() => mockDatabase.readDao.updateReads(cid, reads))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updateReads(cid, reads);
       verify(() => mockDatabase.readDao.updateReads(cid, reads)).called(1);
     });
 
     test('updateUsers', () async {
-      final users = List.generate(3, (index) => User());
-      when(() => mockDatabase.userDao.updateUsers(users)).thenAnswer((_) async {
-        return;
-      });
+      final users = List.generate(3, (index) => User(id: 'testUserId$index'));
+      when(() => mockDatabase.userDao.updateUsers(users))
+          .thenAnswer((_) => Future.value());
 
       await client.updateUsers(users);
       verify(() => mockDatabase.userDao.updateUsers(users)).called(1);
     });
 
     test('updateReactions', () async {
-      final reactions = List.generate(3, (index) => Reaction());
+      final reactions = List.generate(
+        3,
+        (index) => Reaction(type: 'testType$index'),
+      );
       when(() => mockDatabase.reactionDao.updateReactions(reactions))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.updateReactions(reactions);
       verify(() => mockDatabase.reactionDao.updateReactions(reactions))
@@ -530,9 +505,7 @@ void main() {
       final messageIds = <String>[];
       when(() =>
               mockDatabase.reactionDao.deleteReactionsByMessageIds(messageIds))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.deleteReactionsByMessageId(messageIds);
       verify(() =>
@@ -543,9 +516,7 @@ void main() {
     test('deleteMembersByCids', () async {
       final cids = <String>[];
       when(() => mockDatabase.memberDao.deleteMemberByCids(cids))
-          .thenAnswer((_) async {
-        return;
-      });
+          .thenAnswer((_) => Future.value());
 
       await client.deleteMembersByCids(cids);
       verify(() => mockDatabase.memberDao.deleteMemberByCids(cids)).called(1);

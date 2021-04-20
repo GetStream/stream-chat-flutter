@@ -208,7 +208,7 @@ class Message extends Equatable {
     includeIfNull: false,
     defaultValue: {},
   )
-  final Map<String, dynamic> extraData;
+  final Map<String, Object> extraData;
 
   /// True if the message is a system info
   bool get isSystem => type == 'system';
@@ -289,7 +289,7 @@ class Message extends Equatable {
     DateTime? pinnedAt,
     Object? pinExpires = _pinExpires,
     User? pinnedBy,
-    Map<String, dynamic>? extraData,
+    Map<String, Object>? extraData,
     MessageSendingStatus? status,
     bool? skipPush,
   }) {

@@ -27,7 +27,7 @@ class Users extends Table {
   BoolColumn get banned => boolean().withDefault(const Constant(false))();
 
   /// Map of custom user extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object>())();
+  TextColumn get extraData => text().map(MapConverter<Object>())();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -24,10 +24,10 @@ abstract class ChatPersistenceClient {
   });
 
   /// Get stored connection event
-  Future<Event> getConnectionInfo();
+  Future<Event?> getConnectionInfo();
 
   /// Get stored lastSyncAt
-  Future<DateTime> getLastSyncAt();
+  Future<DateTime?> getLastSyncAt();
 
   /// Update stored connection event
   Future<void> updateConnectionInfo(Event event);
@@ -39,7 +39,7 @@ abstract class ChatPersistenceClient {
   Future<List<String>> getChannelCids();
 
   /// Get stored [ChannelModel]s by providing channel [cid]
-  Future<ChannelModel> getChannelByCid(String cid);
+  Future<ChannelModel?> getChannelByCid(String cid);
 
   /// Get stored channel [Member]s by providing channel [cid]
   Future<List<Member>> getMembersByCid(String cid);
@@ -90,7 +90,7 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic>? filter,
-    List<SortOption<ChannelModel>>? sort = const [],
+    List<SortOption<ChannelModel>>? sort,
     PaginationParams? paginationParams,
   });
 

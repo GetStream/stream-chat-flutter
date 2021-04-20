@@ -63,7 +63,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     pinnedBy: json['pinned_by'] == null
         ? null
         : User.fromJson(json['pinned_by'] as Map<String, dynamic>),
-    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
+    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(k, e as Object),
+        ) ??
+        {},
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
