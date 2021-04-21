@@ -27,7 +27,7 @@ class Channel {
   }
 
   /// Create a channel client instance from a [ChannelState] object
-  Channel.fromState(this._client, ChannelState channelState) {
+  Channel.fromState(this._client, ChannelState channelState) : _extraData = {} {
     _cid = channelState.channel!.cid;
     _id = channelState.channel!.id;
     type = channelState.channel!.type;
@@ -45,9 +45,9 @@ class Channel {
 
   String? _id;
   String? _cid;
-  Map<String, dynamic>? _extraData;
+  Map<String, dynamic> _extraData;
 
-  set extraData(Map<String, dynamic>? extraData) {
+  set extraData(Map<String, dynamic> extraData) {
     if (_initializedCompleter.isCompleted) {
       throw Exception(
           'Once the channel is initialized you should use channel.update '
@@ -81,7 +81,7 @@ class Channel {
   /// Channel configuration as a stream
   Stream<ChannelConfig?>? get configStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs!.channel?.config);
+    return state?.channelStateStream.map((cs) => cs.channel?.config);
   }
 
   /// Channel user creator
@@ -93,7 +93,7 @@ class Channel {
   /// Channel user creator as a stream
   Stream<User?>? get createdByStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs!.channel?.createdBy);
+    return state?.channelStateStream.map((cs) => cs.channel?.createdBy);
   }
 
   /// Channel frozen status
@@ -105,7 +105,7 @@ class Channel {
   /// Channel frozen status as a stream
   Stream<bool?>? get frozenStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs!.channel?.frozen);
+    return state?.channelStateStream.map((cs) => cs.channel?.frozen);
   }
 
   /// Channel creation date
@@ -117,7 +117,7 @@ class Channel {
   /// Channel creation date as a stream
   Stream<DateTime?>? get createdAtStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs!.channel?.createdAt);
+    return state?.channelStateStream.map((cs) => cs.channel?.createdAt);
   }
 
   /// Channel last message date
@@ -131,7 +131,7 @@ class Channel {
   Stream<DateTime?>? get lastMessageAtStream {
     _checkInitialized();
 
-    return state?.channelStateStream.map((cs) => cs!.channel?.lastMessageAt);
+    return state?.channelStateStream.map((cs) => cs.channel?.lastMessageAt);
   }
 
   /// Channel updated date
@@ -145,7 +145,7 @@ class Channel {
   Stream<DateTime?>? get updatedAtStream {
     _checkInitialized();
 
-    return state?.channelStateStream.map((cs) => cs!.channel?.updatedAt);
+    return state?.channelStateStream.map((cs) => cs.channel?.updatedAt);
   }
 
   /// Channel deletion date
@@ -159,7 +159,7 @@ class Channel {
   Stream<DateTime?>? get deletedAtStream {
     _checkInitialized();
 
-    return state?.channelStateStream.map((cs) => cs!.channel?.deletedAt);
+    return state?.channelStateStream.map((cs) => cs.channel?.deletedAt);
   }
 
   /// Channel member count
@@ -173,7 +173,7 @@ class Channel {
   Stream<int?>? get memberCountStream {
     _checkInitialized();
 
-    return state?.channelStateStream.map((cs) => cs!.channel?.memberCount);
+    return state?.channelStateStream.map((cs) => cs.channel?.memberCount);
   }
 
   /// Channel id
@@ -189,13 +189,13 @@ class Channel {
   }
 
   /// Channel extra data
-  Map<String, dynamic>? get extraData =>
+  Map<String, dynamic> get extraData =>
       state?._channelState.channel?.extraData ?? _extraData;
 
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>?>? get extraDataStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs!.channel?.extraData);
+    return state?.channelStateStream.map((cs) => cs.channel?.extraData);
   }
 
   /// The main Stream chat client
@@ -842,7 +842,7 @@ class Channel {
           messages: state?.messages?..remove(oldMessage),
         ));
       } else {
-        oldMessage = state!.threads!.values
+        oldMessage = state!.threads.values
             .expand((messages) => messages)
             .firstWhereOrNull((m) => m.id == messageId);
         if (oldMessage?.parentId != null) {
@@ -853,8 +853,8 @@ class Channel {
             state!.addMessage(parentMessage.copyWith(
                 replyCount: parentMessage.replyCount! - 1));
           }
-          state!.updateThreadInfo(oldMessage!.parentId,
-              state!.threads![oldMessage.parentId!]!..remove(oldMessage));
+          state!.updateThreadInfo(oldMessage!.parentId!,
+              state!.threads[oldMessage.parentId!]!..remove(oldMessage));
         }
       }
 
@@ -1028,7 +1028,7 @@ class Channel {
     })
       ..addAll(options);
 
-    if (_extraData != null) {
+    if (_extraData.isNotEmpty) {
       payload['data'] = _extraData;
     }
 
@@ -1333,7 +1333,7 @@ class ChannelClientState {
   final _subscriptions = <StreamSubscription>[];
 
   void _computeInitialUnread() {
-    final userRead = channelState?.read.firstWhereOrNull(
+    final userRead = channelState.read.firstWhereOrNull(
       (r) => r.user.id == _channel._client.state.user?.id,
     );
     if (userRead != null) {
@@ -1372,9 +1372,9 @@ class ChannelClientState {
   void _listenMemberAdded() {
     _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
       final member = e.member;
-      updateChannelState(channelState!.copyWith(
+      updateChannelState(channelState.copyWith(
         members: [
-          ...channelState!.members,
+          ...channelState.members,
           member!,
         ],
       ));
@@ -1384,9 +1384,9 @@ class ChannelClientState {
   void _listenMemberRemoved() {
     _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
       final user = e.user;
-      updateChannelState(channelState!.copyWith(
+      updateChannelState(channelState.copyWith(
         members: List.from(
-            channelState!.members..removeWhere((m) => m.userId == user!.id)),
+            channelState.members..removeWhere((m) => m.userId == user!.id)),
       ));
     }));
   }
@@ -1394,7 +1394,7 @@ class ChannelClientState {
   void _listenChannelUpdated() {
     _subscriptions.add(_channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel!;
-      updateChannelState(channelState!.copyWith(
+      updateChannelState(channelState.copyWith(
         channel: channel,
         members: channel.members,
       ));
@@ -1416,14 +1416,14 @@ class ChannelClientState {
   /// This flag should be managed by UI sdks.
   /// When false, any new message (received by WebSocket event
   /// - [EventType.messageNew]) will not be pushed on to message list.
-  bool get isUpToDate => _isUpToDateController.value!;
+  bool get isUpToDate => _isUpToDateController.value ?? true;
 
   set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
 
   /// [isUpToDate] flag count as a stream
-  Stream<bool?> get isUpToDateStream => _isUpToDateController.stream;
+  Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
 
-  final BehaviorSubject<bool?> _isUpToDateController =
+  final BehaviorSubject<bool> _isUpToDateController =
       BehaviorSubject.seeded(true);
 
   /// The retry queue associated to this channel
@@ -1432,7 +1432,7 @@ class ChannelClientState {
   /// Retry failed message
   Future<void> retryFailedMessages() async {
     final failedMessages =
-        <Message>[...messages, ...threads!.values.expand((v) => v)]
+        <Message>[...messages, ...threads.values.expand((v) => v)]
             .where(
               (message) =>
                   message.status != MessageSendingStatus.sent &&
@@ -1549,7 +1549,7 @@ class ChannelClientState {
     }
 
     if (message.parentId != null) {
-      updateThreadInfo(message.parentId, [message]);
+      updateThreadInfo(message.parentId!, [message]);
     }
   }
 
@@ -1592,14 +1592,14 @@ class ChannelClientState {
 
   /// Channel message list as a stream
   Stream<List<Message>?> get messagesStream =>
-      channelStateStream.map((cs) => cs!.messages);
+      channelStateStream.map((cs) => cs.messages);
 
   /// Channel pinned message list
   List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();
 
   /// Channel pinned message list as a stream
   Stream<List<Message>?> get pinnedMessagesStream =>
-      channelStateStream.map((cs) => cs!.pinnedMessages.toList());
+      channelStateStream.map((cs) => cs.pinnedMessages.toList());
 
   /// Get channel last message
   Message? get lastMessage => _channelState.messages.isNotEmpty == true
@@ -1618,7 +1618,7 @@ class ChannelClientState {
   /// Channel members list as a stream
   Stream<List<Member>> get membersStream => CombineLatestStream.combine2<
           List<Member?>?, Map<String?, User?>, List<Member>>(
-        channelStateStream.map((cs) => cs!.members),
+        channelStateStream.map((cs) => cs.members),
         _channel.client.state.usersStream,
         (members, users) =>
             members!.map((e) => e!.copyWith(user: users[e.user!.id])).toList(),
@@ -1629,7 +1629,7 @@ class ChannelClientState {
 
   /// Channel watcher count as a stream
   Stream<int?> get watcherCountStream =>
-      channelStateStream.map((cs) => cs!.watcherCount);
+      channelStateStream.map((cs) => cs.watcherCount);
 
   /// Channel watchers list
   List<User> get watchers => _channelState.watchers
@@ -1639,7 +1639,7 @@ class ChannelClientState {
   /// Channel watchers list as a stream
   Stream<List<User>> get watchersStream => CombineLatestStream.combine2<
           List<User>?, Map<String?, User?>, List<User>>(
-        channelStateStream.map((cs) => cs!.watchers),
+        channelStateStream.map((cs) => cs.watchers),
         _channel.client.state.usersStream,
         (watchers, users) => watchers!.map((e) => users[e.id] ?? e).toList(),
       );
@@ -1648,8 +1648,7 @@ class ChannelClientState {
   List<Read>? get read => _channelState.read;
 
   /// Channel read list as a stream
-  Stream<List<Read>?> get readStream =>
-      channelStateStream.map((cs) => cs!.read);
+  Stream<List<Read>?> get readStream => channelStateStream.map((cs) => cs.read);
 
   final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
 
@@ -1672,17 +1671,17 @@ class ChannelClientState {
   }
 
   /// Update threads with updated information about messages
-  void updateThreadInfo(String? parentId, List<Message>? messages) {
-    final newThreads = Map<String?, List<Message>?>.from(threads!);
+  void updateThreadInfo(String parentId, List<Message> messages) {
+    final newThreads = Map<String, List<Message>>.from(threads);
 
     if (newThreads.containsKey(parentId)) {
       newThreads[parentId] = [
         ...newThreads[parentId]
-                ?.where((newMessage) =>
-                    !messages!.any((m) => m.id == newMessage.id))
+                ?.where(
+                    (newMessage) => !messages.any((m) => m.id == newMessage.id))
                 .toList() ??
             [],
-        ...messages!,
+        ...messages,
       ];
 
       newThreads[parentId]!.sort(_sortByCreatedAt);
@@ -1758,11 +1757,10 @@ class ChannelClientState {
   ChannelState get _channelState => _channelStateController.value!;
 
   /// The channel state related to this client as a stream
-  Stream<ChannelState?> get channelStateStream =>
-      _channelStateController.stream;
+  Stream<ChannelState> get channelStateStream => _channelStateController.stream;
 
   /// The channel state related to this client
-  ChannelState? get channelState => _channelStateController.value;
+  ChannelState get channelState => _channelStateController.value!;
   late BehaviorSubject<ChannelState> _channelStateController;
 
   final Debounce _debouncedUpdatePersistenceChannelState;
@@ -1773,33 +1771,33 @@ class ChannelClientState {
   }
 
   /// The channel threads related to this channel
-  Map<String, List<Message>>? get threads => _threadsController.value
-      ?.map((key, value) => MapEntry(key ?? '', value ?? []));
+  Map<String, List<Message>> get threads =>
+      _threadsController.value!.map((key, value) => MapEntry(key, value));
 
   /// The channel threads related to this channel as a stream
-  Stream<Map<String?, List<Message>?>> get threadsStream =>
+  Stream<Map<String, List<Message>>> get threadsStream =>
       _threadsController.stream;
-  final BehaviorSubject<Map<String?, List<Message>?>> _threadsController =
+  final BehaviorSubject<Map<String, List<Message>>> _threadsController =
       BehaviorSubject.seeded({});
 
-  set _threads(Map<String?, List<Message>?> v) {
+  set _threads(Map<String, List<Message>> v) {
     _channel._client.chatPersistenceClient?.updateMessages(
       _channel.cid!,
-      v.values.expand((v) => v!).toList(),
+      v.values.expand((v) => v).toList(),
     );
     _threadsController.add(v);
   }
 
   /// Channel related typing users last value
-  List<User>? get typingEvents => _typingEventsController.value as List<User>?;
+  List<User> get typingEvents => _typingEventsController.value!;
 
   /// Channel related typing users stream
-  Stream<List<User?>> get typingEventsStream => _typingEventsController.stream;
-  final BehaviorSubject<List<User?>> _typingEventsController =
+  Stream<List<User>> get typingEventsStream => _typingEventsController.stream;
+  final BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 
   final Channel _channel;
-  final Map<User?, DateTime> _typings = {};
+  final Map<User, DateTime> _typings = {};
 
   void _listenTypingEvents() {
     if (_channelState.channel?.config.typingEvents == false) {
@@ -1810,9 +1808,12 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.typingStart).listen(
           (event) {
-            if (event.user!.id != _channel.client.state.user!.id) {
-              _typings[event.user] = DateTime.now();
-              _typingEventsController.add(_typings.keys.toList());
+            if (event.user != null) {
+              final user = event.user!;
+              if (user.id != _channel.client.state.user?.id) {
+                _typings[user] = DateTime.now();
+                _typingEventsController.add(_typings.keys.toList());
+              }
             }
           },
         ),
@@ -1820,9 +1821,12 @@ class ChannelClientState {
       ..add(
         _channel.on(EventType.typingStop).listen(
           (event) {
-            if (event.user!.id != _channel.client.state.user!.id) {
-              _typings.remove(event.user);
-              _typingEventsController.add(_typings.keys.toList());
+            if (event.user != null) {
+              final user = event.user!;
+              if (user.id != _channel.client.state.user?.id) {
+                _typings.remove(event.user);
+                _typingEventsController.add(_typings.keys.toList());
+              }
             }
           },
         ),
@@ -1878,7 +1882,7 @@ class ChannelClientState {
   void _startCleaningPinnedMessages() {
     _pinnedMessagesTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       final now = DateTime.now();
-      var expiredMessages = channelState!.pinnedMessages
+      var expiredMessages = channelState.pinnedMessages
           .where((m) => m.pinExpires?.isBefore(now) == true)
           .toList();
       if (expiredMessages.isNotEmpty) {

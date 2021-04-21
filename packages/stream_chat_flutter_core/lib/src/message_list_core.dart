@@ -61,30 +61,20 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 class MessageListCore extends StatefulWidget {
   /// Instantiate a new [MessageListView].
   const MessageListCore({
-    Key key,
-    @required this.loadingBuilder,
-    @required this.emptyBuilder,
-    @required this.messageListBuilder,
-    @required this.errorWidgetBuilder,
+    Key? key,
+    required this.loadingBuilder,
+    required this.emptyBuilder,
+    required this.messageListBuilder,
+    required this.errorWidgetBuilder,
     this.showScrollToBottom = true,
     this.parentMessage,
     this.messageListController,
     this.messageFilter,
-  })  : assert(loadingBuilder != null, 'loadingBuilder should not be null'),
-        assert(emptyBuilder != null, 'emptyBuilder should not be null'),
-        assert(
-          messageListBuilder != null,
-          'messageListBuilder should not be null',
-        ),
-        assert(
-          errorWidgetBuilder != null,
-          'errorWidgetBuilder should not be null',
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [MessageListController] allows pagination.
   /// Use [ChannelListController.paginateData] pagination.
-  final MessageListController messageListController;
+  final MessageListController? messageListController;
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>) messageListBuilder;
@@ -108,10 +98,10 @@ class MessageListCore extends StatefulWidget {
 
   /// If the current message belongs to a `thread`, this property represents the
   /// first message or the parent of the conversation.
-  final Message parentMessage;
+  final Message? parentMessage;
 
   /// Predicate used to filter messages
-  final bool Function(Message) messageFilter;
+  final bool Function(Message)? messageFilter;
 
   @override
   MessageListCoreState createState() => MessageListCoreState();
@@ -119,41 +109,44 @@ class MessageListCore extends StatefulWidget {
 
 /// The current state of the [MessageListCore].
 class MessageListCoreState extends State<MessageListCore> {
-  StreamChannelState _streamChannel;
+  late StreamChannelState _streamChannel;
 
-  bool get _upToDate => _streamChannel.channel.state.isUpToDate;
+  bool get _upToDate => _streamChannel.channel.state?.isUpToDate ?? true;
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser get _currentUser => _streamChannel.channel.client.state.user;
+  OwnUser? get _currentUser => _streamChannel.channel.client.state.user;
 
   var _messages = <Message>[];
 
   @override
   Widget build(BuildContext context) {
     final messagesStream = _isThreadConversation
-        ? _streamChannel.channel.state.threadsStream
-            .where((threads) => threads.containsKey(widget.parentMessage.id))
-            .map((threads) => threads[widget.parentMessage.id])
+        ? _streamChannel.channel.state?.threadsStream
+            .where((threads) => threads.containsKey(widget.parentMessage!.id))
+            .map((threads) => threads[widget.parentMessage!.id])
         : _streamChannel.channel.state?.messagesStream;
 
     bool defaultFilter(Message m) {
-      final isMyMessage = m.user.id == _currentUser.id;
+      final isMyMessage = m.user?.id == _currentUser?.id;
       final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
       if (isDeletedOrShadowed && !isMyMessage) return false;
       return true;
     }
 
-    return StreamBuilder<List<Message>>(
+    return StreamBuilder<List<Message>?>(
       stream: messagesStream?.map((messages) =>
-          messages?.where(widget.messageFilter ?? defaultFilter)?.toList()),
+          messages?.where(widget.messageFilter ?? defaultFilter).toList(
+                growable: false,
+              )),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return widget.errorWidgetBuilder(context, snapshot.error);
+          return widget.errorWidgetBuilder(context, snapshot.error!);
         } else if (!snapshot.hasData) {
           return widget.loadingBuilder(context);
         } else {
-          final messageList = snapshot.data?.reversed?.toList() ?? [];
+          final messageList =
+              snapshot.data?.reversed.toList(growable: false) ?? [];
           if (messageList.isEmpty && !_isThreadConversation) {
             if (_upToDate) {
               return widget.emptyBuilder(context);
@@ -169,13 +162,14 @@ class MessageListCoreState extends State<MessageListCore> {
 
   /// Fetches more messages with updated pagination and updates the widget.
   ///
-  /// Optionally pass the fetch direction, defaults to [QueryDirection.bottom]
-  Future<void> paginateData(
-      {QueryDirection direction = QueryDirection.bottom}) {
+  /// Optionally pass the fetch direction, defaults to [QueryDirection.top]
+  Future<void> paginateData({
+    QueryDirection direction = QueryDirection.top,
+  }) {
     if (!_isThreadConversation) {
       return _streamChannel.queryMessages(direction: direction);
     } else {
-      return _streamChannel.getReplies(widget.parentMessage.id);
+      return _streamChannel.getReplies(widget.parentMessage!.id);
     }
   }
 
@@ -184,11 +178,11 @@ class MessageListCoreState extends State<MessageListCore> {
     _streamChannel = StreamChannel.of(context);
 
     if (_isThreadConversation) {
-      _streamChannel.getReplies(widget.parentMessage.id);
+      _streamChannel.getReplies(widget.parentMessage!.id);
     }
 
     if (widget.messageListController != null) {
-      widget.messageListController.paginateData = paginateData;
+      widget.messageListController!.paginateData = paginateData;
     }
 
     super.initState();
@@ -206,5 +200,5 @@ class MessageListCoreState extends State<MessageListCore> {
 /// Controller used for paginating data in [ChannelListView]
 class MessageListController {
   /// Call this function to load further data
-  Future<void> Function({QueryDirection direction}) paginateData;
+  Future<void> Function({QueryDirection direction})? paginateData;
 }
