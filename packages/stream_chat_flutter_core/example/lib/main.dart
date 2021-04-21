@@ -307,8 +307,10 @@ class _MessageScreenState extends State<MessageScreen> {
                           await channel.sendMessage(
                             Message(text: _controller.value.text),
                           );
-                          _controller.clear();
-                          _updateList();
+                          if (mounted) {
+                            _controller.clear();
+                            _updateList();
+                          }
                         }
                       },
                       child: const Padding(
