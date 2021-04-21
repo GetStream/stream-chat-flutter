@@ -7,7 +7,7 @@ Matcher isSameChannelAs(Channel targetChannel) =>
 
 class _IsSameChannelAs extends Matcher {
   const _IsSameChannelAs({
-    @required this.targetChannel,
+    required this.targetChannel,
   }) : assert(targetChannel != null, '');
 
   final Channel targetChannel;
@@ -26,7 +26,7 @@ Matcher isSameChannelListAs(List<Channel> targetChannelList) =>
 
 class _IsSameChannelListAs extends Matcher {
   const _IsSameChannelListAs({
-    @required this.targetChannelList,
+    required this.targetChannelList,
   }) : assert(targetChannelList != null, '');
 
   final List<Channel> targetChannelList;

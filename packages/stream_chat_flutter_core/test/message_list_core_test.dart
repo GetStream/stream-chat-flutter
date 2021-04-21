@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/src/message_list_core.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -62,61 +62,6 @@ void main() {
     return threads ? threadMessages : messages;
   }
 
-  test(
-    'should throw assertion error in case messageListBuilder is null',
-    () {
-      final messageListCore = () => MessageListCore(
-            messageListBuilder: null,
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorWidgetBuilder: (BuildContext context, Object error) =>
-                Offstage(),
-          );
-      expect(messageListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case loadingBuilder is null',
-    () {
-      final messageListCore = () => MessageListCore(
-            messageListBuilder: (_, __) => Offstage(),
-            loadingBuilder: null,
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorWidgetBuilder: (BuildContext context, Object error) =>
-                Offstage(),
-          );
-      expect(messageListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case emptyBuilder is null',
-    () {
-      final messageListCore = () => MessageListCore(
-            messageListBuilder: (_, __) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: null,
-            errorWidgetBuilder: (BuildContext context, Object error) =>
-                Offstage(),
-          );
-      expect(messageListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case errorWidgetBuilder is null',
-    () {
-      final messageListCore = () => MessageListCore(
-            messageListBuilder: (_, __) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorWidgetBuilder: null,
-          );
-      expect(messageListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
   testWidgets(
     'should throw if MessageListCore is used where StreamChannel is not present '
     'in the widget tree',
@@ -150,8 +95,11 @@ void main() {
       );
 
       final mockChannel = MockChannel();
+      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
-      when(mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.messagesStream)
+          .thenAnswer((_) => Stream.value([]));
 
       await tester.pumpWidget(
         StreamChannel(
@@ -182,7 +130,10 @@ void main() {
 
       final mockChannel = MockChannel();
 
-      when(mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.state.messagesStream)
+          .thenAnswer((_) => Stream.value([]));
+      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
 
       await tester.pumpWidget(
         StreamChannel(
@@ -213,11 +164,11 @@ void main() {
 
       final mockChannel = MockChannel();
 
-      when(mockChannel.state.isUpToDate).thenReturn(true);
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       const error = 'Error! Error! Error!';
-      when(mockChannel.state.messagesStream)
+      when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.error(error));
 
       await tester.pumpWidget(
@@ -252,11 +203,11 @@ void main() {
 
       final mockChannel = MockChannel();
 
-      when(mockChannel.state.isUpToDate).thenReturn(true);
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       const messages = <Message>[];
-      when(mockChannel.state.messagesStream)
+      when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
 
       await tester.pumpWidget(
@@ -291,11 +242,18 @@ void main() {
 
       final mockChannel = MockChannel();
 
-      when(mockChannel.state.isUpToDate).thenReturn(false);
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(false);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.query(
+            options: any(named: 'options'),
+            membersPagination: any(named: 'membersPagination'),
+            messagesPagination: any(named: 'messagesPagination'),
+            preferOffline: any(named: 'preferOffline'),
+            watchersPagination: any(named: 'watchersPagination'),
+          )).thenAnswer((_) async => ChannelState());
 
       const messages = <Message>[];
-      when(mockChannel.state.messagesStream)
+      when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
 
       await tester.pumpWidget(
@@ -335,11 +293,11 @@ void main() {
 
       final mockChannel = MockChannel();
 
-      when(mockChannel.state.isUpToDate).thenReturn(true);
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final messages = _generateMessages();
-      when(mockChannel.state.messagesStream)
+      when(() => mockChannel.state.messagesStream)
           .thenAnswer((_) => Stream.value(messages));
 
       await tester.pumpWidget(
@@ -382,13 +340,13 @@ void main() {
 
       final mockChannel = MockChannel();
 
-      when(mockChannel.state.isUpToDate).thenReturn(true);
-      when(mockChannel.initialized).thenAnswer((_) async => true);
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      when(() => mockChannel.initialized).thenAnswer((_) async => true);
 
       final threads = {parentMessage.id: messages};
 
-      when(mockChannel.state.threads).thenReturn(threads);
-      when(mockChannel.state.threadsStream)
+      when(() => mockChannel.state.threads).thenReturn(threads);
+      when(() => mockChannel.state.threadsStream)
           .thenAnswer((_) => Stream.value(threads));
 
       await tester.pumpWidget(

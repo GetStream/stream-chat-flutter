@@ -81,7 +81,7 @@ class User {
   int get hashCode => id.hashCode;
 
   /// Shortcut for user name
-  String? get name =>
+  String get name =>
       (extraData.containsKey('name') == true && extraData['name'] != '')
           ? extraData['name']
           : id;

@@ -780,10 +780,11 @@ class StreamChatClient {
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await _chatPersistenceClient?.getChannelStates(
-      filter: filter,
-      sort: sort,
-      paginationParams: paginationParams,
-    ))!;
+          filter: filter,
+          sort: sort,
+          paginationParams: paginationParams,
+        )) ??
+        [];
     final updatedData = _mapChannelStateToChannel(offlineChannels);
     state.channels = updatedData.key;
     return updatedData.value;
@@ -1193,7 +1194,7 @@ class StreamChatClient {
   Channel channel(
     String type, {
     String? id,
-    Map<String, dynamic>? extraData,
+    Map<String, dynamic> extraData = const {},
   }) {
     if (id != null && state.channels?.containsKey('$type:$id') == true) {
       if (state.channels!['$type:$id'] != null) {

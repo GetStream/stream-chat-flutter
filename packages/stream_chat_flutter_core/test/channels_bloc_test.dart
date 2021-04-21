@@ -2,13 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'matchers/channel_matcher.dart';
 import 'mocks.dart';
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue<PaginationParams>(const PaginationParams());
+  });
+
   List<Channel> _generateChannels(
     StreamChatClient client, {
     int count = 3,
@@ -27,18 +31,6 @@ void main() {
       },
     );
   }
-
-  test(
-    'should throw assertion error if child is null',
-    () async {
-      const channelsBlocKey = Key('channelsBloc');
-      final channelsBloc = () => ChannelsBloc(
-            key: channelsBlocKey,
-            child: null,
-          );
-      expect(channelsBloc, throwsA(isA<AssertionError>()));
-    },
-  );
 
   testWidgets(
     'should throw if ChannelsBloc is used where StreamChat is not present in the widget tree',
@@ -70,7 +62,8 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -101,7 +94,8 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -117,12 +111,12 @@ void main() {
       final offlineChannels = _generateChannels(mockClient);
       final onlineChannels = _generateChannels(mockClient, offset: 3);
 
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer(
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer(
         (_) => Stream.fromIterable([offlineChannels, onlineChannels]),
       );
 
@@ -136,12 +130,12 @@ void main() {
         ]),
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -163,7 +157,8 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -176,14 +171,14 @@ void main() {
         find.byKey(channelsBlocKey),
       );
 
-      final error = 'Error! Error! Error!';
+      const error = 'Error! Error! Error!';
 
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenThrow(error);
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenThrow(error);
 
       channelsBlocState.queryChannels();
 
@@ -192,12 +187,12 @@ void main() {
         emitsError(error),
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
     },
   );
 
@@ -214,7 +209,8 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -229,38 +225,41 @@ void main() {
 
       final channels = _generateChannels(mockClient);
 
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer((_) => Stream.value(channels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: any(named: 'paginationParams'),
+          )).thenAnswer((_) => Stream.value(channels));
 
-      channelsBlocState.queryChannels();
+      const pagination = PaginationParams(limit: 3);
+      channelsBlocState.queryChannels(
+        paginationParams: pagination,
+      );
 
       await expectLater(
         channelsBlocState.channelsStream,
         emits(isSameChannelListAs(channels)),
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: any(named: 'paginationParams'),
+          )).called(1);
 
       final offset = channels.length;
-      final paginationParams = PaginationParams(offset: offset);
+      final paginationParams = pagination.copyWith(offset: offset);
 
       final newChannels = _generateChannels(mockClient, offset: offset);
 
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: paginationParams,
-      )).thenAnswer(
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: paginationParams,
+          )).thenAnswer(
         (_) => Stream.value(newChannels),
       );
 
@@ -277,12 +276,12 @@ void main() {
         ),
       ]);
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: paginationParams,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: paginationParams,
+          )).called(1);
     },
   );
 
@@ -299,7 +298,8 @@ void main() {
 
       final mockClient = MockClient();
 
-      when(mockClient.on(any, any, any, any)).thenAnswer((_) => Stream.empty());
+      when(() => mockClient.on(any(), any(), any(), any()))
+          .thenAnswer((_) => Stream.empty());
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -313,39 +313,41 @@ void main() {
       );
 
       final channels = _generateChannels(mockClient);
+      final paginationParams = const PaginationParams(
+        limit: 3,
+      );
 
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).thenAnswer((_) => Stream.value(channels));
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: paginationParams,
+          )).thenAnswer((_) => Stream.value(channels));
 
-      channelsBlocState.queryChannels();
+      channelsBlocState.queryChannels(
+        paginationParams: paginationParams,
+      );
 
       await expectLater(
         channelsBlocState.channelsStream,
         emits(isSameChannelListAs(channels)),
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: anyNamed('paginationParams'),
-      )).called(1);
-
-      final offset = channels.length;
-      final paginationParams = PaginationParams(offset: offset);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: paginationParams,
+          )).called(1);
 
       final error = 'Error! Error! Error!';
 
-      when(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: paginationParams,
-      )).thenThrow(error);
+      when(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: paginationParams,
+          )).thenThrow(error);
 
       channelsBlocState.queryChannels(paginationParams: paginationParams);
 
@@ -354,17 +356,17 @@ void main() {
         emitsError(error),
       );
 
-      verify(mockClient.queryChannels(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        paginationParams: paginationParams,
-      )).called(1);
+      verify(() => mockClient.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            paginationParams: paginationParams,
+          )).called(1);
     },
   );
 
   group('event controller test', () {
-    StreamController<Event> eventController;
+    late StreamController<Event> eventController;
     setUp(() {
       eventController = StreamController<Event>.broadcast();
     });
@@ -379,12 +381,12 @@ void main() {
           child: Offstage(),
         );
 
-        when(mockClient.on(any, any, any, any))
+        when(() => mockClient.on(any(), any(), any(), any()))
             .thenAnswer((_) => Stream.empty());
 
-        when(mockClient.on(
-          EventType.channelHidden,
-        )).thenAnswer((_) => eventController.stream);
+        when(() => mockClient.on(
+              EventType.channelHidden,
+            )).thenAnswer((_) => eventController.stream);
 
         await tester.pumpWidget(
           StreamChatCore(
@@ -399,23 +401,23 @@ void main() {
 
         final channels = _generateChannels(mockClient);
 
-        when(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).thenAnswer(
+        when(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).thenAnswer(
           (_) => Stream.value(channels),
         );
 
         await channelsBlocState.queryChannels();
 
-        verify(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).called(1);
+        verify(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).called(1);
 
         final channelHiddenEvent = Event(
           type: EventType.channelHidden,
@@ -435,7 +437,7 @@ void main() {
           ]),
         );
 
-        verify(mockClient.on(EventType.channelHidden)).called(1);
+        verify(() => mockClient.on(EventType.channelHidden)).called(1);
       },
     );
 
@@ -450,13 +452,13 @@ void main() {
           child: Offstage(),
         );
 
-        when(mockClient.on(any, any, any, any))
+        when(() => mockClient.on(any(), any(), any(), any()))
             .thenAnswer((_) => Stream.empty());
 
-        when(mockClient.on(
-          EventType.channelDeleted,
-          EventType.notificationRemovedFromChannel,
-        )).thenAnswer((_) => eventController.stream);
+        when(() => mockClient.on(
+              EventType.channelDeleted,
+              EventType.notificationRemovedFromChannel,
+            )).thenAnswer((_) => eventController.stream);
 
         await tester.pumpWidget(
           StreamChatCore(
@@ -471,31 +473,38 @@ void main() {
 
         final channels = _generateChannels(mockClient);
 
-        when(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).thenAnswer(
+        when(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).thenAnswer(
           (_) => Stream.value(channels),
         );
 
         await channelsBlocState.queryChannels();
 
-        verify(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).called(1);
+        verify(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).called(1);
 
         final channelDeletedOrNotificationRemovedEvent = Event(
-          channel: EventChannel(cid: channels.first.cid),
+          channel: EventChannel(
+            cid: channels.first.cid!,
+            updatedAt: DateTime.now(),
+            config: ChannelConfig(),
+            createdAt: DateTime.now(),
+            memberCount: 1,
+          ),
         );
 
         eventController.add(channelDeletedOrNotificationRemovedEvent);
 
-        final channelCid = channelDeletedOrNotificationRemovedEvent.channel.cid;
+        final channelCid =
+            channelDeletedOrNotificationRemovedEvent.channel?.cid;
         final newChannels = [...channels]
           ..removeWhere((it) => it.cid == channelCid);
 
@@ -507,10 +516,10 @@ void main() {
           ]),
         );
 
-        verify(mockClient.on(
-          EventType.channelDeleted,
-          EventType.notificationRemovedFromChannel,
-        )).called(1);
+        verify(() => mockClient.on(
+              EventType.channelDeleted,
+              EventType.notificationRemovedFromChannel,
+            )).called(1);
       },
     );
 
@@ -525,12 +534,12 @@ void main() {
           child: Offstage(),
         );
 
-        when(mockClient.on(any, any, any, any))
+        when(() => mockClient.on(any(), any(), any(), any()))
             .thenAnswer((_) => Stream.empty());
 
-        when(mockClient.on(
-          EventType.messageNew,
-        )).thenAnswer((_) => eventController.stream);
+        when(() => mockClient.on(
+              EventType.messageNew,
+            )).thenAnswer((_) => eventController.stream);
 
         await tester.pumpWidget(
           StreamChatCore(
@@ -545,23 +554,23 @@ void main() {
 
         final channels = _generateChannels(mockClient);
 
-        when(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).thenAnswer(
+        when(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).thenAnswer(
           (_) => Stream.value(channels),
         );
 
         await channelsBlocState.queryChannels();
 
-        verify(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).called(1);
+        verify(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).called(1);
 
         final messageNewEvent = Event(
           type: EventType.messageNew,
@@ -585,7 +594,7 @@ void main() {
           ]),
         );
 
-        verify(mockClient.on(EventType.messageNew)).called(1);
+        verify(() => mockClient.on(EventType.messageNew)).called(1);
       },
     );
 
@@ -609,16 +618,16 @@ void main() {
           shouldAddChannel: (e) => channels.map((it) => it.cid).contains(e.cid),
         );
 
-        when(mockClient.on(any, any, any, any))
+        when(() => mockClient.on(any(), any(), any(), any()))
             .thenAnswer((_) => Stream.empty());
 
-        when(mockClient.on(
-          EventType.channelHidden,
-        )).thenAnswer((_) => hiddenChannelEventController.stream);
+        when(() => mockClient.on(
+              EventType.channelHidden,
+            )).thenAnswer((_) => hiddenChannelEventController.stream);
 
-        when(mockClient.on(
-          EventType.messageNew,
-        )).thenAnswer((_) => eventController.stream);
+        when(() => mockClient.on(
+              EventType.messageNew,
+            )).thenAnswer((_) => eventController.stream);
 
         final messageNewEvent = Event(
           type: EventType.messageNew,
@@ -636,23 +645,23 @@ void main() {
           find.byKey(channelsBlocKey),
         );
 
-        when(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).thenAnswer(
+        when(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).thenAnswer(
           (_) => Stream.value(channels),
         );
 
         await channelsBlocState.queryChannels();
 
-        verify(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).called(1);
+        verify(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).called(1);
 
         final channelHiddenEvent = Event(
           type: EventType.channelHidden,
@@ -681,8 +690,8 @@ void main() {
           ]),
         );
 
-        verify(mockClient.on(EventType.channelHidden)).called(1);
-        verify(mockClient.on(EventType.messageNew)).called(1);
+        verify(() => mockClient.on(EventType.channelHidden)).called(1);
+        verify(() => mockClient.on(EventType.messageNew)).called(1);
       },
     );
 
@@ -703,14 +712,14 @@ void main() {
           shouldAddChannel: (_) => true,
         );
 
-        when(mockClient.state.channels).thenReturn(stateChannels);
+        when(() => mockClient.state.channels).thenReturn(stateChannels);
 
-        when(mockClient.on(any, any, any, any))
+        when(() => mockClient.on(any(), any(), any(), any()))
             .thenAnswer((_) => Stream.empty());
 
-        when(mockClient.on(
-          EventType.messageNew,
-        )).thenAnswer((_) => eventController.stream);
+        when(() => mockClient.on(
+              EventType.messageNew,
+            )).thenAnswer((_) => eventController.stream);
 
         await tester.pumpWidget(
           StreamChatCore(
@@ -723,23 +732,23 @@ void main() {
           find.byKey(channelsBlocKey),
         );
 
-        when(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).thenAnswer(
+        when(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).thenAnswer(
           (_) => Stream.value(channels),
         );
 
         await channelsBlocState.queryChannels();
 
-        verify(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).called(1);
+        verify(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).called(1);
 
         final messageNewEvent = Event(
           type: EventType.messageNew,
@@ -749,7 +758,7 @@ void main() {
         eventController.add(messageNewEvent);
 
         final newChannels = [...channels]
-          ..insert(0, stateChannels[stateChannels.keys.first]);
+          ..insert(0, stateChannels[stateChannels.keys.first]!);
 
         await expectLater(
           channelsBlocState.channelsStream,
@@ -759,7 +768,7 @@ void main() {
           ]),
         );
 
-        verify(mockClient.on(EventType.messageNew)).called(1);
+        verify(() => mockClient.on(EventType.messageNew)).called(1);
       },
     );
 
@@ -783,12 +792,12 @@ void main() {
           channelsComparator: channelComparator,
         );
 
-        when(mockClient.on(any, any, any, any))
+        when(() => mockClient.on(any(), any(), any(), any()))
             .thenAnswer((_) => Stream.empty());
 
-        when(mockClient.on(
-          EventType.messageNew,
-        )).thenAnswer((_) => eventController.stream);
+        when(() => mockClient.on(
+              EventType.messageNew,
+            )).thenAnswer((_) => eventController.stream);
 
         await tester.pumpWidget(
           StreamChatCore(
@@ -801,23 +810,23 @@ void main() {
           find.byKey(channelsBlocKey),
         );
 
-        when(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).thenAnswer(
+        when(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).thenAnswer(
           (_) => Stream.value(channels),
         );
 
         await channelsBlocState.queryChannels();
 
-        verify(mockClient.queryChannels(
-          filter: anyNamed('filter'),
-          sort: anyNamed('sort'),
-          options: anyNamed('options'),
-          paginationParams: anyNamed('paginationParams'),
-        )).called(1);
+        verify(() => mockClient.queryChannels(
+              filter: any(named: 'filter'),
+              sort: any(named: 'sort'),
+              options: any(named: 'options'),
+              paginationParams: any(named: 'paginationParams'),
+            )).called(1);
 
         final messageNewEvent = Event(
           type: EventType.messageNew,
@@ -836,7 +845,7 @@ void main() {
           ]),
         );
 
-        verify(mockClient.on(EventType.messageNew)).called(1);
+        verify(() => mockClient.on(EventType.messageNew)).called(1);
       },
     );
 

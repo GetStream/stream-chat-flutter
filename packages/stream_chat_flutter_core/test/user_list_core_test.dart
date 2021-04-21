@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/src/user_list_core.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -32,58 +32,6 @@ void main() {
       },
     );
   }
-
-  test(
-    'should throw assertion error in case listBuilder is null',
-    () {
-      final userListCore = () => UserListCore(
-            listBuilder: null,
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (Object error) => Offstage(),
-          );
-      expect(userListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case loadingBuilder is null',
-    () {
-      final userListCore = () => UserListCore(
-            listBuilder: (_, __) => Offstage(),
-            loadingBuilder: null,
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (Object error) => Offstage(),
-          );
-      expect(userListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case emptyBuilder is null',
-    () {
-      final userListCore = () => UserListCore(
-            listBuilder: (_, __) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: null,
-            errorBuilder: (Object error) => Offstage(),
-          );
-      expect(userListCore, throwsA(isA<AssertionError>()));
-    },
-  );
-
-  test(
-    'should throw assertion error in case errorBuilder is null',
-    () {
-      final userListCore = () => UserListCore(
-            listBuilder: (_, __) => Offstage(),
-            loadingBuilder: (BuildContext context) => Offstage(),
-            emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: null,
-          );
-      expect(userListCore, throwsA(isA<AssertionError>()));
-    },
-  );
 
   testWidgets(
     'should throw if UserListCore is used where UsersBloc is not present '
@@ -183,12 +131,12 @@ void main() {
       final mockClient = MockClient();
 
       const error = 'Error! Error! Error!';
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenThrow(error);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenThrow(error);
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -203,12 +151,12 @@ void main() {
 
       expect(find.byKey(errorWidgetKey), findsOneWidget);
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
     },
   );
 
@@ -228,12 +176,12 @@ void main() {
       final mockClient = MockClient();
 
       const users = <User>[];
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -248,12 +196,12 @@ void main() {
 
       expect(find.byKey(emptyWidgetKey), findsOneWidget);
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
     },
   );
 
@@ -273,12 +221,12 @@ void main() {
       final mockClient = MockClient();
 
       final users = _generateUsers();
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       await tester.pumpWidget(
         StreamChatCore(
@@ -293,12 +241,12 @@ void main() {
 
       expect(find.byKey(listWidgetKey), findsOneWidget);
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
     },
   );
 
@@ -314,7 +262,7 @@ void main() {
           child: ListView(
             children: items.map((e) {
               return Container(
-                key: Key(e.key),
+                key: Key(e.key ?? ''),
                 child: e.when(
                   headerItem: (heading) => Text(heading),
                   userItem: (user) => Text(user.id),
@@ -332,12 +280,12 @@ void main() {
       final mockClient = MockClient();
 
       final users = _generateUsers();
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       await tester.pumpWidget(
         Directionality(
@@ -359,12 +307,12 @@ void main() {
         expect(find.byKey(Key('USER-${user.id}')), findsOneWidget);
       }
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
     },
   );
 
@@ -382,7 +330,7 @@ void main() {
           child: ListView(
             children: items.map((e) {
               return Container(
-                key: Key(e.key),
+                key: Key(e.key ?? ''),
                 child: e.when(
                   headerItem: (heading) => Text(heading),
                   userItem: (user) => Text(user.id),
@@ -401,12 +349,12 @@ void main() {
       final mockClient = MockClient();
 
       final users = _generateUsers();
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       await tester.pumpWidget(
         Directionality(
@@ -428,12 +376,12 @@ void main() {
         expect(find.byKey(Key('USER-${user.id}')), findsOneWidget);
       }
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
 
       final userListCoreState = tester.state<UserListCoreState>(
         find.byKey(userListCoreKey),
@@ -442,12 +390,14 @@ void main() {
       final offset = users.length;
       final paginatedUsers = _generateUsers(offset: offset);
       final updatedPagination = pagination.copyWith(offset: offset);
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: updatedPagination,
-      )).thenAnswer((_) async => QueryUsersResponse()..users = paginatedUsers);
+      when(() => mockClient.queryUsers(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                options: any(named: 'options'),
+                pagination: updatedPagination,
+              ))
+          .thenAnswer(
+              (_) async => QueryUsersResponse()..users = paginatedUsers);
 
       await userListCoreState.paginateData();
 
@@ -458,12 +408,12 @@ void main() {
         expect(find.byKey(Key('USER-${user.id}')), findsOneWidget);
       }
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: updatedPagination,
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: updatedPagination,
+          )).called(1);
     },
   );
 
@@ -473,7 +423,7 @@ void main() {
     (tester) async {
       const pagination = PaginationParams();
 
-      StateSetter _stateSetter;
+      StateSetter? _stateSetter;
       int limit = pagination.limit;
 
       const userListCoreKey = Key('userListCore');
@@ -485,7 +435,7 @@ void main() {
               child: ListView(
                 children: items.map((e) {
                   return Container(
-                    key: Key(e.key),
+                    key: Key(e.key ?? ''),
                     child: e.when(
                       headerItem: (heading) => Text(heading),
                       userItem: (user) => Text(user.id),
@@ -504,12 +454,12 @@ void main() {
       final mockClient = MockClient();
 
       final users = _generateUsers();
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       await tester.pumpWidget(
         Directionality(
@@ -535,24 +485,25 @@ void main() {
         expect(find.byKey(Key('USER-${user.id}')), findsOneWidget);
       }
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
 
       // Rebuilding UserListCore with new pagination limit
-      _stateSetter(() => limit = 6);
+      _stateSetter?.call(() => limit = 6);
 
       final updatedUsers = _generateUsers(count: limit);
       final updatedPagination = pagination.copyWith(limit: limit);
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: updatedPagination,
-      )).thenAnswer((_) async => QueryUsersResponse()..users = updatedUsers);
+      when(() => mockClient.queryUsers(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                options: any(named: 'options'),
+                pagination: updatedPagination,
+              ))
+          .thenAnswer((_) async => QueryUsersResponse()..users = updatedUsers);
 
       await tester.pumpAndSettle();
 
@@ -561,12 +512,12 @@ void main() {
         expect(find.byKey(Key('USER-${user.id}')), findsOneWidget);
       }
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: updatedPagination,
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: updatedPagination,
+          )).called(1);
     },
   );
 }

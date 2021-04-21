@@ -27,7 +27,7 @@ class ChannelModel {
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
         assert(
-          cid != null || (id != null && type != null),
+          (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
         ),
         id = id ?? cid!.split(':')[1],
