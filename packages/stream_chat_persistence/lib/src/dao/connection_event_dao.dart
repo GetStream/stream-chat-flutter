@@ -15,19 +15,18 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
   ConnectionEventDao(MoorChatDatabase db) : super(db);
 
   /// Get the latest stored connection event
-  Future<Event> get connectionEvent => select(connectionEvents)
+  Future<Event?> get connectionEvent => select(connectionEvents)
       .map((eventEntity) => eventEntity.toEvent())
       .getSingleOrNull();
 
   /// Get the latest stored lastSyncAt
-  Future<DateTime> get lastSyncAt =>
+  Future<DateTime?> get lastSyncAt =>
       select(connectionEvents).getSingleOrNull().then((r) => r?.lastSyncAt);
 
   /// Update stored connection event with latest data
-  Future<void> updateConnectionEvent(Event event) async =>
-      transaction(() async {
+  Future<int> updateConnectionEvent(Event event) => transaction(() async {
         final connectionInfo = await select(connectionEvents).getSingleOrNull();
-        await into(connectionEvents).insert(
+        return into(connectionEvents).insert(
           ConnectionEventEntity(
             id: 1,
             lastSyncAt: connectionInfo?.lastSyncAt,

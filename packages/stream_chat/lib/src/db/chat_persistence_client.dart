@@ -7,6 +7,7 @@ import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/read.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/extensions/iterable_extension.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
@@ -24,10 +25,10 @@ abstract class ChatPersistenceClient {
   });
 
   /// Get stored connection event
-  Future<Event> getConnectionInfo();
+  Future<Event?> getConnectionInfo();
 
   /// Get stored lastSyncAt
-  Future<DateTime> getLastSyncAt();
+  Future<DateTime?> getLastSyncAt();
 
   /// Update stored connection event
   Future<void> updateConnectionInfo(Event event);
@@ -39,7 +40,7 @@ abstract class ChatPersistenceClient {
   Future<List<String>> getChannelCids();
 
   /// Get stored [ChannelModel]s by providing channel [cid]
-  Future<ChannelModel> getChannelByCid(String cid);
+  Future<ChannelModel?> getChannelByCid(String cid);
 
   /// Get stored channel [Member]s by providing channel [cid]
   Future<List<Member>> getMembersByCid(String cid);
@@ -78,7 +79,7 @@ abstract class ChatPersistenceClient {
     return ChannelState(
       members: data[0] as List<Member>,
       read: data[1] as List<Read>,
-      channel: data[2] as ChannelModel,
+      channel: data[2] as ChannelModel?,
       messages: data[3] as List<Message>,
       pinnedMessages: data[4] as List<Message>,
     );
@@ -90,7 +91,7 @@ abstract class ChatPersistenceClient {
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic>? filter,
-    List<SortOption<ChannelModel>>? sort = const [],
+    List<SortOption<ChannelModel>>? sort,
     PaginationParams? paginationParams,
   });
 
@@ -192,17 +193,17 @@ abstract class ChatPersistenceClient {
       deleteMembers,
     ]);
 
-    final channels = cleanedChannelStates
-        .map((it) => it.channel)
-        .where((it) => it != null) as Iterable<ChannelModel>;
+    final channels = cleanedChannelStates.map((it) => it.channel).withNullifyer;
 
-    final reactions =
-        cleanedChannelStates.expand((it) => it.messages).expand((it) => [
+    final reactions = cleanedChannelStates
+        .expand((it) => it.messages)
+        .expand((it) => [
               if (it.ownReactions != null)
                 ...it.ownReactions!.where((r) => r.userId != null),
               if (it.latestReactions != null)
                 ...it.latestReactions!.where((r) => r.userId != null),
-            ]);
+            ])
+        .withNullifyer;
 
     final users = cleanedChannelStates
         .map((cs) => [
@@ -220,7 +221,7 @@ abstract class ChatPersistenceClient {
               ...cs.members.map((m) => m.user),
             ])
         .expand((it) => it)
-        .where((it) => it != null) as Iterable<User>;
+        .withNullifyer;
 
     final updateMessagesFuture = cleanedChannelStates.map((it) {
       final cid = it.channel!.cid;

@@ -23,7 +23,7 @@ class OwnUser extends User {
     DateTime? updatedAt,
     DateTime? lastActive,
     bool online = false,
-    Map<String, dynamic> extraData = const {},
+    Map<String, Object> extraData = const {},
     bool banned = false,
   }) : super(
           id: id,

@@ -32,7 +32,7 @@ void main() {
     test('should return list of String if json data list is provided', () {
       final data = ['data1', 'data2', 'data3'];
       final res = listConverter.mapToDart(jsonEncode(data));
-      expect(res.length, data.length);
+      expect(res!.length, data.length);
     });
   });
 

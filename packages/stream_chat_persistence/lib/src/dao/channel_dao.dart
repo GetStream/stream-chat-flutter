@@ -15,11 +15,11 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
   ChannelDao(MoorChatDatabase db) : super(db);
 
   /// Get channel by cid
-  Future<ChannelModel> getChannelByCid(String cid) async =>
+  Future<ChannelModel?> getChannelByCid(String cid) async =>
       (select(channels)..where((c) => c.cid.equals(cid))).join([
         leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
       ]).map((rows) {
-        final channel = rows.readTableOrNull(channels);
+        final channel = rows.readTable(channels);
         final createdBy = rows.readTableOrNull(users);
         return channel.toChannelModel(createdBy: createdBy?.toUser());
       }).getSingleOrNull();
@@ -30,7 +30,7 @@ class ChannelDao extends DatabaseAccessor<MoorChatDatabase>
   /// 1. Channel Reads
   /// 2. Channel Members
   /// 3. Channel Messages -> Messages Reactions
-  Future<void> deleteChannelByCids(List<String> cids) async =>
+  Future<int> deleteChannelByCids(List<String> cids) async =>
       (delete(channels)..where((tbl) => tbl.cid.isIn(cids))).go();
 
   /// Get the channel cids saved in the storage

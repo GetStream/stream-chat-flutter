@@ -6,8 +6,8 @@ import 'package:test/test.dart';
 import '../utils/date_matcher.dart';
 
 void main() {
-  ConnectionEventDao eventDao;
-  MoorChatDatabase database;
+  late ConnectionEventDao eventDao;
+  late MoorChatDatabase database;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');
@@ -30,7 +30,8 @@ void main() {
 
     // Should match the added event
     final updatedEvent = await eventDao.connectionEvent;
-    expect(updatedEvent.me.id, newEvent.me.id);
+    expect(updatedEvent, isNotNull);
+    expect(updatedEvent!.me!.id, newEvent.me!.id);
     expect(updatedEvent.totalUnreadCount, newEvent.totalUnreadCount);
     expect(updatedEvent.unreadChannels, newEvent.unreadChannels);
   });
@@ -70,7 +71,8 @@ void main() {
 
     // Should match the previously added event
     final fetchedEvent = await eventDao.connectionEvent;
-    expect(fetchedEvent.me.id, event.me.id);
+    expect(fetchedEvent, isNotNull);
+    expect(fetchedEvent!.me!.id, event.me!.id);
     expect(fetchedEvent.totalUnreadCount, event.totalUnreadCount);
     expect(fetchedEvent.unreadChannels, event.unreadChannels);
 
@@ -80,7 +82,8 @@ void main() {
 
     // Should match the updated event
     final fetchedNewEvent = await eventDao.connectionEvent;
-    expect(fetchedNewEvent.me.id, event.me.id);
+    expect(fetchedNewEvent, isNotNull);
+    expect(fetchedNewEvent!.me!.id, event.me!.id);
     expect(fetchedNewEvent.totalUnreadCount, event.totalUnreadCount);
     expect(fetchedNewEvent.unreadChannels, newEvent.unreadChannels);
   });

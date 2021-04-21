@@ -620,7 +620,7 @@ class Channel {
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
-    Map<String, dynamic> extraData = const {},
+    Map<String, Object> extraData = const {},
     bool enforceUnique = false,
   }) async {
     _checkInitialized();

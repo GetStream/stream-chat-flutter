@@ -209,7 +209,7 @@ class GetMessageResponse extends _BaseResponse {
     final res = _$GetMessageResponseFromJson(json);
     final jsonChannel = res.message.extraData.remove('channel');
     if (jsonChannel != null) {
-      res.channel = ChannelModel.fromJson(jsonChannel);
+      res.channel = ChannelModel.fromJson(jsonChannel as Map<String, dynamic>);
     }
     return res;
   }

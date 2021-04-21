@@ -6,7 +6,7 @@ import 'package:moor/moor.dart';
 /// by the sqlite backend.
 class MapConverter<T> extends TypeConverter<Map<String, T>, String> {
   @override
-  Map<String, T> mapToDart(String fromDb) {
+  Map<String, T>? mapToDart(String? fromDb) {
     if (fromDb == null) {
       return null;
     }
@@ -14,7 +14,7 @@ class MapConverter<T> extends TypeConverter<Map<String, T>, String> {
   }
 
   @override
-  String mapToSql(Map<String, T> value) {
+  String? mapToSql(Map<String, T>? value) {
     if (value == null) {
       return null;
     }

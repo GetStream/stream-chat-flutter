@@ -84,7 +84,7 @@ class ChannelModel {
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic>? extraData;
+  final Map<String, Object>? extraData;
 
   /// The team the channel belongs to
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -108,8 +108,9 @@ class ChannelModel {
   ];
 
   /// Shortcut for channel name
-  String? get name =>
-      extraData?.containsKey('name') == true ? extraData!['name'] : cid;
+  String get name => extraData?.containsKey('name') == true
+      ? extraData!['name'] as String
+      : cid;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
@@ -129,7 +130,7 @@ class ChannelModel {
     DateTime? updatedAt,
     DateTime? deletedAt,
     int? memberCount,
-    Map<String, dynamic>? extraData,
+    Map<String, Object>? extraData,
     String? team,
   }) =>
       ChannelModel(

@@ -6,8 +6,8 @@ import 'package:test/test.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 void main() {
-  UserDao userDao;
-  MoorChatDatabase database;
+  late UserDao userDao;
+  late MoorChatDatabase database;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');

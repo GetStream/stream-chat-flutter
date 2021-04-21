@@ -16,7 +16,7 @@ void main() {
     );
     final event = entity.toEvent();
     expect(event, isA<Event>());
-    expect(event.me.id, ownUser.id);
+    expect(event.me!.id, ownUser.id);
     expect(event.totalUnreadCount, entity.totalUnreadCount);
     expect(event.unreadChannels, entity.unreadChannels);
   });

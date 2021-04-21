@@ -21,22 +21,22 @@ class Members extends Table {
   DateTimeColumn get inviteRejectedAt => dateTime().nullable()();
 
   /// True if the user has been invited to the channel
-  BoolColumn get invited => boolean().nullable()();
+  BoolColumn get invited => boolean().withDefault(const Constant(false))();
 
   /// True if the member is banned from the channel
-  BoolColumn get banned => boolean().nullable()();
+  BoolColumn get banned => boolean().withDefault(const Constant(false))();
 
   /// True if the member is shadow banned from the channel
-  BoolColumn get shadowBanned => boolean().nullable()();
+  BoolColumn get shadowBanned => boolean().withDefault(const Constant(false))();
 
   /// True if the user is a moderator of the channel
-  BoolColumn get isModerator => boolean().nullable()();
+  BoolColumn get isModerator => boolean().withDefault(const Constant(false))();
 
   /// The date of creation
-  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// The last date of update
-  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {

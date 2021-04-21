@@ -30,7 +30,9 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
             ?.map((e) => Action.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
-    extraData: json['extra_data'] as Map<String, dynamic>?,
+    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
+      (k, e) => MapEntry(k, e as Object),
+    ),
     file: json['file'] == null
         ? null
         : AttachmentFile.fromJson(json['file'] as Map<String, dynamic>),

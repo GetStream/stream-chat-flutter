@@ -111,7 +111,7 @@ class Attachment extends Equatable {
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic>? extraData;
+  final Map<String, Object>? extraData;
 
   /// The attachment ID.
   ///
@@ -180,7 +180,7 @@ class Attachment extends Equatable {
     List<Action>? actions,
     AttachmentFile? file,
     UploadState? uploadState,
-    Map<String, dynamic>? extraData,
+    Map<String, Object>? extraData,
   }) =>
       Attachment(
         id: id ?? this.id,

@@ -8,8 +8,8 @@ import 'package:test/test.dart';
 import '../utils/date_matcher.dart';
 
 void main() {
-  MoorChatDatabase database;
-  ChannelQueryDao channelQueryDao;
+  late MoorChatDatabase database;
+  late ChannelQueryDao channelQueryDao;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');
@@ -147,7 +147,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
+          isSameDateAs(insertedChannel.lastMessageAt!),
         );
       }
     });
@@ -160,10 +160,7 @@ void main() {
         const pagination = PaginationParams(offset: offset, limit: limit);
 
         // Inserting test data for get channels
-        final insertedChannels = await _insertTestDataForGetChannel(
-          filter,
-          count: 30,
-        );
+        await _insertTestDataForGetChannel(filter, count: 30);
 
         // Should match with the inserted channels
         final updatedChannels = await channelQueryDao.getChannels(
@@ -210,7 +207,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
+          isSameDateAs(insertedChannel.lastMessageAt!),
         );
       }
     });
@@ -226,8 +223,8 @@ void main() {
 
     test('should return sorted channels using custom field', () async {
       int sortComparator(ChannelModel a, ChannelModel b) {
-        final aData = a.extraData['test_custom_field'] as int;
-        final bData = b.extraData['test_custom_field'] as int;
+        final aData = a.extraData!['test_custom_field'] as int;
+        final bData = b.extraData!['test_custom_field'] as int;
         return bData.compareTo(aData);
       }
 
@@ -261,7 +258,7 @@ void main() {
         // Should match lastMessageAt date
         expect(
           updatedChannel.lastMessageAt,
-          isSameDateAs(insertedChannel.lastMessageAt),
+          isSameDateAs(insertedChannel.lastMessageAt!),
         );
       }
     });

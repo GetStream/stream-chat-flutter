@@ -34,7 +34,9 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['last_active'] as String),
     online: json['online'] as bool? ?? false,
-    extraData: json['extra_data'] as Map<String, dynamic>,
+    extraData: (json['extra_data'] as Map<String, dynamic>).map(
+      (k, e) => MapEntry(k, e as Object),
+    ),
     banned: json['banned'] as bool? ?? false,
   );
 }

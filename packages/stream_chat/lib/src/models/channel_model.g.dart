@@ -31,7 +31,9 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['deleted_at'] as String),
     memberCount: json['member_count'] as int? ?? 0,
-    extraData: json['extra_data'] as Map<String, dynamic>?,
+    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
+      (k, e) => MapEntry(k, e as Object),
+    ),
     team: json['team'] as String?,
   );
 }
