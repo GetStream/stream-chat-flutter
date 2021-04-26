@@ -168,7 +168,12 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
-        sort: [SortOption('member_count', comparator: sortComparator)],
+        sort: [
+          SortOption(
+            'member_count',
+            comparator: sortComparator,
+          )
+        ],
       );
 
       expect(updatedChannels.length, insertedChannels.length);

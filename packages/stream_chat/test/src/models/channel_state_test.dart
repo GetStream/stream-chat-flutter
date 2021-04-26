@@ -861,10 +861,10 @@ void main() {
           DateTime.parse('2019-04-03T18:43:33.213374Z'));
       expect(channelState.channel?.createdBy, isA<User>());
       expect(channelState.channel?.frozen, true);
-      expect(channelState.channel?.extraData!['example'], 1);
-      expect(channelState.channel?.extraData!['name'], '#dev');
+      expect(channelState.channel?.extraData['example'], 1);
+      expect(channelState.channel?.extraData['name'], '#dev');
       expect(
-        channelState.channel?.extraData!['image'],
+        channelState.channel?.extraData['image'],
         'https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png',
       );
       expect(channelState.messages, hasLength(25));
