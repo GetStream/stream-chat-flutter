@@ -28,6 +28,7 @@ export './src/models/channel_state.dart';
 export './src/models/command.dart';
 export './src/models/device.dart';
 export './src/models/event.dart';
+export './src/models/filter.dart' show Filter;
 export './src/models/member.dart';
 export './src/models/message.dart';
 export './src/models/mute.dart';
