@@ -77,7 +77,7 @@ extension FilterOperatorX on FilterOperator {
 /// of type messaging where the current user is a member
 ///
 /// ```dart
-/// val filter = Filter.and(
+/// final filter = Filter.and(
 ///     Filter.equal('type', 'messaging'),
 ///     Filter.in_('members', [user.id])
 /// )
