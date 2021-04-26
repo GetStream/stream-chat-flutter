@@ -25,8 +25,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
-        child: child,
         client: client,
+        child: child,
       ),
       home: SplitView(),
     );
@@ -39,7 +39,7 @@ class SplitView extends StatefulWidget {
 }
 
 class _SplitViewState extends State<SplitView> {
-  Channel selectedChannel;
+  Channel? selectedChannel;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +47,7 @@ class _SplitViewState extends State<SplitView> {
       direction: Axis.horizontal,
       children: <Widget>[
         Flexible(
+          flex: 1,
           child: ChannelListPage(
             onTap: (channel) {
               setState(() {
@@ -54,15 +55,15 @@ class _SplitViewState extends State<SplitView> {
               });
             },
           ),
-          flex: 1,
         ),
         Flexible(
+          flex: 2,
           child: Scaffold(
             body: selectedChannel != null
                 ? StreamChannel(
-                    key: ValueKey(selectedChannel.cid),
+                    key: ValueKey(selectedChannel!.cid),
+                    channel: selectedChannel!,
                     child: ChannelPage(),
-                    channel: selectedChannel,
                   )
                 : Center(
                     child: Text(
@@ -71,7 +72,6 @@ class _SplitViewState extends State<SplitView> {
                     ),
                   ),
           ),
-          flex: 2,
         ),
       ],
     );
@@ -79,7 +79,7 @@ class _SplitViewState extends State<SplitView> {
 }
 
 class ChannelListPage extends StatelessWidget {
-  final void Function(Channel) onTap;
+  final void Function(Channel)? onTap;
 
   ChannelListPage({this.onTap});
 
@@ -90,12 +90,12 @@ class ChannelListPage extends StatelessWidget {
         child: ChannelListView(
           onChannelTap: onTap != null
               ? (channel, _) {
-                  onTap(channel);
+                  onTap!(channel);
                 }
               : null,
           filter: Filter.in_(
             'members',
-            [StreamChat.of(context).user.id],
+            [StreamChat.of(context).user!.id],
           ),
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
@@ -109,7 +109,7 @@ class ChannelListPage extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -610,7 +609,7 @@ class MessageInputState extends State<MessageInput> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    constraints: BoxConstraints.tight(Size(64, 24)),
+                    constraints: BoxConstraints.tight(Size(84, 24)),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: theme.colorTheme.accentBlue,
@@ -1105,10 +1104,14 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _addAttachment(AssetEntity medium) async {
-    final mediaFile = await (medium.originFile.timeout(
+    final mediaFile = await medium.originFile.timeout(
       Duration(seconds: 5),
       onTimeout: () => medium.originFile,
-    ) as FutureOr<File>);
+    );
+
+    if (mediaFile == null) {
+      return;
+    }
 
     var file = AttachmentFile(
       path: mediaFile.path,

@@ -61,8 +61,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       builder: (context, widget) {
         return StreamChat(
-          child: widget,
           client: client,
+          child: widget,
         );
       },
       home: StreamChannel(
@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
 class ChannelPage extends StatelessWidget {
   /// Creates the page that shows the list of messages
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

@@ -21,7 +21,12 @@ class GiphyAttachment extends AttachmentWidget {
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(
+          key: key,
+          message: message,
+          attachment: attachment,
+          size: size,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +178,7 @@ class GiphyAttachment extends AttachmentWidget {
                                     .black
                                     .withOpacity(0.5),
                               ),
+                          maxLines: 1,
                         ),
                       ),
                     ),

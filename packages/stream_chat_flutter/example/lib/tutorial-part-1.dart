@@ -55,8 +55,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       builder: (context, widget) {
         return StreamChat(
-          child: widget,
           client: client,
+          child: widget,
         );
       },
       home: StreamChannel(
@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

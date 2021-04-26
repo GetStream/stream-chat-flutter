@@ -446,7 +446,7 @@ class _MessageWidgetState extends State<MessageWidget>
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
               child: FractionallySizedBox(
                 alignment: Alignment.centerLeft,
-                widthFactor: 0.75,
+                widthFactor: 0.78,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,

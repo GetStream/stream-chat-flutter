@@ -177,7 +177,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   @override
   ImageStreamCompleter load(key, decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode) as Future<ui.Codec>,
+      codec: _loadAsync(key, decode),
       scale: 1.0,
       informationCollector: () sync* {
         yield ErrorDescription('Id: ${media.id}');
@@ -185,11 +185,10 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
     );
   }
 
-  Future<ui.Codec?> _loadAsync(
+  Future<ui.Codec> _loadAsync(
       MediaThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
     final bytes = await media.thumbData;
-    if (bytes?.isNotEmpty != true) return null;
 
     return await decode(bytes!);
   }

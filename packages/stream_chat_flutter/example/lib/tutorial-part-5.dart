@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
-        child: child,
         client: client,
+        child: child,
       ),
       home: ChannelListPage(),
     );
@@ -54,7 +54,7 @@ class ChannelListPage extends StatelessWidget {
         child: ChannelListView(
           filter: Filter.in_(
             'members',
-            [StreamChat.of(context).user.id],
+            [StreamChat.of(context).user!.id],
           ),
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
@@ -69,7 +69,7 @@ class ChannelListPage extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -95,7 +95,7 @@ class ChannelPage extends StatelessWidget {
     List<Message> messages,
   ) {
     final message = details.message;
-    final isCurrentUser = StreamChat.of(context).user.id == message.user.id;
+    final isCurrentUser = StreamChat.of(context).user!.id == message.user!.id;
     final textAlign = isCurrentUser ? TextAlign.right : TextAlign.left;
     final color = isCurrentUser ? Colors.blueGrey : Colors.blue;
 
@@ -110,11 +110,11 @@ class ChannelPage extends StatelessWidget {
         ),
         child: ListTile(
           title: Text(
-            message.text,
+            message.text!,
             textAlign: textAlign,
           ),
           subtitle: Text(
-            message.user.extraData['name'],
+            message.user!.extraData['name'] as String,
             textAlign: textAlign,
           ),
         ),
