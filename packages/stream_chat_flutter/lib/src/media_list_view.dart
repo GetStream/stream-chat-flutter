@@ -21,10 +21,10 @@ extension on Duration {
 
 class MediaListView extends StatefulWidget {
   final List<String> selectedIds;
-  final void Function(AssetEntity media) onSelect;
+  final void Function(AssetEntity media)? onSelect;
 
   const MediaListView({
-    Key key,
+    Key? key,
     this.selectedIds = const [],
     this.onSelect,
   }) : super(key: key);
@@ -58,7 +58,7 @@ class _MediaListViewState extends State<MediaListView> {
             child: InkWell(
               onTap: () {
                 if (widget.onSelect != null) {
-                  widget.onSelect(media);
+                  widget.onSelect!(media);
                 }
               },
               child: Stack(
@@ -147,7 +147,7 @@ class _MediaListViewState extends State<MediaListView> {
     final assetList = await PhotoManager.getAssetPathList(
       hasAll: true,
     ).then((value) {
-      if (value?.isNotEmpty == true) {
+      if (value.isNotEmpty == true) {
         return value.singleWhere((element) => element.isAll);
       }
     });
@@ -169,29 +169,29 @@ class _MediaListViewState extends State<MediaListView> {
 
 class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   const MediaThumbnailProvider({
-    @required this.media,
-  }) : assert(media != null);
+    required this.media,
+  });
 
   final AssetEntity media;
 
   @override
   ImageStreamCompleter load(key, decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
+      codec: _loadAsync(key, decode) as Future<ui.Codec>,
       scale: 1.0,
       informationCollector: () sync* {
-        yield ErrorDescription('Id: ${media?.id}');
+        yield ErrorDescription('Id: ${media.id}');
       },
     );
   }
 
-  Future<ui.Codec> _loadAsync(
+  Future<ui.Codec?> _loadAsync(
       MediaThumbnailProvider key, DecoderCallback decode) async {
     assert(key == this);
     final bytes = await media.thumbData;
     if (bytes?.isNotEmpty != true) return null;
 
-    return await decode(bytes);
+    return await decode(bytes!);
   }
 
   @override
@@ -203,12 +203,12 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) return false;
     final MediaThumbnailProvider typedOther = other;
-    return media?.id == typedOther.media?.id;
+    return media.id == typedOther.media.id;
   }
 
   @override
-  int get hashCode => media?.id?.hashCode ?? 0;
+  int get hashCode => media.id.hashCode;
 
   @override
-  String toString() => '$runtimeType("${media?.id}")';
+  String toString() => '$runtimeType("${media.id}")';
 }

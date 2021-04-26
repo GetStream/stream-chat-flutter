@@ -14,19 +14,19 @@ import 'stream_chat_theme.dart';
 
 class MessageReactionsModal extends StatelessWidget {
   final Message message;
-  final MessageTheme messageTheme;
+  final MessageTheme? messageTheme;
   final bool reverse;
   final bool showReactions;
   final DisplayWidget showUserAvatar;
-  final ShapeBorder messageShape;
-  final ShapeBorder attachmentShape;
-  final void Function(User) onUserAvatarTap;
-  final BorderRadius attachmentBorderRadiusGeometry;
+  final ShapeBorder? messageShape;
+  final ShapeBorder? attachmentShape;
+  final void Function(User)? onUserAvatarTap;
+  final BorderRadius? attachmentBorderRadiusGeometry;
 
   const MessageReactionsModal({
-    Key key,
-    @required this.message,
-    @required this.messageTheme,
+    Key? key,
+    required this.message,
+    required this.messageTheme,
     this.showReactions = true,
     this.messageShape,
     this.attachmentShape,
@@ -42,10 +42,10 @@ class MessageReactionsModal extends StatelessWidget {
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
-    var messageTextLength = message.text.length;
+    var messageTextLength = message.text!.length;
     if (message.quotedMessage != null) {
-      var quotedMessageLength = message.quotedMessage.text.length + 40;
-      if (message.quotedMessage.attachments?.isNotEmpty == true) {
+      var quotedMessageLength = message.quotedMessage!.text!.length + 40;
+      if (message.quotedMessage!.attachments.isNotEmpty == true) {
         quotedMessageLength += 40;
       }
       if (quotedMessageLength > messageTextLength) {
@@ -53,8 +53,8 @@ class MessageReactionsModal extends StatelessWidget {
       }
     }
     final roughSentenceSize =
-        messageTextLength * messageTheme.messageText.fontSize * 1.2;
-    final divFactor = message.attachments?.isNotEmpty == true
+        messageTextLength * (messageTheme?.messageText?.fontSize ?? 1) * 1.2;
+    final divFactor = message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
@@ -64,7 +64,7 @@ class MessageReactionsModal extends StatelessWidget {
       curve: Curves.easeInOutBack,
       builder: (context, val, snapshot) {
         final hasFileAttachment =
-            message.attachments?.any((it) => it.type == 'file') == true;
+            message.attachments.any((it) => it.type == 'file') == true;
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => Navigator.maybePop(context),
@@ -92,11 +92,10 @@ class MessageReactionsModal extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           if (showReactions &&
-                              (message.status == MessageSendingStatus.sent ||
-                                  message.status == null))
+                              (message.status == MessageSendingStatus.sent))
                             Align(
                               alignment: Alignment(
-                                  user.id == message.user.id
+                                  user!.id == message.user!.id
                                       ? (divFactor > 1.0
                                           ? 0.0
                                           : (1.0 - divFactor))
@@ -115,8 +114,8 @@ class MessageReactionsModal extends StatelessWidget {
                               key: Key('MessageWidget'),
                               reverse: reverse,
                               message: message.copyWith(
-                                text: message.text.length > 200
-                                    ? '${message.text.substring(0, 200)}...'
+                                text: message.text!.length > 200
+                                    ? '${message.text!.substring(0, 200)}...'
                                     : message.text,
                               ),
                               messageTheme: messageTheme,
@@ -138,12 +137,11 @@ class MessageReactionsModal extends StatelessWidget {
                               showInChannelIndicator: false,
                               textPadding: EdgeInsets.symmetric(
                                 vertical: 8.0,
-                                horizontal: message.text.isOnlyEmoji ? 0 : 16.0,
+                                horizontal:
+                                    message.text!.isOnlyEmoji ? 0 : 16.0,
                               ),
                               showReactionPickerIndicator: showReactions &&
-                                  (message.status ==
-                                          MessageSendingStatus.sent ||
-                                      message.status == null),
+                                  (message.status == MessageSendingStatus.sent),
                             ),
                           ),
                           if (message.latestReactions?.isNotEmpty == true) ...[
@@ -188,10 +186,10 @@ class MessageReactionsModal extends StatelessWidget {
                   spacing: 16,
                   runSpacing: 16,
                   alignment: WrapAlignment.start,
-                  children: message.latestReactions
+                  children: message.latestReactions!
                       .map((e) => _buildReaction(
                             e,
-                            currentUser,
+                            currentUser!,
                             context,
                           ))
                       .toList(),
@@ -209,7 +207,7 @@ class MessageReactionsModal extends StatelessWidget {
     User currentUser,
     BuildContext context,
   ) {
-    final isCurrentUser = reaction.user.id == currentUser.id;
+    final isCurrentUser = reaction.user?.id == currentUser.id;
     return ConstrainedBox(
       constraints: BoxConstraints.loose(Size(
         64,
@@ -225,7 +223,7 @@ class MessageReactionsModal extends StatelessWidget {
             children: [
               UserAvatar(
                 onTap: onUserAvatarTap,
-                user: reaction.user,
+                user: reaction.user!,
                 constraints: BoxConstraints.tightFor(
                   height: 64,
                   width: 64,
@@ -246,8 +244,10 @@ class MessageReactionsModal extends StatelessWidget {
                   child: ReactionBubble(
                     reactions: [reaction],
                     flipTail: !reverse,
-                    borderColor: messageTheme.reactionsBorderColor,
-                    backgroundColor: messageTheme.reactionsBackgroundColor,
+                    borderColor: messageTheme?.reactionsBorderColor ??
+                        Colors.transparent,
+                    backgroundColor: messageTheme?.reactionsBackgroundColor ??
+                        Colors.transparent,
                     maskColor: StreamChatTheme.of(context).colorTheme.white,
                     tailCirclesSpacing: 1,
                     highlightOwnReactions: false,
@@ -258,7 +258,7 @@ class MessageReactionsModal extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            reaction.user.name.split(' ')[0],
+            reaction.user!.name.split(' ')[0],
             style: StreamChatTheme.of(context).textTheme.footnoteBold,
             textAlign: TextAlign.center,
           ),

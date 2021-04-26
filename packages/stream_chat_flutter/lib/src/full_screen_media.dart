@@ -24,19 +24,18 @@ class FullScreenMedia extends StatefulWidget {
 
   final int startIndex;
   final String userName;
-  final DateTime sentAt;
-  final ShowMessageCallback onShowMessage;
+  final ShowMessageCallback? onShowMessage;
 
   /// Instantiate a new FullScreenImage
   const FullScreenMedia({
-    Key key,
-    @required this.mediaAttachments,
-    this.message,
+    Key? key,
+    required this.mediaAttachments,
+    required this.message,
     this.startIndex = 0,
-    this.userName = '',
-    this.sentAt,
+    String? userName,
     this.onShowMessage,
-  }) : super(key: key);
+  })  : userName = userName ?? '',
+        super(key: key);
 
   @override
   _FullScreenMediaState createState() => _FullScreenMediaState();
@@ -46,10 +45,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
     with SingleTickerProviderStateMixin {
   bool _optionsShown = true;
 
-  AnimationController _controller;
-  PageController _pageController;
+  late final AnimationController _controller;
+  late final PageController _pageController;
 
-  int _currentPage;
+  late int _currentPage;
 
   final videoPackages = <String, VideoPackage>{};
 
@@ -101,10 +100,11 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                           attachment.assetUrl ??
                           attachment.thumbUrl;
                       return PhotoView(
-                        imageProvider:
-                            imageUrl == null && attachment.localUri != null
-                                ? Image.memory(attachment.file.bytes).image
-                                : CachedNetworkImageProvider(imageUrl),
+                        imageProvider: (imageUrl == null &&
+                                attachment.localUri != null &&
+                                attachment.file?.bytes != null)
+                            ? Image.memory(attachment.file!.bytes!).image
+                            : CachedNetworkImageProvider(imageUrl!),
                         maxScale: PhotoViewComputedScale.covered,
                         minScale: PhotoViewComputedScale.contained,
                         heroAttributes: PhotoViewHeroAttributes(
@@ -112,12 +112,12 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         ),
                         backgroundDecoration: BoxDecoration(
                           color: ColorTween(
-                                  begin: StreamChatTheme.of(context)
-                                      .channelTheme
-                                      .channelHeaderTheme
-                                      .color,
-                                  end: Colors.black)
-                              .lerp(_controller.value),
+                            begin: StreamChatTheme.of(context)
+                                .channelTheme
+                                .channelHeaderTheme
+                                .color,
+                            end: Colors.black,
+                          ).lerp(_controller.value),
                         ),
                         onTapUp: (a, b, c) {
                           setState(() {
@@ -131,7 +131,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         },
                       );
                     } else if (attachment.type == 'video') {
-                      final controller = videoPackages[attachment.id];
+                      final controller = videoPackages[attachment.id]!;
                       if (!controller.initialized) {
                         return Center(
                           child: CircularProgressIndicator(),
@@ -153,7 +153,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                             vertical: 50.0,
                           ),
                           child: Chewie(
-                            controller: controller.chewieController,
+                            controller: controller.chewieController!,
                           ),
                         ),
                       );
@@ -171,9 +171,8 @@ class _FullScreenMediaState extends State<FullScreenMedia>
               children: [
                 ImageHeader(
                   userName: widget.userName,
-                  sentAt: widget.message.createdAt == null
-                      ? ''
-                      : 'Sent ${getDay(widget.message.createdAt)} at ${Jiffy(widget.sentAt.toLocal()).format('HH:mm')}',
+                  sentAt:
+                      'Sent ${getDay(widget.message.createdAt.toLocal())} at ${Jiffy(widget.message.createdAt.toLocal()).format('HH:mm')}',
                   onBackPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -181,8 +180,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                   urls: widget.mediaAttachments,
                   currentIndex: _currentPage,
                   onShowMessage: () {
-                    widget.onShowMessage(
-                        widget.message, StreamChannel.of(context).channel);
+                    widget.onShowMessage?.call(
+                      widget.message,
+                      StreamChannel.of(context).channel,
+                    );
                   },
                 ),
                 if (widget.message.type != 'ephemeral')
@@ -194,9 +195,11 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                     mediaSelectedCallBack: (val) {
                       setState(() {
                         _currentPage = val;
-                        _pageController.animateToPage(val,
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.easeInOut);
+                        _pageController.animateToPage(
+                          val,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
                         Navigator.pop(context);
                       });
                     },
@@ -210,7 +213,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
   }
 
   String getDay(DateTime dateTime) {
-    var now = DateTime.now();
+    final now = DateTime.now();
 
     if (DateTime(dateTime.year, dateTime.month, dateTime.day) ==
         DateTime(now.year, now.month, now.day)) {
@@ -238,11 +241,11 @@ class VideoPackage {
   final bool _showControls;
   final bool _autoInitialize;
   final VideoPlayerController _videoPlayerController;
-  ChewieController _chewieController;
+  ChewieController? _chewieController;
 
   VideoPlayerController get videoPlayer => _videoPlayerController;
 
-  ChewieController get chewieController => _chewieController;
+  ChewieController? get chewieController => _chewieController;
 
   bool get initialized => _videoPlayerController.value.isInitialized;
 
@@ -250,12 +253,11 @@ class VideoPackage {
     Attachment attachment, {
     bool showControls = false,
     bool autoInitialize = true,
-  })  : assert(attachment != null),
-        _showControls = showControls,
+  })  : _showControls = showControls,
         _autoInitialize = autoInitialize,
         _videoPlayerController = attachment.localUri != null
-            ? VideoPlayerController.file(File.fromUri(attachment.localUri))
-            : VideoPlayerController.network(attachment.assetUrl);
+            ? VideoPlayerController.file(File.fromUri(attachment.localUri!))
+            : VideoPlayerController.network(attachment.assetUrl!);
 
   Future<void> initialize() {
     return _videoPlayerController.initialize().then((_) {
@@ -278,6 +280,6 @@ class VideoPackage {
 
   Future<void> dispose() {
     _chewieController?.dispose();
-    return _videoPlayerController?.dispose();
+    return _videoPlayerController.dispose();
   }
 }

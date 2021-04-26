@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class MockClient extends Mock implements StreamChatClient {}
 
 class MockClientState extends Mock implements ClientState {}
 
-class MockChannel extends Mock implements Channel {}
+class MockChannel extends Mock implements Channel {
+  @override
+  Future<bool> get initialized async => true;
+
+  @override
+  Future<void> keyStroke([String? parentId]) async {
+    return;
+  }
+}
 
 class MockChannelState extends Mock implements ChannelClientState {}
 

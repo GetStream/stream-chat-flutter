@@ -22,8 +22,8 @@ class _VideoAttachmentThumbnail extends StatefulWidget {
   final Attachment attachment;
 
   const _VideoAttachmentThumbnail({
-    Key key,
-    @required this.attachment,
+    Key? key,
+    required this.attachment,
     this.size = const Size(32, 32),
   }) : super(key: key);
 
@@ -33,12 +33,12 @@ class _VideoAttachmentThumbnail extends StatefulWidget {
 }
 
 class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
-  VideoPlayerController _controller;
+  late VideoPlayerController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.attachment.assetUrl)
+    _controller = VideoPlayerController.network(widget.attachment.assetUrl!)
       ..initialize().then((_) {
         setState(() {}); //when your thumbnail will show.
       });
@@ -67,7 +67,7 @@ class QuotedMessageWidget extends StatelessWidget {
   final Message message;
 
   /// The message theme
-  final MessageTheme messageTheme;
+  final MessageTheme? messageTheme;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -79,18 +79,18 @@ class QuotedMessageWidget extends StatelessWidget {
   final int textLimit;
 
   /// Map that defines a thumbnail builder for an attachment type
-  final Map<String, QuotedMessageAttachmentThumbnailBuilder>
+  final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
       attachmentThumbnailBuilders;
 
   final EdgeInsetsGeometry padding;
 
-  final GestureTapCallback onTap;
+  final GestureTapCallback? onTap;
 
   ///
   QuotedMessageWidget({
-    Key key,
-    @required this.message,
-    @required this.messageTheme,
+    Key? key,
+    required this.message,
+    required this.messageTheme,
     this.reverse = false,
     this.showBorder = false,
     this.textLimit = 170,
@@ -99,13 +99,12 @@ class QuotedMessageWidget extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  bool get _hasAttachments => message.attachments?.isNotEmpty == true;
+  bool get _hasAttachments => message.attachments.isNotEmpty == true;
 
   bool get _containsScrapeUrl =>
-      message.attachments?.any((element) => element.ogScrapeUrl != null) ==
-      true;
+      message.attachments.any((element) => element.ogScrapeUrl != null) == true;
 
-  bool get _containsText => message?.text?.isNotEmpty == true;
+  bool get _containsText => message.text?.isNotEmpty == true;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +118,7 @@ class QuotedMessageWidget extends StatelessWidget {
           children: [
             Flexible(child: _buildMessage(context)),
             SizedBox(width: 8),
-            _buildUserAvatar(),
+            if (message.user != null) _buildUserAvatar(),
           ],
         ),
       ),
@@ -127,17 +126,17 @@ class QuotedMessageWidget extends StatelessWidget {
   }
 
   Widget _buildMessage(BuildContext context) {
-    final isOnlyEmoji = message.text.isOnlyEmoji;
+    final isOnlyEmoji = message.text!.isOnlyEmoji;
     var msg = _hasAttachments && !_containsText
-        ? message.copyWith(text: message.attachments.last?.title ?? '')
+        ? message.copyWith(text: message.attachments.last.title ?? '')
         : message;
-    if (msg.text.length > textLimit) {
-      msg = msg.copyWith(text: '${msg.text.substring(0, textLimit - 3)}...');
+    if (msg.text!.length > textLimit) {
+      msg = msg.copyWith(text: '${msg.text!.substring(0, textLimit - 3)}...');
     }
 
     final children = [
       if (_hasAttachments) _parseAttachments(context),
-      if (msg.text.isNotEmpty)
+      if (msg.text!.isNotEmpty)
         Flexible(
           child: Transform(
             transform: Matrix4.rotationY(reverse ? pi : 0),
@@ -145,12 +144,12 @@ class QuotedMessageWidget extends StatelessWidget {
             child: MessageText(
               message: msg,
               messageTheme: isOnlyEmoji && _containsText
-                  ? messageTheme.copyWith(
-                      messageText: messageTheme.messageText.copyWith(
+                  ? messageTheme?.copyWith(
+                      messageText: messageTheme?.messageText?.copyWith(
                       fontSize: 32,
                     ))
-                  : messageTheme.copyWith(
-                      messageText: messageTheme.messageText.copyWith(
+                  : messageTheme?.copyWith(
+                      messageText: messageTheme?.messageText?.copyWith(
                       fontSize: 12,
                     )),
             ),
@@ -193,7 +192,7 @@ class QuotedMessageWidget extends StatelessWidget {
           image: DecorationImage(
             fit: BoxFit.cover,
             image: CachedNetworkImageProvider(
-              attachment.imageUrl,
+              attachment.imageUrl!,
             ),
           ),
         ),
@@ -211,16 +210,16 @@ class QuotedMessageWidget extends StatelessWidget {
       );
       child = _buildUrlAttachment(attachment);
     } else {
-      QuotedMessageAttachmentThumbnailBuilder attachmentBuilder;
+      QuotedMessageAttachmentThumbnailBuilder? attachmentBuilder;
       attachment = message.attachments.last;
-      if (attachmentThumbnailBuilders?.containsKey(attachment?.type) == true) {
-        attachmentBuilder = attachmentThumbnailBuilders[attachment?.type];
+      if (attachmentThumbnailBuilders?.containsKey(attachment.type) == true) {
+        attachmentBuilder = attachmentThumbnailBuilders![attachment.type];
       }
-      attachmentBuilder = _defaultAttachmentBuilder[attachment?.type];
+      attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       if (attachmentBuilder == null) {
         child = Offstage();
       }
-      child = attachmentBuilder(context, attachment);
+      child = attachmentBuilder!(context, attachment);
     }
     child = AbsorbPointer(child: child);
     return Transform(
@@ -247,7 +246,7 @@ class QuotedMessageWidget extends StatelessWidget {
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
       child: UserAvatar(
-        user: message.user,
+        user: message.user!,
         constraints: BoxConstraints.tightFor(
           height: 24,
           width: 24,
@@ -277,19 +276,20 @@ class QuotedMessageWidget extends StatelessWidget {
       'giphy': (_, attachment) {
         final size = Size(32, 32);
         return CachedNetworkImage(
-          height: size?.height,
-          width: size?.width,
+          height: size.height,
+          width: size.width,
           placeholder: (_, __) {
             return Container(
-              width: size?.width,
-              height: size?.height,
+              width: size.width,
+              height: size.height,
               child: Center(
                 child: CircularProgressIndicator(),
               ),
             );
           },
-          imageUrl:
-              attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl,
+          imageUrl: attachment.thumbUrl ??
+              attachment.imageUrl ??
+              attachment.assetUrl!,
           errorWidget: (context, url, error) {
             return AttachmentError(size: size);
           },
@@ -300,16 +300,16 @@ class QuotedMessageWidget extends StatelessWidget {
         return Container(
           height: 32,
           width: 32,
-          child: getFileTypeImage(attachment.extraData['mime_type']),
+          child: getFileTypeImage(attachment.extraData['mime_type'] as String?),
         );
       },
     };
   }
 
-  Color _getBackgroundColor(BuildContext context) {
+  Color? _getBackgroundColor(BuildContext context) {
     if (_containsScrapeUrl) {
       return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
-    return messageTheme.messageBackgroundColor;
+    return messageTheme?.messageBackgroundColor;
   }
 }

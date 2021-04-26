@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(MaterialPageRoute(builder: (context) => SizedBox()));
+    registerFallbackValue(Message());
+  });
+
   testWidgets(
     'it should show the all actions',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -55,11 +60,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -102,11 +107,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       var tapped = false;
       await tester.pumpWidget(
@@ -156,11 +161,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       var tapped = false;
 
@@ -173,7 +178,7 @@ void main() {
             child: Container(
               child: MessageActionsModal(
                 onReplyTap: (m) {
-                  return tapped = true;
+                  tapped = true;
                 },
                 message: Message(
                   text: 'test',
@@ -201,11 +206,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       var tapped = false;
 
@@ -218,7 +223,7 @@ void main() {
             child: Container(
               child: MessageActionsModal(
                 onThreadReplyTap: (m) {
-                  return tapped = true;
+                  tapped = true;
                 },
                 message: Message(
                   text: 'test',
@@ -247,12 +252,11 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -298,12 +302,11 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -352,12 +355,11 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       var tapped = false;
 
@@ -404,12 +406,13 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.sendMessage(any()))
+          .thenAnswer((_) async => SendMessageResponse());
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -443,7 +446,7 @@ void main() {
 
       await tester.tap(find.text('Resend'));
 
-      verify(channel.sendMessage(any)).called(1);
+      verify(() => channel.sendMessage(any())).called(1);
     },
   );
 
@@ -454,12 +457,13 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.updateMessage(any()))
+          .thenAnswer((_) async => UpdateMessageResponse());
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -493,7 +497,7 @@ void main() {
 
       await tester.tap(find.text('Resend Edited Message'));
 
-      verify(channel.updateMessage(any)).called(1);
+      verify(() => channel.updateMessage(any())).called(1);
     },
   );
 
@@ -504,12 +508,11 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -549,7 +552,7 @@ void main() {
       await tester.tap(find.text('FLAG'));
       await tester.pumpAndSettle();
 
-      verify(client.flagMessage('testid')).called(1);
+      verify(() => client.flagMessage('testid')).called(1);
     },
   );
 
@@ -560,16 +563,15 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
-      when(client.flagMessage(any)).thenThrow(ApiError(
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.flagMessage(any())).thenThrow(ApiError(
         '{}',
         500,
       ));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -620,16 +622,15 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
-      when(client.flagMessage(any)).thenThrow(ApiError(
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.flagMessage(any())).thenThrow(ApiError(
         '{"code":4}',
         400,
       ));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -680,12 +681,11 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -725,7 +725,7 @@ void main() {
       await tester.tap(find.text('DELETE'));
       await tester.pumpAndSettle();
 
-      verify(channel.deleteMessage(any)).called(1);
+      verify(() => channel.deleteMessage(any())).called(1);
     },
   );
 
@@ -736,16 +736,15 @@ void main() {
       final clientState = MockClientState();
       final channel = MockChannel();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
-      when(channel.deleteMessage(any)).thenThrow(ApiError(
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.deleteMessage(any())).thenThrow(ApiError(
         '{}',
         500,
       ));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       await tester.pumpWidget(
         MaterialApp(

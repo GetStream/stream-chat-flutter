@@ -5,8 +5,8 @@ class StreamNeumorphicButton extends StatelessWidget {
   final Color backgroundColor;
 
   const StreamNeumorphicButton({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.backgroundColor = Colors.white,
   }) : super(key: key);
 
@@ -21,7 +21,7 @@ class StreamNeumorphicButton extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey[700],
+            color: Colors.grey.shade700,
             offset: Offset(0, 1.0),
             blurRadius: 0.5,
             spreadRadius: 0,

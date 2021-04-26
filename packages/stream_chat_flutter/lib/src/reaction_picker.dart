@@ -16,13 +16,13 @@ import 'extension.dart';
 
 class ReactionPicker extends StatefulWidget {
   const ReactionPicker({
-    Key key,
-    @required this.message,
-    @required this.messageTheme,
+    Key? key,
+    required this.message,
+    required this.messageTheme,
   }) : super(key: key);
 
   final Message message;
-  final MessageTheme messageTheme;
+  final MessageTheme? messageTheme;
 
   @override
   _ReactionPickerState createState() => _ReactionPickerState();
@@ -98,7 +98,8 @@ class _ReactionPickerState extends State<ReactionPicker>
                               if (ownReactionIndex != -1) {
                                 removeReaction(
                                   context,
-                                  widget.message.ownReactions[ownReactionIndex],
+                                  widget
+                                      .message.ownReactions![ownReactionIndex],
                                 );
                               } else {
                                 sendReaction(
@@ -129,7 +130,7 @@ class _ReactionPickerState extends State<ReactionPicker>
                                               .accentBlue
                                           : Theme.of(context)
                                               .iconTheme
-                                              .color
+                                              .color!
                                               .withOpacity(.5),
                                     ),
                                   );
@@ -181,7 +182,7 @@ class _ReactionPickerState extends State<ReactionPicker>
   @override
   void dispose() {
     for (var a in animations) {
-      a?.dispose();
+      a.dispose();
     }
     super.dispose();
   }

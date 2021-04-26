@@ -11,16 +11,16 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
-  final VoidCallback onBackPressed;
+  final VoidCallback? onBackPressed;
 
   /// Callback to call when pressing the show message button.
-  final VoidCallback onShowMessage;
+  final VoidCallback? onShowMessage;
 
   /// Callback to call when the header is tapped.
-  final VoidCallback onTitleTap;
+  final VoidCallback? onTitleTap;
 
   /// Callback to call when the image is tapped.
-  final VoidCallback onImageTap;
+  final VoidCallback? onImageTap;
 
   final Message message;
 
@@ -32,9 +32,9 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// Creates a channel header
   ImageHeader({
-    Key key,
-    this.message,
-    this.urls,
+    Key? key,
+    required this.message,
+    this.urls = const [],
     this.currentIndex,
     this.showBackButton = true,
     this.onBackPressed,
@@ -109,7 +109,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   void _showMessageActionModalBottomSheet(BuildContext context) async {
     final channel = StreamChannel.of(context).channel;
 
-    var result = await showDialog(
+    final result = await showDialog(
       context: context,
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       builder: (context) {

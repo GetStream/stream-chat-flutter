@@ -5,11 +5,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 class SendingIndicator extends StatelessWidget {
   final Message message;
   final bool isMessageRead;
-  final double size;
+  final double? size;
 
   const SendingIndicator({
-    Key key,
-    this.message,
+    Key? key,
+    required this.message,
     this.isMessageRead = false,
     this.size = 12,
   }) : super(key: key);
@@ -22,10 +22,10 @@ class SendingIndicator extends StatelessWidget {
         color: StreamChatTheme.of(context).colorTheme.accentBlue,
       );
     }
-    if (message.status == MessageSendingStatus.sent || message.status == null) {
+    if (message.status == MessageSendingStatus.sent) {
       return StreamSvgIcon.check(
         size: size,
-        color: IconTheme.of(context).color.withOpacity(0.5),
+        color: IconTheme.of(context).color!.withOpacity(0.5),
       );
     }
     if (message.status == MessageSendingStatus.sending ||

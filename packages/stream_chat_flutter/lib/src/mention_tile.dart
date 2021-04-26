@@ -9,16 +9,16 @@ class MentionTile extends StatelessWidget {
   final Member member;
 
   /// Widget to display as title
-  final Widget title;
+  final Widget? title;
 
   /// Widget to display below [title]
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// Widget at the start of the tile
-  final Widget leading;
+  final Widget? leading;
 
   /// Widget at the end of tile
-  final Widget trailing;
+  final Widget? trailing;
 
   MentionTile(
     this.member, {
@@ -46,7 +46,7 @@ class MentionTile extends StatelessWidget {
                     40,
                   ),
                 ),
-                user: member.user,
+                user: member.user!,
               ),
           SizedBox(
             width: 8.0,
@@ -60,7 +60,7 @@ class MentionTile extends StatelessWidget {
                 children: [
                   title ??
                       Text(
-                        '${member.user.name}',
+                        '${member.user!.name}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: StreamChatTheme.of(context).textTheme.bodyBold,
@@ -87,7 +87,10 @@ class MentionTile extends StatelessWidget {
           ),
           trailing ??
               Padding(
-                padding: const EdgeInsets.only(right: 18.0, left: 8.0),
+                padding: const EdgeInsets.only(
+                  right: 18.0,
+                  left: 8.0,
+                ),
                 child: StreamSvgIcon.mentions(
                   color: StreamChatTheme.of(context).colorTheme.accentBlue,
                 ),

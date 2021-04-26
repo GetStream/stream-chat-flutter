@@ -207,8 +207,8 @@ void main() {
 
     test('should return sorted channels using custom field', () async {
       int sortComparator(ChannelModel a, ChannelModel b) {
-        final aData = a.extraData!['test_custom_field'] as int;
-        final bData = b.extraData!['test_custom_field'] as int;
+        final aData = a.extraData['test_custom_field'] as int;
+        final bData = b.extraData['test_custom_field'] as int;
         return bData.compareTo(aData);
       }
 

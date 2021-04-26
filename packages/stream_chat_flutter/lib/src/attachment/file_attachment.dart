@@ -11,19 +11,24 @@ import '../upload_progress_indicator.dart';
 import 'attachment_widget.dart';
 
 class FileAttachment extends AttachmentWidget {
-  final Widget title;
-  final Widget trailing;
-  final VoidCallback onAttachmentTap;
+  final Widget? title;
+  final Widget? trailing;
+  final VoidCallback? onAttachmentTap;
 
   const FileAttachment({
-    Key key,
-    @required Message message,
-    @required Attachment attachment,
-    Size size,
+    Key? key,
+    required Message message,
+    required Attachment attachment,
+    Size? size,
     this.title,
     this.trailing,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(
+          key: key,
+          message: message,
+          attachment: attachment,
+          size: size,
+        );
 
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
 
@@ -31,6 +36,7 @@ class FileAttachment extends AttachmentWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorTheme = StreamChatTheme.of(context).colorTheme;
     return Material(
       child: GestureDetector(
         onTap: onAttachmentTap,
@@ -38,10 +44,10 @@ class FileAttachment extends AttachmentWidget {
           width: size?.width ?? 100,
           height: 56.0,
           decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).colorTheme.white,
+            color: colorTheme.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+              color: colorTheme.greyWhisper,
             ),
           ),
           child: Row(
@@ -60,7 +66,7 @@ class FileAttachment extends AttachmentWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      attachment?.title ?? 'File',
+                      attachment.title ?? 'File',
                       style: StreamChatTheme.of(context).textTheme.bodyBold,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -93,34 +99,51 @@ class FileAttachment extends AttachmentWidget {
         type: MaterialType.transparency,
         shape: _getDefaultShape(context),
         child: source.when(
-          local: () => Image.memory(
-            attachment.file.bytes,
-            fit: BoxFit.cover,
-            errorBuilder: (_, obj, trace) {
-              return getFileTypeImage(attachment.extraData['other']);
-            },
-          ),
-          network: () => CachedNetworkImage(
-            imageUrl: attachment.imageUrl ??
-                attachment.assetUrl ??
-                attachment.thumbUrl,
-            fit: BoxFit.cover,
-            errorWidget: (_, obj, trace) {
-              return getFileTypeImage(attachment.extraData['other']);
-            },
-            placeholder: (_, __) {
-              return Shimmer.fromColors(
-                baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-                highlightColor:
-                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                child: Image.asset(
+          local: () {
+            if (attachment.file?.bytes == null) {
+              return getFileTypeImage(attachment.extraData['other'] as String?);
+            }
+            return Image.memory(
+              attachment.file!.bytes!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, obj, trace) {
+                return getFileTypeImage(
+                    attachment.extraData['other'] as String?);
+              },
+            );
+          },
+          network: () {
+            if ((attachment.imageUrl ??
+                    attachment.assetUrl ??
+                    attachment.thumbUrl) ==
+                null) {
+              return getFileTypeImage(attachment.extraData['other'] as String?);
+            }
+            return CachedNetworkImage(
+              imageUrl: attachment.imageUrl ??
+                  attachment.assetUrl ??
+                  attachment.thumbUrl!,
+              fit: BoxFit.cover,
+              errorWidget: (_, obj, trace) {
+                return getFileTypeImage(
+                    attachment.extraData['other'] as String?);
+              },
+              placeholder: (_, __) {
+                final image = Image.asset(
                   'images/placeholder.png',
                   fit: BoxFit.cover,
                   package: 'stream_chat_flutter',
-                ),
-              );
-            },
-          ),
+                );
+
+                final colorTheme = StreamChatTheme.of(context).colorTheme;
+                return Shimmer.fromColors(
+                  baseColor: colorTheme.greyGainsboro,
+                  highlightColor: colorTheme.whiteSmoke,
+                  child: image,
+                );
+              },
+            );
+          },
         ),
       );
     }
@@ -132,7 +155,7 @@ class FileAttachment extends AttachmentWidget {
         shape: _getDefaultShape(context),
         child: source.when(
           local: () => VideoThumbnailImage(
-            video: attachment.file.path,
+            video: attachment.file?.path,
             placeholderBuilder: (_) {
               return Center(
                 child: Container(
@@ -158,14 +181,14 @@ class FileAttachment extends AttachmentWidget {
         ),
       );
     }
-    return getFileTypeImage(attachment.extraData['mime_type']);
+    return getFileTypeImage(attachment.extraData['mime_type'] as String?);
   }
 
   Widget _buildButton({
-    Widget icon,
+    Widget? icon,
     double iconSize = 24.0,
-    VoidCallback onPressed,
-    Color fillColor,
+    VoidCallback? onPressed,
+    Color? fillColor,
   }) {
     return Container(
       height: iconSize,
@@ -189,7 +212,7 @@ class FileAttachment extends AttachmentWidget {
     final channel = StreamChannel.of(context).channel;
     final attachmentId = attachment.id;
     var trailingWidget = trailing;
-    trailingWidget ??= attachment.uploadState?.when(
+    trailingWidget ??= attachment.uploadState.when(
           preparing: () => Padding(
             padding: const EdgeInsets.all(8.0),
             child: _buildButton(
@@ -220,7 +243,7 @@ class FileAttachment extends AttachmentWidget {
               icon: StreamSvgIcon.retry(color: theme.colorTheme.white),
               fillColor: theme.colorTheme.overlayDark,
               onPressed: () => channel.retryAttachmentUpload(
-                message?.id,
+                message.id,
                 attachmentId,
               ),
             ),
@@ -236,9 +259,7 @@ class FileAttachment extends AttachmentWidget {
           },
         );
 
-    if (message != null &&
-        (message.status == null ||
-            message.status == MessageSendingStatus.sent)) {
+    if (message.status == MessageSendingStatus.sent) {
       trailingWidget = IconButton(
         icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
         padding: const EdgeInsets.all(8),
@@ -262,11 +283,8 @@ class FileAttachment extends AttachmentWidget {
     final textStyle = theme.textTheme.footnote.copyWith(
       color: theme.colorTheme.grey,
     );
-    return attachment.uploadState?.when(
+    return attachment.uploadState.when(
           preparing: () {
-            if (message == null) {
-              return Text('${fileSize(size, 2)}', style: textStyle);
-            }
             return UploadProgressIndicator(
               uploaded: 0,
               total: double.maxFinite.toInt(),

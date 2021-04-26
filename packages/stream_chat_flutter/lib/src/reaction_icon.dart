@@ -3,7 +3,7 @@ class ReactionIcon {
   final String assetName;
 
   ReactionIcon({
-    this.type,
-    this.assetName,
+    required this.type,
+    required this.assetName,
   });
 }

@@ -7,8 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../stream_chat_flutter.dart';
 import 'stream_svg_icon.dart';
 
-Future<void> launchURL(BuildContext context, String url) async {
-  if (await canLaunch(url)) {
+Future<void> launchURL(BuildContext context, String? url) async {
+  if (url != null && await canLaunch(url)) {
     await launch(url);
   } else {
     // ignore: deprecated_member_use
@@ -20,13 +20,13 @@ Future<void> launchURL(BuildContext context, String url) async {
   }
 }
 
-Future<bool> showConfirmationDialog(
+Future<bool?> showConfirmationDialog(
   BuildContext context, {
-  String title,
-  Widget icon,
-  String question,
-  String okText,
-  String cancelText,
+  String? title,
+  Widget? icon,
+  String? question,
+  String? okText,
+  String? cancelText,
 }) {
   return showModalBottomSheet(
       backgroundColor: StreamChatTheme.of(context).colorTheme.white,
@@ -46,17 +46,17 @@ Future<bool> showConfirmationDialog(
               if (icon != null) icon,
               SizedBox(height: 26.0),
               Text(
-                title,
+                title!,
                 style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
               SizedBox(height: 7.0),
               Text(
-                question,
+                question!,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 36.0),
               Container(
-                color: effect.color.withOpacity(effect.alpha ?? 1),
+                color: effect.color!.withOpacity(effect.alpha ?? 1),
                 height: 1,
               ),
               Row(
@@ -69,7 +69,7 @@ Future<bool> showConfirmationDialog(
                           Navigator.of(context).pop(false);
                         },
                         child: Text(
-                          cancelText,
+                          cancelText!,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -90,7 +90,7 @@ Future<bool> showConfirmationDialog(
                           Navigator.pop(context, true);
                         },
                         child: Text(
-                          okText,
+                          okText!,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -110,17 +110,17 @@ Future<bool> showConfirmationDialog(
       });
 }
 
-Future<bool> showInfoDialog(
+Future<bool?> showInfoDialog(
   BuildContext context, {
-  String title,
-  Widget icon,
-  String details,
-  String okText,
-  StreamChatThemeData theme,
+  String? title,
+  Widget? icon,
+  String? details,
+  String? okText,
+  StreamChatThemeData? theme,
 }) {
   return showModalBottomSheet(
-    backgroundColor: theme?.colorTheme?.white ??
-        StreamChatTheme.of(context).colorTheme.white,
+    backgroundColor:
+        theme?.colorTheme.white ?? StreamChatTheme.of(context).colorTheme.white,
     context: context,
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -140,19 +140,19 @@ Future<bool> showInfoDialog(
               height: 26.0,
             ),
             Text(
-              title,
-              style: theme?.textTheme?.headlineBold ??
+              title!,
+              style: theme?.textTheme.headlineBold ??
                   StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             SizedBox(
               height: 7.0,
             ),
-            Text(details),
+            Text(details!),
             SizedBox(
               height: 36.0,
             ),
             Container(
-              color: theme?.colorTheme?.black?.withOpacity(.08) ??
+              color: theme?.colorTheme.black.withOpacity(.08) ??
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
               height: 1.0,
             ),
@@ -162,9 +162,9 @@ Future<bool> showInfoDialog(
                   Navigator.of(context).pop();
                 },
                 child: Text(
-                  okText,
+                  okText!,
                   style: TextStyle(
-                    color: theme?.colorTheme?.black?.withOpacity(0.5) ??
+                    color: theme?.colorTheme.black.withOpacity(0.5) ??
                         StreamChatTheme.of(context).colorTheme.accentBlue,
                     fontWeight: FontWeight.w400,
                   ),
@@ -183,7 +183,7 @@ String getRandomPicUrl(User user) =>
     'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
 
 /// Get websiteName from [hostName]
-String getWebsiteName(String hostName) {
+String? getWebsiteName(String hostName) {
   switch (hostName) {
     case 'reddit':
       return 'Reddit';
@@ -292,62 +292,44 @@ String fileSize(dynamic size, [int round = 2]) {
 }
 
 ///
-StreamSvgIcon getFileTypeImage(String type) {
+StreamSvgIcon getFileTypeImage(String? type) {
   switch (type) {
     case '7z':
       return StreamSvgIcon.filetype7z();
-      break;
     case 'csv':
       return StreamSvgIcon.filetypeCsv();
-      break;
     case 'doc':
       return StreamSvgIcon.filetypeDoc();
-      break;
     case 'docx':
       return StreamSvgIcon.filetypeDocx();
-      break;
     case 'html':
       return StreamSvgIcon.filetypeHtml();
-      break;
     case 'md':
       return StreamSvgIcon.filetypeMd();
-      break;
     case 'odt':
       return StreamSvgIcon.filetypeOdt();
-      break;
     case 'pdf':
       return StreamSvgIcon.filetypePdf();
-      break;
     case 'ppt':
       return StreamSvgIcon.filetypePpt();
-      break;
     case 'pptx':
       return StreamSvgIcon.filetypePptx();
-      break;
     case 'rar':
       return StreamSvgIcon.filetypeRar();
-      break;
     case 'rtf':
       return StreamSvgIcon.filetypeRtf();
-      break;
     case 'tar':
       return StreamSvgIcon.filetypeTar();
-      break;
     case 'txt':
       return StreamSvgIcon.filetypeTxt();
-      break;
     case 'xls':
       return StreamSvgIcon.filetypeXls();
-      break;
     case 'xlsx':
       return StreamSvgIcon.filetypeXlsx();
-      break;
     case 'zip':
       return StreamSvgIcon.filetypeZip();
-      break;
     default:
       return StreamSvgIcon.filetypeGeneric();
-      break;
   }
 }
 

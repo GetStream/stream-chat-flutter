@@ -912,7 +912,10 @@ class Channel {
 
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
-    client.state.channels[cid!] = this;
+
+    if (cid != null) {
+      client.state.channels[cid!] = this;
+    }
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
     }

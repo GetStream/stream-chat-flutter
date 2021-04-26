@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/group_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -16,15 +16,15 @@ void main() {
       final channel = MockChannel();
       final channelState = MockChannelState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
             'image': 'imagetest',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
         'image': 'imagetest',
       });
@@ -55,17 +55,17 @@ void main() {
       final channel = MockChannel();
       final channelState = MockChannelState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
@@ -80,7 +80,7 @@ void main() {
               ),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id2',
           user: User(
@@ -95,7 +95,7 @@ void main() {
           user: User(id: 'user-id'),
         )
       ]);
-      when(clientState.usersStream).thenAnswer((i) => Stream.value({
+      when(() => clientState.usersStream).thenAnswer((i) => Stream.value({
             'user-id2': User(
               id: 'user-id2',
               extraData: {
@@ -103,7 +103,7 @@ void main() {
               },
             ),
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
 
@@ -133,17 +133,17 @@ void main() {
       final channel = MockChannel();
       final channelState = MockChannelState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(
@@ -172,7 +172,7 @@ void main() {
               ),
             ),
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(
@@ -230,15 +230,15 @@ void main() {
       final channel = MockChannel();
       final channelState = MockChannelState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
             'image': 'imagetest',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
         'image': 'imagetest',
       });

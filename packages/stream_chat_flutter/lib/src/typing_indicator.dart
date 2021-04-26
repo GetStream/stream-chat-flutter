@@ -6,7 +6,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class TypingIndicator extends StatelessWidget {
   /// Instantiate a new TypingIndicator
   const TypingIndicator({
-    Key key,
+    Key? key,
     this.channel,
     this.alternativeWidget,
     this.style,
@@ -15,13 +15,13 @@ class TypingIndicator extends StatelessWidget {
   }) : super(key: key);
 
   /// Style of the text widget
-  final TextStyle style;
+  final TextStyle? style;
 
   /// List of typing users
-  final Channel channel;
+  final Channel? channel;
 
   /// Widget built when no typings is happening
-  final Widget alternativeWidget;
+  final Widget? alternativeWidget;
 
   /// The padding of this widget
   final EdgeInsets padding;
@@ -31,7 +31,7 @@ class TypingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final channelState =
-        channel?.state ?? StreamChannel.of(context).channel.state;
+        channel?.state ?? StreamChannel.of(context).channel.state!;
     return StreamBuilder<List<User>>(
       initialData: channelState.typingEvents,
       stream: channelState.typingEventsStream,
@@ -53,7 +53,7 @@ class TypingIndicator extends StatelessWidget {
                           height: 4,
                         ),
                         Text(
-                          '  ${snapshot.data[0].name}${snapshot.data.length == 1 ? '' : ' and ${snapshot.data.length - 1} more'} ${snapshot.data.length == 1 ? 'is' : 'are'} typing',
+                          '  ${snapshot.data![0].name}${snapshot.data!.length == 1 ? '' : ' and ${snapshot.data!.length - 1} more'} ${snapshot.data!.length == 1 ? 'is' : 'are'} typing',
                           maxLines: 1,
                           style: style,
                         ),

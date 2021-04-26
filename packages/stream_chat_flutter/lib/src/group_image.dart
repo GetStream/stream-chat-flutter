@@ -5,8 +5,8 @@ import '../stream_chat_flutter.dart';
 
 class GroupImage extends StatelessWidget {
   const GroupImage({
-    Key key,
-    @required this.images,
+    Key? key,
+    required this.images,
     this.constraints,
     this.onTap,
     this.borderRadius,
@@ -15,12 +15,12 @@ class GroupImage extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
-  final List<String> images;
-  final BoxConstraints constraints;
-  final VoidCallback onTap;
+  final List<String?> images;
+  final BoxConstraints? constraints;
+  final VoidCallback? onTap;
   final bool selected;
-  final BorderRadius borderRadius;
-  final Color selectionColor;
+  final BorderRadius? borderRadius;
+  final Color? selectionColor;
   final double selectionThickness;
 
   @override
@@ -35,13 +35,13 @@ class GroupImage extends StatelessWidget {
             StreamChatTheme.of(context)
                 .ownMessageTheme
                 .avatarTheme
-                .borderRadius,
+                ?.borderRadius,
         child: Container(
           constraints: constraints ??
               StreamChatTheme.of(context)
                   .ownMessageTheme
                   .avatarTheme
-                  .constraints,
+                  ?.constraints,
           decoration: BoxDecoration(
             color: StreamChatTheme.of(context).colorTheme.accentBlue,
           ),
@@ -64,7 +64,7 @@ class GroupImage extends StatelessWidget {
                               child: Transform.scale(
                                 scale: 1.2,
                                 child: CachedNetworkImage(
-                                  imageUrl: url,
+                                  imageUrl: url!,
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -89,7 +89,7 @@ class GroupImage extends StatelessWidget {
                                 child: Transform.scale(
                                   scale: 1.2,
                                   child: CachedNetworkImage(
-                                    imageUrl: url,
+                                    imageUrl: url!,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -107,7 +107,8 @@ class GroupImage extends StatelessWidget {
     if (selected) {
       avatar = ClipRRect(
         borderRadius: (borderRadius ??
-                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
+                streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius ??
+                BorderRadius.zero) +
             BorderRadius.circular(selectionThickness),
         child: Container(
           color: selectionColor ??

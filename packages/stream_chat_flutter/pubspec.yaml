@@ -8,7 +8,7 @@ issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 publish_to: none
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -19,12 +19,12 @@ dependencies:
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   jiffy: ^4.1.0
   flutter_svg: ^0.21.0+1
-  flutter_portal: ^0.4.0-nullsafety.0
+  flutter_portal: ^0.4.0
   cached_network_image: ^3.0.0
   shimmer: ^2.0.0-nullsafety.0
   flutter_markdown: ^0.6.1
   url_launcher: ^6.0.3
-  emojis: 
+  emojis:
     git: git@github.com:Parkar99/emojis.git
   video_player: ^2.1.1
   chewie: ^1.0.0
@@ -36,7 +36,7 @@ dependencies:
   http_parser: ^4.0.0
   meta: ^1.3.0
   lottie: ^1.0.1
-  substring_highlight: 
+  substring_highlight:
     git: git@github.com:ArturAntin/substring_highlight.git
   flutter_slidable: ^0.6.0-nullsafety.0
   image_gallery_saver: ^1.6.9
@@ -48,6 +48,7 @@ dependencies:
   characters: ^1.1.0
   path_provider: ^2.0.1
   video_thumbnail: ^0.3.3
+  collection: ^1.15.0
 
 dependency_overrides:
   stream_chat:
@@ -66,7 +67,7 @@ flutter:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  mockito: ^5.0.3
+  mocktail: ^0.1.2
   pedantic: ^1.11.0
   golden_toolkit: ^0.9.0
   

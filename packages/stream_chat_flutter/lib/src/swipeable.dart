@@ -8,15 +8,15 @@ import 'stream_chat_theme.dart';
 class Swipeable extends StatefulWidget {
   final Widget child;
   final Widget backgroundIcon;
-  final VoidCallback onSwipeStart;
-  final VoidCallback onSwipeCancel;
-  final VoidCallback onSwipeEnd;
+  final VoidCallback? onSwipeStart;
+  final VoidCallback? onSwipeCancel;
+  final VoidCallback? onSwipeEnd;
   final double threshold;
 
   ///
   const Swipeable({
-    @required this.child,
-    @required this.backgroundIcon,
+    required this.child,
+    required this.backgroundIcon,
     this.onSwipeStart,
     this.onSwipeCancel,
     this.onSwipeEnd,
@@ -29,11 +29,11 @@ class Swipeable extends StatefulWidget {
 
 class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   double _dragExtent = 0.0;
-  AnimationController _moveController;
-  AnimationController _iconMoveController;
-  Animation<Offset> _moveAnimation;
-  Animation<Offset> _iconTransitionAnimation;
-  Animation<double> _iconFadeAnimation;
+  late AnimationController _moveController;
+  late AnimationController _iconMoveController;
+  late Animation<Offset> _moveAnimation;
+  late Animation<Offset> _iconTransitionAnimation;
+  late Animation<double> _iconFadeAnimation;
   bool _pastThreshold = false;
 
   final _animationDuration = const Duration(milliseconds: 200);
@@ -67,18 +67,18 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
 
   void _handleDragStart(DragStartDetails details) {
     if (widget.onSwipeStart != null) {
-      widget.onSwipeStart();
+      widget.onSwipeStart!();
     }
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    final delta = details.primaryDelta;
+    final delta = details.primaryDelta!;
     _dragExtent += delta;
 
     if (_dragExtent.isNegative) return;
 
     var movePastThresholdPixels = widget.threshold;
-    var newPos = _dragExtent.abs() / context.size.width;
+    var newPos = _dragExtent.abs() / context.size!.width;
 
     if (_dragExtent.abs() > movePastThresholdPixels) {
       // how many "thresholds" past the threshold we are. 1 = the threshold 2
@@ -90,7 +90,7 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
       var reducedThreshold = math.pow(n, 0.3);
 
       var adjustedPixelPos = movePastThresholdPixels * reducedThreshold;
-      newPos = adjustedPixelPos / context.size.width;
+      newPos = adjustedPixelPos / context.size!.width;
 
       if (_dragExtent > 0 && !_pastThreshold) {
         _iconMoveController.value = 1;
@@ -100,7 +100,7 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
       // Send a cancel event if the user has swiped back underneath the
       // threshold
       if (_pastThreshold && widget.onSwipeCancel != null) {
-        widget.onSwipeCancel();
+        widget.onSwipeCancel!();
       }
       _pastThreshold = false;
     }
@@ -115,7 +115,7 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
     _iconMoveController.animateTo(0.0, duration: _animationDuration);
     _dragExtent = 0.0;
     if (_pastThreshold && widget.onSwipeEnd != null) {
-      widget.onSwipeEnd();
+      widget.onSwipeEnd!();
     }
   }
 

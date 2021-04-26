@@ -798,11 +798,13 @@ class StreamChatClient {
     for (final channelState in channelStates) {
       final channel = channels[channelState.channel!.cid];
       if (channel != null) {
-        channel.state!.updateChannelState(channelState);
+        channel.state?.updateChannelState(channelState);
         newChannels.add(channel);
       } else {
         final newChannel = Channel.fromState(this, channelState);
-        channels[newChannel.cid!] = newChannel;
+        if (newChannel.cid != null) {
+          channels[newChannel.cid!] = newChannel;
+        }
         newChannels.add(newChannel);
       }
     }
@@ -1513,7 +1515,7 @@ class ClientState {
   /// The current list of channels in memory
   Map<String, Channel> get channels => _channelsController.value!;
 
-  set channels(Map<String, Channel>? v) {
+  set channels(Map<String, Channel> v) {
     if (v != null) _channelsController.add(v);
   }
 

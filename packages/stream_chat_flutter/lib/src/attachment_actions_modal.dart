@@ -12,7 +12,7 @@ import 'extension.dart';
 /// Callback to download an attachment asset
 typedef AttachmentDownloader = Future<String> Function(
   Attachment attachment, {
-  ProgressCallback progressCallback,
+  ProgressCallback? progressCallback,
 });
 
 /// Widget that shows the options in the gallery view
@@ -21,25 +21,25 @@ class AttachmentActionsModal extends StatelessWidget {
   final Message message;
 
   /// Current page index
-  final currentIndex;
+  final int currentIndex;
 
   /// Callback to show the message
-  final VoidCallback onShowMessage;
+  final VoidCallback? onShowMessage;
 
   /// Callback to download images
-  final AttachmentDownloader imageDownloader;
+  final AttachmentDownloader? imageDownloader;
 
   /// Callback to provide download files
-  final AttachmentDownloader fileDownloader;
+  final AttachmentDownloader? fileDownloader;
 
   /// Returns a new [AttachmentActionsModal]
   const AttachmentActionsModal({
-    @required this.currentIndex,
-    this.message,
+    required this.currentIndex,
+    required this.message,
     this.onShowMessage,
     this.imageDownloader,
     this.fileDownloader,
-  }) : assert(currentIndex != null, 'currentIndex cannot be null');
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -99,11 +99,16 @@ class AttachmentActionsModal extends StatelessWidget {
                     () {
                       final attachment = message.attachments[currentIndex];
                       final isImage = attachment.type == 'image';
-                      final saveFile = fileDownloader ?? _downloadAttachment;
-                      final saveImage = imageDownloader ?? _downloadAttachment;
+                      final Future<String?> Function(Attachment,
+                              {void Function(int, int) progressCallback})
+                          saveFile = fileDownloader ?? _downloadAttachment;
+                      final Future<String?> Function(Attachment,
+                              {void Function(int, int) progressCallback})
+                          saveImage = imageDownloader ?? _downloadAttachment;
                       final downloader = isImage ? saveImage : saveFile;
 
-                      final progressNotifier = ValueNotifier<_DownloadProgress>(
+                      final progressNotifier =
+                          ValueNotifier<_DownloadProgress?>(
                         _DownloadProgress.initial(),
                       );
 
@@ -134,7 +139,7 @@ class AttachmentActionsModal extends StatelessWidget {
                       );
                     },
                   ),
-                  if (StreamChat.of(context).user.id == message.user.id)
+                  if (StreamChat.of(context).user?.id == message.user?.id)
                     _buildButton(
                       context,
                       'Delete',
@@ -164,8 +169,10 @@ class AttachmentActionsModal extends StatelessWidget {
                       color: theme.colorTheme.accentRed,
                     ),
                 ]
-                    .map<Widget>((e) =>
-                        Align(alignment: Alignment.centerRight, child: e))
+                    .map<Widget>((e) => Align(
+                          alignment: Alignment.centerRight,
+                          child: e,
+                        ))
                     .insertBetween(
                       Container(
                         height: 1,
@@ -184,9 +191,9 @@ class AttachmentActionsModal extends StatelessWidget {
     context,
     String title,
     StreamSvgIcon icon,
-    VoidCallback onTap, {
-    Color color,
-    Key key,
+    VoidCallback? onTap, {
+    Color? color,
+    Key? key,
   }) {
     return Material(
       key: key,
@@ -215,16 +222,16 @@ class AttachmentActionsModal extends StatelessWidget {
 
   Widget _buildDownloadProgressDialog(
     BuildContext context,
-    ValueNotifier<_DownloadProgress> progressNotifier,
+    ValueNotifier<_DownloadProgress?> progressNotifier,
   ) {
     final theme = StreamChatTheme.of(context);
     return WillPopScope(
       onWillPop: () => Future.value(false),
       child: ValueListenableBuilder(
         valueListenable: progressNotifier,
-        builder: (_, _DownloadProgress progress, __) {
+        builder: (_, _DownloadProgress? progress, __) {
           // Pop the dialog in case the progress is null or it's completed.
-          if (progress == null || progress?.toProgressIndicatorValue == 1.0) {
+          if (progress == null || progress.toProgressIndicatorValue == 1.0) {
             Future.delayed(
               const Duration(milliseconds: 500),
               Navigator.of(context).maybePop,
@@ -291,23 +298,23 @@ class AttachmentActionsModal extends StatelessWidget {
     );
   }
 
-  Future<String> _downloadAttachment(
+  Future<String?> _downloadAttachment(
     Attachment attachment, {
-    ProgressCallback progressCallback,
+    ProgressCallback? progressCallback,
   }) async {
-    String filePath;
+    String? filePath;
     final appDocDir = await getTemporaryDirectory();
     await Dio().download(
-      attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl,
+      attachment.assetUrl ?? attachment.imageUrl ?? attachment.thumbUrl!,
       (Headers responseHeaders) {
-        final contentType = responseHeaders[Headers.contentTypeHeader];
-        final mimeType = contentType.first?.split('/')?.last;
+        final contentType = responseHeaders[Headers.contentTypeHeader]!;
+        final mimeType = contentType.first.split('/').last;
         filePath ??= '${appDocDir.path}/${attachment.id}.$mimeType';
         return filePath;
       },
       onReceiveProgress: progressCallback,
     );
-    final result = await ImageGallerySaver.saveFile(filePath);
+    final result = await ImageGallerySaver.saveFile(filePath!);
     return (result as Map)['filePath'];
   }
 }

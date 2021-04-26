@@ -17,7 +17,7 @@ extension ChannelEntityX on ChannelEntity {
       cid: cid,
       lastMessageAt: lastMessageAt,
       deletedAt: deletedAt,
-      extraData: extraData,
+      extraData: extraData ?? {},
       createdBy: createdBy,
     );
   }

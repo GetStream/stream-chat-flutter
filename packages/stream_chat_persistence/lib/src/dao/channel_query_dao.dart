@@ -6,7 +6,6 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
@@ -93,7 +92,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
 
     final possibleSortingFields = cachedChannels.fold<List<String>>(
         ChannelModel.topLevelFields, (previousValue, element) {
-      final extraData = element.extraData ?? {};
+      final extraData = element.extraData;
       return {...previousValue, ...extraData.keys}.toList();
     });
 

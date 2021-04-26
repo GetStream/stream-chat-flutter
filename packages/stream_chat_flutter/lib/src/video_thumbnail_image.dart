@@ -9,17 +9,17 @@ import 'stream_svg_icon.dart';
 import 'video_service.dart';
 
 class VideoThumbnailImage extends StatefulWidget {
-  final String video;
-  final double width;
-  final double height;
-  final BoxFit fit;
+  final String? video;
+  final double? width;
+  final double? height;
+  final BoxFit? fit;
   final ImageFormat format;
-  final Widget Function(BuildContext, Object) errorBuilder;
-  final WidgetBuilder placeholderBuilder;
+  final Widget Function(BuildContext, Object?)? errorBuilder;
+  final WidgetBuilder? placeholderBuilder;
 
   const VideoThumbnailImage({
-    Key key,
-    @required this.video,
+    Key? key,
+    required this.video,
     this.width,
     this.height,
     this.fit,
@@ -33,12 +33,12 @@ class VideoThumbnailImage extends StatefulWidget {
 }
 
 class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
-  Future<Uint8List> thumbnailFuture;
+  late Future<Uint8List?> thumbnailFuture;
 
   @override
   void initState() {
     thumbnailFuture = VideoService.generateVideoThumbnail(
-      video: widget.video,
+      video: widget.video!,
       imageFormat: widget.format,
     );
     super.initState();
@@ -48,7 +48,7 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   void didUpdateWidget(covariant VideoThumbnailImage oldWidget) {
     if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
       thumbnailFuture = VideoService.generateVideoThumbnail(
-        video: widget.video,
+        video: widget.video!,
         imageFormat: widget.format,
       );
     }
@@ -57,13 +57,13 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List>(
+    return FutureBuilder<Uint8List?>(
       future: thumbnailFuture,
       builder: (context, snapshot) {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           child: Builder(
-            key: ValueKey<AsyncSnapshot<Uint8List>>(snapshot),
+            key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
             builder: (_) {
               if (snapshot.hasError) {
                 return widget.errorBuilder?.call(context, snapshot.error) ??
@@ -90,7 +90,7 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
                 );
               }
               return Image.memory(
-                snapshot.data,
+                snapshot.data!,
                 fit: widget.fit,
                 height: widget.height,
                 width: widget.width,

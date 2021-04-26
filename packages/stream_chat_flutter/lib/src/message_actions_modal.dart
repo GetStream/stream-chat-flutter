@@ -16,13 +16,13 @@ import 'stream_chat.dart';
 import 'stream_chat_theme.dart';
 
 class MessageActionsModal extends StatefulWidget {
-  final Widget Function(BuildContext, Message) editMessageInputBuilder;
-  final OnMessageTap onThreadReplyTap;
-  final OnMessageTap onReplyTap;
+  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
+  final OnMessageTap? onThreadReplyTap;
+  final OnMessageTap? onReplyTap;
   final Message message;
-  final MessageTheme messageTheme;
+  final MessageTheme? messageTheme;
   final bool showReactions;
-  final OnMessageTap onCopyTap;
+  final OnMessageTap? onCopyTap;
   final bool showDeleteMessage;
   final bool showCopyMessage;
   final bool showEditMessage;
@@ -31,18 +31,18 @@ class MessageActionsModal extends StatefulWidget {
   final bool showThreadReplyMessage;
   final bool showFlagButton;
   final bool reverse;
-  final ShapeBorder messageShape;
-  final ShapeBorder attachmentShape;
+  final ShapeBorder? messageShape;
+  final ShapeBorder? attachmentShape;
   final DisplayWidget showUserAvatar;
-  final BorderRadius attachmentBorderRadiusGeometry;
+  final BorderRadius? attachmentBorderRadiusGeometry;
 
   /// List of custom actions
   final List<MessageAction> customActions;
 
   const MessageActionsModal({
-    Key key,
-    @required this.message,
-    @required this.messageTheme,
+    Key? key,
+    required this.message,
+    required this.messageTheme,
     this.showReactions = true,
     this.showDeleteMessage = true,
     this.showEditMessage = true,
@@ -80,24 +80,26 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
-    var messageTextLength = widget.message.text.length;
+    var messageTextLength = widget.message.text!.length;
     if (widget.message.quotedMessage != null) {
-      var quotedMessageLength = widget.message.quotedMessage.text.length + 40;
-      if (widget.message.quotedMessage.attachments?.isNotEmpty == true) {
+      var quotedMessageLength =
+          (widget.message.quotedMessage!.text?.length ?? 0) + 40;
+      if (widget.message.quotedMessage!.attachments.isNotEmpty) {
         quotedMessageLength += 40;
       }
       if (quotedMessageLength > messageTextLength) {
         messageTextLength = quotedMessageLength;
       }
     }
-    final roughSentenceSize =
-        messageTextLength * widget.messageTheme.messageText.fontSize * 1.2;
-    final divFactor = widget.message.attachments?.isNotEmpty == true
+    final roughSentenceSize = messageTextLength *
+        (widget.messageTheme?.messageText?.fontSize ?? 1) *
+        1.2;
+    final divFactor = widget.message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
     final hasFileAttachment =
-        widget.message.attachments?.any((it) => it.type == 'file') == true;
+        widget.message.attachments.any((it) => it.type == 'file') == true;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -134,11 +136,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                           children: <Widget>[
                             if (widget.showReactions &&
                                 (widget.message.status ==
-                                        MessageSendingStatus.sent ||
-                                    widget.message.status == null))
+                                    MessageSendingStatus.sent))
                               Align(
                                 alignment: Alignment(
-                                    user.id == widget.message.user.id
+                                    user?.id == widget.message.user?.id
                                         ? (divFactor > 1.0
                                             ? 0.0
                                             : (1.0 - divFactor))
@@ -159,8 +160,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 attachmentBorderRadiusGeometry:
                                     widget.attachmentBorderRadiusGeometry,
                                 message: widget.message.copyWith(
-                                  text: widget.message.text.length > 200
-                                      ? '${widget.message.text.substring(0, 200)}...'
+                                  text: widget.message.text!.length > 200
+                                      ? '${widget.message.text!.substring(0, 200)}...'
                                       : widget.message.text,
                                 ),
                                 messageTheme: widget.messageTheme,
@@ -177,15 +178,14 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 padding: const EdgeInsets.all(0),
                                 textPadding: EdgeInsets.symmetric(
                                   vertical: 8.0,
-                                  horizontal: widget.message.text.isOnlyEmoji
+                                  horizontal: widget.message.text!.isOnlyEmoji
                                       ? 0
                                       : 16.0,
                                 ),
                                 showReactionPickerIndicator:
                                     widget.showReactions &&
                                         (widget.message.status ==
-                                                MessageSendingStatus.sent ||
-                                            widget.message.status == null),
+                                            MessageSendingStatus.sent),
                                 showInChannelIndicator: false,
                                 showSendingIndicator: false,
                                 shape: widget.messageShape,
@@ -212,14 +212,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                         CrossAxisAlignment.stretch,
                                     children: [
                                       if (widget.showReplyMessage &&
-                                              widget.message.status ==
-                                                  MessageSendingStatus.sent ||
-                                          widget.message.status == null)
+                                          widget.message.status ==
+                                              MessageSendingStatus.sent)
                                         _buildReplyButton(context),
                                       if (widget.showThreadReplyMessage &&
                                           (widget.message.status ==
-                                                  MessageSendingStatus.sent ||
-                                              widget.message.status == null) &&
+                                              MessageSendingStatus.sent) &&
                                           widget.message.parentId == null)
                                         _buildThreadReplyButton(context),
                                       if (widget.showResendMessage)
@@ -315,7 +313,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           okText: 'OK',
         );
       } catch (err) {
-        if (json.decode(err?.body ?? {})['code'] == 4) {
+        if (err is ApiError && json.decode(err.body ?? '{}')['code'] == 4) {
           await showInfoDialog(
             context,
             icon: StreamSvgIcon.flag(
@@ -337,7 +335,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     setState(() {
       _showActions = false;
     });
-    var answer = await showConfirmationDialog(
+    final answer = await showConfirmationDialog(
       context,
       title: 'Delete message',
       icon: StreamSvgIcon.flag(
@@ -349,7 +347,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       cancelText: 'CANCEL',
     );
 
-    if (answer) {
+    if (answer == true) {
       try {
         Navigator.pop(context);
         await StreamChannel.of(context).channel.deleteMessage(widget.message);
@@ -381,7 +379,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       onTap: () {
         Navigator.pop(context);
         if (widget.onReplyTap != null) {
-          widget.onReplyTap(widget.message);
+          widget.onReplyTap!(widget.message);
         }
       },
       child: Padding(
@@ -578,7 +576,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 ),
               ),
               widget.editMessageInputBuilder != null
-                  ? widget.editMessageInputBuilder(context, widget.message)
+                  ? widget.editMessageInputBuilder!(context, widget.message)
                   : MessageInput(
                       editMessage: widget.message,
                       preMessageSending: (m) {
@@ -599,7 +597,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       onTap: () {
         Navigator.pop(context);
         if (widget.onThreadReplyTap != null) {
-          widget.onThreadReplyTap(widget.message);
+          widget.onThreadReplyTap!(widget.message);
         }
       },
       child: Padding(

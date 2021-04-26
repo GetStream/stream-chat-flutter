@@ -43,19 +43,21 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
 
   /// Map of custom channel extraData
   final Map<String, Object>? extraData;
-  ChannelEntity(
-      {required this.id,
-      required this.type,
-      required this.cid,
-      required this.config,
-      required this.frozen,
-      this.lastMessageAt,
-      required this.createdAt,
-      required this.updatedAt,
-      this.deletedAt,
-      required this.memberCount,
-      this.createdById,
-      this.extraData});
+
+  ChannelEntity({
+    required this.id,
+    required this.type,
+    required this.cid,
+    required this.config,
+    required this.frozen,
+    this.lastMessageAt,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.memberCount,
+    this.createdById,
+    this.extraData,
+  });
   factory ChannelEntity.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
