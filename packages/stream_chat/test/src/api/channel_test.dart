@@ -516,7 +516,7 @@ void main() {
       );
       await channelClient.watch();
 
-      final event = const Event(type: EventType.any);
+      const event = Event(type: EventType.any);
 
       when(
         () => mockDio.post<String>(
@@ -564,7 +564,7 @@ void main() {
       );
       await channelClient.watch();
 
-      final event = const Event(type: EventType.typingStart);
+      const event = Event(type: EventType.typingStart);
 
       when(
         () => mockDio.post<String>(
@@ -610,7 +610,7 @@ void main() {
       );
       await channelClient.watch();
 
-      final event = const Event(type: EventType.typingStop);
+      const event = Event(type: EventType.typingStop);
 
       when(
         () => mockDio.post<String>(

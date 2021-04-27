@@ -23,16 +23,16 @@ class ChannelModel {
     this.memberCount = 0,
     this.extraData,
     this.team,
-  })  : config = config ?? ChannelConfig(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now(),
-        assert(
+  })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
           'provide either a cid or an id and type',
         ),
         id = id ?? cid!.split(':')[1],
         type = type ?? cid!.split(':')[0],
-        cid = cid ?? '$type:$id';
+        cid = cid ?? '$type:$id',
+        config = config ?? ChannelConfig(),
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) =>

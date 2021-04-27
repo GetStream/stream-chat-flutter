@@ -26,7 +26,7 @@ void main() {
           client,
           'testType$index',
           'testId$index',
-          {'extra_data_key': 'extra_data_value_$index'},
+          extraData: {'extra_data_key': 'extra_data_value_$index'},
         );
       },
     );
@@ -703,7 +703,7 @@ void main() {
         final mockClient = MockClient();
         final channels = _generateChannels(mockClient);
         final stateChannels = {
-          for (var c in _generateChannels(mockClient, offset: 5)) c.cid: c
+          for (var c in _generateChannels(mockClient, offset: 5)) c.cid!: c
         };
         const channelsBlocKey = Key('channelsBloc');
         final channelsBloc = ChannelsBloc(

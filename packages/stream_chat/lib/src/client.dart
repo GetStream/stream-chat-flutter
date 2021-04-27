@@ -29,6 +29,8 @@ import 'package:stream_chat/src/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:stream_chat/src/models/filter.dart';
+
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
@@ -552,13 +554,16 @@ class StreamChatClient {
           type: EventType.connectionRecovered,
           online: true,
         ));
-        if (state.channels?.isNotEmpty == true) {
+        if (state.channels.isNotEmpty == true) {
           // ignore: unawaited_futures
-          queryChannelsOnline(filter: {
-            'cid': {
-              '\$in': state.channels!.keys.toList(),
-            },
-          }).then(
+          queryChannelsOnline(
+            filter: Filter.in_('cid', state.channels.keys.toList()),
+            // {
+            //   'cid': {
+            //     '\$in': state.channels!.keys.toList(),
+            //   },
+            // }
+          ).then(
             (_) async {
               await resync();
             },
@@ -641,7 +646,7 @@ class StreamChatClient {
 
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption<ChannelModel>>? sort,
     Map<String, dynamic>? options,
     PaginationParams paginationParams = const PaginationParams(),
@@ -684,7 +689,7 @@ class StreamChatClient {
 
   /// Requests channels with a given query from the API.
   Future<List<Channel>> queryChannelsOnline({
-    required Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption<ChannelModel>>? sort,
     Map<String, dynamic>? options,
     int? messageLimit,
@@ -764,7 +769,7 @@ class StreamChatClient {
     final updateData = _mapChannelStateToChannel(channels);
 
     await _chatPersistenceClient?.updateChannelQueries(
-      filter ?? {},
+      filter,
       channels.map((c) => c.channel!.cid).toList(),
       clearQueryCache: paginationParams.offset == 0,
     );
@@ -775,7 +780,7 @@ class StreamChatClient {
 
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
-    required Map<String, dynamic>? filter,
+    required Filter? filter,
     required List<SortOption<ChannelModel>>? sort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
@@ -790,10 +795,10 @@ class StreamChatClient {
     return updatedData.value;
   }
 
-  MapEntry<Map<String?, Channel>, List<Channel>> _mapChannelStateToChannel(
+  MapEntry<Map<String, Channel>, List<Channel>> _mapChannelStateToChannel(
     List<ChannelState> channelStates,
   ) {
-    final channels = {...state.channels ?? {}};
+    final channels = {...state.channels};
     final newChannels = <Channel>[];
     for (final channelState in channelStates) {
       final channel = channels[channelState.channel!.cid];
@@ -802,7 +807,7 @@ class StreamChatClient {
         newChannels.add(channel);
       } else {
         final newChannel = Channel.fromState(this, channelState);
-        channels[newChannel.cid] = newChannel;
+        channels[newChannel.cid!] = newChannel;
         newChannels.add(newChannel);
       }
     }
@@ -1061,16 +1066,13 @@ class StreamChatClient {
 
   /// A message search.
   Future<SearchMessagesResponse> search(
-    Map<String, dynamic> filters, {
+    Filter filter, {
     String? query,
     List<SortOption>? sort,
     PaginationParams? paginationParams,
     Map<String, dynamic>? messageFilters,
   }) async {
     assert(() {
-      if (filters.isEmpty) {
-        throw ArgumentError('`filters` cannot be set as null or empty');
-      }
       if (query == null && messageFilters == null) {
         throw ArgumentError('Provide at least `query` or `messageFilters`');
       }
@@ -1083,7 +1085,7 @@ class StreamChatClient {
     }(), 'Check incoming params.');
 
     final payload = {
-      'filter_conditions': filters,
+      'filter_conditions': filter,
       'message_filter_conditions': messageFilters,
       'query': query,
       'sort': sort,
@@ -1194,15 +1196,12 @@ class StreamChatClient {
   Channel channel(
     String type, {
     String? id,
-    Map<String, dynamic> extraData = const {},
+    Map<String, Object> extraData = const {},
   }) {
-    if (id != null && state.channels?.containsKey('$type:$id') == true) {
-      if (state.channels!['$type:$id'] != null) {
-        return state.channels!['$type:$id'] as Channel;
-      }
+    if (id != null && state.channels.containsKey('$type:$id')) {
+      return state.channels['$type:$id']!;
     }
-
-    return Channel(this, type, id, extraData);
+    return Channel(this, type, id, extraData: extraData);
   }
 
   /// Update or Create the given user object.
@@ -1443,9 +1442,7 @@ class ClientState {
       if (cid != null) {
         _client.chatPersistenceClient?.deleteChannels([cid]);
       }
-      if (channels != null) {
-        channels = channels?..removeWhere((cid, ch) => cid == event.cid);
-      }
+      channels = channels..removeWhere((cid, ch) => cid == event.cid);
     }));
   }
 
@@ -1468,9 +1465,7 @@ class ClientState {
         .listen((Event event) async {
       final eventChannel = event.channel!;
       await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-      if (channels != null) {
-        channels = channels?..remove(eventChannel.cid);
-      }
+      channels = channels..remove(eventChannel.cid);
     }));
   }
 
@@ -1521,13 +1516,13 @@ class ClientState {
       _channelsController.stream;
 
   /// The current list of channels in memory
-  Map<String?, Channel>? get channels => _channelsController.value;
+  Map<String, Channel> get channels => _channelsController.value!;
 
-  set channels(Map<String?, Channel>? v) {
-    _channelsController.add(v);
+  set channels(Map<String, Channel>? v) {
+    if (v != null) _channelsController.add(v);
   }
 
-  final BehaviorSubject<Map<String?, Channel>?> _channelsController =
+  final BehaviorSubject<Map<String, Channel>> _channelsController =
       BehaviorSubject.seeded({});
   final BehaviorSubject<OwnUser?> _userController = BehaviorSubject();
   final BehaviorSubject<Map<String?, User?>> _usersController =
@@ -1541,7 +1536,7 @@ class ClientState {
     _userController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
-    channels!.values.forEach((c) => c.dispose());
+    channels.values.forEach((c) => c.dispose());
     _channelsController.close();
   }
 }

@@ -19,19 +19,24 @@ class Channel {
   /// Create a channel client instance.
   Channel(
     this._client,
-    this.type,
-    this._id,
-    this._extraData,
-  ) : _cid = _id != null ? '$type:$_id' : null {
+    this._type,
+    this._id, {
+    Map<String, Object> extraData = const {},
+  })  : _cid = _id != null ? '$_type:$_id' : null,
+        _extraData = extraData {
     _client.logger.info('New Channel instance not initialized created');
   }
 
   /// Create a channel client instance from a [ChannelState] object
-  Channel.fromState(this._client, ChannelState channelState) : _extraData = {} {
-    _cid = channelState.channel!.cid;
-    _id = channelState.channel!.id;
-    type = channelState.channel!.type;
-
+  Channel.fromState(this._client, ChannelState channelState)
+      : assert(
+          channelState.channel != null,
+          'No channel found inside channel state',
+        ),
+        _id = channelState.channel!.id,
+        _type = channelState.channel!.type,
+        _cid = channelState.channel!.cid,
+        _extraData = channelState.channel!.extraData ?? {} {
     state = ChannelClientState(this, channelState);
     _initializedCompleter.complete(true);
     _client.logger.info('New Channel instance initialized created');
@@ -41,19 +46,20 @@ class Channel {
   ChannelClientState? state;
 
   /// The channel type
-  String? type;
+  final String _type;
 
   String? _id;
   String? _cid;
-  Map<String, dynamic> _extraData;
+  final Map<String, dynamic> _extraData;
 
   set extraData(Map<String, dynamic> extraData) {
     if (_initializedCompleter.isCompleted) {
-      throw Exception(
-          'Once the channel is initialized you should use channel.update '
-          'to update channel data');
+      throw StateError(
+        'Once the channel is initialized you should use channel.update '
+        'to update channel data',
+      );
     }
-    _extraData = extraData;
+    _extraData.addAll(extraData);
   }
 
   /// Returns true if the channel is muted
@@ -179,6 +185,9 @@ class Channel {
   /// Channel id
   String? get id => state?._channelState.channel?.id ?? _id;
 
+  /// Channel type
+  String get type => state?._channelState.channel?.type ?? _type;
+
   /// Channel cid
   String? get cid => state?._channelState.channel?.cid ?? _cid;
 
@@ -193,9 +202,11 @@ class Channel {
       state?._channelState.channel?.extraData ?? _extraData;
 
   /// Channel extra data as a stream
-  Stream<Map<String, dynamic>?>? get extraDataStream {
+  Stream<Map<String, dynamic>> get extraDataStream {
     _checkInitialized();
-    return state?.channelStateStream.map((cs) => cs.channel?.extraData);
+    return state!.channelStateStream.map(
+      (cs) => cs.channel?.extraData ?? _extraData,
+    );
   }
 
   /// The main Stream chat client
@@ -384,7 +395,7 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.sendMessage(message, id!, type!);
+      final response = await _client.sendMessage(message, id!, type);
       state!.addMessage(response.message);
       return response;
     } catch (error) {
@@ -537,7 +548,7 @@ class Channel {
     return _client.sendFile(
       file,
       id!,
-      type!,
+      type,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );
@@ -553,7 +564,7 @@ class Channel {
     return _client.sendImage(
       file,
       id!,
-      type!,
+      type,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );
@@ -565,18 +576,16 @@ class Channel {
     Map<String, dynamic>? messageFilters,
     List<SortOption>? sort,
     PaginationParams? paginationParams,
-  }) =>
-      _client.search(
-        {
-          'cid': {
-            r'$in': [cid],
-          },
-        },
-        sort: sort,
-        query: query,
-        paginationParams: paginationParams,
-        messageFilters: messageFilters,
-      );
+  }) {
+    _checkInitialized();
+    return _client.search(
+      Filter.in_('cid', [cid!]),
+      sort: sort,
+      query: query,
+      paginationParams: paginationParams,
+      messageFilters: messageFilters,
+    );
+  }
 
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(
@@ -587,7 +596,7 @@ class Channel {
     return _client.deleteFile(
       url,
       id!,
-      type!,
+      type,
       cancelToken: cancelToken,
     );
   }
@@ -601,7 +610,7 @@ class Channel {
     return _client.deleteImage(
       url,
       id!,
-      type!,
+      type,
       cancelToken: cancelToken,
     );
   }
@@ -903,7 +912,7 @@ class Channel {
 
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
-    client.state.channels![cid] = this;
+    client.state.channels[cid!] = this;
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
     }
@@ -1018,9 +1027,7 @@ class Channel {
     bool preferOffline = false,
   }) async {
     var path = '/channels/$type';
-    if (id != null) {
-      path = '$path/$id';
-    }
+    if (id != null) path = '$path/$id';
     path = '$path/query';
 
     final payload = Map<String, dynamic>.from({

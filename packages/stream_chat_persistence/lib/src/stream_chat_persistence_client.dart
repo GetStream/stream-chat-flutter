@@ -253,7 +253,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<List<ChannelState>> getChannelStates({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption<ChannelModel>>? sort,
     PaginationParams? paginationParams,
   }) {
@@ -273,7 +273,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
 
   @override
   Future<void> updateChannelQueries(
-    Map<String, dynamic> filter,
+    Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   }) {

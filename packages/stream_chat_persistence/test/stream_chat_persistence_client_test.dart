@@ -292,7 +292,7 @@ void main() {
     });
 
     test('updateChannelQueries', () async {
-      const filter = <String, dynamic>{};
+      final filter = Filter.in_('members', const ['testUserId']);
       const cids = <String>[];
       when(() =>
               mockDatabase.channelQueryDao.updateChannelQueries(filter, cids))

@@ -92,7 +92,7 @@ class ChannelListCore extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic>? filter;
+  final Filter? filter;
 
   /// Query channels options.
   ///

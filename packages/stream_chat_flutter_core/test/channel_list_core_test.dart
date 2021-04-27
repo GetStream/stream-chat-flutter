@@ -24,7 +24,7 @@ void main() {
           client,
           'testType$index',
           'testId$index',
-          {'extra_data_key': 'extra_data_value_$index'},
+          extraData: {'extra_data_key': 'extra_data_value_$index'},
         );
       },
     );

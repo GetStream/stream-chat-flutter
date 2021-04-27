@@ -6,6 +6,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
 
+final testFilter = Filter.custom(operator: '\$test', value: 'testValue');
+
 void main() {
   List<GetMessageResponse> _generateMessages({
     int count = 3,
@@ -37,7 +39,7 @@ void main() {
         loadingBuilder: (BuildContext context) => const Offstage(),
         emptyBuilder: (BuildContext context) => const Offstage(),
         errorBuilder: (BuildContext context, Object? error) => const Offstage(),
-        filters: const {},
+        filters: testFilter,
       );
 
       await tester.pumpWidget(messageSearchListCore);
@@ -58,7 +60,7 @@ void main() {
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object? error) => Offstage(),
-        filters: {},
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
@@ -89,7 +91,7 @@ void main() {
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
         messageSearchListController: controller,
-        filters: {},
+        filters: testFilter,
       );
 
       expect(controller.loadData, isNull);
@@ -125,14 +127,14 @@ void main() {
         errorBuilder: (BuildContext context, Object error) => Offstage(
           key: errorWidgetKey,
         ),
-        filters: {},
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       const error = 'Error! Error! Error!';
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -153,7 +155,7 @@ void main() {
       expect(find.byKey(errorWidgetKey), findsOneWidget);
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -174,14 +176,14 @@ void main() {
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(key: emptyWidgetKey),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
-        filters: {},
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       final messageResponseList = <GetMessageResponse>[];
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -204,7 +206,7 @@ void main() {
       expect(find.byKey(emptyWidgetKey), findsOneWidget);
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -226,14 +228,14 @@ void main() {
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
-        filters: {},
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       final messageResponseList = _generateMessages();
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -256,7 +258,7 @@ void main() {
       expect(find.byKey(childWidgetKey), findsOneWidget);
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -284,14 +286,14 @@ void main() {
         emptyBuilder: (BuildContext context) => Offstage(),
         errorBuilder: (BuildContext context, Object error) => Offstage(),
         paginationParams: pagination,
-        filters: {},
+        filters: testFilter,
       );
 
       final mockClient = MockClient();
 
       final messageResponseList = _generateMessages();
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -325,7 +327,7 @@ void main() {
       );
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -341,7 +343,7 @@ void main() {
       final paginatedMessageResponseList = _generateMessages(offset: offset);
       final updatedPagination = pagination.copyWith(offset: offset);
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -365,7 +367,7 @@ void main() {
       );
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -400,14 +402,14 @@ void main() {
             emptyBuilder: (BuildContext context) => Offstage(),
             errorBuilder: (BuildContext context, Object error) => Offstage(),
             paginationParams: pagination.copyWith(limit: limit),
-            filters: {},
+            filters: testFilter,
           );
 
       final mockClient = MockClient();
 
       final messageResponseList = _generateMessages();
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -445,7 +447,7 @@ void main() {
       );
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -458,7 +460,7 @@ void main() {
       final updatedMessageResponseList = _generateMessages(count: limit);
       final updatedPagination = pagination.copyWith(limit: limit);
       when(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),
@@ -479,7 +481,7 @@ void main() {
       );
 
       verify(() => mockClient.search(
-            any(),
+            testFilter,
             query: any(named: 'query'),
             sort: any(named: 'sort'),
             messageFilters: any(named: 'messageFilters'),

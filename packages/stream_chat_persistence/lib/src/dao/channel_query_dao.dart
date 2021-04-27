@@ -18,7 +18,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   /// Creates a new channel query dao instance
   ChannelQueryDao(MoorChatDatabase db) : super(db);
 
-  String _computeHash(Map<String, dynamic>? filter) {
+  String _computeHash(Filter? filter) {
     if (filter == null) {
       return 'allchannels';
     }
@@ -30,7 +30,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
-    Map<String, dynamic> filter,
+    Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   }) async =>
@@ -58,7 +58,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
       });
 
   ///
-  Future<List<String>> getCachedChannelCids(Map<String, dynamic>? filter) {
+  Future<List<String>> getCachedChannelCids(Filter? filter) {
     final hash = _computeHash(filter);
     return (select(channelQueries)..where((c) => c.queryHash.equals(hash)))
         .map((c) => c.channelCid)
@@ -67,7 +67,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelModel>> getChannels({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption<ChannelModel>>? sort,
     PaginationParams? paginationParams,
   }) async {

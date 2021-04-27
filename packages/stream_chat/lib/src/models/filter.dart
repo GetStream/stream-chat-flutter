@@ -1,5 +1,7 @@
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 
+import 'package:equatable/equatable.dart';
+
 const _groupOperators = [
   FilterOperator.and,
   FilterOperator.or,
@@ -83,7 +85,7 @@ extension FilterOperatorX on FilterOperator {
 /// )
 /// ```
 /// See <a href="https://getstream.io/chat/docs/query_channels/?language=dart" target="_top">Query Channels Documentation</a>
-class Filter {
+class Filter extends Equatable {
   const Filter.__({
     required this.operator,
     required this.value,
@@ -170,6 +172,9 @@ class Filter {
 
   ///
   final Object /*List<Object>|List<Filter>|String*/ value;
+
+  @override
+  List<Object?> get props => [operator, key, value];
 
   ///
   Map<String, Object> toJson() {
