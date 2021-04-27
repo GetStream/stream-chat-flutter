@@ -127,7 +127,7 @@ void main() {
           ),
         );
 
-        await client.queryChannelsOnline(filter: null, waitForConnect: false);
+        await client.queryChannelsOnline(waitForConnect: false);
 
         verify(() =>
                 mockDio.get<String>('/channels', queryParameters: queryParams))
@@ -141,7 +141,7 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final queryFilter = Filter.in_('id', ['test']);
+        final queryFilter = Filter.in_('id', const ['test']);
         final sortOptions = <SortOption<ChannelModel>>[];
         final options = {'state': false, 'watch': false, 'presence': true};
         const paginationParams = PaginationParams(offset: 2);
@@ -189,7 +189,7 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final filter = Filter.in_('cid', ['messaging:testId']);
+        final filter = Filter.in_('cid', const ['messaging:testId']);
         const query = 'hello';
         final queryParams = {
           'payload': json.encode({
@@ -222,7 +222,7 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final filters = Filter.in_('id', ['test']);
+        final filters = Filter.in_('id', const ['test']);
         const sortOptions = [SortOption('name')];
         const query = 'query';
         final queryParams = {

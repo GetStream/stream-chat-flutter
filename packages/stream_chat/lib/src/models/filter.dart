@@ -158,7 +158,7 @@ class Filter extends Equatable {
       Filter._(operator: FilterOperator.exists, key: key, value: exists);
 
   /// Creates a custom [Filter] if there isn't one already available.
-  factory Filter.custom({
+  const factory Filter.custom({
     required String operator,
     required Object value,
     String? key,
