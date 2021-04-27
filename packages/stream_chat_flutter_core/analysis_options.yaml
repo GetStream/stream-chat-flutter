@@ -3,6 +3,7 @@ analyzer:
     - lib/**/*.g.dart
     - lib/**/*.freezed.dart
     - example/*
+    - test/*
 
 linter:
   rules:
