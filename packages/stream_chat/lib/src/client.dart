@@ -558,11 +558,6 @@ class StreamChatClient {
           // ignore: unawaited_futures
           queryChannelsOnline(
             filter: Filter.in_('cid', state.channels.keys.toList()),
-            // {
-            //   'cid': {
-            //     '\$in': state.channels!.keys.toList(),
-            //   },
-            // }
           ).then(
             (_) async {
               await resync();
