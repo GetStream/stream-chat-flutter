@@ -775,8 +775,8 @@ class StreamChatClient {
 
   /// Requests channels with a given query from the Persistence client.
   Future<List<Channel>> queryChannelsOffline({
-    required Filter? filter,
-    required List<SortOption<ChannelModel>>? sort,
+    Filter? filter,
+    List<SortOption<ChannelModel>>? sort,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final offlineChannels = (await _chatPersistenceClient?.getChannelStates(
