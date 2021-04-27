@@ -124,7 +124,7 @@ void main() {
       const key = 'testKey';
       const value = 'testValue';
       const operator = '\$customOperator';
-      final filter = Filter.custom(operator: operator, key: key, value: value);
+      const filter = Filter.custom(operator: operator, key: key, value: value);
       expect(filter.key, key);
       expect(filter.value, value);
       expect(filter.operator, operator);
@@ -132,7 +132,7 @@ void main() {
 
     group('groupedOperator', () {
       final filter1 = Filter.equal('testKey', 'testValue');
-      final filter2 = Filter.in_('testKey', ['testValue']);
+      final filter2 = Filter.in_('testKey', const ['testValue']);
       final filters = [filter1, filter2];
 
       test('and', () {
@@ -184,7 +184,7 @@ void main() {
 
     test('groupedFilter', () {
       final filter1 = Filter.equal('testKey', 'testValue');
-      final filter2 = Filter.in_('testKey', ['testValue']);
+      final filter2 = Filter.in_('testKey', const ['testValue']);
       final filters = [filter1, filter2];
 
       final filter = Filter.and(filters);
@@ -193,6 +193,20 @@ void main() {
         encoded,
         '{"${FilterOperator.and.rawValue}":${json.encode(filters)}}',
       );
+    });
+
+    group('equality', () {
+      test('simpleFilter', () {
+        final filter1 = Filter.equal('testKey', 'testValue');
+        final filter2 = Filter.equal('testKey', 'testValue');
+        expect(filter1, filter2);
+      });
+
+      test('groupedFilter', () {
+        final filter1 = Filter.and([Filter.equal('testKey', 'testValue')]);
+        final filter2 = Filter.and([Filter.equal('testKey', 'testValue')]);
+        expect(filter1, filter2);
+      });
     });
   });
 }
