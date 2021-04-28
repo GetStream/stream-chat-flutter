@@ -32,7 +32,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// Use [StreamChat.of] to get the current [StreamChatState] instance.
 class StreamChat extends StatefulWidget {
   final StreamChatClient client;
-  final Widget child;
+  final Widget? child;
   final StreamChatThemeData? streamChatThemeData;
 
   /// The amount of time that will pass before disconnecting the client in the background
@@ -96,7 +96,7 @@ class StreamChatState extends State<StreamChat> {
                 client: client,
                 onBackgroundEventReceived: widget.onBackgroundEventReceived,
                 backgroundKeepAlive: widget.backgroundKeepAlive,
-                child: widget.child,
+                child: widget.child ?? Offstage(),
               ),
             );
           },
