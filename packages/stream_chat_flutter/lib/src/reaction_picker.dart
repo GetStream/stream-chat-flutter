@@ -18,11 +18,9 @@ class ReactionPicker extends StatefulWidget {
   const ReactionPicker({
     Key? key,
     required this.message,
-    required this.messageTheme,
   }) : super(key: key);
 
   final Message message;
-  final MessageTheme? messageTheme;
 
   @override
   _ReactionPickerState createState() => _ReactionPickerState();

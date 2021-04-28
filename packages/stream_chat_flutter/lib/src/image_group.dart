@@ -15,7 +15,7 @@ class ImageGroup extends StatelessWidget {
 
   final List<Attachment> images;
   final Message message;
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
   final Size size;
   final ShowMessageCallback? onShowMessage;
 

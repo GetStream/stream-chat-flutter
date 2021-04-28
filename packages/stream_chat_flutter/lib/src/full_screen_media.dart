@@ -177,7 +177,6 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                     Navigator.of(context).pop();
                   },
                   message: widget.message,
-                  urls: widget.mediaAttachments,
                   currentIndex: _currentPage,
                   onShowMessage: () {
                     widget.onShowMessage?.call(

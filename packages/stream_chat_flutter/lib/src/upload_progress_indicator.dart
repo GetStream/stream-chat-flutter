@@ -5,7 +5,7 @@ import 'stream_chat_theme.dart';
 class UploadProgressIndicator extends StatelessWidget {
   final int uploaded;
   final int total;
-  late final Color progressIndicatorColor;
+  final Color progressIndicatorColor;
   final EdgeInsetsGeometry padding;
   final bool showBackground;
   final TextStyle? textStyle;
@@ -14,7 +14,7 @@ class UploadProgressIndicator extends StatelessWidget {
     Key? key,
     required this.uploaded,
     required this.total,
-    Color? progressIndicatorColor,
+    this.progressIndicatorColor = const Color(0xffb2b2b2),
     this.padding = const EdgeInsets.only(
       top: 5,
       bottom: 5,
@@ -23,9 +23,7 @@ class UploadProgressIndicator extends StatelessWidget {
     ),
     this.showBackground = true,
     this.textStyle,
-  })  : progressIndicatorColor =
-            progressIndicatorColor ?? const Color(0xffb2b2b2),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -66,7 +66,7 @@ class MessageWidget extends StatefulWidget {
   final Message message;
 
   /// The message theme
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -93,7 +93,7 @@ class MessageWidget extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
 
   /// The internal padding of the message text
-  final EdgeInsetsGeometry textPadding;
+  final EdgeInsets textPadding;
 
   /// The internal padding of an attachment
   final EdgeInsetsGeometry attachmentPadding;
@@ -222,7 +222,7 @@ class MessageWidget extends StatefulWidget {
                 child: wrapAttachmentWidget(
                   context,
                   Material(
-                    color: messageTheme?.messageBackgroundColor,
+                    color: messageTheme.messageBackgroundColor,
                     child: ImageGroup(
                       size: Size(
                         MediaQuery.of(context).size.width * 0.8,
@@ -425,7 +425,7 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget build(BuildContext context) {
     super.build(context);
     final avatarWidth =
-        widget.messageTheme?.avatarTheme?.constraints.maxWidth ?? 40;
+        widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
     var leftPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
@@ -544,7 +544,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                                             BorderSide(
                                                               color: widget
                                                                       .messageTheme
-                                                                      ?.messageBorderColor ??
+                                                                      .messageBorderColor ??
                                                                   Colors.grey,
                                                             ),
                                                         borderRadius: widget
@@ -702,7 +702,7 @@ class _MessageWidgetState extends State<MessageWidget>
           ),
         InkWell(
           onTap: widget.onThreadTap != null ? onThreadTap : null,
-          child: Text(msg, style: widget.messageTheme?.replies),
+          child: Text(msg, style: widget.messageTheme.replies),
         ),
       ],
       if (showUsername)
@@ -710,13 +710,13 @@ class _MessageWidgetState extends State<MessageWidget>
           widget.message.user!.name,
           maxLines: 1,
           key: usernameKey,
-          style: widget.messageTheme?.messageAuthor,
+          style: widget.messageTheme.messageAuthor,
           overflow: TextOverflow.ellipsis,
         ),
       if (showTimeStamp)
         Text(
           Jiffy(widget.message.createdAt.toLocal()).jm,
-          style: widget.messageTheme?.createdAt,
+          style: widget.messageTheme.createdAt,
         ),
       if (showSendingIndicator) _buildSendingIndicator(),
     ]);
@@ -731,13 +731,13 @@ class _MessageWidgetState extends State<MessageWidget>
           Container(
             margin: EdgeInsets.only(
               bottom: context.textScaleFactor *
-                  ((widget.messageTheme?.replies?.fontSize ?? 1) / 2),
+                  ((widget.messageTheme.replies?.fontSize ?? 1) / 2),
             ),
             child: CustomPaint(
               size: Size(16, 32) * context.textScaleFactor,
               painter: _ThreadReplyPainter(
                 context: context,
-                color: widget.messageTheme?.messageBorderColor,
+                color: widget.messageTheme.messageBorderColor,
               ),
             ),
           ),
@@ -775,7 +775,7 @@ class _MessageWidgetState extends State<MessageWidget>
     return UrlAttachment(
       urlAttachment: urlAttachment,
       hostDisplayName: hostDisplayName,
-      textPadding: widget.textPadding as EdgeInsets,
+      textPadding: widget.textPadding,
     );
   }
 
@@ -830,12 +830,11 @@ class _MessageWidgetState extends State<MessageWidget>
                 key: ValueKey('${widget.message.id}.reactions'),
                 reverse: widget.reverse,
                 flipTail: widget.reverse,
-                backgroundColor:
-                    widget.messageTheme?.reactionsBackgroundColor ??
-                        Colors.transparent,
-                borderColor: widget.messageTheme?.reactionsBorderColor ??
+                backgroundColor: widget.messageTheme.reactionsBackgroundColor ??
                     Colors.transparent,
-                maskColor: widget.messageTheme?.reactionsMaskColor ??
+                borderColor: widget.messageTheme.reactionsBorderColor ??
+                    Colors.transparent,
+                maskColor: widget.messageTheme.reactionsMaskColor ??
                     Colors.transparent,
                 reactions: reactionsList,
               ),
@@ -1001,7 +1000,7 @@ class _MessageWidgetState extends State<MessageWidget>
   }
 
   Widget _buildSendingIndicator() {
-    final style = widget.messageTheme?.createdAt;
+    final style = widget.messageTheme.createdAt;
     final message = widget.message;
 
     if (hasNonUrlAttachments &&
@@ -1053,7 +1052,7 @@ class _MessageWidgetState extends State<MessageWidget>
           offset: Offset(
             0,
             widget.translateUserAvatar
-                ? (widget.messageTheme?.avatarTheme?.constraints.maxHeight ??
+                ? (widget.messageTheme.avatarTheme?.constraints.maxHeight ??
                         40) /
                     2
                 : 0,
@@ -1061,8 +1060,8 @@ class _MessageWidgetState extends State<MessageWidget>
           child: UserAvatar(
             user: widget.message.user!,
             onTap: widget.onUserAvatarTap,
-            constraints: widget.messageTheme?.avatarTheme!.constraints,
-            borderRadius: widget.messageTheme?.avatarTheme!.borderRadius,
+            constraints: widget.messageTheme.avatarTheme!.constraints,
+            borderRadius: widget.messageTheme.avatarTheme!.borderRadius,
             showOnlineStatus: false,
           ),
         ),
@@ -1085,9 +1084,9 @@ class _MessageWidgetState extends State<MessageWidget>
                     message: widget.message,
                     onMentionTap: widget.onMentionTap,
                     messageTheme: isOnlyEmoji
-                        ? widget.messageTheme?.copyWith(
+                        ? widget.messageTheme.copyWith(
                             messageText:
-                                widget.messageTheme?.messageText!.copyWith(
+                                widget.messageTheme.messageText!.copyWith(
                             fontSize: 42,
                           ))
                         : widget.messageTheme,
@@ -1103,7 +1102,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Color? _getBackgroundColor() {
     if (hasQuotedMessage) {
-      return widget.messageTheme?.messageBackgroundColor;
+      return widget.messageTheme.messageBackgroundColor;
     }
 
     if (hasUrlAttachments) {
@@ -1118,7 +1117,7 @@ class _MessageWidgetState extends State<MessageWidget>
       return Colors.transparent;
     }
 
-    return widget.messageTheme?.messageBackgroundColor;
+    return widget.messageTheme.messageBackgroundColor;
   }
 
   void retryMessage(BuildContext context) {

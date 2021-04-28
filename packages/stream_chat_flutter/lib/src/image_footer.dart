@@ -221,8 +221,8 @@ class _ImageFooterState extends State<ImageFooter> {
                             child: FittedBox(
                               fit: BoxFit.cover,
                               child: VideoThumbnailImage(
-                                video: attachment.file?.path ??
-                                    attachment.assetUrl,
+                                video: (attachment.file?.path ??
+                                    attachment.assetUrl)!,
                               ),
                             ),
                           );

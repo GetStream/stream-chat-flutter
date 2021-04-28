@@ -204,7 +204,8 @@ class Channel {
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>> get extraDataStream {
     _checkInitialized();
-    return state!.channelStateStream.map(
+    return state!.channelStateStream
+        .map(
       (cs) => cs.channel?.extraData ?? _extraData,
     );
   }

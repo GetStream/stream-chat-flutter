@@ -67,7 +67,7 @@ class QuotedMessageWidget extends StatelessWidget {
   final Message message;
 
   /// The message theme
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -144,12 +144,12 @@ class QuotedMessageWidget extends StatelessWidget {
             child: MessageText(
               message: msg,
               messageTheme: isOnlyEmoji && _containsText
-                  ? messageTheme?.copyWith(
-                      messageText: messageTheme?.messageText?.copyWith(
+                  ? messageTheme.copyWith(
+                      messageText: messageTheme.messageText?.copyWith(
                       fontSize: 32,
                     ))
-                  : messageTheme?.copyWith(
-                      messageText: messageTheme?.messageText?.copyWith(
+                  : messageTheme.copyWith(
+                      messageText: messageTheme.messageText?.copyWith(
                       fontSize: 12,
                     )),
             ),
@@ -310,6 +310,6 @@ class QuotedMessageWidget extends StatelessWidget {
     if (_containsScrapeUrl) {
       return StreamChatTheme.of(context).colorTheme.blueAlice;
     }
-    return messageTheme?.messageBackgroundColor;
+    return messageTheme.messageBackgroundColor;
   }
 }

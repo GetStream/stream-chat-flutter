@@ -264,7 +264,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -314,7 +314,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -369,7 +369,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -420,7 +420,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -471,7 +471,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -520,7 +520,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -579,7 +579,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -638,7 +638,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -693,7 +693,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,
@@ -752,7 +752,7 @@ void main() {
             return StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child,
+              child: child!,
             );
           },
           theme: themeData,

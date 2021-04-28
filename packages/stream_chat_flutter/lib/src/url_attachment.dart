@@ -11,16 +11,21 @@ class UrlAttachment extends StatelessWidget {
   UrlAttachment({
     required this.urlAttachment,
     required this.hostDisplayName,
-    required this.textPadding,
+    this.textPadding = const EdgeInsets.symmetric(
+      horizontal: 16.0,
+      vertical: 8.0,
+    ),
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => launchURL(
-        context,
-        urlAttachment.ogScrapeUrl!,
-      ),
+      onTap: () {
+        launchURL(
+          context,
+          urlAttachment.ogScrapeUrl,
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

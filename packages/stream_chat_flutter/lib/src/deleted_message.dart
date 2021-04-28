@@ -14,7 +14,7 @@ class DeletedMessage extends StatelessWidget {
   }) : super(key: key);
 
   /// The theme of the message
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
 
   /// The border radius of the message text
   final BorderRadiusGeometry? borderRadiusGeometry;
@@ -34,7 +34,7 @@ class DeletedMessage extends StatelessWidget {
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
       child: Material(
-        color: messageTheme?.messageBackgroundColor,
+        color: messageTheme.messageBackgroundColor,
         shape: shape ??
             RoundedRectangleBorder(
               borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
@@ -61,9 +61,9 @@ class DeletedMessage extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               'Message deleted',
-              style: messageTheme?.messageText?.copyWith(
+              style: messageTheme.messageText?.copyWith(
                 fontStyle: FontStyle.italic,
-                color: messageTheme?.createdAt?.color,
+                color: messageTheme.createdAt?.color,
               ),
             ),
           ),

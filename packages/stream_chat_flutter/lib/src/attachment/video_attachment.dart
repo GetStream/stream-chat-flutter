@@ -8,7 +8,7 @@ import 'attachment_upload_state_builder.dart';
 import 'attachment_widget.dart';
 
 class VideoAttachment extends AttachmentWidget {
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
   final ShowMessageCallback? onShowMessage;
   final ValueChanged<ReturnActionType>? onReturnAction;
   final VoidCallback? onAttachmentTap;
@@ -17,8 +17,8 @@ class VideoAttachment extends AttachmentWidget {
     Key? key,
     required Message message,
     required Attachment attachment,
+    required this.messageTheme,
     Size? size,
-    this.messageTheme,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
@@ -39,7 +39,7 @@ class VideoAttachment extends AttachmentWidget {
         return _buildVideoAttachment(
           context,
           VideoThumbnailImage(
-            video: attachment.file?.path,
+            video: attachment.file!.path!,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -54,7 +54,7 @@ class VideoAttachment extends AttachmentWidget {
         return _buildVideoAttachment(
           context,
           VideoThumbnailImage(
-            video: attachment.assetUrl,
+            video: attachment.assetUrl!,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -116,7 +116,7 @@ class VideoAttachment extends AttachmentWidget {
           ),
           if (attachment.title != null)
             Material(
-              color: messageTheme?.messageBackgroundColor,
+              color: messageTheme.messageBackgroundColor,
               child: AttachmentTitle(
                 messageTheme: messageTheme,
                 attachment: attachment,

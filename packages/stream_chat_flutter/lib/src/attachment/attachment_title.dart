@@ -11,7 +11,7 @@ class AttachmentTitle extends StatelessWidget {
     required this.messageTheme,
   }) : super(key: key);
 
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
   final Attachment attachment;
 
   @override
@@ -32,7 +32,7 @@ class AttachmentTitle extends StatelessWidget {
               Text(
                 attachment.title!,
                 overflow: TextOverflow.ellipsis,
-                style: messageTheme?.messageText?.copyWith(
+                style: messageTheme.messageText?.copyWith(
                   color: StreamChatTheme.of(context).colorTheme.accentBlue,
                   fontWeight: FontWeight.bold,
                 ),
@@ -47,7 +47,7 @@ class AttachmentTitle extends StatelessWidget {
                     .toList()
                     .reversed
                     .join('.'),
-                style: messageTheme?.messageText,
+                style: messageTheme.messageText,
               ),
           ],
         ),

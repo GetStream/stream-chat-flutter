@@ -1661,7 +1661,7 @@ class MessageInputState extends State<MessageInput> {
             VideoThumbnailImage(
               height: 104,
               width: 104,
-              video: attachment.file?.path ?? attachment.assetUrl,
+              video: (attachment.file?.path ?? attachment.assetUrl)!,
               fit: BoxFit.cover,
             ),
             Positioned(

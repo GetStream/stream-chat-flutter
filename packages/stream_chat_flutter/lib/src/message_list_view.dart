@@ -832,7 +832,7 @@ class _MessageListViewState extends State<MessageListView> {
             break;
           case ReturnActionType.reply:
             FocusScope.of(context).unfocus();
-            widget.onMessageSwiped!(message);
+            widget.onMessageSwiped?.call(message);
             break;
         }
       },
@@ -1008,7 +1008,7 @@ class _MessageListViewState extends State<MessageListView> {
             break;
           case ReturnActionType.reply:
             FocusScope.of(context).unfocus();
-            widget.onMessageSwiped!(message);
+            widget.onMessageSwiped?.call(message);
             break;
         }
       },
@@ -1034,7 +1034,7 @@ class _MessageListViewState extends State<MessageListView> {
         child: Swipeable(
           onSwipeEnd: () {
             FocusScope.of(context).unfocus();
-            widget.onMessageSwiped!(message);
+            widget.onMessageSwiped?.call(message);
           },
           backgroundIcon: StreamSvgIcon.reply(
             color: StreamChatTheme.of(context).colorTheme.accentBlue,

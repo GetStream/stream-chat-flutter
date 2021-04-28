@@ -155,7 +155,7 @@ class FileAttachment extends AttachmentWidget {
         shape: _getDefaultShape(context),
         child: source.when(
           local: () => VideoThumbnailImage(
-            video: attachment.file?.path,
+            video: attachment.file!.path!,
             placeholderBuilder: (_) {
               return Center(
                 child: Container(
@@ -167,7 +167,7 @@ class FileAttachment extends AttachmentWidget {
             },
           ),
           network: () => VideoThumbnailImage(
-            video: attachment.assetUrl,
+            video: attachment.assetUrl!,
             placeholderBuilder: (_) {
               return Center(
                 child: Container(

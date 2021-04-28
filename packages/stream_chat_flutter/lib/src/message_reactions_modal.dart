@@ -14,7 +14,7 @@ import 'stream_chat_theme.dart';
 
 class MessageReactionsModal extends StatelessWidget {
   final Message message;
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
   final bool reverse;
   final bool showReactions;
   final DisplayWidget showUserAvatar;
@@ -53,7 +53,7 @@ class MessageReactionsModal extends StatelessWidget {
       }
     }
     final roughSentenceSize =
-        messageTextLength * (messageTheme?.messageText?.fontSize ?? 1) * 1.2;
+        messageTextLength * (messageTheme.messageText?.fontSize ?? 1) * 1.2;
     final divFactor = message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
@@ -105,7 +105,6 @@ class MessageReactionsModal extends StatelessWidget {
                                   0.0),
                               child: ReactionPicker(
                                 message: message,
-                                messageTheme: messageTheme,
                               ),
                             ),
                           const SizedBox(height: 8),
@@ -244,9 +243,9 @@ class MessageReactionsModal extends StatelessWidget {
                   child: ReactionBubble(
                     reactions: [reaction],
                     flipTail: !reverse,
-                    borderColor: messageTheme?.reactionsBorderColor ??
-                        Colors.transparent,
-                    backgroundColor: messageTheme?.reactionsBackgroundColor ??
+                    borderColor:
+                        messageTheme.reactionsBorderColor ?? Colors.transparent,
+                    backgroundColor: messageTheme.reactionsBackgroundColor ??
                         Colors.transparent,
                     maskColor: StreamChatTheme.of(context).colorTheme.white,
                     tailCirclesSpacing: 1,

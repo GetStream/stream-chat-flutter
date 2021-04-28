@@ -18,11 +18,11 @@ class MessageText extends StatelessWidget {
   final Message message;
   final void Function(User)? onMentionTap;
   final void Function(String)? onLinkTap;
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
 
   @override
   Widget build(BuildContext context) {
-    final text = _replaceMentions(message.text)!.replaceAll('\n', '\\\n');
+    final text = _replaceMentions(message.text ?? '').replaceAll('\n', '\\\n');
 
     return MarkdownBody(
       data: text,
@@ -55,23 +55,23 @@ class MessageText extends StatelessWidget {
       styleSheet: MarkdownStyleSheet.fromTheme(
         Theme.of(context).copyWith(
           textTheme: Theme.of(context).textTheme.apply(
-                bodyColor: messageTheme!.messageText!.color,
-                decoration: messageTheme!.messageText!.decoration,
-                decorationColor: messageTheme!.messageText!.decorationColor,
-                decorationStyle: messageTheme!.messageText!.decorationStyle,
-                fontFamily: messageTheme!.messageText!.fontFamily,
+                bodyColor: messageTheme.messageText?.color,
+                decoration: messageTheme.messageText?.decoration,
+                decorationColor: messageTheme.messageText?.decorationColor,
+                decorationStyle: messageTheme.messageText?.decorationStyle,
+                fontFamily: messageTheme.messageText?.fontFamily,
               ),
         ),
       ).copyWith(
-        a: messageTheme!.messageLinks,
-        p: messageTheme!.messageText,
+        a: messageTheme.messageLinks,
+        p: messageTheme.messageText,
       ),
     );
   }
 
-  String? _replaceMentions(String? text) {
+  String _replaceMentions(String text) {
     message.mentionedUsers.map((u) => u.name).toSet().forEach((userName) {
-      text = text!.replaceAll(
+      text = text.replaceAll(
           '@$userName', '[@$userName](@${userName.replaceAll(' ', '')})');
     });
     return text;

@@ -20,7 +20,7 @@ class MessageActionsModal extends StatefulWidget {
   final OnMessageTap? onThreadReplyTap;
   final OnMessageTap? onReplyTap;
   final Message message;
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
   final bool showReactions;
   final OnMessageTap? onCopyTap;
   final bool showDeleteMessage;
@@ -92,7 +92,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       }
     }
     final roughSentenceSize = messageTextLength *
-        (widget.messageTheme?.messageText?.fontSize ?? 1) *
+        (widget.messageTheme.messageText?.fontSize ?? 1) *
         1.2;
     final divFactor = widget.message.attachments.isNotEmpty == true
         ? 1
@@ -149,7 +149,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                     0.0),
                                 child: ReactionPicker(
                                   message: widget.message,
-                                  messageTheme: widget.messageTheme,
                                 ),
                               ),
                             SizedBox(height: 8),

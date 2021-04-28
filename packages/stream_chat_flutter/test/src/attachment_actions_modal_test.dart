@@ -278,7 +278,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: StreamChannel(
@@ -331,7 +331,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: StreamChannel(
@@ -381,7 +381,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: StreamChannel(
@@ -415,7 +415,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: Container(
@@ -472,7 +472,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: Container(

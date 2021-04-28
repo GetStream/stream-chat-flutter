@@ -22,10 +22,10 @@ Future<void> launchURL(BuildContext context, String? url) async {
 
 Future<bool?> showConfirmationDialog(
   BuildContext context, {
-  String? title,
+  required String title,
+  required String okText,
   Widget? icon,
   String? question,
-  String? okText,
   String? cancelText,
 }) {
   return showModalBottomSheet(
@@ -46,14 +46,15 @@ Future<bool?> showConfirmationDialog(
               if (icon != null) icon,
               SizedBox(height: 26.0),
               Text(
-                title!,
+                title,
                 style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
               SizedBox(height: 7.0),
-              Text(
-                question!,
-                textAlign: TextAlign.center,
-              ),
+              if (question != null)
+                Text(
+                  question,
+                  textAlign: TextAlign.center,
+                ),
               SizedBox(height: 36.0),
               Container(
                 color: effect.color!.withOpacity(effect.alpha ?? 1),
@@ -61,27 +62,28 @@ Future<bool?> showConfirmationDialog(
               ),
               Row(
                 children: [
-                  Flexible(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                        child: Text(
-                          cancelText!,
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .bodyBold
-                              .copyWith(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .black
-                                      .withOpacity(0.5)),
+                  if (cancelText != null)
+                    Flexible(
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(false);
+                          },
+                          child: Text(
+                            cancelText,
+                            style: StreamChatTheme.of(context)
+                                .textTheme
+                                .bodyBold
+                                .copyWith(
+                                    color: StreamChatTheme.of(context)
+                                        .colorTheme
+                                        .black
+                                        .withOpacity(0.5)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   Flexible(
                     child: Container(
                       alignment: Alignment.center,
@@ -90,7 +92,7 @@ Future<bool?> showConfirmationDialog(
                           Navigator.pop(context, true);
                         },
                         child: Text(
-                          okText!,
+                          okText,
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .bodyBold
@@ -112,10 +114,10 @@ Future<bool?> showConfirmationDialog(
 
 Future<bool?> showInfoDialog(
   BuildContext context, {
-  String? title,
+  required String title,
+  required String okText,
   Widget? icon,
   String? details,
-  String? okText,
   StreamChatThemeData? theme,
 }) {
   return showModalBottomSheet(
@@ -140,14 +142,14 @@ Future<bool?> showInfoDialog(
               height: 26.0,
             ),
             Text(
-              title!,
+              title,
               style: theme?.textTheme.headlineBold ??
                   StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             SizedBox(
               height: 7.0,
             ),
-            Text(details!),
+            if (details != null) Text(details),
             SizedBox(
               height: 36.0,
             ),
@@ -162,7 +164,7 @@ Future<bool?> showInfoDialog(
                   Navigator.of(context).pop();
                 },
                 child: Text(
-                  okText!,
+                  okText,
                   style: TextStyle(
                     color: theme?.colorTheme.black.withOpacity(0.5) ??
                         StreamChatTheme.of(context).colorTheme.accentBlue,

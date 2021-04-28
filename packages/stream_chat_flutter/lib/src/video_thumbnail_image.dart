@@ -9,7 +9,7 @@ import 'stream_svg_icon.dart';
 import 'video_service.dart';
 
 class VideoThumbnailImage extends StatefulWidget {
-  final String? video;
+  final String video;
   final double? width;
   final double? height;
   final BoxFit? fit;
@@ -38,7 +38,7 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   @override
   void initState() {
     thumbnailFuture = VideoService.generateVideoThumbnail(
-      video: widget.video!,
+      video: widget.video,
       imageFormat: widget.format,
     );
     super.initState();
@@ -48,7 +48,7 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   void didUpdateWidget(covariant VideoThumbnailImage oldWidget) {
     if (oldWidget.video != widget.video || oldWidget.format != widget.format) {
       thumbnailFuture = VideoService.generateVideoThumbnail(
-        video: widget.video!,
+        video: widget.video,
         imageFormat: widget.format,
       );
     }

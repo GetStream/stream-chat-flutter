@@ -27,15 +27,13 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final String sentAt;
 
-  final List<Attachment> urls;
-  final currentIndex;
+  final int currentIndex;
 
   /// Creates a channel header
   ImageHeader({
     Key? key,
     required this.message,
-    this.urls = const [],
-    this.currentIndex,
+    this.currentIndex = 0,
     this.showBackButton = true,
     this.onBackPressed,
     this.onShowMessage,

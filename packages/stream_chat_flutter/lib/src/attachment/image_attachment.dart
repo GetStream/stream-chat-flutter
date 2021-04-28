@@ -10,7 +10,7 @@ import 'attachment_title.dart';
 import 'attachment_widget.dart';
 
 class ImageAttachment extends AttachmentWidget {
-  final MessageTheme? messageTheme;
+  final MessageTheme messageTheme;
   final bool showTitle;
   final ShowMessageCallback? onShowMessage;
   final ValueChanged<ReturnActionType>? onReturnAction;
@@ -20,8 +20,8 @@ class ImageAttachment extends AttachmentWidget {
     Key? key,
     required Message message,
     required Attachment attachment,
+    required this.messageTheme,
     Size? size,
-    this.messageTheme,
     this.showTitle = false,
     this.onShowMessage,
     this.onReturnAction,
@@ -157,7 +157,7 @@ class ImageAttachment extends AttachmentWidget {
           ),
           if (showTitle && attachment.title != null)
             Material(
-              color: messageTheme?.messageBackgroundColor,
+              color: messageTheme.messageBackgroundColor,
               child: AttachmentTitle(
                 messageTheme: messageTheme,
                 attachment: attachment,
