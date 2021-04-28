@@ -1333,6 +1333,8 @@ class StreamChatClient {
   }
 
   /// Pins provided message
+  /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
+  /// to be added to [DateTime.now]
   Future<UpdateMessageResponse> pinMessage(
     Message message,
     Object timeoutOrExpirationDate,
@@ -1350,9 +1352,11 @@ class StreamChatClient {
     if (timeoutOrExpirationDate is DateTime) {
       pinExpires = timeoutOrExpirationDate.toUtc();
     } else if (timeoutOrExpirationDate is num) {
-      pinExpires = DateTime.now().add(
-        Duration(seconds: timeoutOrExpirationDate.toInt()),
-      );
+      pinExpires = DateTime.now()
+          .add(
+            Duration(seconds: timeoutOrExpirationDate.toInt()),
+          )
+          .toUtc();
     }
     return updateMessage(
       message.copyWith(pinned: true, pinExpires: pinExpires),
