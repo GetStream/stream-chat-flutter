@@ -164,19 +164,25 @@ class Filter extends Equatable {
     String? key,
   }) = Filter.__;
 
-  /// Operator to use in filter.
+  /// An operator used for the filter. The operator string must start with `$`
   final String operator;
 
+  /// The "left-hand" side of the filter.
+  /// Specifies the name of the field the filter should match.
   ///
+  /// Some operators like `and` or `or`,
+  /// don't require the key value to be present.
+  /// see-more : [_groupOperators]
   final String? key;
 
-  ///
+  /// The "right-hand" side of the filter.
+  /// Specifies the [value] the filter should match.
   final Object /*List<Object>|List<Filter>|String*/ value;
 
   @override
   List<Object?> get props => [operator, key, value];
 
-  ///
+  /// Serializes to json object
   Map<String, Object> toJson() {
     final json = <String, Object>{};
     final groupOperators = _groupOperators.map((it) => it.rawValue);
