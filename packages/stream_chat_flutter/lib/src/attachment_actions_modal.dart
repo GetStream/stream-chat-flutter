@@ -120,7 +120,7 @@ class AttachmentActionsModal extends StatelessWidget {
                             received,
                           );
                         },
-                      ).catchError((_) {
+                      ).catchError((e, stk) {
                         progressNotifier.value = null;
                       });
 
@@ -225,76 +225,73 @@ class AttachmentActionsModal extends StatelessWidget {
     ValueNotifier<_DownloadProgress?> progressNotifier,
   ) {
     final theme = StreamChatTheme.of(context);
-    return WillPopScope(
-      onWillPop: () => Future.value(false),
-      child: ValueListenableBuilder(
-        valueListenable: progressNotifier,
-        builder: (_, _DownloadProgress? progress, __) {
-          // Pop the dialog in case the progress is null or it's completed.
-          if (progress == null || progress.toProgressIndicatorValue == 1.0) {
-            Future.delayed(
-              const Duration(milliseconds: 500),
-              Navigator.of(context).maybePop,
-            );
-          }
-          return Material(
-            type: MaterialType.transparency,
-            child: Center(
-              child: Container(
-                height: 182,
-                width: 182,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: theme.colorTheme.white,
-                ),
-                child: Center(
-                  child: progress == null
-                      ? Container(
-                          height: 100,
-                          width: 100,
-                          child: StreamSvgIcon.error(
-                            color: theme.colorTheme.greyGainsboro,
-                          ),
-                        )
-                      : progress.toProgressIndicatorValue == 1.0
-                          ? Container(
-                              key: Key('completedIcon'),
-                              height: 160,
-                              width: 160,
-                              child: StreamSvgIcon.check(
-                                color: theme.colorTheme.greyGainsboro,
-                              ),
-                            )
-                          : Container(
-                              height: 100,
-                              width: 100,
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  CircularProgressIndicator(
-                                    value: progress.toProgressIndicatorValue,
-                                    strokeWidth: 8.0,
-                                    valueColor: AlwaysStoppedAnimation(
-                                      theme.colorTheme.accentBlue,
-                                    ),
-                                  ),
-                                  Center(
-                                    child: Text(
-                                      '${progress.toPercentage}%',
-                                      style: theme.textTheme.headline.copyWith(
-                                        color: theme.colorTheme.grey,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+    return ValueListenableBuilder(
+      valueListenable: progressNotifier,
+      builder: (_, _DownloadProgress? progress, __) {
+        // Pop the dialog in case the progress is null or it's completed.
+        if (progress == null || progress.toProgressIndicatorValue == 1.0) {
+          Future.delayed(
+            const Duration(milliseconds: 500),
+            () => Navigator.of(context).maybePop(),
+          );
+        }
+        return Material(
+          type: MaterialType.transparency,
+          child: Center(
+            child: Container(
+              height: 182,
+              width: 182,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: theme.colorTheme.white,
+              ),
+              child: Center(
+                child: progress == null
+                    ? Container(
+                        height: 100,
+                        width: 100,
+                        child: StreamSvgIcon.error(
+                          color: theme.colorTheme.greyGainsboro,
+                        ),
+                      )
+                    : progress.toProgressIndicatorValue == 1.0
+                        ? Container(
+                            key: Key('completedIcon'),
+                            height: 160,
+                            width: 160,
+                            child: StreamSvgIcon.check(
+                              color: theme.colorTheme.greyGainsboro,
                             ),
-                ),
+                          )
+                        : Container(
+                            height: 100,
+                            width: 100,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: progress.toProgressIndicatorValue,
+                                  strokeWidth: 8.0,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    theme.colorTheme.accentBlue,
+                                  ),
+                                ),
+                                Center(
+                                  child: Text(
+                                    '${progress.toPercentage}%',
+                                    style: theme.textTheme.headline.copyWith(
+                                      color: theme.colorTheme.grey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -310,7 +307,7 @@ class AttachmentActionsModal extends StatelessWidget {
         final contentType = responseHeaders[Headers.contentTypeHeader]!;
         final mimeType = contentType.first.split('/').last;
         filePath ??= '${appDocDir.path}/${attachment.id}.$mimeType';
-        return filePath;
+        return filePath!;
       },
       onReceiveProgress: progressCallback,
     );
