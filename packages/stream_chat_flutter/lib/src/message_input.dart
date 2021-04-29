@@ -609,7 +609,7 @@ class MessageInputState extends State<MessageInput> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    constraints: BoxConstraints.tight(Size(84, 24)),
+                    constraints: BoxConstraints.tight(Size(64, 24)),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: theme.colorTheme.accentBlue,
