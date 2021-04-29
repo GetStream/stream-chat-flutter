@@ -218,8 +218,9 @@ class QuotedMessageWidget extends StatelessWidget {
       attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       if (attachmentBuilder == null) {
         child = Offstage();
+      } else {
+        child = attachmentBuilder(context, attachment);
       }
-      child = attachmentBuilder!(context, attachment);
     }
     child = AbsorbPointer(child: child);
     return Transform(
