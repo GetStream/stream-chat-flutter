@@ -15,7 +15,7 @@ class GroupImage extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
-  final List<String?> images;
+  final List<String> images;
   final BoxConstraints? constraints;
   final VoidCallback? onTap;
   final bool selected;
@@ -64,7 +64,7 @@ class GroupImage extends StatelessWidget {
                               child: Transform.scale(
                                 scale: 1.2,
                                 child: CachedNetworkImage(
-                                  imageUrl: url!,
+                                  imageUrl: url,
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -89,7 +89,7 @@ class GroupImage extends StatelessWidget {
                                 child: Transform.scale(
                                   scale: 1.2,
                                   child: CachedNetworkImage(
-                                    imageUrl: url!,
+                                    imageUrl: url,
                                     fit: BoxFit.cover,
                                   ),
                                 ),

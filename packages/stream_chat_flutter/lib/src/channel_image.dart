@@ -117,7 +117,7 @@ class ChannelImage extends StatelessWidget {
                   member.user?.id != streamChat.user?.id &&
                   member.user?.extraData['image'] != null)
               .take(4)
-              .map((e) => e.user?.extraData['image'] as String?)
+              .map((e) => e.user?.extraData['image'] as String)
               .toList();
           return GroupImage(
             images: images ?? [],
