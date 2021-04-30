@@ -88,7 +88,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption<ChannelModel>>? sortOptions,
     PaginationParams paginationParams = const PaginationParams(limit: 30),
     Map<String, dynamic>? options,
@@ -160,9 +160,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
             newChannels.insert(0, _hiddenChannels[hiddenIndex]);
             _hiddenChannels.removeAt(hiddenIndex);
           } else {
-            if (client.state.channels != null &&
-                client.state.channels?[e.cid] != null) {
-              newChannels.insert(0, client.state.channels![e.cid]!);
+            if (client.state.channels[e.cid] != null) {
+              newChannels.insert(0, client.state.channels[e.cid]!);
             }
           }
         }

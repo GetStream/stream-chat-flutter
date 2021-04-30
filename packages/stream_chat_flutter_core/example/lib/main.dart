@@ -78,14 +78,12 @@ class HomeScreen extends StatelessWidget {
       body: ChannelsBloc(
         child: ChannelListCore(
           channelListController: channelListController,
-          filter: {
-            'type': 'messaging',
-            'members': {
-              r'$in': [
-                StreamChatCore.of(context).user!.id,
-              ]
-            }
-          },
+          filter: Filter.and([
+            Filter.equal('type', 'messaging'),
+            Filter.in_('members', [
+              StreamChatCore.of(context).user!.id,
+            ])
+          ]),
           emptyBuilder: (BuildContext context) {
             return Center(
               child: Text('Looks like you are not in any channels'),

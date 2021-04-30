@@ -93,11 +93,10 @@ class ChannelListPage extends StatelessWidget {
                   onTap(channel);
                 }
               : null,
-          filter: {
-            'members': {
-              '\$in': [StreamChat.of(context).user.id],
-            }
-          },
+          filter: Filter.in_(
+            'members',
+            [StreamChat.of(context).user.id],
+          ),
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
             limit: 20,

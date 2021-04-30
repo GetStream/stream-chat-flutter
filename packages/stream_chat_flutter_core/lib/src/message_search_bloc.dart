@@ -9,7 +9,7 @@ import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 /// [MessageSearchBloc] can be access at anytime by using the static [of] method
 /// using Flutter's [BuildContext].
 ///
-// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
+/// API docs: https://getstream.io/chat/docs/flutter-dart/send_message/
 class MessageSearchBloc extends StatefulWidget {
   /// Instantiate a new MessageSearchBloc
   const MessageSearchBloc({
@@ -58,7 +58,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   /// Calls [StreamChatClient.search] updating
   /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
-    required Map<String, dynamic> filter,
+    required Filter filter,
     Map<String, dynamic>? messageFilter,
     List<SortOption>? sort,
     String? query,

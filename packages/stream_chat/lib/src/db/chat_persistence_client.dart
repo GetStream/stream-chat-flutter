@@ -2,6 +2,7 @@ import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/filter.dart';
 import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
@@ -90,7 +91,7 @@ abstract class ChatPersistenceClient {
   /// Optionally, pass [filter], [sort], [paginationParams]
   /// for filtering out states.
   Future<List<ChannelState>> getChannelStates({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption<ChannelModel>>? sort,
     PaginationParams? paginationParams,
   });
@@ -100,7 +101,7 @@ abstract class ChatPersistenceClient {
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
-    Map<String, dynamic> filter,
+    Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   });

@@ -58,7 +58,7 @@ class UsersBlocState extends State<UsersBloc>
   /// online/offline.
   /// [API Reference](https://getstream.io/chat/docs/flutter-dart/query_users/?language=dart)
   Future<void> queryUsers({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption>? sort,
     Map<String, dynamic>? options,
     PaginationParams? pagination,
