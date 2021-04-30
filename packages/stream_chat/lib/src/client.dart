@@ -22,14 +22,13 @@ import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/filter.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/src/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
-
-import 'package:stream_chat/src/models/filter.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -1067,7 +1066,7 @@ class StreamChatClient {
     String? query,
     List<SortOption>? sort,
     PaginationParams? paginationParams,
-    Map<String, dynamic>? messageFilters,
+    Filter? messageFilters,
   }) async {
     assert(() {
       if (query == null && messageFilters == null) {
@@ -1516,7 +1515,7 @@ class ClientState {
   Map<String, Channel> get channels => _channelsController.value!;
 
   set channels(Map<String, Channel> v) {
-    if (v != null) _channelsController.add(v);
+    _channelsController.add(v);
   }
 
   final BehaviorSubject<Map<String, Channel>> _channelsController =

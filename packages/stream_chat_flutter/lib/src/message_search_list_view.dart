@@ -92,7 +92,7 @@ class MessageSearchListView extends StatefulWidget {
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic>? messageFilters;
+  final Filter? messageFilters;
 
   /// Builder used to create a custom item preview
   final MessageSearchItemBuilder? itemBuilder;

@@ -36,7 +36,7 @@ class Channel {
         _id = channelState.channel!.id,
         _type = channelState.channel!.type,
         _cid = channelState.channel!.cid,
-        _extraData = channelState.channel!.extraData ?? {} {
+        _extraData = channelState.channel!.extraData {
     state = ChannelClientState(this, channelState);
     _initializedCompleter.complete(true);
     _client.logger.info('New Channel instance initialized created');
@@ -204,8 +204,7 @@ class Channel {
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>> get extraDataStream {
     _checkInitialized();
-    return state!.channelStateStream
-        .map(
+    return state!.channelStateStream.map(
       (cs) => cs.channel?.extraData ?? _extraData,
     );
   }
@@ -574,7 +573,7 @@ class Channel {
   /// A message search.
   Future<SearchMessagesResponse> search({
     String? query,
-    Map<String, dynamic>? messageFilters,
+    Filter? messageFilters,
     List<SortOption>? sort,
     PaginationParams? paginationParams,
   }) {
