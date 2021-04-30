@@ -546,7 +546,7 @@ class StreamChatClient {
 
     var event = await _chatPersistenceClient?.getConnectionInfo();
 
-    await _ws.connect().then((e) async {
+    await _ws.connect().then((e) {
       _chatPersistenceClient?.updateConnectionInfo(e);
       event = e;
       resync();
