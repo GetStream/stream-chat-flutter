@@ -30,10 +30,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
 
-dependency_overrides:
-  stream_chat:
-    path: ../../stream_chat
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
