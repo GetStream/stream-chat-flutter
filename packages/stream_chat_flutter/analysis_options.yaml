@@ -6,6 +6,7 @@ analyzer:
   exclude:
     - lib/**/*.g.dart
     - example/**
+    - lib/src/emoji
 
 linter:
   rules:

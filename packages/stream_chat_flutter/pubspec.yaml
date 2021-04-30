@@ -24,8 +24,6 @@ dependencies:
   shimmer: ^2.0.0-nullsafety.0
   flutter_markdown: ^0.6.1
   url_launcher: ^6.0.3
-  emojis:
-    git: git@github.com:Parkar99/emojis.git
   video_player: ^2.1.1
   chewie: ^1.0.0
   file_picker: ^3.0.1
