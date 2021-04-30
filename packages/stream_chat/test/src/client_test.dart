@@ -363,7 +363,7 @@ void main() {
         final client = StreamChatClient('api-key', httpClient: mockDio);
         final queryParams = {
           'payload': json.encode({
-            'filter_conditions': {},
+            'filter_conditions': null,
             'sort': null,
             'presence': false,
           }),
@@ -396,11 +396,7 @@ void main() {
         when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient('api-key', httpClient: mockDio);
-        final queryFilter = <String, dynamic>{
-          'id': {
-            '\$in': ['test'],
-          },
-        };
+        final queryFilter = Filter.in_('id', const ['test']);
         const sortOptions = <SortOption>[];
         final options = {'presence': true};
         final queryParams = <String, dynamic>{

@@ -1243,11 +1243,10 @@ class MessageInputState extends State<MessageInput> {
     Future<List<Member>> queryMembers;
 
     if (query.isNotEmpty) {
-      queryMembers = StreamChannel.of(context).channel.queryMembers(filter: {
-        'name': {
-          '\$autocomplete': query,
-        },
-      }).then((res) => res.members);
+      queryMembers = StreamChannel.of(context)
+          .channel
+          .queryMembers(filter: Filter.autoComplete('name', query))
+          .then((res) => res.members);
     }
 
     final members = StreamChannel.of(context).channel.state.members?.where((m) {

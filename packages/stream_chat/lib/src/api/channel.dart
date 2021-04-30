@@ -1089,7 +1089,7 @@ class Channel {
 
   /// Query channel members
   Future<QueryMembersResponse> queryMembers({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption>? sort,
     PaginationParams? pagination,
   }) async {

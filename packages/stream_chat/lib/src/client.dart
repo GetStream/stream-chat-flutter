@@ -1020,7 +1020,7 @@ class StreamChatClient {
 
   /// Requests users with a given query.
   Future<QueryUsersResponse> queryUsers({
-    Map<String, dynamic>? filter,
+    Filter? filter,
     List<SortOption>? sort,
     Map<String, dynamic>? options,
     PaginationParams? pagination,
@@ -1030,7 +1030,7 @@ class StreamChatClient {
     };
 
     final payload = <String, dynamic>{
-      'filter_conditions': filter ?? {},
+      'filter_conditions': filter,
       'sort': sort,
     }..addAll(defaultOptions);
 
