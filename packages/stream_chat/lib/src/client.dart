@@ -22,14 +22,13 @@ import 'package:stream_chat/src/models/attachment_file.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/filter.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/src/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
-
-import 'package:stream_chat/src/models/filter.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -576,10 +575,10 @@ class StreamChatClient {
 
     await _ws.connect().then((e) async {
       if (e != null) {
-        await _chatPersistenceClient?.updateConnectionInfo(e);
+        _chatPersistenceClient?.updateConnectionInfo(e);
         event = e;
       }
-      await resync();
+      resync();
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
       if (err is Map) {
@@ -663,7 +662,7 @@ class StreamChatClient {
       );
       if (channels.isNotEmpty) yield channels;
 
-      if (wsConnectionStatus == ConnectionStatus.connected) {
+      try {
         final newQueryChannelsFuture = queryChannelsOnline(
           filter: filter,
           sort: sort,
@@ -678,6 +677,8 @@ class StreamChatClient {
         _queryChannelsStreams[hash] = newQueryChannelsFuture;
 
         yield await newQueryChannelsFuture;
+      } catch (_) {
+        if (channels.isEmpty) rethrow;
       }
     }
   }
@@ -1355,6 +1356,8 @@ class StreamChatClient {
   }
 
   /// Pins provided message
+  /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
+  /// to be added to [DateTime.now]
   Future<UpdateMessageResponse> pinMessage(
     Message message,
     Object timeoutOrExpirationDate,
@@ -1371,9 +1374,11 @@ class StreamChatClient {
     if (timeoutOrExpirationDate is DateTime) {
       pinExpires = timeoutOrExpirationDate.toUtc();
     } else if (timeoutOrExpirationDate is num) {
-      pinExpires = DateTime.now().add(
-        Duration(seconds: timeoutOrExpirationDate.toInt()),
-      );
+      pinExpires = DateTime.now()
+          .add(
+            Duration(seconds: timeoutOrExpirationDate.toInt()),
+          )
+          .toUtc();
     }
     return updateMessage(
       message.copyWith(pinned: true, pinExpires: pinExpires),

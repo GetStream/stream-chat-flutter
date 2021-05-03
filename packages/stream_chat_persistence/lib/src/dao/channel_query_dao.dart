@@ -6,7 +6,6 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
@@ -90,17 +89,6 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
       final channelEntity = row.readTable(channels);
       return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
     })).get();
-
-    final possibleSortingFields = cachedChannels.fold<List<String>>(
-        ChannelModel.topLevelFields, (previousValue, element) {
-      final extraData = element.extraData ?? {};
-      return {...previousValue, ...extraData.keys}.toList();
-    });
-
-    // ignore: parameter_assignments
-    sort = sort
-        ?.where((s) => possibleSortingFields.contains(s.field))
-        .toList(growable: false);
 
     var chainedComparator = (ChannelModel a, ChannelModel b) {
       final dateA = a.lastMessageAt ?? a.createdAt;
