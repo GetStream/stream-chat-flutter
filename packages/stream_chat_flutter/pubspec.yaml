@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stream_chat_flutter_core: ^1.5.1
+  stream_chat_flutter_core: ^1.5.2
   photo_view: ^0.11.0
   rxdart: ^0.25.0
   scrollable_positioned_list: ^0.1.8
