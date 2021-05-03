@@ -142,6 +142,7 @@ class MessageListView extends StatefulWidget {
     this.onSystemMessageTap,
     this.onAttachmentTap,
     this.textBuilder,
+    this.onLinkTap,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -236,6 +237,8 @@ class MessageListView extends StatefulWidget {
 
   /// Customize the MessageWidget textBuilder
   final void Function(BuildContext context, Message message)? textBuilder;
+
+  final void Function(String link) onLinkTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -845,6 +848,7 @@ class _MessageListViewState extends State<MessageListView> {
       },
       textBuilder:
           widget.textBuilder as Widget Function(BuildContext, Message)?,
+      onLinkTap: widget.onLinkTap,
     );
   }
 
@@ -1022,6 +1026,7 @@ class _MessageListViewState extends State<MessageListView> {
       onAttachmentTap: widget.onAttachmentTap,
       textBuilder:
           widget.textBuilder as Widget Function(BuildContext, Message)?,
+      onLinkTap: widget.onLinkTap,
     );
 
     if (!message.isDeleted &&

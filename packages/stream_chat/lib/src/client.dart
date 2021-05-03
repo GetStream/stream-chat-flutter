@@ -575,10 +575,10 @@ class StreamChatClient {
 
     await _ws.connect().then((e) async {
       if (e != null) {
-        await _chatPersistenceClient?.updateConnectionInfo(e);
+        _chatPersistenceClient?.updateConnectionInfo(e);
         event = e;
       }
-      await resync();
+      resync();
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
       if (err is Map) {
@@ -662,7 +662,7 @@ class StreamChatClient {
       );
       if (channels.isNotEmpty) yield channels;
 
-      if (wsConnectionStatus == ConnectionStatus.connected) {
+      try {
         final newQueryChannelsFuture = queryChannelsOnline(
           filter: filter,
           sort: sort,
@@ -677,6 +677,8 @@ class StreamChatClient {
         _queryChannelsStreams[hash] = newQueryChannelsFuture;
 
         yield await newQueryChannelsFuture;
+      } catch (_) {
+        if (channels.isEmpty) rethrow;
       }
     }
   }
@@ -1356,6 +1358,8 @@ class StreamChatClient {
   }
 
   /// Pins provided message
+  /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
+  /// to be added to [DateTime.now]
   Future<UpdateMessageResponse> pinMessage(
     Message message,
     Object timeoutOrExpirationDate,
@@ -1372,9 +1376,11 @@ class StreamChatClient {
     if (timeoutOrExpirationDate is DateTime) {
       pinExpires = timeoutOrExpirationDate.toUtc();
     } else if (timeoutOrExpirationDate is num) {
-      pinExpires = DateTime.now().add(
-        Duration(seconds: timeoutOrExpirationDate.toInt()),
-      );
+      pinExpires = DateTime.now()
+          .add(
+            Duration(seconds: timeoutOrExpirationDate.toInt()),
+          )
+          .toUtc();
     }
     return updateMessage(
       message.copyWith(pinned: true, pinExpires: pinExpires),
