@@ -1,4 +1,4 @@
-## 2.0.0-nullsafety.0
+## 2.0.0-nullsafety.1
 
 * Migrate this package to null safety
 * Update llc dependency
