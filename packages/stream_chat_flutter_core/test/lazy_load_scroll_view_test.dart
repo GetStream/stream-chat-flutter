@@ -3,18 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter_core/src/lazy_load_scroll_view.dart';
 
 void main() {
-  test(
-    'should throw assertion error if child is null',
-    () async {
-      const lazyLoadScrollViewKey = Key('lazyLoadScrollView');
-      final lazyLoadScrollView = () => LazyLoadScrollView(
-            key: lazyLoadScrollViewKey,
-            child: null,
-          );
-      expect(lazyLoadScrollView, throwsA(isA<AssertionError>()));
-    },
-  );
-
   testWidgets(
     'should render LazyLoadScrollView if child is provided',
     (tester) async {

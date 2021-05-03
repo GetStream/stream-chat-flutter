@@ -2,19 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/attachment_actions_modal.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
 
 class MockAttachmentDownloader extends Mock {
-  ProgressCallback progressCallback;
+  ProgressCallback? progressCallback;
   Completer<String> completer = Completer();
 
   Future<String> call(
     Attachment attachment, {
-    ProgressCallback progressCallback,
+    ProgressCallback? progressCallback,
   }) {
     this.progressCallback = progressCallback;
     return completer.future;
@@ -22,17 +22,22 @@ class MockAttachmentDownloader extends Mock {
 }
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(MaterialPageRoute(builder: (context) => SizedBox()));
+    registerFallbackValue(Message());
+  });
+
   testWidgets(
     'it should show all the actions',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -70,11 +75,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id2'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id2'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -112,11 +117,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidget(
         MaterialApp(
           theme: themeData,
@@ -153,11 +158,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       final mockObserver = MockNavigatorObserver();
 
@@ -190,7 +195,7 @@ void main() {
         ),
       );
       await tester.tap(find.text('Reply'));
-      verify(mockObserver.didPop(any, any));
+      verify(() => mockObserver.didPop(any(), any()));
     },
   );
 
@@ -200,11 +205,11 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final themeData = ThemeData();
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
       final onShowMessage = MockVoidCallback();
 
       await tester.pumpWidget(
@@ -234,7 +239,7 @@ void main() {
         ),
       );
       await tester.tap(find.text('Show in Chat'));
-      verify(onShowMessage.call()).called(1);
+      verify(() => onShowMessage.call()).called(1);
     },
   );
 
@@ -245,11 +250,11 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(mockChannel.updateMessage(any)).thenAnswer((_) {
-        return;
+      when(() => mockChannel.updateMessage(any())).thenAnswer((_) async {
+        return UpdateMessageResponse();
       });
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final message = Message(
         text: 'test',
@@ -273,7 +278,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: StreamChannel(
@@ -287,11 +292,11 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(mockChannel.updateMessage(message.copyWith(
-        attachments: [
-          message.attachments[1],
-        ],
-      ))).called(1);
+      verify(() => mockChannel.updateMessage(message.copyWith(
+            attachments: [
+              message.attachments[1],
+            ],
+          ))).called(1);
     },
   );
 
@@ -302,11 +307,11 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(mockChannel.updateMessage(any)).thenAnswer((_) {
-        return;
+      when(() => mockChannel.updateMessage(any())).thenAnswer((_) async {
+        return UpdateMessageResponse();
       });
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final message = Message(
         text: 'test',
@@ -326,7 +331,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: StreamChannel(
@@ -340,9 +345,9 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(mockChannel.updateMessage(message.copyWith(
-        attachments: [],
-      ))).called(1);
+      verify(() => mockChannel.updateMessage(message.copyWith(
+            attachments: [],
+          ))).called(1);
     },
   );
 
@@ -353,11 +358,11 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(mockChannel.deleteMessage(any)).thenAnswer((_) {
-        return;
+      when(() => mockChannel.deleteMessage(any())).thenAnswer((_) async {
+        return EmptyResponse();
       });
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final message = Message(
         user: User(
@@ -376,7 +381,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: StreamChannel(
@@ -390,7 +395,7 @@ void main() {
         ),
       );
       await tester.tap(find.text('Delete'));
-      verify(mockChannel.deleteMessage(message)).called(1);
+      verify(() => mockChannel.deleteMessage(message)).called(1);
     },
   );
 
@@ -400,8 +405,8 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final imageDownloader = MockAttachmentDownloader();
 
@@ -410,7 +415,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: Container(
@@ -435,15 +440,15 @@ void main() {
 
       await tester.tap(find.text('Save Image'));
 
-      imageDownloader.progressCallback(0, 100);
+      imageDownloader.progressCallback!(0, 100);
       await tester.pump();
       expect(find.text('0%'), findsOneWidget);
 
-      imageDownloader.progressCallback(50, 100);
+      imageDownloader.progressCallback!(50, 100);
       await tester.pump();
       expect(find.text('50%'), findsOneWidget);
 
-      imageDownloader.progressCallback(100, 100);
+      imageDownloader.progressCallback!(100, 100);
       imageDownloader.completer.complete('path');
       await tester.pump();
       expect(find.byKey(Key('completedIcon')), findsOneWidget);
@@ -457,8 +462,8 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       final fileDownloader = MockAttachmentDownloader();
 
@@ -467,7 +472,7 @@ void main() {
           builder: (context, child) {
             return StreamChat(
               client: client,
-              child: child,
+              child: child!,
             );
           },
           home: Container(
@@ -492,15 +497,15 @@ void main() {
 
       await tester.tap(find.text('Save Video'));
 
-      fileDownloader.progressCallback(0, 100);
+      fileDownloader.progressCallback!(0, 100);
       await tester.pump();
       expect(find.text('0%'), findsOneWidget);
 
-      fileDownloader.progressCallback(50, 100);
+      fileDownloader.progressCallback!(50, 100);
       await tester.pump();
       expect(find.text('50%'), findsOneWidget);
 
-      fileDownloader.progressCallback(100, 100);
+      fileDownloader.progressCallback!(100, 100);
       fileDownloader.completer.complete('path');
       await tester.pump();
       expect(find.byKey(Key('completedIcon')), findsOneWidget);

@@ -57,11 +57,11 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 class ChannelListCore extends StatefulWidget {
   /// Instantiate a new ChannelListView
   const ChannelListCore({
-    Key key,
-    @required this.errorBuilder,
-    @required this.emptyBuilder,
-    @required this.loadingBuilder,
-    @required this.listBuilder,
+    Key? key,
+    required this.errorBuilder,
+    required this.emptyBuilder,
+    required this.loadingBuilder,
+    required this.listBuilder,
     this.filter,
     this.options,
     this.sort,
@@ -69,29 +69,13 @@ class ChannelListCore extends StatefulWidget {
       limit: 25,
     ),
     this.channelListController,
-  })  : assert(
-          errorBuilder != null,
-          'Parameter errorBuilder should not be null',
-        ),
-        assert(
-          emptyBuilder != null,
-          'Parameter emptyBuilder should not be null',
-        ),
-        assert(
-          loadingBuilder != null,
-          'Parameter loadingBuilder should not be null',
-        ),
-        assert(
-          listBuilder != null,
-          'Parameter listBuilder should not be null',
-        ),
-        super(key: key);
+  }) : super(key: key);
 
   /// A [ChannelListController] allows reloading and pagination.
   /// Use [ChannelListController.loadData] and
   /// [ChannelListController.paginateData] respectively for reloading and
   /// pagination.
-  final ChannelListController channelListController;
+  final ChannelListController? channelListController;
 
   /// The builder that will be used in case of error
   final ErrorBuilder errorBuilder;
@@ -108,20 +92,20 @@ class ChannelListCore extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic> filter;
+  final Filter? filter;
 
   /// Query channels options.
   ///
   /// state: if true returns the Channel state
   /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic> options;
+  final Map<String, dynamic>? options;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
   /// provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created
   /// _at or member_count. Direction can be ascending or descending.
-  final List<SortOption<ChannelModel>> sort;
+  final List<SortOption<ChannelModel>>? sort;
 
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
@@ -149,12 +133,12 @@ class ChannelListCoreState extends State<ChannelListCore> {
         stream: channelsBlocState.channelsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(context, snapshot.error);
+            return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
           }
-          final channels = snapshot.data;
+          final channels = snapshot.data!;
           if (channels.isEmpty) {
             return widget.emptyBuilder(context);
           }
@@ -186,7 +170,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
     );
   }
 
-  StreamSubscription<Event> _subscription;
+  late StreamSubscription<Event> _subscription;
 
   @override
   void initState() {
@@ -203,8 +187,8 @@ class ChannelListCoreState extends State<ChannelListCore> {
         .listen((event) => loadData());
 
     if (widget.channelListController != null) {
-      widget.channelListController.loadData = loadData;
-      widget.channelListController.paginateData = paginateData;
+      widget.channelListController!.loadData = loadData;
+      widget.channelListController!.paginateData = paginateData;
     }
   }
 
@@ -215,8 +199,8 @@ class ChannelListCoreState extends State<ChannelListCore> {
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
         widget.options?.toString() != oldWidget.options?.toString() ||
-        widget.pagination?.toJson()?.toString() !=
-            oldWidget.pagination?.toJson()?.toString()) {
+        widget.pagination.toJson().toString() !=
+            oldWidget.pagination.toJson().toString()) {
       loadData();
     }
   }
@@ -233,10 +217,10 @@ class ChannelListCoreState extends State<ChannelListCore> {
 class ChannelListController {
   /// This function calls Stream's servers to load a list of channels.
   /// If there is existing data, calling this function causes a reload.
-  AsyncCallback loadData;
+  AsyncCallback? loadData;
 
   /// This function is used to load another page of data. Note, [loadData]
   /// should be used to populate the initial page of data. Calling
   /// [paginateData] performs a query to load subsequent pages.
-  AsyncCallback paginateData;
+  AsyncCallback? paginateData;
 }

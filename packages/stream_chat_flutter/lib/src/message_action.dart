@@ -4,13 +4,13 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// Class describing a message action
 class MessageAction {
   /// leading widget
-  final Widget leading;
+  final Widget? leading;
 
   /// title widget
-  final Widget title;
+  final Widget? title;
 
   /// callback called on tap
-  final OnMessageTap onTap;
+  final OnMessageTap? onTap;
 
   /// returns a new instance of a [MessageAction]
   MessageAction({

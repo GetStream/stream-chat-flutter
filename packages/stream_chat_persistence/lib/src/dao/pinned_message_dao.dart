@@ -36,17 +36,18 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   Future<Message> _messageFromJoinRow(TypedResult rows) async {
-    final userEntity = rows.readTable(users);
-    final pinnedByEntity = rows.readTable(_pinnedByUsers);
+    final userEntity = rows.readTableOrNull(users);
+    final pinnedByEntity = rows.readTableOrNull(_pinnedByUsers);
     final msgEntity = rows.readTable(pinnedMessages);
     final latestReactions = await _db.reactionDao.getReactions(msgEntity.id);
     final ownReactions = await _db.reactionDao.getReactionsByUserId(
       msgEntity.id,
       _db.userId,
     );
-    Message quotedMessage;
-    if (msgEntity.quotedMessageId != null) {
-      quotedMessage = await getMessageById(msgEntity.quotedMessageId);
+    Message? quotedMessage;
+    final quotedMessageId = msgEntity.quotedMessageId;
+    if (quotedMessageId != null) {
+      quotedMessage = await getMessageById(quotedMessageId);
     }
     return msgEntity.toMessage(
       user: userEntity?.toUser(),
@@ -58,7 +59,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   }
 
   /// Returns a single message by matching the [PinnedMessages.id] with [id]
-  Future<Message> getMessageById(String id) async =>
+  Future<Message?> getMessageById(String id) async =>
       await (select(pinnedMessages).join([
         leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
         leftOuterJoin(_pinnedByUsers,
@@ -66,7 +67,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       ])
             ..where(pinnedMessages.id.equals(id)))
           .map(_messageFromJoinRow)
-          .getSingle();
+          .getSingleOrNull();
 
   /// Returns all the messages of a particular thread by matching
   /// [PinnedMessages.channelCid] with [cid]
@@ -77,7 +78,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
             pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
       ])
             ..where(pinnedMessages.channelCid.equals(cid))
-            ..where(isNotNull(pinnedMessages.parentId))
+            ..where(pinnedMessages.parentId.isNotNull())
             ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
           .map(_messageFromJoinRow)
           .get());
@@ -86,14 +87,14 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// [PinnedMessages.parentId] with [parentId]
   Future<List<Message>> getThreadMessagesByParentId(
     String parentId, {
-    PaginationParams options,
+    PaginationParams? options,
   }) async {
     final msgList = await Future.wait(await (select(pinnedMessages).join([
       leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
       leftOuterJoin(_pinnedByUsers,
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
-          ..where(isNotNull(pinnedMessages.parentId))
+          ..where(pinnedMessages.parentId.isNotNull())
           ..where(pinnedMessages.parentId.equals(parentId))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
@@ -102,7 +103,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
     if (msgList.isNotEmpty) {
       if (options?.lessThan != null) {
         final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == options.lessThan,
+          (m) => m.id == options!.lessThan,
         );
         if (lessThanIndex != -1) {
           msgList.removeRange(lessThanIndex, msgList.length);
@@ -110,14 +111,14 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       }
       if (options?.greaterThanOrEqual != null) {
         final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == options.greaterThanOrEqual,
+          (m) => m.id == options!.greaterThanOrEqual,
         );
         if (greaterThanIndex != -1) {
           msgList.removeRange(0, greaterThanIndex);
         }
       }
       if (options?.limit != null) {
-        return msgList.take(options.limit).toList();
+        return msgList.take(options!.limit).toList();
       }
     }
     return msgList;
@@ -127,7 +128,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
   /// [PinnedMessages.channelCid] with [parentId]
   Future<List<Message>> getMessagesByCid(
     String cid, {
-    PaginationParams messagePagination,
+    PaginationParams? messagePagination,
   }) async {
     final msgList = await Future.wait(await (select(pinnedMessages).join([
       leftOuterJoin(_users, pinnedMessages.userId.equalsExp(_users.id)),
@@ -135,7 +136,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
           pinnedMessages.pinnedByUserId.equalsExp(_pinnedByUsers.id)),
     ])
           ..where(pinnedMessages.channelCid.equals(cid))
-          ..where(isNull(pinnedMessages.parentId) |
+          ..where(pinnedMessages.parentId.isNull() |
               pinnedMessages.showInChannel.equals(true))
           ..orderBy([OrderingTerm.asc(pinnedMessages.createdAt)]))
         .map(_messageFromJoinRow)
@@ -144,7 +145,7 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
     if (msgList.isNotEmpty) {
       if (messagePagination?.lessThan != null) {
         final lessThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination.lessThan,
+          (m) => m.id == messagePagination!.lessThan,
         );
         if (lessThanIndex != -1) {
           msgList.removeRange(lessThanIndex, msgList.length);
@@ -152,14 +153,14 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
       }
       if (messagePagination?.greaterThanOrEqual != null) {
         final greaterThanIndex = msgList.indexWhere(
-          (m) => m.id == messagePagination.greaterThanOrEqual,
+          (m) => m.id == messagePagination!.greaterThanOrEqual,
         );
         if (greaterThanIndex != -1) {
           msgList.removeRange(0, greaterThanIndex);
         }
       }
       if (messagePagination?.limit != null) {
-        return msgList.take(messagePagination.limit).toList();
+        return msgList.take(messagePagination!.limit).toList();
       }
     }
     return msgList;
@@ -167,17 +168,13 @@ class PinnedMessageDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Updates the message data of a particular channel with
   /// the new [messageList] data
-  Future<void> updateMessages(String cid, List<Message> messageList) async {
-    if (messageList == null) {
-      return;
-    }
-
-    return batch((batch) {
-      batch.insertAll(
-        pinnedMessages,
-        messageList.map((it) => it.toPinnedEntity(cid: cid)).toList(),
-        mode: InsertMode.insertOrReplace,
+  Future<void> updateMessages(String cid, List<Message> messageList) => batch(
+        (batch) {
+          batch.insertAll(
+            pinnedMessages,
+            messageList.map((it) => it.toPinnedEntity(cid: cid)).toList(),
+            mode: InsertMode.insertOrReplace,
+          );
+        },
       );
-    });
-  }
 }

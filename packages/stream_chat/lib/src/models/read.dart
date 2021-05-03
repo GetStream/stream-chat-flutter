@@ -8,9 +8,9 @@ part 'read.g.dart';
 class Read {
   /// Constructor used for json serialization
   Read({
-    this.lastRead,
-    this.user,
-    this.unreadMessages,
+    required this.lastRead,
+    required this.user,
+    this.unreadMessages = 0,
   });
 
   /// Create a new instance from a json
@@ -23,6 +23,7 @@ class Read {
   final User user;
 
   /// Number of unread messages
+  @JsonKey(defaultValue: 0)
   final int unreadMessages;
 
   /// Serialize to json
@@ -30,9 +31,9 @@ class Read {
 
   /// Creates a copy of [Read] with specified attributes overridden.
   Read copyWith({
-    DateTime lastRead,
-    User user,
-    int unreadMessages,
+    DateTime? lastRead,
+    User? user,
+    int? unreadMessages,
   }) =>
       Read(
         lastRead: lastRead ?? this.lastRead,

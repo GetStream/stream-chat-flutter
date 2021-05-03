@@ -6,8 +6,8 @@ import '../stream_chat_flutter.dart';
 
 class UserAvatar extends StatelessWidget {
   const UserAvatar({
-    Key key,
-    @required this.user,
+    Key? key,
+    required this.user,
     this.constraints,
     this.onlineIndicatorConstraints,
     this.onTap,
@@ -22,19 +22,19 @@ class UserAvatar extends StatelessWidget {
 
   final User user;
   final Alignment onlineIndicatorAlignment;
-  final BoxConstraints constraints;
-  final BorderRadius borderRadius;
-  final BoxConstraints onlineIndicatorConstraints;
-  final void Function(User) onTap;
-  final void Function(User) onLongPress;
+  final BoxConstraints? constraints;
+  final BorderRadius? borderRadius;
+  final BoxConstraints? onlineIndicatorConstraints;
+  final void Function(User)? onTap;
+  final void Function(User)? onLongPress;
   final bool showOnlineStatus;
   final bool selected;
-  final Color selectionColor;
+  final Color? selectionColor;
   final double selectionThickness;
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = user.extraData?.containsKey('image') == true &&
+    final hasImage = user.extraData.containsKey('image') &&
         user.extraData['image'] != null &&
         user.extraData['image'] != '';
     final streamChatTheme = StreamChatTheme.of(context);
@@ -44,17 +44,17 @@ class UserAvatar extends StatelessWidget {
       child: ClipRRect(
         clipBehavior: Clip.antiAlias,
         borderRadius: borderRadius ??
-            streamChatTheme.ownMessageTheme.avatarTheme.borderRadius,
+            streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
         child: Container(
           constraints: constraints ??
-              streamChatTheme.ownMessageTheme.avatarTheme.constraints,
+              streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
           decoration: BoxDecoration(
             color: streamChatTheme.colorTheme.accentBlue,
           ),
           child: hasImage
               ? CachedNetworkImage(
                   filterQuality: FilterQuality.high,
-                  imageUrl: user.extraData['image'],
+                  imageUrl: user.extraData['image'] as String,
                   errorWidget: (_, __, ___) {
                     return streamChatTheme.defaultUserImage(context, user);
                   },
@@ -68,11 +68,12 @@ class UserAvatar extends StatelessWidget {
     if (selected) {
       avatar = ClipRRect(
         borderRadius: (borderRadius ??
-                streamChatTheme.ownMessageTheme.avatarTheme.borderRadius) +
+                streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius ??
+                BorderRadius.zero) +
             BorderRadius.circular(selectionThickness),
         child: Container(
           constraints: constraints ??
-              streamChatTheme.ownMessageTheme.avatarTheme.constraints,
+              streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
           color: selectionColor ??
               StreamChatTheme.of(context).colorTheme.accentBlue,
           child: Padding(
@@ -83,12 +84,12 @@ class UserAvatar extends StatelessWidget {
       );
     }
     return GestureDetector(
-      onTap: onTap != null ? () => onTap(user) : null,
-      onLongPress: onLongPress != null ? () => onLongPress(user) : null,
+      onTap: onTap != null ? () => onTap!(user) : null,
+      onLongPress: onLongPress != null ? () => onLongPress!(user) : null,
       child: Stack(
         children: <Widget>[
           avatar,
-          if (showOnlineStatus && user.online == true)
+          if (showOnlineStatus && user.online)
             Positioned.fill(
               child: Align(
                 alignment: onlineIndicatorAlignment,

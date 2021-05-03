@@ -45,13 +45,13 @@ enum MessageSendingStatus {
 class Message extends Equatable {
   /// Constructor used for json serialization
   Message({
-    String id,
+    String? id,
     this.text,
-    this.type,
-    this.attachments,
-    this.mentionedUsers,
-    this.silent,
-    this.shadowed,
+    this.type = 'regular',
+    this.attachments = const [],
+    this.mentionedUsers = const [],
+    this.silent = false,
+    this.shadowed = false,
     this.reactionCounts,
     this.reactionScores,
     this.latestReactions,
@@ -63,19 +63,21 @@ class Message extends Equatable {
     this.threadParticipants,
     this.showInChannel,
     this.command,
-    this.createdAt,
-    this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.user,
     this.pinned = false,
     this.pinnedAt,
-    DateTime pinExpires,
+    DateTime? pinExpires,
     this.pinnedBy,
-    this.extraData,
+    this.extraData = const {},
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
-    this.skipPush,
-  })  : id = id ?? Uuid().v4(),
-        pinExpires = pinExpires?.toUtc();
+    this.skipPush = false,
+  })  : id = id ?? const Uuid().v4(),
+        pinExpires = pinExpires?.toUtc(),
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
@@ -86,75 +88,91 @@ class Message extends Equatable {
   final String id;
 
   /// The text of this message
-  final String text;
+  final String? text;
 
   /// The status of a sending message
   @JsonKey(ignore: true)
   final MessageSendingStatus status;
 
   /// The message type
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+    includeIfNull: false,
+    toJson: Serialization.readOnly,
+    defaultValue: 'regular',
+  )
   final String type;
 
   /// The list of attachments, either provided by the user or generated from a
   /// command or as a result of URL scraping.
-  @JsonKey(includeIfNull: false)
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: [],
+  )
   final List<Attachment> attachments;
 
   /// The list of user mentioned in the message
-  @JsonKey(toJson: Serialization.userIds)
+  @JsonKey(
+    toJson: Serialization.userIds,
+    defaultValue: [],
+  )
   final List<User> mentionedUsers;
 
   /// A map describing the count of number of every reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final Map<String, int> reactionCounts;
+  final Map<String, int>? reactionCounts;
 
   /// A map describing the count of score of every reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final Map<String, int> reactionScores;
+  final Map<String, int>? reactionScores;
 
   /// The latest reactions to the message created by any user.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Reaction> latestReactions;
+  final List<Reaction>? latestReactions;
 
   /// The reactions added to the message by the current user.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<Reaction> ownReactions;
+  final List<Reaction>? ownReactions;
 
   /// The ID of the parent message, if the message is a thread reply.
-  final String parentId;
+  final String? parentId;
 
   /// A quoted reply message
   @JsonKey(toJson: Serialization.readOnly)
-  final Message quotedMessage;
+  final Message? quotedMessage;
 
   /// The ID of the quoted message, if the message is a quoted reply.
-  final String quotedMessageId;
+  final String? quotedMessageId;
 
   /// Reserved field indicating the number of replies for this message.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final int replyCount;
+  final int? replyCount;
 
   /// Reserved field indicating the thread participants for this message.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final List<User> threadParticipants;
+  final List<User>? threadParticipants;
 
   /// Check if this message needs to show in the channel.
-  final bool showInChannel;
+  final bool? showInChannel;
 
   /// If true the message is silent
+  @JsonKey(defaultValue: false)
   final bool silent;
 
   /// If true the message will not send a push notification
+  @JsonKey(defaultValue: false)
   final bool skipPush;
 
   /// If true the message is shadowed
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+    includeIfNull: false,
+    toJson: Serialization.readOnly,
+    defaultValue: false,
+  )
   final bool shadowed;
 
   /// A used command name.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String command;
+  final String? command;
 
   /// Reserved field indicating when the message was created.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -166,27 +184,31 @@ class Message extends Equatable {
 
   /// User who sent the message
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User user;
+  final User? user;
 
   /// If true the message is pinned
+  @JsonKey(defaultValue: false)
   final bool pinned;
 
   /// Reserved field indicating when the message was pinned
   @JsonKey(toJson: Serialization.readOnly)
-  final DateTime pinnedAt;
+  final DateTime? pinnedAt;
 
   /// Reserved field indicating when the message will expire
   ///
   /// if `null` message has no expiry
-  final DateTime pinExpires;
+  final DateTime? pinExpires;
 
   /// Reserved field indicating who pinned the message
   @JsonKey(toJson: Serialization.readOnly)
-  final User pinnedBy;
+  final User? pinnedBy;
 
   /// Message custom extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object> extraData;
 
   /// True if the message is a system info
   bool get isSystem => type == 'system';
@@ -199,7 +221,7 @@ class Message extends Equatable {
 
   /// Reserved field indicating when the message was deleted.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime deletedAt;
+  final DateTime? deletedAt;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -236,39 +258,40 @@ class Message extends Equatable {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$MessageToJson(this), topLevelFields);
+        _$MessageToJson(this),
+      );
 
   /// Creates a copy of [Message] with specified attributes overridden.
   Message copyWith({
-    String id,
-    String text,
-    String type,
-    List<Attachment> attachments,
-    List<User> mentionedUsers,
-    Map<String, int> reactionCounts,
-    Map<String, int> reactionScores,
-    List<Reaction> latestReactions,
-    List<Reaction> ownReactions,
-    String parentId,
-    Message quotedMessage,
-    String quotedMessageId,
-    int replyCount,
-    List<User> threadParticipants,
-    bool showInChannel,
-    bool shadowed,
-    bool silent,
-    String command,
-    DateTime createdAt,
-    DateTime updatedAt,
-    DateTime deletedAt,
-    User user,
-    bool pinned,
-    DateTime pinnedAt,
-    Object pinExpires = _pinExpires,
-    User pinnedBy,
-    Map<String, dynamic> extraData,
-    MessageSendingStatus status,
-    bool skipPush,
+    String? id,
+    String? text,
+    String? type,
+    List<Attachment>? attachments,
+    List<User>? mentionedUsers,
+    Map<String, int>? reactionCounts,
+    Map<String, int>? reactionScores,
+    List<Reaction>? latestReactions,
+    List<Reaction>? ownReactions,
+    String? parentId,
+    Message? quotedMessage,
+    String? quotedMessageId,
+    int? replyCount,
+    List<User>? threadParticipants,
+    bool? showInChannel,
+    bool? shadowed,
+    bool? silent,
+    String? command,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+    User? user,
+    bool? pinned,
+    DateTime? pinnedAt,
+    Object? pinExpires = _pinExpires,
+    User? pinnedBy,
+    Map<String, Object>? extraData,
+    MessageSendingStatus? status,
+    bool? skipPush,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -306,49 +329,47 @@ class Message extends Equatable {
       pinned: pinned ?? this.pinned,
       pinnedAt: pinnedAt ?? this.pinnedAt,
       pinnedBy: pinnedBy ?? this.pinnedBy,
-      pinExpires: pinExpires == _pinExpires ? this.pinExpires : pinExpires,
+      pinExpires:
+          pinExpires == _pinExpires ? this.pinExpires : pinExpires as DateTime?,
       skipPush: skipPush ?? this.skipPush,
     );
   }
 
   /// Returns a new [Message] that is a combination of this message and the
   /// given [other] message.
-  Message merge(Message other) {
-    if (other == null) return this;
-    return copyWith(
-      id: other.id,
-      text: other.text,
-      type: other.type,
-      attachments: other.attachments,
-      mentionedUsers: other.mentionedUsers,
-      reactionCounts: other.reactionCounts,
-      reactionScores: other.reactionScores,
-      latestReactions: other.latestReactions,
-      ownReactions: other.ownReactions,
-      parentId: other.parentId,
-      quotedMessage: other.quotedMessage,
-      quotedMessageId: other.quotedMessageId,
-      replyCount: other.replyCount,
-      threadParticipants: other.threadParticipants,
-      showInChannel: other.showInChannel,
-      command: other.command,
-      createdAt: other.createdAt,
-      silent: other.silent,
-      extraData: other.extraData,
-      user: other.user,
-      shadowed: other.shadowed,
-      updatedAt: other.updatedAt,
-      deletedAt: other.deletedAt,
-      status: other.status,
-      pinned: other.pinned,
-      pinnedAt: other.pinnedAt,
-      pinExpires: other.pinExpires,
-      pinnedBy: other.pinnedBy,
-    );
-  }
+  Message merge(Message other) => copyWith(
+        id: other.id,
+        text: other.text,
+        type: other.type,
+        attachments: other.attachments,
+        mentionedUsers: other.mentionedUsers,
+        reactionCounts: other.reactionCounts,
+        reactionScores: other.reactionScores,
+        latestReactions: other.latestReactions,
+        ownReactions: other.ownReactions,
+        parentId: other.parentId,
+        quotedMessage: other.quotedMessage,
+        quotedMessageId: other.quotedMessageId,
+        replyCount: other.replyCount,
+        threadParticipants: other.threadParticipants,
+        showInChannel: other.showInChannel,
+        command: other.command,
+        createdAt: other.createdAt,
+        silent: other.silent,
+        extraData: other.extraData,
+        user: other.user,
+        shadowed: other.shadowed,
+        updatedAt: other.updatedAt,
+        deletedAt: other.deletedAt,
+        status: other.status,
+        pinned: other.pinned,
+        pinnedAt: other.pinnedAt,
+        pinExpires: other.pinExpires,
+        pinnedBy: other.pinnedBy,
+      );
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         text,
         type,
@@ -386,7 +407,7 @@ class Message extends Equatable {
 @JsonSerializable()
 class TranslatedMessage extends Message {
   /// Constructor used for json serialization
-  TranslatedMessage(this.i18n);
+  TranslatedMessage(this.i18n) : super();
 
   /// Create a new instance from a json
   factory TranslatedMessage.fromJson(Map<String, dynamic> json) =>
@@ -395,7 +416,7 @@ class TranslatedMessage extends Message {
       );
 
   /// A Map of
-  final Map<String, String> i18n;
+  final Map<String, String>? i18n;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -408,6 +429,5 @@ class TranslatedMessage extends Message {
   @override
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$TranslatedMessageToJson(this),
-        topLevelFields,
       );
 }

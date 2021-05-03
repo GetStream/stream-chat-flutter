@@ -59,5 +59,4 @@ dev_dependencies:
   pedantic: 1.9.2
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.22.4 <2.0.0"
+  sdk: ">=2.12.0 <3.0.0"

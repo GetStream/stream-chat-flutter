@@ -10,20 +10,24 @@ class Reaction {
   /// Constructor used for json serialization
   Reaction({
     this.messageId,
-    this.createdAt,
-    this.type,
+    DateTime? createdAt,
+    required this.type,
     this.user,
-    String userId,
-    this.score,
+    String? userId,
+    this.score = 0,
     this.extraData,
-  }) : userId = userId ?? user?.id;
+  })  : userId = userId ?? user?.id,
+        createdAt = createdAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory Reaction.fromJson(Map<String, dynamic> json) => _$ReactionFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+  factory Reaction.fromJson(Map<String, dynamic> json) =>
+      _$ReactionFromJson(Serialization.moveToExtraDataFromRoot(
+        json,
+        topLevelFields,
+      ));
 
   /// The messageId to which the reaction belongs
-  final String messageId;
+  final String? messageId;
 
   /// The type of the reaction
   final String type;
@@ -34,18 +38,19 @@ class Reaction {
 
   /// The user that sent the reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User user;
+  final User? user;
 
   /// The score of the reaction (ie. number of reactions sent)
+  @JsonKey(defaultValue: 0)
   final int score;
 
   /// The userId that sent the reaction
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String userId;
+  final String? userId;
 
   /// Reaction custom extraData
   @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  final Map<String, Object>? extraData;
 
   /// Map of custom user extraData
   static const topLevelFields = [
@@ -59,17 +64,18 @@ class Reaction {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$ReactionToJson(this), topLevelFields);
+        _$ReactionToJson(this),
+      );
 
   /// Creates a copy of [Reaction] with specified attributes overridden.
   Reaction copyWith({
-    String messageId,
-    DateTime createdAt,
-    String type,
-    User user,
-    String userId,
-    int score,
-    Map<String, dynamic> extraData,
+    String? messageId,
+    DateTime? createdAt,
+    String? type,
+    User? user,
+    String? userId,
+    int? score,
+    Map<String, Object>? extraData,
   }) =>
       Reaction(
         messageId: messageId ?? this.messageId,
@@ -83,16 +89,13 @@ class Reaction {
 
   /// Returns a new [Reaction] that is a combination of this reaction and the
   /// given [other] reaction.
-  Reaction merge(Reaction other) {
-    if (other == null) return this;
-    return copyWith(
-      messageId: other.messageId,
-      createdAt: other.createdAt,
-      type: other.type,
-      user: other.user,
-      userId: other.userId,
-      score: other.score,
-      extraData: other.extraData,
-    );
-  }
+  Reaction merge(Reaction other) => copyWith(
+        messageId: other.messageId,
+        createdAt: other.createdAt,
+        type: other.type,
+        user: other.user,
+        userId: other.userId,
+        score: other.score,
+        extraData: other.extraData,
+      );
 }

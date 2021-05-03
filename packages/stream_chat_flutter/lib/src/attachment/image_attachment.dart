@@ -12,33 +12,38 @@ import 'attachment_widget.dart';
 class ImageAttachment extends AttachmentWidget {
   final MessageTheme messageTheme;
   final bool showTitle;
-  final ShowMessageCallback onShowMessage;
-  final ValueChanged<ReturnActionType> onReturnAction;
-  final VoidCallback onAttachmentTap;
+  final ShowMessageCallback? onShowMessage;
+  final ValueChanged<ReturnActionType>? onReturnAction;
+  final VoidCallback? onAttachmentTap;
 
   const ImageAttachment({
-    Key key,
-    @required Message message,
-    @required Attachment attachment,
-    Size size,
-    this.messageTheme,
+    Key? key,
+    required Message message,
+    required Attachment attachment,
+    required this.messageTheme,
+    Size? size,
     this.showTitle = false,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(
+          key: key,
+          message: message,
+          attachment: attachment,
+          size: size,
+        );
 
   @override
   Widget build(BuildContext context) {
     return source.when(
       local: () {
-        if (attachment.localUri == null) {
+        if (attachment.localUri == null || attachment.file?.bytes == null) {
           return AttachmentError(size: size);
         }
         return _buildImageAttachment(
           context,
           Image.memory(
-            attachment.file.bytes,
+            attachment.file!.bytes!,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -85,15 +90,16 @@ class ImageAttachment extends AttachmentWidget {
             height: size?.height,
             width: size?.width,
             placeholder: (_, __) {
+              final image = Image.asset(
+                'images/placeholder.png',
+                fit: BoxFit.cover,
+                package: 'stream_chat_flutter',
+              );
+              final colorTheme = StreamChatTheme.of(context).colorTheme;
               return Shimmer.fromColors(
-                baseColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
-                highlightColor:
-                    StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                child: Image.asset(
-                  'images/placeholder.png',
-                  fit: BoxFit.cover,
-                  package: 'stream_chat_flutter',
-                ),
+                baseColor: colorTheme.greyGainsboro,
+                highlightColor: colorTheme.whiteSmoke,
+                child: image,
               );
             },
             imageUrl: imageUrl,
@@ -109,7 +115,7 @@ class ImageAttachment extends AttachmentWidget {
 
   Widget _buildImageAttachment(BuildContext context, Widget imageWidget) {
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(size),
+      constraints: BoxConstraints.loose(size!),
       child: Column(
         children: <Widget>[
           Expanded(
@@ -127,8 +133,7 @@ class ImageAttachment extends AttachmentWidget {
                                 channel: channel,
                                 child: FullScreenMedia(
                                   mediaAttachments: [attachment],
-                                  userName: message.user.name,
-                                  sentAt: message.createdAt,
+                                  userName: message.user?.name,
                                   message: message,
                                   onShowMessage: onShowMessage,
                                 ),
@@ -136,7 +141,7 @@ class ImageAttachment extends AttachmentWidget {
                             },
                           ),
                         );
-                        if (result != null) onReturnAction(result);
+                        if (result != null) onReturnAction?.call(result);
                       },
                   child: imageWidget,
                 ),

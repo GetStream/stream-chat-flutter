@@ -5,7 +5,8 @@ import 'package:stream_chat/src/models/device.dart';
 
 void main() {
   group('src/models/device', () {
-    const jsonExample = r'''{
+    const jsonExample = '''
+    {
       "id": "device-id",
       "push_provider": "push-provider"
     }''';

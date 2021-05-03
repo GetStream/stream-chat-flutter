@@ -1,18 +1,21 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:dio/native_imp.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/reaction.dart';
 import 'package:stream_chat/src/models/own_user.dart';
+import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import 'package:stream_chat/stream_chat.dart';
-
 class MockDio extends Mock implements DioForNative {}
+
+class FakeRequestOptions extends Fake implements RequestOptions {}
 
 class MockAttachmentUploader extends Mock implements AttachmentFileUploader {}
 
@@ -24,8 +27,8 @@ void main() {
       test('sendMessage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -33,28 +36,45 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(
-          text: 'hey',
-          id: 'test',
-        );
+        final message = Message(text: 'hey', id: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid/message', data: {
-          'message': message.toJson(),
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid/message',
+            data: {'message': message.toJson()},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': message}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.sendMessage(message);
 
-        verify(
+        verify(() =>
             mockDio.post<String>('/channels/messaging/testid/message', data: {
-          'message': message.toJson(),
-        })).called(1);
+              'message': message.toJson(),
+            })).called(1);
       });
 
       test('markRead', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -64,29 +84,40 @@ void main() {
 
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
               statusCode: 200,
+              requestOptions: FakeRequestOptions(),
             ));
         await channelClient.watch();
 
-        when(mockDio.post<String>('/channels/messaging/testid/read', data: {}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid/read',
+            data: {},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.markRead();
 
-        verify(mockDio.post<String>('/channels/messaging/testid/read',
+        verify(() => mockDio.post<String>('/channels/messaging/testid/read',
             data: {})).called(1);
       });
 
       test('getReplies', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -94,24 +125,28 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final pagination = PaginationParams();
+        const pagination = PaginationParams();
 
-        when(mockDio.get<String>('/messages/messageid/replies',
-                queryParameters: pagination.toJson()))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.get<String>('/messages/messageid/replies',
+            queryParameters: pagination.toJson())).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.getReplies('messageid', pagination);
 
-        verify(mockDio.get<String>('/messages/messageid/replies',
-                queryParameters: pagination.toJson()))
-            .called(1);
+        verify(() => mockDio.get<String>('/messages/messageid/replies',
+            queryParameters: pagination.toJson())).called(1);
       });
 
       test('sendAction', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -120,39 +155,46 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
         await channelClient.watch();
 
-        final Map<String, dynamic> data = {'test': true};
+        final data = <String, dynamic>{'test': true};
 
-        when(mockDio.post<String>('/messages/messageid/action', data: {
-          'id': 'testid',
-          'type': 'messaging',
-          'form_data': data,
-          'message_id': 'messageid',
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.post<String>('/messages/messageid/action', data: {
+              'id': 'testid',
+              'type': 'messaging',
+              'form_data': data,
+              'message_id': 'messageid',
+            })).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
 
         await channelClient.sendAction(Message(id: 'messageid'), data);
 
-        verify(mockDio.post<String>('/messages/messageid/action', data: {
-          'id': 'testid',
-          'type': 'messaging',
-          'form_data': data,
-          'message_id': 'messageid',
-        })).called(1);
+        verify(() => mockDio.post<String>('/messages/messageid/action', data: {
+              'id': 'testid',
+              'type': 'messaging',
+              'form_data': data,
+              'message_id': 'messageid',
+            })).called(1);
       });
 
       test('getMessagesById', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -162,13 +204,18 @@ void main() {
         final channelClient = client.channel('messaging', id: 'testid');
         final messageIds = ['a', 'b'];
 
-        when(mockDio.get<String>('/channels/messaging/testid/messages',
-                queryParameters: {'ids': messageIds.join(',')}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.get<String>('/channels/messaging/testid/messages',
+            queryParameters: {'ids': messageIds.join(',')})).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.getMessagesById(messageIds);
 
-        verify(mockDio.get<String>('/channels/messaging/testid/messages',
+        verify(() => mockDio.get<String>('/channels/messaging/testid/messages',
             queryParameters: {'ids': messageIds.join(',')})).called(1);
       });
 
@@ -176,12 +223,15 @@ void main() {
         final mockDio = MockDio();
         final mockUploader = MockAttachmentUploader();
 
-        final file = AttachmentFile(path: 'filePath/fileName.pdf');
-        final channelId = 'testId';
-        final channelType = 'messaging';
+        const file = AttachmentFile(
+          path: 'filePath/fileName.pdf',
+          size: 100,
+        );
+        const channelId = 'testId';
+        const channelType = 'messaging';
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -191,24 +241,39 @@ void main() {
         );
         final channelClient = client.channel(channelType, id: channelId);
 
-        when(mockUploader.sendFile(file, channelId, channelType))
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(() => mockUploader.sendFile(file, channelId, channelType))
             .thenAnswer((_) async => SendFileResponse());
 
         await channelClient.sendFile(file);
 
-        verify(mockUploader.sendFile(file, channelId, channelType)).called(1);
+        verify(() => mockUploader.sendFile(file, channelId, channelType))
+            .called(1);
       });
 
       test('sendImage', () async {
         final mockDio = MockDio();
         final mockUploader = MockAttachmentUploader();
 
-        final image = AttachmentFile(path: 'imagePath/imageName.jpeg');
-        final channelId = 'testId';
-        final channelType = 'messaging';
+        const image = AttachmentFile(
+          path: 'imagePath/imageName.jpeg',
+          size: 100,
+        );
+        const channelId = 'testId';
+        const channelType = 'messaging';
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -218,19 +283,31 @@ void main() {
         );
         final channelClient = client.channel(channelType, id: channelId);
 
-        when(mockUploader.sendImage(image, channelId, channelType))
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(() => mockUploader.sendImage(image, channelId, channelType))
             .thenAnswer((_) async => SendImageResponse());
 
         await channelClient.sendImage(image);
 
-        verify(mockUploader.sendImage(image, channelId, channelType)).called(1);
+        verify(() => mockUploader.sendImage(image, channelId, channelType))
+            .called(1);
       });
 
       test('deleteFile', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -238,23 +315,43 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final url = 'url';
+        const url = 'url';
 
-        when(mockDio.delete<String>('/channels/messaging/testid/file',
-                queryParameters: {'url': url}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(
+          () => mockDio.delete<String>(
+            '/channels/messaging/testid/file',
+            queryParameters: {'url': url},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.deleteFile(url);
 
-        verify(mockDio.delete<String>('/channels/messaging/testid/file',
+        verify(() => mockDio.delete<String>('/channels/messaging/testid/file',
             queryParameters: {'url': url})).called(1);
       });
 
       test('deleteImage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -262,15 +359,35 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final url = 'url';
+        const url = 'url';
 
-        when(mockDio.delete<String>('/channels/messaging/testid/image',
-                queryParameters: {'url': url}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(
+          () => mockDio.delete<String>(
+            '/channels/messaging/testid/image',
+            queryParameters: {'url': url},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.deleteImage(url);
 
-        verify(mockDio.delete<String>('/channels/messaging/testid/image',
+        verify(() => mockDio.delete<String>('/channels/messaging/testid/image',
             queryParameters: {'url': url})).called(1);
       });
 
@@ -290,60 +407,90 @@ void main() {
       test('should be pinned successfully', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
         );
-
         final channelClient = client.channel('messaging', id: 'testid');
+        final message = Message(text: 'Hello', id: 'test');
 
-        final message = Message(
-          text: 'Hello',
-          id: 'test',
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(
+          () => mockDio.post<String>(
+            '/messages/${message.id}',
+            data: anything,
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': message}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>(
-          '/messages/${message.id}',
-          data: anything,
-        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.pinMessage(message, 30);
 
-        verify(mockDio.post<String>('/messages/${message.id}', data: anything))
+        verify(() =>
+                mockDio.post<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
 
       test('should be unpinned successfully', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
         );
-
         final channelClient = client.channel('messaging', id: 'testid');
+        final message = Message(text: 'Hello', id: 'test');
 
-        final message = Message(
-          text: 'Hello',
-          id: 'test',
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(
+          () => mockDio.post<String>(
+            '/messages/${message.id}',
+            data: anything,
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': message}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>(
-          '/messages/${message.id}',
-          data: anything,
-        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.unpinMessage(message);
 
-        verify(mockDio.post<String>('/messages/${message.id}', data: anything))
+        verify(() =>
+                mockDio.post<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
     });
@@ -351,8 +498,8 @@ void main() {
     test('sendEvent', () async {
       final mockDio = MockDio();
 
-      when(mockDio.options).thenReturn(BaseOptions());
-      when(mockDio.interceptors).thenReturn(Interceptors());
+      when(() => mockDio.options).thenReturn(BaseOptions());
+      when(() => mockDio.interceptors).thenReturn(Interceptors());
 
       final client = StreamChatClient(
         'api-key',
@@ -361,32 +508,46 @@ void main() {
       );
       final channelClient = client.channel('messaging', id: 'testid');
 
-      when(mockDio.post<String>(
-        any,
-        data: anyNamed('data'),
-      )).thenAnswer((_) async => Response(
-            data: '{}',
-            statusCode: 200,
-          ));
+      when(
+        () => mockDio.post<String>(
+          any(),
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: '{}',
+          statusCode: 200,
+          requestOptions: FakeRequestOptions(),
+        ),
+      );
       await channelClient.watch();
 
-      final event = Event(type: EventType.any);
+      const event = Event(type: EventType.any);
 
-      when(mockDio.post<String>('/channels/messaging/testid/event',
-              data: {'event': event.toJson()}))
-          .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+      when(
+        () => mockDio.post<String>(
+          '/channels/messaging/testid/event',
+          data: {'event': event.toJson()},
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: '{}',
+          statusCode: 200,
+          requestOptions: FakeRequestOptions(),
+        ),
+      );
 
       await channelClient.sendEvent(event);
 
-      verify(mockDio.post<String>('/channels/messaging/testid/event',
+      verify(() => mockDio.post<String>('/channels/messaging/testid/event',
           data: {'event': event.toJson()})).called(1);
     });
 
     test('keyStroke', () async {
       final mockDio = MockDio();
 
-      when(mockDio.options).thenReturn(BaseOptions());
-      when(mockDio.interceptors).thenReturn(Interceptors());
+      when(() => mockDio.options).thenReturn(BaseOptions());
+      when(() => mockDio.interceptors).thenReturn(Interceptors());
 
       final client = StreamChatClient(
         'api-key',
@@ -395,32 +556,46 @@ void main() {
       );
       final channelClient = client.channel('messaging', id: 'testid');
 
-      when(mockDio.post<String>(
-        any,
-        data: anyNamed('data'),
-      )).thenAnswer((_) async => Response(
-            data: '{}',
-            statusCode: 200,
-          ));
+      when(
+        () => mockDio.post<String>(
+          any(),
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: '{}',
+          statusCode: 200,
+          requestOptions: FakeRequestOptions(),
+        ),
+      );
       await channelClient.watch();
 
-      final event = Event(type: EventType.typingStart);
+      const event = Event(type: EventType.typingStart);
 
-      when(mockDio.post<String>('/channels/messaging/testid/event',
-              data: {'event': event.toJson()}))
-          .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+      when(
+        () => mockDio.post<String>(
+          '/channels/messaging/testid/event',
+          data: {'event': event.toJson()},
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: '{}',
+          statusCode: 200,
+          requestOptions: FakeRequestOptions(),
+        ),
+      );
 
       await channelClient.keyStroke();
 
-      verify(mockDio.post<String>('/channels/messaging/testid/event',
+      verify(() => mockDio.post<String>('/channels/messaging/testid/event',
           data: {'event': event.toJson()})).called(1);
     });
 
     test('stopTyping', () async {
       final mockDio = MockDio();
 
-      when(mockDio.options).thenReturn(BaseOptions());
-      when(mockDio.interceptors).thenReturn(Interceptors());
+      when(() => mockDio.options).thenReturn(BaseOptions());
+      when(() => mockDio.interceptors).thenReturn(Interceptors());
 
       final client = StreamChatClient(
         'api-key',
@@ -429,24 +604,36 @@ void main() {
       );
       final channelClient = client.channel('messaging', id: 'testid');
 
-      when(mockDio.post<String>(
-        any,
-        data: anyNamed('data'),
-      )).thenAnswer((_) async => Response(
-            data: '{}',
-            statusCode: 200,
-          ));
+      when(() => mockDio.post<String>(
+            any(),
+            data: any(named: 'data'),
+          )).thenAnswer(
+        (_) async => Response(
+          data: '{}',
+          statusCode: 200,
+          requestOptions: FakeRequestOptions(),
+        ),
+      );
       await channelClient.watch();
 
-      final event = Event(type: EventType.typingStop);
+      const event = Event(type: EventType.typingStop);
 
-      when(mockDio.post<String>('/channels/messaging/testid/event',
-              data: {'event': event.toJson()}))
-          .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+      when(
+        () => mockDio.post<String>(
+          '/channels/messaging/testid/event',
+          data: {'event': event.toJson()},
+        ),
+      ).thenAnswer(
+        (_) async => Response(
+          data: '{}',
+          statusCode: 200,
+          requestOptions: FakeRequestOptions(),
+        ),
+      );
 
       await channelClient.stopTyping();
 
-      verify(mockDio.post<String>('/channels/messaging/testid/event',
+      verify(() => mockDio.post<String>('/channels/messaging/testid/event',
           data: {'event': event.toJson()})).called(1);
     });
 
@@ -454,84 +641,120 @@ void main() {
       test('sendReaction', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-        )..state.user = OwnUser(id: 'test-id');
+        );
 
+        final user = OwnUser(id: 'test-id');
+
+        client.state.user = user;
+
+        final message = Message(id: 'messageid');
+        const reactionType = 'test';
+        final reaction = Reaction(type: reactionType);
         final channelClient = client.channel('messaging', id: 'testid');
-        final reactionType = 'test';
 
-        when(mockDio.post<String>(
-          '/messages/messageid/reaction',
-          data: {
-            'reaction': {
-              'type': reactionType,
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
+        await channelClient.watch();
+
+        when(
+          () => mockDio.post<String>(
+            '/messages/${message.id}/reaction',
+            data: {
+              'reaction': {
+                'type': reactionType,
+              },
+              'enforce_unique': false,
             },
-            'enforce_unique': false,
-          },
-        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'message': message,
+              'reaction': reaction,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.sendReaction(
-          Message(
-            id: 'messageid',
-            reactionCounts: const <String, int>{},
-            reactionScores: const <String, int>{},
-            latestReactions: const <Reaction>[],
-            ownReactions: const <Reaction>[],
-          ),
+          message,
           reactionType,
         );
 
-        verify(mockDio.post<String>('/messages/messageid/reaction', data: {
-          'reaction': {
-            'type': reactionType,
-          },
-          'enforce_unique': false,
-        })).called(1);
+        verify(
+            () => mockDio.post<String>('/messages/messageid/reaction', data: {
+                  'reaction': {
+                    'type': reactionType,
+                  },
+                  'enforce_unique': false,
+                })).called(1);
       });
 
       test('deleteReaction', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
           tokenProvider: (_) async => '',
-        )..state.user = OwnUser(id: 'test-id');
+        );
+
+        client.state.user = OwnUser(id: 'test-id');
 
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.delete<String>('/messages/messageid/reaction/test'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.delete<String>('/messages/messageid/reaction/test'),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.deleteReaction(
           Message(
             id: 'messageid',
-            reactionCounts: const <String, int>{},
-            reactionScores: const <String, int>{},
-            latestReactions: const <Reaction>[],
-            ownReactions: const <Reaction>[],
           ),
-          Reaction(type: 'test'),
+          Reaction(
+            type: 'test',
+            createdAt: DateTime.now(),
+            user: User(
+              id: client.state.user?.id ?? '',
+            ),
+          ),
         );
 
-        verify(mockDio.delete<String>('/messages/messageid/reaction/test'))
+        verify(() =>
+                mockDio.delete<String>('/messages/messageid/reaction/test'))
             .called(1);
       });
 
       test('getReactions', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -539,17 +762,25 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final pagination = PaginationParams();
+        const pagination = PaginationParams();
 
-        when(mockDio.get<String>('/messages/messageid/reactions',
-                queryParameters: pagination.toJson()))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.get<String>(
+            '/messages/messageid/reactions',
+            queryParameters: pagination.toJson(),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.getReactions('messageid', pagination);
 
-        verify(mockDio.get<String>('/messages/messageid/reactions',
-                queryParameters: pagination.toJson()))
-            .called(1);
+        verify(() => mockDio.get<String>('/messages/messageid/reactions',
+            queryParameters: pagination.toJson())).called(1);
       });
     });
 
@@ -557,8 +788,8 @@ void main() {
       test('addMembers', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -566,25 +797,52 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final members = ['vishal'];
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        final members = [Member(userId: 'vishal')];
+        final memberIds = members.map((e) => e.userId!).toList();
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'add_members': members, 'message': message.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid',
+            data: {'add_members': memberIds, 'message': message.toJson()},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'members': members,
+              'message': message,
+              'channel': channelModel,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
-        await channelClient.addMembers(members, message);
+        await channelClient.addMembers(memberIds, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid',
-                data: {'add_members': members, 'message': message.toJson()}))
+        verify(() => mockDio.post<String>('/channels/messaging/testid',
+                data: {'add_members': memberIds, 'message': message.toJson()}))
             .called(1);
       });
 
       test('acceptInvite', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -592,15 +850,40 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'accept_invite': true, 'message': message.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid',
+            data: {'accept_invite': true, 'message': message.toJson()},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'message': message,
+              'channel': channelModel,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.acceptInvite(message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid',
+        verify(() => mockDio.post<String>('/channels/messaging/testid',
                 data: {'accept_invite': true, 'message': message.toJson()}))
             .called(1);
       });
@@ -609,8 +892,8 @@ void main() {
         test('without id', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
           final client = StreamChatClient(
             'api-key',
@@ -618,15 +901,18 @@ void main() {
             tokenProvider: (_) async => '',
           );
           final channelClient = client.channel('messaging');
-          final Map<String, dynamic> options = {
+          final options = <String, dynamic>{
             'watch': true,
             'state': false,
             'presence': true,
           };
 
-          when(mockDio.post<String>('/channels/messaging/query', data: options))
-              .thenAnswer((_) async {
-            return Response(data: r'''
+          when(() => mockDio.post<String>(
+                '/channels/messaging/query',
+                data: options,
+              )).thenAnswer(
+            (_) async => Response(
+              data: r'''
             {
             "channel": {
                 "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
@@ -912,23 +1198,27 @@ void main() {
                 }
             ]
         }
-            ''', statusCode: 200);
-          });
+            ''',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
 
           final response = await channelClient.query(options: options);
 
-          verify(mockDio.post<String>('/channels/messaging/query',
-                  data: options))
-              .called(1);
-          expect(channelClient.id, response.channel.id);
-          expect(channelClient.cid, response.channel.cid);
+          verify(() => mockDio.post<String>(
+                '/channels/messaging/query',
+                data: options,
+              )).called(1);
+          expect(channelClient.id, response.channel?.id);
+          expect(channelClient.cid, response.channel?.cid);
         });
 
         test('with id', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
           final client = StreamChatClient(
             'api-key',
@@ -936,13 +1226,12 @@ void main() {
             tokenProvider: (_) async => '',
           );
           final channelClient = client.channel('messaging', id: 'testid');
-          final Map<String, dynamic> options = {
-            'state': false,
-          };
+          final options = <String, dynamic>{'state': false};
 
-          when(mockDio.post<String>('/channels/messaging/testid/query',
-                  data: options))
-              .thenAnswer((_) async => Response(data: r'''
+          when(() => mockDio.post<String>('/channels/messaging/testid/query',
+              data: options)).thenAnswer(
+            (_) async => Response(
+              data: r'''
             {
             "channel": {
                 "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
@@ -1228,21 +1517,24 @@ void main() {
                 }
             ]
         }
-            ''', statusCode: 200));
+            ''',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
 
           await channelClient.query(options: options);
 
-          verify(mockDio.post<String>('/channels/messaging/testid/query',
-                  data: options))
-              .called(1);
+          verify(() => mockDio.post<String>('/channels/messaging/testid/query',
+              data: options)).called(1);
         });
       });
 
       test('create', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1250,14 +1542,16 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging');
-        final Map<String, dynamic> options = {
+        final options = <String, dynamic>{
           'watch': false,
           'state': false,
           'presence': false,
         };
 
-        when(mockDio.post<String>('/channels/messaging/query', data: options))
-            .thenAnswer((_) async => Response(data: r'''
+        when(() => mockDio.post<String>('/channels/messaging/query',
+            data: options)).thenAnswer(
+          (_) async => Response(
+            data: r'''
             {
             "channel": {
                 "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
@@ -1543,21 +1837,25 @@ void main() {
                 }
             ]
         }
-            ''', statusCode: 200));
+            ''',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         final response = await channelClient.create();
 
-        verify(mockDio.post<String>('/channels/messaging/query', data: options))
-            .called(1);
-        expect(channelClient.id, response.channel.id);
-        expect(channelClient.cid, response.channel.cid);
+        verify(() => mockDio.post<String>('/channels/messaging/query',
+            data: options)).called(1);
+        expect(channelClient.id, response.channel?.id);
+        expect(channelClient.cid, response.channel?.cid);
       });
 
       test('watch', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1571,8 +1869,10 @@ void main() {
           'presence': true,
         };
 
-        when(mockDio.post<String>('/channels/messaging/query', data: options))
-            .thenAnswer((_) async => Response(data: r'''
+        when(() => mockDio.post<String>('/channels/messaging/query',
+            data: options)).thenAnswer(
+          (_) async => Response(
+            data: r'''
             {
             "channel": {
                 "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
@@ -1858,21 +2158,25 @@ void main() {
                 }
             ]
         }
-            ''', statusCode: 200));
+            ''',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         final response = await channelClient.watch({'presence': true});
 
-        verify(mockDio.post<String>('/channels/messaging/query', data: options))
-            .called(1);
-        expect(channelClient.id, response.channel.id);
-        expect(channelClient.cid, response.channel.cid);
+        verify(() => mockDio.post<String>('/channels/messaging/query',
+            data: options)).called(1);
+        expect(channelClient.id, response.channel?.id);
+        expect(channelClient.cid, response.channel?.cid);
       });
 
       test('stopWatching', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1881,24 +2185,32 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          '/channels/messaging/testid/stop-watching',
-          data: {},
-        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid/stop-watching',
+            data: {},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.stopWatching();
 
-        verify(mockDio.post<String>(
-          '/channels/messaging/testid/stop-watching',
-          data: {},
-        )).called(1);
+        verify(() => mockDio.post<String>(
+              '/channels/messaging/testid/stop-watching',
+              data: {},
+            )).called(1);
       });
 
       test('update', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1906,26 +2218,55 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid', data: {
-          'message': message.toJson(),
-          'data': {'test': true},
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid',
+            data: {
+              'message': message.toJson(),
+              'data': {'test': true},
+            },
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'channel': channelModel,
+              'message': message,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.update({'test': true}, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid', data: {
-          'message': message.toJson(),
-          'data': {'test': true},
-        })).called(1);
+        verify(
+          () => mockDio.post<String>('/channels/messaging/testid', data: {
+            'message': message.toJson(),
+            'data': {'test': true},
+          }),
+        ).called(1);
       });
 
       test('delete', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1934,19 +2275,27 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.delete<String>('/channels/messaging/testid'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.delete<String>('/channels/messaging/testid'),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.delete();
 
-        verify(mockDio.delete<String>('/channels/messaging/testid')).called(1);
+        verify(() => mockDio.delete<String>('/channels/messaging/testid'))
+            .called(1);
       });
 
       test('truncate', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1955,20 +2304,28 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>('/channels/messaging/testid/truncate'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>('/channels/messaging/testid/truncate'),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.truncate();
 
-        verify(mockDio.post<String>('/channels/messaging/testid/truncate'))
+        verify(() =>
+                mockDio.post<String>('/channels/messaging/testid/truncate'))
             .called(1);
       });
 
       test('rejectInvite', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -1976,15 +2333,40 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'reject_invite': true, 'message': message.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid',
+            data: {'reject_invite': true, 'message': message.toJson()},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'message': message,
+              'channel': channelModel,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.rejectInvite(message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid',
+        verify(() => mockDio.post<String>('/channels/messaging/testid',
                 data: {'reject_invite': true, 'message': message.toJson()}))
             .called(1);
       });
@@ -1992,8 +2374,8 @@ void main() {
       test('inviteMembers', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -2001,24 +2383,52 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final members = ['vishal'];
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        final members = [Member(userId: 'vishal')];
+        final memberIds = members.map((e) => e.userId!).toList();
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'invites': members, 'message': message.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid',
+            data: {'invites': memberIds, 'message': message.toJson()},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'members': members,
+              'message': message,
+              'channel': channelModel,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
-        await channelClient.inviteMembers(members, message);
+        await channelClient.inviteMembers(memberIds, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid',
-            data: {'invites': members, 'message': message.toJson()})).called(1);
+        verify(() => mockDio.post<String>('/channels/messaging/testid',
+                data: {'invites': memberIds, 'message': message.toJson()}))
+            .called(1);
       });
 
       test('removeMembers', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -2026,25 +2436,53 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final members = ['vishal'];
+        final channelModel = ChannelModel(cid: 'messaging:testid');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState(channel: channelModel)),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        final members = [Member(userId: 'vishal')];
+        final memberIds = members.map((e) => e.userId!).toList();
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'remove_members': members, 'message': message.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid',
+            data: {'remove_members': memberIds, 'message': message.toJson()},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({
+              'members': members,
+              'message': message,
+              'channel': channelModel,
+            }),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
-        await channelClient.removeMembers(members, message);
+        await channelClient.removeMembers(memberIds, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid',
-                data: {'remove_members': members, 'message': message.toJson()}))
-            .called(1);
+        verify(() => mockDio.post<String>('/channels/messaging/testid', data: {
+              'remove_members': memberIds,
+              'message': message.toJson()
+            })).called(1);
       });
 
       test('hide', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -2053,30 +2491,44 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.post<String>(
+            any(),
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
         await channelClient.watch();
 
-        when(mockDio.post<String>('/channels/messaging/testid/hide',
-                data: {'clear_history': true}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/channels/messaging/testid/hide',
+            data: {'clear_history': true},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.hide(clearHistory: true);
 
-        verify(mockDio.post<String>('/channels/messaging/testid/hide',
+        verify(() => mockDio.post<String>('/channels/messaging/testid/hide',
             data: {'clear_history': true})).called(1);
       });
 
       test('show', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -2085,29 +2537,41 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.post<String>(
+            any(),
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
         await channelClient.watch();
 
-        when(mockDio.post<String>('/channels/messaging/testid/show'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>('/channels/messaging/testid/show'),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.show();
 
-        verify(mockDio.post<String>('/channels/messaging/testid/show'))
+        verify(() => mockDio.post<String>('/channels/messaging/testid/show'))
             .called(1);
       });
 
       test('banUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -2116,38 +2580,51 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.post<String>(
+            any(),
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
         await channelClient.watch();
 
-        when(mockDio.post<String>('/moderation/ban', data: {
-          'test': true,
-          'target_user_id': 'test-id',
-          'type': 'messaging',
-          'id': 'testid',
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>('/moderation/ban', data: {
+            'test': true,
+            'target_user_id': 'test-id',
+            'type': 'messaging',
+            'id': 'testid',
+          }),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
-        final Map<String, dynamic> options = {'test': true};
+        final options = <String, dynamic>{'test': true};
         await channelClient.banUser('test-id', options);
 
-        verify(mockDio.post<String>('/moderation/ban', data: {
-          'test': true,
-          'target_user_id': 'test-id',
-          'type': 'messaging',
-          'id': 'testid',
-        })).called(1);
+        verify(() => mockDio.post<String>('/moderation/ban', data: {
+              'test': true,
+              'target_user_id': 'test-id',
+              'type': 'messaging',
+              'id': 'testid',
+            })).called(1);
       });
 
       test('unbanUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -2156,28 +2633,46 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>(
-          any,
-          data: anyNamed('data'),
-        )).thenAnswer((_) async => Response(
-              data: '{}',
-              statusCode: 200,
-            ));
+        when(
+          () => mockDio.post<String>(
+            any(),
+            data: any(named: 'data'),
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
         await channelClient.watch();
 
-        when(mockDio.delete<String>('/moderation/ban', queryParameters: {
-          'target_user_id': 'test-id',
-          'type': 'messaging',
-          'id': 'testid',
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.delete<String>(
+            '/moderation/ban',
+            queryParameters: {
+              'target_user_id': 'test-id',
+              'type': 'messaging',
+              'id': 'testid',
+            },
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.unbanUser('test-id');
 
-        verify(mockDio.delete<String>('/moderation/ban', queryParameters: {
-          'target_user_id': 'test-id',
-          'type': 'messaging',
-          'id': 'testid',
-        })).called(1);
+        verify(
+          () => mockDio.delete<String>('/moderation/ban', queryParameters: {
+            'target_user_id': 'test-id',
+            'type': 'messaging',
+            'id': 'testid',
+          }),
+        ).called(1);
       });
     });
   });

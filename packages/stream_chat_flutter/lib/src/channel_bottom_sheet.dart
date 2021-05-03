@@ -5,7 +5,7 @@ import 'channel_info.dart';
 import 'option_list_tile.dart';
 
 class ChannelBottomSheet extends StatefulWidget {
-  final VoidCallback onViewInfoTap;
+  final VoidCallback? onViewInfoTap;
 
   ChannelBottomSheet({this.onViewInfoTap});
 
@@ -18,13 +18,13 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    var channel = StreamChannel.of(context).channel;
+    final channel = StreamChannel.of(context).channel;
 
-    var members = channel.state.members;
+    final members = channel.state?.members ?? [];
 
-    var userAsMember =
-        members.firstWhere((e) => e.user.id == StreamChat.of(context).user.id);
-    var isOwner = userAsMember.role == 'owner';
+    final userAsMember = members
+        .firstWhere((e) => e.user?.id == StreamChat.of(context).user?.id);
+    final isOwner = userAsMember.role == 'owner';
 
     return Material(
       color: StreamChatTheme.of(context).colorTheme.white,
@@ -73,8 +73,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       UserAvatar(
                         user: members
                             .firstWhere(
-                                (e) => e.user.id != userAsMember.user.id)
-                            .user,
+                                (e) => e.user?.id != userAsMember.user?.id)
+                            .user!,
                         constraints: BoxConstraints(
                           maxHeight: 64.0,
                           maxWidth: 64.0,
@@ -88,10 +88,11 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                       ),
                       Text(
                         members
-                            .firstWhere(
-                                (e) => e.user.id != userAsMember.user.id)
-                            .user
-                            .name,
+                                .firstWhere(
+                                    (e) => e.user?.id != userAsMember.user?.id)
+                                .user
+                                ?.name ??
+                            '',
                         style:
                             StreamChatTheme.of(context).textTheme.footnoteBold,
                         maxLines: 1,
@@ -113,7 +114,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                           child: Column(
                             children: [
                               UserAvatar(
-                                user: members[index].user,
+                                user: members[index].user!,
                                 constraints: BoxConstraints.tightFor(
                                   height: 64.0,
                                   width: 64.0,
@@ -126,7 +127,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                                 height: 6.0,
                               ),
                               Text(
-                                members[index].user.name,
+                                members[index].user?.name ?? '',
                                 style: StreamChatTheme.of(context)
                                     .textTheme
                                     .footnoteBold,
@@ -220,7 +221,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
         color: StreamChatTheme.of(context).colorTheme.accentRed,
       ),
     );
-    var channel = StreamChannel.of(context).channel;
+    final channel = StreamChannel.of(context).channel;
     if (res == true) {
       await channel.delete();
       Navigator.pop(context);
@@ -240,7 +241,10 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     );
     if (res == true) {
       final channel = StreamChannel.of(context).channel;
-      await channel.removeMembers([StreamChat.of(context).user.id]);
+      final user = StreamChat.of(context).user;
+      if (user != null) {
+        await channel.removeMembers([user.id]);
+      }
       Navigator.pop(context);
     }
   }

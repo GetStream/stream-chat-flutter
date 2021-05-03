@@ -72,6 +72,13 @@ class MoorChatDatabase extends _$MoorChatDatabase {
         },
       );
 
+  /// Deletes all the tables
+  Future<void> flush() => batch((batch) {
+        allTables.forEach((table) {
+          delete(table).go();
+        });
+      });
+
   /// Closes the database instance
   Future<void> disconnect() => close();
 }

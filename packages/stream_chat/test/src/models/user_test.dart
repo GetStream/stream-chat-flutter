@@ -1,13 +1,14 @@
 import 'dart:convert';
 
-import 'package:test/test.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('src/models/user', () {
     const jsonExample = '''
       {
-        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e"
+        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+        "role": "test-role"
       }     
       ''';
 
@@ -17,11 +18,13 @@ void main() {
     });
 
     test('should serialize to json correctly', () {
-      final user =
-          User(id: 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e', role: "abc");
+      final user = User(
+        id: 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e',
+        role: 'abc',
+      );
 
       expect(user.toJson(), {
-        'id': "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+        'id': 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e',
       });
     });
   });

@@ -6,22 +6,16 @@ part of 'read.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Read _$ReadFromJson(Map json) {
+Read _$ReadFromJson(Map<String, dynamic> json) {
   return Read(
-    lastRead: json['last_read'] == null
-        ? null
-        : DateTime.parse(json['last_read'] as String),
-    user: json['user'] == null
-        ? null
-        : User.fromJson((json['user'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
-    unreadMessages: json['unread_messages'] as int,
+    lastRead: DateTime.parse(json['last_read'] as String),
+    user: User.fromJson(json['user'] as Map<String, dynamic>),
+    unreadMessages: json['unread_messages'] as int? ?? 0,
   );
 }
 
 Map<String, dynamic> _$ReadToJson(Read instance) => <String, dynamic>{
-      'last_read': instance.lastRead?.toIso8601String(),
-      'user': instance.user?.toJson(),
+      'last_read': instance.lastRead.toIso8601String(),
+      'user': instance.user.toJson(),
       'unread_messages': instance.unreadMessages,
     };

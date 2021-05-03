@@ -9,30 +9,33 @@ import '../stream_svg_icon.dart';
 import 'attachment_widget.dart';
 
 class GiphyAttachment extends AttachmentWidget {
-  final MessageTheme messageTheme;
-  final ShowMessageCallback onShowMessage;
-  final ValueChanged<ReturnActionType> onReturnAction;
-  final VoidCallback onAttachmentTap;
+  final ShowMessageCallback? onShowMessage;
+  final ValueChanged<ReturnActionType>? onReturnAction;
+  final VoidCallback? onAttachmentTap;
 
   const GiphyAttachment({
-    Key key,
-    @required Message message,
-    @required Attachment attachment,
-    Size size,
-    this.messageTheme,
+    Key? key,
+    required Message message,
+    required Attachment attachment,
+    Size? size,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(
+          key: key,
+          message: message,
+          attachment: attachment,
+          size: size,
+        );
 
   @override
   Widget build(BuildContext context) {
     final imageUrl =
         attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
-    if (imageUrl == null && source == AttachmentSource.network) {
+    if (imageUrl == null) {
       return AttachmentError();
     }
-    if (attachment.actions != null) {
+    if (attachment.actions.isNotEmpty) {
       return _buildSendingAttachment(context, imageUrl);
     }
     return _buildSentAttachment(context, imageUrl);
@@ -73,7 +76,7 @@ class GiphyAttachment extends AttachmentWidget {
                     if (attachment.title != null)
                       Flexible(
                         child: Text(
-                          attachment.title,
+                          attachment.title!,
                           style: TextStyle(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
@@ -175,6 +178,7 @@ class GiphyAttachment extends AttachmentWidget {
                                     .black
                                     .withOpacity(0.5),
                               ),
+                          maxLines: 1,
                         ),
                       ),
                     ),
@@ -199,10 +203,11 @@ class GiphyAttachment extends AttachmentWidget {
                         child: Text(
                           'Send',
                           style: TextStyle(
-                              color: StreamChatTheme.of(context)
-                                  .colorTheme
-                                  .accentBlue,
-                              fontWeight: FontWeight.bold),
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .accentBlue,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -259,8 +264,7 @@ class GiphyAttachment extends AttachmentWidget {
             channel: channel,
             child: FullScreenMedia(
               mediaAttachments: [attachment],
-              userName: message.user.name,
-              sentAt: message.createdAt,
+              userName: message.user?.name,
               message: message,
               onShowMessage: onShowMessage,
             ),
@@ -268,7 +272,7 @@ class GiphyAttachment extends AttachmentWidget {
         },
       ),
     );
-    if (res != null) onReturnAction(res);
+    if (res != null) onReturnAction?.call(res);
   }
 
   Widget _buildSentAttachment(BuildContext context, String imageUrl) {
@@ -282,14 +286,13 @@ class GiphyAttachment extends AttachmentWidget {
               channel: channel,
               child: FullScreenMedia(
                 mediaAttachments: [attachment],
-                userName: message.user.name,
-                sentAt: message.createdAt,
+                userName: message.user?.name,
                 message: message,
                 onShowMessage: onShowMessage,
               ),
             );
           }));
-          if (res != null) onReturnAction(res);
+          if (res != null) onReturnAction!(res);
         },
         child: Stack(
           children: [
@@ -297,16 +300,17 @@ class GiphyAttachment extends AttachmentWidget {
               height: size?.height,
               width: size?.width,
               placeholder: (_, __) {
+                final image = Image.asset(
+                  'images/placeholder.png',
+                  fit: BoxFit.cover,
+                  package: 'stream_chat_flutter',
+                );
+
+                final colorTheme = StreamChatTheme.of(context).colorTheme;
                 return Shimmer.fromColors(
-                  baseColor:
-                      StreamChatTheme.of(context).colorTheme.greyGainsboro,
-                  highlightColor:
-                      StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                  child: Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
-                  ),
+                  baseColor: colorTheme.greyGainsboro,
+                  highlightColor: colorTheme.whiteSmoke,
+                  child: image,
                 );
               },
               imageUrl: imageUrl,

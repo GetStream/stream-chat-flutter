@@ -1,11 +1,10 @@
 analyzer:
-  exclude: 
+  exclude:
     - lib/**/*.g.dart
     - lib/**/*.freezed.dart
     - example/*
-    - test/*
-linter: 
-  rules: 
+linter:
+  rules:
     - always_use_package_imports
     - avoid_empty_else
     - avoid_relative_lib_imports

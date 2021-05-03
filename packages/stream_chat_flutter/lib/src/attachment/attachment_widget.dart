@@ -13,15 +13,9 @@ extension AttachmentSourceX on AttachmentSource {
   /// Its prototype depends on the AttachmentSource defined.
   // ignore: missing_return
   T when<T>({
-    @required T Function() local,
-    @required T Function() network,
+    required T Function() local,
+    required T Function() network,
   }) {
-    assert(() {
-      if (local == null || network == null) {
-        throw 'check for all possible cases';
-      }
-      return true;
-    }());
     switch (this) {
       case AttachmentSource.local:
         return local();
@@ -32,30 +26,32 @@ extension AttachmentSourceX on AttachmentSource {
 }
 
 abstract class AttachmentWidget extends StatelessWidget {
-  final Size size;
+  final Size? size;
+  final AttachmentSource? _source;
   final Message message;
   final Attachment attachment;
-  final AttachmentSource _source;
 
-  AttachmentSource get source => _source ?? attachment.file != null
-      ? AttachmentSource.local
-      : AttachmentSource.network;
+  AttachmentSource get source =>
+      _source ??
+      (attachment.file != null
+          ? AttachmentSource.local
+          : AttachmentSource.network);
 
   const AttachmentWidget({
-    Key key,
-    @required this.message,
-    @required this.attachment,
+    Key? key,
+    required this.message,
+    required this.attachment,
     this.size,
-    AttachmentSource source,
+    AttachmentSource? source,
   })  : _source = source,
         super(key: key);
 }
 
 class AttachmentError extends StatelessWidget {
-  final Size size;
+  final Size? size;
 
   const AttachmentError({
-    Key key,
+    Key? key,
     this.size,
   }) : super(key: key);
 

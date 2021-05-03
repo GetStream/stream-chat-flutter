@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/stream_chat_core.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
-import 'package:mockito/mockito.dart';
 
 import 'matchers/users_matcher.dart';
 import 'mocks.dart';
@@ -30,18 +30,6 @@ void main() {
       },
     );
   }
-
-  test(
-    'should throw assertion error if child is null',
-    () async {
-      const usersBlocKey = Key('usersBloc');
-      final usersBloc = () => UsersBloc(
-            key: usersBlocKey,
-            child: null,
-          );
-      expect(usersBloc, throwsA(isA<AssertionError>()));
-    },
-  );
 
   testWidgets(
     'usersBlocState.queryUsers() should throw if used where '
@@ -96,12 +84,12 @@ void main() {
 
       final users = _generateUsers();
 
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       usersBlocState.queryUsers();
 
@@ -110,12 +98,12 @@ void main() {
         emits(isSameUserListAs(users)),
       );
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
     },
   );
 
@@ -145,12 +133,12 @@ void main() {
 
       final error = 'Error! Error! Error!';
 
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenThrow(error);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenThrow(error);
 
       usersBlocState.queryUsers();
 
@@ -159,12 +147,12 @@ void main() {
         emitsError(error),
       );
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
     },
   );
 
@@ -195,12 +183,12 @@ void main() {
 
       final users = _generateUsers();
 
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       usersBlocState.queryUsers();
 
@@ -209,23 +197,25 @@ void main() {
         emits(isSameUserListAs(users)),
       );
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
 
       final offset = users.length;
       final paginatedUsers = _generateUsers(offset: offset);
       final pagination = PaginationParams(offset: offset);
 
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: pagination,
-      )).thenAnswer((_) async => QueryUsersResponse()..users = paginatedUsers);
+      when(() => mockClient.queryUsers(
+                filter: any(named: 'filter'),
+                sort: any(named: 'sort'),
+                options: any(named: 'options'),
+                pagination: pagination,
+              ))
+          .thenAnswer(
+              (_) async => QueryUsersResponse()..users = paginatedUsers);
 
       usersBlocState.queryUsers(pagination: pagination);
 
@@ -240,12 +230,12 @@ void main() {
         ),
       ]);
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: pagination,
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: pagination,
+          )).called(1);
     },
   );
 
@@ -276,12 +266,12 @@ void main() {
 
       final users = _generateUsers();
 
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).thenAnswer((_) async => QueryUsersResponse()..users = users);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
       usersBlocState.queryUsers();
 
@@ -290,24 +280,24 @@ void main() {
         emits(isSameUserListAs(users)),
       );
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: anyNamed('pagination'),
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: any(named: 'pagination'),
+          )).called(1);
 
       final offset = users.length;
       final pagination = PaginationParams(offset: offset);
 
       final error = 'Error! Error! Error!';
 
-      when(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: pagination,
-      )).thenThrow(error);
+      when(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: pagination,
+          )).thenThrow(error);
 
       usersBlocState.queryUsers(pagination: pagination);
 
@@ -316,12 +306,12 @@ void main() {
         emitsError(error),
       );
 
-      verify(mockClient.queryUsers(
-        filter: anyNamed('filter'),
-        sort: anyNamed('sort'),
-        options: anyNamed('options'),
-        pagination: pagination,
-      )).called(1);
+      verify(() => mockClient.queryUsers(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            options: any(named: 'options'),
+            pagination: pagination,
+          )).called(1);
     },
   );
 }

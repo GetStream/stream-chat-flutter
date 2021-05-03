@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:emojis/emoji.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
@@ -19,6 +19,7 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
+import 'package:video_compress/video_compress.dart';
 
 import '../stream_chat_flutter.dart';
 import 'attachment/attachment.dart';
@@ -109,7 +110,7 @@ const _kMaxAttachmentSize = 20971520; // 20MB in Bytes
 class MessageInput extends StatefulWidget {
   /// Instantiate a new MessageInput
   MessageInput({
-    Key key,
+    Key? key,
     this.onMessageSent,
     this.preMessageSending,
     this.parentMessage,
@@ -135,20 +136,20 @@ class MessageInput extends StatefulWidget {
   }) : super(key: key);
 
   /// Message to edit
-  final Message editMessage;
+  final Message? editMessage;
 
   /// Message to start with
-  final Message initialMessage;
+  final Message? initialMessage;
 
   /// Function called after sending the message
-  final void Function(Message) onMessageSent;
+  final void Function(Message)? onMessageSent;
 
   /// Function called right before sending the message
   /// Use this to transform the message
-  final FutureOr<Message> Function(Message) preMessageSending;
+  final FutureOr<Message> Function(Message)? preMessageSending;
 
   /// Parent message in case of a thread
-  final Message parentMessage;
+  final Message? parentMessage;
 
   /// Maximum Height for the TextField to grow before it starts scrolling
   final double maxHeight;
@@ -166,25 +167,25 @@ class MessageInput extends StatefulWidget {
   final bool hideSendAsDm;
 
   /// The text controller of the TextField
-  final TextEditingController textEditingController;
+  final TextEditingController? textEditingController;
 
   /// List of action widgets
-  final List<Widget> actions;
+  final List<Widget>? actions;
 
   /// The location of the custom actions
   final ActionsLocation actionsLocation;
 
   /// Map that defines a thumbnail builder for an attachment type
-  final Map<String, AttachmentThumbnailBuilder> attachmentThumbnailBuilders;
+  final Map<String, AttachmentThumbnailBuilder>? attachmentThumbnailBuilders;
 
   /// The focus node associated to the TextField
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   ///
-  final Message quotedMessage;
+  final Message? quotedMessage;
 
   ///
-  final VoidCallback onQuotedMessageCleared;
+  final VoidCallback? onQuotedMessageCleared;
 
   /// The location of the send button
   final SendButtonLocation sendButtonLocation;
@@ -193,20 +194,20 @@ class MessageInput extends StatefulWidget {
   final bool autofocus;
 
   /// Send button widget in an idle state
-  final Widget idleSendButton;
+  final Widget? idleSendButton;
 
   /// Send button widget in an active state
-  final Widget activeSendButton;
+  final Widget? activeSendButton;
 
   /// Customize the tile for the mentions overlay
-  final MentionTileBuilder mentionsTileBuilder;
+  final MentionTileBuilder? mentionsTileBuilder;
 
   @override
   MessageInputState createState() => MessageInputState();
 
   /// Use this method to get the current [StreamChatState] instance
   static MessageInputState of(BuildContext context) {
-    MessageInputState messageInputState;
+    MessageInputState? messageInputState;
 
     messageInputState = context.findAncestorStateOfType<MessageInputState>();
 
@@ -224,15 +225,15 @@ class MessageInputState extends State<MessageInput> {
   final List<User> _mentionedUsers = [];
 
   final _imagePicker = ImagePicker();
-  FocusNode _focusNode;
+  late final FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
   bool _animateContainer = true;
   bool _commandEnabled = false;
-  OverlayEntry _commandsOverlay, _mentionsOverlay, _emojiOverlay;
-  Iterable<String> _emojiNames;
+  OverlayEntry? _commandsOverlay, _mentionsOverlay, _emojiOverlay;
+  late Iterable<String> _emojiNames;
 
-  Command _chosenCommand;
+  Command? _chosenCommand;
   bool _actionsShrunk = false;
   bool _sendAsDm = false;
   bool _openFilePickerSection = false;
@@ -242,7 +243,7 @@ class MessageInputState extends State<MessageInput> {
       KeyboardVisibilityController();
 
   /// The editing controller passed to the input TextField
-  TextEditingController textEditingController;
+  late final TextEditingController textEditingController;
 
   bool get _hasQuotedMessage => widget.quotedMessage != null;
 
@@ -250,7 +251,8 @@ class MessageInputState extends State<MessageInput> {
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
-    _emojiNames = Emoji.all().map((e) => e.name);
+    _emojiNames =
+        Emoji.all().where((it) => it.name != null).map((e) => e.name!);
 
     if (!kIsWeb) {
       _keyboardListener =
@@ -264,7 +266,7 @@ class MessageInputState extends State<MessageInput> {
     textEditingController =
         widget.textEditingController ?? TextEditingController();
     if (widget.editMessage != null || widget.initialMessage != null) {
-      _parseExistingMessage(widget.editMessage ?? widget.initialMessage);
+      _parseExistingMessage(widget.editMessage ?? widget.initialMessage!);
     }
 
     textEditingController.addListener(() {
@@ -447,7 +449,7 @@ class MessageInputState extends State<MessageInput> {
       firstChild: sendButton,
       secondChild: widget.idleSendButton ?? _buildIdleSendButton(context),
       duration:
-          StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration,
+          StreamChatTheme.of(context).messageInputTheme.sendAnimationDuration!,
       alignment: Alignment.center,
     );
   }
@@ -490,9 +492,9 @@ class MessageInputState extends State<MessageInput> {
                   widget.editMessage == null &&
                   StreamChannel.of(context)
                           .channel
-                          ?.config
+                          .config
                           ?.commands
-                          ?.isNotEmpty ==
+                          .isNotEmpty ==
                       true)
                 _buildCommandButton(),
               ...widget.actions ?? [],
@@ -571,7 +573,7 @@ class MessageInputState extends State<MessageInput> {
     return InputDecoration(
       isDense: true,
       hintText: _getHint(),
-      hintStyle: theme.messageInputTheme.inputTextStyle.copyWith(
+      hintStyle: theme.messageInputTheme.inputTextStyle!.copyWith(
         color: theme.colorTheme.grey,
       ),
       border: OutlineInputBorder(
@@ -621,7 +623,7 @@ class MessageInputState extends State<MessageInput> {
                           size: 16.0,
                         ),
                         Text(
-                          _chosenCommand?.name?.toUpperCase() ?? '',
+                          _chosenCommand?.name.toUpperCase() ?? '',
                           style: StreamChatTheme.of(context)
                               .textTheme
                               .footnoteBold
@@ -676,9 +678,9 @@ class MessageInputState extends State<MessageInput> {
     ).merge(passedDecoration);
   }
 
-  Timer _debounce;
+  Timer? _debounce;
 
-  String _previousValue;
+  String? _previousValue;
 
   void _onChanged(BuildContext context, String s) {
     if (s == _previousValue) {
@@ -686,14 +688,14 @@ class MessageInputState extends State<MessageInput> {
     }
     _previousValue = s;
 
-    if (_debounce?.isActive == true) _debounce.cancel();
+    if (_debounce?.isActive == true) _debounce!.cancel();
     _debounce = Timer(
       const Duration(milliseconds: 350),
       () {
         if (!mounted) {
           return;
         }
-        StreamChannel.of(context).channel.keyStroke()?.catchError((e) {});
+        StreamChannel.of(context).channel.keyStroke().catchError((e) {});
 
         setState(() {
           _messageIsPresent = s.trim().isNotEmpty;
@@ -721,7 +723,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   String _getHint() {
-    if (_commandEnabled && _chosenCommand.name == 'giphy') {
+    if (_commandEnabled && _chosenCommand!.name == 'giphy') {
       return 'Search GIFs';
     }
     if (_attachments.isNotEmpty) {
@@ -742,7 +744,7 @@ class MessageInputState extends State<MessageInput> {
       final textToSelection = textEditingController.text
           .substring(0, textEditingController.value.selection.start);
       final splits = textToSelection.split(':');
-      final query = splits[splits.length - 2]?.toLowerCase();
+      final query = splits[splits.length - 2].toLowerCase();
       final emoji = Emoji.byName(query);
 
       if (textToSelection.endsWith(':') && emoji != null) {
@@ -751,7 +753,7 @@ class MessageInputState extends State<MessageInput> {
         _emojiOverlay = _buildEmojiOverlay();
 
         if (_emojiOverlay != null) {
-          Overlay.of(context).insert(_emojiOverlay);
+          Overlay.of(context)!.insert(_emojiOverlay!);
         }
       }
     }
@@ -767,7 +769,7 @@ class MessageInputState extends State<MessageInput> {
             .contains('@')) {
       _mentionsOverlay = _buildMentionsOverlayEntry();
       if (_mentionsOverlay != null) {
-        Overlay.of(context).insert(_mentionsOverlay);
+        Overlay.of(context)!.insert(_mentionsOverlay!);
       }
     }
   }
@@ -778,8 +780,8 @@ class MessageInputState extends State<MessageInput> {
               .channel
               .config
               ?.commands
-              ?.where((element) => element.name == s.substring(1))
-              ?.toList() ??
+              .where((element) => element.name == s.substring(1))
+              .toList() ??
           [];
 
       if (matchedCommandsList.length == 1) {
@@ -789,32 +791,32 @@ class MessageInputState extends State<MessageInput> {
         setState(() {
           _commandEnabled = true;
         });
-        _commandsOverlay.remove();
+        _commandsOverlay!.remove();
         _commandsOverlay = null;
       } else {
         _commandsOverlay = _buildCommandsOverlayEntry();
         if (_commandsOverlay != null) {
-          Overlay.of(context).insert(_commandsOverlay);
+          Overlay.of(context)!.insert(_commandsOverlay!);
         }
       }
     }
   }
 
-  OverlayEntry _buildCommandsOverlayEntry() {
+  OverlayEntry? _buildCommandsOverlayEntry() {
     final text = textEditingController.text.trimLeft();
     final commands = StreamChannel.of(context)
             .channel
             .config
             ?.commands
-            ?.where((c) => c.name.contains(text.replaceFirst('/', '')))
-            ?.toList() ??
+            .where((c) => c.name.contains(text.replaceFirst('/', '')))
+            .toList() ??
         [];
 
     if (commands.isEmpty) {
       return null;
     }
 
-    RenderBox renderBox = context.findRenderObject();
+    final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
     return OverlayEntry(builder: (context) {
@@ -951,7 +953,6 @@ class MessageInputState extends State<MessageInput> {
                       .colorTheme
                       .black
                       .withOpacity(0.2));
-          break;
         case 1:
           return _attachmentContainsFile
               ? StreamChatTheme.of(context).colorTheme.accentBlue
@@ -964,17 +965,14 @@ class MessageInputState extends State<MessageInput> {
                       .colorTheme
                       .black
                       .withOpacity(0.2));
-          break;
         case 2:
           return _attachmentContainsFile && _attachments.isNotEmpty
               ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
               : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
-          break;
         case 3:
           return _attachmentContainsFile && _attachments.isNotEmpty
               ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
               : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
-          break;
         default:
           return Colors.black;
       }
@@ -1111,17 +1109,22 @@ class MessageInputState extends State<MessageInput> {
       onTimeout: () => medium.originFile,
     );
 
+    if (mediaFile == null) {
+      return;
+    }
+
     var file = AttachmentFile(
       path: mediaFile.path,
       size: await mediaFile.length(),
       bytes: mediaFile.readAsBytesSync(),
     );
 
-    if (file.size > _kMaxAttachmentSize) {
-      if (medium?.type == AssetType.video) {
-        final mediaInfo = await VideoService.compressVideo(file.path);
+    if (file.size! > _kMaxAttachmentSize) {
+      if (medium.type == AssetType.video) {
+        final mediaInfo = await (VideoService.compressVideo(file.path)
+            as FutureOr<MediaInfo>);
 
-        if (mediaInfo.filesize > _kMaxAttachmentSize) {
+        if (mediaInfo.filesize! > _kMaxAttachmentSize) {
           _showErrorAlert(
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
           );
@@ -1129,8 +1132,8 @@ class MessageInputState extends State<MessageInput> {
         }
         file = AttachmentFile(
           name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file.readAsBytes(),
+          size: mediaInfo.filesize!,
+          bytes: await mediaInfo.file?.readAsBytes(),
           path: mediaInfo.path,
         );
       } else {
@@ -1159,7 +1162,6 @@ class MessageInputState extends State<MessageInput> {
             size: 24.0,
           ),
         );
-        break;
       case 'ban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1169,7 +1171,6 @@ class MessageInputState extends State<MessageInput> {
             color: Colors.white,
           ),
         );
-        break;
       case 'flag':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1179,7 +1180,6 @@ class MessageInputState extends State<MessageInput> {
             color: Colors.white,
           ),
         );
-        break;
       case 'imgur':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1190,7 +1190,6 @@ class MessageInputState extends State<MessageInput> {
             ),
           ),
         );
-        break;
       case 'mute':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1200,7 +1199,6 @@ class MessageInputState extends State<MessageInput> {
             color: Colors.white,
           ),
         );
-        break;
       case 'unban':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1210,7 +1208,6 @@ class MessageInputState extends State<MessageInput> {
             color: Colors.white,
           ),
         );
-        break;
       case 'unmute':
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1220,7 +1217,6 @@ class MessageInputState extends State<MessageInput> {
             color: Colors.white,
           ),
         );
-        break;
       default:
         return CircleAvatar(
           backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
@@ -1230,36 +1226,34 @@ class MessageInputState extends State<MessageInput> {
             color: Colors.white,
           ),
         );
-        break;
     }
   }
 
-  OverlayEntry _buildMentionsOverlayEntry() {
+  OverlayEntry? _buildMentionsOverlayEntry() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split('@');
     final query = splits.last.toLowerCase();
 
-    Future<List<Member>> queryMembers;
+    Future<List<Member>>? queryMembers;
 
     if (query.isNotEmpty) {
-      queryMembers = StreamChannel.of(context).channel.queryMembers(filter: {
-        'name': {
-          '\$autocomplete': query,
-        },
-      }).then((res) => res.members);
+      queryMembers = StreamChannel.of(context)
+          .channel
+          .queryMembers(filter: Filter.autoComplete('name', query))
+          .then((res) => res.members);
     }
 
-    final members = StreamChannel.of(context).channel.state.members?.where((m) {
-          return m.user.name.toLowerCase().contains(query);
-        })?.toList() ??
+    final members = StreamChannel.of(context).channel.state?.members.where((m) {
+          return m.user?.name.toLowerCase().contains(query) == true;
+        }).toList() ??
         [];
 
     if (members.isEmpty) {
       return null;
     }
 
-    RenderBox renderBox = context.findRenderObject();
+    final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
     return OverlayEntry(
@@ -1299,7 +1293,9 @@ class MessageInputState extends State<MessageInput> {
                             SizedBox(
                               height: 8.0,
                             ),
-                            ...snapshot.data.map(
+                            ...snapshot.data!
+                                .where((it) => it.user != null)
+                                .map(
                               (m) {
                                 return Material(
                                   color: StreamChatTheme.of(context)
@@ -1307,9 +1303,11 @@ class MessageInputState extends State<MessageInput> {
                                       .white,
                                   child: InkWell(
                                     onTap: () {
-                                      _mentionedUsers.add(m.user);
+                                      if (m.user != null) {
+                                        _mentionedUsers.add(m.user!);
+                                      }
 
-                                      splits[splits.length - 1] = m.user.name;
+                                      splits[splits.length - 1] = m.user!.name;
                                       final rejoin = splits.join('@');
 
                                       textEditingController.value =
@@ -1322,12 +1320,13 @@ class MessageInputState extends State<MessageInput> {
                                           offset: rejoin.length,
                                         ),
                                       );
-                                      _debounce.cancel();
+                                      _debounce!.cancel();
                                       _mentionsOverlay?.remove();
                                       _mentionsOverlay = null;
                                     },
                                     child: widget.mentionsTileBuilder != null
-                                        ? widget.mentionsTileBuilder(context, m)
+                                        ? widget.mentionsTileBuilder!(
+                                            context, m)
                                         : MentionTile(m),
                                   ),
                                 );
@@ -1350,7 +1349,7 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  OverlayEntry _buildEmojiOverlay() {
+  OverlayEntry? _buildEmojiOverlay() {
     final splits = textEditingController.text
         .substring(0, textEditingController.value.selection.start)
         .split(':');
@@ -1369,7 +1368,7 @@ class MessageInputState extends State<MessageInput> {
       return null;
     }
 
-    RenderBox renderBox = context.findRenderObject();
+    final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
     return OverlayEntry(builder: (context) {
@@ -1432,19 +1431,20 @@ class MessageInputState extends State<MessageInput> {
                     );
                   }
 
-                  final emoji = emojis.elementAt(i - 1);
+                  final emoji = emojis.elementAt(i - 1)!;
                   return ListTile(
                     title: SubstringHighlight(
-                      text: "${emoji.char} ${emoji.name.replaceAll('_', ' ')}",
+                      text: "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
                       term: query,
                       textStyleHighlight:
-                          Theme.of(context).textTheme.headline6.copyWith(
+                          Theme.of(context).textTheme.headline6!.copyWith(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.bold,
                               ),
-                      textStyle: Theme.of(context).textTheme.headline6.copyWith(
-                            fontSize: 14.5,
-                          ),
+                      textStyle:
+                          Theme.of(context).textTheme.headline6!.copyWith(
+                                fontSize: 14.5,
+                              ),
                     ),
                     onTap: () {
                       _chooseEmoji(splits, emoji);
@@ -1458,7 +1458,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _chooseEmoji(List<String> splits, Emoji emoji) {
-    final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char;
+    final rejoin = splits.sublist(0, splits.length - 1).join(':') + emoji.char!;
 
     textEditingController.value = TextEditingValue(
       text: rejoin +
@@ -1486,8 +1486,8 @@ class MessageInputState extends State<MessageInput> {
 
   Widget _buildReplyToMessage() {
     if (!_hasQuotedMessage) return Offstage();
-    final containsUrl = widget.quotedMessage.attachments
-            ?.any((element) => element.ogScrapeUrl != null) ==
+    final containsUrl = widget.quotedMessage!.attachments
+            .any((element) => element.ogScrapeUrl != null) ==
         true;
     return Transform(
       transform: Matrix4.rotationY(pi),
@@ -1495,7 +1495,7 @@ class MessageInputState extends State<MessageInput> {
       child: QuotedMessageWidget(
         reverse: true,
         showBorder: !containsUrl,
-        message: widget.quotedMessage,
+        message: widget.quotedMessage!,
         messageTheme: StreamChatTheme.of(context).otherMessageTheme,
         padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       ),
@@ -1526,7 +1526,7 @@ class MessageInputState extends State<MessageInput> {
                         borderRadius: BorderRadius.circular(10),
                         clipBehavior: Clip.antiAlias,
                         child: FileAttachment(
-                          message: null,
+                          message: Message(), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1610,11 +1610,9 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildAttachment(Attachment attachment) {
-    if (attachment == null) return Offstage();
-
     if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
         true) {
-      return widget.attachmentThumbnailBuilders[attachment.type](
+      return widget.attachmentThumbnailBuilders![attachment.type!]!(
         context,
         attachment,
       );
@@ -1625,7 +1623,7 @@ class MessageInputState extends State<MessageInput> {
       case 'giphy':
         return attachment.file != null
             ? Image.memory(
-                attachment.file.bytes,
+                attachment.file!.bytes!,
                 fit: BoxFit.cover,
                 errorBuilder: (context, _, __) {
                   return Image.asset(
@@ -1637,10 +1635,11 @@ class MessageInputState extends State<MessageInput> {
             : CachedNetworkImage(
                 imageUrl: attachment.imageUrl ??
                     attachment.assetUrl ??
-                    attachment.thumbUrl,
+                    attachment.thumbUrl!,
                 fit: BoxFit.cover,
                 errorWidget: (_, obj, trace) {
-                  return getFileTypeImage(attachment.extraData['other']);
+                  return getFileTypeImage(
+                      attachment.extraData['other'] as String?);
                 },
                 progressIndicatorBuilder: (context, _, progress) {
                   return Shimmer.fromColors(
@@ -1662,7 +1661,7 @@ class MessageInputState extends State<MessageInput> {
             VideoThumbnailImage(
               height: 104,
               width: 104,
-              video: attachment.file?.path ?? attachment.assetUrl,
+              video: (attachment.file?.path ?? attachment.assetUrl)!,
               fit: BoxFit.cover,
             ),
             Positioned(
@@ -1718,7 +1717,7 @@ class MessageInputState extends State<MessageInput> {
           setState(() {
             _commandsOverlay = _buildCommandsOverlayEntry();
             if (_commandsOverlay != null) {
-              Overlay.of(context).insert(_commandsOverlay);
+              Overlay.of(context)!.insert(_commandsOverlay!);
             }
           });
         } else {
@@ -1853,7 +1852,7 @@ class MessageInputState extends State<MessageInput> {
   void addAttachment(Attachment attachment) {
     setState(() {
       _attachments[attachment.id] = attachment.copyWith(
-        uploadState: attachment.uploadState ?? UploadState.success(),
+        uploadState: attachment.uploadState,
       );
     });
   }
@@ -1863,8 +1862,8 @@ class MessageInputState extends State<MessageInput> {
   void pickFile(DefaultAttachmentTypes fileType, [bool camera = false]) async {
     setState(() => _inputEnabled = false);
 
-    AttachmentFile file;
-    String attachmentType;
+    AttachmentFile? file;
+    String? attachmentType;
 
     if (fileType == DefaultAttachmentTypes.image) {
       attachmentType = 'image';
@@ -1875,7 +1874,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     if (camera) {
-      PickedFile pickedFile;
+      PickedFile? pickedFile;
       if (fileType == DefaultAttachmentTypes.image) {
         pickedFile = await _imagePicker.getImage(source: ImageSource.camera);
       } else if (fileType == DefaultAttachmentTypes.video) {
@@ -1891,7 +1890,7 @@ class MessageInputState extends State<MessageInput> {
         bytes: bytes,
       );
     } else {
-      FileType type;
+      late FileType type;
       if (fileType == DefaultAttachmentTypes.image) {
         type = FileType.image;
       } else if (fileType == DefaultAttachmentTypes.video) {
@@ -1903,8 +1902,8 @@ class MessageInputState extends State<MessageInput> {
         type: type,
         withData: true,
       );
-      if (res?.files?.isNotEmpty == true) {
-        file = res.files.single.toAttachmentFile;
+      if (res?.files.isNotEmpty == true) {
+        file = res!.files.single.toAttachmentFile;
       }
     }
 
@@ -1912,29 +1911,28 @@ class MessageInputState extends State<MessageInput> {
 
     if (file == null) return;
 
-    final mimeType = file.name?.mimeType ?? file.path.split('/').last.mimeType;
+    final mimeType = file.name?.mimeType ?? file.path!.split('/').last.mimeType;
 
-    final extraDataMap = <String, dynamic>{};
+    final extraDataMap = <String, Object>{};
 
     if (mimeType?.subtype != null) {
-      extraDataMap['mime_type'] = mimeType.subtype.toLowerCase();
+      extraDataMap['mime_type'] = mimeType!.subtype.toLowerCase();
     }
 
-    if (file.size != null) {
-      extraDataMap['file_size'] = file.size;
-    }
+    extraDataMap['file_size'] = file.size!;
 
     final attachment = Attachment(
       file: file,
       type: attachmentType,
-      extraData: extraDataMap.isNotEmpty ? extraDataMap : null,
+      extraData: extraDataMap,
     );
 
-    if (file.size > _kMaxAttachmentSize) {
+    if (file.size! > _kMaxAttachmentSize) {
       if (attachmentType == 'Video') {
-        final mediaInfo = await VideoService.compressVideo(file.path);
+        final mediaInfo = await (VideoService.compressVideo(file.path)
+            as FutureOr<MediaInfo>);
 
-        if (mediaInfo.filesize > _kMaxAttachmentSize) {
+        if (mediaInfo.filesize! > _kMaxAttachmentSize) {
           _showErrorAlert(
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
           );
@@ -1942,8 +1940,8 @@ class MessageInputState extends State<MessageInput> {
         }
         file = AttachmentFile(
           name: file.name,
-          size: mediaInfo.filesize,
-          bytes: await mediaInfo.file.readAsBytes(),
+          size: mediaInfo.filesize!,
+          bytes: await mediaInfo.file!.readAsBytes(),
           path: mediaInfo.path,
         );
       } else {
@@ -1960,7 +1958,8 @@ class MessageInputState extends State<MessageInput> {
       _attachments.update(attachment.id, (it) {
         return it.copyWith(
           file: file,
-          extraData: {...it.extraData}..update('file_size', (_) => file.size),
+          extraData: {...it.extraData}
+            ..update('file_size', ((_) => file!.size!)),
         );
       });
     });
@@ -2024,7 +2023,7 @@ class MessageInputState extends State<MessageInput> {
     final shouldUnfocus = _commandEnabled;
 
     if (_commandEnabled) {
-      text = '/${_chosenCommand.name} ' + text;
+      text = '/${_chosenCommand!.name} ' + text;
     }
 
     final attachments = [..._attachments.values];
@@ -2032,7 +2031,7 @@ class MessageInputState extends State<MessageInput> {
     textEditingController.clear();
     _attachments.clear();
     if (widget.onQuotedMessageCleared != null) {
-      widget.onQuotedMessageCleared();
+      widget.onQuotedMessageCleared!();
     }
 
     setState(() {
@@ -2048,7 +2047,7 @@ class MessageInputState extends State<MessageInput> {
     Future sendingFuture;
     Message message;
     if (widget.editMessage != null) {
-      message = widget.editMessage.copyWith(
+      message = widget.editMessage!.copyWith(
         text: text,
         attachments: attachments,
         mentionedUsers:
@@ -2067,25 +2066,25 @@ class MessageInputState extends State<MessageInput> {
 
     if (widget.quotedMessage != null) {
       message = message.copyWith(
-        quotedMessageId: widget.quotedMessage.id,
+        quotedMessageId: widget.quotedMessage!.id,
       );
     }
 
     if (widget.preMessageSending != null) {
-      message = await widget.preMessageSending(message);
+      message = await widget.preMessageSending!(message);
     }
 
     final streamChannel = StreamChannel.of(context);
     final channel = streamChannel.channel;
-    if (!channel.state.isUpToDate) {
+    if (!channel.state!.isUpToDate) {
       await streamChannel.reloadChannel();
     }
 
     _mentionedUsers.clear();
 
     if (widget.editMessage == null ||
-        widget.editMessage.status == MessageSendingStatus.failed ||
-        widget.editMessage.status == MessageSendingStatus.sending) {
+        widget.editMessage!.status == MessageSendingStatus.failed ||
+        widget.editMessage!.status == MessageSendingStatus.sending) {
       sendingFuture = channel.sendMessage(message);
     } else {
       sendingFuture = channel.updateMessage(message);
@@ -2100,12 +2099,12 @@ class MessageInputState extends State<MessageInput> {
         _parseExistingMessage(message);
       }
       if (widget.onMessageSent != null) {
-        widget.onMessageSent(resp.message);
+        widget.onMessageSent!(resp.message);
       }
     });
   }
 
-  StreamSubscription _keyboardListener;
+  StreamSubscription? _keyboardListener;
 
   void _showErrorAlert(String description) {
     showModalBottomSheet(
@@ -2179,14 +2178,12 @@ class MessageInputState extends State<MessageInput> {
   }
 
   void _parseExistingMessage(Message message) {
-    textEditingController.text = message.text;
+    textEditingController.text = message.text!;
     _messageIsPresent = true;
-    if (message.attachments != null) {
-      for (final attachment in message.attachments) {
-        _attachments[attachment.id] = attachment.copyWith(
-          uploadState: attachment.uploadState ?? UploadState.success(),
-        );
-      }
+    for (final attachment in message.attachments) {
+      _attachments[attachment.id] = attachment.copyWith(
+        uploadState: attachment.uploadState,
+      );
     }
   }
 
@@ -2267,12 +2264,12 @@ class _PickerWidget extends StatefulWidget {
   final void Function(AssetEntity) onMediaSelected;
 
   const _PickerWidget({
-    Key key,
-    @required this.filePickerIndex,
-    @required this.containsFile,
-    @required this.selectedMedias,
-    @required this.onAddMoreFilesClick,
-    @required this.onMediaSelected,
+    Key? key,
+    required this.filePickerIndex,
+    required this.containsFile,
+    required this.selectedMedias,
+    required this.onAddMoreFilesClick,
+    required this.onMediaSelected,
   }) : super(key: key);
 
   @override
@@ -2280,7 +2277,7 @@ class _PickerWidget extends StatefulWidget {
 }
 
 class __PickerWidgetState extends State<_PickerWidget> {
-  Future<bool> requestPermission;
+  Future<bool>? requestPermission;
 
   @override
   void initState() {
@@ -2300,7 +2297,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.data) {
+          if (snapshot.data!) {
             if (widget.containsFile) {
               return GestureDetector(
                 onTap: () {

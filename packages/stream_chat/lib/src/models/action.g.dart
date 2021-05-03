@@ -6,13 +6,13 @@ part of 'action.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Action _$ActionFromJson(Map json) {
+Action _$ActionFromJson(Map<String, dynamic> json) {
   return Action(
     name: json['name'] as String,
-    style: json['style'] as String,
+    style: json['style'] as String? ?? 'default',
     text: json['text'] as String,
     type: json['type'] as String,
-    value: json['value'] as String,
+    value: json['value'] as String?,
   );
 }
 

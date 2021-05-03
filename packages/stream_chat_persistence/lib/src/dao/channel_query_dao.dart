@@ -6,7 +6,6 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/entity/channel_queries.dart';
 import 'package:stream_chat_persistence/src/entity/channels.dart';
 import 'package:stream_chat_persistence/src/entity/users.dart';
-
 import 'package:stream_chat_persistence/src/mapper/mapper.dart';
 
 part 'channel_query_dao.g.dart';
@@ -18,7 +17,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   /// Creates a new channel query dao instance
   ChannelQueryDao(MoorChatDatabase db) : super(db);
 
-  String _computeHash(Map<String, dynamic> filter) {
+  String _computeHash(Filter? filter) {
     if (filter == null) {
       return 'allchannels';
     }
@@ -30,7 +29,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
   Future<void> updateChannelQueries(
-    Map<String, dynamic> filter,
+    Filter? filter,
     List<String> cids, {
     bool clearQueryCache = false,
   }) async =>
@@ -58,7 +57,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
       });
 
   ///
-  Future<List<String>> getCachedChannelCids(Map<String, dynamic> filter) {
+  Future<List<String>> getCachedChannelCids(Filter? filter) {
     final hash = _computeHash(filter);
     return (select(channelQueries)..where((c) => c.queryHash.equals(hash)))
         .map((c) => c.channelCid)
@@ -67,9 +66,9 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
 
   /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelModel>> getChannels({
-    Map<String, dynamic> filter,
-    List<SortOption<ChannelModel>> sort = const [],
-    PaginationParams paginationParams,
+    Filter? filter,
+    List<SortOption<ChannelModel>>? sort,
+    PaginationParams? paginationParams,
   }) async {
     assert(() {
       if (sort != null && sort.any((it) => it.comparator == null)) {
@@ -86,7 +85,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     final cachedChannels = await (query.join([
       leftOuterJoin(users, channels.createdById.equalsExp(users.id)),
     ]).map((row) {
-      final createdByEntity = row.readTable(users);
+      final createdByEntity = row.readTableOrNull(users);
       final channelEntity = row.readTable(channels);
       return channelEntity.toChannelModel(createdBy: createdByEntity?.toUser());
     })).get();
@@ -102,7 +101,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
         int result;
         for (final comparator in sort.map((it) => it.comparator)) {
           try {
-            result = comparator(a, b);
+            result = comparator!(a, b);
           } catch (e) {
             result = 0;
           }
@@ -115,11 +114,11 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     cachedChannels.sort(chainedComparator);
 
     if (paginationParams?.offset != null && cachedChannels.isNotEmpty) {
-      cachedChannels.removeRange(0, paginationParams.offset);
+      cachedChannels.removeRange(0, paginationParams!.offset);
     }
 
     if (paginationParams?.limit != null) {
-      return cachedChannels.take(paginationParams.limit).toList();
+      return cachedChannels.take(paginationParams!.limit).toList();
     }
 
     return cachedChannels;

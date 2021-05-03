@@ -6,15 +6,15 @@ class InfoTile extends StatelessWidget {
   final String message;
   final Widget child;
   final bool showMessage;
-  final Alignment tileAnchor;
-  final Alignment childAnchor;
-  final TextStyle textStyle;
-  final Color backgroundColor;
+  final Alignment? tileAnchor;
+  final Alignment? childAnchor;
+  final TextStyle? textStyle;
+  final Color? backgroundColor;
 
   InfoTile({
-    this.message,
-    this.child,
-    this.showMessage,
+    required this.message,
+    required this.child,
+    required this.showMessage,
     this.tileAnchor,
     this.childAnchor,
     this.textStyle,

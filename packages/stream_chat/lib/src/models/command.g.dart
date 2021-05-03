@@ -6,7 +6,7 @@ part of 'command.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Command _$CommandFromJson(Map json) {
+Command _$CommandFromJson(Map<String, dynamic> json) {
   return Command(
     name: json['name'] as String,
     description: json['description'] as String,

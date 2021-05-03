@@ -1,8 +1,7 @@
 import 'dart:io';
 
-import 'package:rxdart/rxdart.dart';
-import 'package:test/test.dart';
 import 'package:stream_chat/version.dart';
+import 'package:test/test.dart';
 
 void prepareTest() {
   // https://github.com/flutter/flutter/issues/20907
@@ -14,11 +13,12 @@ void prepareTest() {
 void main() {
   prepareTest();
   test('stream chat version matches pubspec', () {
-    final String pubspecPath = '${Directory.current.path}/pubspec.yaml';
-    final String pubspec = File(pubspecPath).readAsStringSync();
-    final RegExp regex = RegExp('version:\s*(.*)');
-    final RegExpMatch match = regex.firstMatch(pubspec);
+    final pubspecPath = '${Directory.current.path}/pubspec.yaml';
+    final pubspec = File(pubspecPath).readAsStringSync();
+    // ignore: unnecessary_string_escapes
+    final regex = RegExp('version:\s*(.*)');
+    final match = regex.firstMatch(pubspec);
     expect(match, isNotNull);
-    expect(PACKAGE_VERSION, match.group(1).trim());
+    expect(PACKAGE_VERSION, match?.group(1)?.trim());
   });
 }

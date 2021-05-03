@@ -9,7 +9,7 @@ class ConnectionEvents extends Table {
   IntColumn get id => integer()();
 
   /// User object of the current user
-  TextColumn get ownUser => text().nullable().map(MapConverter<Object>())();
+  TextColumn get ownUser => text().nullable().map(MapConverter())();
 
   /// The number of unread messages for current user
   IntColumn get totalUnreadCount => integer().nullable()();

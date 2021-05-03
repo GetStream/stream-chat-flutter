@@ -1,13 +1,10 @@
 import 'package:test/test.dart';
-import 'package:meta/meta.dart';
 
 Matcher isSameDateAs(DateTime targetDate) =>
     _IsSameDateAs(targetDate: targetDate);
 
 class _IsSameDateAs extends Matcher {
-  const _IsSameDateAs({
-    @required this.targetDate,
-  }) : assert(targetDate != null, '');
+  const _IsSameDateAs({required this.targetDate});
 
   final DateTime targetDate;
 

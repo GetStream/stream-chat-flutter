@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/back_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -19,7 +19,7 @@ void main() {
               return Material(
                 child: Center(
                   child: StreamChatTheme(
-                    data: StreamChatThemeData.getDefaultTheme(theme),
+                    data: StreamChatThemeData.fromTheme(theme),
                     child: StreamBackButton(),
                   ),
                 ),
@@ -51,7 +51,7 @@ void main() {
           home: Material(
             child: Center(
               child: StreamChatTheme(
-                data: StreamChatThemeData.getDefaultTheme(theme),
+                data: StreamChatThemeData.fromTheme(theme),
                 child: StreamBackButton(),
               ),
             ),
@@ -82,7 +82,7 @@ void main() {
               return Material(
                 child: Center(
                   child: StreamChatTheme(
-                    data: StreamChatThemeData.getDefaultTheme(theme),
+                    data: StreamChatThemeData.fromTheme(theme),
                     child: StreamBackButton(
                       onPressed: () => customCallbackWasCalled = true,
                     ),
@@ -121,7 +121,9 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.totalUnreadCountStream)
+          .thenAnswer((i) => Stream.value(0));
 
       await tester.pumpWidget(
         MaterialApp(

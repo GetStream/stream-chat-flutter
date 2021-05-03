@@ -5,7 +5,8 @@ import 'package:stream_chat/src/models/action.dart';
 
 void main() {
   group('src/models/action', () {
-    const jsonExample = r'''{
+    const jsonExample = '''
+    {
     "name": "name",
     "style": "style",
     "text": "text",

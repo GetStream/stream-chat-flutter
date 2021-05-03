@@ -64,9 +64,9 @@ class MyApp extends StatelessWidget {
       theme: themeData,
       builder: (context, child) {
         return StreamChat(
-          child: child,
           client: client,
           streamChatThemeData: customTheme,
+          child: child,
         );
       },
       home: ChannelListPage(),
@@ -80,11 +80,10 @@ class ChannelListPage extends StatelessWidget {
     return Scaffold(
       body: ChannelsBloc(
         child: ChannelListView(
-          filter: {
-            'members': {
-              '\$in': [StreamChat.of(context).user.id],
-            }
-          },
+          filter: Filter.in_(
+            'members',
+            [StreamChat.of(context).user!.id],
+          ),
           sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
             limit: 20,
@@ -98,7 +97,7 @@ class ChannelListPage extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -124,10 +123,10 @@ class ChannelPage extends StatelessWidget {
 }
 
 class ThreadPage extends StatelessWidget {
-  final Message parent;
+  final Message? parent;
 
   ThreadPage({
-    Key key,
+    Key? key,
     this.parent,
   }) : super(key: key);
 
@@ -135,7 +134,7 @@ class ThreadPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ThreadHeader(
-        parent: parent,
+        parent: parent!,
       ),
       body: Column(
         children: <Widget>[

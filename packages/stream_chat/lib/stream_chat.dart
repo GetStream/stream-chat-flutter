@@ -3,6 +3,7 @@ library stream_chat;
 export 'package:async/async.dart';
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
+export 'package:dio/src/options.dart';
 export 'package:dio/src/options.dart' show ProgressCallback;
 export 'package:logging/logging.dart' show Logger, Level;
 
@@ -27,6 +28,7 @@ export './src/models/channel_state.dart';
 export './src/models/command.dart';
 export './src/models/device.dart';
 export './src/models/event.dart';
+export './src/models/filter.dart' show Filter;
 export './src/models/member.dart';
 export './src/models/message.dart';
 export './src/models/mute.dart';

@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:synchronized/synchronized.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:meta/meta.dart';
 
 class IVideoService {
   static final IVideoService instance = IVideoService._();
@@ -27,10 +26,10 @@ class IVideoService {
   /// );
   /// debugPrint(info.toJson());
   /// ```
-  Future<MediaInfo> compressVideo(String path) async {
+  Future<MediaInfo?> compressVideo(String? path) async {
     return _lock.synchronized(() {
       return VideoCompress.compressVideo(
-        path,
+        path!,
       );
     });
   }
@@ -39,8 +38,8 @@ class IVideoService {
   /// The video can be a local video file, or an URL repreents iOS or Android native supported video format.
   /// Speicify the maximum height or width for the thumbnail or 0 for same resolution as the original video.
   /// The lower quality value creates lower quality of the thumbnail image, but it gets ignored for PNG format.
-  Future<Uint8List> generateVideoThumbnail({
-    @required String video,
+  Future<Uint8List?> generateVideoThumbnail({
+    required String video,
     ImageFormat imageFormat = ImageFormat.PNG,
     int maxHeight = 0,
     int maxWidth = 0,

@@ -14,10 +14,10 @@ part 'attachment.g.dart';
 class Attachment extends Equatable {
   /// Constructor used for json serialization
   Attachment({
-    String id,
+    String? id,
     this.type,
     this.titleLink,
-    String title,
+    String? title,
     this.thumbUrl,
     this.text,
     this.pretext,
@@ -32,17 +32,19 @@ class Attachment extends Equatable {
     this.authorLink,
     this.authorIcon,
     this.assetUrl,
-    this.actions,
-    this.extraData,
+    List<Action>? actions,
+    this.extraData = const {},
     this.file,
-    UploadState uploadState,
-  })  : id = id ?? Uuid().v4(),
+    UploadState? uploadState,
+  })  : id = id ?? const Uuid().v4(),
         title = title ?? file?.name,
-        localUri = file?.path != null ? Uri.parse(file.path) : null,
-        uploadState = uploadState ??
-            ((assetUrl != null || imageUrl != null)
-                ? const UploadState.success()
-                : const UploadState.preparing());
+        localUri = file?.path != null ? Uri.parse(file!.path!) : null,
+        actions = actions ?? [] {
+    this.uploadState = uploadState ??
+        ((assetUrl != null || imageUrl != null)
+            ? const UploadState.success()
+            : const UploadState.preparing());
+  }
 
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
@@ -56,59 +58,63 @@ class Attachment extends Equatable {
 
   ///The attachment type based on the URL resource. This can be: audio,
   ///image or video
-  final String type;
+  final String? type;
 
   ///The link to which the attachment message points to.
-  final String titleLink;
+  final String? titleLink;
 
   /// The attachment title
-  final String title;
+  final String? title;
 
   /// The URL to the attached file thumbnail. You can use this to represent the
   /// attached link.
-  final String thumbUrl;
+  final String? thumbUrl;
 
   /// The attachment text. It will be displayed in the channel next to the
   /// original message.
-  final String text;
+  final String? text;
 
   /// Optional text that appears above the attachment block
-  final String pretext;
+  final String? pretext;
 
   /// The original URL that was used to scrape this attachment.
-  final String ogScrapeUrl;
+  final String? ogScrapeUrl;
 
   /// The URL to the attached image. This is present for URL pointing to an
   /// image article (eg. Unsplash)
-  final String imageUrl;
-  final String footerIcon;
-  final String footer;
+  final String? imageUrl;
+  final String? footerIcon;
+  final String? footer;
   final dynamic fields;
-  final String fallback;
-  final String color;
+  final String? fallback;
+  final String? color;
 
   /// The name of the author.
-  final String authorName;
-  final String authorLink;
-  final String authorIcon;
+  final String? authorName;
+  final String? authorLink;
+  final String? authorIcon;
 
   /// The URL to the audio, video or image related to the URL.
-  final String assetUrl;
+  final String? assetUrl;
 
   /// Actions from a command
+  @JsonKey(defaultValue: [])
   final List<Action> actions;
 
-  final Uri localUri;
+  final Uri? localUri;
 
   /// The file present inside this attachment.
-  final AttachmentFile file;
+  final AttachmentFile? file;
 
   /// The current upload state of the attachment
-  final UploadState uploadState;
+  late final UploadState uploadState;
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object> extraData;
 
   /// The attachment ID.
   ///
@@ -147,37 +153,37 @@ class Attachment extends Equatable {
   ];
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
-      _$AttachmentToJson(this), topLevelFields)
-    ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
+  Map<String, dynamic> toJson() =>
+      Serialization.moveFromExtraDataToRoot(_$AttachmentToJson(this))
+        ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
   /// Serialize to db data
-  Map<String, dynamic> toData() => Serialization.moveFromExtraDataToRoot(
-      _$AttachmentToJson(this), topLevelFields + dbSpecificTopLevelFields);
+  Map<String, dynamic> toData() =>
+      Serialization.moveFromExtraDataToRoot(_$AttachmentToJson(this));
 
   Attachment copyWith({
-    String id,
-    String type,
-    String titleLink,
-    String title,
-    String thumbUrl,
-    String text,
-    String pretext,
-    String ogScrapeUrl,
-    String imageUrl,
-    String footerIcon,
-    String footer,
+    String? id,
+    String? type,
+    String? titleLink,
+    String? title,
+    String? thumbUrl,
+    String? text,
+    String? pretext,
+    String? ogScrapeUrl,
+    String? imageUrl,
+    String? footerIcon,
+    String? footer,
     dynamic fields,
-    String fallback,
-    String color,
-    String authorName,
-    String authorLink,
-    String authorIcon,
-    String assetUrl,
-    List<Action> actions,
-    AttachmentFile file,
-    UploadState uploadState,
-    Map<String, dynamic> extraData,
+    String? fallback,
+    String? color,
+    String? authorName,
+    String? authorLink,
+    String? authorIcon,
+    String? assetUrl,
+    List<Action>? actions,
+    AttachmentFile? file,
+    UploadState? uploadState,
+    Map<String, Object>? extraData,
   }) =>
       Attachment(
         id: id ?? this.id,
@@ -205,7 +211,7 @@ class Attachment extends Equatable {
       );
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         id,
         type,
         titleLink,

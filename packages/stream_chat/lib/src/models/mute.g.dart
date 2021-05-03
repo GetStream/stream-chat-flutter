@@ -6,24 +6,12 @@ part of 'mute.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Mute _$MuteFromJson(Map json) {
+Mute _$MuteFromJson(Map<String, dynamic> json) {
   return Mute(
-    user: json['user'] == null
-        ? null
-        : User.fromJson((json['user'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
-    channel: json['channel'] == null
-        ? null
-        : ChannelModel.fromJson((json['channel'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
-    createdAt: json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    updatedAt: json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
+    user: User.fromJson(json['user'] as Map<String, dynamic>),
+    channel: ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
+    createdAt: DateTime.parse(json['created_at'] as String),
+    updatedAt: DateTime.parse(json['updated_at'] as String),
   );
 }
 

@@ -9,7 +9,12 @@ part 'mute.g.dart';
 @JsonSerializable()
 class Mute {
   /// Constructor used for json serialization
-  Mute({this.user, this.channel, this.createdAt, this.updatedAt});
+  Mute({
+    required this.user,
+    required this.channel,
+    required this.createdAt,
+    required this.updatedAt,
+  });
 
   /// Create a new instance from a json
   factory Mute.fromJson(Map<String, dynamic> json) => _$MuteFromJson(json);

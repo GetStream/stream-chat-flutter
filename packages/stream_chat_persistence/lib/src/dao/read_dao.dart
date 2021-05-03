@@ -24,7 +24,7 @@ class ReadDao extends DatabaseAccessor<MoorChatDatabase> with _$ReadDaoMixin {
           .map((row) {
         final userEntity = row.readTable(users);
         final readEntity = row.readTable(reads);
-        return readEntity.toRead(user: userEntity?.toUser());
+        return readEntity.toRead(user: userEntity.toUser());
       }).get();
 
   /// Updates the read data of a particular channel with

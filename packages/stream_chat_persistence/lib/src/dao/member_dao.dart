@@ -26,7 +26,7 @@ class MemberDao extends DatabaseAccessor<MoorChatDatabase>
           .map((row) {
         final userEntity = row.readTable(users);
         final memberEntity = row.readTable(members);
-        return memberEntity.toMember(user: userEntity?.toUser());
+        return memberEntity.toMember(user: userEntity.toUser());
       }).get();
 
   /// Updates all the members using the new [memberList] data

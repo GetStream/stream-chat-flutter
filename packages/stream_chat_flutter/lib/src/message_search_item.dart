@@ -12,8 +12,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class MessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
   const MessageSearchItem({
-    Key key,
-    @required this.getMessageResponse,
+    Key? key,
+    required this.getMessageResponse,
     this.onTap,
     this.showOnlineStatus = true,
   }) : super(key: key);
@@ -22,7 +22,7 @@ class MessageSearchItem extends StatelessWidget {
   final GetMessageResponse getMessageResponse;
 
   /// Function called when tapping this widget
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   /// If true the [MessageSearchItem] will show the current online Status
   final bool showOnlineStatus;
@@ -31,8 +31,8 @@ class MessageSearchItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = getMessageResponse.message;
     final channel = getMessageResponse.channel;
-    final channelName = channel.extraData['name'];
-    final user = message.user;
+    final channelName = channel?.extraData['name'];
+    final user = message.user!;
     return ListTile(
       onTap: onTap,
       leading: UserAvatar(
@@ -46,7 +46,7 @@ class MessageSearchItem extends StatelessWidget {
       title: Row(
         children: [
           Text(
-            user.id == StreamChat.of(context).user.id ? 'You' : user.name,
+            user.id == StreamChat.of(context).user?.id ? 'You' : user.name,
             style: StreamChatTheme.of(context).channelPreviewTheme.title,
           ),
           if (channelName != null) ...[
@@ -55,12 +55,12 @@ class MessageSearchItem extends StatelessWidget {
               style: StreamChatTheme.of(context)
                   .channelPreviewTheme
                   .title
-                  .copyWith(
+                  ?.copyWith(
                     fontWeight: FontWeight.normal,
                   ),
             ),
             Text(
-              channelName,
+              channelName as String,
               style: StreamChatTheme.of(context).channelPreviewTheme.title,
             ),
           ],
@@ -96,14 +96,10 @@ class MessageSearchItem extends StatelessWidget {
   }
 
   Widget _buildSubtitle(BuildContext context, Message message) {
-    if (message == null) {
-      return SizedBox();
-    }
-
     var text = message.text;
     if (message.isDeleted) {
       text = 'This message was deleted.';
-    } else if (message.attachments != null) {
+    } else if (message.attachments.isNotEmpty) {
       final parts = <String>[
         ...message.attachments.map((e) {
           if (e.type == 'image') {
@@ -116,7 +112,7 @@ class MessageSearchItem extends StatelessWidget {
           return e == message.attachments.last
               ? (e.title ?? 'File')
               : '${e.title ?? 'File'} , ';
-        }).where((e) => e != null),
+        }),
         message.text ?? '',
       ];
 
@@ -125,15 +121,15 @@ class MessageSearchItem extends StatelessWidget {
 
     return Text.rich(
       _getDisplayText(
-        text,
+        text!,
         message.mentionedUsers,
         message.attachments,
-        StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+        StreamChatTheme.of(context).channelPreviewTheme.subtitle?.copyWith(
               fontStyle: (message.isSystem || message.isDeleted)
                   ? FontStyle.italic
                   : FontStyle.normal,
             ),
-        StreamChatTheme.of(context).channelPreviewTheme.subtitle.copyWith(
+        StreamChatTheme.of(context).channelPreviewTheme.subtitle?.copyWith(
               fontStyle: (message.isSystem || message.isDeleted)
                   ? FontStyle.italic
                   : FontStyle.normal,
@@ -149,26 +145,24 @@ class MessageSearchItem extends StatelessWidget {
       String text,
       List<User> mentions,
       List<Attachment> attachments,
-      TextStyle normalTextStyle,
-      TextStyle mentionsTextStyle) {
+      TextStyle? normalTextStyle,
+      TextStyle? mentionsTextStyle) {
     var textList = text.split(' ');
     var resList = <TextSpan>[];
     for (var e in textList) {
-      if (mentions != null &&
-          mentions.isNotEmpty &&
+      if (mentions.isNotEmpty &&
           mentions.any((element) => '@${element.name}' == e)) {
         resList.add(TextSpan(
           text: '$e ',
           style: mentionsTextStyle,
         ));
-      } else if (attachments != null &&
-          attachments.isNotEmpty &&
+      } else if (attachments.isNotEmpty &&
           attachments
               .where((e) => e.title != null)
               .any((element) => element.title == e)) {
         resList.add(TextSpan(
           text: '$e ',
-          style: normalTextStyle.copyWith(fontStyle: FontStyle.italic),
+          style: normalTextStyle?.copyWith(fontStyle: FontStyle.italic),
         ));
       } else {
         resList.add(TextSpan(

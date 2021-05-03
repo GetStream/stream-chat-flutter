@@ -1,3 +1,8 @@
+## 2.0.0-nullsafety.0
+
+* Migrate this package to null safety
+* Update llc dependency
+
 ## 1.5.2
 
 * Fix sorting by last_updated

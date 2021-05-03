@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/user_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'stream_chat_theme.dart';
 
@@ -19,8 +19,8 @@ import 'stream_chat_theme.dart';
 class UserItem extends StatelessWidget {
   /// Instantiate a new UserItem
   const UserItem({
-    Key key,
-    @required this.user,
+    Key? key,
+    required this.user,
     this.onTap,
     this.onLongPress,
     this.onImageTap,
@@ -29,16 +29,16 @@ class UserItem extends StatelessWidget {
   }) : super(key: key);
 
   /// Function called when tapping this widget
-  final void Function(User) onTap;
+  final void Function(User)? onTap;
 
   /// Function called when long pressing this widget
-  final void Function(User) onLongPress;
+  final void Function(User)? onLongPress;
 
   /// User displayed
   final User user;
 
   /// The function called when the image is tapped
-  final void Function(User) onImageTap;
+  final void Function(User)? onImageTap;
 
   /// If true the [UserItem] will show a trailing checkmark
   final bool selected;
@@ -51,12 +51,12 @@ class UserItem extends StatelessWidget {
     return ListTile(
       onTap: () {
         if (onTap != null) {
-          onTap(user);
+          onTap!(user);
         }
       },
       onLongPress: () {
         if (onLongPress != null) {
-          onLongPress(user);
+          onLongPress!(user);
         }
       },
       leading: UserAvatar(
@@ -64,7 +64,7 @@ class UserItem extends StatelessWidget {
         showOnlineStatus: true,
         onTap: (user) {
           if (onImageTap != null) {
-            onImageTap(user);
+            onImageTap!(user);
           }
         },
         constraints: BoxConstraints.tightFor(

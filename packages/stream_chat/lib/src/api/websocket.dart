@@ -16,8 +16,8 @@ typedef EventHandler = void Function(Event);
 /// Typedef used for connecting to a websocket. Method returns a
 /// [WebSocketChannel] and accepts a connection [url] and an optional
 /// [Iterable] of `protocols`.
-typedef ConnectWebSocket = WebSocketChannel Function(String url,
-    {Iterable<String> protocols});
+typedef ConnectWebSocket = WebSocketChannel Function(String? url,
+    {Iterable<String>? protocols});
 
 // TODO: parse error even
 // TODO: if parsing an error into an event fails we should not hide the
@@ -27,11 +27,11 @@ class WebSocket {
   /// Creates a new websocket
   /// To connect the WS call [connect]
   WebSocket({
-    @required this.baseUrl,
-    this.user,
-    this.connectParams,
-    this.connectPayload,
-    this.handler,
+    required this.baseUrl,
+    required this.user,
+    required this.handler,
+    this.connectParams = const {},
+    this.connectPayload = const {},
     this.logger,
     this.connectFunc,
     this.reconnectionMonitorInterval = 1,
@@ -78,12 +78,12 @@ class WebSocket {
   final EventHandler handler;
 
   /// A WS specific logger instance
-  final Logger logger;
+  final Logger? logger;
 
   /// Connection function
   /// Used only for testing purpose
   @visibleForTesting
-  final ConnectWebSocket connectFunc;
+  final ConnectWebSocket? connectFunc;
 
   /// Interval of the reconnection monitor timer
   /// This checks that it received a new event in the last
@@ -107,43 +107,43 @@ class WebSocket {
       _connectionStatusController.add(status);
 
   /// The current connection status value
-  ConnectionStatus get connectionStatus => _connectionStatusController.value;
+  ConnectionStatus? get connectionStatus => _connectionStatusController.value;
 
   /// This notifies of connection status changes
   Stream<ConnectionStatus> get connectionStatusStream =>
       _connectionStatusController.stream;
 
-  String _path;
+  late String _path;
   int _retryAttempt = 1;
-  WebSocketChannel _channel;
-  Timer _healthCheck, _reconnectionMonitor;
-  DateTime _lastEventAt;
+  late WebSocketChannel _channel;
+  Timer? _healthCheck, _reconnectionMonitor;
+  DateTime? _lastEventAt;
   bool _manuallyDisconnected = false;
   bool _connecting = false;
   bool _reconnecting = false;
 
   Event _decodeEvent(String source) => Event.fromJson(json.decode(source));
 
-  Completer<Event> _connectionCompleter = Completer<Event>();
+  Completer<Event?> _connectionCompleter = Completer<Event?>();
 
   /// Connect the WS using the parameters passed in the constructor
-  Future<Event> connect() {
+  Future<Event?> connect() async {
     _manuallyDisconnected = false;
 
     if (_connecting) {
-      logger.severe('already connecting');
+      logger?.severe('already connecting');
       return null;
     }
 
     _connecting = true;
     _connectionStatus = ConnectionStatus.connecting;
 
-    logger.info('connecting to $_path');
+    logger?.info('connecting to $_path');
 
     _channel =
         connectFunc?.call(_path) ?? WebSocketChannel.connect(Uri.parse(_path));
     _channel.stream.listen(
-      (data) {
+      (data) async {
         final jsonData = json.decode(data);
         if (jsonData['error'] != null) {
           return _onConnectionError(jsonData['error']);
@@ -153,9 +153,7 @@ class WebSocket {
       onError: (error, stacktrace) {
         _onConnectionError(error, stacktrace);
       },
-      onDone: () {
-        _onDone();
-      },
+      onDone: _onDone,
     );
     return _connectionCompleter.future;
   }
@@ -166,7 +164,7 @@ class WebSocket {
       return;
     }
 
-    logger.info('connection closed | closeCode: ${_channel.closeCode} | '
+    logger?.info('connection closed | closeCode: ${_channel.closeCode} | '
         'closedReason: ${_channel.closeReason}');
 
     if (!_reconnecting) {
@@ -180,10 +178,10 @@ class WebSocket {
     }
 
     final event = _decodeEvent(data);
-    logger.info('received new event: $data');
+    logger?.info('received new event: $data');
 
     if (_lastEventAt == null) {
-      logger.info('connection estabilished');
+      logger?.info('connection estabilished');
       _connecting = false;
       _reconnecting = false;
       _lastEventAt = DateTime.now();
@@ -204,9 +202,9 @@ class WebSocket {
   }
 
   Future<void> _onConnectionError(error, [stacktrace]) async {
-    logger..severe('error connecting')..severe(error);
+    logger?..severe('error connecting')..severe(error);
     if (stacktrace != null) {
-      logger.severe(stacktrace);
+      logger?.severe(stacktrace);
     }
     _connecting = false;
 
@@ -225,7 +223,7 @@ class WebSocket {
   void _reconnectionTimer(_) {
     final now = DateTime.now();
     if (_lastEventAt != null &&
-        now.difference(_lastEventAt).inSeconds > reconnectionMonitorTimeout) {
+        now.difference(_lastEventAt!).inSeconds > reconnectionMonitorTimeout) {
       _channel.sink.close();
     }
   }
@@ -244,18 +242,18 @@ class WebSocket {
       return;
     }
     if (_connecting) {
-      logger.info('already connecting');
+      logger?.info('already connecting');
       return;
     }
 
-    logger.info('reconnecting..');
+    logger?.info('reconnecting..');
 
     _cancelTimers();
 
     try {
       await connect();
     } catch (e) {
-      logger.log(Level.SEVERE, e.toString());
+      logger?.log(Level.SEVERE, e.toString());
     }
     await Future.delayed(
       Duration(seconds: min(_retryAttempt * 5, 25)),
@@ -267,7 +265,7 @@ class WebSocket {
   }
 
   Future<void> _reconnect() async {
-    logger.info('reconnect');
+    logger?.info('reconnect');
     if (!_reconnecting) {
       _reconnecting = true;
       _connectionStatus = ConnectionStatus.connecting;
@@ -279,20 +277,20 @@ class WebSocket {
   void _cancelTimers() {
     _lastEventAt = null;
     if (_healthCheck != null) {
-      _healthCheck.cancel();
+      _healthCheck!.cancel();
     }
     if (_reconnectionMonitor != null) {
-      _reconnectionMonitor.cancel();
+      _reconnectionMonitor!.cancel();
     }
   }
 
   void _healthCheckTimer(_) {
-    logger.info('sending health.check');
+    logger?.info('sending health.check');
     _channel.sink.add("{'type': 'health.check'}");
   }
 
   void _startHealthCheck() {
-    logger.info('start health check monitor');
+    logger?.info('start health check monitor');
 
     _healthCheck = Timer.periodic(
       Duration(seconds: healthCheckInterval),
@@ -311,13 +309,13 @@ class WebSocket {
     if (_manuallyDisconnected) {
       return;
     }
-    logger.info('disconnecting');
+    logger?.info('disconnecting');
     _connectionCompleter = Completer();
     _cancelTimers();
     _reconnecting = false;
     _manuallyDisconnected = true;
     _connectionStatus = ConnectionStatus.disconnected;
     await _connectionStatusController.close();
-    return _channel.sink.close();
+    await _channel.sink.close();
   }
 }

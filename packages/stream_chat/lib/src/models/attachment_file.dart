@@ -8,18 +8,21 @@ part 'attachment_file.g.dart';
 
 /// Union class to hold various [UploadState] of a attachment.
 @freezed
-abstract class UploadState with _$UploadState {
+class UploadState with _$UploadState {
   /// Preparing state of the union
   const factory UploadState.preparing() = Preparing;
 
   /// InProgress state of the union
-  const factory UploadState.inProgress({int uploaded, int total}) = InProgress;
+  const factory UploadState.inProgress({
+    required int uploaded,
+    required int total,
+  }) = InProgress;
 
   /// Success state of the union
   const factory UploadState.success() = Success;
 
   /// Failed state of the union
-  const factory UploadState.failed({@required String error}) = Failed;
+  const factory UploadState.failed({required String error}) = Failed;
 
   /// Creates a new instance from a json
   factory UploadState.fromJson(Map<String, dynamic> json) =>
@@ -27,7 +30,7 @@ abstract class UploadState with _$UploadState {
 }
 
 /// Helper extension for UploadState
-extension UploadStateX on UploadState {
+extension UploadStateX on UploadState? {
   /// Returns true if state is [Preparing]
   bool get isPreparing => this is Preparing;
 
@@ -41,20 +44,29 @@ extension UploadStateX on UploadState {
   bool get isFailed => this is Failed;
 }
 
-Uint8List _fromString(String bytes) => Uint8List.fromList(bytes.codeUnits);
+Uint8List? _fromString(String? bytes) {
+  if (bytes == null) return null;
+  return Uint8List.fromList(bytes.codeUnits);
+}
 
-String _toString(Uint8List bytes) => String.fromCharCodes(bytes);
+String? _toString(Uint8List? bytes) {
+  if (bytes == null) return null;
+  return String.fromCharCodes(bytes);
+}
 
 /// The class that contains the information about an attachment file
 @JsonSerializable()
 class AttachmentFile {
   /// Creates a new [AttachmentFile] instance.
   const AttachmentFile({
+    required this.size,
     this.path,
     this.name,
     this.bytes,
-    this.size,
-  });
+  }) : assert(
+          path != null || bytes != null,
+          'Either path or bytes should be != null',
+        );
 
   /// Create a new instance from a json
   factory AttachmentFile.fromJson(Map<String, dynamic> json) =>
@@ -65,21 +77,21 @@ class AttachmentFile {
   /// ```
   /// final File myFile = File(platformFile.path);
   /// ```
-  final String path;
+  final String? path;
 
   /// File name including its extension.
-  final String name;
+  final String? name;
 
   /// Byte data for this file. Particularly useful if you want to manipulate
   /// its data or easily upload to somewhere else.
   @JsonKey(toJson: _toString, fromJson: _fromString)
-  final Uint8List bytes;
+  final Uint8List? bytes;
 
   /// The file size in bytes.
-  final int size;
+  final int? size;
 
   /// File extension for this file.
-  String get extension => name?.split('.')?.last;
+  String? get extension => name?.split('.').last;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);

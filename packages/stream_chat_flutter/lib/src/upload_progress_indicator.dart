@@ -8,14 +8,19 @@ class UploadProgressIndicator extends StatelessWidget {
   final Color progressIndicatorColor;
   final EdgeInsetsGeometry padding;
   final bool showBackground;
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
-  const UploadProgressIndicator({
-    Key key,
-    @required this.uploaded,
-    @required this.total,
+  UploadProgressIndicator({
+    Key? key,
+    required this.uploaded,
+    required this.total,
     this.progressIndicatorColor = const Color(0xffb2b2b2),
-    this.padding = const EdgeInsets.only(top: 5, bottom: 5, right: 11, left: 5),
+    this.padding = const EdgeInsets.only(
+      top: 5,
+      bottom: 5,
+      right: 11,
+      left: 5,
+    ),
     this.showBackground = true,
     this.textStyle,
   }) : super(key: key);

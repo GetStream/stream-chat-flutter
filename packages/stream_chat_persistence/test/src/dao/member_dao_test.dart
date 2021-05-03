@@ -8,8 +8,8 @@ import 'package:test/test.dart';
 import '../utils/date_matcher.dart';
 
 void main() {
-  MemberDao memberDao;
-  MoorChatDatabase database;
+  late MemberDao memberDao;
+  late MoorChatDatabase database;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');
@@ -53,7 +53,7 @@ void main() {
     for (var i = 0; i < fetchedMembers.length; i++) {
       final member = memberList[i];
       final fetchedMember = fetchedMembers[i];
-      expect(fetchedMember.user.id, member.user.id);
+      expect(fetchedMember.user!.id, member.user!.id);
       expect(fetchedMember.banned, member.banned);
       expect(fetchedMember.shadowBanned, member.shadowBanned);
       expect(fetchedMember.createdAt, isSameDateAs(member.createdAt));
@@ -63,7 +63,7 @@ void main() {
       expect(fetchedMember.updatedAt, isSameDateAs(member.updatedAt));
       expect(
         fetchedMember.inviteAcceptedAt,
-        isSameDateAs(member.inviteAcceptedAt),
+        isSameDateAs(member.inviteAcceptedAt!),
       );
     }
   });
@@ -80,7 +80,7 @@ void main() {
     for (var i = 0; i < fetchedMembers.length; i++) {
       final member = memberList[i];
       final fetchedMember = fetchedMembers[i];
-      expect(fetchedMember.user.id, member.user.id);
+      expect(fetchedMember.user!.id, member.user!.id);
       expect(fetchedMember.banned, member.banned);
       expect(fetchedMember.shadowBanned, member.shadowBanned);
       expect(fetchedMember.createdAt, isSameDateAs(member.createdAt));
@@ -90,7 +90,7 @@ void main() {
       expect(fetchedMember.updatedAt, isSameDateAs(member.updatedAt));
       expect(
         fetchedMember.inviteAcceptedAt,
-        isSameDateAs(member.inviteAcceptedAt),
+        isSameDateAs(member.inviteAcceptedAt!),
       );
     }
 
@@ -118,13 +118,13 @@ void main() {
     expect(newFetchedMembers.length, fetchedMembers.length + 1);
     expect(
       newFetchedMembers
-          .firstWhere((it) => it.user.id == copyMember.user.id)
+          .firstWhere((it) => it.user!.id == copyMember.user!.id)
           .banned,
       true,
     );
     expect(
       newFetchedMembers
-          .where((it) => it.user.id == newMember.user.id)
+          .where((it) => it.user!.id == newMember.user!.id)
           .isNotEmpty,
       true,
     );

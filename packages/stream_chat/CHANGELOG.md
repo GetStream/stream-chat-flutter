@@ -1,3 +1,8 @@
+## 2.0.0-nullsafety.0
+
+- Migrate this package to null safety
+- Added typed filters
+
 ## 1.5.3
 
 - fix: `StreamChatClient.connect` returns quicker when you're using the persistence package

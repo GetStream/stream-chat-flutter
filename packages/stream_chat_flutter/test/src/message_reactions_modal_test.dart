@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -15,10 +15,10 @@ void main() {
       final clientState = MockClientState();
       final themeData = ThemeData();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       final message = Message(
         id: 'test',
@@ -75,10 +75,10 @@ void main() {
       final clientState = MockClientState();
       final themeData = ThemeData();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
-      final streamTheme = StreamChatThemeData.getDefaultTheme(themeData);
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
 
       final message = Message(
         id: 'test',
@@ -90,6 +90,7 @@ void main() {
           Reaction(
             messageId: 'test',
             user: User(id: 'testid'),
+            type: 'test',
           ),
         ],
       );

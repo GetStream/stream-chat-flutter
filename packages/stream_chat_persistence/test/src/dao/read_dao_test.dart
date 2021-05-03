@@ -6,8 +6,8 @@ import 'package:test/test.dart';
 import '../utils/date_matcher.dart';
 
 void main() {
-  ReadDao readDao;
-  MoorChatDatabase database;
+  late ReadDao readDao;
+  late MoorChatDatabase database;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');

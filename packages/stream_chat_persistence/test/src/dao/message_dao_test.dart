@@ -6,8 +6,8 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
 void main() {
-  MessageDao messageDao;
-  MoorChatDatabase database;
+  late MessageDao messageDao;
+  late MoorChatDatabase database;
 
   setUp(() {
     database = MoorChatDatabase.testable('testUserId');
@@ -32,7 +32,7 @@ void main() {
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
-        extraData: {'extra_test_field': 'extraTestData'},
+        extraData: const {'extra_test_field': 'extraTestData'},
         text: 'Dummy text #$index',
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
@@ -49,7 +49,7 @@ void main() {
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
-        extraData: {'extra_test_field': 'extraTestData'},
+        extraData: const {'extra_test_field': 'extraTestData'},
         text: 'Dummy text #$index',
         quotedMessageId: messages[index].id,
         pinned: math.Random().nextBool(),
@@ -69,7 +69,7 @@ void main() {
         shadowed: math.Random().nextBool(),
         replyCount: index,
         updatedAt: DateTime.now(),
-        extraData: {'extra_test_field': 'extraTestData'},
+        extraData: const {'extra_test_field': 'extraTestData'},
         text: 'Dummy text #$index',
         pinned: math.Random().nextBool(),
         pinnedAt: DateTime.now(),
@@ -168,7 +168,8 @@ void main() {
 
     // Fetched message id should match the inserted message id
     final fetchedMessage = await messageDao.getMessageById(id);
-    expect(fetchedMessage.id, insertedMessages.first.id);
+    expect(fetchedMessage, isNotNull);
+    expect(fetchedMessage!.id, insertedMessages.first.id);
   });
 
   test('getThreadMessages', () async {
@@ -332,7 +333,7 @@ void main() {
       showInChannel: math.Random().nextBool(),
       replyCount: 4,
       updatedAt: DateTime.now(),
-      extraData: {'extra_test_field': 'extraTestData'},
+      extraData: const {'extra_test_field': 'extraTestData'},
       text: 'Dummy text #4',
       pinned: math.Random().nextBool(),
       pinnedAt: DateTime.now(),

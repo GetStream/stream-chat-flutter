@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -43,8 +44,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, child) => StreamChat(
-        child: child,
         client: client,
+        child: child,
       ),
       home: ChannelListPage(),
     );
@@ -57,11 +58,10 @@ class ChannelListPage extends StatelessWidget {
     return Scaffold(
       body: ChannelsBloc(
         child: ChannelListView(
-          filter: {
-            'members': {
-              '\$in': [StreamChat.of(context).user.id],
-            }
-          },
+          filter: Filter.in_(
+            'members',
+            [StreamChat.of(context).user!.id],
+          ),
           channelPreviewBuilder: _channelPreviewBuilder,
           // sort: [SortOption('last_message_at')],
           pagination: PaginationParams(
@@ -74,13 +74,12 @@ class ChannelListPage extends StatelessWidget {
   }
 
   Widget _channelPreviewBuilder(BuildContext context, Channel channel) {
-    final lastMessage = channel.state.messages.reversed.firstWhere(
+    final lastMessage = channel.state?.messages.reversed.firstWhereOrNull(
       (message) => !message.isDeleted,
-      orElse: () => null,
     );
 
-    final subtitle = (lastMessage == null ? 'nothing yet' : lastMessage.text);
-    final opacity = channel.state.unreadCount > .0 ? 1.0 : 0.5;
+    final subtitle = (lastMessage == null ? 'nothing yet' : lastMessage.text!);
+    final opacity = (channel.state?.unreadCount ?? 0) > 0 ? 1.0 : 0.5;
 
     return ListTile(
       onTap: () {
@@ -88,8 +87,8 @@ class ChannelListPage extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => StreamChannel(
-              child: ChannelPage(),
               channel: channel,
+              child: ChannelPage(),
             ),
           ),
         );
@@ -99,7 +98,7 @@ class ChannelListPage extends StatelessWidget {
       ),
       title: ChannelName(
         textStyle:
-            StreamChatTheme.of(context).channelPreviewTheme.title.copyWith(
+            StreamChatTheme.of(context).channelPreviewTheme.title!.copyWith(
                   color: StreamChatTheme.of(context)
                       .colorTheme
                       .black
@@ -107,10 +106,10 @@ class ChannelListPage extends StatelessWidget {
                 ),
       ),
       subtitle: Text(subtitle),
-      trailing: channel.state.unreadCount > 0
+      trailing: channel.state!.unreadCount! > 0
           ? CircleAvatar(
               radius: 10,
-              child: Text(channel.state.unreadCount.toString()),
+              child: Text(channel.state!.unreadCount.toString()),
             )
           : SizedBox(),
     );
@@ -119,7 +118,7 @@ class ChannelListPage extends StatelessWidget {
 
 class ChannelPage extends StatelessWidget {
   const ChannelPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

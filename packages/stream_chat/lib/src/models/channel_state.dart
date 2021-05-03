@@ -22,24 +22,29 @@ class ChannelState {
   });
 
   /// The channel to which this state belongs
-  final ChannelModel channel;
+  final ChannelModel? channel;
 
   /// A paginated list of channel messages
+  @JsonKey(defaultValue: <Message>[])
   final List<Message> messages;
 
   /// A paginated list of channel members
+  @JsonKey(defaultValue: <Member>[])
   final List<Member> members;
 
   /// A paginated list of pinned messages
+  @JsonKey(defaultValue: <Message>[])
   final List<Message> pinnedMessages;
 
   /// The count of users watching the channel
-  final int watcherCount;
+  final int? watcherCount;
 
   /// A paginated list of users watching the channel
+  @JsonKey(defaultValue: <User>[])
   final List<User> watchers;
 
   /// The list of channel reads
+  @JsonKey(defaultValue: <Read>[])
   final List<Read> read;
 
   /// Create a new instance from a json
@@ -51,13 +56,13 @@ class ChannelState {
 
   /// Creates a copy of [ChannelState] with specified attributes overridden.
   ChannelState copyWith({
-    ChannelModel channel,
-    List<Message> messages,
-    List<Member> members,
-    List<Message> pinnedMessages,
-    int watcherCount,
-    List<User> watchers,
-    List<Read> read,
+    ChannelModel? channel,
+    List<Message>? messages,
+    List<Member>? members,
+    List<Message>? pinnedMessages,
+    int? watcherCount,
+    List<User>? watchers,
+    List<Read>? read,
   }) =>
       ChannelState(
         channel: channel ?? this.channel,

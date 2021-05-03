@@ -1,34 +1,44 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:dio/native_imp.dart';
 import 'package:logging/logging.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/filter.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
 
+class FakeRequestOptions extends Fake implements RequestOptions {}
+
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
 
 class Functions {
-  Future<String> tokenProvider(String userId) => null;
+  Future<String> tokenProvider(String userId) async => '';
 }
 
 class MockFunctions extends Mock implements Functions {}
 
 void main() {
   group('src/client', () {
-    group('constructor', () {
-      final List<String> log = [];
+    setUpAll(() {
+      registerFallbackValue<RequestOptions>(FakeRequestOptions());
+      registerFallbackValue<Stream<Uint8List>>(const Stream<Uint8List>.empty());
+      registerFallbackValue<Future<dynamic>>(Future<dynamic>.value());
+    });
 
-      overridePrint(testFn()) => () {
+    group('constructor', () {
+      final log = <String>[];
+
+      dynamic overridePrint(testFn()) => () {
             log.clear();
             final spec = ZoneSpecification(print: (_, __, ___, String msg) {
               // Add to log instead of printing to stdout
@@ -37,9 +47,7 @@ void main() {
             return Zone.current.fork(specification: spec).run(testFn);
           };
 
-      tearDown(() {
-        log.clear();
-      });
+      tearDown(log.clear);
 
       test('should create the object correctly', () {
         final client = StreamChatClient('api-key');
@@ -52,14 +60,14 @@ void main() {
       });
 
       test('should create the object correctly', overridePrint(() {
-        final LogHandlerFunction logHandler = (LogRecord record) {
+        void logHandler(LogRecord record) {
           print(record.message);
-        };
+        }
 
         final client = StreamChatClient(
           'api-key',
-          connectTimeout: Duration(seconds: 10),
-          receiveTimeout: Duration(seconds: 12),
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 12),
           logLevel: Level.INFO,
           baseURL: 'test.com',
           logHandlerFunction: logHandler,
@@ -74,13 +82,15 @@ void main() {
         client.logger.warning('test');
         client.logger.config('test config');
 
-        expect([log[log.length - 2], log[log.length - 1]],
-            ['instantiating new client', 'test']);
+        expect(
+          [log[log.length - 2], log[log.length - 1]],
+          ['instantiating new client', 'test'],
+        );
       }));
 
       test('Channel', () {
         final client = StreamChatClient('test');
-        final Map<String, dynamic> data = {'test': 1};
+        final data = <String, Object>{'test': 1};
         final channelClient = client.channel('type', id: 'id', extraData: data);
         expect(channelClient.type, 'type');
         expect(channelClient.id, 'id');
@@ -91,71 +101,71 @@ void main() {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
         final queryParams = {
           'payload': json.encode({
-            "filter_conditions": null,
-            "sort": null,
-            "state": true,
-            "watch": true,
-            "presence": false,
-            "limit": 10,
-            "offset": 0,
+            'filter_conditions': null,
+            'sort': null,
+            'state': true,
+            'watch': true,
+            'presence': false,
+            'limit': 10,
+            'offset': 0,
           }),
         };
 
-        when(mockDio.get<String>('/channels', queryParameters: queryParams))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.get<String>('/channels', queryParameters: queryParams),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
-        await client.queryChannelsOnline(filter: null, waitForConnect: false);
+        await client.queryChannelsOnline(waitForConnect: false);
 
-        verify(mockDio.get<String>('/channels', queryParameters: queryParams))
+        verify(() =>
+                mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
       });
 
       test('should pass right parameters', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
-        final queryFilter = <String, dynamic>{
-          "id": {
-            "\$in": ["test"],
-          },
-        };
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        final queryFilter = Filter.in_('id', const ['test']);
         final sortOptions = <SortOption<ChannelModel>>[];
-        final options = {"state": false, "watch": false, "presence": true};
-        final paginationParams = PaginationParams(
-          limit: 10,
-          offset: 2,
-        );
+        final options = {'state': false, 'watch': false, 'presence': true};
+        const paginationParams = PaginationParams(offset: 2);
 
         final queryParams = {
           'payload': json.encode({
-            "filter_conditions": queryFilter,
-            "sort": sortOptions,
+            'filter_conditions': queryFilter,
+            'sort': sortOptions,
           }
             ..addAll(options)
-            ..addAll(paginationParams.toJson())),
+            ..addAll(paginationParams
+                .toJson()
+                .map((key, value) => MapEntry(key, value as Object)))),
         };
 
-        when(mockDio.get<String>('/channels', queryParameters: queryParams))
-            .thenAnswer((_) async {
-          return Response(data: '{"channels":[]}', statusCode: 200);
-        });
+        when(
+          () => mockDio.get<String>('/channels', queryParameters: queryParams),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{"channels":[]}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.queryChannelsOnline(
           filter: queryFilter,
@@ -165,7 +175,8 @@ void main() {
           waitForConnect: false,
         );
 
-        verify(mockDio.get<String>('/channels', queryParameters: queryParams))
+        verify(() =>
+                mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
       });
     });
@@ -174,22 +185,12 @@ void main() {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
-        final filter = {
-          'cid': {
-            r'$in': ['messaging:testId']
-          }
-        };
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        final filter = Filter.in_('cid', const ['messaging:testId']);
         const query = 'hello';
-
         final queryParams = {
           'payload': json.encode({
             'filter_conditions': filter,
@@ -197,34 +198,33 @@ void main() {
           }),
         };
 
-        when(mockDio.get<String>('/search', queryParameters: queryParams))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.get<String>('/search', queryParameters: queryParams),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.search(filter, query: query);
 
-        verify(mockDio.get<String>('/search', queryParameters: queryParams))
+        verify(() =>
+                mockDio.get<String>('/search', queryParameters: queryParams))
             .called(1);
       });
 
       test('should pass right parameters', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
-        final filters = {
-          "id": {
-            "\$in": ["test"],
-          },
-        };
-        final sortOptions = [SortOption('name')];
-        final query = 'query';
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        final filters = Filter.in_('id', const ['test']);
+        const sortOptions = [SortOption('name')];
+        const query = 'query';
         final queryParams = {
           'payload': json.encode({
             'filter_conditions': filters,
@@ -235,18 +235,26 @@ void main() {
           }),
         };
 
-        when(mockDio.get<String>('/search', queryParameters: queryParams))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.get<String>('/search', queryParameters: queryParams),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.search(
           filters,
           sort: sortOptions,
           query: query,
-          paginationParams: PaginationParams(),
+          paginationParams: const PaginationParams(),
         );
 
-        verify(mockDio.get<String>('/search', queryParameters: queryParams))
-            .called(1);
+        verify(
+          () => mockDio.get<String>('/search', queryParameters: queryParams),
+        ).called(1);
       });
     });
 
@@ -254,23 +262,28 @@ void main() {
       test('addDevice', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>('/devices', data: {
+            'id': 'test-id',
+            'push_provider': 'firebase',
+          }),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/devices', data: {
-          'id': 'test-id',
-          'push_provider': 'firebase',
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.addDevice('test-id', PushProvider.firebase);
 
         verify(
-          mockDio.post<String>(
+          () => mockDio.post<String>(
             '/devices',
             data: {'id': 'test-id', 'push_provider': 'firebase'},
           ),
@@ -280,41 +293,53 @@ void main() {
       test('getDevices', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(() => mockDio.get<String>('/devices')).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.get<String>('/devices'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.getDevices();
 
-        verify(mockDio.get<String>('/devices')).called(1);
+        verify(() => mockDio.get<String>('/devices')).called(1);
       });
 
       test('removeDevice', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.delete<String>(
+            '/devices',
+            queryParameters: {'id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio
-                .delete<String>('/devices', queryParameters: {'id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.removeDevice('test-id');
 
-        verify(mockDio.delete<String>('/devices',
-            queryParameters: {'id': 'test-id'})).called(1);
+        verify(
+          () => mockDio.delete<String>(
+            '/devices',
+            queryParameters: {'id': 'test-id'},
+          ),
+        ).called(1);
       });
     });
 
@@ -324,7 +349,7 @@ void main() {
 
       expect(
         token,
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCJ9.devtoken',
+        '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCJ9.devtoken''',
       );
     });
 
@@ -332,62 +357,64 @@ void main() {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
         final queryParams = {
           'payload': json.encode({
-            "filter_conditions": {},
-            "sort": null,
-            "presence": false,
+            'filter_conditions': null,
+            'sort': null,
+            'presence': false,
           }),
         };
 
-        when(mockDio.get<String>('/users', queryParameters: queryParams))
-            .thenAnswer(
-                (_) async => Response(data: '{"users":[]}', statusCode: 200));
+        when(
+          () => mockDio.get<String>('/users', queryParameters: queryParams),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{"users":[]}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.queryUsers();
 
-        verify(mockDio.get<String>('/users', queryParameters: queryParams))
-            .called(1);
+        verify(
+          () => mockDio.get<String>(
+            '/users',
+            queryParameters: queryParams,
+          ),
+        ).called(1);
       });
 
       test('should pass right parameters', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
-        final Map<String, dynamic> queryFilter = {
-          "id": {
-            "\$in": ["test"],
-          },
-        };
-        final List<SortOption> sortOptions = [];
-        final options = {"presence": true};
-
-        final Map<String, dynamic> queryParams = {
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        final queryFilter = Filter.in_('id', const ['test']);
+        const sortOptions = <SortOption>[];
+        final options = {'presence': true};
+        final queryParams = <String, dynamic>{
           'payload': json.encode({
-            "filter_conditions": queryFilter,
-            "sort": sortOptions,
+            'filter_conditions': queryFilter,
+            'sort': sortOptions,
           }..addAll(options)),
         };
 
-        when(mockDio.get<String>('/users', queryParameters: queryParams))
-            .thenAnswer((_) async {
-          return Response(data: '{"users":[]}', statusCode: 200);
-        });
+        when(
+          () => mockDio.get<String>('/users', queryParameters: queryParams),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{"users":[]}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.queryUsers(
           filter: queryFilter,
@@ -395,7 +422,8 @@ void main() {
           options: options,
         );
 
-        verify(mockDio.get<String>('/users', queryParameters: queryParams))
+        verify(() =>
+                mockDio.get<String>('/users', queryParameters: queryParams))
             .called(1);
       });
     });
@@ -404,34 +432,37 @@ void main() {
       test('connectUser should throw exception', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/flag',
+            data: {'target_user_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/flag',
-                data: {'target_user_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.flagUser('test-id');
 
-        verify(mockDio.post<String>('/moderation/flag',
+        verify(() => mockDio.post<String>('/moderation/flag',
             data: {'target_user_id': 'test-id'})).called(1);
       });
 
       test('flagUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
+        final client = StreamChatClient('api-key', httpClient: mockDio);
 
         expect(() => client.connectUserWithProvider(User(id: 'test-id')),
             throwsA(isA<Exception>()));
@@ -440,60 +471,62 @@ void main() {
       test('unflagUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/unflag',
+            data: {'target_user_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/unflag',
-                data: {'target_user_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.unflagUser('test-id');
 
-        verify(mockDio.post<String>('/moderation/unflag',
+        verify(() => mockDio.post<String>('/moderation/unflag',
             data: {'target_user_id': 'test-id'})).called(1);
       });
 
       test('updateUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
         final user = User(id: 'test-id');
-
         final data = {
           'users': {user.id: user.toJson()},
         };
 
-        when(mockDio.post<String>('/users', data: data))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.post<String>('/users', data: data)).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.updateUser(user);
 
-        verify(mockDio.post<String>('/users', data: data)).called(1);
+        verify(() => mockDio.post<String>('/users', data: data)).called(1);
       });
 
       test('updateUsers', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
         final user = User(id: 'test-id');
         final user2 = User(id: 'test-id2');
 
@@ -504,53 +537,70 @@ void main() {
           },
         };
 
-        when(mockDio.post<String>('/users', data: data))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(() => mockDio.post<String>('/users', data: data)).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.updateUsers([user, user2]);
 
-        verify(mockDio.post<String>('/users', data: data)).called(1);
+        verify(() => mockDio.post<String>('/users', data: data)).called(1);
       });
 
       test('banUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/ban',
+            data: {'test': true, 'target_user_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/ban',
-                data: {'test': true, 'target_user_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.banUser('test-id', {'test': true});
 
-        verify(mockDio.post<String>('/moderation/ban',
+        verify(() => mockDio.post<String>('/moderation/ban',
             data: {'test': true, 'target_user_id': 'test-id'})).called(1);
       });
 
       test('unbanUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.delete<String>(
+            '/moderation/ban',
+            queryParameters: {'test': true, 'target_user_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.delete<String>('/moderation/ban',
-                queryParameters: {'test': true, 'target_user_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.unbanUser('test-id', {'test': true});
 
-        verify(mockDio.delete<String>('/moderation/ban',
+        verify(() => mockDio.delete<String>('/moderation/ban',
                 queryParameters: {'test': true, 'target_user_id': 'test-id'}))
             .called(1);
       });
@@ -558,42 +608,54 @@ void main() {
       test('muteUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/mute',
+            data: {'target_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/mute',
-                data: {'target_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.muteUser('test-id');
 
-        verify(mockDio.post<String>('/moderation/mute',
+        verify(() => mockDio.post<String>('/moderation/mute',
             data: {'target_id': 'test-id'})).called(1);
       });
 
       test('unmuteUser', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/unmute',
+            data: {'target_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/unmute',
-                data: {'target_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.unmuteUser('test-id');
 
-        verify(mockDio.post<String>('/moderation/unmute',
+        verify(() => mockDio.post<String>('/moderation/unmute',
             data: {'target_id': 'test-id'})).called(1);
       });
     });
@@ -602,131 +664,150 @@ void main() {
       test('flagMessage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/flag',
+            data: {'target_message_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/flag',
-                data: {'target_message_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.flagMessage('test-id');
 
-        verify(mockDio.post<String>('/moderation/flag',
+        verify(() => mockDio.post<String>('/moderation/flag',
             data: {'target_message_id': 'test-id'})).called(1);
       });
 
       test('unflagMessage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(
+          () => mockDio.post<String>(
+            '/moderation/unflag',
+            data: {'target_message_id': 'test-id'},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/moderation/unflag',
-                data: {'target_message_id': 'test-id'}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.unflagMessage('test-id');
 
-        verify(mockDio.post<String>('/moderation/unflag',
+        verify(() => mockDio.post<String>('/moderation/unflag',
             data: {'target_message_id': 'test-id'})).called(1);
       });
 
       test('updateMessage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
-        );
-
+        final client = StreamChatClient('api-key', httpClient: mockDio);
         final message = Message(
           id: 'test',
-          updatedAt: DateTime.now(),
         );
 
-        when(mockDio.post<String>(
-          '/messages/${message.id}',
-          data: {'message': anything},
-        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.post<String>(
+            '/messages/${message.id}',
+            data: {'message': anything},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': message}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await client.updateMessage(message);
 
-        verify(mockDio.post<String>('/messages/${message.id}',
+        verify(() => mockDio.post<String>('/messages/${message.id}',
             data: {'message': anything})).called(1);
       });
 
       test('deleteMessage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        const messageId = 'test';
+
+        when(() => mockDio.delete<String>('/messages/$messageId')).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        final messageId = 'test';
-
-        when(mockDio.delete<String>('/messages/$messageId'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.deleteMessage(Message(id: messageId));
 
-        verify(mockDio.delete<String>('/messages/$messageId')).called(1);
+        verify(() => mockDio.delete<String>('/messages/$messageId')).called(1);
       });
 
       test('getMessage', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        const messageId = 'test';
+
+        when(() => mockDio.get<String>('/messages/$messageId')).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': Message(id: messageId)}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        final messageId = 'test';
-
-        when(mockDio.get<String>('/messages/$messageId'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.getMessage(messageId);
 
-        verify(mockDio.get<String>('/messages/$messageId')).called(1);
+        verify(() => mockDio.get<String>('/messages/$messageId')).called(1);
       });
 
       test('markAllRead', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = StreamChatClient(
-          'api-key',
-          httpClient: mockDio,
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+
+        when(() => mockDio.post<String>('/channels/read')).thenAnswer(
+          (_) async => Response(
+            data: '{}',
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
         );
-
-        when(mockDio.post<String>('/channels/read'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.markAllRead();
 
-        verify(mockDio.post<String>('/channels/read')).called(1);
+        verify(() => mockDio.post<String>('/channels/read')).called(1);
       });
     });
 
@@ -735,43 +816,53 @@ void main() {
         test('should put the correct parameters', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: mockDio,
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+          final queryParams = <String, dynamic>{'test': 1};
+
+          when(
+            () => mockDio.get<String>('/test', queryParameters: queryParams),
+          ).thenAnswer(
+            (_) async => Response(
+              data: '{}',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
           );
-
-          final Map<String, dynamic> queryParams = {
-            'test': 1,
-          };
-
-          when(mockDio.get<String>('/test', queryParameters: queryParams))
-              .thenAnswer((_) async {
-            return Response(data: '{}', statusCode: 200);
-          });
 
           await client.get('/test', queryParameters: queryParams);
 
-          verify(mockDio.get<String>('/test', queryParameters: queryParams))
+          verify(() =>
+                  mockDio.get<String>('/test', queryParameters: queryParams))
               .called(1);
         });
 
         test('should catch the error', () async {
-          final dioHttp = Dio();
-          final mockHttpClientAdapter = MockHttpClientAdapter();
-          dioHttp.httpClientAdapter = mockHttpClientAdapter;
+          final mockDio = MockDio();
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: dioHttp,
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+
+          when(() => mockDio.get(any())).thenThrow(
+            DioError(
+              type: DioErrorType.response,
+              response: Response<String>(
+                data: 'test error',
+                statusCode: 400,
+                requestOptions: FakeRequestOptions(),
+              ),
+              requestOptions: FakeRequestOptions(),
+            ),
           );
 
-          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
-              (_) async => ResponseBody.fromString('test error', 400));
-
-          expect(client.get('/test'), throwsA(ApiError('test error', 400)));
+          expect(
+            client.get('/test'),
+            throwsA(ApiError('test error', 400)),
+          );
         });
       });
 
@@ -779,39 +870,47 @@ void main() {
         test('should put the correct parameters', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+          final data = <String, dynamic>{'test': 1};
+
+          when(() => mockDio.post<String>('/test', data: data)).thenAnswer(
+            (_) async => Response(
+              data: '{}',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
+
+          await client.post('/test', data: data);
+
+          verify(() => mockDio.post<String>('/test', data: data)).called(1);
+        });
+
+        test('should catch the error', () async {
+          final mockDio = MockDio();
+
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
           final client = StreamChatClient(
             'api-key',
             httpClient: mockDio,
           );
 
-          final Map<String, dynamic> data = {
-            'test': 1,
-          };
-
-          when(mockDio.post<String>('/test', data: data)).thenAnswer((_) async {
-            return Response(data: '{}', statusCode: 200);
-          });
-
-          await client.post('/test', data: data);
-
-          verify(mockDio.post<String>('/test', data: data)).called(1);
-        });
-
-        test('should catch the error', () async {
-          final dioHttp = Dio();
-          final mockHttpClientAdapter = MockHttpClientAdapter();
-          dioHttp.httpClientAdapter = mockHttpClientAdapter;
-
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: dioHttp,
+          when(() => mockDio.post(any())).thenThrow(
+            DioError(
+              type: DioErrorType.response,
+              response: Response<String>(
+                data: 'test error',
+                statusCode: 400,
+                requestOptions: FakeRequestOptions(),
+              ),
+              requestOptions: FakeRequestOptions(),
+            ),
           );
-
-          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
-              (_) async => ResponseBody.fromString('test error', 400));
 
           expect(client.post('/test'), throwsA(ApiError('test error', 400)));
         });
@@ -821,39 +920,44 @@ void main() {
         test('should put the correct parameters', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: mockDio,
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+          final data = <String, dynamic>{'test': 1};
+
+          when(() => mockDio.put<String>('/test', data: data)).thenAnswer(
+            (_) async => Response(
+              data: '{}',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
           );
-
-          final Map<String, dynamic> data = {
-            'test': 1,
-          };
-
-          when(mockDio.put<String>('/test', data: data)).thenAnswer((_) async {
-            return Response(data: '{}', statusCode: 200);
-          });
 
           await client.put('/test', data: data);
 
-          verify(mockDio.put<String>('/test', data: data)).called(1);
+          verify(() => mockDio.put<String>('/test', data: data)).called(1);
         });
 
         test('should catch the error', () async {
-          final dioHttp = Dio();
-          final mockHttpClientAdapter = MockHttpClientAdapter();
-          dioHttp.httpClientAdapter = mockHttpClientAdapter;
+          final mockDio = MockDio();
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: dioHttp,
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+
+          when(() => mockDio.put(any())).thenThrow(
+            DioError(
+              type: DioErrorType.response,
+              response: Response<String>(
+                data: 'test error',
+                statusCode: 400,
+                requestOptions: FakeRequestOptions(),
+              ),
+              requestOptions: FakeRequestOptions(),
+            ),
           );
-
-          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
-              (_) async => ResponseBody.fromString('test error', 400));
 
           expect(client.put('/test'), throwsA(ApiError('test error', 400)));
         });
@@ -863,40 +967,47 @@ void main() {
         test('should put the correct parameters', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: mockDio,
-          );
+          final client = StreamChatClient('api-key', httpClient: mockDio);
 
-          final Map<String, dynamic> data = {
+          final data = <String, dynamic>{
             'test': 1,
           };
 
-          when(mockDio.patch<String>('/test', data: data))
-              .thenAnswer((_) async {
-            return Response(data: '{}', statusCode: 200);
-          });
+          when(() => mockDio.patch<String>('/test', data: data)).thenAnswer(
+            (_) async => Response(
+              data: '{}',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
 
           await client.patch('/test', data: data);
 
-          verify(mockDio.patch<String>('/test', data: data)).called(1);
+          verify(() => mockDio.patch<String>('/test', data: data)).called(1);
         });
 
         test('should catch the error', () async {
-          final dioHttp = Dio();
-          final mockHttpClientAdapter = MockHttpClientAdapter();
-          dioHttp.httpClientAdapter = mockHttpClientAdapter;
+          final mockDio = MockDio();
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: dioHttp,
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+
+          when(() => mockDio.patch(any())).thenThrow(
+            DioError(
+              type: DioErrorType.response,
+              response: Response<String>(
+                data: 'test error',
+                statusCode: 400,
+                requestOptions: FakeRequestOptions(),
+              ),
+              requestOptions: FakeRequestOptions(),
+            ),
           );
-
-          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
-              (_) async => ResponseBody.fromString('test error', 400));
 
           expect(client.patch('/test'), throwsA(ApiError('test error', 400)));
         });
@@ -906,41 +1017,54 @@ void main() {
         test('should put the correct parameters', () async {
           final mockDio = MockDio();
 
-          when(mockDio.options).thenReturn(BaseOptions());
-          when(mockDio.interceptors).thenReturn(Interceptors());
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
 
           final client = StreamChatClient(
             'api-key',
             httpClient: mockDio,
           );
 
-          final Map<String, dynamic> queryParams = {
+          final queryParams = <String, dynamic>{
             'test': 1,
           };
 
-          when(mockDio.delete<String>('/test', queryParameters: queryParams))
-              .thenAnswer((_) async {
-            return Response(data: '{}', statusCode: 200);
-          });
+          when(
+            () => mockDio.delete<String>('/test', queryParameters: queryParams),
+          ).thenAnswer(
+            (_) async => Response(
+              data: '{}',
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
 
           await client.delete('/test', queryParameters: queryParams);
 
-          verify(mockDio.delete<String>('/test', queryParameters: queryParams))
+          verify(() =>
+                  mockDio.delete<String>('/test', queryParameters: queryParams))
               .called(1);
         });
 
         test('should catch the error', () async {
-          final dioHttp = Dio();
-          final mockHttpClientAdapter = MockHttpClientAdapter();
-          dioHttp.httpClientAdapter = mockHttpClientAdapter;
+          final mockDio = MockDio();
 
-          final client = StreamChatClient(
-            'api-key',
-            httpClient: dioHttp,
+          when(() => mockDio.options).thenReturn(BaseOptions());
+          when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+          final client = StreamChatClient('api-key', httpClient: mockDio);
+
+          when(() => mockDio.delete(any())).thenThrow(
+            DioError(
+              type: DioErrorType.response,
+              response: Response<String>(
+                data: 'test error',
+                statusCode: 400,
+                requestOptions: FakeRequestOptions(),
+              ),
+              requestOptions: FakeRequestOptions(),
+            ),
           );
-
-          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
-              (_) async => ResponseBody.fromString('test error', 400));
 
           expect(client.delete('/test'), throwsA(ApiError('test error', 400)));
         });
@@ -949,8 +1073,8 @@ void main() {
       group('pin message', () {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
@@ -966,33 +1090,48 @@ void main() {
         });
 
         test('should complete successfully', () async {
-          final timeout = 30;
+          const timeout = 30;
           final message = Message(text: 'Hello');
 
-          when(mockDio.post<String>(
-            '/messages/${message.id}',
-            data: anything,
-          )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+          when(
+            () => mockDio.post<String>(
+              '/messages/${message.id}',
+              data: anything,
+            ),
+          ).thenAnswer(
+            (_) async => Response(
+              data: jsonEncode({'message': message}),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
 
           await client.pinMessage(message, timeout);
 
-          verify(mockDio.post<String>('/messages/${message.id}',
+          verify(() => mockDio.post<String>('/messages/${message.id}',
               data: {'message': anything})).called(1);
         });
 
         test('should unpin message successfully', () async {
           final message = Message(text: 'Hello');
 
-          when(mockDio.post<String>(
-            '/messages/${message.id}',
-            data: anything,
-          )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+          when(
+            () => mockDio.post<String>(
+              '/messages/${message.id}',
+              data: anything,
+            ),
+          ).thenAnswer(
+            (_) async => Response(
+              data: jsonEncode({'message': message}),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
 
           await client.unpinMessage(message);
 
-          verify(mockDio.post<String>('/messages/${message.id}',
-                  data: anything))
-              .called(1);
+          verify(() => mockDio.post<String>('/messages/${message.id}',
+              data: anything)).called(1);
         });
       });
     });
@@ -1001,31 +1140,44 @@ void main() {
       test('should update channel', () async {
         final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
 
         final client = StreamChatClient(
           'api-key',
           httpClient: mockDio,
         );
 
-        final channelClient =
-            client.channel('type', id: 'id', extraData: {'name': 'init'});
+        final channelClient = client.channel(
+          'type',
+          id: 'id',
+          extraData: {'name': 'init'},
+        );
 
-        var update = {
+        const update = {
           'set': {'name': 'demo'}
         };
 
-        when(mockDio.patch<String>(
-          '/channels/${channelClient.type}/${channelClient.id}',
-          data: update,
-        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(
+          () => mockDio.patch<String>(
+            '/channels/${channelClient.type}/${channelClient.id}',
+            data: update,
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'channel': ChannelModel(cid: 'messaging:test')}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
 
         await channelClient.updatePartial(update);
-        verify(mockDio.patch<String>(
-                '/channels/${channelClient.type}/${channelClient.id}',
-                data: update))
-            .called(1);
+        verify(
+          () => mockDio.patch<String>(
+            '/channels/${channelClient.type}/${channelClient.id}',
+            data: update,
+          ),
+        ).called(1);
       });
     });
   });

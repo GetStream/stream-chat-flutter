@@ -5,8 +5,8 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 class DeletedMessage extends StatelessWidget {
   const DeletedMessage({
-    Key key,
-    @required this.messageTheme,
+    Key? key,
+    required this.messageTheme,
     this.borderRadiusGeometry,
     this.shape,
     this.borderSide,
@@ -17,13 +17,13 @@ class DeletedMessage extends StatelessWidget {
   final MessageTheme messageTheme;
 
   /// The border radius of the message text
-  final BorderRadiusGeometry borderRadiusGeometry;
+  final BorderRadiusGeometry? borderRadiusGeometry;
 
   /// The shape of the message text
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// The borderside of the message text
-  final BorderSide borderSide;
+  final BorderSide? borderSide;
 
   /// If true the widget will be mirrored
   final bool reverse;
@@ -61,9 +61,9 @@ class DeletedMessage extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               'Message deleted',
-              style: messageTheme.messageText.copyWith(
+              style: messageTheme.messageText?.copyWith(
                 fontStyle: FontStyle.italic,
-                color: messageTheme.createdAt.color,
+                color: messageTheme.createdAt?.color,
               ),
             ),
           ),

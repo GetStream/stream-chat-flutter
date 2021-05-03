@@ -10,20 +10,29 @@ part 'channel_model.g.dart';
 class ChannelModel {
   /// Constructor used for json serialization
   ChannelModel({
-    this.id,
-    this.type,
-    this.cid,
-    this.config,
+    String? id,
+    String? type,
+    String? cid,
+    ChannelConfig? config,
     this.createdBy,
-    this.frozen,
+    this.frozen = false,
     this.lastMessageAt,
-    this.createdAt,
-    this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.deletedAt,
-    this.memberCount,
-    this.extraData,
+    this.memberCount = 0,
+    this.extraData = const {},
     this.team,
-  });
+  })  : assert(
+          (cid != null && cid.contains(':')) || (id != null && type != null),
+          'provide either a cid or an id and type',
+        ),
+        id = id ?? cid!.split(':')[1],
+        type = type ?? cid!.split(':')[0],
+        cid = cid ?? '$type:$id',
+        config = config ?? ChannelConfig(),
+        createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) =>
@@ -46,15 +55,15 @@ class ChannelModel {
 
   /// The user that created this channel
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final User createdBy;
+  final User? createdBy;
 
   /// True if this channel is frozen
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeIfNull: false, defaultValue: false)
   final bool frozen;
 
   /// The date of the last message
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime lastMessageAt;
+  final DateTime? lastMessageAt;
 
   /// The date of channel creation
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -66,19 +75,23 @@ class ChannelModel {
 
   /// The date of channel deletion
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final DateTime deletedAt;
+  final DateTime? deletedAt;
 
   /// The count of this channel members
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(
+      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: 0)
   final int memberCount;
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, dynamic> extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object> extraData;
 
   /// The team the channel belongs to
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String team;
+  final String? team;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -99,29 +112,28 @@ class ChannelModel {
 
   /// Shortcut for channel name
   String get name =>
-      extraData?.containsKey('name') == true ? extraData['name'] : cid;
+      extraData.containsKey('name') ? extraData['name'] as String : cid;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
         _$ChannelModelToJson(this),
-        topLevelFields,
       );
 
   /// Creates a copy of [ChannelModel] with specified attributes overridden.
   ChannelModel copyWith({
-    String id,
-    String type,
-    String cid,
-    ChannelConfig config,
-    User createdBy,
-    bool frozen,
-    DateTime lastMessageAt,
-    DateTime createdAt,
-    DateTime updatedAt,
-    DateTime deletedAt,
-    int memberCount,
-    Map<String, dynamic> extraData,
-    String team,
+    String? id,
+    String? type,
+    String? cid,
+    ChannelConfig? config,
+    User? createdBy,
+    bool? frozen,
+    DateTime? lastMessageAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+    int? memberCount,
+    Map<String, Object>? extraData,
+    String? team,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -141,7 +153,7 @@ class ChannelModel {
 
   /// Returns a new [ChannelModel] that is a combination of this channelModel
   /// and the given [other] channelModel.
-  ChannelModel merge(ChannelModel other) {
+  ChannelModel merge(ChannelModel? other) {
     if (other == null) return this;
     return copyWith(
       id: other.id,

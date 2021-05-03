@@ -9,20 +9,25 @@ import 'attachment_widget.dart';
 
 class VideoAttachment extends AttachmentWidget {
   final MessageTheme messageTheme;
-  final ShowMessageCallback onShowMessage;
-  final ValueChanged<ReturnActionType> onReturnAction;
-  final VoidCallback onAttachmentTap;
+  final ShowMessageCallback? onShowMessage;
+  final ValueChanged<ReturnActionType>? onReturnAction;
+  final VoidCallback? onAttachmentTap;
 
   const VideoAttachment({
-    Key key,
-    @required Message message,
-    @required Attachment attachment,
-    Size size,
-    this.messageTheme,
+    Key? key,
+    required Message message,
+    required Attachment attachment,
+    required this.messageTheme,
+    Size? size,
     this.onShowMessage,
     this.onReturnAction,
     this.onAttachmentTap,
-  }) : super(key: key, message: message, attachment: attachment, size: size);
+  }) : super(
+          key: key,
+          message: message,
+          attachment: attachment,
+          size: size,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,7 @@ class VideoAttachment extends AttachmentWidget {
         return _buildVideoAttachment(
           context,
           VideoThumbnailImage(
-            video: attachment.file.path,
+            video: attachment.file!.path!,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -49,7 +54,7 @@ class VideoAttachment extends AttachmentWidget {
         return _buildVideoAttachment(
           context,
           VideoThumbnailImage(
-            video: attachment.assetUrl,
+            video: attachment.assetUrl!,
             height: size?.height,
             width: size?.width,
             fit: BoxFit.cover,
@@ -62,7 +67,7 @@ class VideoAttachment extends AttachmentWidget {
 
   Widget _buildVideoAttachment(BuildContext context, Widget videoWidget) {
     return ConstrainedBox(
-      constraints: BoxConstraints.loose(size),
+      constraints: BoxConstraints.loose(size ?? Size.infinite),
       child: Column(
         children: <Widget>[
           Expanded(
@@ -77,15 +82,14 @@ class VideoAttachment extends AttachmentWidget {
                           channel: channel,
                           child: FullScreenMedia(
                             mediaAttachments: [attachment],
-                            userName: message.user.name,
-                            sentAt: message.createdAt,
+                            userName: message.user?.name,
                             message: message,
                             onShowMessage: onShowMessage,
                           ),
                         ),
                       ),
                     );
-                    if (res != null) onReturnAction(res);
+                    if (res != null) onReturnAction?.call(res);
                   },
               child: Stack(
                 children: [

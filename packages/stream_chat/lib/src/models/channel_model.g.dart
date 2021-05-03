@@ -6,22 +6,18 @@ part of 'channel_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ChannelModel _$ChannelModelFromJson(Map json) {
+ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
   return ChannelModel(
-    id: json['id'] as String,
-    type: json['type'] as String,
-    cid: json['cid'] as String,
+    id: json['id'] as String?,
+    type: json['type'] as String?,
+    cid: json['cid'] as String?,
     config: json['config'] == null
         ? null
-        : ChannelConfig.fromJson((json['config'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
+        : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
     createdBy: json['created_by'] == null
         ? null
-        : User.fromJson((json['created_by'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
-    frozen: json['frozen'] as bool,
+        : User.fromJson(json['created_by'] as Map<String, dynamic>),
+    frozen: json['frozen'] as bool? ?? false,
     lastMessageAt: json['last_message_at'] == null
         ? null
         : DateTime.parse(json['last_message_at'] as String),
@@ -34,11 +30,12 @@ ChannelModel _$ChannelModelFromJson(Map json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    memberCount: json['member_count'] as int,
-    extraData: (json['extra_data'] as Map)?.map(
-      (k, e) => MapEntry(k as String, e),
-    ),
-    team: json['team'] as String,
+    memberCount: json['member_count'] as int? ?? 0,
+    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(k, e as Object),
+        ) ??
+        {},
+    team: json['team'] as String?,
   );
 }
 
@@ -57,13 +54,13 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   writeNotNull('cid', readonly(instance.cid));
   writeNotNull('config', readonly(instance.config));
   writeNotNull('created_by', readonly(instance.createdBy));
-  writeNotNull('frozen', instance.frozen);
+  val['frozen'] = instance.frozen;
   writeNotNull('last_message_at', readonly(instance.lastMessageAt));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('member_count', readonly(instance.memberCount));
-  writeNotNull('extra_data', instance.extraData);
+  val['extra_data'] = instance.extraData;
   writeNotNull('team', readonly(instance.team));
   return val;
 }

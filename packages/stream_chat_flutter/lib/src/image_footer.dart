@@ -5,8 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -15,13 +15,13 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
-  final VoidCallback onBackPressed;
+  final VoidCallback? onBackPressed;
 
   /// Callback to call when the header is tapped.
-  final VoidCallback onTitleTap;
+  final VoidCallback? onTitleTap;
 
   /// Callback to call when the image is tapped.
-  final VoidCallback onImageTap;
+  final VoidCallback? onImageTap;
 
   final int currentPage;
   final int totalPages;
@@ -29,18 +29,18 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   final List<Attachment> mediaAttachments;
   final Message message;
 
-  final ValueChanged<int> mediaSelectedCallBack;
+  final ValueChanged<int>? mediaSelectedCallBack;
 
   /// Creates a channel header
   ImageFooter({
-    Key key,
+    Key? key,
+    required this.message,
     this.onBackPressed,
     this.onTitleTap,
     this.onImageTap,
     this.currentPage = 0,
     this.totalPages = 0,
-    this.mediaAttachments,
-    this.message,
+    this.mediaAttachments = const [],
     this.mediaSelectedCallBack,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
@@ -53,13 +53,10 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ImageFooterState extends State<ImageFooter> {
-  TextEditingController _searchController;
   final TextEditingController _messageController = TextEditingController();
   final FocusNode _messageFocusNode = FocusNode();
 
   final List<Channel> _selectedChannels = [];
-
-  Function modalSetStateCallback;
 
   @override
   void initState() {
@@ -67,13 +64,6 @@ class _ImageFooterState extends State<ImageFooter> {
     _messageFocusNode.addListener(() {
       setState(() {});
     });
-  }
-
-  @override
-  void dispose() {
-    _searchController?.clear();
-    _searchController?.dispose();
-    super.dispose();
   }
 
   @override
@@ -106,10 +96,10 @@ class _ImageFooterState extends State<ImageFooter> {
                             widget.mediaAttachments[widget.currentPage];
                         final url = attachment.imageUrl ??
                             attachment.assetUrl ??
-                            attachment.thumbUrl;
+                            attachment.thumbUrl!;
                         final type = attachment.type == 'image'
                             ? 'jpg'
-                            : url?.split('?')?.first?.split('.')?.last ?? 'jpg';
+                            : url.split('?').first.split('.').last;
                         final request =
                             await HttpClient().getUrl(Uri.parse(url));
                         final response = await request.close();
@@ -227,24 +217,24 @@ class _ImageFooterState extends State<ImageFooter> {
                         final attachment = widget.mediaAttachments[index];
                         if (attachment.type == 'video') {
                           media = InkWell(
-                            onTap: () => widget.mediaSelectedCallBack(index),
+                            onTap: () => widget.mediaSelectedCallBack!(index),
                             child: FittedBox(
                               fit: BoxFit.cover,
                               child: VideoThumbnailImage(
-                                video: attachment.file?.path ??
-                                    attachment.assetUrl,
+                                video: (attachment.file?.path ??
+                                    attachment.assetUrl)!,
                               ),
                             ),
                           );
                         } else {
                           media = InkWell(
-                            onTap: () => widget.mediaSelectedCallBack(index),
+                            onTap: () => widget.mediaSelectedCallBack!(index),
                             child: AspectRatio(
                               aspectRatio: 1.0,
                               child: CachedNetworkImage(
                                 imageUrl: attachment.imageUrl ??
                                     attachment.assetUrl ??
-                                    attachment.thumbUrl,
+                                    attachment.thumbUrl!,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -254,32 +244,33 @@ class _ImageFooterState extends State<ImageFooter> {
                         return Stack(
                           children: [
                             media,
-                            Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Container(
-                                clipBehavior: Clip.antiAlias,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.6),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 8.0,
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .black
-                                          .withOpacity(0.3),
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(2),
-                                child: UserAvatar(
-                                  user: widget.message.user,
-                                  constraints:
-                                      BoxConstraints.tight(Size(24, 24)),
-                                  showOnlineStatus: false,
+                            if (widget.message.user != null)
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Container(
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.6),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 8.0,
+                                        color: StreamChatTheme.of(context)
+                                            .colorTheme
+                                            .black
+                                            .withOpacity(0.3),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: const EdgeInsets.all(2),
+                                  child: UserAvatar(
+                                    user: widget.message.user!,
+                                    constraints:
+                                        BoxConstraints.tight(Size(24, 24)),
+                                    showOnlineStatus: false,
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         );
                       },
@@ -302,7 +293,7 @@ class _ImageFooterState extends State<ImageFooter> {
 
     _messageController.clear();
 
-    for (var channel in _selectedChannels) {
+    for (final channel in _selectedChannels) {
       final message = Message(
         text: text,
         attachments: [attachments[widget.currentPage]],
