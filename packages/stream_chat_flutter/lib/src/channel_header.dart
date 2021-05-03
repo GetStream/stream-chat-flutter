@@ -58,13 +58,13 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
-  final VoidCallback onBackPressed;
+  final VoidCallback? onBackPressed;
 
   /// Callback to call when the header is tapped.
-  final VoidCallback onTitleTap;
+  final VoidCallback? onTitleTap;
 
   /// Callback to call when the image is tapped.
-  final VoidCallback onImageTap;
+  final VoidCallback? onImageTap;
 
   /// If true the typing indicator will be rendered if a user is typing
   final bool showTypingIndicator;
@@ -72,21 +72,21 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool showConnectionStateTile;
 
   /// Title widget
-  final Widget title;
+  final Widget? title;
 
   /// Subtitle widget
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// Leading widget
-  final Widget leading;
+  final Widget? leading;
 
   /// AppBar actions
   /// By default it shows the [ChannelImage]
-  final List<Widget> actions;
+  final List<Widget>? actions;
 
   /// Creates a channel header
   ChannelHeader({
-    Key key,
+    Key? key,
     this.showBackButton = true,
     this.onBackPressed,
     this.onTitleTap,
@@ -151,12 +151,12 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                             .channelTheme
                             .channelHeaderTheme
                             .avatarTheme
-                            .borderRadius,
+                            ?.borderRadius,
                         constraints: StreamChatTheme.of(context)
                             .channelTheme
                             .channelHeaderTheme
                             .avatarTheme
-                            .constraints,
+                            ?.constraints,
                         onTap: onImageTap,
                       ),
                     ),

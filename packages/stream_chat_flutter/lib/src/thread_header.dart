@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'back_button.dart';
 import 'channel_name.dart';
@@ -61,30 +61,30 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
 
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
-  final VoidCallback onBackPressed;
+  final VoidCallback? onBackPressed;
 
   /// Callback to call when the title is tapped.
-  final VoidCallback onTitleTap;
+  final VoidCallback? onTitleTap;
 
   /// The message parent of this thread
   final Message parent;
 
   /// Title widget
-  final Widget title;
+  final Widget? title;
 
   /// Subtitle widget
-  final Widget subtitle;
+  final Widget? subtitle;
 
   /// Leading widget
-  final Widget leading;
+  final Widget? leading;
 
   /// AppBar actions
-  final List<Widget> actions;
+  final List<Widget>? actions;
 
   /// Instantiate a new ThreadHeader
   ThreadHeader({
-    Key key,
-    @required this.parent,
+    Key? key,
+    required this.parent,
     this.showBackButton = true,
     this.onBackPressed,
     this.title,

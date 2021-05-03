@@ -6,17 +6,17 @@ import '../stream_chat_flutter.dart';
 
 class StreamBackButton extends StatelessWidget {
   const StreamBackButton({
-    Key key,
+    Key? key,
     this.onPressed,
     this.showUnreads = false,
     this.cid,
   }) : super(key: key);
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool showUnreads;
 
   /// Channel cid used to retrieve unread count
-  final String cid;
+  final String? cid;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class StreamBackButton extends StatelessWidget {
           hoverElevation: 0,
           onPressed: () {
             if (onPressed != null) {
-              onPressed();
+              onPressed!();
             } else {
               Navigator.maybePop(context);
             }

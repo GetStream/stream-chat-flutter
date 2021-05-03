@@ -8,55 +8,52 @@ typedef FailedBuilder = Widget Function(BuildContext, String);
 class AttachmentUploadStateBuilder extends StatelessWidget {
   final Message message;
   final Attachment attachment;
-  final FailedBuilder failedBuilder;
-  final WidgetBuilder successBuilder;
-  final InProgressBuilder inProgressBuilder;
-  final WidgetBuilder preparingBuilder;
+  final FailedBuilder? failedBuilder;
+  final WidgetBuilder? successBuilder;
+  final InProgressBuilder? inProgressBuilder;
+  final WidgetBuilder? preparingBuilder;
 
   const AttachmentUploadStateBuilder({
-    Key key,
-    @required this.message,
-    @required this.attachment,
+    Key? key,
+    required this.message,
+    required this.attachment,
     this.failedBuilder,
     this.successBuilder,
     this.inProgressBuilder,
     this.preparingBuilder,
-  })  : assert(message != null),
-        assert(attachment != null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (message.status == null || message.status == MessageSendingStatus.sent) {
+    if (message.status == MessageSendingStatus.sent) {
       return Offstage();
     }
 
     final messageId = message.id;
     final attachmentId = attachment.id;
 
-    var inProgress = inProgressBuilder;
-    inProgress ??= (context, int sent, int total) {
-      return _InProgressState(
-        sent: sent,
-        total: total,
-        attachmentId: attachmentId,
-      );
-    };
+    final inProgress = inProgressBuilder ??
+        (context, int sent, int total) {
+          return _InProgressState(
+            sent: sent,
+            total: total,
+            attachmentId: attachmentId,
+          );
+        };
 
-    var failed = failedBuilder;
-    failed ??= (context, error) {
-      return _FailedState(
-        error: error,
-        messageId: messageId,
-        attachmentId: attachmentId,
-      );
-    };
+    final failed = failedBuilder ??
+        (context, error) {
+          return _FailedState(
+            error: error,
+            messageId: messageId,
+            attachmentId: attachmentId,
+          );
+        };
 
-    var success = successBuilder;
-    success ??= (context) => _SuccessState();
+    final success = successBuilder ?? (context) => _SuccessState();
 
-    var preparing = preparingBuilder;
-    preparing ??= (context) => _PreparingState(attachmentId: attachmentId);
+    final preparing = preparingBuilder ??
+        (context) => _PreparingState(attachmentId: attachmentId);
 
     return attachment.uploadState.when(
       preparing: () => preparing(context),
@@ -68,13 +65,13 @@ class AttachmentUploadStateBuilder extends StatelessWidget {
 }
 
 class _IconButton extends StatelessWidget {
-  final Widget icon;
+  final Widget? icon;
   final double iconSize;
-  final VoidCallback onPressed;
-  final Color fillColor;
+  final VoidCallback? onPressed;
+  final Color? fillColor;
 
   const _IconButton({
-    Key key,
+    Key? key,
     this.icon,
     this.iconSize = 24.0,
     this.onPressed,
@@ -95,7 +92,9 @@ class _IconButton extends StatelessWidget {
         onPressed: onPressed,
         fillColor:
             fillColor ?? StreamChatTheme.of(context).colorTheme.overlayDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: icon,
       ),
     );
@@ -106,8 +105,8 @@ class _PreparingState extends StatelessWidget {
   final String attachmentId;
 
   const _PreparingState({
-    Key key,
-    @required this.attachmentId,
+    Key? key,
+    required this.attachmentId,
   }) : super(key: key);
 
   @override
@@ -144,10 +143,10 @@ class _InProgressState extends StatelessWidget {
   final String attachmentId;
 
   const _InProgressState({
-    Key key,
-    @required this.sent,
-    @required this.total,
-    @required this.attachmentId,
+    Key? key,
+    required this.sent,
+    required this.total,
+    required this.attachmentId,
   }) : super(key: key);
 
   @override
@@ -179,15 +178,15 @@ class _InProgressState extends StatelessWidget {
 }
 
 class _FailedState extends StatelessWidget {
-  final String error;
+  final String? error;
   final String messageId;
   final String attachmentId;
 
   const _FailedState({
-    Key key,
+    Key? key,
     this.error,
-    @required this.messageId,
-    @required this.attachmentId,
+    required this.messageId,
+    required this.attachmentId,
   }) : super(key: key);
 
   @override
@@ -203,7 +202,7 @@ class _FailedState extends StatelessWidget {
             color: theme.colorTheme.white,
           ),
           onPressed: () {
-            return channel.retryAttachmentUpload(messageId, attachmentId);
+            channel.retryAttachmentUpload(messageId, attachmentId);
           },
         ),
         Center(
@@ -213,7 +212,10 @@ class _FailedState extends StatelessWidget {
               color: theme.colorTheme.overlayDark.withOpacity(0.6),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              padding: const EdgeInsets.symmetric(
+                vertical: 6,
+                horizontal: 12,
+              ),
               child: Text(
                 'UPLOAD ERROR',
                 style: theme.textTheme.footnote.copyWith(

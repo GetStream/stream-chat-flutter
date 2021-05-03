@@ -9,18 +9,23 @@ class UrlAttachment extends StatelessWidget {
   final EdgeInsets textPadding;
 
   UrlAttachment({
-    @required this.urlAttachment,
-    @required this.hostDisplayName,
-    @required this.textPadding,
+    required this.urlAttachment,
+    required this.hostDisplayName,
+    this.textPadding = const EdgeInsets.symmetric(
+      horizontal: 16.0,
+      vertical: 8.0,
+    ),
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => launchURL(
-        context,
-        urlAttachment.ogScrapeUrl,
-      ),
+      onTap: () {
+        launchURL(
+          context,
+          urlAttachment.ogScrapeUrl,
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -35,7 +40,7 @@ class UrlAttachment extends StatelessWidget {
                 children: [
                   CachedNetworkImage(
                     width: double.infinity,
-                    imageUrl: urlAttachment.imageUrl,
+                    imageUrl: urlAttachment.imageUrl!,
                     fit: BoxFit.cover,
                   ),
                   Positioned(
@@ -78,7 +83,7 @@ class UrlAttachment extends StatelessWidget {
               children: [
                 if (urlAttachment.title != null)
                   Text(
-                    urlAttachment.title.trim(),
+                    urlAttachment.title!.trim(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: StreamChatTheme.of(context)
@@ -88,7 +93,7 @@ class UrlAttachment extends StatelessWidget {
                   ),
                 if (urlAttachment.text != null)
                   Text(
-                    urlAttachment.text,
+                    urlAttachment.text!,
                     style: StreamChatTheme.of(context)
                         .textTheme
                         .body

@@ -223,7 +223,10 @@ void main() {
         final mockDio = MockDio();
         final mockUploader = MockAttachmentUploader();
 
-        const file = AttachmentFile(path: 'filePath/fileName.pdf');
+        const file = AttachmentFile(
+          path: 'filePath/fileName.pdf',
+          size: 100,
+        );
         const channelId = 'testId';
         const channelType = 'messaging';
 
@@ -262,7 +265,10 @@ void main() {
         final mockDio = MockDio();
         final mockUploader = MockAttachmentUploader();
 
-        const image = AttachmentFile(path: 'imagePath/imageName.jpeg');
+        const image = AttachmentFile(
+          path: 'imagePath/imageName.jpeg',
+          size: 100,
+        );
         const channelId = 'testId';
         const channelType = 'messaging';
 

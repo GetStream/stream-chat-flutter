@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class UserReactionDisplay extends StatelessWidget {
   const UserReactionDisplay({
-    Key key,
-    @required this.reactionToEmoji,
-    @required this.message,
+    Key? key,
+    required this.reactionToEmoji,
+    required this.message,
     this.size = 30,
   }) : super(key: key);
 
@@ -23,12 +23,13 @@ class UserReactionDisplay extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: reactionToEmoji.keys.map((reactionType) {
-          var firstUserReaction = message.latestReactions.firstWhere(
-              (element) => element.type == reactionType, orElse: () {
-            return null;
-          });
+          var firstUserReaction = message.latestReactions!
+              .firstWhere((element) => element.type == reactionType,
+                  orElse: () {
+                    return null;
+                  } as Reaction Function()?);
 
-          if (firstUserReaction == null) {
+          if (firstUserReaction.user == null) {
             return IconButton(
               iconSize: size,
               icon: Container(),
@@ -39,7 +40,7 @@ class UserReactionDisplay extends StatelessWidget {
           return IconButton(
             iconSize: size,
             icon: UserAvatar(
-              user: firstUserReaction.user,
+              user: firstUserReaction.user!,
               constraints: BoxConstraints(
                 maxHeight: size - 5,
                 maxWidth: size - 5,

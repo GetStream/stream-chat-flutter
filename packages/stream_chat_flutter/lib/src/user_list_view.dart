@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'user_item.dart';
 
 /// Callback called when tapping on a user
-typedef UserTapCallback = void Function(User, Widget);
+typedef UserTapCallback = void Function(User, Widget?);
 
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
@@ -44,7 +44,7 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
   const UserListView({
-    Key key,
+    Key? key,
     this.filter,
     this.options,
     this.sort,
@@ -72,51 +72,51 @@ class UserListView extends StatefulWidget {
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Filter filter;
+  final Filter? filter;
 
   /// Query channels options.
   ///
   /// state: if true returns the Channel state
   /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic> options;
+  final Map<String, dynamic>? options;
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
   /// Direction can be ascending or descending.
-  final List<SortOption> sort;
+  final List<SortOption>? sort;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams pagination;
+  final PaginationParams? pagination;
 
   /// Function called when tapping on a channel
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
   /// with the widget [userWidget] as child.
-  final UserTapCallback onUserTap;
+  final UserTapCallback? onUserTap;
 
   /// Function called when long pressing on a channel
-  final Function(User) onUserLongPress;
+  final Function(User)? onUserLongPress;
 
   /// Widget used when opening a channel
-  final Widget userWidget;
+  final Widget? userWidget;
 
   /// Builder used to create a custom user preview
-  final UserItemBuilder userItemBuilder;
+  final UserItemBuilder? userItemBuilder;
 
   /// Builder used to create a custom item separator
-  final Function(BuildContext, int) separatorBuilder;
+  final Function(BuildContext, int)? separatorBuilder;
 
   /// The function called when the image is tapped
-  final Function(User) onImageTap;
+  final Function(User)? onImageTap;
 
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
   /// Sets a blue trailing checkMark in [ListUserItem] for all the [selectedUsers]
-  final Set<User> selectedUsers;
+  final Set<User>? selectedUsers;
 
   /// Set it to true to group users by their first character
   ///
@@ -127,16 +127,17 @@ class UserListView extends StatefulWidget {
   final int crossAxisCount;
 
   /// The builder that will be used in case of error
-  final Widget Function(Error error) errorBuilder;
+  final Widget Function(Error error)? errorBuilder;
 
   /// The builder that will be used to build the list
-  final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
+  final Widget Function(BuildContext context, List<ListItem> users)?
+      listBuilder;
 
   /// The builder that will be used for loading
-  final WidgetBuilder loadingBuilder;
+  final WidgetBuilder? loadingBuilder;
 
   /// The builder used when the channel list is empty.
-  final WidgetBuilder emptyBuilder;
+  final WidgetBuilder? emptyBuilder;
 
   @override
   _UserListViewState createState() => _UserListViewState();
@@ -151,9 +152,9 @@ class _UserListViewState extends State<UserListView>
   @override
   Widget build(BuildContext context) {
     var child = UserListCore(
-      errorBuilder: widget.errorBuilder ??
+      errorBuilder: widget.errorBuilder as Widget Function(Object)? ??
           (err) {
-            return _buildError(err);
+            return _buildError(err as Error);
           },
       emptyBuilder: widget.emptyBuilder ??
           (context) {
@@ -193,7 +194,7 @@ class _UserListViewState extends State<UserListView>
       return child;
     } else {
       return RefreshIndicator(
-        onRefresh: () => _userListController.loadData(),
+        onRefresh: () => _userListController.loadData!(),
         child: child,
       );
     }
@@ -241,7 +242,7 @@ class _UserListViewState extends State<UserListView>
             child: Text(message),
           ),
           TextButton(
-            onPressed: () => _userListController.loadData(),
+            onPressed: () => _userListController.loadData!(),
             child: Text('Retry'),
           ),
         ],
@@ -276,7 +277,7 @@ class _UserListViewState extends State<UserListView>
             itemCount: items.isNotEmpty ? items.length + 1 : items.length,
             separatorBuilder: (_, index) {
               if (widget.separatorBuilder != null) {
-                return widget.separatorBuilder(context, index);
+                return widget.separatorBuilder!(context, index);
               }
               return _separatorBuilder(context, index);
             },
@@ -296,7 +297,7 @@ class _UserListViewState extends State<UserListView>
           );
 
     return LazyLoadScrollView(
-      onEndOfPage: () => _userListController.paginateData(),
+      onEndOfPage: () => _userListController.paginateData!(),
       child: child,
     );
   }
@@ -329,10 +330,10 @@ class _UserListViewState extends State<UserListView>
           return Container(
             key: ValueKey<String>('USER-${user.id}'),
             child: widget.userItemBuilder != null
-                ? widget.userItemBuilder(context, user, selected)
+                ? widget.userItemBuilder!(context, user, selected)
                 : UserItem(
                     user: user,
-                    onTap: (user) => widget.onUserTap(user, widget.userWidget),
+                    onTap: (user) => widget.onUserTap!(user, widget.userWidget),
                     onLongPress: widget.onUserLongPress,
                     onImageTap: widget.onImageTap,
                     selected: selected,
@@ -356,7 +357,7 @@ class _UserListViewState extends State<UserListView>
           return Container(
             key: ValueKey<String>('USER-${user.id}'),
             child: widget.userItemBuilder != null
-                ? widget.userItemBuilder(context, user, selected)
+                ? widget.userItemBuilder!(context, user, selected)
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -374,7 +375,7 @@ class _UserListViewState extends State<UserListView>
                           width: 12,
                         ),
                         onTap: (user) =>
-                            widget.onUserTap(user, widget.userWidget),
+                            widget.onUserTap!(user, widget.userWidget),
                         onLongPress: widget.onUserLongPress,
                       ),
                       SizedBox(height: 4),
@@ -424,7 +425,7 @@ class _UserListViewState extends State<UserListView>
             height: 100,
             padding: EdgeInsets.all(32),
             child: Center(
-              child: snapshot.data ? CircularProgressIndicator() : Container(),
+              child: snapshot.data! ? CircularProgressIndicator() : Container(),
             ),
           );
         });

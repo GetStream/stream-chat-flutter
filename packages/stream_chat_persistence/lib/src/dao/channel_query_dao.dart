@@ -99,7 +99,7 @@ class ChannelQueryDao extends DatabaseAccessor<MoorChatDatabase>
     if (sort != null && sort.isNotEmpty) {
       chainedComparator = (a, b) {
         int result;
-        for (final comparator in sort!.map((it) => it.comparator)) {
+        for (final comparator in sort.map((it) => it.comparator)) {
           try {
             result = comparator!(a, b);
           } catch (e) {

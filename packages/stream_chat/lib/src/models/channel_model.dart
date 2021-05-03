@@ -21,7 +21,7 @@ class ChannelModel {
     DateTime? updatedAt,
     this.deletedAt,
     this.memberCount = 0,
-    this.extraData,
+    this.extraData = const {},
     this.team,
   })  : assert(
           (cid != null && cid.contains(':')) || (id != null && type != null),
@@ -83,8 +83,11 @@ class ChannelModel {
   final int memberCount;
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, Object>? extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object> extraData;
 
   /// The team the channel belongs to
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -108,9 +111,8 @@ class ChannelModel {
   ];
 
   /// Shortcut for channel name
-  String get name => extraData?.containsKey('name') == true
-      ? extraData!['name'] as String
-      : cid;
+  String get name =>
+      extraData.containsKey('name') ? extraData['name'] as String : cid;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(

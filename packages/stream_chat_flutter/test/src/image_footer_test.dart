@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
@@ -15,17 +15,17 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
 
@@ -37,7 +37,9 @@ void main() {
             child: WillPopScope(
               onWillPop: () async => false,
               child: Scaffold(
-                body: ImageFooter(),
+                body: ImageFooter(
+                  message: Message(),
+                ),
               ),
             ),
           ),

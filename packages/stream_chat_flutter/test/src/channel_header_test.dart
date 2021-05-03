@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -16,28 +16,33 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.unreadCount).thenReturn(1);
+      when(() => client.wsConnectionStatusStream)
+          .thenAnswer((_) => Stream.value(ConnectionStatus.connected));
+      when(() => channelState.unreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => clientState.totalUnreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
@@ -72,35 +77,38 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.unreadCount).thenReturn(1);
+      when(() => channelState.unreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
         ),
       ]);
-      when(client.wsConnectionStatusStream)
+      when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => clientState.totalUnreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -131,36 +139,38 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.unreadCount).thenReturn(1);
+      when(() => channelState.unreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
         ),
       ]);
-      when(client.wsConnectionStatusStream)
+      when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
-      when(channel.initialized).thenAnswer((_) => Future.value(true));
+      when(() => clientState.totalUnreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -194,33 +204,38 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.unreadCount).thenReturn(1);
+      when(() => channelState.unreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
         ),
       ]);
+      when(() => client.wsConnectionStatusStream)
+          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => clientState.totalUnreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
@@ -263,34 +278,35 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.unreadCount).thenReturn(1);
+      when(() => channelState.unreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
         ),
       ]);
-      when(client.wsConnectionStatusStream)
+      when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
 
       await tester.pumpWidget(MaterialApp(
@@ -328,33 +344,38 @@ void main() {
       final channelState = MockChannelState();
       final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(channel.lastMessageAt).thenReturn(lastMessageAt);
-      when(channel.state).thenReturn(channelState);
-      when(channel.client).thenReturn(client);
-      when(channel.isMuted).thenReturn(false);
-      when(channel.isMutedStream).thenAnswer((i) => Stream.value(false));
-      when(channel.extraDataStream).thenAnswer((i) => Stream.value({
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
             'name': 'test',
           }));
-      when(channel.extraData).thenReturn({
+      when(() => channel.extraData).thenReturn({
         'name': 'test',
       });
-      when(channelState.unreadCount).thenReturn(1);
-      when(channelState.unreadCountStream).thenAnswer((i) => Stream.value(1));
-      when(channelState.membersStream).thenAnswer((i) => Stream.value([
+      when(() => channelState.unreadCount).thenReturn(1);
+      when(() => channelState.unreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
+      when(() => channelState.membersStream).thenAnswer((i) => Stream.value([
             Member(
               userId: 'user-id',
               user: User(id: 'user-id'),
             )
           ]));
-      when(channelState.members).thenReturn([
+      when(() => channelState.members).thenReturn([
         Member(
           userId: 'user-id',
           user: User(id: 'user-id'),
         ),
       ]);
+      when(() => client.wsConnectionStatusStream)
+          .thenAnswer((_) => Stream.value(ConnectionStatus.connecting));
+      when(() => clientState.totalUnreadCountStream)
+          .thenAnswer((i) => Stream.value(1));
 
       var backPressed = false;
       var imageTapped = false;

@@ -10,11 +10,15 @@ typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
 
 /// Builder used to create a custom [ListUserItem] from a [User]
 typedef MessageSearchItemBuilder = Widget Function(
-    BuildContext, GetMessageResponse);
+  BuildContext,
+  GetMessageResponse,
+);
 
 /// Builder used when [MessageSearchListView] is empty
 typedef EmptyMessageSearchBuilder = Widget Function(
-    BuildContext context, String searchQuery);
+  BuildContext context,
+  String searchQuery,
+);
 
 ///
 /// It shows the list of searched messages.
@@ -47,9 +51,9 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
   const MessageSearchListView({
-    Key key,
+    Key? key,
+    required this.filters,
     this.messageQuery,
-    this.filters,
     this.sortOptions,
     this.paginationParams,
     this.messageFilters,
@@ -66,7 +70,7 @@ class MessageSearchListView extends StatefulWidget {
   }) : super(key: key);
 
   /// Message String to search on
-  final String messageQuery;
+  final String? messageQuery;
 
   /// The query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
@@ -77,27 +81,27 @@ class MessageSearchListView extends StatefulWidget {
   /// Sorting is based on field and direction, multiple sorting options can be provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
   /// Direction can be ascending or descending.
-  final List<SortOption> sortOptions;
+  final List<SortOption>? sortOptions;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams paginationParams;
+  final PaginationParams? paginationParams;
 
   /// The message query filters to use.
   /// You can query on any of the custom fields you've defined on the [Channel].
   /// You can also filter other built-in channel fields.
-  final Map<String, dynamic> messageFilters;
+  final Filter? messageFilters;
 
   /// Builder used to create a custom item preview
-  final MessageSearchItemBuilder itemBuilder;
+  final MessageSearchItemBuilder? itemBuilder;
 
   /// Function called when tapping on a [MessageSearchItem]
-  final MessageSearchItemTapCallback onItemTap;
+  final MessageSearchItemTapCallback? onItemTap;
 
   /// Builder used to create a custom item separator
-  final IndexedWidgetBuilder separatorBuilder;
+  final IndexedWidgetBuilder? separatorBuilder;
 
   /// Set it to false to hide total results text
   final bool showResultCount;
@@ -108,16 +112,16 @@ class MessageSearchListView extends StatefulWidget {
   final bool showErrorTile;
 
   /// The builder that is used when the search messages are fetched
-  final Widget Function(List<GetMessageResponse>) childBuilder;
+  final Widget Function(List<GetMessageResponse>)? childBuilder;
 
   /// The builder used when the channel list is empty.
-  final WidgetBuilder emptyBuilder;
+  final WidgetBuilder? emptyBuilder;
 
   /// The builder that will be used in case of error
-  final ErrorBuilder errorBuilder;
+  final ErrorBuilder? errorBuilder;
 
   /// The builder that will be used in case of loading
-  final WidgetBuilder loadingBuilder;
+  final WidgetBuilder? loadingBuilder;
 
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
@@ -202,11 +206,11 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
   Widget _listItemBuilder(
       BuildContext context, GetMessageResponse getMessageResponse) {
     if (widget.itemBuilder != null) {
-      return widget.itemBuilder(context, getMessageResponse);
+      return widget.itemBuilder!(context, getMessageResponse);
     }
     return MessageSearchItem(
       getMessageResponse: getMessageResponse,
-      onTap: () => widget.onItemTap(getMessageResponse),
+      onTap: () => widget.onItemTap!(getMessageResponse),
     );
   }
 
@@ -235,7 +239,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             height: 100,
             padding: EdgeInsets.all(32),
             child: Center(
-              child: snapshot.data ? CircularProgressIndicator() : Container(),
+              child: snapshot.data! ? CircularProgressIndicator() : Container(),
             ),
           );
         });
@@ -249,7 +253,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       itemCount: items.isNotEmpty ? items.length + 1 : items.length,
       separatorBuilder: (_, index) {
         if (widget.separatorBuilder != null) {
-          return widget.separatorBuilder(context, index);
+          return widget.separatorBuilder!(context, index);
         }
         return _separatorBuilder(context, index);
       },
@@ -262,13 +266,13 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
     if (widget.pullToRefresh) {
       child = RefreshIndicator(
-        onRefresh: () => _messageSearchListController.loadData(),
+        onRefresh: () => _messageSearchListController.loadData!(),
         child: child,
       );
     }
 
     child = LazyLoadScrollView(
-      onEndOfPage: () => _messageSearchListController.paginateData(),
+      onEndOfPage: () => _messageSearchListController.paginateData!(),
       child: child,
     );
 

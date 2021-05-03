@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -9,11 +10,11 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ReactionBubble extends StatelessWidget {
   const ReactionBubble({
-    Key key,
-    @required this.reactions,
-    @required this.borderColor,
-    @required this.backgroundColor,
-    @required this.maskColor,
+    Key? key,
+    required this.reactions,
+    required this.borderColor,
+    required this.backgroundColor,
+    required this.maskColor,
     this.reverse = false,
     this.flipTail = false,
     this.highlightOwnReactions = true,
@@ -108,9 +109,8 @@ class ReactionBubble extends StatelessWidget {
     Reaction reaction,
     BuildContext context,
   ) {
-    final reactionIcon = reactionIcons.firstWhere(
+    final reactionIcon = reactionIcons.firstWhereOrNull(
       (r) => r.type == reaction.type,
-      orElse: () => null,
     );
 
     return Padding(
@@ -123,7 +123,7 @@ class ReactionBubble extends StatelessWidget {
               width: 16,
               height: 16,
               color: (!highlightOwnReactions ||
-                      reaction.user.id == StreamChat.of(context).user.id)
+                      reaction.user?.id == StreamChat.of(context).user?.id)
                   ? StreamChatTheme.of(context).colorTheme.accentBlue
                   : StreamChatTheme.of(context)
                       .colorTheme
@@ -134,7 +134,7 @@ class ReactionBubble extends StatelessWidget {
               Icons.help_outline_rounded,
               size: 16,
               color: (!highlightOwnReactions ||
-                      reaction.user.id == StreamChat.of(context).user.id)
+                      reaction.user?.id == StreamChat.of(context).user?.id)
                   ? StreamChatTheme.of(context).colorTheme.accentBlue
                   : StreamChatTheme.of(context)
                       .colorTheme

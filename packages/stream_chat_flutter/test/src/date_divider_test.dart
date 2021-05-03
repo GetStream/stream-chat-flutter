@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
@@ -12,8 +12,8 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -39,10 +39,10 @@ void main() {
       final clientState = MockClientState();
       final themeData = ThemeData.light();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
-      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+      final theme = StreamChatThemeData.fromTheme(themeData);
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
@@ -55,9 +55,9 @@ void main() {
                   user: User(id: 'test'),
                 ),
               ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
         ),
@@ -73,15 +73,15 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.dark();
-      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+      final theme = StreamChatThemeData.fromTheme(themeData);
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
+          streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: Container(
             color: Colors.black,
             child: ReactionBubble(
@@ -91,9 +91,9 @@ void main() {
                   user: User(id: 'test'),
                 ),
               ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
         ),
@@ -109,15 +109,15 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.light();
-      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+      final theme = StreamChatThemeData.fromTheme(themeData);
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
+          streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: Container(
             color: Colors.black,
             child: ReactionBubble(
@@ -135,9 +135,9 @@ void main() {
                   user: User(id: 'test'),
                 ),
               ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
         ),
@@ -153,15 +153,15 @@ void main() {
       final client = MockClient();
       final clientState = MockClientState();
       final themeData = ThemeData.dark();
-      final theme = StreamChatThemeData.getDefaultTheme(themeData);
+      final theme = StreamChatThemeData.fromTheme(themeData);
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
+          streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: Container(
             color: Colors.black,
             child: ReactionBubble(
@@ -179,9 +179,9 @@ void main() {
                   user: User(id: 'test'),
                 ),
               ],
-              borderColor: theme.ownMessageTheme.reactionsBorderColor,
-              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor,
-              maskColor: theme.ownMessageTheme.reactionsMaskColor,
+              borderColor: theme.ownMessageTheme.reactionsBorderColor!,
+              backgroundColor: theme.ownMessageTheme.reactionsBackgroundColor!,
+              maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
         ),
@@ -198,13 +198,13 @@ void main() {
       final clientState = MockClientState();
       final themeData = ThemeData();
 
-      when(client.state).thenReturn(clientState);
-      when(clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
-          streamChatThemeData: StreamChatThemeData.getDefaultTheme(themeData),
+          streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: Container(
             child: ReactionBubble(
               reactions: [

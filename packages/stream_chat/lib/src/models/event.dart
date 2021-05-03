@@ -193,7 +193,7 @@ class EventChannel extends ChannelModel {
           updatedAt: updatedAt,
           deletedAt: deletedAt,
           memberCount: memberCount,
-          extraData: extraData,
+          extraData: extraData ?? {},
         );
 
   /// Create a new instance from a json

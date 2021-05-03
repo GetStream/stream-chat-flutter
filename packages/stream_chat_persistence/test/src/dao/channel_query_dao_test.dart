@@ -168,7 +168,12 @@ void main() {
       // Should match with the inserted channels
       final updatedChannels = await channelQueryDao.getChannels(
         filter: filter,
-        sort: [SortOption('member_count', comparator: sortComparator)],
+        sort: [
+          SortOption(
+            'member_count',
+            comparator: sortComparator,
+          )
+        ],
       );
 
       expect(updatedChannels.length, insertedChannels.length);
@@ -207,8 +212,8 @@ void main() {
 
     test('should return sorted channels using custom field', () async {
       int sortComparator(ChannelModel a, ChannelModel b) {
-        final aData = a.extraData!['test_custom_field'] as int;
-        final bData = b.extraData!['test_custom_field'] as int;
+        final aData = a.extraData['test_custom_field'] as int;
+        final bData = b.extraData['test_custom_field'] as int;
         return bData.compareTo(aData);
       }
 

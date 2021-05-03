@@ -59,10 +59,10 @@ String? _toString(Uint8List? bytes) {
 class AttachmentFile {
   /// Creates a new [AttachmentFile] instance.
   const AttachmentFile({
+    required this.size,
     this.path,
     this.name,
     this.bytes,
-    this.size,
   }) : assert(
           path != null || bytes != null,
           'Either path or bytes should be != null',

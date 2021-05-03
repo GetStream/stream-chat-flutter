@@ -8,8 +8,8 @@ class DateDivider extends StatelessWidget {
   final bool uppercase;
 
   const DateDivider({
-    Key key,
-    @required this.dateTime,
+    Key? key,
+    required this.dateTime,
     this.uppercase = false,
   }) : super(key: key);
 

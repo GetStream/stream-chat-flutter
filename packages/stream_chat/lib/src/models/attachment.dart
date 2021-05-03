@@ -33,7 +33,7 @@ class Attachment extends Equatable {
     this.authorIcon,
     this.assetUrl,
     List<Action>? actions,
-    this.extraData,
+    this.extraData = const {},
     this.file,
     UploadState? uploadState,
   })  : id = id ?? const Uuid().v4(),
@@ -110,8 +110,11 @@ class Attachment extends Equatable {
   late final UploadState uploadState;
 
   /// Map of custom channel extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, Object>? extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object> extraData;
 
   /// The attachment ID.
   ///

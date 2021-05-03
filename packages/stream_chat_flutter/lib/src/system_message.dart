@@ -7,11 +7,11 @@ class SystemMessage extends StatelessWidget {
   final Message message;
 
   /// The function called when tapping on the message when the message is not failed
-  final void Function(Message) onMessageTap;
+  final void Function(Message)? onMessageTap;
 
   const SystemMessage({
-    Key key,
-    @required this.message,
+    Key? key,
+    required this.message,
     this.onMessageTap,
   }) : super(key: key);
 
@@ -22,11 +22,11 @@ class SystemMessage extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         if (onMessageTap != null) {
-          onMessageTap(message);
+          onMessageTap!(message);
         }
       },
       child: Text(
-        message.text,
+        message.text!,
         textAlign: TextAlign.center,
         softWrap: true,
         style: theme.textTheme.captionBold.copyWith(

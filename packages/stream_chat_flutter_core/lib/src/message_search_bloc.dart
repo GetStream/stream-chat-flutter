@@ -59,7 +59,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   /// [messagesStream] and [queryMessagesLoading] stream
   Future<void> search({
     required Filter filter,
-    Map<String, dynamic>? messageFilter,
+    Filter? messageFilter,
     List<SortOption>? sort,
     String? query,
     PaginationParams? pagination,
