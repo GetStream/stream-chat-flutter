@@ -238,7 +238,7 @@ class MessageListView extends StatefulWidget {
   /// Customize the MessageWidget textBuilder
   final void Function(BuildContext context, Message message)? textBuilder;
 
-  final void Function(String link) onLinkTap;
+  final void Function(String link)? onLinkTap;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
