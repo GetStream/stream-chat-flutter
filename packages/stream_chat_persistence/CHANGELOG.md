@@ -1,3 +1,7 @@
+## 1.5.2
+
+* Fix sorting by last_updated
+
 ## 1.5.1
 
 * Improved test coverage to > 95%

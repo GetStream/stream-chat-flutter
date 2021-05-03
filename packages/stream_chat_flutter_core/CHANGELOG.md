@@ -1,3 +1,7 @@
+## 1.5.2
+
+* Update llc dependency
+
 ## 1.5.1
 
 * Improved test coverage to > 90%
