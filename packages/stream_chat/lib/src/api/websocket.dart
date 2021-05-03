@@ -113,7 +113,7 @@ class WebSocket {
   Stream<ConnectionStatus> get connectionStatusStream =>
       _connectionStatusController.stream;
 
-  late final String _path;
+  late String _path;
   int _retryAttempt = 1;
   late WebSocketChannel _channel;
   Timer? _healthCheck, _reconnectionMonitor;
