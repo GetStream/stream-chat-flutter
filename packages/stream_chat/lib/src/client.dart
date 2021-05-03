@@ -546,10 +546,10 @@ class StreamChatClient {
 
     var event = await _chatPersistenceClient?.getConnectionInfo();
 
-    await _ws.connect().then((e) async {
-      await _chatPersistenceClient?.updateConnectionInfo(e);
+    await _ws.connect().then((e) {
+      _chatPersistenceClient?.updateConnectionInfo(e);
       event = e;
-      await resync();
+      resync();
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
       if (err is Map) {

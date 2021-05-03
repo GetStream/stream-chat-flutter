@@ -1,3 +1,7 @@
+## 1.5.3
+
+- Updated `stream_chat_core` dependency
+
 ## 1.5.2
 
 - Fix accessibility text size overflows
