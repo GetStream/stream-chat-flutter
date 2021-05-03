@@ -5,8 +5,6 @@ version: 2.0.0-nullsafety.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
-publish_to: none
-
 environment:
   sdk: '>=2.12.0 <3.0.0'
 
@@ -46,12 +44,6 @@ dependencies:
   path_provider: ^2.0.1
   video_thumbnail: ^0.3.3
   collection: ^1.15.0
-
-dependency_overrides:
-  stream_chat:
-    path: ../stream_chat
-  stream_chat_flutter_core:
-    path: ../stream_chat_flutter_core
 
 flutter:
   assets:
