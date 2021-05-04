@@ -192,8 +192,7 @@ class AttachmentActionsModal extends StatelessWidget {
     VoidCallback? onTap, {
     Color? color,
     Key? key,
-  }) {
-    return Material(
+  }) => Material(
       key: key,
       color: StreamChatTheme.of(context).colorTheme.white,
       child: InkWell(
@@ -216,7 +215,6 @@ class AttachmentActionsModal extends StatelessWidget {
         ),
       ),
     );
-  }
 
   Widget _buildDownloadProgressDialog(
     BuildContext context,
@@ -245,7 +243,7 @@ class AttachmentActionsModal extends StatelessWidget {
               ),
               child: Center(
                 child: progress == null
-                    ? Container(
+                    ? SizedBox(
                         height: 100,
                         width: 100,
                         child: StreamSvgIcon.error(
@@ -253,7 +251,7 @@ class AttachmentActionsModal extends StatelessWidget {
                         ),
                       )
                     : progress.toProgressIndicatorValue == 1.0
-                        ? Container(
+                        ? SizedBox(
                             key: Key('completedIcon'),
                             height: 160,
                             width: 160,
@@ -261,7 +259,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               color: theme.colorTheme.greyGainsboro,
                             ),
                           )
-                        : Container(
+                        : SizedBox(
                             height: 100,
                             width: 100,
                             child: Stack(

@@ -812,8 +812,7 @@ class MessageInputState extends State<MessageInput> {
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
-    return OverlayEntry(builder: (context) {
-      return Positioned(
+    return OverlayEntry(builder: (context) => Positioned(
         bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
         left: 0,
         right: 0,
@@ -821,8 +820,7 @@ class MessageInputState extends State<MessageInput> {
             tween: Tween(begin: 0, end: 1),
             duration: Duration(milliseconds: 300),
             curve: Curves.easeInOutExpo,
-            builder: (context, val, wid) {
-              return Transform.scale(
+            builder: (context, val, wid) => Transform.scale(
                 scale: val,
                 child: Padding(
                   padding: const EdgeInsets.all(8),
@@ -869,7 +867,7 @@ class MessageInputState extends State<MessageInput> {
                                 ],
                               ),
                             ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           ...commands
@@ -878,21 +876,21 @@ class MessageInputState extends State<MessageInput> {
                                   onTap: () {
                                     _setCommand(c);
                                   },
-                                  child: Container(
+                                  child: SizedBox(
                                     height: 40,
                                     child: Row(
                                       children: [
-                                        SizedBox(
+                                        const SizedBox(
                                           width: 16,
                                         ),
                                         _buildCommandIcon(c.name),
-                                        SizedBox(
+                                        const SizedBox(
                                           width: 8,
                                         ),
                                         Text.rich(
                                           TextSpan(
                                             text: c.name.capitalize(),
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontWeight: FontWeight.bold),
                                             children: [
                                               TextSpan(
@@ -922,10 +920,8 @@ class MessageInputState extends State<MessageInput> {
                     ),
                   ),
                 ),
-              );
-            }),
-      );
-    });
+              )),
+      ));
   }
 
   Widget _buildFilePickerSection() {
@@ -1038,12 +1034,12 @@ class MessageInputState extends State<MessageInput> {
               child: Container(
                 decoration: BoxDecoration(
                   color: StreamChatTheme.of(context).colorTheme.white,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
                 ),
-                child: Container(
+                child: SizedBox(
                   width: double.infinity,
                   child: Center(
                     child: Padding(
