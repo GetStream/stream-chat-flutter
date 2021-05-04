@@ -1,21 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
 import 'package:stream_chat_flutter/src/attachment/attachment_upload_state_builder.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../full_screen_media.dart';
-import '../stream_chat_theme.dart';
-import 'attachment_title.dart';
-import 'attachment_widget.dart';
-
+/// Widget for showing an image attachment
 class ImageAttachment extends AttachmentWidget {
-  final MessageTheme messageTheme;
-  final bool showTitle;
-  final ShowMessageCallback? onShowMessage;
-  final ValueChanged<ReturnActionType>? onReturnAction;
-  final VoidCallback? onAttachmentTap;
-
+  /// Constructor for creating a [ImageAttachment] widget
   const ImageAttachment({
     Key? key,
     required Message message,
@@ -32,6 +26,21 @@ class ImageAttachment extends AttachmentWidget {
           attachment: attachment,
           size: size,
         );
+
+  /// [MessageTheme] for showing image title
+  final MessageTheme messageTheme;
+
+  /// Flag for showing title
+  final bool showTitle;
+
+  /// Callback when show message is tapped
+  final ShowMessageCallback? onShowMessage;
+
+  /// Callback when attachment is returned to from other screens
+  final ValueChanged<ReturnActionType>? onReturnAction;
+
+  /// Callback when attachment is tapped
+  final VoidCallback? onAttachmentTap;
 
   @override
   Widget build(BuildContext context) => source.when(

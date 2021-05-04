@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/full_screen_media.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'attachment_title.dart';
-import 'attachment_upload_state_builder.dart';
-import 'attachment_widget.dart';
-
+/// Widget for showing a video attachment
 class VideoAttachment extends AttachmentWidget {
-  final MessageTheme messageTheme;
-  final ShowMessageCallback? onShowMessage;
-  final ValueChanged<ReturnActionType>? onReturnAction;
-  final VoidCallback? onAttachmentTap;
-
+  /// Constructor for creating a [VideoAttachment] widget
   const VideoAttachment({
     Key? key,
     required Message message,
@@ -28,6 +23,18 @@ class VideoAttachment extends AttachmentWidget {
           attachment: attachment,
           size: size,
         );
+
+  /// [MessageTheme] for showing title
+  final MessageTheme messageTheme;
+
+  /// Callback when show message is tapped
+  final ShowMessageCallback? onShowMessage;
+
+  /// Callback when attachment is returned to from other screens
+  final ValueChanged<ReturnActionType>? onReturnAction;
+
+  /// Callback when attachment is tapped
+  final VoidCallback? onAttachmentTap;
 
   @override
   Widget build(BuildContext context) => source.when(

@@ -11,10 +11,7 @@ import '../upload_progress_indicator.dart';
 import 'attachment_widget.dart';
 
 class FileAttachment extends AttachmentWidget {
-  final Widget? title;
-  final Widget? trailing;
-  final VoidCallback? onAttachmentTap;
-
+  /// Constructor for creating a widget when attachment is of type 'file'
   const FileAttachment({
     Key? key,
     required Message message,
@@ -30,8 +27,19 @@ class FileAttachment extends AttachmentWidget {
           size: size,
         );
 
+  /// Title for attachment
+  final Widget? title;
+
+  /// Widget for displaying at the end of attachment (such as a download button)
+  final Widget? trailing;
+
+  /// Callback called when attachment widget is tapped
+  final VoidCallback? onAttachmentTap;
+
+  /// Check if attachment is a video
   bool get isVideoAttachment => attachment.title?.mimeType?.type == 'video';
 
+  /// Check if attachment is an image
   bool get isImageAttachment => attachment.title?.mimeType?.type == 'image';
 
   @override
@@ -56,10 +64,10 @@ class FileAttachment extends AttachmentWidget {
               Container(
                 height: 40,
                 width: 33.33,
-                margin: EdgeInsets.all(8),
+                margin: const EdgeInsets.all(8),
                 child: _getFileTypeImage(context),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -71,12 +79,12 @@ class FileAttachment extends AttachmentWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 3),
+                    const SizedBox(height: 3),
                     _buildSubtitle(context),
                   ],
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               _buildTrailing(context),
             ],
           ),
@@ -85,12 +93,10 @@ class FileAttachment extends AttachmentWidget {
     );
   }
 
-  ShapeBorder _getDefaultShape(BuildContext context) {
-    return RoundedRectangleBorder(
-      side: BorderSide(width: 0, color: Colors.transparent),
-      borderRadius: BorderRadius.circular(8),
-    );
-  }
+  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
+        side: const BorderSide(width: 0, color: Colors.transparent),
+        borderRadius: BorderRadius.circular(8),
+      );
 
   Widget _getFileTypeImage(BuildContext context) {
     if (isImageAttachment) {
@@ -106,10 +112,8 @@ class FileAttachment extends AttachmentWidget {
             return Image.memory(
               attachment.file!.bytes!,
               fit: BoxFit.cover,
-              errorBuilder: (_, obj, trace) {
-                return getFileTypeImage(
-                    attachment.extraData['other'] as String?);
-              },
+              errorBuilder: (_, obj, trace) =>
+                  getFileTypeImage(attachment.extraData['other'] as String?),
             );
           },
           network: () {
@@ -124,10 +128,8 @@ class FileAttachment extends AttachmentWidget {
                   attachment.assetUrl ??
                   attachment.thumbUrl!,
               fit: BoxFit.cover,
-              errorWidget: (_, obj, trace) {
-                return getFileTypeImage(
-                    attachment.extraData['other'] as String?);
-              },
+              errorWidget: (_, obj, trace) =>
+                  getFileTypeImage(attachment.extraData['other'] as String?),
               placeholder: (_, __) {
                 final image = Image.asset(
                   'images/placeholder.png',
@@ -156,27 +158,23 @@ class FileAttachment extends AttachmentWidget {
         child: source.when(
           local: () => VideoThumbnailImage(
             video: attachment.file!.path!,
-            placeholderBuilder: (_) {
-              return Center(
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  child: const CircularProgressIndicator(),
-                ),
-              );
-            },
+            placeholderBuilder: (_) => const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(),
+              ),
+            ),
           ),
           network: () => VideoThumbnailImage(
             video: attachment.assetUrl!,
-            placeholderBuilder: (_) {
-              return Center(
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  child: const CircularProgressIndicator(),
-                ),
-              );
-            },
+            placeholderBuilder: (_) => const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(),
+              ),
+            ),
           ),
         ),
       );
@@ -189,22 +187,22 @@ class FileAttachment extends AttachmentWidget {
     double iconSize = 24.0,
     VoidCallback? onPressed,
     Color? fillColor,
-  }) {
-    return Container(
-      height: iconSize,
-      width: iconSize,
-      child: RawMaterialButton(
-        elevation: 0,
-        highlightElevation: 0,
-        focusElevation: 0,
-        hoverElevation: 0,
-        onPressed: onPressed,
-        fillColor: fillColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: icon,
-      ),
-    );
-  }
+  }) =>
+      SizedBox(
+        height: iconSize,
+        width: iconSize,
+        child: RawMaterialButton(
+          elevation: 0,
+          highlightElevation: 0,
+          focusElevation: 0,
+          hoverElevation: 0,
+          onPressed: onPressed,
+          fillColor: fillColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: icon,
+        ),
+      );
 
   Widget _buildTrailing(BuildContext context) {
     final theme = StreamChatTheme.of(context);
@@ -281,26 +279,22 @@ class FileAttachment extends AttachmentWidget {
       color: theme.colorTheme.grey,
     );
     return attachment.uploadState.when(
-          preparing: () {
-            return UploadProgressIndicator(
-              uploaded: 0,
-              total: double.maxFinite.toInt(),
-              showBackground: false,
-              padding: EdgeInsets.zero,
-              textStyle: textStyle,
-              progressIndicatorColor: theme.colorTheme.accentBlue,
-            );
-          },
-          inProgress: (sent, total) {
-            return UploadProgressIndicator(
-              uploaded: sent,
-              total: total,
-              showBackground: false,
-              padding: EdgeInsets.zero,
-              textStyle: textStyle,
-              progressIndicatorColor: theme.colorTheme.accentBlue,
-            );
-          },
+          preparing: () => UploadProgressIndicator(
+            uploaded: 0,
+            total: double.maxFinite.toInt(),
+            showBackground: false,
+            padding: EdgeInsets.zero,
+            textStyle: textStyle,
+            progressIndicatorColor: theme.colorTheme.accentBlue,
+          ),
+          inProgress: (sent, total) => UploadProgressIndicator(
+            uploaded: sent,
+            total: total,
+            showBackground: false,
+            padding: EdgeInsets.zero,
+            textStyle: textStyle,
+            progressIndicatorColor: theme.colorTheme.accentBlue,
+          ),
           success: () => Text(fileSize(size), style: textStyle),
           failed: (_) => Text('UPLOAD ERROR', style: textStyle),
         ) ??

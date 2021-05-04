@@ -100,7 +100,7 @@ class ChannelInfo extends StatelessWidget {
               child: CircularProgressIndicator(),
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Text(
             'Searching for Network',
             style: textStyle,
