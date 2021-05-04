@@ -43,7 +43,7 @@ class StreamChat extends StatefulWidget {
   /// upon the [Event.type]
   final EventHandler? onBackgroundEventReceived;
 
-  StreamChat({
+  const StreamChat({
     Key? key,
     required this.client,
     required this.child,

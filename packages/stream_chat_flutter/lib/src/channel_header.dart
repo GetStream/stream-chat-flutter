@@ -144,7 +144,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             actions: actions ??
                 <Widget>[
                   Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
+                    padding: const EdgeInsets.only(right: 10),
                     child: Center(
                       child: ChannelImage(
                         borderRadius: StreamChatTheme.of(context)
@@ -169,7 +169,6 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                 height: preferredSize.height,
                 width: preferredSize.width,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     title ??

@@ -201,8 +201,8 @@ class MessageWidget extends StatefulWidget {
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
-      horizontal: 16.0,
-      vertical: 8.0,
+      horizontal: 16,
+      vertical: 8,
     ),
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
@@ -211,8 +211,7 @@ class MessageWidget extends StatefulWidget {
     this.onAttachmentTap,
   })  : attachmentBuilders = {
           'image': (context, message, attachments) {
-            var border = RoundedRectangleBorder(
-              side: BorderSide.none,
+            final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -267,8 +266,7 @@ class MessageWidget extends StatefulWidget {
             );
           },
           'video': (context, message, attachments) {
-            var border = RoundedRectangleBorder(
-              side: BorderSide.none,
+            final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -302,7 +300,6 @@ class MessageWidget extends StatefulWidget {
           },
           'giphy': (context, message, attachments) {
             final border = RoundedRectangleBorder(
-              side: BorderSide.none,
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -329,7 +326,7 @@ class MessageWidget extends StatefulWidget {
             );
           },
           'file': (context, message, attachments) {
-            var border = RoundedRectangleBorder(
+            final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
                   BorderSide(
                     color: StreamChatTheme.of(context).colorTheme.greyWhisper,
@@ -426,7 +423,7 @@ class _MessageWidgetState extends State<MessageWidget>
     super.build(context);
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    var leftPadding =
+    final leftPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
@@ -460,7 +457,6 @@ class _MessageWidgetState extends State<MessageWidget>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
@@ -481,8 +477,8 @@ class _MessageWidgetState extends State<MessageWidget>
                                           BoxConstraints(maxWidth: 22 * 6.0),
                                       child: _buildReactionIndicator(context),
                                     ),
-                                    portalAnchor: Alignment(-1.0, -1.0),
-                                    childAnchor: Alignment(1, -1.0),
+                                    portalAnchor: Alignment(-1, -1),
+                                    childAnchor: Alignment(1, -1),
                                     child: Stack(
                                       clipBehavior: Clip.none,
                                       children: [
@@ -526,7 +522,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                                 )
                                               : Card(
                                                   clipBehavior: Clip.antiAlias,
-                                                  elevation: 0.0,
+                                                  elevation: 0,
                                                   margin: EdgeInsets.symmetric(
                                                     horizontal: (isFailedState
                                                             ? 15.0
@@ -650,9 +646,9 @@ class _MessageWidgetState extends State<MessageWidget>
           children: [
             StreamSvgIcon.eye(
               color: StreamChatTheme.of(context).colorTheme.grey,
-              size: 16.0,
+              size: 16,
             ),
-            SizedBox(width: 8.0),
+            SizedBox(width: 8),
             Text(
               'Only visible to you',
               style: StreamChatTheme.of(context)
@@ -665,7 +661,7 @@ class _MessageWidgetState extends State<MessageWidget>
       );
     }
 
-    var children = <Widget>[];
+    final children = <Widget>[];
 
     final threadParticipants = widget.message.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
@@ -757,18 +753,18 @@ class _MessageWidgetState extends State<MessageWidget>
             return mappedChild;
           },
         ),
-      ].insertBetween(const SizedBox(width: 8.0)),
+      ].insertBetween(const SizedBox(width: 8)),
     );
   }
 
   Widget _buildUrlAttachment() {
-    var urlAttachment = widget.message.attachments
+    final urlAttachment = widget.message.attachments
         .firstWhere((element) => element.ogScrapeUrl != null);
 
-    var host = Uri.parse(urlAttachment.ogScrapeUrl!).host;
-    var splitList = host.split('.');
-    var hostName = splitList.length == 3 ? splitList[1] : splitList[0];
-    var hostDisplayName = urlAttachment.authorName?.capitalize() ??
+    final host = Uri.parse(urlAttachment.ogScrapeUrl!).host;
+    final splitList = host.split('.');
+    final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
+    final hostDisplayName = urlAttachment.authorName?.capitalize() ??
         getWebsiteName(hostName.toLowerCase()) ??
         hostName.capitalize();
 

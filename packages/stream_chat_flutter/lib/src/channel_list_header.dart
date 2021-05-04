@@ -168,8 +168,8 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                           return SvgPicture.asset(
                             'svgs/icon_pen_write.svg',
                             package: 'stream_chat_flutter',
-                            width: 24.0,
-                            height: 24.0,
+                            width: 24,
+                            height: 24,
                             color: color,
                           );
                         },

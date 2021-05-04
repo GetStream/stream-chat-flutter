@@ -111,7 +111,7 @@ class MessageDetails {
 /// Modify it to change the widget appearance.
 class MessageListView extends StatefulWidget {
   /// Instantiate a new MessageListView
-  MessageListView({
+  const MessageListView({
     Key? key,
     this.showScrollToBottom = true,
     this.messageBuilder,
@@ -418,7 +418,6 @@ class _MessageListViewState extends State<MessageListView> {
                 child: ScrollablePositionedList.separated(
                   key: ValueKey(initialIndex! + initialAlignment!),
                   itemPositionsListener: _itemPositionListener,
-                  addAutomaticKeepAlives: true,
                   initialScrollIndex: initialIndex ?? 0,
                   initialAlignment: initialAlignment ?? 0,
                   physics: widget.scrollPhysics,
@@ -437,7 +436,7 @@ class _MessageListViewState extends State<MessageListView> {
                               StreamChatTheme.of(context).colorTheme.bgGradient,
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Text(
                             '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
                             textAlign: TextAlign.center,
@@ -464,7 +463,7 @@ class _MessageListViewState extends State<MessageListView> {
                               dateTime: nextMessage.createdAt.toLocal(),
                             );
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: divider,
                       );
                     }
@@ -554,7 +553,7 @@ class _MessageListViewState extends State<MessageListView> {
         ),
         if (widget.showScrollToBottom) _buildScrollToBottom(),
         Positioned(
-          top: 20.0,
+          top: 20,
           child: ValueListenableBuilder<Iterable<ItemPosition>>(
             valueListenable: _itemPositionListener.itemPositions,
             builder: (context, values, _) {
@@ -660,7 +659,7 @@ class _MessageListViewState extends State<MessageListView> {
                   top: -10,
                   child: CircleAvatar(
                     child: Padding(
-                      padding: const EdgeInsets.all(3.0),
+                      padding: const EdgeInsets.all(3),
                       child: Text(
                         '$unreadCount',
                         style: TextStyle(
@@ -712,7 +711,7 @@ class _MessageListViewState extends State<MessageListView> {
         }
         return Center(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: const CircularProgressIndicator(),
           ),
         );
@@ -799,8 +798,6 @@ class _MessageListViewState extends State<MessageListView> {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
 
     return MessageWidget(
-      showThreadReplyIndicator: false,
-      showInChannelIndicator: false,
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -810,7 +807,7 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap as void Function(Message)?,
       borderRadiusGeometry: BorderRadius.only(
@@ -820,7 +817,7 @@ class _MessageListViewState extends State<MessageListView> {
         bottomRight: Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8.0,
+        vertical: 8,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
@@ -940,7 +937,7 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
       showUsername: showUsername,
@@ -997,7 +994,7 @@ class _MessageListViewState extends State<MessageListView> {
         bottomRight: Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8.0,
+        vertical: 8,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage
@@ -1069,7 +1066,7 @@ class _MessageListViewState extends State<MessageListView> {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
+          padding: const EdgeInsets.only(top: 4),
           child: child,
         ),
       );

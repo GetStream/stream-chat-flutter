@@ -147,8 +147,8 @@ class MessageSearchItem extends StatelessWidget {
       List<Attachment> attachments,
       TextStyle? normalTextStyle,
       TextStyle? mentionsTextStyle) {
-    var textList = text.split(' ');
-    var resList = <TextSpan>[];
+    final textList = text.split(' ');
+    final resList = <TextSpan>[];
     for (var e in textList) {
       if (mentions.isNotEmpty &&
           mentions.any((element) => '@${element.name}' == e)) {
@@ -166,7 +166,7 @@ class MessageSearchItem extends StatelessWidget {
         ));
       } else {
         resList.add(TextSpan(
-          text: e == textList.last ? '$e' : '$e ',
+          text: e == textList.last ? e : '$e ',
           style: normalTextStyle,
         ));
       }

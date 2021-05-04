@@ -61,7 +61,6 @@ class UserItem extends StatelessWidget {
       },
       leading: UserAvatar(
         user: user,
-        showOnlineStatus: true,
         onTap: (user) {
           if (onImageTap != null) {
             onImageTap!(user);

@@ -224,7 +224,6 @@ void main() {
               borderColor: Colors.red,
               backgroundColor: Colors.blue,
               maskColor: Colors.green,
-              highlightOwnReactions: true,
               reverse: true,
               flipTail: true,
               tailCirclesSpacing: 4,

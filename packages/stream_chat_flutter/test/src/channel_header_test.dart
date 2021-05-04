@@ -318,7 +318,6 @@ void main() {
               body: ChannelHeader(
                 showTypingIndicator: false,
                 showBackButton: false,
-                showConnectionStateTile: false,
               ),
             ),
           ),

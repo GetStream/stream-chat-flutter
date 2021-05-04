@@ -113,8 +113,8 @@ class GroupImage extends StatelessWidget {
         child: Container(
           color: selectionColor ??
               StreamChatTheme.of(context).colorTheme.accentBlue,
-          height: 64.0,
-          width: 64.0,
+          height: 64,
+          width: 64,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,

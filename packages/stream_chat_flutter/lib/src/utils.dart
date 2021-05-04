@@ -33,8 +33,8 @@ Future<bool?> showConfirmationDialog(
       context: context,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16.0),
-        topRight: Radius.circular(16.0),
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
       )),
       builder: (context) {
         final effect = StreamChatTheme.of(context).colorTheme.borderTop;
@@ -42,20 +42,20 @@ Future<bool?> showConfirmationDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 26.0),
+              SizedBox(height: 26),
               if (icon != null) icon,
-              SizedBox(height: 26.0),
+              SizedBox(height: 26),
               Text(
                 title,
                 style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
-              SizedBox(height: 7.0),
+              SizedBox(height: 7),
               if (question != null)
                 Text(
                   question,
                   textAlign: TextAlign.center,
                 ),
-              SizedBox(height: 36.0),
+              SizedBox(height: 36),
               Container(
                 color: effect.color!.withOpacity(effect.alpha ?? 1),
                 height: 1,
@@ -126,8 +126,8 @@ Future<bool?> showInfoDialog(
     context: context,
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-      topLeft: Radius.circular(16.0),
-      topRight: Radius.circular(16.0),
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
     )),
     builder: (context) {
       return SafeArea(
@@ -135,11 +135,11 @@ Future<bool?> showInfoDialog(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 26.0,
+              height: 26,
             ),
             if (icon != null) icon,
             SizedBox(
-              height: 26.0,
+              height: 26,
             ),
             Text(
               title,
@@ -147,16 +147,16 @@ Future<bool?> showInfoDialog(
                   StreamChatTheme.of(context).textTheme.headlineBold,
             ),
             SizedBox(
-              height: 7.0,
+              height: 7,
             ),
             if (details != null) Text(details),
             SizedBox(
-              height: 36.0,
+              height: 36,
             ),
             Container(
               color: theme?.colorTheme.black.withOpacity(.08) ??
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
-              height: 1.0,
+              height: 1,
             ),
             Center(
               child: TextButton(
@@ -236,7 +236,7 @@ String fileSize(dynamic size, [int round = 2]) {
    * the optional parameter [round] specifies the number
    * of digits after comma/point (default is 2)
    */
-  final divider = 1024;
+  const divider = 1024;
   int _size;
   try {
     _size = int.parse(size.toString());
@@ -274,21 +274,21 @@ String fileSize(dynamic size, [int round = 2]) {
 
   if (_size < divider * divider * divider * divider * divider &&
       _size % divider == 0) {
-    num r = _size / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} TB';
   }
 
   if (_size < divider * divider * divider * divider * divider) {
-    num r = _size / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} TB';
   }
 
   if (_size < divider * divider * divider * divider * divider * divider &&
       _size % divider == 0) {
-    num r = _size / divider / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(0)} PB';
   } else {
-    num r = _size / divider / divider / divider / divider / divider;
+    final num r = _size / divider / divider / divider / divider / divider;
     return '${r.toStringAsFixed(round)} PB';
   }
 }

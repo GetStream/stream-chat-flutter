@@ -53,7 +53,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
           ? IconButton(
               icon: StreamSvgIcon.close(
                 color: StreamChatTheme.of(context).colorTheme.black,
-                size: 24.0,
+                size: 24,
               ),
               onPressed: onBackPressed,
             )
@@ -79,7 +79,6 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
                 height: preferredSize.height,
                 width: preferredSize.width,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[

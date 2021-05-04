@@ -87,7 +87,7 @@ class QuotedMessageWidget extends StatelessWidget {
   final GestureTapCallback? onTap;
 
   ///
-  QuotedMessageWidget({
+  const QuotedMessageWidget({
     Key? key,
     required this.message,
     required this.messageTheme,
@@ -237,7 +237,7 @@ class QuotedMessageWidget extends StatelessWidget {
 
   ShapeBorder _getDefaultShape(BuildContext context) {
     return RoundedRectangleBorder(
-      side: BorderSide(width: 0.0, color: Colors.transparent),
+      side: BorderSide(width: 0, color: Colors.transparent),
       borderRadius: BorderRadius.circular(8),
     );
   }

@@ -8,12 +8,12 @@ class UrlAttachment extends StatelessWidget {
   final String hostDisplayName;
   final EdgeInsets textPadding;
 
-  UrlAttachment({
+  const UrlAttachment({
     required this.urlAttachment,
     required this.hostDisplayName,
     this.textPadding = const EdgeInsets.symmetric(
-      horizontal: 16.0,
-      vertical: 8.0,
+      horizontal: 16,
+      vertical: 8,
     ),
   });
 
@@ -32,9 +32,9 @@ class UrlAttachment extends StatelessWidget {
           if (urlAttachment.imageUrl != null)
             Container(
               clipBehavior: Clip.antiAliasWithSaveLayer,
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
+              margin: EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Stack(
                 children: [
@@ -44,20 +44,20 @@ class UrlAttachment extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                   Positioned(
-                    left: 0.0,
+                    left: 0,
                     bottom: -1,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16.0),
+                          topRight: Radius.circular(16),
                         ),
                         color: StreamChatTheme.of(context).colorTheme.blueAlice,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          top: 8.0,
-                          left: 8.0,
-                          right: 8.0,
+                          top: 8,
+                          left: 8,
+                          right: 8,
                         ),
                         child: Text(
                           hostDisplayName,

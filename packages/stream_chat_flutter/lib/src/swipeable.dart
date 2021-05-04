@@ -28,7 +28,7 @@ class Swipeable extends StatefulWidget {
 }
 
 class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
-  double _dragExtent = 0.0;
+  double _dragExtent = 0;
   late AnimationController _moveController;
   late AnimationController _iconMoveController;
   late Animation<Offset> _moveAnimation;
@@ -45,15 +45,15 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
         AnimationController(duration: _animationDuration, vsync: this);
     _iconMoveController =
         AnimationController(duration: _animationDuration, vsync: this);
-    _moveAnimation = Tween<Offset>(begin: Offset.zero, end: Offset(1.0, 0.0))
+    _moveAnimation = Tween<Offset>(begin: Offset.zero, end: Offset(1, 0))
         .animate(_moveController);
     _iconTransitionAnimation =
-        Tween<Offset>(begin: Offset(-0.1, 0.0), end: Offset(0.4, 0.0))
+        Tween<Offset>(begin: Offset(-0.1, 0), end: Offset(0.4, 0))
             .animate(_moveController);
     _iconFadeAnimation =
-        Tween<double>(begin: 0.7, end: 1.0).animate(_iconMoveController);
+        Tween<double>(begin: 0.7, end: 1).animate(_iconMoveController);
 
-    final controllerValue = 0.0;
+    const controllerValue = 0.0;
     _moveController.animateTo(controllerValue);
     _iconMoveController.animateTo(controllerValue);
   }
@@ -77,19 +77,19 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
 
     if (_dragExtent.isNegative) return;
 
-    var movePastThresholdPixels = widget.threshold;
+    final movePastThresholdPixels = widget.threshold;
     var newPos = _dragExtent.abs() / context.size!.width;
 
     if (_dragExtent.abs() > movePastThresholdPixels) {
       // how many "thresholds" past the threshold we are. 1 = the threshold 2
       // = two thresholds.
-      var n = _dragExtent.abs() / movePastThresholdPixels;
+      final n = _dragExtent.abs() / movePastThresholdPixels;
 
       // Take the number of thresholds past the threshold, and reduce this
       // number
-      var reducedThreshold = math.pow(n, 0.3);
+      final reducedThreshold = math.pow(n, 0.3);
 
-      var adjustedPixelPos = movePastThresholdPixels * reducedThreshold;
+      final adjustedPixelPos = movePastThresholdPixels * reducedThreshold;
       newPos = adjustedPixelPos / context.size!.width;
 
       if (_dragExtent > 0 && !_pastThreshold) {
@@ -111,8 +111,8 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    _moveController.animateTo(0.0, duration: _animationDuration);
-    _iconMoveController.animateTo(0.0, duration: _animationDuration);
+    _moveController.animateTo(0, duration: _animationDuration);
+    _iconMoveController.animateTo(0, duration: _animationDuration);
     _dragExtent = 0.0;
     if (_pastThreshold && widget.onSwipeEnd != null) {
       widget.onSwipeEnd!();

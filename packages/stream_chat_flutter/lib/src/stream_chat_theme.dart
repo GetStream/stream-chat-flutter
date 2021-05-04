@@ -13,7 +13,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 class StreamChatTheme extends InheritedWidget {
   final StreamChatThemeData data;
 
-  StreamChatTheme({
+  const StreamChatTheme({
     Key? key,
     required this.data,
     required Widget child,
@@ -237,7 +237,7 @@ class StreamChatThemeData {
           lastMessageAt: textTheme.footnote.copyWith(
             color: colorTheme.black.withOpacity(.5),
           ),
-          indicatorIconSize: 16.0),
+          indicatorIconSize: 16),
       channelListHeaderTheme: ChannelListHeaderTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
@@ -543,17 +543,13 @@ class ColorTheme {
       stops: [0, 1],
     ),
     this.borderTop = const Effect(
-        sigmaX: 0,
-        sigmaY: -1,
-        color: Color(0xff000000),
-        blur: 0.0,
-        alpha: 0.08),
+        sigmaX: 0, sigmaY: -1, color: Color(0xff000000), blur: 0, alpha: 0.08),
     this.borderBottom = const Effect(
-        sigmaX: 0, sigmaY: 1, color: Color(0xff000000), blur: 0.0, alpha: 0.08),
+        sigmaX: 0, sigmaY: 1, color: Color(0xff000000), blur: 0, alpha: 0.08),
     this.shadowIconButton = const Effect(
-        sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4.0),
+        sigmaX: 0, sigmaY: 2, color: Color(0xff000000), alpha: 0.5, blur: 4),
     this.modalShadow = const Effect(
-        sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8.0),
+        sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8),
   }) : brightness = Brightness.light;
 
   ColorTheme.dark({
@@ -572,28 +568,28 @@ class ColorTheme {
       sigmaX: 0,
       sigmaY: -1,
       color: Color(0xff141924),
-      blur: 0.0,
+      blur: 0,
     ),
     this.borderBottom = const Effect(
       sigmaX: 0,
       sigmaY: 1,
       color: Color(0xff141924),
-      blur: 0.0,
-      alpha: 1.0,
+      blur: 0,
+      alpha: 1,
     ),
     this.shadowIconButton = const Effect(
       sigmaX: 0,
       sigmaY: 2,
       color: Color(0xff000000),
       alpha: 0.5,
-      blur: 4.0,
+      blur: 4,
     ),
     this.modalShadow = const Effect(
       sigmaX: 0,
       sigmaY: 0,
       color: Color(0xff000000),
       alpha: 1,
-      blur: 8.0,
+      blur: 8,
     ),
     this.highlight = const Color(0xff302d22),
     this.overlay = const Color.fromRGBO(0, 0, 0, 0.4),

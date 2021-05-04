@@ -27,22 +27,19 @@ class ImageGroup extends StatelessWidget {
         direction: Axis.vertical,
         children: <Widget>[
           Flexible(
-            flex: 1,
             fit: FlexFit.tight,
             child: Flex(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               direction: Axis.horizontal,
               children: [
                 Flexible(
-                  flex: 1,
                   fit: FlexFit.tight,
                   child: _buildImage(context, 0),
                 ),
                 Flexible(
-                  flex: 1,
                   fit: FlexFit.tight,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 2.0),
+                    padding: const EdgeInsets.only(left: 2),
                     child: _buildImage(context, 1),
                   ),
                 ),
@@ -52,24 +49,21 @@ class ImageGroup extends StatelessWidget {
           if (images.length >= 3)
             Flexible(
               fit: FlexFit.tight,
-              flex: 1,
               child: Padding(
-                padding: const EdgeInsets.only(top: 2.0),
+                padding: const EdgeInsets.only(top: 2),
                 child: Flex(
                   direction: Axis.horizontal,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     Flexible(
                       fit: FlexFit.tight,
-                      flex: 1,
                       child: _buildImage(context, 2),
                     ),
                     if (images.length >= 4)
                       Flexible(
                         fit: FlexFit.tight,
-                        flex: 1,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 2.0),
+                          padding: const EdgeInsets.only(left: 2),
                           child: Stack(
                             fit: StackFit.expand,
                             children: <Widget>[

@@ -47,7 +47,7 @@ class ChannelPreview extends StatelessWidget {
   /// Widget rendering the sending indicator, by default it uses the [SendingIndicator] widget
   final Widget? sendingIndicator;
 
-  ChannelPreview({
+  const ChannelPreview({
     required this.channel,
     Key? key,
     this.onTap,
@@ -128,7 +128,7 @@ class ChannelPreview extends StatelessWidget {
                           if (lastMessage?.user?.id ==
                               StreamChat.of(context).user?.id) {
                             return Padding(
-                              padding: const EdgeInsets.only(right: 4.0),
+                              padding: const EdgeInsets.only(right: 4),
                               child: SendingIndicator(
                                 message: lastMessage!,
                                 size: channelPreviewTheme.indicatorIconSize,
@@ -167,7 +167,7 @@ class ChannelPreview extends StatelessWidget {
         String stringDate;
         final now = DateTime.now();
 
-        var startOfDay = DateTime(now.year, now.month, now.day);
+        final startOfDay = DateTime(now.year, now.month, now.day);
 
         if (lastMessageAt.millisecondsSinceEpoch >=
             startOfDay.millisecondsSinceEpoch) {
@@ -298,7 +298,7 @@ class ChannelPreview extends StatelessWidget {
         ));
       } else {
         resList.add(TextSpan(
-          text: e == textList.last ? '$e' : '$e ',
+          text: e == textList.last ? e : '$e ',
           style: normalTextStyle,
         ));
       }

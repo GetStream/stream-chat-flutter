@@ -82,47 +82,45 @@ class _ImageFooterState extends State<ImageFooter> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              !showShareButton
-                  ? Container(
-                      width: 48,
-                    )
-                  : IconButton(
-                      icon: StreamSvgIcon.iconShare(
-                        size: 24.0,
-                        color: StreamChatTheme.of(context).colorTheme.black,
-                      ),
-                      onPressed: () async {
-                        final attachment =
-                            widget.mediaAttachments[widget.currentPage];
-                        final url = attachment.imageUrl ??
-                            attachment.assetUrl ??
-                            attachment.thumbUrl!;
-                        final type = attachment.type == 'image'
-                            ? 'jpg'
-                            : url.split('?').first.split('.').last;
-                        final request =
-                            await HttpClient().getUrl(Uri.parse(url));
-                        final response = await request.close();
-                        final bytes =
-                            await consolidateHttpClientResponseBytes(response);
-                        final tmpPath = await getTemporaryDirectory();
-                        final filePath =
-                            '${tmpPath.path}/${attachment.id}.$type';
-                        final file = File(filePath);
-                        await file.writeAsBytes(bytes);
-                        await Share.shareFiles(
-                          [filePath],
-                          mimeTypes: [
-                            'image/$type',
-                          ],
-                        );
-                      },
-                    ),
+              if (!showShareButton)
+                Container(
+                  width: 48,
+                )
+              else
+                IconButton(
+                  icon: StreamSvgIcon.iconShare(
+                    size: 24,
+                    color: StreamChatTheme.of(context).colorTheme.black,
+                  ),
+                  onPressed: () async {
+                    final attachment =
+                        widget.mediaAttachments[widget.currentPage];
+                    final url = attachment.imageUrl ??
+                        attachment.assetUrl ??
+                        attachment.thumbUrl!;
+                    final type = attachment.type == 'image'
+                        ? 'jpg'
+                        : url.split('?').first.split('.').last;
+                    final request = await HttpClient().getUrl(Uri.parse(url));
+                    final response = await request.close();
+                    final bytes =
+                        await consolidateHttpClientResponseBytes(response);
+                    final tmpPath = await getTemporaryDirectory();
+                    final filePath = '${tmpPath.path}/${attachment.id}.$type';
+                    final file = File(filePath);
+                    await file.writeAsBytes(bytes);
+                    await Share.shareFiles(
+                      [filePath],
+                      mimeTypes: [
+                        'image/$type',
+                      ],
+                    );
+                  },
+                ),
               InkWell(
                 onTap: widget.onTitleTap,
                 child: Container(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -156,12 +154,12 @@ class _ImageFooterState extends State<ImageFooter> {
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
       builder: (context) {
-        final crossAxisCount = 3;
+        const crossAxisCount = 3;
         final noOfRowToShowInitially =
             widget.mediaAttachments.length > crossAxisCount ? 2 : 1;
         final size = MediaQuery.of(context).size;
@@ -181,7 +179,7 @@ class _ImageFooterState extends State<ImageFooter> {
                     children: [
                       Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(16),
                           child: Text(
                             'Photos',
                             style: StreamChatTheme.of(context)
@@ -209,8 +207,8 @@ class _ImageFooterState extends State<ImageFooter> {
                       padding: const EdgeInsets.all(1),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 2.0,
-                        crossAxisSpacing: 2.0,
+                        mainAxisSpacing: 2,
+                        crossAxisSpacing: 2,
                       ),
                       itemBuilder: (context, index) {
                         Widget media;
@@ -230,7 +228,7 @@ class _ImageFooterState extends State<ImageFooter> {
                           media = InkWell(
                             onTap: () => widget.mediaSelectedCallBack!(index),
                             child: AspectRatio(
-                              aspectRatio: 1.0,
+                              aspectRatio: 1,
                               child: CachedNetworkImage(
                                 imageUrl: attachment.imageUrl ??
                                     attachment.assetUrl ??
@@ -246,7 +244,7 @@ class _ImageFooterState extends State<ImageFooter> {
                             media,
                             if (widget.message.user != null)
                               Padding(
-                                padding: EdgeInsets.all(8.0),
+                                padding: EdgeInsets.all(8),
                                 child: Container(
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
@@ -254,7 +252,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                     color: Colors.white.withOpacity(0.6),
                                     boxShadow: [
                                       BoxShadow(
-                                        blurRadius: 8.0,
+                                        blurRadius: 8,
                                         color: StreamChatTheme.of(context)
                                             .colorTheme
                                             .black
@@ -287,7 +285,7 @@ class _ImageFooterState extends State<ImageFooter> {
 
   /// Sends the current message
   Future sendMessage() async {
-    var text = _messageController.text.trim();
+    final text = _messageController.text.trim();
 
     final attachments = widget.message.attachments;
 
@@ -311,10 +309,10 @@ class _ImageFooterState extends State<ImageFooter> {
 class IconClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    var leftX = size.width / 5;
-    var rightX = 4 * size.width / 5;
-    var topY = size.height / 5;
-    var bottomY = 4 * size.height / 5;
+    final leftX = size.width / 5;
+    final rightX = 4 * size.width / 5;
+    final topY = size.height / 5;
+    final bottomY = 4 * size.height / 5;
 
     final path = Path();
     path.moveTo(leftX, topY);
@@ -322,7 +320,7 @@ class IconClipper extends CustomClipper<Path> {
     path.lineTo(rightX, bottomY);
     path.lineTo(rightX, topY);
     path.lineTo(leftX, topY);
-    path.lineTo(0.0, 0.0);
+    path.lineTo(0, 0);
     path.close();
     return path;
   }

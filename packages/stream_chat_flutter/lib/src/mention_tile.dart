@@ -20,7 +20,7 @@ class MentionTile extends StatelessWidget {
   /// Widget at the end of tile
   final Widget? trailing;
 
-  MentionTile(
+  const MentionTile(
     this.member, {
     this.title,
     this.subtitle,
@@ -31,12 +31,11 @@ class MentionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56.0,
+      height: 56,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 16.0,
+            width: 16,
           ),
           leading ??
               UserAvatar(
@@ -49,7 +48,7 @@ class MentionTile extends StatelessWidget {
                 user: member.user!,
               ),
           SizedBox(
-            width: 8.0,
+            width: 8,
           ),
           Expanded(
             child: Align(
@@ -60,13 +59,13 @@ class MentionTile extends StatelessWidget {
                 children: [
                   title ??
                       Text(
-                        '${member.user!.name}',
+                        member.user!.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: StreamChatTheme.of(context).textTheme.bodyBold,
                       ),
                   SizedBox(
-                    height: 2.0,
+                    height: 2,
                   ),
                   subtitle ??
                       Text(
@@ -88,8 +87,8 @@ class MentionTile extends StatelessWidget {
           trailing ??
               Padding(
                 padding: const EdgeInsets.only(
-                  right: 18.0,
-                  left: 8.0,
+                  right: 18,
+                  left: 8,
                 ),
                 child: StreamSvgIcon.mentions(
                   color: StreamChatTheme.of(context).colorTheme.accentBlue,

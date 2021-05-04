@@ -42,27 +42,25 @@ class AttachmentActionsModal extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.maybePop(context),
-      child: _buildPage(context),
-    );
-  }
+  Widget build(BuildContext context) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => Navigator.maybePop(context),
+        child: _buildPage(context),
+      );
 
   Widget _buildPage(context) {
     final theme = StreamChatTheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        SizedBox(height: kToolbarHeight),
+        const SizedBox(height: kToolbarHeight),
         Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.only(right: 8),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.5,
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Container(
               child: Column(
@@ -73,7 +71,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     context,
                     'Reply',
                     StreamSvgIcon.iconCurveLineLeftUp(
-                      size: 24.0,
+                      size: 24,
                       color: theme.colorTheme.grey,
                     ),
                     () {
@@ -84,7 +82,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     context,
                     'Show in Chat',
                     StreamSvgIcon.eye(
-                      size: 24.0,
+                      size: 24,
                       color: theme.colorTheme.black,
                     ),
                     onShowMessage,
@@ -93,7 +91,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     context,
                     'Save ${message.attachments[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                     StreamSvgIcon.iconSave(
-                      size: 24.0,
+                      size: 24,
                       color: theme.colorTheme.grey,
                     ),
                     () {
@@ -144,7 +142,7 @@ class AttachmentActionsModal extends StatelessWidget {
                       context,
                       'Delete',
                       StreamSvgIcon.delete(
-                        size: 24.0,
+                        size: 24,
                         color: theme.colorTheme.accentRed,
                       ),
                       () {
@@ -201,7 +199,7 @@ class AttachmentActionsModal extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           child: Row(
             children: [
               icon,
@@ -271,7 +269,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               children: [
                                 CircularProgressIndicator(
                                   value: progress.toProgressIndicatorValue,
-                                  strokeWidth: 8.0,
+                                  strokeWidth: 8,
                                   valueColor: AlwaysStoppedAnimation(
                                     theme.colorTheme.accentBlue,
                                   ),

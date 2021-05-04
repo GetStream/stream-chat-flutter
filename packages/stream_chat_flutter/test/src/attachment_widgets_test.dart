@@ -26,8 +26,8 @@ void main() {
               child: Container(
                 child: FileAttachment(
                   size: Size(
-                    300.0,
-                    300.0,
+                    300,
+                    300,
                   ),
                   message: Message(),
                   attachment: Attachment(

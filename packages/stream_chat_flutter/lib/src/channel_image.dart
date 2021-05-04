@@ -158,30 +158,29 @@ class ChannelImage extends StatelessWidget {
               alignment: Alignment.center,
               fit: StackFit.expand,
               children: <Widget>[
-                image != null
-                    ? CachedNetworkImage(
-                        imageUrl: image,
-                        errorWidget: (_, __, ___) {
-                          return Center(
-                            child: Text(
-                              snapshot.data?.containsKey('name') ?? false
-                                  ? snapshot.data!['name'][0]
-                                  : '',
-                              style: TextStyle(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        },
-                        fit: BoxFit.cover,
-                      )
-                    : StreamChatTheme.of(context).defaultChannelImage(
-                        context,
-                        channel,
-                      ),
+                if (image != null)
+                  CachedNetworkImage(
+                    imageUrl: image,
+                    errorWidget: (_, __, ___) {
+                      return Center(
+                        child: Text(
+                          snapshot.data?.containsKey('name') ?? false
+                              ? snapshot.data!['name'][0]
+                              : '',
+                          style: TextStyle(
+                            color: StreamChatTheme.of(context).colorTheme.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                    fit: BoxFit.cover,
+                  )
+                else
+                  StreamChatTheme.of(context).defaultChannelImage(
+                    context,
+                    channel,
+                  ),
                 Material(
                   color: Colors.transparent,
                   child: InkWell(

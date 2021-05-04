@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Widget to build in progress
 typedef InProgressBuilder = Widget Function(BuildContext, int, int);
+
+/// Widget to build on failure
 typedef FailedBuilder = Widget Function(BuildContext, String);
 
+/// Widget to display attachment upload state
 class AttachmentUploadStateBuilder extends StatelessWidget {
   final Message message;
   final Attachment attachment;
@@ -87,7 +91,6 @@ class _IconButton extends StatelessWidget {
         elevation: 0,
         highlightElevation: 0,
         focusElevation: 0,
-        disabledElevation: 0,
         hoverElevation: 0,
         onPressed: onPressed,
         fillColor:
@@ -237,7 +240,7 @@ class _SuccessState extends StatelessWidget {
       alignment: Alignment.topRight,
       child: CircleAvatar(
         backgroundColor: StreamChatTheme.of(context).colorTheme.overlayDark,
-        maxRadius: 12.0,
+        maxRadius: 12,
         child: StreamSvgIcon.check(
           color: StreamChatTheme.of(context).colorTheme.white,
         ),

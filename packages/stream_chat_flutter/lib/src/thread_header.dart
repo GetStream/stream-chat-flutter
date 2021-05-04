@@ -118,7 +118,6 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           height: preferredSize.height,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               title ??
@@ -133,7 +132,6 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
               subtitle ??
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(

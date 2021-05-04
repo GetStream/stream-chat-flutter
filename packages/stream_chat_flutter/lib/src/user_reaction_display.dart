@@ -23,7 +23,7 @@ class UserReactionDisplay extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: reactionToEmoji.keys.map((reactionType) {
-          var firstUserReaction = message.latestReactions!
+          final firstUserReaction = message.latestReactions!
               .firstWhere((element) => element.type == reactionType,
                   orElse: () {
                     return null;

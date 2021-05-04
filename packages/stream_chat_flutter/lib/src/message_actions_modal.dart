@@ -119,7 +119,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           ),
           if (_showActions)
             TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
+              tween: Tween(begin: 0, end: 1),
               duration: Duration(milliseconds: 300),
               curve: Curves.easeInOutBack,
               builder: (context, val, snapshot) {
@@ -128,7 +128,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   child: Center(
                     child: SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8),
                         child: Column(
                           crossAxisAlignment: widget.reverse
                               ? CrossAxisAlignment.end
@@ -146,7 +146,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                         : (divFactor > 1.0
                                             ? 0.0
                                             : -(1.0 - divFactor)),
-                                    0.0),
+                                    0),
                                 child: ReactionPicker(
                                   message: widget.message,
                                 ),
@@ -166,7 +166,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 messageTheme: widget.messageTheme,
                                 showReactions: false,
                                 showUsername: false,
-                                showThreadReplyIndicator: false,
                                 showReplyMessage: false,
                                 showUserAvatar: widget.showUserAvatar,
                                 attachmentPadding: EdgeInsets.all(
@@ -176,7 +175,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                 translateUserAvatar: false,
                                 padding: const EdgeInsets.all(0),
                                 textPadding: EdgeInsets.symmetric(
-                                  vertical: 8.0,
+                                  vertical: 8,
                                   horizontal: widget.message.text!.isOnlyEmoji
                                       ? 0
                                       : 16.0,
@@ -185,7 +184,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                     widget.showReactions &&
                                         (widget.message.status ==
                                             MessageSendingStatus.sent),
-                                showInChannelIndicator: false,
                                 showSendingIndicator: false,
                                 shape: widget.messageShape,
                                 attachmentShape: widget.attachmentShape,
@@ -269,7 +267,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         messageAction.onTap?.call(widget.message);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             messageAction.leading ?? Offstage(),
@@ -289,7 +287,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       title: 'Flag Message',
       icon: StreamSvgIcon.flag(
         color: StreamChatTheme.of(context).colorTheme.accentRed,
-        size: 24.0,
+        size: 24,
       ),
       question:
           'Do you want to send a copy of this message to a\nmoderator for further investigation?',
@@ -305,7 +303,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           context,
           icon: StreamSvgIcon.flag(
             color: theme.colorTheme.accentRed,
-            size: 24.0,
+            size: 24,
           ),
           details: 'The message has been reported to a moderator.',
           title: 'Message flagged',
@@ -317,7 +315,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             context,
             icon: StreamSvgIcon.flag(
               color: theme.colorTheme.accentRed,
-              size: 24.0,
+              size: 24,
             ),
             details: 'The message has been reported to a moderator.',
             title: 'Message flagged',
@@ -339,7 +337,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       title: 'Delete message',
       icon: StreamSvgIcon.flag(
         color: StreamChatTheme.of(context).colorTheme.accentRed,
-        size: 24.0,
+        size: 24,
       ),
       question: 'Are you sure you want to permanently delete this\nmessage?',
       okText: 'DELETE',
@@ -365,7 +363,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       context,
       icon: StreamSvgIcon.error(
         color: StreamChatTheme.of(context).colorTheme.accentRed,
-        size: 24.0,
+        size: 24,
       ),
       details: 'The operation couldn\'t be completed.',
       title: 'Something went wrong',
@@ -382,7 +380,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.reply(
@@ -401,9 +399,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   Widget _buildFlagButton(BuildContext context) {
     return InkWell(
-      onTap: () => _showFlagDialog(),
+      onTap: _showFlagDialog,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.iconFlag(
@@ -424,9 +422,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final isDeleteFailed =
         widget.message.status == MessageSendingStatus.failed_delete;
     return InkWell(
-      onTap: () => _showDeleteDialog(),
+      onTap: _showDeleteDialog,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.delete(
@@ -453,7 +451,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         Navigator.pop(context);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.copy(
@@ -478,7 +476,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         _showEditBottomSheet(context);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.edit(
@@ -509,7 +507,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.circleUp(
@@ -555,7 +553,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: StreamSvgIcon.edit(
                         color: StreamChatTheme.of(context)
                             .colorTheme
@@ -574,16 +572,17 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   ],
                 ),
               ),
-              widget.editMessageInputBuilder != null
-                  ? widget.editMessageInputBuilder!(context, widget.message)
-                  : MessageInput(
-                      editMessage: widget.message,
-                      preMessageSending: (m) {
-                        FocusScope.of(context).unfocus();
-                        Navigator.pop(context);
-                        return m;
-                      },
-                    ),
+              if (widget.editMessageInputBuilder != null)
+                widget.editMessageInputBuilder!(context, widget.message)
+              else
+                MessageInput(
+                  editMessage: widget.message,
+                  preMessageSending: (m) {
+                    FocusScope.of(context).unfocus();
+                    Navigator.pop(context);
+                    return m;
+                  },
+                ),
             ],
           ),
         );
@@ -600,7 +599,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
         child: Row(
           children: [
             StreamSvgIcon.thread(

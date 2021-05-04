@@ -53,7 +53,7 @@ class DeletedMessage extends StatelessWidget {
             ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            vertical: 8.0,
+            vertical: 8,
             horizontal: 16,
           ),
           child: Transform(

@@ -33,8 +33,8 @@ class UnreadIndicator extends StatelessWidget {
                 .unreadCounterColor,
             child: Padding(
               padding: const EdgeInsets.only(
-                left: 5.0,
-                right: 5.0,
+                left: 5,
+                right: 5,
                 top: 2,
                 bottom: 1,
               ),

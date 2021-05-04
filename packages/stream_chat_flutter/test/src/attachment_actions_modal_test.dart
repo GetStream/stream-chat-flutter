@@ -239,7 +239,7 @@ void main() {
         ),
       );
       await tester.tap(find.text('Show in Chat'));
-      verify(() => onShowMessage.call()).called(1);
+      verify(onShowMessage.call).called(1);
     },
   );
 

@@ -10,7 +10,7 @@ class UploadProgressIndicator extends StatelessWidget {
   final bool showBackground;
   final TextStyle? textStyle;
 
-  UploadProgressIndicator({
+  const UploadProgressIndicator({
     Key? key,
     required this.uploaded,
     required this.total,

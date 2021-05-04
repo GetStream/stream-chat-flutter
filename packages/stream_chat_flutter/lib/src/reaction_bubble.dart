@@ -40,7 +40,6 @@ class ReactionBubble extends StatelessWidget {
       alignment: Alignment.center,
       child: Stack(
         alignment: Alignment.center,
-        fit: StackFit.loose,
         children: [
           Transform.translate(
             offset: Offset(reverse ? offset : -offset, 0),
@@ -115,7 +114,7 @@ class ReactionBubble extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: 4.0,
+        horizontal: 4,
       ),
       child: reactionIcon != null
           ? StreamSvgIcon(
@@ -239,9 +238,9 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
-    final dy = -2.2;
-    final startAngle = 1.1;
-    final sweepAngle = 1.2;
+    const dy = -2.2;
+    const startAngle = 1.1;
+    const sweepAngle = 1.2;
     final path = Path();
     path.addArc(
       Rect.fromCircle(
@@ -259,9 +258,9 @@ class ReactionBubblePainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 1;
 
-    final dy = -2.2;
-    final startAngle = 1;
-    final sweepAngle = 1.3;
+    const dy = -2.2;
+    const startAngle = 1;
+    const sweepAngle = 1.3;
     final path = Path();
     path.addArc(
       Rect.fromCircle(
@@ -280,9 +279,9 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.fill;
 
-    final dy = -2.2;
-    final startAngle = 1.1;
-    final sweepAngle = 1.2;
+    const dy = -2.2;
+    const startAngle = 1.1;
+    const sweepAngle = 1.2;
     final path = Path();
     path.addArc(
       Rect.fromCircle(

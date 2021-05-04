@@ -52,10 +52,10 @@ class GiphyAttachment extends AttachmentWidget {
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-              topRight: Radius.circular(16.0),
-              bottomRight: Radius.circular(0.0),
-              topLeft: Radius.circular(16.0),
-              bottomLeft: Radius.circular(16.0),
+              topRight: Radius.circular(16),
+              bottomRight: Radius.circular(0),
+              topLeft: Radius.circular(16),
+              bottomLeft: Radius.circular(16),
             ),
           ),
           child: Column(
@@ -63,7 +63,7 @@ class GiphyAttachment extends AttachmentWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
                     StreamSvgIcon.giphyIcon(),
@@ -91,7 +91,7 @@ class GiphyAttachment extends AttachmentWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(2),
                 child: GestureDetector(
                   onTap: () => onAttachmentTap ?? _onImageTap(context),
                   child: CachedNetworkImage(
@@ -123,8 +123,6 @@ class GiphyAttachment extends AttachmentWidget {
                 height: 0.5,
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Container(
@@ -156,7 +154,7 @@ class GiphyAttachment extends AttachmentWidget {
                         .colorTheme
                         .black
                         .withOpacity(0.2),
-                    height: 50.0,
+                    height: 50,
                   ),
                   Expanded(
                     child: Container(
@@ -189,7 +187,7 @@ class GiphyAttachment extends AttachmentWidget {
                         .colorTheme
                         .black
                         .withOpacity(0.2),
-                    height: 50.0,
+                    height: 50,
                   ),
                   Expanded(
                     child: Container(
@@ -217,11 +215,11 @@ class GiphyAttachment extends AttachmentWidget {
             ],
           ),
         ),
-        SizedBox(height: 4.0),
+        SizedBox(height: 4),
         Align(
           alignment: Alignment.centerRight,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -230,10 +228,10 @@ class GiphyAttachment extends AttachmentWidget {
                       .colorTheme
                       .black
                       .withOpacity(0.5),
-                  size: 16.0,
+                  size: 16,
                 ),
                 SizedBox(
-                  width: 8.0,
+                  width: 8,
                 ),
                 Text(
                   'Only visible to you',
@@ -332,8 +330,8 @@ class GiphyAttachment extends AttachmentWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 4.0,
+                    horizontal: 8,
+                    vertical: 4,
                   ),
                   child: Row(
                     children: [

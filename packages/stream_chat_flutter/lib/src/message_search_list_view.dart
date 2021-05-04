@@ -189,10 +189,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               },
             );
           },
-      childBuilder: widget.childBuilder ??
-          (list) {
-            return _buildListView(list);
-          },
+      childBuilder: widget.childBuilder ?? _buildListView,
     );
   }
 
@@ -228,7 +225,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   .accentRed
                   .withOpacity(.2),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: Text('Error loading messages'),
                 ),

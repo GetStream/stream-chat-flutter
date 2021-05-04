@@ -13,7 +13,7 @@ class StreamNeumorphicButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(8.0),
+      margin: EdgeInsets.all(8),
       height: 40,
       width: 40,
       decoration: BoxDecoration(
@@ -22,15 +22,12 @@ class StreamNeumorphicButton extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade700,
-            offset: Offset(0, 1.0),
+            offset: Offset(0, 1),
             blurRadius: 0.5,
-            spreadRadius: 0,
           ),
           BoxShadow(
             color: Colors.white,
-            offset: Offset.zero,
             blurRadius: 0.5,
-            spreadRadius: 0,
           ),
         ],
       ),

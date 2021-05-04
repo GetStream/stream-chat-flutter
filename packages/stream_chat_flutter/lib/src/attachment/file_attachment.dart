@@ -42,7 +42,7 @@ class FileAttachment extends AttachmentWidget {
         onTap: onAttachmentTap,
         child: Container(
           width: size?.width ?? 100,
-          height: 56.0,
+          height: 56,
           decoration: BoxDecoration(
             color: colorTheme.white,
             borderRadius: BorderRadius.circular(12),
@@ -54,12 +54,12 @@ class FileAttachment extends AttachmentWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                height: 40.0,
+                height: 40,
                 width: 33.33,
-                margin: EdgeInsets.all(8.0),
+                margin: EdgeInsets.all(8),
                 child: _getFileTypeImage(context),
               ),
-              SizedBox(width: 8.0),
+              SizedBox(width: 8),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -71,12 +71,12 @@ class FileAttachment extends AttachmentWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 3.0),
+                    SizedBox(height: 3),
                     _buildSubtitle(context),
                   ],
                 ),
               ),
-              SizedBox(width: 8.0),
+              SizedBox(width: 8),
               _buildTrailing(context),
             ],
           ),
@@ -87,7 +87,7 @@ class FileAttachment extends AttachmentWidget {
 
   ShapeBorder _getDefaultShape(BuildContext context) {
     return RoundedRectangleBorder(
-      side: BorderSide(width: 0.0, color: Colors.transparent),
+      side: BorderSide(width: 0, color: Colors.transparent),
       borderRadius: BorderRadius.circular(8),
     );
   }
@@ -159,8 +159,8 @@ class FileAttachment extends AttachmentWidget {
             placeholderBuilder: (_) {
               return Center(
                 child: Container(
-                  width: 20.0,
-                  height: 20.0,
+                  width: 20,
+                  height: 20,
                   child: const CircularProgressIndicator(),
                 ),
               );
@@ -171,8 +171,8 @@ class FileAttachment extends AttachmentWidget {
             placeholderBuilder: (_) {
               return Center(
                 child: Container(
-                  width: 20.0,
-                  height: 20.0,
+                  width: 20,
+                  height: 20,
                   child: const CircularProgressIndicator(),
                 ),
               );
@@ -197,7 +197,6 @@ class FileAttachment extends AttachmentWidget {
         elevation: 0,
         highlightElevation: 0,
         focusElevation: 0,
-        disabledElevation: 0,
         hoverElevation: 0,
         onPressed: onPressed,
         fillColor: fillColor,
@@ -214,7 +213,7 @@ class FileAttachment extends AttachmentWidget {
     var trailingWidget = trailing;
     trailingWidget ??= attachment.uploadState.when(
           preparing: () => Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: _buildButton(
               icon: StreamSvgIcon.close(color: theme.colorTheme.white),
               fillColor: theme.colorTheme.overlayDark,
@@ -222,7 +221,7 @@ class FileAttachment extends AttachmentWidget {
             ),
           ),
           inProgress: (_, __) => Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: _buildButton(
               icon: StreamSvgIcon.close(color: theme.colorTheme.white),
               fillColor: theme.colorTheme.overlayDark,
@@ -230,15 +229,15 @@ class FileAttachment extends AttachmentWidget {
             ),
           ),
           success: () => Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: CircleAvatar(
               backgroundColor: theme.colorTheme.accentBlue,
-              maxRadius: 12.0,
+              maxRadius: 12,
               child: StreamSvgIcon.check(color: theme.colorTheme.white),
             ),
           ),
           failed: (_) => Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: _buildButton(
               icon: StreamSvgIcon.retry(color: theme.colorTheme.white),
               fillColor: theme.colorTheme.overlayDark,
@@ -251,7 +250,6 @@ class FileAttachment extends AttachmentWidget {
         ) ??
         IconButton(
           icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
-          padding: const EdgeInsets.all(8),
           visualDensity: VisualDensity.compact,
           splashRadius: 16,
           onPressed: () {
@@ -262,7 +260,6 @@ class FileAttachment extends AttachmentWidget {
     if (message.status == MessageSendingStatus.sent) {
       trailingWidget = IconButton(
         icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
-        padding: const EdgeInsets.all(8),
         visualDensity: VisualDensity.compact,
         splashRadius: 16,
         onPressed: () {
@@ -304,9 +301,9 @@ class FileAttachment extends AttachmentWidget {
               progressIndicatorColor: theme.colorTheme.accentBlue,
             );
           },
-          success: () => Text('${fileSize(size, 2)}', style: textStyle),
+          success: () => Text(fileSize(size), style: textStyle),
           failed: (_) => Text('UPLOAD ERROR', style: textStyle),
         ) ??
-        Text('${fileSize(size)}', style: textStyle);
+        Text(fileSize(size), style: textStyle);
   }
 }

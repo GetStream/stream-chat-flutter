@@ -30,7 +30,6 @@ class StreamBackButton extends StatelessWidget {
           elevation: 0,
           highlightElevation: 0,
           focusElevation: 0,
-          disabledElevation: 0,
           hoverElevation: 0,
           onPressed: () {
             if (onPressed != null) {
@@ -39,7 +38,7 @@ class StreamBackButton extends StatelessWidget {
               Navigator.maybePop(context);
             }
           },
-          padding: const EdgeInsets.all(14.0),
+          padding: const EdgeInsets.all(14),
           child: StreamSvgIcon.left(
             size: 24,
             color: StreamChatTheme.of(context).colorTheme.black,

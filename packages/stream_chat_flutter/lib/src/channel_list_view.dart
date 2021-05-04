@@ -54,7 +54,7 @@ typedef ViewInfoCallback = void Function(Channel);
 /// Modify it to change the widget appearance.
 class ChannelListView extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  ChannelListView({
+  const ChannelListView({
     Key? key,
     this.filter,
     this.options,
@@ -248,7 +248,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: StreamSvgIcon.message(
                         size: 136,
                         color: StreamChatTheme.of(context)
@@ -257,7 +257,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: Text(
                         'Let’s start chatting!',
                         style: StreamChatTheme.of(context).textTheme.headline,
@@ -265,7 +265,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
+                        vertical: 8,
                         horizontal: 52,
                       ),
                       child: Text(
@@ -340,7 +340,7 @@ class _ChannelListViewState extends State<ChannelListView> {
         highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
-            SizedBox(height: 4.0),
+            SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -358,7 +358,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               ],
             ),
             SizedBox(
-              height: 16.0,
+              height: 16,
             ),
           ],
         ),
@@ -441,7 +441,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                 WidgetSpan(
                   child: Padding(
                     padding: const EdgeInsets.only(
-                      right: 2.0,
+                      right: 2,
                     ),
                     child: Icon(Icons.error_outline),
                   ),
@@ -477,7 +477,6 @@ class _ChannelListViewState extends State<ChannelListView> {
               enabled: widget.swipeToAction,
               actionPane: SlidableBehindActionPane(),
               actionExtentRatio: 0.12,
-              closeOnScroll: true,
               secondaryActions: <Widget>[
                 IconSlideAction(
                   color: backgroundColor,
@@ -589,7 +588,6 @@ class _ChannelListViewState extends State<ChannelListView> {
       key: ValueKey<String>('CHANNEL-${channel.id}'),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ChannelImage(
             channel: channel,
@@ -634,7 +632,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   .accentRed
                   .withOpacity(.2),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: Text('Error loading channels'),
                 ),
@@ -644,7 +642,7 @@ class _ChannelListViewState extends State<ChannelListView> {
           return snapshot.data!
               ? Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: const CircularProgressIndicator(),
                   ),
                 )
@@ -653,7 +651,7 @@ class _ChannelListViewState extends State<ChannelListView> {
   }
 
   Widget _separatorBuilder(context, i) {
-    var effect = StreamChatTheme.of(context).colorTheme.borderBottom;
+    final effect = StreamChatTheme.of(context).colorTheme.borderBottom;
 
     return Container(
       height: 1,

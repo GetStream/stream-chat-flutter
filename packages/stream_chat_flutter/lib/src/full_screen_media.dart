@@ -150,7 +150,7 @@ class _FullScreenMediaState extends State<FullScreenMedia>
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                            vertical: 50.0,
+                            vertical: 50,
                           ),
                           child: Chewie(
                             controller: controller.chewieController!,

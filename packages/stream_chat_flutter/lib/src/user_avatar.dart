@@ -42,7 +42,6 @@ class UserAvatar extends StatelessWidget {
     Widget avatar = FittedBox(
       fit: BoxFit.cover,
       child: ClipRRect(
-        clipBehavior: Clip.antiAlias,
         borderRadius: borderRadius ??
             streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
         child: Container(
@@ -97,7 +96,7 @@ class UserAvatar extends StatelessWidget {
                   type: MaterialType.circle,
                   color: streamChatTheme.colorTheme.white,
                   child: Container(
-                    margin: const EdgeInsets.all(2.0),
+                    margin: const EdgeInsets.all(2),
                     constraints: onlineIndicatorConstraints ??
                         BoxConstraints.tightFor(
                           width: 8,

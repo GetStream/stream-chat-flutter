@@ -49,7 +49,7 @@ class _ReactionPickerState extends State<ReactionPicker>
     }
 
     return TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0.0, end: 1.0),
+        tween: Tween(begin: 0, end: 1),
         curve: Curves.easeInOutBack,
         duration: Duration(milliseconds: 500),
         builder: (context, val, wid) {
@@ -61,8 +61,8 @@ class _ReactionPickerState extends State<ReactionPicker>
               clipBehavior: Clip.hardEdge,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
+                  horizontal: 16,
+                  vertical: 8,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +74,7 @@ class _ReactionPickerState extends State<ReactionPicker>
                                 ?.indexWhere((reaction) =>
                                     reaction.type == reactionIcon.type) ??
                             -1;
-                        var index = reactionIcons.indexOf(reactionIcon);
+                        final index = reactionIcons.indexOf(reactionIcon);
 
                         return ConstrainedBox(
                           constraints: BoxConstraints.tightFor(
@@ -83,8 +83,6 @@ class _ReactionPickerState extends State<ReactionPicker>
                           ),
                           child: RawMaterialButton(
                             elevation: 0,
-                            padding: const EdgeInsets.all(0),
-                            clipBehavior: Clip.none,
                             shape: ContinuousRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -110,7 +108,6 @@ class _ReactionPickerState extends State<ReactionPicker>
                                 animation: animations[index],
                                 builder: (context, val) {
                                   return Transform.scale(
-                                    alignment: Alignment.center,
                                     scale: animations[index].value,
                                     child: StreamSvgIcon(
                                       assetName: reactionIcon.assetName,

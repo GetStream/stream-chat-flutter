@@ -151,7 +151,7 @@ class _UserListViewState extends State<UserListView>
 
   @override
   Widget build(BuildContext context) {
-    var child = UserListCore(
+    final child = UserListCore(
       errorBuilder: widget.errorBuilder as Widget Function(Object)? ??
           (err) {
             return _buildError(err as Error);
@@ -225,7 +225,7 @@ class _UserListViewState extends State<UserListView>
                 WidgetSpan(
                   child: Padding(
                     padding: const EdgeInsets.only(
-                      right: 2.0,
+                      right: 2,
                     ),
                     child: Icon(Icons.error_outline),
                   ),
@@ -237,7 +237,7 @@ class _UserListViewState extends State<UserListView>
           ),
           Padding(
             padding: const EdgeInsets.only(
-              top: 16.0,
+              top: 16,
             ),
             child: Text(message),
           ),
@@ -313,7 +313,7 @@ class _UserListViewState extends State<UserListView>
             color:
                 StreamChatTheme.of(context).colorTheme.black.withOpacity(0.05),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Text(
                 header,
                 style: TextStyle(
@@ -360,7 +360,6 @@ class _UserListViewState extends State<UserListView>
                 ? widget.userItemBuilder!(context, user, selected)
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       UserAvatar(
                         user: user,
@@ -414,7 +413,7 @@ class _UserListViewState extends State<UserListView>
                   .accentRed
                   .withOpacity(.2),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: Text('Error loading users'),
                 ),

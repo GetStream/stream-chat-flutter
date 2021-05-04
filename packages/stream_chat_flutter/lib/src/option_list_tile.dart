@@ -11,7 +11,7 @@ class OptionListTile extends StatelessWidget {
   final Color? separatorColor;
   final TextStyle? titleTextStyle;
 
-  OptionListTile({
+  const OptionListTile({
     this.title,
     this.leading,
     this.trailing,
@@ -29,12 +29,12 @@ class OptionListTile extends StatelessWidget {
         Container(
           color: separatorColor ??
               StreamChatTheme.of(context).colorTheme.greyGainsboro,
-          height: 1.0,
+          height: 1,
         ),
         Material(
           color: tileColor ?? StreamChatTheme.of(context).colorTheme.white,
           child: Container(
-            height: 63.0,
+            height: 63,
             child: InkWell(
               onTap: onTap,
               child: Row(
@@ -42,7 +42,7 @@ class OptionListTile extends StatelessWidget {
                   if (leading != null) Center(child: leading),
                   if (leading == null)
                     SizedBox(
-                      width: 16.0,
+                      width: 16,
                     ),
                   Expanded(
                     flex: 4,
@@ -62,7 +62,7 @@ class OptionListTile extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
+                      padding: const EdgeInsets.only(right: 16),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: trailing ?? Container(),

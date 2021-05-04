@@ -25,7 +25,6 @@ class StreamSvgIcon extends StatelessWidget {
       width: width,
       height: height,
       color: color,
-      alignment: Alignment.center,
     );
   }
 

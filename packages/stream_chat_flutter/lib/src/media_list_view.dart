@@ -54,7 +54,7 @@ class _MediaListViewState extends State<MediaListView> {
         ) {
           final media = _media.elementAt(position);
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0),
+            padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
             child: InkWell(
               onTap: () {
                 if (widget.onSelect != null) {
@@ -64,7 +64,7 @@ class _MediaListViewState extends State<MediaListView> {
               child: Stack(
                 children: [
                   AspectRatio(
-                    aspectRatio: 1.0,
+                    aspectRatio: 1,
                     child: FadeInImage(
                       fadeInDuration: Duration(milliseconds: 300),
                       placeholder: AssetImage(
@@ -144,9 +144,7 @@ class _MediaListViewState extends State<MediaListView> {
   }
 
   void _getMedia() async {
-    final assetList = await PhotoManager.getAssetPathList(
-      hasAll: true,
-    ).then((value) {
+    final assetList = await PhotoManager.getAssetPathList().then((value) {
       if (value.isNotEmpty == true) {
         return value.singleWhere((element) => element.isAll);
       }
@@ -178,7 +176,7 @@ class MediaThumbnailProvider extends ImageProvider<MediaThumbnailProvider> {
   ImageStreamCompleter load(key, decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
-      scale: 1.0,
+      scale: 1,
       informationCollector: () sync* {
         yield ErrorDescription('Id: ${media.id}');
       },
