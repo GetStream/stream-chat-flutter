@@ -6,10 +6,7 @@ import 'package:stream_chat_flutter/src/stream_neumorphic_button.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'connection_status_builder.dart';
-import 'info_tile.dart';
-import 'stream_chat.dart';
-
+/// Widget builder for title
 typedef TitleBuilder = Widget Function(
   BuildContext context,
   ConnectionStatus status,
@@ -42,10 +39,13 @@ typedef TitleBuilder = Widget Function(
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
 ///
-/// The widget by default uses the inherited [StreamChatClient] to fetch information about the status.
-/// However you can also pass your own [StreamChatClient] if you don't have it in the widget tree.
+/// The widget by default uses the inherited [StreamChatClient]
+/// to fetch information about the status.
+/// However you can also pass your own [StreamChatClient]
+/// if you don't have it in the widget tree.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelListHeaderTheme] property.
+/// The widget components render the ui based on the first ancestor of type
+/// [StreamChatTheme] and on its [ChannelListHeaderTheme] property.
 /// Modify it to change the widget appearance.
 class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Instantiates a ChannelListHeader
@@ -75,8 +75,10 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
   /// Callback to call when pressing the new chat button.
   final VoidCallback? onNewChatButtonTap;
 
+  /// Show connection state tile
   final bool showConnectionStateTile;
 
+  /// Callback before navigation is performed
   final VoidCallback? preNavigationCallback;
 
   /// Subtitle widget
@@ -113,6 +115,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         return InfoTile(
+          // ignore: avoid_bool_literals_in_conditional_expressions
           showMessage: showConnectionStateTile ? showStatus : false,
           message: statusString,
           child: AppBar(
@@ -143,7 +146,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                               .avatarTheme
                               ?.constraints,
                         )
-                      : Offstage(),
+                      : const Offstage(),
                 ),
             actions: actions ??
                 [
@@ -151,7 +154,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                     child: IconButton(
                       icon: ConnectionStatusBuilder(
                         statusBuilder: (context, status) {
-                          var color;
+                          Color? color;
                           switch (status) {
                             case ConnectionStatus.connected:
                               color = StreamChatTheme.of(context)
@@ -193,11 +196,11 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
                       case ConnectionStatus.disconnected:
                         return _buildDisconnectedTitleState(context, _client);
                       default:
-                        return Offstage();
+                        return const Offstage();
                     }
                   },
                 ),
-                subtitle ?? Offstage(),
+                subtitle ?? const Offstage(),
               ],
             ),
           ),
@@ -213,18 +216,17 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
       );
 
-  Widget _buildConnectingTitleState(BuildContext context) {
-    return Row(
+  Widget _buildConnectingTitleState(BuildContext context) => Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
+        const SizedBox(
           height: 16,
           width: 16,
           child: Center(
             child: CircularProgressIndicator(),
           ),
         ),
-        SizedBox(width: 10),
+        const SizedBox(width: 10),
         Text(
           'Searching for Network',
           style: StreamChatTheme.of(context)
@@ -237,13 +239,11 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
     );
-  }
 
   Widget _buildDisconnectedTitleState(
     BuildContext context,
     StreamChatClient client,
-  ) {
-    return Row(
+  ) => Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
@@ -275,8 +275,7 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
     );
-  }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

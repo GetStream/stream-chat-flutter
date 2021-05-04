@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-import 'stream_chat.dart';
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream] of type [ConnectionStatus].
 ///
-/// The widget will use the closest [StreamChatClient.wsConnectionStatusStream] in case no
-/// stream is provided.
+/// The widget will use the closest [StreamChatClient.wsConnectionStatusStream]
+/// in case no stream is provided.
 class ConnectionStatusBuilder extends StatelessWidget {
   /// Creates a new ConnectionStatusBuilder
   const ConnectionStatusBuilder({
@@ -47,11 +46,11 @@ class ConnectionStatusBuilder extends StatelessWidget {
           if (errorBuilder != null) {
             return errorBuilder!(context, snapshot.error);
           }
-          return Offstage();
+          return const Offstage();
         }
         if (!snapshot.hasData) {
           if (loadingBuilder != null) return loadingBuilder!(context);
-          return Offstage();
+          return const Offstage();
         }
         return statusBuilder(context, snapshot.data!);
       },

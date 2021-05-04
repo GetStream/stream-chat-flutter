@@ -3,7 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
+/// Widget to display deleted message
 class DeletedMessage extends StatelessWidget {
+
+  /// Constructor to create [DeletedMessage]
   const DeletedMessage({
     Key? key,
     required this.messageTheme,
@@ -29,8 +32,7 @@ class DeletedMessage extends StatelessWidget {
   final bool reverse;
 
   @override
-  Widget build(BuildContext context) {
-    return Transform(
+  Widget build(BuildContext context) => Transform(
       transform: Matrix4.rotationY(reverse ? pi : 0),
       alignment: Alignment.center,
       child: Material(
@@ -70,5 +72,4 @@ class DeletedMessage extends StatelessWidget {
         ),
       ),
     );
-  }
 }

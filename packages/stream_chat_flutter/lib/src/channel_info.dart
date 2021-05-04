@@ -6,6 +6,14 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'connection_status_builder.dart';
 
 class ChannelInfo extends StatelessWidget {
+  const ChannelInfo({
+    Key? key,
+    required this.channel,
+    this.textStyle,
+    this.showTypingIndicator = true,
+  }) : super(key: key);
+
+  /// The channel about which the info is to be displayed
   final Channel channel;
 
   /// The style of the text displayed
@@ -13,13 +21,6 @@ class ChannelInfo extends StatelessWidget {
 
   /// If true the typing indicator will be rendered if a user is typing
   final bool showTypingIndicator;
-
-  const ChannelInfo({
-    Key? key,
-    required this.channel,
-    this.textStyle,
-    this.showTypingIndicator = true,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +94,10 @@ class ChannelInfo extends StatelessWidget {
   Widget _buildConnectingTitleState(BuildContext context) => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          const SizedBox(
             height: 16,
             width: 16,
-            child: const Center(
+            child: Center(
               child: CircularProgressIndicator(),
             ),
           ),

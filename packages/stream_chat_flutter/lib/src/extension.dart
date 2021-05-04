@@ -9,9 +9,7 @@ final _emojis = Emoji.all();
 /// String extension
 extension StringExtension on String {
   /// Returns the capitalized string
-  String capitalize() {
-    return '${this[0].toUpperCase()}${substring(1)}';
-  }
+  String capitalize() => '${this[0].toUpperCase()}${substring(1)}';
 
   /// Returns whether the string contains only emoji's or not.
   ///
@@ -46,7 +44,9 @@ extension PlatformFileX on PlatformFile {
       );
 }
 
+///
 extension InputDecorationX on InputDecoration {
+  ///
   InputDecoration merge(InputDecoration? other) {
     if (other == null) return this;
     return copyWith(
@@ -98,7 +98,9 @@ extension InputDecorationX on InputDecoration {
   }
 }
 
+/// Gets text scale factor through context
 extension BuildContextX on BuildContext {
+  // ignore: public_member_api_docs
   double get textScaleFactor =>
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 }

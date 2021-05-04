@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/unread_indicator.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../stream_chat_flutter.dart';
-
+/// Back button implementation
 class StreamBackButton extends StatelessWidget {
+
+  /// Constructor for creating back button
   const StreamBackButton({
     Key? key,
     this.onPressed,
@@ -12,15 +14,17 @@ class StreamBackButton extends StatelessWidget {
     this.cid,
   }) : super(key: key);
 
+  /// Callback for when button is pressed
   final VoidCallback? onPressed;
+
+  /// Show unread count
   final bool showUnreads;
 
   /// Channel cid used to retrieve unread count
   final String? cid;
 
   @override
-  Widget build(BuildContext context) {
-    return Stack(
+  Widget build(BuildContext context) => Stack(
       alignment: Alignment.center,
       children: [
         RawMaterialButton(
@@ -54,5 +58,4 @@ class StreamBackButton extends StatelessWidget {
           ),
       ],
     );
-  }
 }

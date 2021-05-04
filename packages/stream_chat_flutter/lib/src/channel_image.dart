@@ -36,12 +36,14 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// }
 /// ```
 ///
-/// The widget uses a [StreamBuilder] to render the channel information image as soon as it updates.
+/// The widget uses a [StreamBuilder] to render the channel information
+/// image as soon as it updates.
 ///
 /// By default the widget radius size is 40x40 pixels.
 /// Set the property [constraints] to set a custom dimension.
 ///
-/// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget renders the ui based on the first ancestor of type
+/// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class ChannelImage extends StatelessWidget {
   /// Instantiate a new ChannelImage
@@ -56,6 +58,7 @@ class ChannelImage extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
+  /// [BorderRadius] to display the widget
   final BorderRadius? borderRadius;
 
   /// The channel to show the image of
@@ -67,10 +70,13 @@ class ChannelImage extends StatelessWidget {
   /// The function called when the image is tapped
   final VoidCallback? onTap;
 
+  /// If image is selected
   final bool selected;
 
+  /// Selection color for image
   final Color? selectionColor;
 
+  /// Thickness of selection image
   final double selectionThickness;
 
   @override
@@ -91,8 +97,7 @@ class ChannelImage extends StatelessWidget {
               stream: streamChat.client.state.usersStream.map(
                   (users) => users[otherMember?.userId] ?? otherMember!.user!),
               initialData: otherMember!.user,
-              builder: (context, snapshot) {
-                return UserAvatar(
+              builder: (context, snapshot) => UserAvatar(
                   borderRadius: borderRadius ??
                       StreamChatTheme.of(context)
                           .channelPreviewTheme
@@ -109,14 +114,14 @@ class ChannelImage extends StatelessWidget {
                   selectionColor: selectionColor ??
                       StreamChatTheme.of(context).colorTheme.accentBlue,
                   selectionThickness: selectionThickness,
-                );
-              });
+                ));
         } else {
           final images = channel.state?.members
               .where((member) =>
                   member.user?.id != streamChat.user?.id &&
                   member.user?.extraData['image'] != null)
               .take(4)
+              // ignore: cast_nullable_to_non_nullable
               .map((e) => e.user?.extraData['image'] as String)
               .toList();
           return GroupImage(
@@ -161,8 +166,7 @@ class ChannelImage extends StatelessWidget {
                 if (image != null)
                   CachedNetworkImage(
                     imageUrl: image,
-                    errorWidget: (_, __, ___) {
-                      return Center(
+                    errorWidget: (_, __, ___) => Center(
                         child: Text(
                           snapshot.data?.containsKey('name') ?? false
                               ? snapshot.data!['name'][0]
@@ -172,8 +176,7 @@ class ChannelImage extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      );
-                    },
+                      ),
                     fit: BoxFit.cover,
                   )
                 else

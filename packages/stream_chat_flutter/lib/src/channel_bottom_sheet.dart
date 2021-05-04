@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/channel_info.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../stream_chat_flutter.dart';
-import 'channel_info.dart';
-import 'option_list_tile.dart';
-
+/// Bottom Sheet with options
 class ChannelBottomSheet extends StatefulWidget {
-  final VoidCallback? onViewInfoTap;
+  /// Constructor for creating bottom sheet
+  const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
 
-  const ChannelBottomSheet({this.onViewInfoTap});
+  /// Callback when 'View Info' is tapped
+  final VoidCallback? onViewInfoTap;
 
   @override
   _ChannelBottomSheetState createState() => _ChannelBottomSheetState();
@@ -29,7 +30,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     return Material(
       color: StreamChatTheme.of(context).colorTheme.white,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
@@ -120,7 +121,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                               ),
                               borderRadius: BorderRadius.circular(32),
                               onlineIndicatorConstraints:
-                                  BoxConstraints.tight(Size(12, 12)),
+                                  BoxConstraints.tight(const Size(12, 12)),
                             ),
                             const SizedBox(
                               height: 6,
