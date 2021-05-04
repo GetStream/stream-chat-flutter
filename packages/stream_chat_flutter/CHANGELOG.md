@@ -1,4 +1,4 @@
-## 2.0.0-nullsafety.1
+## 2.0.0-nullsafety.2
 
 - Migrate this package to null safety
 - Updated `stream_chat_core` dependency
