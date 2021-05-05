@@ -482,25 +482,29 @@ class MessageInputState extends State<MessageInput> {
           ),
           splashRadius: 24,
         ),
-        secondChild: FittedBox(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              if (!widget.disableAttachments) _buildAttachmentButton(),
-              if (widget.showCommandsButton &&
-                  widget.editMessage == null &&
-                  StreamChannel.of(context)
-                          .channel
-                          .config
-                          ?.commands
-                          .isNotEmpty ==
-                      true)
-                _buildCommandButton(),
-              ...widget.actions ?? [],
-            ].insertBetween(const SizedBox(width: 8)),
-          ),
-        ),
+        secondChild: widget.disableAttachments &&
+                !widget.showCommandsButton &&
+                widget.actions?.isNotEmpty != true
+            ? Offstage()
+            : FittedBox(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    if (!widget.disableAttachments) _buildAttachmentButton(),
+                    if (widget.showCommandsButton &&
+                        widget.editMessage == null &&
+                        StreamChannel.of(context)
+                                .channel
+                                .config
+                                ?.commands
+                                .isNotEmpty ==
+                            true)
+                      _buildCommandButton(),
+                    ...widget.actions ?? [],
+                  ].insertBetween(const SizedBox(width: 8)),
+                ),
+              ),
         duration: Duration(milliseconds: 300),
         alignment: Alignment.center,
       ),
