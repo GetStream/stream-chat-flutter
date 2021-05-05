@@ -8,7 +8,9 @@ import 'package:stream_chat_flutter/src/reaction_icon.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Creates reaction bubble widget for displaying over messages
 class ReactionBubble extends StatelessWidget {
+  /// Constructor for creating a [ReactionBubble]
   const ReactionBubble({
     Key? key,
     required this.reactions,
@@ -21,13 +23,28 @@ class ReactionBubble extends StatelessWidget {
     this.tailCirclesSpacing = 0,
   }) : super(key: key);
 
+  /// Reactions to show
   final List<Reaction> reactions;
+
+  /// Border color of bubble
   final Color borderColor;
+
+  /// Background color of bubble
   final Color backgroundColor;
+
+  /// Mask color
   final Color maskColor;
+
+  /// Reverse for other side
   final bool reverse;
+
+  /// Reverse tail for other side
   final bool flipTail;
+
+  /// Flag for highlighting own reactions
   final bool highlightOwnReactions;
+
+  /// Spacing for tail circles
   final double tailCirclesSpacing;
 
   @override
@@ -47,7 +64,7 @@ class ReactionBubble extends StatelessWidget {
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: maskColor,
-                borderRadius: BorderRadius.all(Radius.circular(16)),
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
               ),
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -59,35 +76,32 @@ class ReactionBubble extends StatelessWidget {
                     color: borderColor,
                   ),
                   color: backgroundColor,
-                  borderRadius: BorderRadius.all(Radius.circular(14)),
+                  borderRadius: const BorderRadius.all(Radius.circular(14)),
                 ),
                 child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Flex(
-                      direction: Axis.horizontal,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (constraints.maxWidth < double.infinity)
-                          ...reactions
-                              .take((constraints.maxWidth) ~/ 24)
-                              .map((reaction) {
-                            return _buildReaction(
-                              reactionIcons,
-                              reaction,
-                              context,
-                            );
-                          }).toList(),
-                        if (constraints.maxWidth == double.infinity)
-                          ...reactions.map((reaction) {
-                            return _buildReaction(
-                              reactionIcons,
-                              reaction,
-                              context,
-                            );
-                          }).toList(),
-                      ],
-                    );
-                  },
+                  builder: (context, constraints) => Flex(
+                    direction: Axis.horizontal,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (constraints.maxWidth < double.infinity)
+                        ...reactions
+                            .take((constraints.maxWidth) ~/ 24)
+                            .map((reaction) => _buildReaction(
+                                  reactionIcons,
+                                  reaction,
+                                  context,
+                                ))
+                            .toList(),
+                      if (constraints.maxWidth == double.infinity)
+                        ...reactions
+                            .map((reaction) => _buildReaction(
+                                  reactionIcons,
+                                  reaction,
+                                  context,
+                                ))
+                            .toList(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -160,18 +174,27 @@ class ReactionBubble extends StatelessWidget {
   }
 }
 
+/// Painter widget for a reaction bubble
 class ReactionBubblePainter extends CustomPainter {
-  final Color color;
-  final Color borderColor;
-  final Color maskColor;
-  final double tailCirclesSpace;
-
+  /// Constructor for creating a [ReactionBubblePainter]
   ReactionBubblePainter(
     this.color,
     this.borderColor,
     this.maskColor, {
     this.tailCirclesSpace = 0,
   });
+
+  /// Color of bubble
+  final Color color;
+
+  /// Border color of bubble
+  final Color borderColor;
+
+  /// Mask color
+  final Color maskColor;
+
+  /// Tail circle space
+  final double tailCirclesSpace;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -193,13 +216,14 @@ class ReactionBubblePainter extends CustomPainter {
       ..color = maskColor
       ..style = PaintingStyle.fill;
 
-    final path = Path();
-    path.addOval(
-      Rect.fromCircle(
-        center: Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
-        radius: 4,
-      ),
-    );
+    final path = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center:
+              const Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
+          radius: 4,
+        ),
+      );
     canvas.drawPath(path, paint);
   }
 
@@ -209,13 +233,14 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
-    final path = Path();
-    path.addOval(
-      Rect.fromCircle(
-        center: Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
-        radius: 2,
-      ),
-    );
+    final path = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center:
+              const Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
+          radius: 2,
+        ),
+      );
     canvas.drawPath(path, paint);
   }
 
@@ -224,11 +249,11 @@ class ReactionBubblePainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 1;
 
-    final path = Path();
-    path.addOval(Rect.fromCircle(
-      center: Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
-      radius: 2,
-    ));
+    final path = Path()
+      ..addOval(Rect.fromCircle(
+        center: const Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
+        radius: 2,
+      ));
     canvas.drawPath(path, paint);
   }
 
@@ -241,15 +266,15 @@ class ReactionBubblePainter extends CustomPainter {
     const dy = -2.2;
     const startAngle = 1.1;
     const sweepAngle = 1.2;
-    final path = Path();
-    path.addArc(
-      Rect.fromCircle(
-        center: Offset(1, dy),
-        radius: 4,
-      ),
-      -pi * startAngle,
-      -pi / sweepAngle,
-    );
+    final path = Path()
+      ..addArc(
+        Rect.fromCircle(
+          center: const Offset(1, dy),
+          radius: 4,
+        ),
+        -pi * startAngle,
+        -pi / sweepAngle,
+      );
     canvas.drawPath(path, paint);
   }
 
@@ -261,15 +286,15 @@ class ReactionBubblePainter extends CustomPainter {
     const dy = -2.2;
     const startAngle = 1;
     const sweepAngle = 1.3;
-    final path = Path();
-    path.addArc(
-      Rect.fromCircle(
-        center: Offset(1, dy),
-        radius: 4,
-      ),
-      -pi * startAngle,
-      -pi * sweepAngle,
-    );
+    final path = Path()
+      ..addArc(
+        Rect.fromCircle(
+          center: const Offset(1, dy),
+          radius: 4,
+        ),
+        -pi * startAngle,
+        -pi * sweepAngle,
+      );
     canvas.drawPath(path, paint);
   }
 
@@ -282,20 +307,18 @@ class ReactionBubblePainter extends CustomPainter {
     const dy = -2.2;
     const startAngle = 1.1;
     const sweepAngle = 1.2;
-    final path = Path();
-    path.addArc(
-      Rect.fromCircle(
-        center: Offset(1, dy),
-        radius: 6,
-      ),
-      -pi * startAngle,
-      -pi / sweepAngle,
-    );
+    final path = Path()
+      ..addArc(
+        Rect.fromCircle(
+          center: const Offset(1, dy),
+          radius: 6,
+        ),
+        -pi * startAngle,
+        -pi / sweepAngle,
+      );
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
