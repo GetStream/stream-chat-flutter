@@ -11,6 +11,7 @@ class MockChannel extends Mock implements Channel {
   Future<bool> get initialized async => true;
 
   @override
+  // ignore: prefer_expression_function_bodies
   Future<void> keyStroke([String? parentId]) async {
     return;
   }

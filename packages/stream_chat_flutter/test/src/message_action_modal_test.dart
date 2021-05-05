@@ -8,7 +8,8 @@ import 'mocks.dart';
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(MaterialPageRoute(builder: (context) => SizedBox()));
+    registerFallbackValue(
+        MaterialPageRoute(builder: (context) => const SizedBox()));
     registerFallbackValue(Message());
   });
 
@@ -29,7 +30,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   text: 'test',
@@ -45,7 +46,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(Key('MessageWidget')), findsOneWidget);
+      expect(find.byKey(const Key('MessageWidget')), findsOneWidget);
       expect(find.text('Thread Reply'), findsOneWidget);
       expect(find.text('Reply'), findsOneWidget);
       expect(find.text('Edit Message'), findsOneWidget);
@@ -71,7 +72,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 showEditMessage: false,
                 showCopyMessage: false,
@@ -92,7 +93,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(Key('MessageWidget')), findsOneWidget);
+      expect(find.byKey(const Key('MessageWidget')), findsOneWidget);
       expect(find.text('Reply'), findsNothing);
       expect(find.text('Thread reply'), findsNothing);
       expect(find.text('Edit message'), findsNothing);
@@ -120,7 +121,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   text: 'test',
@@ -131,8 +132,8 @@ void main() {
                 messageTheme: streamTheme.ownMessageTheme,
                 customActions: [
                   MessageAction(
-                    leading: Icon(Icons.check),
-                    title: Text('title'),
+                    leading: const Icon(Icons.check),
+                    title: const Text('title'),
                     onTap: (m) {
                       tapped = true;
                     },
@@ -175,7 +176,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 onReplyTap: (m) {
                   tapped = true;
@@ -220,7 +221,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 onThreadReplyTap: (m) {
                   tapped = true;
@@ -260,18 +261,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   text: 'test',
@@ -310,22 +309,18 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
-                editMessageInputBuilder: (context, m) {
-                  return Text('test');
-                },
+                editMessageInputBuilder: (context, m) => const Text('test'),
                 message: Message(
                   text: 'test',
                   user: User(
@@ -365,18 +360,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 onCopyTap: (m) => tapped = true,
                 message: Message(
@@ -416,18 +409,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   status: MessageSendingStatus.failed,
@@ -467,18 +458,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   status: MessageSendingStatus.failed_update,
@@ -516,18 +505,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   id: 'testid',
@@ -575,18 +562,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   id: 'testid',
@@ -634,18 +619,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   id: 'testid',
@@ -689,18 +672,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   id: 'testid',
@@ -748,18 +729,16 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               streamChatThemeData: streamTheme,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
             channel: channel,
-            child: Container(
+            child: SizedBox(
               child: MessageActionsModal(
                 message: Message(
                   id: 'testid',

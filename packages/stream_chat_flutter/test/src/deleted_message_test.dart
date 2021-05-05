@@ -19,7 +19,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
-          child: Scaffold(
+          child: const Scaffold(
             body: DeletedMessage(
               messageTheme: MessageTheme(
                 createdAt: TextStyle(
@@ -81,7 +81,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size.square(200),
+        surfaceSize: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'deleted_message_light');
@@ -133,7 +133,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size.square(200),
+        surfaceSize: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'deleted_message_dark');
@@ -189,7 +189,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size.square(200),
+        surfaceSize: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'deleted_message_custom');

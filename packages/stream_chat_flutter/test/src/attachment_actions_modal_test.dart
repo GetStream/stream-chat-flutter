@@ -128,7 +128,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: AttachmentActionsModal(
                 message: Message(
                   text: 'test',
@@ -185,7 +185,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: AttachmentActionsModal(
                 message: message,
                 currentIndex: 0,
@@ -218,7 +218,7 @@ void main() {
           home: StreamChat(
             streamChatThemeData: streamTheme,
             client: client,
-            child: Container(
+            child: SizedBox(
               child: AttachmentActionsModal(
                 onShowMessage: onShowMessage,
                 message: Message(
@@ -250,9 +250,8 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(() => mockChannel.updateMessage(any())).thenAnswer((_) async {
-        return UpdateMessageResponse();
-      });
+      when(() => mockChannel.updateMessage(any()))
+          .thenAnswer((_) async => UpdateMessageResponse());
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
@@ -275,12 +274,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
-              client: client,
-              child: child!,
-            );
-          },
+          builder: (context, child) => StreamChat(
+            client: client,
+            child: child,
+          ),
           home: StreamChannel(
             showLoading: false,
             channel: mockChannel,
@@ -307,9 +304,8 @@ void main() {
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(() => mockChannel.updateMessage(any())).thenAnswer((_) async {
-        return UpdateMessageResponse();
-      });
+      when(() => mockChannel.updateMessage(any()))
+          .thenAnswer((_) async => UpdateMessageResponse());
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
@@ -328,12 +324,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
-              client: client,
-              child: child!,
-            );
-          },
+          builder: (context, child) => StreamChat(
+            client: client,
+            child: child,
+          ),
           home: StreamChannel(
             showLoading: false,
             channel: mockChannel,
@@ -352,15 +346,15 @@ void main() {
   );
 
   testWidgets(
+    // ignore: lines_longer_than_80_chars
     'tapping on delete in chat should remove the message if that\'s the only attachment and there is no text',
     (WidgetTester tester) async {
       final client = MockClient();
       final clientState = MockClientState();
       final mockChannel = MockChannel();
 
-      when(() => mockChannel.deleteMessage(any())).thenAnswer((_) async {
-        return EmptyResponse();
-      });
+      when(() => mockChannel.deleteMessage(any()))
+          .thenAnswer((_) async => EmptyResponse());
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
 
@@ -378,12 +372,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
-              child: child!,
-            );
-          },
+              child: child,
+            ),
           home: StreamChannel(
             showLoading: false,
             channel: mockChannel,
@@ -412,13 +404,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
-              child: child!,
-            );
-          },
-          home: Container(
+              child: child,
+            ),
+          home: SizedBox(
             child: AttachmentActionsModal(
               imageDownloader: imageDownloader,
               message: Message(
@@ -451,8 +441,8 @@ void main() {
       imageDownloader.progressCallback!(100, 100);
       imageDownloader.completer.complete('path');
       await tester.pump();
-      expect(find.byKey(Key('completedIcon')), findsOneWidget);
-      await tester.pumpAndSettle(Duration(milliseconds: 500));
+      expect(find.byKey(const Key('completedIcon')), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
     },
   );
 
@@ -469,12 +459,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          builder: (context, child) {
-            return StreamChat(
+          builder: (context, child) => StreamChat(
               client: client,
               child: child!,
-            );
-          },
+            ),
           home: Container(
             child: AttachmentActionsModal(
               fileDownloader: fileDownloader,
@@ -508,8 +496,8 @@ void main() {
       fileDownloader.progressCallback!(100, 100);
       fileDownloader.completer.complete('path');
       await tester.pump();
-      expect(find.byKey(Key('completedIcon')), findsOneWidget);
-      await tester.pumpAndSettle(Duration(milliseconds: 500));
+      expect(find.byKey(const Key('completedIcon')), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
     },
   );
 }

@@ -21,7 +21,7 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelListHeader(),
             ),
           ),
@@ -51,7 +51,7 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelListHeader(
                 showConnectionStateTile: true,
               ),
@@ -80,7 +80,7 @@ void main() {
         MaterialApp(
           home: StreamChat(
             client: client,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelListHeader(
                 showConnectionStateTile: true,
               ),
@@ -111,12 +111,10 @@ void main() {
             client: client,
             child: Scaffold(
               body: ChannelListHeader(
-                titleBuilder: (context, status, client) {
-                  return Text('TITLE');
-                },
-                subtitle: Text('SUBTITLE'),
-                leading: Text('LEADING'),
-                actions: [
+                titleBuilder: (context, status, client) => const Text('TITLE'),
+                subtitle: const Text('SUBTITLE'),
+                leading: const Text('LEADING'),
+                actions: const [
                   Text('ACTION'),
                 ],
                 client: client,

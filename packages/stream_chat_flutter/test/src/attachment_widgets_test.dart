@@ -23,9 +23,9 @@ void main() {
             data: streamTheme,
             child: StreamChannel(
               channel: channel,
-              child: Container(
+              child: SizedBox(
                 child: FileAttachment(
-                  size: Size(
+                  size: const Size(
                     300,
                     300,
                   ),
@@ -33,7 +33,7 @@ void main() {
                   attachment: Attachment(
                     type: 'file',
                     title: 'example.pdf',
-                    extraData: {
+                    extraData: const {
                       'mime_type': 'pdf',
                     },
                   ),

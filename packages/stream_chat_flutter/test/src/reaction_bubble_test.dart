@@ -16,7 +16,7 @@ void main() {
         SimpleFrame(
           child: StreamChatTheme(
             data: StreamChatThemeData(),
-            child: Container(
+            child: const SizedBox(
               child: ReactionBubble(
                 reactions: [],
                 borderColor: Colors.black,

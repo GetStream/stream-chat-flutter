@@ -41,7 +41,7 @@ void main() {
         ),
       );
 
-      await tester.pump(Duration(milliseconds: 1000));
+      await tester.pump(const Duration(milliseconds: 1000));
 
       expect(find.byType(MessageWidget), findsOneWidget);
       final messageWidget =
@@ -95,6 +95,7 @@ void main() {
         ],
       );
 
+      // ignore: prefer_function_declarations_over_variables
       final onUserAvatarTap = (u) => print('ok');
 
       await tester.pumpWidget(
@@ -109,16 +110,16 @@ void main() {
               showUserAvatar: DisplayWidget.gone,
               reverse: true,
               attachmentBorderRadiusGeometry: BorderRadius.circular(1),
-              attachmentShape: RoundedRectangleBorder(),
+              attachmentShape: const RoundedRectangleBorder(),
               showReactions: false,
-              messageShape: RoundedRectangleBorder(),
+              messageShape: const RoundedRectangleBorder(),
               onUserAvatarTap: onUserAvatarTap,
             ),
           ),
         ),
       );
 
-      await tester.pump(Duration(milliseconds: 1000));
+      await tester.pump(const Duration(milliseconds: 1000));
 
       expect(find.byType(MessageWidget), findsOneWidget);
       final messageWidget =
@@ -130,8 +131,8 @@ void main() {
       expect(messageWidget.showUserAvatar, DisplayWidget.gone);
       expect(messageWidget.reverse, true);
       expect(messageWidget.showReactions, false);
-      expect(messageWidget.attachmentShape, RoundedRectangleBorder());
-      expect(messageWidget.shape, RoundedRectangleBorder());
+      expect(messageWidget.attachmentShape, const RoundedRectangleBorder());
+      expect(messageWidget.shape, const RoundedRectangleBorder());
       expect(messageWidget.showReactions, false);
       expect(messageWidget.showUsername, false);
       expect(messageWidget.showThreadReplyIndicator, false);
