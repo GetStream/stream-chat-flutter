@@ -3,16 +3,22 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Used to show the sending status of the message
 class SendingIndicator extends StatelessWidget {
-  final Message message;
-  final bool isMessageRead;
-  final double? size;
-
+  /// Constructor for creating a [SendingIndicator] widget
   const SendingIndicator({
     Key? key,
     required this.message,
     this.isMessageRead = false,
     this.size = 12,
   }) : super(key: key);
+
+  /// Message for sending indicator
+  final Message message;
+
+  /// Flag if message is read
+  final bool isMessageRead;
+
+  /// Size for message
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +41,6 @@ class SendingIndicator extends StatelessWidget {
         size: size,
       );
     }
-    return SizedBox();
+    return const SizedBox();
   }
 }
