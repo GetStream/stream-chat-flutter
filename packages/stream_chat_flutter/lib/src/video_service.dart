@@ -60,6 +60,6 @@ class IVideoService {
       );
 }
 
-// ignore: non_constant_identifier_names
 /// Get instance of [IVideoService]
+// ignore: non_constant_identifier_names
 IVideoService get VideoService => IVideoService.instance;

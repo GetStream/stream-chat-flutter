@@ -12,10 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   stream_chat_flutter_core: ^2.0.0-nullsafety.0
-  photo_view: ^0.11.1
   rxdart: ^0.26.0
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   jiffy: ^4.1.0
+  photo_view: ^0.11.1
   flutter_svg: ^0.22.0
   flutter_portal: ^0.4.0
   cached_network_image: ^3.0.0
@@ -57,6 +57,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mocktail: ^0.1.2
-  pedantic: ^1.11.0
   golden_toolkit: ^0.9.0
-  
+  pedantic: ^1.11.0
+

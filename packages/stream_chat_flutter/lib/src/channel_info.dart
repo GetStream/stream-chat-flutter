@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'connection_status_builder.dart';
-
+/// Widget which shows channel info
 class ChannelInfo extends StatelessWidget {
+  /// Constructor which creates a [ChannelInfo] widget
   const ChannelInfo({
     Key? key,
     required this.channel,

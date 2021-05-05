@@ -3,10 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../stream_chat_flutter.dart';
-import 'stream_svg_icon.dart';
-
+/// Launch URL
 Future<void> launchURL(BuildContext context, String? url) async {
   if (url != null && await canLaunch(url)) {
     await launch(url);
@@ -20,6 +19,7 @@ Future<void> launchURL(BuildContext context, String? url) async {
   }
 }
 
+/// Shows confirmation dialog
 Future<bool?> showConfirmationDialog(
   BuildContext context, {
   required String title,

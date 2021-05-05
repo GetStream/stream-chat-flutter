@@ -26,7 +26,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size(100, 100),
+        surfaceSize: const Size(100, 100),
       );
       await screenMatchesGolden(tester, 'reaction_bubble_0');
     },
@@ -47,7 +47,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: theme,
-          child: Container(
+          child: SizedBox(
             child: ReactionBubble(
               reactions: [
                 Reaction(
@@ -61,7 +61,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size(100, 100),
+        surfaceSize: const Size(100, 100),
       );
       await screenMatchesGolden(tester, 'reaction_bubble_like_light');
     },
@@ -97,7 +97,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size(100, 100),
+        surfaceSize: const Size(100, 100),
       );
       await screenMatchesGolden(tester, 'reaction_bubble_like_dark');
     },
@@ -141,7 +141,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size(140, 140),
+        surfaceSize: const Size(140, 140),
       );
       await screenMatchesGolden(tester, 'reaction_bubble_3_light');
     },
@@ -185,7 +185,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size(140, 140),
+        surfaceSize: const Size(140, 140),
       );
       await screenMatchesGolden(tester, 'reaction_bubble_3_dark');
     },
@@ -205,7 +205,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
-          child: Container(
+          child: SizedBox(
             child: ReactionBubble(
               reactions: [
                 Reaction(
@@ -230,7 +230,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size(200, 200),
+        surfaceSize: const Size(200, 200),
       );
 
       await screenMatchesGolden(tester, 'reaction_bubble_2');

@@ -117,13 +117,13 @@ void main() {
             child: Scaffold(
               body: ThreadHeader(
                 parent: Message(),
-                subtitle: Text('subtitle'),
-                leading: Text('leading'),
-                title: Text('title'),
+                subtitle: const Text('subtitle'),
+                leading: const Text('leading'),
+                title: const Text('title'),
                 onTitleTap: () {
                   tapped = true;
                 },
-                actions: [
+                actions: const [
                   Text('action'),
                 ],
               ),

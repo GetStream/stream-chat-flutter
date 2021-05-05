@@ -23,7 +23,8 @@ class MockAttachmentDownloader extends Mock {
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(MaterialPageRoute(builder: (context) => SizedBox()));
+    registerFallbackValue(
+        MaterialPageRoute(builder: (context) => const SizedBox()));
     registerFallbackValue(Message());
   });
 
@@ -461,9 +462,9 @@ void main() {
         MaterialApp(
           builder: (context, child) => StreamChat(
             client: client,
-            child: child!,
+            child: child,
           ),
-          home: Container(
+          home: SizedBox(
             child: AttachmentActionsModal(
               fileDownloader: fileDownloader,
               message: Message(

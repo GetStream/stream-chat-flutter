@@ -67,6 +67,7 @@ class AttachmentError extends StatelessWidget {
     this.size,
   }) : super(key: key);
 
+  /// Size of error
   final Size? size;
 
   @override

@@ -102,7 +102,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size.square(200),
+        surfaceSize: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'system_message_light');
@@ -153,7 +153,7 @@ void main() {
             ),
           ),
         ),
-        surfaceSize: Size.square(200),
+        surfaceSize: const Size.square(200),
       );
 
       await screenMatchesGolden(tester, 'system_message_dark');

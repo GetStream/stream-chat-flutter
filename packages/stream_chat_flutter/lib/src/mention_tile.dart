@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// This widget is used for showing user tiles for mentions
 /// Use [title], [subtitle], [leading], [trailing] for

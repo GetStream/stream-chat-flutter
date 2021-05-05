@@ -19,7 +19,7 @@ void main() {
                   child: Center(
                     child: StreamChatTheme(
                       data: StreamChatThemeData.fromTheme(theme),
-                      child: StreamBackButton(),
+                      child: const StreamBackButton(),
                     ),
                   ),
                 ),

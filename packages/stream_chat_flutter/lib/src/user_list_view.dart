@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'user_item.dart';
-
 /// Callback called when tapping on a user
 typedef UserTapCallback = void Function(User, Widget?);
 

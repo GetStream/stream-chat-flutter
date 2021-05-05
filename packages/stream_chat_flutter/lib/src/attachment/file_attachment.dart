@@ -6,10 +6,12 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
 
-import '../upload_progress_indicator.dart';
+// ignore: always_use_package_imports
 import 'attachment_widget.dart';
 
+/// Widget for displaying file attachments
 class FileAttachment extends AttachmentWidget {
   /// Constructor for creating a widget when attachment is of type 'file'
   const FileAttachment({

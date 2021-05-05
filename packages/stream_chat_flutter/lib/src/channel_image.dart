@@ -196,7 +196,7 @@ class ChannelImage extends StatelessWidget {
         );
         if (selected) {
           child = ClipRRect(
-            key: Key('selectedImage'),
+            key: const Key('selectedImage'),
             borderRadius: (borderRadius ??
                     StreamChatTheme.of(context)
                         .ownMessageTheme

@@ -5,9 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../stream_chat_flutter.dart';
-import 'extension.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Callback to download an attachment asset
 typedef AttachmentDownloader = Future<String> Function(
@@ -17,6 +16,16 @@ typedef AttachmentDownloader = Future<String> Function(
 
 /// Widget that shows the options in the gallery view
 class AttachmentActionsModal extends StatelessWidget {
+  /// Returns a new [AttachmentActionsModal]
+  const AttachmentActionsModal({
+    Key? key,
+    required this.currentIndex,
+    required this.message,
+    this.onShowMessage,
+    this.imageDownloader,
+    this.fileDownloader,
+  }) : super(key: key);
+
   /// The message containing the attachments
   final Message message;
 
@@ -31,15 +40,6 @@ class AttachmentActionsModal extends StatelessWidget {
 
   /// Callback to provide download files
   final AttachmentDownloader? fileDownloader;
-
-  /// Returns a new [AttachmentActionsModal]
-  const AttachmentActionsModal({
-    required this.currentIndex,
-    required this.message,
-    this.onShowMessage,
-    this.imageDownloader,
-    this.fileDownloader,
-  });
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -62,7 +62,7 @@ class AttachmentActionsModal extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Container(
+            child: SizedBox(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
@@ -89,6 +89,7 @@ class AttachmentActionsModal extends StatelessWidget {
                   ),
                   _buildButton(
                     context,
+                    // ignore: lines_longer_than_80_chars
                     'Save ${message.attachments[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                     StreamSvgIcon.iconSave(
                       size: 24,
@@ -203,7 +204,7 @@ class AttachmentActionsModal extends StatelessWidget {
             child: Row(
               children: [
                 icon,
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Text(
                   title,
                   style: StreamChatTheme.of(context)
@@ -253,7 +254,7 @@ class AttachmentActionsModal extends StatelessWidget {
                       )
                     : progress.toProgressIndicatorValue == 1.0
                         ? SizedBox(
-                            key: Key('completedIcon'),
+                            key: const Key('completedIcon'),
                             height: 160,
                             width: 160,
                             child: StreamSvgIcon.check(
@@ -314,14 +315,13 @@ class AttachmentActionsModal extends StatelessWidget {
 }
 
 class _DownloadProgress {
-  final int total;
-  final int received;
-
   const _DownloadProgress(this.total, this.received);
 
-  factory _DownloadProgress.initial() {
-    return _DownloadProgress(double.maxFinite.toInt(), 0);
-  }
+  factory _DownloadProgress.initial() =>
+      _DownloadProgress(double.maxFinite.toInt(), 0);
+
+  final int total;
+  final int received;
 
   double get toProgressIndicatorValue => received / total;
 
