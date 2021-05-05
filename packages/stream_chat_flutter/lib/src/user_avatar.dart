@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../stream_chat_flutter.dart';
-
+/// Widget that displays a user avatar
 class UserAvatar extends StatelessWidget {
+  /// Constructor to create a [UserAvatar]
   const UserAvatar({
     Key? key,
     required this.user,
@@ -20,16 +21,37 @@ class UserAvatar extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
+  /// User whose avatar is to displayed
   final User user;
+
+  /// Alignment of the online indicator
   final Alignment onlineIndicatorAlignment;
+
+  /// Size of the avatar
   final BoxConstraints? constraints;
+
+  /// [BorderRadius] of the image
   final BorderRadius? borderRadius;
+
+  /// Size of the online indicator
   final BoxConstraints? onlineIndicatorConstraints;
+
+  /// Callback when avatar is tapped
   final void Function(User)? onTap;
+
+  /// Callback when avatar is long pressed
   final void Function(User)? onLongPress;
+
+  /// Flag for showing online status
   final bool showOnlineStatus;
+
+  /// Flag for if avatar is selected
   final bool selected;
+
+  /// Color of selection
   final Color? selectionColor;
+
+  /// Selection thickness around the avatar
   final double selectionThickness;
 
   @override
@@ -53,10 +75,10 @@ class UserAvatar extends StatelessWidget {
           child: hasImage
               ? CachedNetworkImage(
                   filterQuality: FilterQuality.high,
+                  // ignore: cast_nullable_to_non_nullable
                   imageUrl: user.extraData['image'] as String,
-                  errorWidget: (_, __, ___) {
-                    return streamChatTheme.defaultUserImage(context, user);
-                  },
+                  errorWidget: (_, __, ___) =>
+                      streamChatTheme.defaultUserImage(context, user),
                   fit: BoxFit.cover,
                 )
               : streamChatTheme.defaultUserImage(context, user),
@@ -98,12 +120,12 @@ class UserAvatar extends StatelessWidget {
                   child: Container(
                     margin: const EdgeInsets.all(2),
                     constraints: onlineIndicatorConstraints ??
-                        BoxConstraints.tightFor(
+                        const BoxConstraints.tightFor(
                           width: 8,
                           height: 8,
                         ),
                     child: Material(
-                      shape: CircleBorder(),
+                      shape: const CircleBorder(),
                       color: streamChatTheme.colorTheme.accentGreen,
                     ),
                   ),

@@ -5,16 +5,17 @@ import 'package:stream_chat_flutter/src/user_list_view.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'stream_chat_theme.dart';
-
 ///
 /// It shows the current [User] preview.
 ///
-/// The widget uses a [StreamBuilder] to render the user information image as soon as it updates.
+/// The widget uses a [StreamBuilder] to render the user information
+/// image as soon as it updates.
 ///
-/// Usually you don't use this widget as it's the default user preview used by [UserListView].
+/// Usually you don't use this widget as it's the default user preview used
+/// by [UserListView].
 ///
-/// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget renders the ui based on the first ancestor of type
+/// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class UserItem extends StatelessWidget {
   /// Instantiate a new UserItem
@@ -47,50 +48,47 @@ class UserItem extends StatelessWidget {
   final bool showLastOnline;
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: () {
-        if (onTap != null) {
-          onTap!(user);
-        }
-      },
-      onLongPress: () {
-        if (onLongPress != null) {
-          onLongPress!(user);
-        }
-      },
-      leading: UserAvatar(
-        user: user,
-        onTap: (user) {
-          if (onImageTap != null) {
-            onImageTap!(user);
+  Widget build(BuildContext context) => ListTile(
+        onTap: () {
+          if (onTap != null) {
+            onTap!(user);
           }
         },
-        constraints: BoxConstraints.tightFor(
-          height: 40,
-          width: 40,
+        onLongPress: () {
+          if (onLongPress != null) {
+            onLongPress!(user);
+          }
+        },
+        leading: UserAvatar(
+          user: user,
+          onTap: (user) {
+            if (onImageTap != null) {
+              onImageTap!(user);
+            }
+          },
+          constraints: const BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
+          ),
         ),
-      ),
-      trailing: selected
-          ? StreamSvgIcon.checkSend(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
-            )
-          : null,
-      title: Text(
-        user.name,
-        style: StreamChatTheme.of(context).textTheme.bodyBold,
-      ),
-      subtitle: showLastOnline ? _buildLastActive(context) : null,
-    );
-  }
+        trailing: selected
+            ? StreamSvgIcon.checkSend(
+                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              )
+            : null,
+        title: Text(
+          user.name,
+          style: StreamChatTheme.of(context).textTheme.bodyBold,
+        ),
+        subtitle: showLastOnline ? _buildLastActive(context) : null,
+      );
 
-  Widget _buildLastActive(context) {
-    return Text(
-      user.online == true
-          ? 'Online'
-          : 'Last online ${Jiffy(user.lastActive).fromNow()}',
-      style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-          color: StreamChatTheme.of(context).colorTheme.black.withOpacity(.5)),
-    );
-  }
+  Widget _buildLastActive(context) => Text(
+        user.online == true
+            ? 'Online'
+            : 'Last online ${Jiffy(user.lastActive).fromNow()}',
+        style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
+            color:
+                StreamChatTheme.of(context).colorTheme.black.withOpacity(.5)),
+      );
 }
