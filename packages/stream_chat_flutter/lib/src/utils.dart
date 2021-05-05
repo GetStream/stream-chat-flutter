@@ -13,7 +13,7 @@ Future<void> launchURL(BuildContext context, String? url) async {
   } else {
     // ignore: deprecated_member_use
     Scaffold.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Cannot launch the url'),
       ),
     );
@@ -27,11 +27,10 @@ Future<bool?> showConfirmationDialog(
   Widget? icon,
   String? question,
   String? cancelText,
-}) {
-  return showModalBottomSheet(
+}) => showModalBottomSheet(
       backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
         topLeft: Radius.circular(16),
         topRight: Radius.circular(16),
@@ -42,20 +41,20 @@ Future<bool?> showConfirmationDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 26),
+              const SizedBox(height: 26),
               if (icon != null) icon,
-              SizedBox(height: 26),
+              const SizedBox(height: 26),
               Text(
                 title,
                 style: StreamChatTheme.of(context).textTheme.headlineBold,
               ),
-              SizedBox(height: 7),
+              const SizedBox(height: 7),
               if (question != null)
                 Text(
                   question,
                   textAlign: TextAlign.center,
                 ),
-              SizedBox(height: 36),
+              const SizedBox(height: 36),
               Container(
                 color: effect.color!.withOpacity(effect.alpha ?? 1),
                 height: 1,
@@ -110,8 +109,8 @@ Future<bool?> showConfirmationDialog(
           ),
         );
       });
-}
 
+/// Shows info dialog
 Future<bool?> showInfoDialog(
   BuildContext context, {
   required String title,
@@ -119,26 +118,24 @@ Future<bool?> showInfoDialog(
   Widget? icon,
   String? details,
   StreamChatThemeData? theme,
-}) {
-  return showModalBottomSheet(
+}) => showModalBottomSheet(
     backgroundColor:
         theme?.colorTheme.white ?? StreamChatTheme.of(context).colorTheme.white,
     context: context,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
       topLeft: Radius.circular(16),
       topRight: Radius.circular(16),
     )),
-    builder: (context) {
-      return SafeArea(
+    builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 26,
             ),
             if (icon != null) icon,
-            SizedBox(
+            const SizedBox(
               height: 26,
             ),
             Text(
@@ -146,11 +143,11 @@ Future<bool?> showInfoDialog(
               style: theme?.textTheme.headlineBold ??
                   StreamChatTheme.of(context).textTheme.headlineBold,
             ),
-            SizedBox(
+            const SizedBox(
               height: 7,
             ),
             if (details != null) Text(details),
-            SizedBox(
+            const SizedBox(
               height: 36,
             ),
             Container(
@@ -175,10 +172,8 @@ Future<bool?> showInfoDialog(
             ),
           ],
         ),
-      );
-    },
+      ),
   );
-}
 
 /// Get random png with initials
 String getRandomPicUrl(User user) =>
@@ -335,15 +330,16 @@ StreamSvgIcon getFileTypeImage(String? type) {
   }
 }
 
+/// Wraps attachment widget with custom shape
 Widget wrapAttachmentWidget(
   BuildContext context,
   Widget attachmentWidget,
   ShapeBorder attachmentShape,
+  // ignore: avoid_positional_boolean_parameters
   bool reverse,
   BorderRadius borderRadius,
-) {
-  return ClipRRect(
-    borderRadius: borderRadius,
+) => ClipRRect(
+  borderRadius: borderRadius,
     child: Material(
       clipBehavior: Clip.antiAlias,
       shape: attachmentShape,
@@ -355,4 +351,3 @@ Widget wrapAttachmentWidget(
       ),
     ),
   );
-}

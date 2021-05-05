@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Displays a list of users who reacted
 class UserReactionDisplay extends StatelessWidget {
+
+  /// Constructor for creating a [UserReactionDisplay]
   const UserReactionDisplay({
     Key? key,
     required this.reactionToEmoji,
@@ -10,13 +13,17 @@ class UserReactionDisplay extends StatelessWidget {
     this.size = 30,
   }) : super(key: key);
 
+  /// Reaction map
   final Map<String, String> reactionToEmoji;
+
+  /// Message which is reacted to
   final Message message;
+
+  /// Size of Icon
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       color: Colors.black87,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,9 +32,8 @@ class UserReactionDisplay extends StatelessWidget {
         children: reactionToEmoji.keys.map((reactionType) {
           final firstUserReaction = message.latestReactions!
               .firstWhere((element) => element.type == reactionType,
-                  orElse: () {
-                    return null;
-                  } as Reaction Function()?);
+                  //ignore: unnecessary_parenthesis
+                  orElse: (() => null) as Reaction Function()?);
 
           if (firstUserReaction.user == null) {
             return IconButton(
@@ -52,5 +58,4 @@ class UserReactionDisplay extends StatelessWidget {
         }).toList(),
       ),
     );
-  }
 }
