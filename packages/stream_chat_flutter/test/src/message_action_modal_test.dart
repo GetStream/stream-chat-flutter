@@ -262,10 +262,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -310,10 +310,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -361,10 +361,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -410,10 +410,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -459,10 +459,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -506,10 +506,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -563,10 +563,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -620,10 +620,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -673,10 +673,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,
@@ -730,10 +730,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              streamChatThemeData: streamTheme,
-              child: child,
-            ),
+            client: client,
+            streamChatThemeData: streamTheme,
+            child: child,
+          ),
           theme: themeData,
           home: StreamChannel(
             showLoading: false,

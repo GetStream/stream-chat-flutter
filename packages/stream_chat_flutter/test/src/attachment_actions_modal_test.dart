@@ -373,9 +373,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              child: child,
-            ),
+            client: client,
+            child: child,
+          ),
           home: StreamChannel(
             showLoading: false,
             channel: mockChannel,
@@ -405,9 +405,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              child: child,
-            ),
+            client: client,
+            child: child,
+          ),
           home: SizedBox(
             child: AttachmentActionsModal(
               imageDownloader: imageDownloader,
@@ -460,9 +460,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           builder: (context, child) => StreamChat(
-              client: client,
-              child: child!,
-            ),
+            client: client,
+            child: child!,
+          ),
           home: Container(
             child: AttachmentActionsModal(
               fileDownloader: fileDownloader,
