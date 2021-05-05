@@ -1,3 +1,7 @@
+## 1.5.4
+
+- Updated `stream_chat_core` dependency
+
 ## 1.5.3
 
 - Updated `stream_chat_core` dependency
