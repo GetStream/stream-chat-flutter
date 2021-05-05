@@ -1,3 +1,7 @@
+## 2.0.0-nullsafety.3
+
+- Fix MessageInput overflow when there are no actions
+
 ## 2.0.0-nullsafety.2
 
 - Migrate this package to null safety
