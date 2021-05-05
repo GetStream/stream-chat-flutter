@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:stream_chat_flutter/src/video_service.dart';
 
-import 'stream_svg_icon.dart';
-import 'video_service.dart';
-
+/// Widget for creating video thumbnail image
 class VideoThumbnailImage extends StatefulWidget {
   /// Constructor for creating [VideoThumbnailImage]
   const VideoThumbnailImage({
@@ -38,6 +37,8 @@ class VideoThumbnailImage extends StatefulWidget {
 
   /// Builds widget on error
   final Widget Function(BuildContext, Object?)? errorBuilder;
+
+  /// Builds placeholder
   final WidgetBuilder? placeholderBuilder;
 
   @override
@@ -69,8 +70,8 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
-      future: thumbnailFuture,
-      builder: (context, snapshot) => AnimatedSwitcher(
+        future: thumbnailFuture,
+        builder: (context, snapshot) => AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           child: Builder(
             key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
@@ -108,5 +109,5 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
             },
           ),
         ),
-    );
+      );
 }
