@@ -8,37 +8,11 @@ import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
-import 'extension.dart';
-import 'message_input.dart';
-import 'message_widget.dart';
-import 'stream_chat.dart';
-import 'stream_chat_theme.dart';
-
+/// Constructs a modal with actions for a message
 class MessageActionsModal extends StatefulWidget {
-  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
-  final OnMessageTap? onThreadReplyTap;
-  final OnMessageTap? onReplyTap;
-  final Message message;
-  final MessageTheme messageTheme;
-  final bool showReactions;
-  final OnMessageTap? onCopyTap;
-  final bool showDeleteMessage;
-  final bool showCopyMessage;
-  final bool showEditMessage;
-  final bool showResendMessage;
-  final bool showReplyMessage;
-  final bool showThreadReplyMessage;
-  final bool showFlagButton;
-  final bool reverse;
-  final ShapeBorder? messageShape;
-  final ShapeBorder? attachmentShape;
-  final DisplayWidget showUserAvatar;
-  final BorderRadius? attachmentBorderRadiusGeometry;
-
-  /// List of custom actions
-  final List<MessageAction> customActions;
-
+  /// Constructor for creating a [MessageActionsModal] widget
   const MessageActionsModal({
     Key? key,
     required this.message,
@@ -63,6 +37,66 @@ class MessageActionsModal extends StatefulWidget {
     this.onCopyTap,
   }) : super(key: key);
 
+  /// Builder for edit message
+  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
+
+  /// Callback for when thread reply is tapped
+  final OnMessageTap? onThreadReplyTap;
+
+  /// Callback for when reply is tapped
+  final OnMessageTap? onReplyTap;
+
+  /// Message in focus for actions
+  final Message message;
+
+  /// [MessageTheme] for message
+  final MessageTheme messageTheme;
+
+  /// Flag for showing reactions
+  final bool showReactions;
+
+  /// Callback when copy is tapped
+  final OnMessageTap? onCopyTap;
+
+  /// Callback when delete is tapped
+  final bool showDeleteMessage;
+
+  /// Flag for showing copy action
+  final bool showCopyMessage;
+
+  /// Flag for showing edit action
+  final bool showEditMessage;
+
+  /// Flag for showing resend action
+  final bool showResendMessage;
+
+  /// Flag for showing reply action
+  final bool showReplyMessage;
+
+  /// Flag for showing thread reply action
+  final bool showThreadReplyMessage;
+
+  /// Flag for showing flag action
+  final bool showFlagButton;
+
+  /// Flag for reversing message
+  final bool reverse;
+
+  /// [ShapeBorder] to apply to the widget
+  final ShapeBorder? messageShape;
+
+  /// [ShapeBorder] to apply to attachment
+  final ShapeBorder? attachmentShape;
+
+  /// Enum for displaying user avatar
+  final DisplayWidget showUserAvatar;
+
+  /// [BorderRadius] for attachment border
+  final BorderRadius? attachmentBorderRadiusGeometry;
+
+  /// List of custom actions
+  final List<MessageAction> customActions;
+
   @override
   _MessageActionsModalState createState() => _MessageActionsModalState();
 }
@@ -71,9 +105,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   bool _showActions = true;
 
   @override
-  Widget build(BuildContext context) {
-    return _showMessageOptionsModal();
-  }
+  Widget build(BuildContext context) => _showMessageOptionsModal();
 
   Widget _showMessageOptionsModal() {
     final size = MediaQuery.of(context).size;
@@ -120,138 +152,135 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           if (_showActions)
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: 1),
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutBack,
-              builder: (context, val, snapshot) {
-                return Transform.scale(
-                  scale: val,
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: widget.reverse
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: <Widget>[
-                            if (widget.showReactions &&
-                                (widget.message.status ==
-                                    MessageSendingStatus.sent))
-                              Align(
-                                alignment: Alignment(
-                                    user?.id == widget.message.user?.id
-                                        ? (divFactor > 1.0
-                                            ? 0.0
-                                            : (1.0 - divFactor))
-                                        : (divFactor > 1.0
-                                            ? 0.0
-                                            : -(1.0 - divFactor)),
-                                    0),
-                                child: ReactionPicker(
-                                  message: widget.message,
-                                ),
-                              ),
-                            SizedBox(height: 8),
-                            IgnorePointer(
-                              child: MessageWidget(
-                                key: Key('MessageWidget'),
-                                reverse: widget.reverse,
-                                attachmentBorderRadiusGeometry:
-                                    widget.attachmentBorderRadiusGeometry,
-                                message: widget.message.copyWith(
-                                  text: widget.message.text!.length > 200
-                                      ? '${widget.message.text!.substring(0, 200)}...'
-                                      : widget.message.text,
-                                ),
-                                messageTheme: widget.messageTheme,
-                                showReactions: false,
-                                showUsername: false,
-                                showReplyMessage: false,
-                                showUserAvatar: widget.showUserAvatar,
-                                attachmentPadding: EdgeInsets.all(
-                                  hasFileAttachment ? 4 : 2,
-                                ),
-                                showTimestamp: false,
-                                translateUserAvatar: false,
-                                padding: const EdgeInsets.all(0),
-                                textPadding: EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: widget.message.text!.isOnlyEmoji
-                                      ? 0
-                                      : 16.0,
-                                ),
-                                showReactionPickerIndicator:
-                                    widget.showReactions &&
-                                        (widget.message.status ==
-                                            MessageSendingStatus.sent),
-                                showSendingIndicator: false,
-                                shape: widget.messageShape,
-                                attachmentShape: widget.attachmentShape,
+              builder: (context, val, snapshot) => Transform.scale(
+                scale: val,
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: widget.reverse
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: <Widget>[
+                          if (widget.showReactions &&
+                              (widget.message.status ==
+                                  MessageSendingStatus.sent))
+                            Align(
+                              alignment: Alignment(
+                                  user?.id == widget.message.user?.id
+                                      ? (divFactor > 1.0
+                                          ? 0.0
+                                          : (1.0 - divFactor))
+                                      : (divFactor > 1.0
+                                          ? 0.0
+                                          : -(1.0 - divFactor)),
+                                  0),
+                              child: ReactionPicker(
+                                message: widget.message,
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                left: widget.reverse ? 0 : 40,
+                          const SizedBox(height: 8),
+                          IgnorePointer(
+                            child: MessageWidget(
+                              key: const Key('MessageWidget'),
+                              reverse: widget.reverse,
+                              attachmentBorderRadiusGeometry:
+                                  widget.attachmentBorderRadiusGeometry,
+                              message: widget.message.copyWith(
+                                text: widget.message.text!.length > 200
+                                    // ignore: lines_longer_than_80_chars
+                                    ? '${widget.message.text!.substring(0, 200)}...'
+                                    : widget.message.text,
                               ),
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.75,
-                                child: Material(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .whiteSnow,
-                                  clipBehavior: Clip.hardEdge,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      if (widget.showReplyMessage &&
-                                          widget.message.status ==
-                                              MessageSendingStatus.sent)
-                                        _buildReplyButton(context),
-                                      if (widget.showThreadReplyMessage &&
-                                          (widget.message.status ==
-                                              MessageSendingStatus.sent) &&
-                                          widget.message.parentId == null)
-                                        _buildThreadReplyButton(context),
-                                      if (widget.showResendMessage)
-                                        _buildResendMessage(context),
-                                      if (widget.showEditMessage)
-                                        _buildEditMessage(context),
-                                      if (widget.showCopyMessage)
-                                        _buildCopyButton(context),
-                                      if (widget.showFlagButton)
-                                        _buildFlagButton(context),
-                                      if (widget.showDeleteMessage)
-                                        _buildDeleteButton(context),
-                                      ...widget.customActions.map((action) {
-                                        return _buildCustomAction(
-                                          context,
-                                          action,
-                                        );
-                                      })
-                                    ].insertBetween(
-                                      Container(
-                                        height: 1,
-                                        color: StreamChatTheme.of(context)
-                                            .colorTheme
-                                            .greyWhisper,
-                                      ),
+                              messageTheme: widget.messageTheme,
+                              showReactions: false,
+                              showUsername: false,
+                              showReplyMessage: false,
+                              showUserAvatar: widget.showUserAvatar,
+                              attachmentPadding: EdgeInsets.all(
+                                hasFileAttachment ? 4 : 2,
+                              ),
+                              showTimestamp: false,
+                              translateUserAvatar: false,
+                              padding: const EdgeInsets.all(0),
+                              textPadding: EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal:
+                                    widget.message.text!.isOnlyEmoji ? 0 : 16.0,
+                              ),
+                              showReactionPickerIndicator:
+                                  widget.showReactions &&
+                                      (widget.message.status ==
+                                          MessageSendingStatus.sent),
+                              showSendingIndicator: false,
+                              shape: widget.messageShape,
+                              attachmentShape: widget.attachmentShape,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: widget.reverse ? 0 : 40,
+                            ),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.75,
+                              child: Material(
+                                color: StreamChatTheme.of(context)
+                                    .colorTheme
+                                    .whiteSnow,
+                                clipBehavior: Clip.hardEdge,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    if (widget.showReplyMessage &&
+                                        widget.message.status ==
+                                            MessageSendingStatus.sent)
+                                      _buildReplyButton(context),
+                                    if (widget.showThreadReplyMessage &&
+                                        (widget.message.status ==
+                                            MessageSendingStatus.sent) &&
+                                        widget.message.parentId == null)
+                                      _buildThreadReplyButton(context),
+                                    if (widget.showResendMessage)
+                                      _buildResendMessage(context),
+                                    if (widget.showEditMessage)
+                                      _buildEditMessage(context),
+                                    if (widget.showCopyMessage)
+                                      _buildCopyButton(context),
+                                    if (widget.showFlagButton)
+                                      _buildFlagButton(context),
+                                    if (widget.showDeleteMessage)
+                                      _buildDeleteButton(context),
+                                    ...widget.customActions
+                                        .map((action) => _buildCustomAction(
+                                              context,
+                                              action,
+                                            ))
+                                  ].insertBetween(
+                                    Container(
+                                      height: 1,
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .greyWhisper,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
         ],
       ),
@@ -261,23 +290,22 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   InkWell _buildCustomAction(
     BuildContext context,
     MessageAction messageAction,
-  ) {
-    return InkWell(
-      onTap: () {
-        messageAction.onTap?.call(widget.message);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            messageAction.leading ?? Offstage(),
-            const SizedBox(width: 16),
-            messageAction.title ?? Offstage(),
-          ],
+  ) =>
+      InkWell(
+        onTap: () {
+          messageAction.onTap?.call(widget.message);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+          child: Row(
+            children: [
+              messageAction.leading ?? const Offstage(),
+              const SizedBox(width: 16),
+              messageAction.title ?? const Offstage(),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   void _showFlagDialog() async {
     final client = StreamChat.of(context).client;
@@ -290,6 +318,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         size: 24,
       ),
       question:
+          // ignore: lines_longer_than_80_chars
           'Do you want to send a copy of this message to a\nmoderator for further investigation?',
       okText: 'FLAG',
       cancelText: 'CANCEL',
@@ -371,52 +400,48 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildReplyButton(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        if (widget.onReplyTap != null) {
-          widget.onReplyTap!(widget.message);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.reply(
-              color: StreamChatTheme.of(context).primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Reply',
-              style: StreamChatTheme.of(context).textTheme.body,
-            ),
-          ],
+  Widget _buildReplyButton(BuildContext context) => InkWell(
+        onTap: () {
+          Navigator.pop(context);
+          if (widget.onReplyTap != null) {
+            widget.onReplyTap!(widget.message);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+          child: Row(
+            children: [
+              StreamSvgIcon.reply(
+                color: StreamChatTheme.of(context).primaryIconTheme.color,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Reply',
+                style: StreamChatTheme.of(context).textTheme.body,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _buildFlagButton(BuildContext context) {
-    return InkWell(
-      onTap: _showFlagDialog,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.iconFlag(
-              color: StreamChatTheme.of(context).primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Flag Message',
-              style: StreamChatTheme.of(context).textTheme.body,
-            ),
-          ],
+  Widget _buildFlagButton(BuildContext context) => InkWell(
+        onTap: _showFlagDialog,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+          child: Row(
+            children: [
+              StreamSvgIcon.iconFlag(
+                color: StreamChatTheme.of(context).primaryIconTheme.color,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Flag Message',
+                style: StreamChatTheme.of(context).textTheme.body,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _buildDeleteButton(BuildContext context) {
     final isDeleteFailed =
@@ -444,54 +469,50 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildCopyButton(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        widget.onCopyTap?.call(widget.message);
-        Navigator.pop(context);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.copy(
-              size: 24,
-              color: StreamChatTheme.of(context).primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Copy Message',
-              style: StreamChatTheme.of(context).textTheme.body,
-            ),
-          ],
+  Widget _buildCopyButton(BuildContext context) => InkWell(
+        onTap: () async {
+          widget.onCopyTap?.call(widget.message);
+          Navigator.pop(context);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+          child: Row(
+            children: [
+              StreamSvgIcon.copy(
+                size: 24,
+                color: StreamChatTheme.of(context).primaryIconTheme.color,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Copy Message',
+                style: StreamChatTheme.of(context).textTheme.body,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _buildEditMessage(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        Navigator.pop(context);
-        _showEditBottomSheet(context);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.edit(
-              color: StreamChatTheme.of(context).primaryIconTheme.color,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Edit Message',
-              style: StreamChatTheme.of(context).textTheme.body,
-            ),
-          ],
+  Widget _buildEditMessage(BuildContext context) => InkWell(
+        onTap: () async {
+          Navigator.pop(context);
+          _showEditBottomSheet(context);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+          child: Row(
+            children: [
+              StreamSvgIcon.edit(
+                color: StreamChatTheme.of(context).primaryIconTheme.color,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Edit Message',
+                style: StreamChatTheme.of(context).textTheme.body,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _buildResendMessage(BuildContext context) {
     final isUpdateFailed =
@@ -533,86 +554,81 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       isScrollControlled: true,
       backgroundColor:
           StreamChatTheme.of(context).messageInputTheme.inputBackground,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
         ),
       ),
-      builder: (context) {
-        return StreamChannel(
-          channel: channel,
-          child: Flex(
-            direction: Axis.vertical,
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: StreamSvgIcon.edit(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
-                      ),
+      builder: (context) => StreamChannel(
+        channel: channel,
+        child: Flex(
+          direction: Axis.vertical,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: StreamSvgIcon.edit(
+                      color:
+                          StreamChatTheme.of(context).colorTheme.greyGainsboro,
                     ),
-                    Text(
-                      'Edit Message',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: StreamSvgIcon.closeSmall(),
-                      onPressed: Navigator.of(context).pop,
-                    ),
-                  ],
-                ),
+                  ),
+                  const Text(
+                    'Edit Message',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    icon: StreamSvgIcon.closeSmall(),
+                    onPressed: Navigator.of(context).pop,
+                  ),
+                ],
               ),
-              if (widget.editMessageInputBuilder != null)
-                widget.editMessageInputBuilder!(context, widget.message)
-              else
-                MessageInput(
-                  editMessage: widget.message,
-                  preMessageSending: (m) {
-                    FocusScope.of(context).unfocus();
-                    Navigator.pop(context);
-                    return m;
-                  },
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildThreadReplyButton(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-        if (widget.onThreadReplyTap != null) {
-          widget.onThreadReplyTap!(widget.message);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-        child: Row(
-          children: [
-            StreamSvgIcon.thread(
-              color: StreamChatTheme.of(context).primaryIconTheme.color,
             ),
-            const SizedBox(width: 16),
-            Text(
-              'Thread Reply',
-              style: StreamChatTheme.of(context).textTheme.body,
-            ),
+            if (widget.editMessageInputBuilder != null)
+              widget.editMessageInputBuilder!(context, widget.message)
+            else
+              MessageInput(
+                editMessage: widget.message,
+                preMessageSending: (m) {
+                  FocusScope.of(context).unfocus();
+                  Navigator.pop(context);
+                  return m;
+                },
+              ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildThreadReplyButton(BuildContext context) => InkWell(
+        onTap: () {
+          Navigator.pop(context);
+          if (widget.onThreadReplyTap != null) {
+            widget.onThreadReplyTap!(widget.message);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+          child: Row(
+            children: [
+              StreamSvgIcon.thread(
+                color: StreamChatTheme.of(context).primaryIconTheme.color,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Thread Reply',
+                style: StreamChatTheme.of(context).textTheme.body,
+              ),
+            ],
+          ),
+        ),
+      );
 }
