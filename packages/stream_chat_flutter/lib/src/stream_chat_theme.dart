@@ -11,8 +11,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Inherited widget providing the [StreamChatThemeData] to the widget tree
 class StreamChatTheme extends InheritedWidget {
-  final StreamChatThemeData data;
-
+  /// Constructor for creating a [StreamChatTheme]
   const StreamChatTheme({
     Key? key,
     required this.data,
@@ -22,10 +21,11 @@ class StreamChatTheme extends InheritedWidget {
           child: child,
         );
 
+  /// Theme data
+  final StreamChatThemeData data;
+
   @override
-  bool updateShouldNotify(StreamChatTheme old) {
-    return data != old.data;
-  }
+  bool updateShouldNotify(StreamChatTheme old) => data != old.data;
 
   /// Use this method to get the current [StreamChatThemeData] instance
   static StreamChatThemeData of(BuildContext context) {
@@ -43,42 +43,6 @@ class StreamChatTheme extends InheritedWidget {
 
 /// Theme data
 class StreamChatThemeData {
-  /// The text themes used in the widgets
-  final TextTheme textTheme;
-
-  /// The color themes used in the widgets
-  final ColorTheme colorTheme;
-
-  /// Theme of the [ChannelPreview]
-  final ChannelPreviewTheme channelPreviewTheme;
-
-  /// Theme of the [ChannelListHeader]
-  final ChannelListHeaderTheme channelListHeaderTheme;
-
-  /// Theme of the chat widgets dedicated to a channel
-  final ChannelTheme channelTheme;
-
-  /// Theme of the current user messages
-  final MessageTheme ownMessageTheme;
-
-  /// Theme of other users messages
-  final MessageTheme otherMessageTheme;
-
-  /// Theme dedicated to the [MessageInput] widget
-  final MessageInputTheme messageInputTheme;
-
-  /// The widget that will be built when the channel image is unavailable
-  final Widget Function(BuildContext, Channel) defaultChannelImage;
-
-  /// The widget that will be built when the user image is unavailable
-  final Widget Function(BuildContext, User) defaultUserImage;
-
-  /// Primary icon theme
-  final IconThemeData primaryIconTheme;
-
-  /// Assets used for rendering reactions
-  final List<ReactionIcon> reactionIcons;
-
   /// Create a theme from scratch
   factory StreamChatThemeData({
     Brightness? brightness,
@@ -121,12 +85,15 @@ class StreamChatThemeData {
     return defaultData.merge(customizedData);
   }
 
+  /// Theme initialised with light
   factory StreamChatThemeData.light() =>
       StreamChatThemeData(brightness: Brightness.light);
 
+  /// Theme initialised with dark
   factory StreamChatThemeData.dark() =>
       StreamChatThemeData(brightness: Brightness.dark);
 
+  /// Raw theme init
   const StreamChatThemeData.raw({
     required this.textTheme,
     required this.colorTheme,
@@ -154,7 +121,44 @@ class StreamChatThemeData {
     return defaultTheme.merge(customizedTheme);
   }
 
-  /// Creates a copy of [StreamChatThemeData] with specified attributes overridden.
+  /// The text themes used in the widgets
+  final TextTheme textTheme;
+
+  /// The color themes used in the widgets
+  final ColorTheme colorTheme;
+
+  /// Theme of the [ChannelPreview]
+  final ChannelPreviewTheme channelPreviewTheme;
+
+  /// Theme of the [ChannelListHeader]
+  final ChannelListHeaderTheme channelListHeaderTheme;
+
+  /// Theme of the chat widgets dedicated to a channel
+  final ChannelTheme channelTheme;
+
+  /// Theme of the current user messages
+  final MessageTheme ownMessageTheme;
+
+  /// Theme of other users messages
+  final MessageTheme otherMessageTheme;
+
+  /// Theme dedicated to the [MessageInput] widget
+  final MessageInputTheme messageInputTheme;
+
+  /// The widget that will be built when the channel image is unavailable
+  final Widget Function(BuildContext, Channel) defaultChannelImage;
+
+  /// The widget that will be built when the user image is unavailable
+  final Widget Function(BuildContext, User) defaultUserImage;
+
+  /// Primary icon theme
+  final IconThemeData primaryIconTheme;
+
+  /// Assets used for rendering reactions
+  final List<ReactionIcon> reactionIcons;
+
+  /// Creates a copy of [StreamChatThemeData] with specified attributes
+  /// overridden.
   StreamChatThemeData copyWith({
     TextTheme? textTheme,
     ColorTheme? colorTheme,
@@ -185,6 +189,7 @@ class StreamChatThemeData {
         reactionIcons: reactionIcons ?? this.reactionIcons,
       );
 
+  /// Merge themes
   StreamChatThemeData merge(StreamChatThemeData? other) {
     if (other == null) return this;
     return copyWith(
@@ -204,6 +209,8 @@ class StreamChatThemeData {
     );
   }
 
+  /// Create theme from color and text theme
+  // ignore: prefer_constructors_over_static_methods
   static StreamChatThemeData fromColorAndTextTheme(
     ColorTheme colorTheme,
     TextTheme textTheme,
@@ -213,7 +220,7 @@ class StreamChatThemeData {
       textTheme: textTheme,
       colorTheme: colorTheme,
       primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
-      defaultChannelImage: (context, channel) => SizedBox(),
+      defaultChannelImage: (context, channel) => const SizedBox(),
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
           filterQuality: FilterQuality.high,
@@ -225,14 +232,14 @@ class StreamChatThemeData {
           unreadCounterColor: colorTheme.accentRed,
           avatarTheme: AvatarTheme(
             borderRadius: BorderRadius.circular(20),
-            constraints: BoxConstraints.tightFor(
+            constraints: const BoxConstraints.tightFor(
               height: 40,
               width: 40,
             ),
           ),
           title: textTheme.bodyBold,
           subtitle: textTheme.footnote.copyWith(
-            color: Color(0xff7A7A7A),
+            color: const Color(0xff7A7A7A),
           ),
           lastMessageAt: textTheme.footnote.copyWith(
             color: colorTheme.black.withOpacity(.5),
@@ -241,7 +248,7 @@ class StreamChatThemeData {
       channelListHeaderTheme: ChannelListHeaderTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
+          constraints: const BoxConstraints.tightFor(
             height: 40,
             width: 40,
           ),
@@ -253,7 +260,7 @@ class StreamChatThemeData {
         channelHeaderTheme: ChannelHeaderTheme(
           avatarTheme: AvatarTheme(
             borderRadius: BorderRadius.circular(20),
-            constraints: BoxConstraints.tightFor(
+            constraints: const BoxConstraints.tightFor(
               height: 40,
               width: 40,
             ),
@@ -261,7 +268,7 @@ class StreamChatThemeData {
           color: colorTheme.white,
           title: textTheme.headlineBold,
           subtitle: textTheme.footnote.copyWith(
-            color: Color(0xff7A7A7A),
+            color: const Color(0xff7A7A7A),
           ),
         ),
       ),
@@ -277,7 +284,7 @@ class StreamChatThemeData {
         messageBorderColor: colorTheme.greyGainsboro,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
+          constraints: const BoxConstraints.tightFor(
             height: 32,
             width: 32,
           ),
@@ -301,7 +308,7 @@ class StreamChatThemeData {
         messageBorderColor: colorTheme.greyWhisper,
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
-          constraints: BoxConstraints.tightFor(
+          constraints: const BoxConstraints.tightFor(
             height: 32,
             width: 32,
           ),
@@ -309,7 +316,7 @@ class StreamChatThemeData {
       ),
       messageInputTheme: MessageInputTheme(
         borderRadius: BorderRadius.circular(20),
-        sendAnimationDuration: Duration(milliseconds: 300),
+        sendAnimationDuration: const Duration(milliseconds: 300),
         actionButtonColor: colorTheme.accentBlue,
         actionButtonIdleColor: colorTheme.grey,
         expandButtonColor: colorTheme.accentBlue,
@@ -356,16 +363,9 @@ class StreamChatThemeData {
   }
 }
 
+/// Class for holding text theme
 class TextTheme {
-  final TextStyle title;
-  final TextStyle headlineBold;
-  final TextStyle headline;
-  final TextStyle bodyBold;
-  final TextStyle body;
-  final TextStyle footnoteBold;
-  final TextStyle footnote;
-  final TextStyle captionBold;
-
+  /// Initialise light text theme
   TextTheme.light({
     this.title = const TextStyle(
       fontSize: 22,
@@ -408,6 +408,7 @@ class TextTheme {
     ),
   });
 
+  /// Initialise with dark theme
   TextTheme.dark({
     this.title = const TextStyle(
       fontSize: 22,
@@ -450,6 +451,31 @@ class TextTheme {
     ),
   });
 
+  /// Text theme for title
+  final TextStyle title;
+
+  /// Body Text theme for headline
+  final TextStyle headlineBold;
+
+  /// Text theme for headline
+  final TextStyle headline;
+
+  /// Bold Text theme for body
+  final TextStyle bodyBold;
+
+  /// Text theme body
+  final TextStyle body;
+
+  /// Bold Text theme for footnote
+  final TextStyle footnoteBold;
+
+  /// Text theme for footnote
+  final TextStyle footnote;
+
+  /// Bold Text theme for caption
+  final TextStyle captionBold;
+
+  /// Copy with theme
   TextTheme copyWith({
     Brightness brightness = Brightness.light,
     TextStyle? body,
@@ -460,30 +486,30 @@ class TextTheme {
     TextStyle? footnoteBold,
     TextStyle? footnote,
     TextStyle? captionBold,
-  }) {
-    return brightness == Brightness.light
-        ? TextTheme.light(
-            body: body ?? this.body,
-            title: title ?? this.title,
-            headlineBold: headlineBold ?? this.headlineBold,
-            headline: headline ?? this.headline,
-            bodyBold: bodyBold ?? this.bodyBold,
-            footnoteBold: footnoteBold ?? this.footnoteBold,
-            footnote: footnote ?? this.footnote,
-            captionBold: captionBold ?? this.captionBold,
-          )
-        : TextTheme.dark(
-            body: body ?? this.body,
-            title: title ?? this.title,
-            headlineBold: headlineBold ?? this.headlineBold,
-            headline: headline ?? this.headline,
-            bodyBold: bodyBold ?? this.bodyBold,
-            footnoteBold: footnoteBold ?? this.footnoteBold,
-            footnote: footnote ?? this.footnote,
-            captionBold: captionBold ?? this.captionBold,
-          );
-  }
+  }) =>
+      brightness == Brightness.light
+          ? TextTheme.light(
+              body: body ?? this.body,
+              title: title ?? this.title,
+              headlineBold: headlineBold ?? this.headlineBold,
+              headline: headline ?? this.headline,
+              bodyBold: bodyBold ?? this.bodyBold,
+              footnoteBold: footnoteBold ?? this.footnoteBold,
+              footnote: footnote ?? this.footnote,
+              captionBold: captionBold ?? this.captionBold,
+            )
+          : TextTheme.dark(
+              body: body ?? this.body,
+              title: title ?? this.title,
+              headlineBold: headlineBold ?? this.headlineBold,
+              headline: headline ?? this.headline,
+              bodyBold: bodyBold ?? this.bodyBold,
+              footnoteBold: footnoteBold ?? this.footnoteBold,
+              footnote: footnote ?? this.footnote,
+              captionBold: captionBold ?? this.captionBold,
+            );
 
+  /// Merge text theme
   TextTheme merge(TextTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -499,28 +525,9 @@ class TextTheme {
   }
 }
 
+/// Theme that holds colors
 class ColorTheme {
-  final Color black;
-  final Color grey;
-  final Color greyGainsboro;
-  final Color greyWhisper;
-  final Color whiteSmoke;
-  final Color whiteSnow;
-  final Color white;
-  final Color blueAlice;
-  final Color accentBlue;
-  final Color accentRed;
-  final Color accentGreen;
-  final Effect borderTop;
-  final Effect borderBottom;
-  final Effect shadowIconButton;
-  final Effect modalShadow;
-  final Color highlight;
-  final Color overlay;
-  final Color overlayDark;
-  final Gradient bgGradient;
-  final Brightness brightness;
-
+  /// Initialise with light theme
   ColorTheme.light({
     this.black = const Color(0xff000000),
     this.grey = const Color(0xff7a7a7a),
@@ -552,6 +559,7 @@ class ColorTheme {
         sigmaX: 0, sigmaY: 0, color: Color(0xff000000), alpha: 1, blur: 8),
   }) : brightness = Brightness.light;
 
+  /// Initialise with dark theme
   ColorTheme.dark({
     this.black = const Color(0xffffffff),
     this.grey = const Color(0xff7a7a7a),
@@ -605,6 +613,67 @@ class ColorTheme {
     ),
   }) : brightness = Brightness.dark;
 
+  ///
+  final Color black;
+
+  ///
+  final Color grey;
+
+  ///
+  final Color greyGainsboro;
+
+  ///
+  final Color greyWhisper;
+
+  ///
+  final Color whiteSmoke;
+
+  ///
+  final Color whiteSnow;
+
+  ///
+  final Color white;
+
+  ///
+  final Color blueAlice;
+
+  ///
+  final Color accentBlue;
+
+  ///
+  final Color accentRed;
+
+  ///
+  final Color accentGreen;
+
+  ///
+  final Effect borderTop;
+
+  ///
+  final Effect borderBottom;
+
+  ///
+  final Effect shadowIconButton;
+
+  ///
+  final Effect modalShadow;
+
+  ///
+  final Color highlight;
+
+  ///
+  final Color overlay;
+
+  ///
+  final Color overlayDark;
+
+  ///
+  final Gradient bgGradient;
+
+  ///
+  final Brightness brightness;
+
+  /// Copy with theme
   ColorTheme copyWith({
     Brightness brightness = Brightness.light,
     Color? black,
@@ -626,52 +695,52 @@ class ColorTheme {
     Color? overlay,
     Color? overlayDark,
     Gradient? bgGradient,
-  }) {
-    return brightness == Brightness.light
-        ? ColorTheme.light(
-            black: black ?? this.black,
-            grey: grey ?? this.grey,
-            greyGainsboro: greyGainsboro ?? this.greyGainsboro,
-            greyWhisper: greyWhisper ?? this.greyWhisper,
-            whiteSmoke: whiteSmoke ?? this.whiteSmoke,
-            whiteSnow: whiteSnow ?? this.whiteSnow,
-            white: white ?? this.white,
-            blueAlice: blueAlice ?? this.blueAlice,
-            accentBlue: accentBlue ?? this.accentBlue,
-            accentRed: accentRed ?? this.accentRed,
-            accentGreen: accentGreen ?? this.accentGreen,
-            borderTop: borderTop ?? this.borderTop,
-            borderBottom: borderBottom ?? this.borderBottom,
-            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
-            modalShadow: modalShadow ?? this.modalShadow,
-            highlight: highlight ?? this.highlight,
-            overlay: overlay ?? this.overlay,
-            overlayDark: overlayDark ?? this.overlayDark,
-            bgGradient: bgGradient ?? this.bgGradient,
-          )
-        : ColorTheme.dark(
-            black: black ?? this.black,
-            grey: grey ?? this.grey,
-            greyGainsboro: greyGainsboro ?? this.greyGainsboro,
-            greyWhisper: greyWhisper ?? this.greyWhisper,
-            whiteSmoke: whiteSmoke ?? this.whiteSmoke,
-            whiteSnow: whiteSnow ?? this.whiteSnow,
-            white: white ?? this.white,
-            blueAlice: blueAlice ?? this.blueAlice,
-            accentBlue: accentBlue ?? this.accentBlue,
-            accentRed: accentRed ?? this.accentRed,
-            accentGreen: accentGreen ?? this.accentGreen,
-            borderTop: borderTop ?? this.borderTop,
-            borderBottom: borderBottom ?? this.borderBottom,
-            shadowIconButton: shadowIconButton ?? this.shadowIconButton,
-            modalShadow: modalShadow ?? this.modalShadow,
-            highlight: highlight ?? this.highlight,
-            overlay: overlay ?? this.overlay,
-            overlayDark: overlayDark ?? this.overlayDark,
-            bgGradient: bgGradient ?? this.bgGradient,
-          );
-  }
+  }) =>
+      brightness == Brightness.light
+          ? ColorTheme.light(
+              black: black ?? this.black,
+              grey: grey ?? this.grey,
+              greyGainsboro: greyGainsboro ?? this.greyGainsboro,
+              greyWhisper: greyWhisper ?? this.greyWhisper,
+              whiteSmoke: whiteSmoke ?? this.whiteSmoke,
+              whiteSnow: whiteSnow ?? this.whiteSnow,
+              white: white ?? this.white,
+              blueAlice: blueAlice ?? this.blueAlice,
+              accentBlue: accentBlue ?? this.accentBlue,
+              accentRed: accentRed ?? this.accentRed,
+              accentGreen: accentGreen ?? this.accentGreen,
+              borderTop: borderTop ?? this.borderTop,
+              borderBottom: borderBottom ?? this.borderBottom,
+              shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+              modalShadow: modalShadow ?? this.modalShadow,
+              highlight: highlight ?? this.highlight,
+              overlay: overlay ?? this.overlay,
+              overlayDark: overlayDark ?? this.overlayDark,
+              bgGradient: bgGradient ?? this.bgGradient,
+            )
+          : ColorTheme.dark(
+              black: black ?? this.black,
+              grey: grey ?? this.grey,
+              greyGainsboro: greyGainsboro ?? this.greyGainsboro,
+              greyWhisper: greyWhisper ?? this.greyWhisper,
+              whiteSmoke: whiteSmoke ?? this.whiteSmoke,
+              whiteSnow: whiteSnow ?? this.whiteSnow,
+              white: white ?? this.white,
+              blueAlice: blueAlice ?? this.blueAlice,
+              accentBlue: accentBlue ?? this.accentBlue,
+              accentRed: accentRed ?? this.accentRed,
+              accentGreen: accentGreen ?? this.accentGreen,
+              borderTop: borderTop ?? this.borderTop,
+              borderBottom: borderBottom ?? this.borderBottom,
+              shadowIconButton: shadowIconButton ?? this.shadowIconButton,
+              modalShadow: modalShadow ?? this.modalShadow,
+              highlight: highlight ?? this.highlight,
+              overlay: overlay ?? this.overlay,
+              overlayDark: overlayDark ?? this.overlayDark,
+              bgGradient: bgGradient ?? this.bgGradient,
+            );
 
+  /// Merge color theme
   ColorTheme merge(ColorTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -700,12 +769,13 @@ class ColorTheme {
 
 /// Channel theme data
 class ChannelTheme {
-  /// Theme of the [ChannelHeader] widget
-  final ChannelHeaderTheme channelHeaderTheme;
-
+  /// Constructor for creating [ChannelTheme]
   ChannelTheme({
     required this.channelHeaderTheme,
   });
+
+  /// Theme of the [ChannelHeader] widget
+  final ChannelHeaderTheme channelHeaderTheme;
 
   /// Creates a copy of [ChannelTheme] with specified attributes overridden.
   ChannelTheme copyWith({
@@ -715,6 +785,7 @@ class ChannelTheme {
         channelHeaderTheme: channelHeaderTheme ?? this.channelHeaderTheme,
       );
 
+  /// Merge with theme
   ChannelTheme merge(ChannelTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -723,28 +794,30 @@ class ChannelTheme {
   }
 }
 
+/// Theme for avatar
 class AvatarTheme {
-  final BoxConstraints? _constraints;
-  final BorderRadius? _borderRadius;
-
-  BoxConstraints get constraints {
-    return _constraints ??
-        BoxConstraints.tightFor(
-          height: 32,
-          width: 32,
-        );
-  }
-
-  BorderRadius get borderRadius {
-    return _borderRadius ?? BorderRadius.circular(20);
-  }
-
+  /// Constructor for creating [AvatarTheme]
   AvatarTheme({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
   })  : _constraints = constraints,
         _borderRadius = borderRadius;
 
+  final BoxConstraints? _constraints;
+  final BorderRadius? _borderRadius;
+
+  /// Get constraints for avatar
+  BoxConstraints get constraints =>
+      _constraints ??
+      const BoxConstraints.tightFor(
+        height: 32,
+        width: 32,
+      );
+
+  /// Get border radius
+  BorderRadius get borderRadius => _borderRadius ?? BorderRadius.circular(20);
+
+  /// Copy with another theme
   AvatarTheme copyWith({
     BoxConstraints? constraints,
     BorderRadius? borderRadius,
@@ -754,6 +827,7 @@ class AvatarTheme {
         borderRadius: borderRadius ?? _borderRadius,
       );
 
+  /// Merge with another AvatarTheme
   AvatarTheme merge(AvatarTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -763,19 +837,9 @@ class AvatarTheme {
   }
 }
 
+/// Class for getting message theme
 class MessageTheme {
-  final TextStyle? messageText;
-  final TextStyle? messageAuthor;
-  final TextStyle? messageLinks;
-  final TextStyle? createdAt;
-  final TextStyle? replies;
-  final Color? messageBackgroundColor;
-  final Color? messageBorderColor;
-  final Color? reactionsBackgroundColor;
-  final Color? reactionsBorderColor;
-  final Color? reactionsMaskColor;
-  final AvatarTheme? avatarTheme;
-
+  /// Constructor into [MessageTheme]
   const MessageTheme({
     this.replies,
     this.messageText,
@@ -790,6 +854,40 @@ class MessageTheme {
     this.createdAt,
   });
 
+  /// Text style for message text
+  final TextStyle? messageText;
+
+  /// Text style for message author
+  final TextStyle? messageAuthor;
+
+  /// Text style for message links
+  final TextStyle? messageLinks;
+
+  /// Text style for created at text
+  final TextStyle? createdAt;
+
+  /// Text style for replies
+  final TextStyle? replies;
+
+  /// Color for messageBackgroundColor
+  final Color? messageBackgroundColor;
+
+  /// Color for message border color
+  final Color? messageBorderColor;
+
+  /// Color for reactions
+  final Color? reactionsBackgroundColor;
+
+  /// Colors reaction border
+  final Color? reactionsBorderColor;
+
+  /// Color for reaction mask
+  final Color? reactionsMaskColor;
+
+  /// Theme of the avatar
+  final AvatarTheme? avatarTheme;
+
+  /// Copy with a theme
   MessageTheme copyWith({
     TextStyle? messageText,
     TextStyle? messageAuthor,
@@ -819,6 +917,7 @@ class MessageTheme {
         reactionsMaskColor: reactionsMaskColor ?? this.reactionsMaskColor,
       );
 
+  /// Merge with a theme
   MessageTheme merge(MessageTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -839,14 +938,9 @@ class MessageTheme {
   }
 }
 
+/// Theme for channel preview
 class ChannelPreviewTheme {
-  final TextStyle? title;
-  final TextStyle? subtitle;
-  final TextStyle? lastMessageAt;
-  final AvatarTheme? avatarTheme;
-  final Color? unreadCounterColor;
-  final double? indicatorIconSize;
-
+  /// Constructor for creating [ChannelPreviewTheme]
   const ChannelPreviewTheme({
     this.title,
     this.subtitle,
@@ -856,6 +950,25 @@ class ChannelPreviewTheme {
     this.indicatorIconSize,
   });
 
+  /// Theme for title
+  final TextStyle? title;
+
+  /// Theme for subtitle
+  final TextStyle? subtitle;
+
+  /// Theme of last message at
+  final TextStyle? lastMessageAt;
+
+  /// Avatar theme
+  final AvatarTheme? avatarTheme;
+
+  /// Unread counter color
+  final Color? unreadCounterColor;
+
+  /// Indicator icon size
+  final double? indicatorIconSize;
+
+  /// Copy with theme
   ChannelPreviewTheme copyWith({
     TextStyle? title,
     TextStyle? subtitle,
@@ -873,6 +986,7 @@ class ChannelPreviewTheme {
         indicatorIconSize: indicatorIconSize ?? this.indicatorIconSize,
       );
 
+  /// Merge with theme
   ChannelPreviewTheme merge(ChannelPreviewTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -886,12 +1000,9 @@ class ChannelPreviewTheme {
   }
 }
 
+/// Theme for [ChannelHeader]
 class ChannelHeaderTheme {
-  final TextStyle? title;
-  final TextStyle? subtitle;
-  final AvatarTheme? avatarTheme;
-  final Color? color;
-
+  /// Constructor for creating a [ChannelHeaderTheme]
   const ChannelHeaderTheme({
     this.title,
     this.subtitle,
@@ -899,6 +1010,19 @@ class ChannelHeaderTheme {
     this.color,
   });
 
+  /// Theme for title
+  final TextStyle? title;
+
+  /// Theme for subtitle
+  final TextStyle? subtitle;
+
+  /// Theme for avatar
+  final AvatarTheme? avatarTheme;
+
+  /// Color for [ChannelHeaderTheme]
+  final Color? color;
+
+  /// Copy with theme
   ChannelHeaderTheme copyWith({
     TextStyle? title,
     TextStyle? subtitle,
@@ -912,6 +1036,7 @@ class ChannelHeaderTheme {
         color: color ?? this.color,
       );
 
+  /// Merge with other [ChannelHeaderTheme]
   ChannelHeaderTheme merge(ChannelHeaderTheme? other) {
     if (other == null) return this;
     return copyWith(
@@ -925,6 +1050,13 @@ class ChannelHeaderTheme {
 
 /// Theme dedicated to the [ChannelListHeader]
 class ChannelListHeaderTheme {
+  /// Returns a new [ChannelListHeaderTheme]
+  const ChannelListHeaderTheme({
+    this.title,
+    this.avatarTheme,
+    this.color,
+  });
+
   /// Style of the title text
   final TextStyle? title;
 
@@ -933,13 +1065,6 @@ class ChannelListHeaderTheme {
 
   /// Background color of the appbar
   final Color? color;
-
-  /// Returns a new [ChannelListHeaderTheme]
-  const ChannelListHeaderTheme({
-    this.title,
-    this.avatarTheme,
-    this.color,
-  });
 
   /// Returns a new [ChannelListHeaderTheme] replacing some of its properties
   ChannelListHeaderTheme copyWith({
@@ -966,6 +1091,22 @@ class ChannelListHeaderTheme {
 
 /// Defines the theme dedicated to the [MessageInput] widget
 class MessageInputTheme {
+  /// Returns a new [MessageInputTheme]
+  const MessageInputTheme({
+    this.sendAnimationDuration,
+    this.actionButtonColor,
+    this.sendButtonColor,
+    this.actionButtonIdleColor,
+    this.sendButtonIdleColor,
+    this.inputBackground,
+    this.inputTextStyle,
+    this.inputDecoration,
+    this.activeBorderGradient,
+    this.idleBorderGradient,
+    this.borderRadius,
+    this.expandButtonColor,
+  });
+
   /// Duration of the [MessageInput] send button animation
   final Duration? sendAnimationDuration;
 
@@ -1001,22 +1142,6 @@ class MessageInputTheme {
 
   /// Border radius of [MessageInput]
   final BorderRadius? borderRadius;
-
-  /// Returns a new [MessageInputTheme]
-  const MessageInputTheme({
-    this.sendAnimationDuration,
-    this.actionButtonColor,
-    this.sendButtonColor,
-    this.actionButtonIdleColor,
-    this.sendButtonIdleColor,
-    this.inputBackground,
-    this.inputTextStyle,
-    this.inputDecoration,
-    this.activeBorderGradient,
-    this.idleBorderGradient,
-    this.borderRadius,
-    this.expandButtonColor,
-  });
 
   /// Returns a new [MessageInputTheme] replacing some of its properties
   MessageInputTheme copyWith({
@@ -1071,13 +1196,9 @@ class MessageInputTheme {
   }
 }
 
+/// Effect store
 class Effect {
-  final double? sigmaX;
-  final double? sigmaY;
-  final Color? color;
-  final double? alpha;
-  final double? blur;
-
+  /// Constructor for creating [Effect]
   const Effect({
     this.sigmaX,
     this.sigmaY,
@@ -1086,6 +1207,22 @@ class Effect {
     this.blur,
   });
 
+  ///
+  final double? sigmaX;
+
+  ///
+  final double? sigmaY;
+
+  ///
+  final Color? color;
+
+  ///
+  final double? alpha;
+
+  ///
+  final double? blur;
+
+  /// Copy with new effect
   Effect copyWith({
     double? sigmaX,
     double? sigmaY,
