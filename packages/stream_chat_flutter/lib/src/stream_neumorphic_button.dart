@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 
+/// Neumorphic button
 class StreamNeumorphicButton extends StatelessWidget {
-  final Widget child;
-  final Color backgroundColor;
 
+  /// Constructor for creating [StreamNeumorphicButton]
   const StreamNeumorphicButton({
     Key? key,
     required this.child,
     this.backgroundColor = Colors.white,
   }) : super(key: key);
 
+  /// Child contained in the button
+  final Widget child;
+
+  /// Background color of button
+  final Color backgroundColor;
+
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(8),
+  Widget build(BuildContext context) => Container(
+      margin: const EdgeInsets.all(8),
       height: 40,
       width: 40,
       decoration: BoxDecoration(
@@ -22,10 +27,10 @@ class StreamNeumorphicButton extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade700,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
             blurRadius: 0.5,
           ),
-          BoxShadow(
+          const BoxShadow(
             color: Colors.white,
             blurRadius: 0.5,
           ),
@@ -33,5 +38,4 @@ class StreamNeumorphicButton extends StatelessWidget {
       ),
       child: child,
     );
-  }
 }
