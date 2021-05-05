@@ -95,7 +95,10 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }) async {
     final client = StreamChatCore.of(context).client;
 
-    if (_paginationEnded || _queryChannelsLoadingController.value == true) {
+    final clear = paginationParams.offset == 0;
+
+    if ((!clear && _paginationEnded) ||
+        _queryChannelsLoadingController.value == true) {
       return;
     }
 
@@ -104,7 +107,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
 
     try {
-      final clear = paginationParams.offset == 0;
       final oldChannels = List<Channel>.from(channels ?? []);
       var newChannels = <Channel>[];
       await for (final channels in client.queryChannels(
@@ -146,7 +148,11 @@ class ChannelsBlocState extends State<ChannelsBloc>
     final client = StreamChatCore.of(context).client;
 
     if (!widget.lockChannelsOrder) {
-      _subscriptions.add(client.on(EventType.messageNew).listen((e) {
+      _subscriptions.add(client
+          .on(
+        EventType.messageNew,
+      )
+          .listen((e) {
         final newChannels = List<Channel>.from(channels ?? []);
         final index = newChannels.indexWhere((c) => c.cid == e.cid);
         if (index != -1) {
