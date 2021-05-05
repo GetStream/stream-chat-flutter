@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Widget for showing an unread indicator
 class UnreadIndicator extends StatelessWidget {
+  /// Constructor for creating an [UnreadIndicator]
   const UnreadIndicator({
     Key? key,
     this.cid,
@@ -24,7 +26,7 @@ class UnreadIndicator extends StatelessWidget {
             : client.state.totalUnreadCount,
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.data == 0) {
-            return SizedBox();
+            return const SizedBox();
           }
           return Material(
             borderRadius: BorderRadius.circular(8),
@@ -41,7 +43,7 @@ class UnreadIndicator extends StatelessWidget {
               child: Center(
                 child: Text(
                   '${snapshot.data! > 99 ? '99+' : snapshot.data}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
                     color: Colors.white,
                   ),

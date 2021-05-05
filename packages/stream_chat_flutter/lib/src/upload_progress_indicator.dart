@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'stream_chat_theme.dart';
-
+/// Widget for showing upload progress
 class UploadProgressIndicator extends StatelessWidget {
-  final int uploaded;
-  final int total;
-  final Color progressIndicatorColor;
-  final EdgeInsetsGeometry padding;
-  final bool showBackground;
-  final TextStyle? textStyle;
-
+  /// Constructor for creating an [UploadProgressIndicator]
   const UploadProgressIndicator({
     Key? key,
     required this.uploaded,
@@ -24,6 +18,24 @@ class UploadProgressIndicator extends StatelessWidget {
     this.showBackground = true,
     this.textStyle,
   }) : super(key: key);
+
+  /// Bytes uploaded
+  final int uploaded;
+
+  /// Total bytes
+  final int total;
+
+  /// Color of progress indicator
+  final Color progressIndicatorColor;
+
+  /// Padding for widget
+  final EdgeInsetsGeometry padding;
+
+  /// Flag for showing background
+  final bool showBackground;
+
+  /// [TextStyle] to be applied to text
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +54,7 @@ class UploadProgressIndicator extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation(progressIndicatorColor),
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Text(
             '${_percentage.toInt()}%',
             style: textStyle ??
