@@ -153,8 +153,6 @@ class ChannelsBlocState extends State<ChannelsBloc>
       _subscriptions.add(client
           .on(
         EventType.messageNew,
-        EventType.notificationAddedToChannel,
-        EventType.notificationMessageNew,
       )
           .listen((e) {
         final newChannels = List<Channel>.from(channels ?? []);
