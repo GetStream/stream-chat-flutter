@@ -12,7 +12,22 @@ import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+/// Footer widget for media display
 class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
+  /// Creates a channel header
+  const ImageFooter({
+    Key? key,
+    required this.message,
+    this.onBackPressed,
+    this.onTitleTap,
+    this.onImageTap,
+    this.currentPage = 0,
+    this.totalPages = 0,
+    this.mediaAttachments = const [],
+    this.mediaSelectedCallBack,
+  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
+        super(key: key);
+
   /// Callback to call when pressing the back button.
   /// By default it calls [Navigator.pop]
   final VoidCallback? onBackPressed;
@@ -23,27 +38,20 @@ class ImageFooter extends StatefulWidget implements PreferredSizeWidget {
   /// Callback to call when the image is tapped.
   final VoidCallback? onImageTap;
 
+  /// Stores the current index of media shown
   final int currentPage;
+
+  /// Total number of pages of media
   final int totalPages;
 
+  /// All attachments to show
   final List<Attachment> mediaAttachments;
+
+  /// Message which attachments are attached to
   final Message message;
 
+  /// Callback when media is selected
   final ValueChanged<int>? mediaSelectedCallBack;
-
-  /// Creates a channel header
-  ImageFooter({
-    Key? key,
-    required this.message,
-    this.onBackPressed,
-    this.onTitleTap,
-    this.onImageTap,
-    this.currentPage = 0,
-    this.totalPages = 0,
-    this.mediaAttachments = const [],
-    this.mediaSelectedCallBack,
-  })  : preferredSize = Size.fromHeight(kToolbarHeight),
-        super(key: key);
 
   @override
   _ImageFooterState createState() => _ImageFooterState();
@@ -119,7 +127,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 ),
               InkWell(
                 onTap: widget.onTitleTap,
-                child: Container(
+                child: SizedBox(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -169,115 +177,115 @@ class _ImageFooterState extends State<ImageFooter> {
           expand: false,
           initialChildSize: initialChildSize / size.height,
           minChildSize: initialChildSize / size.height,
-          builder: (context, scrollController) {
-            return SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(
-                    children: [
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            'Photos',
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .headlineBold,
-                          ),
+          builder: (context, scrollController) => SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  children: [
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          'Photos',
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .headlineBold,
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: StreamSvgIcon.close(
-                            color: StreamChatTheme.of(context).colorTheme.black,
-                          ),
-                          onPressed: () => Navigator.maybePop(context),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: StreamSvgIcon.close(
+                          color: StreamChatTheme.of(context).colorTheme.black,
                         ),
+                        onPressed: () => Navigator.maybePop(context),
                       ),
-                    ],
-                  ),
-                  Flexible(
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.mediaAttachments.length,
-                      padding: const EdgeInsets.all(1),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 2,
-                        crossAxisSpacing: 2,
-                      ),
-                      itemBuilder: (context, index) {
-                        Widget media;
-                        final attachment = widget.mediaAttachments[index];
-                        if (attachment.type == 'video') {
-                          media = InkWell(
-                            onTap: () => widget.mediaSelectedCallBack!(index),
-                            child: FittedBox(
+                    ),
+                  ],
+                ),
+                Flexible(
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: widget.mediaAttachments.length,
+                    padding: const EdgeInsets.all(1),
+                    // ignore: lines_longer_than_80_chars
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 2,
+                      crossAxisSpacing: 2,
+                    ),
+                    itemBuilder: (context, index) {
+                      Widget media;
+                      final attachment = widget.mediaAttachments[index];
+                      if (attachment.type == 'video') {
+                        media = InkWell(
+                          onTap: () => widget.mediaSelectedCallBack!(index),
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: VideoThumbnailImage(
+                              video: (attachment.file?.path ??
+                                  attachment.assetUrl)!,
+                            ),
+                          ),
+                        );
+                      } else {
+                        media = InkWell(
+                          onTap: () => widget.mediaSelectedCallBack!(index),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: CachedNetworkImage(
+                              imageUrl: attachment.imageUrl ??
+                                  attachment.assetUrl ??
+                                  attachment.thumbUrl!,
                               fit: BoxFit.cover,
-                              child: VideoThumbnailImage(
-                                video: (attachment.file?.path ??
-                                    attachment.assetUrl)!,
-                              ),
                             ),
-                          );
-                        } else {
-                          media = InkWell(
-                            onTap: () => widget.mediaSelectedCallBack!(index),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: CachedNetworkImage(
-                                imageUrl: attachment.imageUrl ??
-                                    attachment.assetUrl ??
-                                    attachment.thumbUrl!,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          );
-                        }
+                          ),
+                        );
+                      }
 
-                        return Stack(
-                          children: [
-                            media,
-                            if (widget.message.user != null)
-                              Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Container(
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withOpacity(0.6),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        blurRadius: 8,
-                                        color: StreamChatTheme.of(context)
-                                            .colorTheme
-                                            .black
-                                            .withOpacity(0.3),
-                                      ),
-                                    ],
-                                  ),
-                                  padding: const EdgeInsets.all(2),
-                                  child: UserAvatar(
-                                    user: widget.message.user!,
-                                    constraints:
-                                        BoxConstraints.tight(Size(24, 24)),
-                                    showOnlineStatus: false,
-                                  ),
+                      return Stack(
+                        children: [
+                          media,
+                          if (widget.message.user != null)
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Container(
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 8,
+                                      color: StreamChatTheme.of(context)
+                                          .colorTheme
+                                          .black
+                                          .withOpacity(0.3),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(2),
+                                child: UserAvatar(
+                                  user: widget.message.user!,
+                                  constraints:
+                                      BoxConstraints.tight(const Size(24, 24)),
+                                  showOnlineStatus: false,
                                 ),
                               ),
-                          ],
-                        );
-                      },
-                    ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
-                ],
-              ),
-            );
-          },
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -302,31 +310,5 @@ class _ImageFooterState extends State<ImageFooter> {
 
     _selectedChannels.clear();
     Navigator.pop(context);
-  }
-}
-
-/// Used for clipping textfield prefix icon
-class IconClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final leftX = size.width / 5;
-    final rightX = 4 * size.width / 5;
-    final topY = size.height / 5;
-    final bottomY = 4 * size.height / 5;
-
-    final path = Path();
-    path.moveTo(leftX, topY);
-    path.lineTo(leftX, bottomY);
-    path.lineTo(rightX, bottomY);
-    path.lineTo(rightX, topY);
-    path.lineTo(leftX, topY);
-    path.lineTo(0, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper oldClipper) {
-    return false;
   }
 }

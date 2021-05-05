@@ -812,116 +812,123 @@ class MessageInputState extends State<MessageInput> {
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
-    return OverlayEntry(builder: (context) => Positioned(
-        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-        left: 0,
-        right: 0,
-        child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOutExpo,
-            builder: (context, val, wid) => Transform.scale(
-                scale: val,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    color: StreamChatTheme.of(context).colorTheme.white,
-                    clipBehavior: Clip.antiAlias,
-                    child: Container(
-                      constraints: BoxConstraints.loose(Size.fromHeight(400)),
-                      decoration: BoxDecoration(
-                          color: StreamChatTheme.of(context).colorTheme.white,
-                          borderRadius: BorderRadius.circular(8)),
-                      child: ListView(
-                        padding: const EdgeInsets.all(0),
-                        shrinkWrap: true,
-                        children: [
-                          if (commands.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Row(
+    return OverlayEntry(
+        builder: (context) => Positioned(
+              bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+              left: 0,
+              right: 0,
+              child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOutExpo,
+                  builder: (context, val, wid) => Transform.scale(
+                        scale: val,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            color: StreamChatTheme.of(context).colorTheme.white,
+                            clipBehavior: Clip.antiAlias,
+                            child: Container(
+                              constraints:
+                                  BoxConstraints.loose(Size.fromHeight(400)),
+                              decoration: BoxDecoration(
+                                  color: StreamChatTheme.of(context)
+                                      .colorTheme
+                                      .white,
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: ListView(
+                                padding: const EdgeInsets.all(0),
+                                shrinkWrap: true,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
+                                  if (commands.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                            child: StreamSvgIcon.lightning(
+                                              color: StreamChatTheme.of(context)
+                                                  .colorTheme
+                                                  .accentBlue,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Instant Commands',
+                                            style: TextStyle(
+                                              color: StreamChatTheme.of(context)
+                                                  .colorTheme
+                                                  .black
+                                                  .withOpacity(.5),
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                    child: StreamSvgIcon.lightning(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .accentBlue,
-                                    ),
+                                  const SizedBox(
+                                    height: 10,
                                   ),
-                                  Text(
-                                    'Instant Commands',
-                                    style: TextStyle(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .black
-                                          .withOpacity(.5),
-                                    ),
-                                  )
+                                  ...commands
+                                      .map(
+                                        (c) => InkWell(
+                                          onTap: () {
+                                            _setCommand(c);
+                                          },
+                                          child: SizedBox(
+                                            height: 40,
+                                            child: Row(
+                                              children: [
+                                                const SizedBox(
+                                                  width: 16,
+                                                ),
+                                                _buildCommandIcon(c.name),
+                                                const SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Text.rich(
+                                                  TextSpan(
+                                                    text: c.name.capitalize(),
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                    children: [
+                                                      TextSpan(
+                                                        text:
+                                                            '   /${c.name} ${c.args}',
+                                                        style:
+                                                            StreamChatTheme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .body
+                                                                .copyWith(
+                                                                  color: StreamChatTheme.of(
+                                                                          context)
+                                                                      .colorTheme
+                                                                      .grey,
+                                                                ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
                                 ],
                               ),
                             ),
-                          const SizedBox(
-                            height: 10,
                           ),
-                          ...commands
-                              .map(
-                                (c) => InkWell(
-                                  onTap: () {
-                                    _setCommand(c);
-                                  },
-                                  child: SizedBox(
-                                    height: 40,
-                                    child: Row(
-                                      children: [
-                                        const SizedBox(
-                                          width: 16,
-                                        ),
-                                        _buildCommandIcon(c.name),
-                                        const SizedBox(
-                                          width: 8,
-                                        ),
-                                        Text.rich(
-                                          TextSpan(
-                                            text: c.name.capitalize(),
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                            children: [
-                                              TextSpan(
-                                                text: '   /${c.name} ${c.args}',
-                                                style:
-                                                    StreamChatTheme.of(context)
-                                                        .textTheme
-                                                        .body
-                                                        .copyWith(
-                                                          color: StreamChatTheme
-                                                                  .of(context)
-                                                              .colorTheme
-                                                              .grey,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              )),
-      ));
+                        ),
+                      )),
+            ));
   }
 
   Widget _buildFilePickerSection() {

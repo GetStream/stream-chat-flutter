@@ -13,7 +13,6 @@ import 'package:video_player/video_player.dart';
 
 /// Return action for coming back from pages
 enum ReturnActionType {
-
   /// No return action
   none,
 
@@ -252,10 +251,10 @@ class _FullScreenMediaState extends State<FullScreenMedia>
 class VideoPackage {
   /// Constructor for creating [VideoPackage]
   VideoPackage(
-      Attachment attachment, {
-        bool showControls = false,
-        bool autoInitialize = true,
-      })  : _showControls = showControls,
+    Attachment attachment, {
+    bool showControls = false,
+    bool autoInitialize = true,
+  })  : _showControls = showControls,
         _autoInitialize = autoInitialize,
         _videoPlayerController = attachment.localUri != null
             ? VideoPlayerController.file(File.fromUri(attachment.localUri!))

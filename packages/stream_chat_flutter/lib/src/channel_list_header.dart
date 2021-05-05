@@ -217,64 +217,65 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
       );
 
   Widget _buildConnectingTitleState(BuildContext context) => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(
-          height: 16,
-          width: 16,
-          child: Center(
-            child: CircularProgressIndicator(),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 16,
+            width: 16,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          'Searching for Network',
-          style: StreamChatTheme.of(context)
-              .channelListHeaderTheme
-              .title
-              ?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
-    );
-
-  Widget _buildDisconnectedTitleState(
-    BuildContext context,
-    StreamChatClient client,
-  ) => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Offline...',
-          style: StreamChatTheme.of(context)
-              .channelListHeaderTheme
-              .title
-              ?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        TextButton(
-          onPressed: () async {
-            await client.disconnect();
-            await client.connect();
-          },
-          child: Text(
-            'Try Again',
+          const SizedBox(width: 10),
+          Text(
+            'Searching for Network',
             style: StreamChatTheme.of(context)
                 .channelListHeaderTheme
                 .title
                 ?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: StreamChatTheme.of(context).colorTheme.accentBlue,
                 ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+
+  Widget _buildDisconnectedTitleState(
+    BuildContext context,
+    StreamChatClient client,
+  ) =>
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Offline...',
+            style: StreamChatTheme.of(context)
+                .channelListHeaderTheme
+                .title
+                ?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          TextButton(
+            onPressed: () async {
+              await client.disconnect();
+              await client.connect();
+            },
+            child: Text(
+              'Try Again',
+              style: StreamChatTheme.of(context)
+                  .channelListHeaderTheme
+                  .title
+                  ?.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                  ),
+            ),
+          ),
+        ],
+      );
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);

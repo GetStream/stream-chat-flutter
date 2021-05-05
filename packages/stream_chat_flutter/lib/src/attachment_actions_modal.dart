@@ -192,29 +192,30 @@ class AttachmentActionsModal extends StatelessWidget {
     VoidCallback? onTap, {
     Color? color,
     Key? key,
-  }) => Material(
-      key: key,
-      color: StreamChatTheme.of(context).colorTheme.white,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Row(
-            children: [
-              icon,
-              SizedBox(width: 16),
-              Text(
-                title,
-                style: StreamChatTheme.of(context)
-                    .textTheme
-                    .body
-                    .copyWith(color: color),
-              ),
-            ],
+  }) =>
+      Material(
+        key: key,
+        color: StreamChatTheme.of(context).colorTheme.white,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: [
+                icon,
+                SizedBox(width: 16),
+                Text(
+                  title,
+                  style: StreamChatTheme.of(context)
+                      .textTheme
+                      .body
+                      .copyWith(color: color),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
   Widget _buildDownloadProgressDialog(
     BuildContext context,

@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-
 /// It shows the current [Channel] name using a [Text] widget.
 ///
 /// The widget uses a [StreamBuilder] to render the channel information
@@ -60,9 +59,8 @@ class ChannelName extends StatelessWidget {
 
               final exceedingMembers =
                   otherMembers.length - currentMembers.length;
-              title =
-                  '${currentMembers.map((e) => e.user?.name).join(', ')} '
-                      '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+              title = '${currentMembers.map((e) => e.user?.name).join(', ')} '
+                  '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
             } else {
               title = 'No title';
             }

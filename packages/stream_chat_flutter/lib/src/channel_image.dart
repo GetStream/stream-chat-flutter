@@ -98,23 +98,23 @@ class ChannelImage extends StatelessWidget {
                   (users) => users[otherMember?.userId] ?? otherMember!.user!),
               initialData: otherMember!.user,
               builder: (context, snapshot) => UserAvatar(
-                  borderRadius: borderRadius ??
-                      StreamChatTheme.of(context)
-                          .channelPreviewTheme
-                          .avatarTheme
-                          ?.borderRadius,
-                  user: snapshot.data ?? otherMember.user!,
-                  constraints: constraints ??
-                      StreamChatTheme.of(context)
-                          .channelPreviewTheme
-                          .avatarTheme
-                          ?.constraints,
-                  onTap: onTap != null ? (_) => onTap!() : null,
-                  selected: selected,
-                  selectionColor: selectionColor ??
-                      StreamChatTheme.of(context).colorTheme.accentBlue,
-                  selectionThickness: selectionThickness,
-                ));
+                    borderRadius: borderRadius ??
+                        StreamChatTheme.of(context)
+                            .channelPreviewTheme
+                            .avatarTheme
+                            ?.borderRadius,
+                    user: snapshot.data ?? otherMember.user!,
+                    constraints: constraints ??
+                        StreamChatTheme.of(context)
+                            .channelPreviewTheme
+                            .avatarTheme
+                            ?.constraints,
+                    onTap: onTap != null ? (_) => onTap!() : null,
+                    selected: selected,
+                    selectionColor: selectionColor ??
+                        StreamChatTheme.of(context).colorTheme.accentBlue,
+                    selectionThickness: selectionThickness,
+                  ));
         } else {
           final images = channel.state?.members
               .where((member) =>
@@ -167,16 +167,16 @@ class ChannelImage extends StatelessWidget {
                   CachedNetworkImage(
                     imageUrl: image,
                     errorWidget: (_, __, ___) => Center(
-                        child: Text(
-                          snapshot.data?.containsKey('name') ?? false
-                              ? snapshot.data!['name'][0]
-                              : '',
-                          style: TextStyle(
-                            color: StreamChatTheme.of(context).colorTheme.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      child: Text(
+                        snapshot.data?.containsKey('name') ?? false
+                            ? snapshot.data!['name'][0]
+                            : '',
+                        style: TextStyle(
+                          color: StreamChatTheme.of(context).colorTheme.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                    ),
                     fit: BoxFit.cover,
                   )
                 else

@@ -4,7 +4,6 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
 /// It shows a date divider depending on the date difference
 class DateDivider extends StatelessWidget {
-
   /// Constructor for creating a [DateDivider]
   const DateDivider({
     Key? key,

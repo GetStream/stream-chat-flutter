@@ -5,7 +5,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Back button implementation
 class StreamBackButton extends StatelessWidget {
-
   /// Constructor for creating back button
   const StreamBackButton({
     Key? key,
@@ -25,37 +24,37 @@ class StreamBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-      alignment: Alignment.center,
-      children: [
-        RawMaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: () {
-            if (onPressed != null) {
-              onPressed!();
-            } else {
-              Navigator.maybePop(context);
-            }
-          },
-          padding: const EdgeInsets.all(14),
-          child: StreamSvgIcon.left(
-            size: 24,
-            color: StreamChatTheme.of(context).colorTheme.black,
-          ),
-        ),
-        if (showUnreads)
-          Positioned(
-            top: 7,
-            right: 7,
-            child: UnreadIndicator(
-              cid: cid,
+        alignment: Alignment.center,
+        children: [
+          RawMaterialButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            elevation: 0,
+            highlightElevation: 0,
+            focusElevation: 0,
+            hoverElevation: 0,
+            onPressed: () {
+              if (onPressed != null) {
+                onPressed!();
+              } else {
+                Navigator.maybePop(context);
+              }
+            },
+            padding: const EdgeInsets.all(14),
+            child: StreamSvgIcon.left(
+              size: 24,
+              color: StreamChatTheme.of(context).colorTheme.black,
             ),
           ),
-      ],
-    );
+          if (showUnreads)
+            Positioned(
+              top: 7,
+              right: 7,
+              child: UnreadIndicator(
+                cid: cid,
+              ),
+            ),
+        ],
+      );
 }

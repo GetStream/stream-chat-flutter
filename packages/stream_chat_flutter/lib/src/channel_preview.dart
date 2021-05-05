@@ -21,7 +21,6 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class ChannelPreview extends StatelessWidget {
-
   /// Constructor for creating [ChannelPreview]
   const ChannelPreview({
     required this.channel,

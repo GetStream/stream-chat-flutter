@@ -9,7 +9,6 @@ import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-
 /// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget?);
 
