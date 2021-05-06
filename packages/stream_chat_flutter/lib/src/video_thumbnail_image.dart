@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:stream_chat_flutter/src/video_service.dart';
 
 /// Widget for creating video thumbnail image
 class VideoThumbnailImage extends StatefulWidget {
@@ -47,6 +47,7 @@ class VideoThumbnailImage extends StatefulWidget {
 
 class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   late Future<Uint8List?> thumbnailFuture;
+  late StreamChatThemeData _streamChatTheme;
 
   @override
   void initState() {
@@ -55,6 +56,12 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
       imageFormat: widget.format,
     );
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _streamChatTheme = StreamChatTheme.of(context);
+    super.didChangeDependencies();
   }
 
   @override
@@ -87,11 +94,8 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
                   constraints: const BoxConstraints.expand(),
                   child: widget.placeholderBuilder?.call(context) ??
                       Shimmer.fromColors(
-                        baseColor: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
-                        highlightColor:
-                            StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                        baseColor: _streamChatTheme.colorTheme.greyGainsboro,
+                        highlightColor: _streamChatTheme.colorTheme.whiteSmoke,
                         child: Image.asset(
                           'images/placeholder.png',
                           fit: BoxFit.cover,

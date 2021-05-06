@@ -78,7 +78,7 @@ void main() {
       await tester.pumpWidget(messageListCore);
 
       expect(find.byKey(messageListCoreKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 
