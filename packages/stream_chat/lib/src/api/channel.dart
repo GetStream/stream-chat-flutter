@@ -646,7 +646,7 @@ class Channel {
       messageId: messageId,
       createdAt: now,
       type: type,
-      user: user!,
+      user: user,
       score: 1,
       extraData: extraData,
     );
@@ -654,7 +654,7 @@ class Channel {
     // Inserting at the 0th index as it's the latest reaction
     latestReactions.insert(0, newReaction);
     final ownReactions = [...latestReactions]
-      ..removeWhere((it) => it.userId != user.id);
+      ..removeWhere((it) => it.userId != user!.id);
 
     final newMessage = message.copyWith(
       reactionCounts: {...message.reactionCounts ?? <String, int>{}}

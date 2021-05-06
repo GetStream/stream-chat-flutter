@@ -112,7 +112,7 @@ class ChannelModel {
 
   /// Shortcut for channel name
   String get name =>
-      extraData.containsKey('name') ? extraData['name'] as String : cid;
+      extraData.containsKey('name') ? extraData['name']! as String : cid;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
