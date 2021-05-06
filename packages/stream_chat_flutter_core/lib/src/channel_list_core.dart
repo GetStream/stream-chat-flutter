@@ -119,12 +119,11 @@ class ChannelListCore extends StatefulWidget {
 
 /// The current state of the [ChannelListCore].
 class ChannelListCoreState extends State<ChannelListCore> {
-  @override
-  Widget build(BuildContext context) {
-    final channelsBloc = ChannelsBloc.of(context);
+  late final ChannelsBlocState _channelsBloc;
+  late final StreamChatCoreState _streamChatCoreState;
 
-    return _buildListView(channelsBloc);
-  }
+  @override
+  Widget build(BuildContext context) => _buildListView(_channelsBloc);
 
   StreamBuilder<List<Channel>> _buildListView(
     ChannelsBlocState channelsBlocState,
@@ -147,36 +146,42 @@ class ChannelListCoreState extends State<ChannelListCore> {
       );
 
   /// Fetches initial channels and updates the widget
-  Future<void> loadData() {
-    final channelsBloc = ChannelsBloc.of(context);
-    return channelsBloc.queryChannels(
-      filter: widget.filter,
-      sortOptions: widget.sort,
-      paginationParams: widget.pagination,
-      options: widget.options,
-    );
-  }
+  Future<void> loadData() => _channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        paginationParams: widget.pagination,
+        options: widget.options,
+      );
 
   /// Fetches more channels with updated pagination and updates the widget
-  Future<void> paginateData() {
-    final channelsBloc = ChannelsBloc.of(context);
-    return channelsBloc.queryChannels(
-      filter: widget.filter,
-      sortOptions: widget.sort,
-      paginationParams: widget.pagination.copyWith(
-        offset: channelsBloc.channels?.length ?? 0,
-      ),
-      options: widget.options,
-    );
-  }
+  Future<void> paginateData() => _channelsBloc.queryChannels(
+        filter: widget.filter,
+        sortOptions: widget.sort,
+        paginationParams: widget.pagination.copyWith(
+          offset: _channelsBloc.channels?.length ?? 0,
+        ),
+        options: widget.options,
+      );
 
-  late StreamSubscription<Event> _subscription;
+  StreamSubscription<Event>? _subscription;
 
   @override
   void initState() {
     super.initState();
-    loadData();
-    final client = StreamChatCore.of(context).client;
+    _setupController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _channelsBloc = ChannelsBloc.of(context);
+    _streamChatCoreState = StreamChatCore.of(context);
+
+    if (_subscription == null) {
+      loadData();
+    }
+
+    final client = _streamChatCoreState.client;
+    _subscription?.cancel();
     _subscription = client
         .on(
           EventType.connectionRecovered,
@@ -186,10 +191,7 @@ class ChannelListCoreState extends State<ChannelListCore> {
         )
         .listen((event) => loadData());
 
-    if (widget.channelListController != null) {
-      widget.channelListController!.loadData = loadData;
-      widget.channelListController!.paginateData = paginateData;
-    }
+    super.didChangeDependencies();
   }
 
   @override
@@ -203,11 +205,22 @@ class ChannelListCoreState extends State<ChannelListCore> {
             oldWidget.pagination.toJson().toString()) {
       loadData();
     }
+
+    if (widget.channelListController != oldWidget.channelListController) {
+      _setupController();
+    }
+  }
+
+  void _setupController() {
+    if (widget.channelListController != null) {
+      widget.channelListController!.loadData = loadData;
+      widget.channelListController!.paginateData = paginateData;
+    }
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 }

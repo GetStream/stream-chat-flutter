@@ -105,21 +105,21 @@ class MessageSearchListCore extends StatefulWidget {
 
 /// The current state of the [MessageSearchListCore].
 class MessageSearchListCoreState extends State<MessageSearchListCore> {
+  late final MessageSearchBlocState messageSearchBloc;
+
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
+    messageSearchBloc = MessageSearchBloc.of(context);
     loadData();
     if (widget.messageSearchListController != null) {
       widget.messageSearchListController!.loadData = loadData;
       widget.messageSearchListController!.paginateData = paginateData;
     }
+    super.didChangeDependencies();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    return _buildListView(messageSearchBloc);
-  }
+  Widget build(BuildContext context) => _buildListView(messageSearchBloc);
 
   Widget _buildListView(MessageSearchBlocState messageSearchBloc) =>
       StreamBuilder<List<GetMessageResponse>>(
@@ -140,30 +140,24 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
       );
 
   /// Fetches initial messages and updates the widget
-  Future<void> loadData() {
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    return messageSearchBloc.search(
-      filter: widget.filters,
-      sort: widget.sortOptions,
-      query: widget.messageQuery,
-      pagination: widget.paginationParams,
-      messageFilter: widget.messageFilters,
-    );
-  }
+  Future<void> loadData() => messageSearchBloc.search(
+        filter: widget.filters,
+        sort: widget.sortOptions,
+        query: widget.messageQuery,
+        pagination: widget.paginationParams,
+        messageFilter: widget.messageFilters,
+      );
 
   /// Fetches more messages with updated pagination and updates the widget
-  Future<void> paginateData() {
-    final messageSearchBloc = MessageSearchBloc.of(context);
-    return messageSearchBloc.search(
-      filter: widget.filters,
-      sort: widget.sortOptions,
-      pagination: widget.paginationParams!.copyWith(
-        offset: messageSearchBloc.messageResponses?.length ?? 0,
-      ),
-      query: widget.messageQuery,
-      messageFilter: widget.messageFilters,
-    );
-  }
+  Future<void> paginateData() => messageSearchBloc.search(
+        filter: widget.filters,
+        sort: widget.sortOptions,
+        pagination: widget.paginationParams!.copyWith(
+          offset: messageSearchBloc.messageResponses?.length ?? 0,
+        ),
+        query: widget.messageQuery,
+        messageFilter: widget.messageFilters,
+      );
 
   @override
   void didUpdateWidget(MessageSearchListCore oldWidget) {

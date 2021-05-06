@@ -109,7 +109,7 @@ class MessageListCore extends StatefulWidget {
 
 /// The current state of the [MessageListCore].
 class MessageListCoreState extends State<MessageListCore> {
-  late StreamChannelState _streamChannel;
+  late final StreamChannelState _streamChannel;
 
   bool get _upToDate => _streamChannel.channel.state?.isUpToDate ?? true;
 
@@ -174,18 +174,34 @@ class MessageListCoreState extends State<MessageListCore> {
   }
 
   @override
-  void initState() {
+  void didChangeDependencies() {
     _streamChannel = StreamChannel.of(context);
-
     if (_isThreadConversation) {
       _streamChannel.getReplies(widget.parentMessage!.id);
     }
+    super.didChangeDependencies();
+  }
 
+  @override
+  void didUpdateWidget(covariant MessageListCore oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.messageListController != oldWidget.messageListController) {
+      _setupController();
+    }
+  }
+
+  @override
+  void initState() {
+    _setupController();
+
+    super.initState();
+  }
+
+  void _setupController() {
     if (widget.messageListController != null) {
       widget.messageListController!.paginateData = paginateData;
     }
-
-    super.initState();
   }
 
   @override

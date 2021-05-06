@@ -124,12 +124,12 @@ class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
     loadData();
     if (widget.userListController != null) {
       widget.userListController!.loadData = loadData;
       widget.userListController!.paginateData = paginateData;
     }
+    super.didChangeDependencies();
   }
 
   @override

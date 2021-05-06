@@ -50,17 +50,20 @@ class ChannelsBloc extends StatefulWidget {
 
     streamChatState = context.findAncestorStateOfType<ChannelsBlocState>();
 
-    if (streamChatState == null) {
-      throw Exception('You must have a ChannelsBloc widget as ancestor');
-    }
+    assert(
+      streamChatState != null,
+      'You must have a ChannelsBloc widget as ancestor',
+    );
 
-    return streamChatState;
+    return streamChatState!;
   }
 }
 
 /// The current state of the [ChannelsBloc].
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
+  late final StreamChatCoreState _streamChatCoreState;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -86,6 +89,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   bool _paginationEnded = false;
 
+  final List<StreamSubscription> _subscriptions = [];
+
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
     Filter? filter,
@@ -93,7 +98,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
     PaginationParams paginationParams = const PaginationParams(limit: 30),
     Map<String, dynamic>? options,
   }) async {
-    final client = StreamChatCore.of(context).client;
+    final client = _streamChatCoreState.client;
 
     final clear = paginationParams.offset == 0;
 
@@ -139,14 +144,12 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
   }
 
-  final List<StreamSubscription> _subscriptions = [];
-
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    _streamChatCoreState = StreamChatCore.of(context);
+    final client = _streamChatCoreState.client;
 
-    final client = StreamChatCore.of(context).client;
-
+    _cancelSubscriptions();
     if (!widget.lockChannelsOrder) {
       _subscriptions.add(client
           .on(
@@ -179,35 +182,42 @@ class ChannelsBlocState extends State<ChannelsBloc>
       }));
     }
 
-    _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
-      final newChannels = List<Channel>.from(channels ?? []);
-      final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
-      if (channelIndex > -1) {
-        final channel = newChannels.removeAt(channelIndex);
-        _hiddenChannels.add(channel);
-        _channelsController.add(newChannels);
-      }
-    }));
-    // ignore: cascade_invocations
-    _subscriptions.add(client
-        .on(
-      EventType.channelDeleted,
-      EventType.notificationRemovedFromChannel,
-    )
-        .listen((e) {
-      // ignore: cascade_invocations
-      final channel = e.channel;
-      _channelsController.add(List.from(
-          (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
-    }));
+    _subscriptions
+      ..add(client.on(EventType.channelHidden).listen((event) async {
+        final newChannels = List<Channel>.from(channels ?? []);
+        final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
+        if (channelIndex > -1) {
+          final channel = newChannels.removeAt(channelIndex);
+          _hiddenChannels.add(channel);
+          _channelsController.add(newChannels);
+        }
+      }))
+      ..add(client
+          .on(
+        EventType.channelDeleted,
+        EventType.notificationRemovedFromChannel,
+      )
+          .listen((e) {
+        final channel = e.channel;
+        _channelsController.add(List.from(
+            (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
+      }));
+
+    super.didChangeDependencies();
   }
 
   @override
   void dispose() {
     _channelsController.close();
     _queryChannelsLoadingController.close();
-    _subscriptions.forEach((s) => s.cancel());
+    _cancelSubscriptions();
     super.dispose();
+  }
+
+  void _cancelSubscriptions() {
+    _subscriptions
+      ..forEach((s) => s.cancel())
+      ..clear();
   }
 
   @override
