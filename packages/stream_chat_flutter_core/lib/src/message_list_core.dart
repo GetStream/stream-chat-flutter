@@ -109,7 +109,7 @@ class MessageListCore extends StatefulWidget {
 
 /// The current state of the [MessageListCore].
 class MessageListCoreState extends State<MessageListCore> {
-  late final StreamChannelState _streamChannel;
+  late StreamChannelState _streamChannel;
 
   bool get _upToDate => _streamChannel.channel.state?.isUpToDate ?? true;
 

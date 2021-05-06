@@ -119,8 +119,8 @@ class ChannelListCore extends StatefulWidget {
 
 /// The current state of the [ChannelListCore].
 class ChannelListCoreState extends State<ChannelListCore> {
-  late final ChannelsBlocState _channelsBloc;
-  late final StreamChatCoreState _streamChatCoreState;
+  late ChannelsBlocState _channelsBloc;
+  late StreamChatCoreState _streamChatCoreState;
 
   @override
   Widget build(BuildContext context) => _buildListView(_channelsBloc);

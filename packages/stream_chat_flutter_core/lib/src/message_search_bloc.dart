@@ -41,7 +41,7 @@ class MessageSearchBloc extends StatefulWidget {
 /// The current state of the [MessageSearchBloc]
 class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
-  late final StreamChatCoreState _streamChatCoreState;
+  late StreamChatCoreState _streamChatCoreState;
 
   /// The current messages list
   List<GetMessageResponse>? get messageResponses => _messageResponses.value;

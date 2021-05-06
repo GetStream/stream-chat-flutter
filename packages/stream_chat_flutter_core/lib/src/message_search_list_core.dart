@@ -105,7 +105,7 @@ class MessageSearchListCore extends StatefulWidget {
 
 /// The current state of the [MessageSearchListCore].
 class MessageSearchListCoreState extends State<MessageSearchListCore> {
-  late final MessageSearchBlocState _messageSearchBloc;
+  late MessageSearchBlocState _messageSearchBloc;
 
   @override
   void didChangeDependencies() {

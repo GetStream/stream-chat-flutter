@@ -62,7 +62,7 @@ class ChannelsBloc extends StatefulWidget {
 /// The current state of the [ChannelsBloc].
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
-  late final StreamChatCoreState _streamChatCoreState;
+  late StreamChatCoreState _streamChatCoreState;
 
   @override
   Widget build(BuildContext context) {

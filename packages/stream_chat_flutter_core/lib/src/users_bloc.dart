@@ -55,7 +55,7 @@ class UsersBlocState extends State<UsersBloc>
   /// The stream notifying the state of queryUsers call
   Stream<bool> get queryUsersLoading => _queryUsersLoadingController.stream;
 
-  late final StreamChatCoreState _streamChatCore;
+  late StreamChatCoreState _streamChatCore;
 
   /// The Query Users method allows you to search for users and see if they are
   /// online/offline.
