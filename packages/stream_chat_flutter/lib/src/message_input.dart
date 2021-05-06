@@ -476,7 +476,6 @@ class MessageInputState extends State<MessageInput> {
           firstChild: IconButton(
             onPressed: () => setState(() => _actionsShrunk = false),
             icon: Transform.rotate(
-              alignment: Alignment.center,
               angle: (widget.actionsLocation == ActionsLocation.right ||
                       widget.actionsLocation == ActionsLocation.rightInside)
                   ? pi
@@ -495,28 +494,27 @@ class MessageInputState extends State<MessageInput> {
             splashRadius: 24,
           ),
           secondChild: widget.disableAttachments &&
-              !widget.showCommandsButton &&
-              widget.actions?.isNotEmpty != true
+                  !widget.showCommandsButton &&
+                  widget.actions?.isNotEmpty != true
               ? const Offstage()
               : FittedBox(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                if (!widget.disableAttachments) _buildAttachmentButton(),
-                if (widget.showCommandsButton &&
-                    widget.editMessage == null &&
-                    StreamChannel.of(context)
-                            .channel
-                            .config
-                            ?.commands
-                            .isNotEmpty ==
-                        true)
-                  _buildCommandButton(),
-                ...widget.actions ?? [],
-              ].insertBetween(const SizedBox(width: 8)),
-            ),
-          ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      if (!widget.disableAttachments) _buildAttachmentButton(),
+                      if (widget.showCommandsButton &&
+                          widget.editMessage == null &&
+                          StreamChannel.of(context)
+                                  .channel
+                                  .config
+                                  ?.commands
+                                  .isNotEmpty ==
+                              true)
+                        _buildCommandButton(),
+                      ...widget.actions ?? [],
+                    ].insertBetween(const SizedBox(width: 8)),
+                  ),
+                ),
           duration: const Duration(milliseconds: 300),
           alignment: Alignment.center,
         ),
