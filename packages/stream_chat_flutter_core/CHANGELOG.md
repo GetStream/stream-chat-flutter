@@ -1,7 +1,15 @@
+## 2.0.0-nullsafety.2
+
+* Fix ChannelsBloc not performing calls if pagination ended
+
 ## 2.0.0-nullsafety.1
 
 * Migrate this package to null safety
 * Update llc dependency
+
+## 1.5.3
+
+* Fix ChannelsBloc not performing calls if pagination ended
 
 ## 1.5.2
 

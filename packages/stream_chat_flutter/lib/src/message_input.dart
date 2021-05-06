@@ -476,6 +476,7 @@ class MessageInputState extends State<MessageInput> {
           firstChild: IconButton(
             onPressed: () => setState(() => _actionsShrunk = false),
             icon: Transform.rotate(
+              alignment: Alignment.center,
               angle: (widget.actionsLocation == ActionsLocation.right ||
                       widget.actionsLocation == ActionsLocation.rightInside)
                   ? pi
@@ -493,8 +494,13 @@ class MessageInputState extends State<MessageInput> {
             ),
             splashRadius: 24,
           ),
-          secondChild: FittedBox(
+          secondChild: widget.disableAttachments &&
+              !widget.showCommandsButton &&
+              widget.actions?.isNotEmpty != true
+              ? const Offstage()
+              : FittedBox(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 if (!widget.disableAttachments) _buildAttachmentButton(),
