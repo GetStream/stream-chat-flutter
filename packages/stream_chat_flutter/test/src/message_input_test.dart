@@ -67,7 +67,7 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
+            child: const Scaffold(
               body: MessageInput(),
             ),
           ),
@@ -76,7 +76,7 @@ void main() {
 
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(StreamSvgIcon), findsNWidgets(8));
-      expect(find.byKey(Key('messageInputText')), findsOneWidget);
+      expect(find.byKey(const Key('messageInputText')), findsOneWidget);
     },
   );
 }

@@ -19,9 +19,9 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
-          child: Scaffold(
+          child: const Scaffold(
             body: Portal(
-              child: Container(
+              child: SizedBox(
                 child: InfoTile(
                   showMessage: true,
                   message: 'message',
@@ -49,9 +49,9 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
-          child: Scaffold(
+          child: const Scaffold(
             body: Portal(
-              child: Container(
+              child: SizedBox(
                 child: InfoTile(
                   showMessage: false,
                   message: 'message',

@@ -1,18 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import '../full_screen_media.dart';
-import '../stream_chat_theme.dart';
-import '../stream_svg_icon.dart';
-import 'attachment_widget.dart';
-
+/// Widget for showing a GIF attachment
 class GiphyAttachment extends AttachmentWidget {
-  final ShowMessageCallback? onShowMessage;
-  final ValueChanged<ReturnActionType>? onReturnAction;
-  final VoidCallback? onAttachmentTap;
-
+  /// Constructor for creating a [GiphyAttachment] widget
   const GiphyAttachment({
     Key? key,
     required Message message,
@@ -28,12 +23,21 @@ class GiphyAttachment extends AttachmentWidget {
           size: size,
         );
 
+  /// Callback when show message is tapped
+  final ShowMessageCallback? onShowMessage;
+
+  /// Callback when attachment is returned to from other screens
+  final ValueChanged<ReturnActionType>? onReturnAction;
+
+  /// Callback when attachment is tapped
+  final VoidCallback? onAttachmentTap;
+
   @override
   Widget build(BuildContext context) {
     final imageUrl =
         attachment.thumbUrl ?? attachment.imageUrl ?? attachment.assetUrl;
     if (imageUrl == null) {
-      return AttachmentError();
+      return const AttachmentError();
     }
     if (attachment.actions.isNotEmpty) {
       return _buildSendingAttachment(context, imageUrl);
@@ -50,12 +54,11 @@ class GiphyAttachment extends AttachmentWidget {
           color: StreamChatTheme.of(context).colorTheme.white,
           elevation: 2,
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-              topRight: Radius.circular(16.0),
-              bottomRight: Radius.circular(0.0),
-              topLeft: Radius.circular(16.0),
-              bottomLeft: Radius.circular(16.0),
+              topRight: Radius.circular(16),
+              topLeft: Radius.circular(16),
+              bottomLeft: Radius.circular(16),
             ),
           ),
           child: Column(
@@ -63,16 +66,16 @@ class GiphyAttachment extends AttachmentWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
                     StreamSvgIcon.giphyIcon(),
-                    SizedBox(width: 8),
-                    Text(
+                    const SizedBox(width: 8),
+                    const Text(
                       'Giphy',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     if (attachment.title != null)
                       Flexible(
                         child: Text(
@@ -91,25 +94,22 @@ class GiphyAttachment extends AttachmentWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(2.0),
+                padding: const EdgeInsets.all(2),
                 child: GestureDetector(
                   onTap: () => onAttachmentTap ?? _onImageTap(context),
                   child: CachedNetworkImage(
                     height: size?.height,
                     width: size?.width,
-                    placeholder: (_, __) {
-                      return Container(
-                        width: size?.width,
-                        height: size?.height,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    },
+                    placeholder: (_, __) => SizedBox(
+                      width: size?.width,
+                      height: size?.height,
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
                     imageUrl: imageUrl,
-                    errorWidget: (context, url, error) {
-                      return AttachmentError(size: size);
-                    },
+                    errorWidget: (context, url, error) =>
+                        AttachmentError(size: size),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -123,11 +123,9 @@ class GiphyAttachment extends AttachmentWidget {
                 height: 0.5,
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Container(
+                    child: SizedBox(
                       height: 50,
                       child: TextButton(
                         onPressed: () {
@@ -156,10 +154,10 @@ class GiphyAttachment extends AttachmentWidget {
                         .colorTheme
                         .black
                         .withOpacity(0.2),
-                    height: 50.0,
+                    height: 50,
                   ),
                   Expanded(
-                    child: Container(
+                    child: SizedBox(
                       height: 50,
                       child: TextButton(
                         onPressed: () {
@@ -189,10 +187,10 @@ class GiphyAttachment extends AttachmentWidget {
                         .colorTheme
                         .black
                         .withOpacity(0.2),
-                    height: 50.0,
+                    height: 50,
                   ),
                   Expanded(
-                    child: Container(
+                    child: SizedBox(
                       height: 50,
                       child: TextButton(
                         onPressed: () {
@@ -217,11 +215,11 @@ class GiphyAttachment extends AttachmentWidget {
             ],
           ),
         ),
-        SizedBox(height: 4.0),
+        const SizedBox(height: 4),
         Align(
           alignment: Alignment.centerRight,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -230,10 +228,10 @@ class GiphyAttachment extends AttachmentWidget {
                       .colorTheme
                       .black
                       .withOpacity(0.5),
-                  size: 16.0,
+                  size: 16,
                 ),
-                SizedBox(
-                  width: 8.0,
+                const SizedBox(
+                  width: 8,
                 ),
                 Text(
                   'Only visible to you',
@@ -275,88 +273,86 @@ class GiphyAttachment extends AttachmentWidget {
     if (res != null) onReturnAction?.call(res);
   }
 
-  Widget _buildSentAttachment(BuildContext context, String imageUrl) {
-    return Container(
-      child: GestureDetector(
-        onTap: () async {
-          final res =
-              await Navigator.push(context, MaterialPageRoute(builder: (_) {
-            final channel = StreamChannel.of(context).channel;
-            return StreamChannel(
-              channel: channel,
-              child: FullScreenMedia(
-                mediaAttachments: [attachment],
-                userName: message.user?.name,
-                message: message,
-                onShowMessage: onShowMessage,
-              ),
-            );
-          }));
-          if (res != null) onReturnAction!(res);
-        },
-        child: Stack(
-          children: [
-            CachedNetworkImage(
-              height: size?.height,
-              width: size?.width,
-              placeholder: (_, __) {
-                final image = Image.asset(
-                  'images/placeholder.png',
-                  fit: BoxFit.cover,
-                  package: 'stream_chat_flutter',
-                );
+  Widget _buildSentAttachment(BuildContext context, String imageUrl) =>
+      SizedBox(
+        child: GestureDetector(
+          onTap: () async {
+            final res =
+                await Navigator.push(context, MaterialPageRoute(builder: (_) {
+              final channel = StreamChannel.of(context).channel;
+              return StreamChannel(
+                channel: channel,
+                child: FullScreenMedia(
+                  mediaAttachments: [attachment],
+                  userName: message.user?.name,
+                  message: message,
+                  onShowMessage: onShowMessage,
+                ),
+              );
+            }));
+            if (res != null) onReturnAction!(res);
+          },
+          child: Stack(
+            children: [
+              CachedNetworkImage(
+                height: size?.height,
+                width: size?.width,
+                placeholder: (_, __) {
+                  final image = Image.asset(
+                    'images/placeholder.png',
+                    fit: BoxFit.cover,
+                    package: 'stream_chat_flutter',
+                  );
 
-                final colorTheme = StreamChatTheme.of(context).colorTheme;
-                return Shimmer.fromColors(
-                  baseColor: colorTheme.greyGainsboro,
-                  highlightColor: colorTheme.whiteSmoke,
-                  child: image,
-                );
-              },
-              imageUrl: imageUrl,
-              errorWidget: (context, url, error) {
-                return AttachmentError(size: size);
-              },
-              fit: BoxFit.cover,
-            ),
-            Positioned(
-              bottom: 8,
-              left: 8,
-              child: Material(
-                color: StreamChatTheme.of(context)
-                    .colorTheme
-                    .black
-                    .withOpacity(.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 4.0,
+                  final colorTheme = StreamChatTheme.of(context).colorTheme;
+                  return Shimmer.fromColors(
+                    baseColor: colorTheme.greyGainsboro,
+                    highlightColor: colorTheme.whiteSmoke,
+                    child: image,
+                  );
+                },
+                imageUrl: imageUrl,
+                errorWidget: (context, url, error) =>
+                    AttachmentError(size: size),
+                fit: BoxFit.cover,
+              ),
+              Positioned(
+                bottom: 8,
+                left: 8,
+                child: Material(
+                  color: StreamChatTheme.of(context)
+                      .colorTheme
+                      .black
+                      .withOpacity(.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
-                    children: [
-                      StreamSvgIcon.lightning(
-                        color: StreamChatTheme.of(context).colorTheme.white,
-                        size: 16,
-                      ),
-                      Text(
-                        'GIPHY',
-                        style: TextStyle(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      children: [
+                        StreamSvgIcon.lightning(
                           color: StreamChatTheme.of(context).colorTheme.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          size: 16,
                         ),
-                      ),
-                    ],
+                        Text(
+                          'GIPHY',
+                          style: TextStyle(
+                            color: StreamChatTheme.of(context).colorTheme.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

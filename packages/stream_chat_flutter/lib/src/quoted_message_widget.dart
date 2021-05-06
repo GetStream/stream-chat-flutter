@@ -4,28 +4,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:video_player/video_player.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
-import 'attachment/attachment.dart';
-import 'extension.dart';
-import 'message_text.dart';
-import 'stream_chat_theme.dart';
-import 'user_avatar.dart';
-import 'utils.dart';
-
+/// Widget builder for quoted message attachment thumnail
 typedef QuotedMessageAttachmentThumbnailBuilder = Widget Function(
   BuildContext,
   Attachment,
 );
 
 class _VideoAttachmentThumbnail extends StatefulWidget {
-  final Size size;
-  final Attachment attachment;
-
   const _VideoAttachmentThumbnail({
     Key? key,
     required this.attachment,
     this.size = const Size(32, 32),
   }) : super(key: key);
+
+  final Size size;
+  final Attachment attachment;
 
   @override
   _VideoAttachmentThumbnailState createState() =>
@@ -51,18 +47,30 @@ class _VideoAttachmentThumbnailState extends State<_VideoAttachmentThumbnail> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => SizedBox(
         height: widget.size.height,
         width: widget.size.width,
         child: _controller.value.isInitialized
             ? VideoPlayer(_controller)
-            : CircularProgressIndicator());
-  }
+            : const CircularProgressIndicator(),
+      );
 }
 
 ///
 class QuotedMessageWidget extends StatelessWidget {
+  ///
+  const QuotedMessageWidget({
+    Key? key,
+    required this.message,
+    required this.messageTheme,
+    this.reverse = false,
+    this.showBorder = false,
+    this.textLimit = 170,
+    this.attachmentThumbnailBuilders,
+    this.padding = const EdgeInsets.all(8),
+    this.onTap,
+  }) : super(key: key);
+
   /// The message
   final Message message;
 
@@ -82,22 +90,11 @@ class QuotedMessageWidget extends StatelessWidget {
   final Map<String, QuotedMessageAttachmentThumbnailBuilder>?
       attachmentThumbnailBuilders;
 
+  /// Padding around the widget
   final EdgeInsetsGeometry padding;
 
+  /// Callback for tap on widget
   final GestureTapCallback? onTap;
-
-  ///
-  QuotedMessageWidget({
-    Key? key,
-    required this.message,
-    required this.messageTheme,
-    this.reverse = false,
-    this.showBorder = false,
-    this.textLimit = 170,
-    this.attachmentThumbnailBuilders,
-    this.padding = const EdgeInsets.all(8),
-    this.onTap,
-  }) : super(key: key);
 
   bool get _hasAttachments => message.attachments.isNotEmpty == true;
 
@@ -107,23 +104,21 @@ class QuotedMessageWidget extends StatelessWidget {
   bool get _containsText => message.text?.isNotEmpty == true;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: InkWell(
-        onTap: onTap,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(child: _buildMessage(context)),
-            SizedBox(width: 8),
-            if (message.user != null) _buildUserAvatar(),
-          ],
+  Widget build(BuildContext context) => Padding(
+        padding: padding,
+        child: InkWell(
+          onTap: onTap,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: _buildMessage(context)),
+              const SizedBox(width: 8),
+              if (message.user != null) _buildUserAvatar(),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _buildMessage(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -165,7 +160,7 @@ class QuotedMessageWidget extends StatelessWidget {
                 color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
               )
             : null,
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topRight: Radius.circular(12),
           topLeft: Radius.circular(12),
           bottomLeft: Radius.circular(12),
@@ -183,7 +178,7 @@ class QuotedMessageWidget extends StatelessWidget {
   }
 
   Widget _buildUrlAttachment(Attachment attachment) {
-    final size = Size(32, 32);
+    const size = Size(32, 32);
     if (attachment.thumbUrl != null) {
       return Container(
         height: size.height,
@@ -198,7 +193,7 @@ class QuotedMessageWidget extends StatelessWidget {
         ),
       );
     }
-    return AttachmentError(size: size);
+    return const AttachmentError(size: size);
   }
 
   Widget _parseAttachments(BuildContext context) {
@@ -217,7 +212,7 @@ class QuotedMessageWidget extends StatelessWidget {
       }
       attachmentBuilder = _defaultAttachmentBuilder[attachment.type];
       if (attachmentBuilder == null) {
-        child = Offstage();
+        child = const Offstage();
       } else {
         child = attachmentBuilder(context, attachment);
       }
@@ -235,77 +230,63 @@ class QuotedMessageWidget extends StatelessWidget {
     );
   }
 
-  ShapeBorder _getDefaultShape(BuildContext context) {
-    return RoundedRectangleBorder(
-      side: BorderSide(width: 0.0, color: Colors.transparent),
-      borderRadius: BorderRadius.circular(8),
-    );
-  }
+  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
+        side: const BorderSide(width: 0, color: Colors.transparent),
+        borderRadius: BorderRadius.circular(8),
+      );
 
-  Widget _buildUserAvatar() {
-    return Transform(
-      transform: Matrix4.rotationY(reverse ? pi : 0),
-      alignment: Alignment.center,
-      child: UserAvatar(
-        user: message.user!,
-        constraints: BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
+  Widget _buildUserAvatar() => Transform(
+        transform: Matrix4.rotationY(reverse ? pi : 0),
+        alignment: Alignment.center,
+        child: UserAvatar(
+          user: message.user!,
+          constraints: const BoxConstraints.tightFor(
+            height: 24,
+            width: 24,
+          ),
+          showOnlineStatus: false,
         ),
-        showOnlineStatus: false,
-      ),
-    );
-  }
+      );
 
   Map<String, QuotedMessageAttachmentThumbnailBuilder>
-      get _defaultAttachmentBuilder {
-    return {
-      'image': (_, attachment) {
-        return ImageAttachment(
-          attachment: attachment,
-          message: message,
-          messageTheme: messageTheme,
-          size: Size(32, 32),
-        );
-      },
-      'video': (_, attachment) {
-        return _VideoAttachmentThumbnail(
-          key: ValueKey(attachment.assetUrl),
-          attachment: attachment,
-        );
-      },
-      'giphy': (_, attachment) {
-        final size = Size(32, 32);
-        return CachedNetworkImage(
-          height: size.height,
-          width: size.width,
-          placeholder: (_, __) {
-            return Container(
-              width: size.width,
-              height: size.height,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          },
-          imageUrl: attachment.thumbUrl ??
-              attachment.imageUrl ??
-              attachment.assetUrl!,
-          errorWidget: (context, url, error) {
-            return AttachmentError(size: size);
-          },
-          fit: BoxFit.cover,
-        );
-      },
-      'file': (_, attachment) {
-        return Container(
-          height: 32,
-          width: 32,
-          child: getFileTypeImage(attachment.extraData['mime_type'] as String?),
-        );
-      },
-    };
-  }
+      get _defaultAttachmentBuilder => {
+            'image': (_, attachment) => ImageAttachment(
+                  attachment: attachment,
+                  message: message,
+                  messageTheme: messageTheme,
+                  size: const Size(32, 32),
+                ),
+            'video': (_, attachment) => _VideoAttachmentThumbnail(
+                  key: ValueKey(attachment.assetUrl),
+                  attachment: attachment,
+                ),
+            'giphy': (_, attachment) {
+              const size = Size(32, 32);
+              return CachedNetworkImage(
+                height: size.height,
+                width: size.width,
+                placeholder: (_, __) => SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                imageUrl: attachment.thumbUrl ??
+                    attachment.imageUrl ??
+                    attachment.assetUrl!,
+                errorWidget: (context, url, error) =>
+                    const AttachmentError(size: size),
+                fit: BoxFit.cover,
+              );
+            },
+            'file': (_, attachment) => SizedBox(
+                  height: 32,
+                  width: 32,
+                  child: getFileTypeImage(
+                      attachment.extraData['mime_type'] as String?),
+                ),
+          };
 
   Color? _getBackgroundColor(BuildContext context) {
     if (_containsScrapeUrl) {

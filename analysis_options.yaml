@@ -1,10 +1,18 @@
 analyzer:
+  enable-experiment:
+    - extension-methods
   exclude:
     - lib/**/*.g.dart
+    - example/**
+    - lib/src/emoji
     - lib/**/*.freezed.dart
-    - example/*
+    - test/**
+
 linter:
   rules:
+    # these rules are documented on and in the same order as
+    # the Dart Lint rules page to make maintenance easier
+    # https://github.com/dart-lang/linter/blob/master/example/all.yaml
     - always_use_package_imports
     - avoid_empty_else
     - avoid_relative_lib_imports
@@ -136,8 +144,7 @@ linter:
     - package_names
     - sort_pub_dependencies
 
-    # To be added when null-safe:
-    # - cast_nullable_to_non_nullable
-    #- unnecessary_null_checks
-    # - tighten_type_of_initializing_formals
-    # - null_check_on_nullable_type_parameter
+    - cast_nullable_to_non_nullable
+    - unnecessary_null_checks
+    - tighten_type_of_initializing_formals
+    - null_check_on_nullable_type_parameter

@@ -1,9 +1,14 @@
+/// Reaction icon data
 class ReactionIcon {
-  final String type;
-  final String assetName;
-
+  /// Constructor for creating [ReactionIcon]
   ReactionIcon({
     required this.type,
     required this.assetName,
   });
+
+  /// Type of reaction
+  final String type;
+
+  /// Asset to display for reaction
+  final String assetName;
 }

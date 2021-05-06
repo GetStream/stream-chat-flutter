@@ -1,34 +1,45 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'stream_chat_theme.dart';
-
-///
+/// Widget to make a swipeable tile
 class Swipeable extends StatefulWidget {
-  final Widget child;
-  final Widget backgroundIcon;
-  final VoidCallback? onSwipeStart;
-  final VoidCallback? onSwipeCancel;
-  final VoidCallback? onSwipeEnd;
-  final double threshold;
-
-  ///
+  /// Constructor for creating a [Swipeable] widget
   const Swipeable({
+    Key? key,
     required this.child,
     required this.backgroundIcon,
     this.onSwipeStart,
     this.onSwipeCancel,
     this.onSwipeEnd,
     this.threshold = 82.0,
-  });
+  }) : super(key: key);
+
+  /// Child to make swipeable
+  final Widget child;
+
+  /// Background icon after swipe
+  final Widget backgroundIcon;
+
+  /// Callback when swipe starts
+  final VoidCallback? onSwipeStart;
+
+  /// Callback when swipe is cancelled
+  final VoidCallback? onSwipeCancel;
+
+  /// Callback when swipe ends
+  final VoidCallback? onSwipeEnd;
+
+  /// Threshold for swipe
+  final double threshold;
 
   @override
   State<StatefulWidget> createState() => _SwipeableState();
 }
 
 class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
-  double _dragExtent = 0.0;
+  double _dragExtent = 0;
   late AnimationController _moveController;
   late AnimationController _iconMoveController;
   late Animation<Offset> _moveAnimation;
@@ -45,15 +56,15 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
         AnimationController(duration: _animationDuration, vsync: this);
     _iconMoveController =
         AnimationController(duration: _animationDuration, vsync: this);
-    _moveAnimation = Tween<Offset>(begin: Offset.zero, end: Offset(1.0, 0.0))
+    _moveAnimation = Tween<Offset>(begin: Offset.zero, end: const Offset(1, 0))
         .animate(_moveController);
     _iconTransitionAnimation =
-        Tween<Offset>(begin: Offset(-0.1, 0.0), end: Offset(0.4, 0.0))
+        Tween<Offset>(begin: const Offset(-0.1, 0), end: const Offset(0.4, 0))
             .animate(_moveController);
     _iconFadeAnimation =
-        Tween<double>(begin: 0.7, end: 1.0).animate(_iconMoveController);
+        Tween<double>(begin: 0.7, end: 1).animate(_iconMoveController);
 
-    final controllerValue = 0.0;
+    const controllerValue = 0.0;
     _moveController.animateTo(controllerValue);
     _iconMoveController.animateTo(controllerValue);
   }
@@ -77,19 +88,19 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
 
     if (_dragExtent.isNegative) return;
 
-    var movePastThresholdPixels = widget.threshold;
+    final movePastThresholdPixels = widget.threshold;
     var newPos = _dragExtent.abs() / context.size!.width;
 
     if (_dragExtent.abs() > movePastThresholdPixels) {
       // how many "thresholds" past the threshold we are. 1 = the threshold 2
       // = two thresholds.
-      var n = _dragExtent.abs() / movePastThresholdPixels;
+      final n = _dragExtent.abs() / movePastThresholdPixels;
 
       // Take the number of thresholds past the threshold, and reduce this
       // number
-      var reducedThreshold = math.pow(n, 0.3);
+      final reducedThreshold = math.pow(n, 0.3);
 
-      var adjustedPixelPos = movePastThresholdPixels * reducedThreshold;
+      final adjustedPixelPos = movePastThresholdPixels * reducedThreshold;
       newPos = adjustedPixelPos / context.size!.width;
 
       if (_dragExtent > 0 && !_pastThreshold) {
@@ -111,8 +122,8 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    _moveController.animateTo(0.0, duration: _animationDuration);
-    _iconMoveController.animateTo(0.0, duration: _animationDuration);
+    _moveController.animateTo(0, duration: _animationDuration);
+    _iconMoveController.animateTo(0, duration: _animationDuration);
     _dragExtent = 0.0;
     if (_pastThreshold && widget.onSwipeEnd != null) {
       widget.onSwipeEnd!();
@@ -120,44 +131,42 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragStart: _handleDragStart,
-      onHorizontalDragUpdate: _handleDragUpdate,
-      onHorizontalDragEnd: _handleDragEnd,
-      behavior: HitTestBehavior.opaque,
-      child: Stack(
-        alignment: Alignment.center,
-        fit: StackFit.passthrough,
-        children: [
-          SlideTransition(
-            position: _iconTransitionAnimation,
-            child: Row(
-              children: [
-                FadeTransition(
-                  opacity: _iconFadeAnimation,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: StreamChatTheme.of(context)
-                            .colorTheme
-                            .greyGainsboro,
+  Widget build(BuildContext context) => GestureDetector(
+        onHorizontalDragStart: _handleDragStart,
+        onHorizontalDragUpdate: _handleDragUpdate,
+        onHorizontalDragEnd: _handleDragEnd,
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          alignment: Alignment.center,
+          fit: StackFit.passthrough,
+          children: [
+            SlideTransition(
+              position: _iconTransitionAnimation,
+              child: Row(
+                children: [
+                  FadeTransition(
+                    opacity: _iconFadeAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .greyGainsboro,
+                        ),
                       ),
+                      child: widget.backgroundIcon,
                     ),
-                    child: widget.backgroundIcon,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          SlideTransition(
-            position: _moveAnimation,
-            child: widget.child,
-          ),
-        ],
-      ),
-    );
-  }
+            SlideTransition(
+              position: _moveAnimation,
+              child: widget.child,
+            ),
+          ],
+        ),
+      );
 }

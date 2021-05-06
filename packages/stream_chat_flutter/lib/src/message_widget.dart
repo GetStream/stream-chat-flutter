@@ -15,17 +15,17 @@ import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/image_group.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
-import 'attachment/attachment.dart';
-import 'extension.dart';
-import 'image_group.dart';
-import 'message_text.dart';
-
+/// Widget builder for building attachments
 typedef AttachmentBuilder = Widget Function(
   BuildContext,
   Message,
   List<Attachment>,
 );
+
+/// Callback for when quoted message is tapped
 typedef OnQuotedMessageTap = void Function(String?);
 
 /// The display behaviour of a widget
@@ -45,119 +45,13 @@ enum DisplayWidget {
 ///
 /// It shows a message with reactions, replies and user avatar.
 ///
-/// Usually you don't use this widget as it's the default message widget used by [MessageListView].
+/// Usually you don't use this widget as it's the default message widget used by
+/// [MessageListView].
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget components render the ui based on the first ancestor of type
+/// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageWidget extends StatefulWidget {
-  /// Function called on mention tap
-  final void Function(User)? onMentionTap;
-
-  /// The function called when tapping on replies
-  final void Function(Message)? onThreadTap;
-  final void Function(Message)? onReplyTap;
-  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
-  final Widget Function(BuildContext, Message)? textBuilder;
-
-  /// Function called on long press
-  final void Function(BuildContext, Message)? onMessageActions;
-
-  /// The message
-  final Message message;
-
-  /// The message theme
-  final MessageTheme messageTheme;
-
-  /// If true the widget will be mirrored
-  final bool reverse;
-
-  /// The shape of the message text
-  final ShapeBorder? shape;
-
-  /// The shape of an attachment
-  final ShapeBorder? attachmentShape;
-
-  /// The borderside of the message text
-  final BorderSide? borderSide;
-
-  /// The borderside of an attachment
-  final BorderSide? attachmentBorderSide;
-
-  /// The border radius of the message text
-  final BorderRadiusGeometry? borderRadiusGeometry;
-
-  /// The border radius of an attachment
-  final BorderRadiusGeometry? attachmentBorderRadiusGeometry;
-
-  /// The padding of the widget
-  final EdgeInsetsGeometry? padding;
-
-  /// The internal padding of the message text
-  final EdgeInsets textPadding;
-
-  /// The internal padding of an attachment
-  final EdgeInsetsGeometry attachmentPadding;
-
-  /// It controls the display behaviour of the user avatar
-  final DisplayWidget showUserAvatar;
-
-  /// It controls the display behaviour of the sending indicator
-  final bool showSendingIndicator;
-
-  /// If true the widget will show the reactions
-  final bool showReactions;
-
-  final bool allRead;
-
-  /// If true the widget will show the thread reply indicator
-  final bool showThreadReplyIndicator;
-
-  /// If true the widget will show the show in channel indicator
-  final bool showInChannelIndicator;
-
-  /// The function called when tapping on UserAvatar
-  final void Function(User)? onUserAvatarTap;
-
-  /// The function called when tapping on a link
-  final void Function(String)? onLinkTap;
-
-  /// Used in [MessageReactionsModal] and [MessageActionsModal]
-  final bool showReactionPickerIndicator;
-
-  final List<Read>? readList;
-
-  final ShowMessageCallback? onShowMessage;
-  final ValueChanged<ReturnActionType>? onReturnAction;
-
-  /// If true show the users username next to the timestamp of the message
-  final bool showUsername;
-  final bool showTimestamp;
-
-  final bool showReplyMessage;
-  final bool showThreadReplyMessage;
-  final bool showEditMessage;
-  final bool showCopyMessage;
-  final bool showDeleteMessage;
-  final bool showResendMessage;
-
-  final bool showFlagButton;
-  final Map<String, AttachmentBuilder> attachmentBuilders;
-
-  /// Center user avatar with bottom of the message
-  final bool translateUserAvatar;
-
-  /// Function called when quotedMessage is tapped
-  final OnQuotedMessageTap? onQuotedMessageTap;
-
-  /// Function called when message is tapped
-  final void Function(Message)? onMessageTap;
-
-  /// List of custom actions shown on message long tap
-  final List<MessageAction> customActions;
-
-  // Customize onTap on attachment
-  final void Function(Message message, Attachment attachment)? onAttachmentTap;
-
   ///
   MessageWidget({
     Key? key,
@@ -201,8 +95,8 @@ class MessageWidget extends StatefulWidget {
     this.readList,
     this.padding,
     this.textPadding = const EdgeInsets.symmetric(
-      horizontal: 16.0,
-      vertical: 8.0,
+      horizontal: 16,
+      vertical: 8,
     ),
     this.attachmentPadding = EdgeInsets.zero,
     this.allRead = false,
@@ -211,8 +105,7 @@ class MessageWidget extends StatefulWidget {
     this.onAttachmentTap,
   })  : attachmentBuilders = {
           'image': (context, message, attachments) {
-            var border = RoundedRectangleBorder(
-              side: BorderSide.none,
+            final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
@@ -267,32 +160,31 @@ class MessageWidget extends StatefulWidget {
             );
           },
           'video': (context, message, attachments) {
-            var border = RoundedRectangleBorder(
-              side: BorderSide.none,
+            final border = RoundedRectangleBorder(
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
             return wrapAttachmentWidget(
               context,
               Column(
-                children: attachments.map((attachment) {
-                  return VideoAttachment(
-                    attachment: attachment,
-                    messageTheme: messageTheme,
-                    size: Size(
-                      MediaQuery.of(context).size.width * 0.8,
-                      MediaQuery.of(context).size.height * 0.3,
-                    ),
-                    message: message,
-                    onShowMessage: onShowMessage,
-                    onReturnAction: onReturnAction,
-                    onAttachmentTap: onAttachmentTap != null
-                        ? () {
-                            onAttachmentTap(message, attachment);
-                          }
-                        : null,
-                  );
-                }).toList(),
+                children: attachments
+                    .map((attachment) => VideoAttachment(
+                          attachment: attachment,
+                          messageTheme: messageTheme,
+                          size: Size(
+                            MediaQuery.of(context).size.width * 0.8,
+                            MediaQuery.of(context).size.height * 0.3,
+                          ),
+                          message: message,
+                          onShowMessage: onShowMessage,
+                          onReturnAction: onReturnAction,
+                          onAttachmentTap: onAttachmentTap != null
+                              ? () {
+                                  onAttachmentTap(message, attachment);
+                                }
+                              : null,
+                        ))
+                    .toList(),
               ),
               border,
               reverse,
@@ -302,25 +194,24 @@ class MessageWidget extends StatefulWidget {
           },
           'giphy': (context, message, attachments) {
             final border = RoundedRectangleBorder(
-              side: BorderSide.none,
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
             return wrapAttachmentWidget(
               context,
               Column(
-                children: attachments.map((attachment) {
-                  return GiphyAttachment(
-                    attachment: attachment,
-                    message: message,
-                    size: Size(
-                      MediaQuery.of(context).size.width * 0.8,
-                      MediaQuery.of(context).size.height * 0.3,
-                    ),
-                    onShowMessage: onShowMessage,
-                    onReturnAction: onReturnAction,
-                  );
-                }).toList(),
+                children: attachments
+                    .map((attachment) => GiphyAttachment(
+                          attachment: attachment,
+                          message: message,
+                          size: Size(
+                            MediaQuery.of(context).size.width * 0.8,
+                            MediaQuery.of(context).size.height * 0.3,
+                          ),
+                          onShowMessage: onShowMessage,
+                          onReturnAction: onReturnAction,
+                        ))
+                    .toList(),
               ),
               border,
               reverse,
@@ -329,7 +220,7 @@ class MessageWidget extends StatefulWidget {
             );
           },
           'file': (context, message, attachments) {
-            var border = RoundedRectangleBorder(
+            final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
                   BorderSide(
                     color: StreamChatTheme.of(context).colorTheme.greyWhisper,
@@ -339,23 +230,21 @@ class MessageWidget extends StatefulWidget {
 
             return Column(
               children: attachments
-                  .map<Widget>((attachment) {
-                    return wrapAttachmentWidget(
-                      context,
-                      FileAttachment(
-                        message: message,
-                        attachment: attachment,
-                        size: Size(
-                          MediaQuery.of(context).size.width * 0.8,
-                          MediaQuery.of(context).size.height * 0.3,
+                  .map<Widget>((attachment) => wrapAttachmentWidget(
+                        context,
+                        FileAttachment(
+                          message: message,
+                          attachment: attachment,
+                          size: Size(
+                            MediaQuery.of(context).size.width * 0.8,
+                            MediaQuery.of(context).size.height * 0.3,
+                          ),
                         ),
-                      ),
-                      border,
-                      reverse,
-                      attachmentBorderRadiusGeometry as BorderRadius? ??
-                          BorderRadius.zero,
-                    );
-                  })
+                        border,
+                        reverse,
+                        attachmentBorderRadiusGeometry as BorderRadius? ??
+                            BorderRadius.zero,
+                      ))
                   .insertBetween(SizedBox(
                     height: attachmentPadding.vertical / 2,
                   ))
@@ -364,6 +253,141 @@ class MessageWidget extends StatefulWidget {
           },
         }..addAll(customAttachmentBuilders ?? {}),
         super(key: key);
+
+  /// Function called on mention tap
+  final void Function(User)? onMentionTap;
+
+  /// The function called when tapping on threads
+  final void Function(Message)? onThreadTap;
+
+  /// The function called when tapping on replies
+  final void Function(Message)? onReplyTap;
+
+  /// Widget builder for edit message layout
+  final Widget Function(BuildContext, Message)? editMessageInputBuilder;
+
+  /// Widget builder for building text
+  final Widget Function(BuildContext, Message)? textBuilder;
+
+  /// Function called on long press
+  final void Function(BuildContext, Message)? onMessageActions;
+
+  /// The message
+  final Message message;
+
+  /// The message theme
+  final MessageTheme messageTheme;
+
+  /// If true the widget will be mirrored
+  final bool reverse;
+
+  /// The shape of the message text
+  final ShapeBorder? shape;
+
+  /// The shape of an attachment
+  final ShapeBorder? attachmentShape;
+
+  /// The borderside of the message text
+  final BorderSide? borderSide;
+
+  /// The borderside of an attachment
+  final BorderSide? attachmentBorderSide;
+
+  /// The border radius of the message text
+  final BorderRadiusGeometry? borderRadiusGeometry;
+
+  /// The border radius of an attachment
+  final BorderRadiusGeometry? attachmentBorderRadiusGeometry;
+
+  /// The padding of the widget
+  final EdgeInsetsGeometry? padding;
+
+  /// The internal padding of the message text
+  final EdgeInsets textPadding;
+
+  /// The internal padding of an attachment
+  final EdgeInsetsGeometry attachmentPadding;
+
+  /// It controls the display behaviour of the user avatar
+  final DisplayWidget showUserAvatar;
+
+  /// It controls the display behaviour of the sending indicator
+  final bool showSendingIndicator;
+
+  /// If true the widget will show the reactions
+  final bool showReactions;
+
+  ///
+  final bool allRead;
+
+  /// If true the widget will show the thread reply indicator
+  final bool showThreadReplyIndicator;
+
+  /// If true the widget will show the show in channel indicator
+  final bool showInChannelIndicator;
+
+  /// The function called when tapping on UserAvatar
+  final void Function(User)? onUserAvatarTap;
+
+  /// The function called when tapping on a link
+  final void Function(String)? onLinkTap;
+
+  /// Used in [MessageReactionsModal] and [MessageActionsModal]
+  final bool showReactionPickerIndicator;
+
+  /// List of users who read
+  final List<Read>? readList;
+
+  /// Callback when show message is tapped
+  final ShowMessageCallback? onShowMessage;
+
+  /// Handle return actions like reply message
+  final ValueChanged<ReturnActionType>? onReturnAction;
+
+  /// If true show the users username next to the timestamp of the message
+  final bool showUsername;
+
+  /// Show message timestamp
+  final bool showTimestamp;
+
+  /// Show reply action
+  final bool showReplyMessage;
+
+  /// Show thread reply action
+  final bool showThreadReplyMessage;
+
+  /// Show edit action
+  final bool showEditMessage;
+
+  /// Show copy action
+  final bool showCopyMessage;
+
+  /// Show delete action
+  final bool showDeleteMessage;
+
+  /// Show resend action
+  final bool showResendMessage;
+
+  /// Show flag action
+  final bool showFlagButton;
+
+  /// Builder for respective attachment types
+  final Map<String, AttachmentBuilder> attachmentBuilders;
+
+  /// Center user avatar with bottom of the message
+  final bool translateUserAvatar;
+
+  /// Function called when quotedMessage is tapped
+  final OnQuotedMessageTap? onQuotedMessageTap;
+
+  /// Function called when message is tapped
+  final void Function(Message)? onMessageTap;
+
+  /// List of custom actions shown on message long tap
+  final List<MessageAction> customActions;
+
+  /// Customize onTap on attachment
+  final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -426,7 +450,7 @@ class _MessageWidgetState extends State<MessageWidget>
     super.build(context);
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    var leftPadding =
+    final leftPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
@@ -440,7 +464,7 @@ class _MessageWidgetState extends State<MessageWidget>
               ? null
               : () => onLongPress(context),
           child: Padding(
-            padding: widget.padding ?? EdgeInsets.all(8),
+            padding: widget.padding ?? const EdgeInsets.all(8),
             child: Transform(
               alignment: Alignment.center,
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
@@ -460,7 +484,6 @@ class _MessageWidgetState extends State<MessageWidget>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
@@ -468,7 +491,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                         DisplayWidget.show &&
                                     widget.message.user != null) ...[
                                   _buildUserAvatar(),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                 ],
                                 if (widget.showUserAvatar == DisplayWidget.hide)
                                   SizedBox(width: avatarWidth + 4),
@@ -477,12 +500,12 @@ class _MessageWidgetState extends State<MessageWidget>
                                     portal: Container(
                                       transform:
                                           Matrix4.translationValues(-12, 0, 0),
-                                      constraints:
-                                          BoxConstraints(maxWidth: 22 * 6.0),
+                                      constraints: const BoxConstraints(
+                                          maxWidth: 22 * 6.0),
                                       child: _buildReactionIndicator(context),
                                     ),
-                                    portalAnchor: Alignment(-1.0, -1.0),
-                                    childAnchor: Alignment(1, -1.0),
+                                    portalAnchor: const Alignment(-1, -1),
+                                    childAnchor: const Alignment(1, -1),
                                     child: Stack(
                                       clipBehavior: Clip.none,
                                       children: [
@@ -505,15 +528,18 @@ class _MessageWidgetState extends State<MessageWidget>
                                                   transform: Matrix4.rotationY(
                                                       widget.reverse ? pi : 0),
                                                   child: Container(
+                                                    // ignore: lines_longer_than_80_chars
                                                     margin: EdgeInsets.symmetric(
                                                         horizontal:
+                                                            // ignore: lines_longer_than_80_chars
                                                             widget.showUserAvatar ==
-                                                                    DisplayWidget
-                                                                        .gone
+                                                                    // ignore: lines_longer_than_80_chars
+                                                                    DisplayWidget.gone
                                                                 ? 0
                                                                 : 4.0),
                                                     child: DeletedMessage(
                                                       reverse: widget.reverse,
+                                                      // ignore: lines_longer_than_80_chars
                                                       borderRadiusGeometry: widget
                                                           .borderRadiusGeometry,
                                                       borderSide:
@@ -526,11 +552,12 @@ class _MessageWidgetState extends State<MessageWidget>
                                                 )
                                               : Card(
                                                   clipBehavior: Clip.antiAlias,
-                                                  elevation: 0.0,
+                                                  elevation: 0,
                                                   margin: EdgeInsets.symmetric(
                                                     horizontal: (isFailedState
                                                             ? 15.0
                                                             : 0.0) +
+                                                        // ignore: lines_longer_than_80_chars
                                                         (widget.showUserAvatar ==
                                                                 DisplayWidget
                                                                     .gone
@@ -543,11 +570,14 @@ class _MessageWidgetState extends State<MessageWidget>
                                                                 .borderSide ??
                                                             BorderSide(
                                                               color: widget
+                                                                      // ignore: lines_longer_than_80_chars
                                                                       .messageTheme
+                                                                      // ignore: lines_longer_than_80_chars
                                                                       .messageBorderColor ??
                                                                   Colors.grey,
                                                             ),
                                                         borderRadius: widget
+                                                                // ignore: lines_longer_than_80_chars
                                                                 .borderRadiusGeometry ??
                                                             BorderRadius.zero,
                                                       ),
@@ -650,9 +680,9 @@ class _MessageWidgetState extends State<MessageWidget>
           children: [
             StreamSvgIcon.eye(
               color: StreamChatTheme.of(context).colorTheme.grey,
-              size: 16.0,
+              size: 16,
             ),
-            SizedBox(width: 8.0),
+            const SizedBox(width: 8),
             Text(
               'Only visible to you',
               style: StreamChatTheme.of(context)
@@ -665,7 +695,7 @@ class _MessageWidgetState extends State<MessageWidget>
       );
     }
 
-    var children = <Widget>[];
+    final children = <Widget>[];
 
     final threadParticipants = widget.message.threadParticipants?.take(2);
     final showThreadParticipants = threadParticipants?.isNotEmpty == true;
@@ -676,6 +706,7 @@ class _MessageWidgetState extends State<MessageWidget>
       msg = '$replyCount Thread Replies';
     }
 
+    // ignore: prefer_function_declarations_over_variables
     final onThreadTap = () async {
       try {
         var message = widget.message;
@@ -687,6 +718,7 @@ class _MessageWidgetState extends State<MessageWidget>
       } catch (e, stk) {
         print(e);
         print(stk);
+        // ignore: avoid_returning_null_for_void
         return null;
       }
     };
@@ -734,7 +766,7 @@ class _MessageWidgetState extends State<MessageWidget>
                   ((widget.messageTheme.replies?.fontSize ?? 1) / 2),
             ),
             child: CustomPaint(
-              size: Size(16, 32) * context.textScaleFactor,
+              size: const Size(16, 32) * context.textScaleFactor,
               painter: _ThreadReplyPainter(
                 context: context,
                 color: widget.messageTheme.messageBorderColor,
@@ -746,7 +778,7 @@ class _MessageWidgetState extends State<MessageWidget>
             Widget mappedChild = Transform(
               transform: Matrix4.rotationY(widget.reverse ? pi : 0),
               alignment: Alignment.center,
-              child: Container(
+              child: SizedBox(
                 height: context.textScaleFactor * 14,
                 child: child,
               ),
@@ -757,18 +789,18 @@ class _MessageWidgetState extends State<MessageWidget>
             return mappedChild;
           },
         ),
-      ].insertBetween(const SizedBox(width: 8.0)),
+      ].insertBetween(const SizedBox(width: 8)),
     );
   }
 
   Widget _buildUrlAttachment() {
-    var urlAttachment = widget.message.attachments
+    final urlAttachment = widget.message.attachments
         .firstWhere((element) => element.ogScrapeUrl != null);
 
-    var host = Uri.parse(urlAttachment.ogScrapeUrl!).host;
-    var splitList = host.split('.');
-    var hostName = splitList.length == 3 ? splitList[1] : splitList[0];
-    var hostDisplayName = urlAttachment.authorName?.capitalize() ??
+    final host = Uri.parse(urlAttachment.ogScrapeUrl!).host;
+    final splitList = host.split('.');
+    final hostName = splitList.length == 3 ? splitList[1] : splitList[0];
+    final hostDisplayName = urlAttachment.authorName?.capitalize() ??
         getWebsiteName(hostName.toLowerCase()) ??
         hostName.capitalize();
 
@@ -796,7 +828,7 @@ class _MessageWidgetState extends State<MessageWidget>
             padding: const EdgeInsets.all(1),
             child: UserAvatar(
               user: user,
-              constraints: BoxConstraints.loose(Size.fromRadius(7)),
+              constraints: BoxConstraints.loose(const Size.fromRadius(7)),
               showOnlineStatus: false,
             ),
           ),
@@ -820,7 +852,7 @@ class _MessageWidgetState extends State<MessageWidget>
       ..sort((a, b) => a.user!.id == ownId ? 1 : -1);
 
     return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       child: (widget.showReactions &&
               (widget.message.reactionCounts?.isNotEmpty == true) &&
               !widget.message.isDeleted)
@@ -839,7 +871,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 reactions: reactionsList,
               ),
             )
-          : SizedBox(),
+          : const SizedBox(),
     );
   }
 
@@ -849,78 +881,75 @@ class _MessageWidgetState extends State<MessageWidget>
     showDialog(
         context: context,
         barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
-        builder: (context) {
-          return StreamChannel(
-            channel: channel,
-            child: MessageActionsModal(
-              onCopyTap: (message) =>
-                  Clipboard.setData(ClipboardData(text: message.text)),
-              attachmentBorderRadiusGeometry:
-                  widget.attachmentBorderRadiusGeometry as BorderRadius?,
-              showUserAvatar:
-                  widget.message.user!.id == channel.client.state.user!.id
-                      ? DisplayWidget.gone
-                      : DisplayWidget.show,
-              messageTheme: widget.messageTheme,
-              messageShape: widget.shape ?? _getDefaultShape(context),
-              attachmentShape:
-                  widget.attachmentShape ?? _getDefaultAttachmentShape(context),
-              reverse: widget.reverse,
-              showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
-              message: widget.message,
-              editMessageInputBuilder: widget.editMessageInputBuilder,
-              onReplyTap: widget.onReplyTap,
-              onThreadReplyTap: widget.onThreadTap,
-              showResendMessage:
-                  widget.showResendMessage && (isSendFailed || isUpdateFailed),
-              showCopyMessage: widget.showCopyMessage &&
-                  !isFailedState &&
-                  widget.message.text?.trim().isNotEmpty == true,
-              showEditMessage: widget.showEditMessage &&
-                  !isDeleteFailed &&
-                  widget.message.attachments
-                          .any((element) => element.type == 'giphy') !=
-                      true,
-              showReactions: widget.showReactions,
-              showReplyMessage: widget.showReplyMessage &&
-                  !isFailedState &&
-                  widget.onReplyTap != null,
-              showThreadReplyMessage: widget.showThreadReplyMessage &&
-                  !isFailedState &&
-                  widget.onThreadTap != null,
-              showFlagButton: widget.showFlagButton,
-              customActions: widget.customActions,
-            ),
-          );
-        });
+        builder: (context) => StreamChannel(
+              channel: channel,
+              child: MessageActionsModal(
+                onCopyTap: (message) =>
+                    Clipboard.setData(ClipboardData(text: message.text)),
+                attachmentBorderRadiusGeometry:
+                    widget.attachmentBorderRadiusGeometry as BorderRadius?,
+                showUserAvatar:
+                    widget.message.user!.id == channel.client.state.user!.id
+                        ? DisplayWidget.gone
+                        : DisplayWidget.show,
+                messageTheme: widget.messageTheme,
+                messageShape: widget.shape ?? _getDefaultShape(context),
+                attachmentShape: widget.attachmentShape ??
+                    _getDefaultAttachmentShape(context),
+                reverse: widget.reverse,
+                showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
+                message: widget.message,
+                editMessageInputBuilder: widget.editMessageInputBuilder,
+                onReplyTap: widget.onReplyTap,
+                onThreadReplyTap: widget.onThreadTap,
+                showResendMessage: widget.showResendMessage &&
+                    (isSendFailed || isUpdateFailed),
+                showCopyMessage: widget.showCopyMessage &&
+                    !isFailedState &&
+                    widget.message.text?.trim().isNotEmpty == true,
+                showEditMessage: widget.showEditMessage &&
+                    !isDeleteFailed &&
+                    widget.message.attachments
+                            .any((element) => element.type == 'giphy') !=
+                        true,
+                showReactions: widget.showReactions,
+                showReplyMessage: widget.showReplyMessage &&
+                    !isFailedState &&
+                    widget.onReplyTap != null,
+                showThreadReplyMessage: widget.showThreadReplyMessage &&
+                    !isFailedState &&
+                    widget.onThreadTap != null,
+                showFlagButton: widget.showFlagButton,
+                customActions: widget.customActions,
+              ),
+            ));
   }
 
   void _showMessageReactionsModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showDialog(
-        context: context,
-        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
-        builder: (context) {
-          return StreamChannel(
-            channel: channel,
-            child: MessageReactionsModal(
-              attachmentBorderRadiusGeometry:
-                  widget.attachmentBorderRadiusGeometry as BorderRadius?,
-              showUserAvatar:
-                  widget.message.user!.id == channel.client.state.user!.id
-                      ? DisplayWidget.gone
-                      : DisplayWidget.show,
-              onUserAvatarTap: widget.onUserAvatarTap,
-              messageTheme: widget.messageTheme,
-              messageShape: widget.shape ?? _getDefaultShape(context),
-              attachmentShape:
-                  widget.attachmentShape ?? _getDefaultAttachmentShape(context),
-              reverse: widget.reverse,
-              message: widget.message,
-              showReactions: widget.showReactions,
-            ),
-          );
-        });
+      context: context,
+      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+      builder: (context) => StreamChannel(
+        channel: channel,
+        child: MessageReactionsModal(
+          attachmentBorderRadiusGeometry:
+              widget.attachmentBorderRadiusGeometry as BorderRadius?,
+          showUserAvatar:
+              widget.message.user!.id == channel.client.state.user!.id
+                  ? DisplayWidget.gone
+                  : DisplayWidget.show,
+          onUserAvatarTap: widget.onUserAvatarTap,
+          messageTheme: widget.messageTheme,
+          messageShape: widget.shape ?? _getDefaultShape(context),
+          attachmentShape:
+              widget.attachmentShape ?? _getDefaultAttachmentShape(context),
+          reverse: widget.reverse,
+          message: widget.message,
+          showReactions: widget.showReactions,
+        ),
+      ),
+    );
   }
 
   ShapeBorder _getDefaultAttachmentShape(BuildContext context) {
@@ -937,15 +966,13 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  ShapeBorder _getDefaultShape(BuildContext context) {
-    return RoundedRectangleBorder(
-      side: widget.borderSide ??
-          BorderSide(
-            color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-          ),
-      borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-    );
-  }
+  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
+        side: widget.borderSide ??
+            BorderSide(
+              color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+            ),
+        borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
+      );
 
   Widget _parseAttachments() {
     final attachmentGroups = <String, List<Attachment>>{};
@@ -1007,9 +1034,8 @@ class _MessageWidgetState extends State<MessageWidget>
         (message.status == MessageSendingStatus.sending ||
             message.status == MessageSendingStatus.updating)) {
       final totalAttachments = message.attachments.length;
-      final uploadRemaining = message.attachments.where((it) {
-        return !it.uploadState.isSuccess;
-      }).length;
+      final uploadRemaining =
+          message.attachments.where((it) => !it.uploadState.isSuccess).length;
       if (uploadRemaining == 0) {
         return StreamSvgIcon.check(
           size: style!.fontSize,
@@ -1037,7 +1063,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 color: StreamChatTheme.of(context).colorTheme.accentBlue,
               ),
             ),
-          SizedBox(width: 2),
+          const SizedBox(width: 2),
           child,
         ],
       );
@@ -1068,7 +1094,7 @@ class _MessageWidgetState extends State<MessageWidget>
       );
 
   Widget _buildTextBubble() {
-    if (widget.message.text!.trim().isEmpty) return Offstage();
+    if (widget.message.text!.trim().isEmpty) return const Offstage();
     return Transform(
       transform: Matrix4.rotationY(widget.reverse ? pi : 0),
       alignment: Alignment.center,
@@ -1139,10 +1165,10 @@ class _MessageWidgetState extends State<MessageWidget>
 }
 
 class _ThreadReplyPainter extends CustomPainter {
+  const _ThreadReplyPainter({this.context, required this.color});
+
   final Color? color;
   final BuildContext? context;
-
-  const _ThreadReplyPainter({this.context, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {

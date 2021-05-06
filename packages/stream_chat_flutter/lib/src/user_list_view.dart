@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-import 'user_item.dart';
-
 /// Callback called when tapping on a user
 typedef UserTapCallback = void Function(User, Widget?);
 
@@ -36,10 +34,13 @@ typedef UserItemBuilder = Widget Function(BuildContext, User, bool);
 /// ```
 ///
 ///
-/// Make sure to have a [UsersBloc] ancestor in order to provide the information about the users.
-/// The widget uses a [ListView.separated], [GridView.builder] to render the list, grid of channels.
+/// Make sure to have a [UsersBloc] ancestor in order to provide the
+/// information about the users.
+/// The widget uses a [ListView.separated], [GridView.builder] to render the
+/// list, grid of channels.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget components render the ui based on the first ancestor of
+/// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class UserListView extends StatefulWidget {
   /// Instantiate a new UserListView
@@ -81,8 +82,10 @@ class UserListView extends StatefulWidget {
   final Map<String, dynamic>? options;
 
   /// The sorting used for the channels matching the filters.
-  /// Sorting is based on field and direction, multiple sorting options can be provided.
-  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
+  /// Sorting is based on field and direction, multiple sorting options can
+  /// be provided.
+  /// You can sort based on last_updated, last_message_at, updated_at, created_
+  /// at or member_count.
   /// Direction can be ascending or descending.
   final List<SortOption>? sort;
 
@@ -115,7 +118,8 @@ class UserListView extends StatefulWidget {
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
-  /// Sets a blue trailing checkMark in [ListUserItem] for all the [selectedUsers]
+  /// Sets a blue trailing checkMark in [ListUserItem] for all the
+  /// [selectedUsers]
   final Set<User>? selectedUsers;
 
   /// Set it to true to group users by their first character
@@ -151,37 +155,27 @@ class _UserListViewState extends State<UserListView>
 
   @override
   Widget build(BuildContext context) {
-    var child = UserListCore(
+    final child = UserListCore(
       errorBuilder: widget.errorBuilder as Widget Function(Object)? ??
-          (err) {
-            return _buildError(err as Error);
-          },
-      emptyBuilder: widget.emptyBuilder ??
-          (context) {
-            return _buildEmpty();
-          },
+          (err) => _buildError(err as Error),
+      emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
       loadingBuilder: widget.loadingBuilder ??
-          (context) {
-            return LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
+          (context) => LayoutBuilder(
+                builder: (context, viewportConstraints) =>
+                    SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: viewportConstraints.maxHeight,
                     ),
-                    child: Center(
+                    child: const Center(
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                );
-              },
-            );
-          },
-      listBuilder: widget.listBuilder ??
-          (context, list) {
-            return _buildListView(list);
-          },
+                ),
+              ),
+      listBuilder:
+          widget.listBuilder ?? (context, list) => _buildListView(list),
       pagination: widget.pagination,
       options: widget.options,
       sort: widget.sort,
@@ -204,7 +198,7 @@ class _UserListViewState extends State<UserListView>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
   Widget _buildError(Error error) {
-    print((error).stackTrace);
+    print(error.stackTrace);
 
     var message = error.toString();
     if (error is DioError) {
@@ -220,12 +214,12 @@ class _UserListViewState extends State<UserListView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text.rich(
-            TextSpan(
+            const TextSpan(
               children: [
                 WidgetSpan(
                   child: Padding(
-                    padding: const EdgeInsets.only(
-                      right: 2.0,
+                    padding: EdgeInsets.only(
+                      right: 2,
                     ),
                     child: Icon(Icons.error_outline),
                   ),
@@ -237,43 +231,39 @@ class _UserListViewState extends State<UserListView>
           ),
           Padding(
             padding: const EdgeInsets.only(
-              top: 16.0,
+              top: 16,
             ),
             child: Text(message),
           ),
           TextButton(
             onPressed: () => _userListController.loadData!(),
-            child: Text('Retry'),
+            child: const Text('Retry'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmpty() {
-    return LayoutBuilder(
-      builder: (context, viewportConstraints) {
-        return SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
+  Widget _buildEmpty() => LayoutBuilder(
+        builder: (context, viewportConstraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: viewportConstraints.maxHeight,
             ),
-            child: Center(
+            child: const Center(
               child: Text('There are no users currently'),
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
 
   Widget _buildListView(
     List<ListItem> items,
   ) {
     final child = _isListView
         ? ListView.separated(
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: items.isNotEmpty ? items.length + 1 : items.length,
             separatorBuilder: (_, index) {
               if (widget.separatorBuilder != null) {
@@ -281,19 +271,17 @@ class _UserListViewState extends State<UserListView>
               }
               return _separatorBuilder(context, index);
             },
-            itemBuilder: (context, index) {
-              return _listItemBuilder(context, index, items);
-            },
+            itemBuilder: (context, index) =>
+                _listItemBuilder(context, index, items),
           )
         : GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: widget.crossAxisCount,
             ),
             itemCount: items.isNotEmpty ? items.length + 1 : items.length,
-            physics: AlwaysScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return _gridItemBuilder(context, index, items);
-            },
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemBuilder: (context, index) =>
+                _gridItemBuilder(context, index, items),
           );
 
     return LazyLoadScrollView(
@@ -307,24 +295,21 @@ class _UserListViewState extends State<UserListView>
     if (i < items.length) {
       final item = items[i];
       return item.when(
-        headerItem: (header) {
-          return Container(
-            key: ValueKey<String>('HEADER-$header'),
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(0.05),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-              child: Text(
-                header,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.5,
-                  color: StreamChatTheme.of(context).colorTheme.grey,
-                ),
+        headerItem: (header) => Container(
+          key: ValueKey<String>('HEADER-$header'),
+          color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.05),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Text(
+              header,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14.5,
+                color: StreamChatTheme.of(context).colorTheme.grey,
               ),
             ),
-          );
-        },
+          ),
+        ),
         userItem: (user) {
           final selected = widget.selectedUsers?.contains(user) ?? false;
           return Container(
@@ -351,7 +336,7 @@ class _UserListViewState extends State<UserListView>
     if (i < items.length) {
       final item = items[i];
       return item.when(
-        headerItem: (_) => Offstage(),
+        headerItem: (_) => const Offstage(),
         userItem: (user) {
           final selected = widget.selectedUsers?.contains(user) ?? false;
           return Container(
@@ -360,17 +345,17 @@ class _UserListViewState extends State<UserListView>
                 ? widget.userItemBuilder!(context, user, selected)
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       UserAvatar(
                         user: user,
                         borderRadius: BorderRadius.circular(32),
                         selected: selected,
-                        constraints: BoxConstraints.tightFor(
+                        constraints: const BoxConstraints.tightFor(
                           height: 64,
                           width: 64,
                         ),
-                        onlineIndicatorConstraints: BoxConstraints.tightFor(
+                        onlineIndicatorConstraints:
+                            const BoxConstraints.tightFor(
                           height: 12,
                           width: 12,
                         ),
@@ -378,7 +363,7 @@ class _UserListViewState extends State<UserListView>
                             widget.onUserTap!(user, widget.userWidget),
                         onLongPress: widget.onUserLongPress,
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
@@ -386,7 +371,7 @@ class _UserListViewState extends State<UserListView>
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -402,39 +387,38 @@ class _UserListViewState extends State<UserListView>
     }
   }
 
-  Widget _buildQueryProgressIndicator(context, UsersBlocState usersProvider) {
-    return StreamBuilder<bool>(
-        stream: usersProvider.queryUsersLoading,
-        initialData: false,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .accentRed
-                  .withOpacity(.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: Text('Error loading users'),
+  Widget _buildQueryProgressIndicator(context, UsersBlocState usersProvider) =>
+      StreamBuilder<bool>(
+          stream: usersProvider.queryUsersLoading,
+          initialData: false,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Container(
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .accentRed
+                    .withOpacity(.2),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: Text('Error loading users'),
+                  ),
                 ),
+              );
+            }
+            return Container(
+              height: 100,
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: snapshot.data!
+                    ? const CircularProgressIndicator()
+                    : Container(),
               ),
             );
-          }
-          return Container(
-            height: 100,
-            padding: EdgeInsets.all(32),
-            child: Center(
-              child: snapshot.data! ? CircularProgressIndicator() : Container(),
-            ),
-          );
-        });
-  }
+          });
 
-  Widget _separatorBuilder(context, i) {
-    return Container(
-      height: 1,
-      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-    );
-  }
+  Widget _separatorBuilder(context, i) => Container(
+        height: 1,
+        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+      );
 }

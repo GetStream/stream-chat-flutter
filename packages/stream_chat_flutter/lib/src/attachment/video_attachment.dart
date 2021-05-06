@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_title.dart';
+import 'package:stream_chat_flutter/src/attachment/attachment_widget.dart';
 import 'package:stream_chat_flutter/src/full_screen_media.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'attachment_title.dart';
-import 'attachment_upload_state_builder.dart';
-import 'attachment_widget.dart';
-
+/// Widget for showing a video attachment
 class VideoAttachment extends AttachmentWidget {
-  final MessageTheme messageTheme;
-  final ShowMessageCallback? onShowMessage;
-  final ValueChanged<ReturnActionType>? onReturnAction;
-  final VoidCallback? onAttachmentTap;
-
+  /// Constructor for creating a [VideoAttachment] widget
   const VideoAttachment({
     Key? key,
     required Message message,
@@ -29,101 +24,110 @@ class VideoAttachment extends AttachmentWidget {
           size: size,
         );
 
-  @override
-  Widget build(BuildContext context) {
-    return source.when(
-      local: () {
-        if (attachment.file == null) {
-          return AttachmentError(size: size);
-        }
-        return _buildVideoAttachment(
-          context,
-          VideoThumbnailImage(
-            video: attachment.file!.path!,
-            height: size?.height,
-            width: size?.width,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __) => AttachmentError(size: size),
-          ),
-        );
-      },
-      network: () {
-        if (attachment.assetUrl == null) {
-          return AttachmentError(size: size);
-        }
-        return _buildVideoAttachment(
-          context,
-          VideoThumbnailImage(
-            video: attachment.assetUrl!,
-            height: size?.height,
-            width: size?.width,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __) => AttachmentError(size: size),
-          ),
-        );
-      },
-    );
-  }
+  /// [MessageTheme] for showing title
+  final MessageTheme messageTheme;
 
-  Widget _buildVideoAttachment(BuildContext context, Widget videoWidget) {
-    return ConstrainedBox(
-      constraints: BoxConstraints.loose(size ?? Size.infinite),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: GestureDetector(
-              onTap: onAttachmentTap ??
-                  () async {
-                    final channel = StreamChannel.of(context).channel;
-                    final res = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => StreamChannel(
-                          channel: channel,
-                          child: FullScreenMedia(
-                            mediaAttachments: [attachment],
-                            userName: message.user?.name,
-                            message: message,
-                            onShowMessage: onShowMessage,
+  /// Callback when show message is tapped
+  final ShowMessageCallback? onShowMessage;
+
+  /// Callback when attachment is returned to from other screens
+  final ValueChanged<ReturnActionType>? onReturnAction;
+
+  /// Callback when attachment is tapped
+  final VoidCallback? onAttachmentTap;
+
+  @override
+  Widget build(BuildContext context) => source.when(
+        local: () {
+          if (attachment.file == null) {
+            return AttachmentError(size: size);
+          }
+          return _buildVideoAttachment(
+            context,
+            VideoThumbnailImage(
+              video: attachment.file!.path!,
+              height: size?.height,
+              width: size?.width,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __) => AttachmentError(size: size),
+            ),
+          );
+        },
+        network: () {
+          if (attachment.assetUrl == null) {
+            return AttachmentError(size: size);
+          }
+          return _buildVideoAttachment(
+            context,
+            VideoThumbnailImage(
+              video: attachment.assetUrl!,
+              height: size?.height,
+              width: size?.width,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __) => AttachmentError(size: size),
+            ),
+          );
+        },
+      );
+
+  Widget _buildVideoAttachment(BuildContext context, Widget videoWidget) =>
+      ConstrainedBox(
+        constraints: BoxConstraints.loose(size ?? Size.infinite),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: GestureDetector(
+                onTap: onAttachmentTap ??
+                    () async {
+                      final channel = StreamChannel.of(context).channel;
+                      final res = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => StreamChannel(
+                            channel: channel,
+                            child: FullScreenMedia(
+                              mediaAttachments: [attachment],
+                              userName: message.user?.name,
+                              message: message,
+                              onShowMessage: onShowMessage,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                    if (res != null) onReturnAction?.call(res);
-                  },
-              child: Stack(
-                children: [
-                  videoWidget,
-                  Center(
-                    child: Material(
-                      shape: CircleBorder(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Icon(Icons.play_arrow),
+                      );
+                      if (res != null) onReturnAction?.call(res);
+                    },
+                child: Stack(
+                  children: [
+                    videoWidget,
+                    const Center(
+                      child: Material(
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Icon(Icons.play_arrow),
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: AttachmentUploadStateBuilder(
-                      message: message,
-                      attachment: attachment,
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: AttachmentUploadStateBuilder(
+                        message: message,
+                        attachment: attachment,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          if (attachment.title != null)
-            Material(
-              color: messageTheme.messageBackgroundColor,
-              child: AttachmentTitle(
-                messageTheme: messageTheme,
-                attachment: attachment,
+            if (attachment.title != null)
+              Material(
+                color: messageTheme.messageBackgroundColor,
+                child: AttachmentTitle(
+                  messageTheme: messageTheme,
+                  attachment: attachment,
+                ),
               ),
-            ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

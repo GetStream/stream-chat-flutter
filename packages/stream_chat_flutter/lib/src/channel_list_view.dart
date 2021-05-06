@@ -3,13 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stream_chat_flutter/src/channel_bottom_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-import '../stream_chat_flutter.dart';
-import 'channel_bottom_sheet.dart';
-import 'channel_preview.dart';
 
 /// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget?);
@@ -17,6 +15,7 @@ typedef ChannelTapCallback = void Function(Channel, Widget?);
 /// Builder used to create a custom [ChannelPreview] from a [Channel]
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
+/// Callback for when 'View Info' is tapped
 typedef ViewInfoCallback = void Function(Channel);
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
@@ -47,14 +46,16 @@ typedef ViewInfoCallback = void Function(Channel);
 /// ```
 ///
 ///
-/// Make sure to have a [StreamChat] ancestor in order to provide the information about the channels.
+/// Make sure to have a [StreamChat] ancestor in order to provide the
+/// information about the channels.
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget components render the ui based on the first ancestor of
+/// type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class ChannelListView extends StatefulWidget {
   /// Instantiate a new ChannelListView
-  ChannelListView({
+  const ChannelListView({
     Key? key,
     this.filter,
     this.options,
@@ -94,8 +95,10 @@ class ChannelListView extends StatefulWidget {
   final Map<String, dynamic>? options;
 
   /// The sorting used for the channels matching the filters.
-  /// Sorting is based on field and direction, multiple sorting options can be provided.
-  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
+  /// Sorting is based on field and direction, multiple sorting options
+  /// can be provided.
+  /// You can sort based on last_updated, last_message_at, updated_at,
+  /// created_at or member_count.
   /// Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
 
@@ -137,8 +140,10 @@ class ChannelListView extends StatefulWidget {
   /// The amount of space by which to inset the children.
   final EdgeInsetsGeometry? padding;
 
+  /// List of selected channels which are displayed differently
   final List<Channel> selectedChannels;
 
+  /// Callback for when 'View Info' is tapped
   final ViewInfoCallback? onViewInfoTap;
 
   /// The builder that will be used in case of error
@@ -203,15 +208,14 @@ class _ChannelListViewState extends State<ChannelListView> {
             crossAxisCount: widget.crossAxisCount,
           ),
           itemCount: channels.length,
-          physics: AlwaysScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            return _gridItemBuilder(context, index, channels);
-          },
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemBuilder: (context, index) =>
+              _gridItemBuilder(context, index, channels),
         );
       } else {
         child = ListView.separated(
           padding: widget.padding,
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount:
               channels.isNotEmpty ? channels.length + 1 : channels.length,
           separatorBuilder: (_, index) {
@@ -220,9 +224,8 @@ class _ChannelListViewState extends State<ChannelListView> {
             }
             return _separatorBuilder(context, index);
           },
-          itemBuilder: (context, index) {
-            return _listItemBuilder(context, index, channels);
-          },
+          itemBuilder: (context, index) =>
+              _listItemBuilder(context, index, channels),
         );
       }
     }
@@ -233,11 +236,9 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
   }
 
-  Widget _buildEmptyWidget(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, viewportConstraints) {
-        return SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
+  Widget _buildEmptyWidget(BuildContext context) => LayoutBuilder(
+        builder: (context, viewportConstraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Stack(
             children: [
               ConstrainedBox(
@@ -248,7 +249,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: StreamSvgIcon.message(
                         size: 136,
                         color: StreamChatTheme.of(context)
@@ -257,7 +258,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: Text(
                         'Let’s start chatting!',
                         style: StreamChatTheme.of(context).textTheme.headline,
@@ -265,7 +266,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
+                        vertical: 8,
                         horizontal: 52,
                       ),
                       child: Text(
@@ -307,31 +308,27 @@ class _ChannelListViewState extends State<ChannelListView> {
                 ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
 
-  Widget _buildLoadingWidget(BuildContext context) {
-    return ListView(
-      padding: widget.padding,
-      physics: AlwaysScrollableScrollPhysics(),
-      children: List.generate(
-        25,
-        (i) {
-          if (widget.crossAxisCount == 1) {
-            if (i % 2 != 0) {
-              if (widget.separatorBuilder != null) {
-                return widget.separatorBuilder!(context, i);
+  Widget _buildLoadingWidget(BuildContext context) => ListView(
+        padding: widget.padding,
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: List.generate(
+          25,
+          (i) {
+            if (widget.crossAxisCount == 1) {
+              if (i % 2 != 0) {
+                if (widget.separatorBuilder != null) {
+                  return widget.separatorBuilder!(context, i);
+                }
+                return _separatorBuilder(context, i);
               }
-              return _separatorBuilder(context, i);
             }
-          }
-          return _buildLoadingItem(context);
-        },
-      ),
-    );
-  }
+            return _buildLoadingItem(context);
+          },
+        ),
+      );
 
   Shimmer _buildLoadingItem(BuildContext context) {
     if (widget.crossAxisCount > 1) {
@@ -340,25 +337,25 @@ class _ChannelListViewState extends State<ChannelListView> {
         highlightColor: StreamChatTheme.of(context).colorTheme.whiteSmoke,
         child: Column(
           children: [
-            SizedBox(height: 4.0),
+            const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 for (int i = 0; i < widget.crossAxisCount; i++)
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    constraints: BoxConstraints.tightFor(
+                    constraints: const BoxConstraints.tightFor(
                       height: 70,
                       width: 70,
                     ),
                   ),
               ],
             ),
-            SizedBox(
-              height: 16.0,
+            const SizedBox(
+              height: 16,
             ),
           ],
         ),
@@ -373,7 +370,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               color: StreamChatTheme.of(context).colorTheme.white,
               shape: BoxShape.circle,
             ),
-            constraints: BoxConstraints.tightFor(
+            constraints: const BoxConstraints.tightFor(
               height: 40,
               width: 40,
             ),
@@ -389,7 +386,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                 color: StreamChatTheme.of(context).colorTheme.white,
                 borderRadius: BorderRadius.circular(11),
               ),
-              constraints: BoxConstraints.tightFor(
+              constraints: const BoxConstraints.tightFor(
                 height: 16,
                 width: 82,
               ),
@@ -406,7 +403,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                       color: StreamChatTheme.of(context).colorTheme.white,
                       borderRadius: BorderRadius.circular(11),
                     ),
-                    constraints: BoxConstraints.expand(
+                    constraints: const BoxConstraints.expand(
                       height: 16,
                     ),
                   ),
@@ -418,7 +415,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   color: StreamChatTheme.of(context).colorTheme.white,
                   borderRadius: BorderRadius.circular(11),
                 ),
-                constraints: BoxConstraints.tightFor(
+                constraints: const BoxConstraints.tightFor(
                   height: 16,
                   width: 42,
                 ),
@@ -430,35 +427,33 @@ class _ChannelListViewState extends State<ChannelListView> {
     }
   }
 
-  Widget _buildErrorWidget(BuildContext context, Object error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text.rich(
-            TextSpan(
-              children: [
-                WidgetSpan(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      right: 2.0,
+  Widget _buildErrorWidget(BuildContext context, Object error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text.rich(
+              const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: 2,
+                      ),
+                      child: Icon(Icons.error_outline),
                     ),
-                    child: Icon(Icons.error_outline),
                   ),
-                ),
-                TextSpan(text: 'Error loading channels'),
-              ],
+                  TextSpan(text: 'Error loading channels'),
+                ],
+              ),
+              style: Theme.of(context).textTheme.headline6,
             ),
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          TextButton(
-            onPressed: () => _channelListController.loadData!(),
-            child: Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
+            TextButton(
+              onPressed: () => _channelListController.loadData!(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
 
   Widget _listItemBuilder(BuildContext context, int i, List<Channel> channels) {
     final channelsProvider = ChannelsBloc.of(context);
@@ -471,83 +466,77 @@ class _ChannelListViewState extends State<ChannelListView> {
         key: ValueKey<String>('CHANNEL-${channel.id}'),
         channel: channel,
         child: Builder(
-          builder: (context) {
-            return Slidable(
-              controller: _slideController,
-              enabled: widget.swipeToAction,
-              actionPane: SlidableBehindActionPane(),
-              actionExtentRatio: 0.12,
-              closeOnScroll: true,
-              secondaryActions: <Widget>[
+          builder: (context) => Slidable(
+            controller: _slideController,
+            enabled: widget.swipeToAction,
+            actionPane: const SlidableBehindActionPane(),
+            actionExtentRatio: 0.12,
+            secondaryActions: <Widget>[
+              IconSlideAction(
+                color: backgroundColor,
+                icon: Icons.more_horiz,
+                onTap: () {
+                  showModalBottomSheet(
+                    clipBehavior: Clip.hardEdge,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
+                      ),
+                    ),
+                    context: context,
+                    builder: (context) => StreamChannel(
+                      channel: channel,
+                      child: ChannelBottomSheet(
+                        onViewInfoTap: () {
+                          widget.onViewInfoTap?.call(channel);
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+              if ([
+                'admin',
+                'owner',
+              ].contains(channel.state!.members
+                  .firstWhereOrNull(
+                      (m) => m.userId == channel.client.state.user?.id)
+                  ?.role))
                 IconSlideAction(
                   color: backgroundColor,
-                  icon: Icons.more_horiz,
-                  onTap: () {
-                    showModalBottomSheet(
-                      clipBehavior: Clip.hardEdge,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32),
-                          topRight: Radius.circular(32),
-                        ),
+                  iconWidget: StreamSvgIcon.delete(
+                    color: StreamChatTheme.of(context).colorTheme.accentRed,
+                  ),
+                  onTap: () async {
+                    final res = await showConfirmationDialog(
+                      context,
+                      title: 'Delete Conversation',
+                      okText: 'DELETE',
+                      question:
+                          'Are you sure you want to delete this conversation?',
+                      cancelText: 'CANCEL',
+                      icon: StreamSvgIcon.delete(
+                        color: StreamChatTheme.of(context).colorTheme.accentRed,
                       ),
-                      context: context,
-                      builder: (context) {
-                        return StreamChannel(
-                          channel: channel,
-                          child: ChannelBottomSheet(
-                            onViewInfoTap: () {
-                              widget.onViewInfoTap?.call(channel);
-                            },
-                          ),
-                        );
-                      },
                     );
+                    if (res == true) {
+                      await channel.delete();
+                    }
                   },
                 ),
-                if ([
-                  'admin',
-                  'owner',
-                ].contains(channel.state!.members
-                    .firstWhereOrNull(
-                        (m) => m.userId == channel.client.state.user?.id)
-                    ?.role))
-                  IconSlideAction(
-                    color: backgroundColor,
-                    iconWidget: StreamSvgIcon.delete(
-                      color: StreamChatTheme.of(context).colorTheme.accentRed,
-                    ),
-                    onTap: () async {
-                      final res = await showConfirmationDialog(
-                        context,
-                        title: 'Delete Conversation',
-                        okText: 'DELETE',
-                        question:
-                            'Are you sure you want to delete this conversation?',
-                        cancelText: 'CANCEL',
-                        icon: StreamSvgIcon.delete(
-                          color:
-                              StreamChatTheme.of(context).colorTheme.accentRed,
-                        ),
-                      );
-                      if (res == true) {
-                        await channel.delete();
-                      }
-                    },
+            ],
+            child: Container(
+              color: StreamChatTheme.of(context).colorTheme.whiteSnow,
+              child: widget.channelPreviewBuilder?.call(context, channel) ??
+                  ChannelPreview(
+                    onLongPress: widget.onChannelLongPress,
+                    channel: channel,
+                    onImageTap: () => widget.onImageTap?.call(channel),
+                    onTap: (channel) => onTap(channel, widget.channelWidget),
                   ),
-              ],
-              child: Container(
-                color: StreamChatTheme.of(context).colorTheme.whiteSnow,
-                child: widget.channelPreviewBuilder?.call(context, channel) ??
-                    ChannelPreview(
-                      onLongPress: widget.onChannelLongPress,
-                      channel: channel,
-                      onImageTap: () => widget.onImageTap?.call(channel),
-                      onTap: (channel) => onTap(channel, widget.channelWidget),
-                    ),
-              ),
-            );
-          },
+            ),
+          ),
         ),
       );
     } else {
@@ -567,12 +556,10 @@ class _ChannelListViewState extends State<ChannelListView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) {
-              return StreamChannel(
-                channel: client,
-                child: widget.channelWidget!,
-              );
-            },
+            builder: (context) => StreamChannel(
+              channel: client,
+              child: widget.channelWidget!,
+            ),
           ),
         );
       };
@@ -589,24 +576,23 @@ class _ChannelListViewState extends State<ChannelListView> {
       key: ValueKey<String>('CHANNEL-${channel.id}'),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ChannelImage(
             channel: channel,
             borderRadius: BorderRadius.circular(32),
             selected: selected,
-            constraints: BoxConstraints.tightFor(
+            constraints: const BoxConstraints.tightFor(
               width: 64,
               height: 64,
             ),
             onTap: () => _getChannelTap(context),
           ),
-          SizedBox(height: 7),
+          const SizedBox(height: 7),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: StreamChannel(
               channel: channel,
-              child: ChannelName(
+              child: const ChannelName(
                 textStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -622,38 +608,37 @@ class _ChannelListViewState extends State<ChannelListView> {
   Widget _buildQueryProgressIndicator(
     context,
     ChannelsBlocState channelsProvider,
-  ) {
-    return StreamBuilder<bool>(
-        stream: channelsProvider.queryChannelsLoading,
-        initialData: false,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Container(
-              color: StreamChatTheme.of(context)
-                  .colorTheme
-                  .accentRed
-                  .withOpacity(.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Center(
-                  child: Text('Error loading channels'),
-                ),
-              ),
-            );
-          }
-          return snapshot.data!
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: const CircularProgressIndicator(),
+  ) =>
+      StreamBuilder<bool>(
+          stream: channelsProvider.queryChannelsLoading,
+          initialData: false,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Container(
+                color: StreamChatTheme.of(context)
+                    .colorTheme
+                    .accentRed
+                    .withOpacity(.2),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: Text('Error loading channels'),
                   ),
-                )
-              : Offstage();
-        });
-  }
+                ),
+              );
+            }
+            return snapshot.data!
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : const Offstage();
+          });
 
   Widget _separatorBuilder(context, i) {
-    var effect = StreamChatTheme.of(context).colorTheme.borderBottom;
+    final effect = StreamChatTheme.of(context).colorTheme.borderBottom;
 
     return Container(
       height: 1,

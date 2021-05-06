@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../stream_chat_flutter.dart';
-
+/// Widget for constructing a group of images
 class GroupImage extends StatelessWidget {
+  /// Constructor for creating a [GroupImage]
   const GroupImage({
     Key? key,
     required this.images,
@@ -15,17 +16,30 @@ class GroupImage extends StatelessWidget {
     this.selectionThickness = 4,
   }) : super(key: key);
 
+  /// List of images to display
   final List<String> images;
+
+  /// Constraints on the widget
   final BoxConstraints? constraints;
+
+  /// Callback when widget is tapped
   final VoidCallback? onTap;
+
+  /// Highlights if selected
   final bool selected;
+
+  /// [BorderRadius] to pass to the widget
   final BorderRadius? borderRadius;
+
+  /// Color of selection if selected
   final Color? selectionColor;
+
+  /// Thickness with which color of selection is shown
   final double selectionThickness;
 
   @override
   Widget build(BuildContext context) {
-    var avatar;
+    Widget? avatar;
     final streamChatTheme = StreamChatTheme.of(context);
 
     avatar = GestureDetector(
@@ -113,8 +127,8 @@ class GroupImage extends StatelessWidget {
         child: Container(
           color: selectionColor ??
               StreamChatTheme.of(context).colorTheme.accentBlue,
-          height: 64.0,
-          width: 64.0,
+          height: 64,
+          width: 64,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,

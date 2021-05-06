@@ -5,9 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../stream_chat_flutter.dart';
-import 'extension.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Callback to download an attachment asset
 typedef AttachmentDownloader = Future<String> Function(
@@ -17,6 +16,16 @@ typedef AttachmentDownloader = Future<String> Function(
 
 /// Widget that shows the options in the gallery view
 class AttachmentActionsModal extends StatelessWidget {
+  /// Returns a new [AttachmentActionsModal]
+  const AttachmentActionsModal({
+    Key? key,
+    required this.currentIndex,
+    required this.message,
+    this.onShowMessage,
+    this.imageDownloader,
+    this.fileDownloader,
+  }) : super(key: key);
+
   /// The message containing the attachments
   final Message message;
 
@@ -32,39 +41,28 @@ class AttachmentActionsModal extends StatelessWidget {
   /// Callback to provide download files
   final AttachmentDownloader? fileDownloader;
 
-  /// Returns a new [AttachmentActionsModal]
-  const AttachmentActionsModal({
-    required this.currentIndex,
-    required this.message,
-    this.onShowMessage,
-    this.imageDownloader,
-    this.fileDownloader,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.maybePop(context),
-      child: _buildPage(context),
-    );
-  }
+  Widget build(BuildContext context) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => Navigator.maybePop(context),
+        child: _buildPage(context),
+      );
 
   Widget _buildPage(context) {
     final theme = StreamChatTheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        SizedBox(height: kToolbarHeight),
+        const SizedBox(height: kToolbarHeight),
         Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.only(right: 8),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.5,
             clipBehavior: Clip.hardEdge,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Container(
+            child: SizedBox(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
@@ -73,7 +71,7 @@ class AttachmentActionsModal extends StatelessWidget {
                     context,
                     'Reply',
                     StreamSvgIcon.iconCurveLineLeftUp(
-                      size: 24.0,
+                      size: 24,
                       color: theme.colorTheme.grey,
                     ),
                     () {
@@ -84,16 +82,17 @@ class AttachmentActionsModal extends StatelessWidget {
                     context,
                     'Show in Chat',
                     StreamSvgIcon.eye(
-                      size: 24.0,
+                      size: 24,
                       color: theme.colorTheme.black,
                     ),
                     onShowMessage,
                   ),
                   _buildButton(
                     context,
+                    // ignore: lines_longer_than_80_chars
                     'Save ${message.attachments[currentIndex].type == 'video' ? 'Video' : 'Image'}',
                     StreamSvgIcon.iconSave(
-                      size: 24.0,
+                      size: 24,
                       color: theme.colorTheme.grey,
                     ),
                     () {
@@ -144,7 +143,7 @@ class AttachmentActionsModal extends StatelessWidget {
                       context,
                       'Delete',
                       StreamSvgIcon.delete(
-                        size: 24.0,
+                        size: 24,
                         color: theme.colorTheme.accentRed,
                       ),
                       () {
@@ -194,31 +193,30 @@ class AttachmentActionsModal extends StatelessWidget {
     VoidCallback? onTap, {
     Color? color,
     Key? key,
-  }) {
-    return Material(
-      key: key,
-      color: StreamChatTheme.of(context).colorTheme.white,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: Row(
-            children: [
-              icon,
-              SizedBox(width: 16),
-              Text(
-                title,
-                style: StreamChatTheme.of(context)
-                    .textTheme
-                    .body
-                    .copyWith(color: color),
-              ),
-            ],
+  }) =>
+      Material(
+        key: key,
+        color: StreamChatTheme.of(context).colorTheme.white,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: [
+                icon,
+                const SizedBox(width: 16),
+                Text(
+                  title,
+                  style: StreamChatTheme.of(context)
+                      .textTheme
+                      .body
+                      .copyWith(color: color),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _buildDownloadProgressDialog(
     BuildContext context,
@@ -247,7 +245,7 @@ class AttachmentActionsModal extends StatelessWidget {
               ),
               child: Center(
                 child: progress == null
-                    ? Container(
+                    ? SizedBox(
                         height: 100,
                         width: 100,
                         child: StreamSvgIcon.error(
@@ -255,15 +253,15 @@ class AttachmentActionsModal extends StatelessWidget {
                         ),
                       )
                     : progress.toProgressIndicatorValue == 1.0
-                        ? Container(
-                            key: Key('completedIcon'),
+                        ? SizedBox(
+                            key: const Key('completedIcon'),
                             height: 160,
                             width: 160,
                             child: StreamSvgIcon.check(
                               color: theme.colorTheme.greyGainsboro,
                             ),
                           )
-                        : Container(
+                        : SizedBox(
                             height: 100,
                             width: 100,
                             child: Stack(
@@ -271,7 +269,7 @@ class AttachmentActionsModal extends StatelessWidget {
                               children: [
                                 CircularProgressIndicator(
                                   value: progress.toProgressIndicatorValue,
-                                  strokeWidth: 8.0,
+                                  strokeWidth: 8,
                                   valueColor: AlwaysStoppedAnimation(
                                     theme.colorTheme.accentBlue,
                                   ),
@@ -317,14 +315,13 @@ class AttachmentActionsModal extends StatelessWidget {
 }
 
 class _DownloadProgress {
-  final int total;
-  final int received;
-
   const _DownloadProgress(this.total, this.received);
 
-  factory _DownloadProgress.initial() {
-    return _DownloadProgress(double.maxFinite.toInt(), 0);
-  }
+  factory _DownloadProgress.initial() =>
+      _DownloadProgress(double.maxFinite.toInt(), 0);
+
+  final int total;
+  final int received;
 
   double get toProgressIndicatorValue => received / total;
 

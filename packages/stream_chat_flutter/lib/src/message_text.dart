@@ -2,11 +2,11 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'stream_chat_theme.dart';
-import 'utils.dart';
-
+/// Text widget to display in message
 class MessageText extends StatelessWidget {
+  /// Constructor for creating a [MessageText] widget
   const MessageText({
     Key? key,
     required this.message,
@@ -15,9 +15,16 @@ class MessageText extends StatelessWidget {
     this.onLinkTap,
   }) : super(key: key);
 
+  /// Message whose text is to be displayed
   final Message message;
+
+  /// Callback for when mention is tapped
   final void Function(User)? onMentionTap;
+
+  /// Callback for when link is tapped
   final void Function(String)? onLinkTap;
+
+  /// [MessageTheme] whose text theme is to be applied
   final MessageTheme messageTheme;
 
   @override
@@ -71,6 +78,7 @@ class MessageText extends StatelessWidget {
 
   String _replaceMentions(String text) {
     message.mentionedUsers.map((u) => u.name).toSet().forEach((userName) {
+      // ignore: parameter_assignments
       text = text.replaceAll(
           '@$userName', '[@$userName](@${userName.replaceAll(' ', '')})');
     });

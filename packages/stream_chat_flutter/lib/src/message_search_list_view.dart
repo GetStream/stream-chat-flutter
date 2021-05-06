@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-import '../stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Callback called when tapping on a user
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
@@ -43,10 +42,12 @@ typedef EmptyMessageSearchBuilder = Widget Function(
 /// ```
 ///
 ///
-/// Make sure to have a [MessageSearchBloc] ancestor in order to provide the information about the messages.
+/// Make sure to have a [MessageSearchBloc] ancestor in order to provide the
+/// information about the messages.
 /// The widget uses a [ListView.separated] to render the list of messages.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget components render the ui based on the first ancestor of type
+/// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageSearchListView extends StatefulWidget {
   /// Instantiate a new MessageSearchListView
@@ -78,8 +79,10 @@ class MessageSearchListView extends StatefulWidget {
   final Filter filters;
 
   /// The sorting used for the channels matching the filters.
-  /// Sorting is based on field and direction, multiple sorting options can be provided.
-  /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
+  /// Sorting is based on field and direction, multiple sorting options
+  /// can be provided.
+  /// You can sort based on last_updated, last_message_at, updated_at,
+  /// created_at or member_count.
   /// Direction can be ascending or descending.
   final List<SortOption>? sortOptions;
 
@@ -109,6 +112,7 @@ class MessageSearchListView extends StatefulWidget {
   /// Set it to false to disable the pull-to-refresh widget
   final bool pullToRefresh;
 
+  /// Show error tile on top
   final bool showErrorTile;
 
   /// The builder that is used when the search messages are fetched
@@ -132,76 +136,63 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
       MessageSearchListController();
 
   @override
-  Widget build(BuildContext context) {
-    return MessageSearchListCore(
-      filters: widget.filters,
-      sortOptions: widget.sortOptions,
-      messageQuery: widget.messageQuery,
-      paginationParams: widget.paginationParams,
-      messageFilters: widget.messageFilters,
-      messageSearchListController: _messageSearchListController,
-      emptyBuilder: widget.emptyBuilder ??
-          (context) {
-            return LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: Center(
-                      child: Text('There are no messages currently'),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-      errorBuilder: widget.errorBuilder ??
-          (BuildContext context, dynamic error) {
-            if (error is Error) {
-              print(error.stackTrace);
-            }
-            return InfoTile(
-              showMessage: widget.showErrorTile,
-              tileAnchor: Alignment.topCenter,
-              childAnchor: Alignment.topCenter,
-              message: 'An error occurred.',
-              child: Container(),
-            );
-          },
-      loadingBuilder: widget.loadingBuilder ??
-          (context) {
-            return LayoutBuilder(
-              builder: (context, viewportConstraints) {
-                return SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: viewportConstraints.maxHeight,
-                    ),
-                    child: Center(
-                      child: CircularProgressIndicator(),
+  Widget build(BuildContext context) => MessageSearchListCore(
+        filters: widget.filters,
+        sortOptions: widget.sortOptions,
+        messageQuery: widget.messageQuery,
+        paginationParams: widget.paginationParams,
+        messageFilters: widget.messageFilters,
+        messageSearchListController: _messageSearchListController,
+        emptyBuilder: widget.emptyBuilder ??
+            (context) => LayoutBuilder(
+                  builder: (context, viewportConstraints) =>
+                      SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: viewportConstraints.maxHeight,
+                      ),
+                      child: const Center(
+                        child: Text('There are no messages currently'),
+                      ),
                     ),
                   ),
-                );
-              },
-            );
-          },
-      childBuilder: widget.childBuilder ??
-          (list) {
-            return _buildListView(list);
-          },
-    );
-  }
+                ),
+        errorBuilder: widget.errorBuilder ??
+            (BuildContext context, dynamic error) {
+              if (error is Error) {
+                print(error.stackTrace);
+              }
+              return InfoTile(
+                showMessage: widget.showErrorTile,
+                tileAnchor: Alignment.topCenter,
+                childAnchor: Alignment.topCenter,
+                message: 'An error occurred.',
+                child: Container(),
+              );
+            },
+        loadingBuilder: widget.loadingBuilder ??
+            (context) => LayoutBuilder(
+                  builder: (context, viewportConstraints) =>
+                      SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: viewportConstraints.maxHeight,
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+                ),
+        childBuilder: widget.childBuilder ?? _buildListView,
+      );
 
-  Widget _separatorBuilder(BuildContext context, int index) {
-    return Container(
-      height: 1,
-      color: StreamChatTheme.of(context).colorTheme.greyWhisper,
-    );
-  }
+  Widget _separatorBuilder(BuildContext context, int index) => Container(
+        height: 1,
+        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+      );
 
   Widget _listItemBuilder(
       BuildContext context, GetMessageResponse getMessageResponse) {
@@ -227,8 +218,8 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
                   .colorTheme
                   .accentRed
                   .withOpacity(.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
                 child: Center(
                   child: Text('Error loading messages'),
                 ),
@@ -237,9 +228,11 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
           }
           return Container(
             height: 100,
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Center(
-              child: snapshot.data! ? CircularProgressIndicator() : Container(),
+              child: snapshot.data!
+                  ? const CircularProgressIndicator()
+                  : Container(),
             ),
           );
         });
@@ -249,7 +242,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     final items = data;
 
     Widget child = ListView.separated(
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: items.isNotEmpty ? items.length + 1 : items.length,
       separatorBuilder: (_, index) {
         if (widget.separatorBuilder != null) {

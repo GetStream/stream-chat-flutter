@@ -4,19 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:stream_chat_flutter/src/video_service.dart';
 
-import 'stream_svg_icon.dart';
-import 'video_service.dart';
-
+/// Widget for creating video thumbnail image
 class VideoThumbnailImage extends StatefulWidget {
-  final String video;
-  final double? width;
-  final double? height;
-  final BoxFit? fit;
-  final ImageFormat format;
-  final Widget Function(BuildContext, Object?)? errorBuilder;
-  final WidgetBuilder? placeholderBuilder;
-
+  /// Constructor for creating [VideoThumbnailImage]
   const VideoThumbnailImage({
     Key? key,
     required this.video,
@@ -27,6 +19,27 @@ class VideoThumbnailImage extends StatefulWidget {
     this.errorBuilder,
     this.placeholderBuilder,
   }) : super(key: key);
+
+  /// Video path
+  final String video;
+
+  /// Width of widget
+  final double? width;
+
+  /// Height of widget
+  final double? height;
+
+  /// Fit of iamge
+  final BoxFit? fit;
+
+  /// Image format
+  final ImageFormat format;
+
+  /// Builds widget on error
+  final Widget Function(BuildContext, Object?)? errorBuilder;
+
+  /// Builds placeholder
+  final WidgetBuilder? placeholderBuilder;
 
   @override
   _VideoThumbnailImageState createState() => _VideoThumbnailImageState();
@@ -56,11 +69,9 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-      future: thumbnailFuture,
-      builder: (context, snapshot) {
-        return AnimatedSwitcher(
+  Widget build(BuildContext context) => FutureBuilder<Uint8List?>(
+        future: thumbnailFuture,
+        builder: (context, snapshot) => AnimatedSwitcher(
           duration: const Duration(milliseconds: 350),
           child: Builder(
             key: ValueKey<AsyncSnapshot<Uint8List?>>(snapshot),
@@ -73,7 +84,7 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
               }
               if (!snapshot.hasData) {
                 return Container(
-                  constraints: BoxConstraints.expand(),
+                  constraints: const BoxConstraints.expand(),
                   child: widget.placeholderBuilder?.call(context) ??
                       Shimmer.fromColors(
                         baseColor: StreamChatTheme.of(context)
@@ -97,8 +108,6 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
               );
             },
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
 }

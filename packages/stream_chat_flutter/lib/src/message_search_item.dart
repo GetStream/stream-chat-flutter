@@ -5,9 +5,11 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// It shows the current [Message] preview.
 ///
-/// Usually you don't use this widget as it's the default item used by [MessageSearchListView].
+/// Usually you don't use this widget as it's the default item used by
+/// [MessageSearchListView].
 ///
-/// The widget renders the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget renders the ui based on the first ancestor of type
+/// [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageSearchItem extends StatelessWidget {
   /// Instantiate a new MessageSearchItem
@@ -38,7 +40,7 @@ class MessageSearchItem extends StatelessWidget {
       leading: UserAvatar(
         user: user,
         showOnlineStatus: showOnlineStatus,
-        constraints: BoxConstraints.tightFor(
+        constraints: const BoxConstraints.tightFor(
           height: 40,
           width: 40,
         ),
@@ -69,7 +71,7 @@ class MessageSearchItem extends StatelessWidget {
       subtitle: Row(
         children: [
           Expanded(child: _buildSubtitle(context, message)),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           _buildDate(context, message),
         ],
       ),
@@ -147,9 +149,9 @@ class MessageSearchItem extends StatelessWidget {
       List<Attachment> attachments,
       TextStyle? normalTextStyle,
       TextStyle? mentionsTextStyle) {
-    var textList = text.split(' ');
-    var resList = <TextSpan>[];
-    for (var e in textList) {
+    final textList = text.split(' ');
+    final resList = <TextSpan>[];
+    for (final e in textList) {
       if (mentions.isNotEmpty &&
           mentions.any((element) => '@${element.name}' == e)) {
         resList.add(TextSpan(
@@ -166,7 +168,7 @@ class MessageSearchItem extends StatelessWidget {
         ));
       } else {
         resList.add(TextSpan(
-          text: e == textList.last ? '$e' : '$e ',
+          text: e == textList.last ? e : '$e ',
           style: normalTextStyle,
         ));
       }

@@ -12,34 +12,60 @@ import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/swipeable.dart';
 
-import '../stream_chat_flutter.dart';
-import 'connection_status_builder.dart';
-import 'date_divider.dart';
-import 'extension.dart';
-import 'swipeable.dart';
-
+/// Widget builder for message
 typedef MessageBuilder = Widget Function(
   BuildContext,
   MessageDetails,
   List<Message>,
 );
+
+/// Widget builder for parent message
 typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message?,
 );
+
+/// Widget builder for system message
 typedef SystemMessageBuilder = Widget Function(
   BuildContext,
   Message,
 );
+
+/// Widget builder for thread
 typedef ThreadBuilder = Widget Function(BuildContext context, Message? parent);
+
+/// Callback for thread taps
 typedef ThreadTapCallback = void Function(Message, Widget?);
 
+/// Callback on message swiped
 typedef OnMessageSwiped = void Function(Message);
+
+/// Callback on message tapped
 typedef OnMessageTap = void Function(Message);
+
+/// Callback on reply tapped
 typedef ReplyTapCallback = void Function(Message);
 
+/// Class for message details
 class MessageDetails {
+  /// Constructor for creating [MessageDetails]
+  MessageDetails(
+    BuildContext context,
+    this.message,
+    List<Message> messages,
+    this.index,
+  ) {
+    isMyMessage = message.user?.id == StreamChat.of(context).user?.id;
+    isLastUser = index + 1 < messages.length &&
+        message.user?.id == messages[index + 1].user?.id;
+    isNextUser =
+        index - 1 >= 0 && message.user!.id == messages[index - 1].user?.id;
+  }
+
   /// True if the message belongs to the current user
   bool? isMyMessage;
 
@@ -54,19 +80,6 @@ class MessageDetails {
 
   /// The index of the message
   int index;
-
-  MessageDetails(
-    BuildContext context,
-    this.message,
-    List<Message> messages,
-    this.index,
-  ) {
-    isMyMessage = message.user?.id == StreamChat.of(context).user?.id;
-    isLastUser = index + 1 < messages.length &&
-        message.user?.id == messages[index + 1].user?.id;
-    isNextUser =
-        index - 1 >= 0 && message.user!.id == messages[index - 1].user?.id;
-  }
 }
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
@@ -104,14 +117,16 @@ class MessageDetails {
 /// ```
 ///
 ///
-/// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channels.
+/// Make sure to have a [StreamChannel] ancestor in order to
+/// provide the information about the channels.
 /// The widget uses a [ListView.custom] to render the list of channels.
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme].
+/// The widget components render the ui based on the first
+/// ancestor of type [StreamChatTheme].
 /// Modify it to change the widget appearance.
 class MessageListView extends StatefulWidget {
   /// Instantiate a new MessageListView
-  MessageListView({
+  const MessageListView({
     Key? key,
     this.showScrollToBottom = true,
     this.messageBuilder,
@@ -158,10 +173,12 @@ class MessageListView extends StatefulWidget {
   final ThreadBuilder? threadBuilder;
 
   /// Function called when tapping on a thread
-  /// By default it calls [Navigator.push] using the widget built using [threadBuilder]
+  /// By default it calls [Navigator.push] using the widget
+  /// built using [threadBuilder]
   final ThreadTapCallback? onThreadTap;
 
-  /// If true will show a scroll to bottom message when there are new messages and the scroll offset is not zero
+  /// If true will show a scroll to bottom message when there are new
+  /// messages and the scroll offset is not zero
   final bool showScrollToBottom;
 
   /// Parent message in case of a thread
@@ -201,8 +218,10 @@ class MessageListView extends StatefulWidget {
   /// Color used while highlighting initial message
   final Color? messageHighlightColor;
 
+  /// Callback when show message is tapped
   final ShowMessageCallback? onShowMessage;
 
+  /// Flag for showing tile on header
   final bool showConnectionStateTile;
 
   /// Function called when messages are fetched
@@ -214,8 +233,10 @@ class MessageListView extends StatefulWidget {
   /// Function used to build an empty widget
   final WidgetBuilder? emptyBuilder;
 
-  /// Callback triggered when an error occurs while performing the given request.
-  /// This parameter can be used to display an error message to users in the event
+  /// Callback triggered when an error occurs while performing the
+  /// given request.
+  /// This parameter can be used to display an error message to
+  /// users in the event
   /// of a connection failure.
   final ErrorBuilder? errorWidgetBuilder;
 
@@ -223,10 +244,12 @@ class MessageListView extends StatefulWidget {
   final bool Function(Message)? messageFilter;
 
   /// Attachment builders for the default message widget
-  /// Please change this in the [MessageWidget] if you are using a custom implementation
+  /// Please change this in the [MessageWidget] if you are using a
+  /// custom implementation
   final Map<String, AttachmentBuilder>? customAttachmentBuilders;
 
-  /// Called when any message is tapped except a system message (use [onSystemMessageTap] instead)
+  /// Called when any message is tapped except a system message
+  /// (use [onSystemMessageTap] instead)
   final OnMessageTap? onMessageTap;
 
   /// Called when system message is tapped
@@ -238,6 +261,7 @@ class MessageListView extends StatefulWidget {
   /// Customize the MessageWidget textBuilder
   final void Function(BuildContext context, Message message)? textBuilder;
 
+  /// Callback for when link is tapped
   final void Function(String link)? onLinkTap;
 
   @override
@@ -257,9 +281,8 @@ class _MessageListViewState extends State<MessageListView> {
     if (streamChannel!.initialMessageId != null) {
       final messages = streamChannel!.channel.state!.messages;
       final totalMessages = messages.length;
-      final messageIndex = messages.indexWhere((e) {
-        return e.id == streamChannel!.initialMessageId;
-      });
+      final messageIndex =
+          messages.indexWhere((e) => e.id == streamChannel!.initialMessageId);
       final index = totalMessages - messageIndex;
       if (index != 0) return index - 1;
       return index;
@@ -272,9 +295,7 @@ class _MessageListViewState extends State<MessageListView> {
     return 0;
   }
 
-  bool _isInitialMessage(String id) {
-    return streamChannel!.initialMessageId == id;
-  }
+  bool _isInitialMessage(String id) => streamChannel!.initialMessageId == id;
 
   bool get _upToDate => streamChannel!.channel.state!.isUpToDate;
 
@@ -295,50 +316,46 @@ class _MessageListViewState extends State<MessageListView> {
   final MessageListController _messageListController = MessageListController();
 
   @override
-  Widget build(BuildContext context) {
-    return MessageListCore(
-      messageFilter: widget.messageFilter,
-      loadingBuilder: widget.loadingBuilder ??
-          (context) {
-            return Center(
-              child: const CircularProgressIndicator(),
-            );
-          },
-      emptyBuilder: widget.emptyBuilder ??
-          (context) {
-            return Center(
-              child: Text(
-                'No chats here yet...',
-                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .black
-                        .withOpacity(.5)),
-              ),
-            );
-          },
-      messageListBuilder: widget.messageListBuilder ??
-          (context, list) {
-            return _buildListView(list);
-          },
-      messageListController: _messageListController,
-      parentMessage: widget.parentMessage,
-      showScrollToBottom: widget.showScrollToBottom,
-      errorWidgetBuilder: widget.errorWidgetBuilder ??
-          (BuildContext context, Object error) {
-            return Center(
-              child: Text(
-                'Something went wrong',
-                style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .black
-                        .withOpacity(.5)),
-              ),
-            );
-          },
-    );
-  }
+  Widget build(BuildContext context) => MessageListCore(
+        messageFilter: widget.messageFilter,
+        loadingBuilder: widget.loadingBuilder ??
+            (context) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+        emptyBuilder: widget.emptyBuilder ??
+            (context) => Center(
+                  child: Text(
+                    'No chats here yet...',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnote
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5)),
+                  ),
+                ),
+        messageListBuilder: widget.messageListBuilder ??
+            (context, list) => _buildListView(list),
+        messageListController: _messageListController,
+        parentMessage: widget.parentMessage,
+        showScrollToBottom: widget.showScrollToBottom,
+        errorWidgetBuilder: widget.errorWidgetBuilder ??
+            (BuildContext context, Object error) => Center(
+                  child: Text(
+                    'Something went wrong',
+                    style: StreamChatTheme.of(context)
+                        .textTheme
+                        .footnote
+                        .copyWith(
+                            color: StreamChatTheme.of(context)
+                                .colorTheme
+                                .black
+                                .withOpacity(.5)),
+                  ),
+                ),
+      );
 
   Widget _buildListView(List<Message> data) {
     messages = data;
@@ -384,6 +401,7 @@ class _MessageListViewState extends State<MessageListView> {
             }
 
             return InfoTile(
+              // ignore: avoid_bool_literals_in_conditional_expressions
               showMessage: widget.showConnectionStateTile ? showStatus : false,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
@@ -418,7 +436,6 @@ class _MessageListViewState extends State<MessageListView> {
                 child: ScrollablePositionedList.separated(
                   key: ValueKey(initialIndex! + initialAlignment!),
                   itemPositionsListener: _itemPositionListener,
-                  addAutomaticKeepAlives: true,
                   initialScrollIndex: initialIndex ?? 0,
                   initialAlignment: initialAlignment ?? 0,
                   physics: widget.scrollPhysics,
@@ -427,8 +444,8 @@ class _MessageListViewState extends State<MessageListView> {
                   itemCount:
                       messages.length + 2 + (_isThreadConversation ? 1 : 0),
                   separatorBuilder: (context, i) {
-                    if (i == messages.length) return Offstage();
-                    if (i == 0) return SizedBox(height: 30);
+                    if (i == messages.length) return const Offstage();
+                    if (i == 0) return const SizedBox(height: 30);
                     if (i == messages.length + 1) {
                       final replyCount = widget.parentMessage!.replyCount;
                       return Container(
@@ -437,8 +454,9 @@ class _MessageListViewState extends State<MessageListView> {
                               StreamChatTheme.of(context).colorTheme.bgGradient,
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8),
                           child: Text(
+                            // ignore: lines_longer_than_80_chars
                             '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
                             textAlign: TextAlign.center,
                             style: StreamChatTheme.of(context)
@@ -464,7 +482,7 @@ class _MessageListViewState extends State<MessageListView> {
                               dateTime: nextMessage.createdAt.toLocal(),
                             );
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: divider,
                       );
                     }
@@ -482,9 +500,9 @@ class _MessageListViewState extends State<MessageListView> {
                         !isNextUserSame ||
                         isThread ||
                         isDeleted) {
-                      return SizedBox(height: 8);
+                      return const SizedBox(height: 8);
                     }
-                    return SizedBox(height: 2);
+                    return const SizedBox(height: 2);
                   },
                   itemBuilder: (context, i) {
                     if (i == messages.length + 2) {
@@ -554,19 +572,19 @@ class _MessageListViewState extends State<MessageListView> {
         ),
         if (widget.showScrollToBottom) _buildScrollToBottom(),
         Positioned(
-          top: 20.0,
+          top: 20,
           child: ValueListenableBuilder<Iterable<ItemPosition>>(
             valueListenable: _itemPositionListener.itemPositions,
             builder: (context, values, _) {
               final items = _itemPositionListener.itemPositions.value;
               if (items.isEmpty || messages.isEmpty) {
-                return SizedBox();
+                return const SizedBox();
               }
 
               var index = _getTopElement(values).index;
 
               if (index > messages.length) {
-                return SizedBox();
+                return const SizedBox();
               }
 
               if (index == messages.length) {
@@ -588,95 +606,90 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Future<void> _paginateData(
-      StreamChannelState? channel, QueryDirection direction) {
-    return _messageListController.paginateData!(direction: direction);
-  }
+          StreamChannelState? channel, QueryDirection direction) =>
+      _messageListController.paginateData!(direction: direction);
 
-  ItemPosition _getTopElement(Iterable<ItemPosition> values) {
-    return values
-        .where((ItemPosition position) => position.itemLeadingEdge < 0.9)
-        .reduce((ItemPosition max, ItemPosition position) =>
-            position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
-  }
+  ItemPosition _getTopElement(Iterable<ItemPosition> values) => values
+      .where((ItemPosition position) => position.itemLeadingEdge < 0.9)
+      .reduce((ItemPosition max, ItemPosition position) =>
+          position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
 
-  Widget _buildScrollToBottom() {
-    return StreamBuilder<Tuple2<bool, int>>(
-      stream: Rx.combineLatest2(
-        streamChannel!.channel.state!.isUpToDateStream,
-        streamChannel!.channel.state!.unreadCountStream,
-        (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
-      ),
-      builder: (_, snapshot) {
-        if (snapshot.hasError) {
-          return Offstage();
-        } else if (!snapshot.hasData) {
-          return Offstage();
-        }
-        final isUpToDate = snapshot.data!.item1;
-        final showScrollToBottom = !isUpToDate || _showScrollToBottom;
-        if (!showScrollToBottom) {
-          return Offstage();
-        }
-        final unreadCount = snapshot.data!.item2;
-        final showUnreadCount = unreadCount > 0 &&
-            streamChannel!.channel.state!.members.any((e) =>
-                e.userId == streamChannel!.channel.client.state.user!.id);
-        return Positioned(
-          bottom: 8,
-          right: 8,
-          width: 40,
-          height: 40,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              FloatingActionButton(
-                backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-                onPressed: () {
-                  if (unreadCount > 0) {
-                    streamChannel!.channel.markRead();
-                  }
-                  if (!_upToDate) {
-                    _bottomPaginationActive = false;
-                    _topPaginationActive = false;
-                    streamChannel!.reloadChannel();
-                  } else {
-                    setState(() => _showScrollToBottom = false);
-                    _scrollController!.scrollTo(
-                      index: 0,
-                      duration: Duration(seconds: 1),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-                child: StreamSvgIcon.down(
-                  color: StreamChatTheme.of(context).colorTheme.black,
+  Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
+        stream: Rx.combineLatest2(
+          streamChannel!.channel.state!.isUpToDateStream,
+          streamChannel!.channel.state!.unreadCountStream,
+          (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
+        ),
+        builder: (_, snapshot) {
+          if (snapshot.hasError) {
+            return const Offstage();
+          } else if (!snapshot.hasData) {
+            return const Offstage();
+          }
+          final isUpToDate = snapshot.data!.item1;
+          final showScrollToBottom = !isUpToDate || _showScrollToBottom;
+          if (!showScrollToBottom) {
+            return const Offstage();
+          }
+          final unreadCount = snapshot.data!.item2;
+          final showUnreadCount = unreadCount > 0 &&
+              streamChannel!.channel.state!.members.any((e) =>
+                  e.userId == streamChannel!.channel.client.state.user!.id);
+          return Positioned(
+            bottom: 8,
+            right: 8,
+            width: 40,
+            height: 40,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FloatingActionButton(
+                  backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+                  onPressed: () {
+                    if (unreadCount > 0) {
+                      streamChannel!.channel.markRead();
+                    }
+                    if (!_upToDate) {
+                      _bottomPaginationActive = false;
+                      _topPaginationActive = false;
+                      streamChannel!.reloadChannel();
+                    } else {
+                      setState(() => _showScrollToBottom = false);
+                      _scrollController!.scrollTo(
+                        index: 0,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  child: StreamSvgIcon.down(
+                    color: StreamChatTheme.of(context).colorTheme.black,
+                  ),
                 ),
-              ),
-              if (showUnreadCount)
-                Positioned(
-                  width: 20,
-                  height: 20,
-                  left: 10,
-                  top: -10,
-                  child: CircleAvatar(
-                    child: Padding(
-                      padding: const EdgeInsets.all(3.0),
-                      child: Text(
-                        '$unreadCount',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                if (showUnreadCount)
+                  Positioned(
+                    width: 20,
+                    height: 20,
+                    left: 10,
+                    top: -10,
+                    child: CircleAvatar(
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: Text(
+                          '$unreadCount',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+              ],
+            ),
+          );
+        },
+      );
 
   Widget _buildLoadingIndicator(
     StreamChannelState? streamChannel,
@@ -686,7 +699,7 @@ class _MessageListViewState extends State<MessageListView> {
         ? streamChannel!.queryTopMessages
         : streamChannel!.queryBottomMessages;
     return StreamBuilder<bool>(
-      key: Key('LOADING-INDICATOR'),
+      key: const Key('LOADING-INDICATOR'),
       stream: stream,
       initialData: false,
       builder: (context, snapshot) {
@@ -696,24 +709,24 @@ class _MessageListViewState extends State<MessageListView> {
                 .colorTheme
                 .accentRed
                 .withOpacity(.2),
-            child: Center(
+            child: const Center(
               child: Text('Error loading messages'),
             ),
           );
         }
         if (!snapshot.data!) {
           if (!_isThreadConversation && direction == QueryDirection.top) {
-            return Container(
+            return const SizedBox(
               height: 52,
               width: double.infinity,
             );
           }
-          return Offstage();
+          return const Offstage();
         }
-        return Center(
+        return const Center(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: const CircularProgressIndicator(),
+            padding: EdgeInsets.all(8),
+            child: CircularProgressIndicator(),
           ),
         );
       },
@@ -729,7 +742,7 @@ class _MessageListViewState extends State<MessageListView> {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
       messageWidget = Builder(
-        key: ValueKey<String>('TOP-MESSAGE'),
+        key: const ValueKey<String>('TOP-MESSAGE'),
         builder: (_) => widget.messageBuilder!(
           context,
           MessageDetails(
@@ -799,8 +812,6 @@ class _MessageListViewState extends State<MessageListView> {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
 
     return MessageWidget(
-      showThreadReplyIndicator: false,
-      showInChannelIndicator: false,
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -810,17 +821,17 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showUsername: !isMyMessage,
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap as void Function(Message)?,
-      borderRadiusGeometry: BorderRadius.only(
+      borderRadiusGeometry: const BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(2),
         topRight: Radius.circular(16),
         bottomRight: Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8.0,
+        vertical: 8,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
@@ -889,8 +900,8 @@ class _MessageListViewState extends State<MessageListView> {
     final channel = streamChannel!.channel;
     final readList = channel.state?.read?.where((read) {
           if (read.user.id == userId) return false;
-          return (read.lastRead.isAfter(message.createdAt) ||
-              read.lastRead.isAtSameMomentAs(message.createdAt));
+          return read.lastRead.isAfter(message.createdAt) ||
+              read.lastRead.isAtSameMomentAs(message.createdAt);
         }).toList() ??
         [];
 
@@ -940,7 +951,7 @@ class _MessageListViewState extends State<MessageListView> {
       message: message,
       reverse: isMyMessage,
       showReactions: !message.isDeleted,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       showInChannelIndicator: showInChannelIndicator,
       showThreadReplyIndicator: showThreadReplyIndicator,
       showUsername: showUsername,
@@ -948,6 +959,7 @@ class _MessageListViewState extends State<MessageListView> {
       showSendingIndicator: showSendingIndicator,
       showUserAvatar: showUserAvatar,
       onQuotedMessageTap: (quotedMessageId) async {
+        // ignore: prefer_function_declarations_over_variables
         final scrollToIndex = () {
           final index = messages.indexWhere((m) => m.id == quotedMessageId);
           _scrollController?.scrollTo(
@@ -987,17 +999,17 @@ class _MessageListViewState extends State<MessageListView> {
       ),
       attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
       borderRadiusGeometry: BorderRadius.only(
-        topLeft: Radius.circular(16),
+        topLeft: const Radius.circular(16),
         bottomLeft: Radius.circular(
           (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
               ? 0
               : 16,
         ),
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
+        topRight: const Radius.circular(16),
+        bottomRight: const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
-        vertical: 8.0,
+        vertical: 8,
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage
@@ -1034,7 +1046,7 @@ class _MessageListViewState extends State<MessageListView> {
         !message.isEphemeral &&
         widget.onMessageSwiped != null) {
       child = Container(
-        decoration: BoxDecoration(),
+        decoration: const BoxDecoration(),
         clipBehavior: Clip.hardEdge,
         child: Swipeable(
           onSwipeEnd: () {
@@ -1062,14 +1074,12 @@ class _MessageListViewState extends State<MessageListView> {
         ),
         duration: const Duration(seconds: 3),
         onEnd: () => initialMessageHighlightComplete = true,
-        builder: (_, color, child) {
-          return Container(
-            color: color,
-            child: child,
-          );
-        },
+        builder: (_, color, child) => Container(
+          color: color,
+          child: child,
+        ),
         child: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
+          padding: const EdgeInsets.only(top: 4),
           child: child,
         ),
       );
@@ -1127,19 +1137,18 @@ class _MessageListViewState extends State<MessageListView> {
       _onThreadTap = (Message message) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) {
-            return StreamBuilder<Message>(
-                stream: streamChannel!.channel.state!.messagesStream.map(
-                    (messages) =>
-                        messages!.firstWhere((m) => m.id == message.id)),
-                initialData: message,
-                builder: (_, snapshot) {
-                  return StreamChannel(
-                    channel: streamChannel!.channel,
-                    child: widget.threadBuilder!(context, snapshot.data),
-                  );
-                });
-          }),
+          MaterialPageRoute(
+            builder: (_) => StreamBuilder<Message>(
+              stream: streamChannel!.channel.state!.messagesStream.map(
+                  (messages) =>
+                      messages!.firstWhere((m) => m.id == message.id)),
+              initialData: message,
+              builder: (_, snapshot) => StreamChannel(
+                channel: streamChannel!.channel,
+                child: widget.threadBuilder!(context, snapshot.data),
+              ),
+            ),
+          ),
         );
       };
     }

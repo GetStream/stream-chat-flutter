@@ -4,12 +4,8 @@ import 'package:stream_chat_flutter/src/channel_info.dart';
 import 'package:stream_chat_flutter/src/channel_name.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-import './channel_name.dart';
-import '../stream_chat_flutter.dart';
-import 'channel_image.dart';
-import 'connection_status_builder.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header.png)
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_header_paint.png)
@@ -43,16 +39,36 @@ import 'connection_status_builder.dart';
 /// Usually you would use this widget as an [AppBar] inside a [Scaffold].
 /// However you can also use it as a normal widget.
 ///
-/// Make sure to have a [StreamChannel] ancestor in order to provide the information about the channel.
-/// Every part of the widget uses a [StreamBuilder] to render the channel information as soon as it updates.
+/// Make sure to have a [StreamChannel] ancestor in order to provide the
+/// information about the channel.
+/// Every part of the widget uses a [StreamBuilder] to render the channel
+/// information as soon as it updates.
 ///
 /// By default the widget shows a backButton that calls [Navigator.pop].
-/// You can disable this button using the [showBackButton] property of just override the behaviour
+/// You can disable this button using the [showBackButton] property of just
+/// override the behaviour
 /// with [onBackPressed].
 ///
-/// The widget components render the ui based on the first ancestor of type [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
+/// The widget components render the ui based on the first ancestor of type
+/// [StreamChatTheme] and on its [ChannelTheme.channelHeaderTheme] property.
 /// Modify it to change the widget appearance.
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a channel header
+  const ChannelHeader({
+    Key? key,
+    this.showBackButton = true,
+    this.onBackPressed,
+    this.onTitleTap,
+    this.showTypingIndicator = true,
+    this.onImageTap,
+    this.showConnectionStateTile = false,
+    this.title,
+    this.subtitle,
+    this.leading,
+    this.actions,
+  })  : preferredSize = const Size.fromHeight(kToolbarHeight),
+        super(key: key);
+
   /// True if this header shows the leading back button
   final bool showBackButton;
 
@@ -69,6 +85,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// If true the typing indicator will be rendered if a user is typing
   final bool showTypingIndicator;
 
+  /// Show connection tile on header
   final bool showConnectionStateTile;
 
   /// Title widget
@@ -84,22 +101,6 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   /// By default it shows the [ChannelImage]
   final List<Widget>? actions;
 
-  /// Creates a channel header
-  ChannelHeader({
-    Key? key,
-    this.showBackButton = true,
-    this.onBackPressed,
-    this.onTitleTap,
-    this.showTypingIndicator = true,
-    this.onImageTap,
-    this.showConnectionStateTile = false,
-    this.title,
-    this.subtitle,
-    this.leading,
-    this.actions,
-  })  : preferredSize = Size.fromHeight(kToolbarHeight),
-        super(key: key);
-
   @override
   Widget build(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
@@ -110,7 +111,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: onBackPressed,
                 showUnreads: true,
               )
-            : SizedBox());
+            : const SizedBox());
 
     return ConnectionStatusBuilder(
       statusBuilder: (context, status) {
@@ -131,6 +132,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         }
 
         return InfoTile(
+          // ignore: avoid_bool_literals_in_conditional_expressions
           showMessage: showConnectionStateTile ? showStatus : false,
           message: statusString,
           child: AppBar(
@@ -144,7 +146,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             actions: actions ??
                 <Widget>[
                   Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
+                    padding: const EdgeInsets.only(right: 10),
                     child: Center(
                       child: ChannelImage(
                         borderRadius: StreamChatTheme.of(context)
@@ -165,11 +167,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             centerTitle: true,
             title: InkWell(
               onTap: onTitleTap,
-              child: Container(
+              child: SizedBox(
                 height: preferredSize.height,
                 width: preferredSize.width,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     title ??
@@ -179,7 +180,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                               .channelHeaderTheme
                               .title,
                         ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     subtitle ??
                         ChannelInfo(
                           showTypingIndicator: showTypingIndicator,

@@ -54,7 +54,7 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelHeader(),
             ),
           ),
@@ -115,7 +115,7 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelHeader(
                 showConnectionStateTile: true,
               ),
@@ -178,7 +178,7 @@ void main() {
           child: StreamChannel(
             channel: channel,
             showLoading: false,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelHeader(
                 showConnectionStateTile: true,
               ),
@@ -242,7 +242,7 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelHeader(
                 leading: Text('leading'),
                 subtitle: Text('subtitle'),
@@ -314,11 +314,10 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
+            child: const Scaffold(
               body: ChannelHeader(
                 showTypingIndicator: false,
                 showBackButton: false,
-                showConnectionStateTile: false,
               ),
             ),
           ),

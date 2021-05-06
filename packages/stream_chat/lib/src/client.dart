@@ -1495,8 +1495,7 @@ class ClientState {
   Stream<OwnUser?> get userStream => _userController.stream;
 
   /// The current user
-  Map<String?, User?> get users =>
-      _usersController.value as Map<String?, User?>;
+  Map<String?, User?> get users => _usersController.value!;
 
   /// The current user as a stream
   Stream<Map<String?, User?>> get usersStream => _usersController.stream;

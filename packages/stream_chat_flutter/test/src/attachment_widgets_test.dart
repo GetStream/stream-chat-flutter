@@ -23,17 +23,17 @@ void main() {
             data: streamTheme,
             child: StreamChannel(
               channel: channel,
-              child: Container(
+              child: SizedBox(
                 child: FileAttachment(
-                  size: Size(
-                    300.0,
-                    300.0,
+                  size: const Size(
+                    300,
+                    300,
                   ),
                   message: Message(),
                   attachment: Attachment(
                     type: 'file',
                     title: 'example.pdf',
-                    extraData: {
+                    extraData: const {
                       'mime_type': 'pdf',
                     },
                   ),

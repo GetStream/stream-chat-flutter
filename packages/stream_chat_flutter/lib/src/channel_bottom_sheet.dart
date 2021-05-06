@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/channel_info.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../stream_chat_flutter.dart';
-import 'channel_info.dart';
-import 'option_list_tile.dart';
-
+/// Bottom Sheet with options
 class ChannelBottomSheet extends StatefulWidget {
-  final VoidCallback? onViewInfoTap;
+  /// Constructor for creating bottom sheet
+  const ChannelBottomSheet({Key? key, this.onViewInfoTap}) : super(key: key);
 
-  ChannelBottomSheet({this.onViewInfoTap});
+  /// Callback when 'View Info' is tapped
+  final VoidCallback? onViewInfoTap;
 
   @override
   _ChannelBottomSheetState createState() => _ChannelBottomSheetState();
@@ -29,31 +30,31 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
     return Material(
       color: StreamChatTheme.of(context).colorTheme.white,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16.0),
-          topRight: Radius.circular(16.0),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
       child: !_showActions
-          ? SizedBox()
+          ? const SizedBox()
           : ListView(
               shrinkWrap: true,
               children: [
-                SizedBox(
-                  height: 24.0,
+                const SizedBox(
+                  height: 24,
                 ),
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: ChannelName(
                       textStyle:
                           StreamChatTheme.of(context).textTheme.headlineBold,
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 5.0,
+                const SizedBox(
+                  height: 5,
                 ),
                 Center(
                   child: ChannelInfo(
@@ -64,8 +65,8 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                         .subtitle,
                   ),
                 ),
-                SizedBox(
-                  height: 17.0,
+                const SizedBox(
+                  height: 17,
                 ),
                 if (channel.isDistinct && channel.memberCount == 2)
                   Column(
@@ -75,16 +76,16 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                             .firstWhere(
                                 (e) => e.user?.id != userAsMember.user?.id)
                             .user!,
-                        constraints: BoxConstraints(
-                          maxHeight: 64.0,
-                          maxWidth: 64.0,
+                        constraints: const BoxConstraints(
+                          maxHeight: 64,
+                          maxWidth: 64,
                         ),
-                        borderRadius: BorderRadius.circular(32.0),
+                        borderRadius: BorderRadius.circular(32),
                         onlineIndicatorConstraints:
-                            BoxConstraints.tight(Size(12.0, 12.0)),
+                            BoxConstraints.tight(const Size(12, 12)),
                       ),
-                      SizedBox(
-                        height: 6.0,
+                      const SizedBox(
+                        height: 6,
                       ),
                       Text(
                         members
@@ -102,50 +103,48 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   ),
                 if (!(channel.isDistinct && channel.memberCount == 2))
                   Container(
-                    height: 94.0,
+                    height: 94,
                     alignment: Alignment.center,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: members.length,
                       shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Column(
-                            children: [
-                              UserAvatar(
-                                user: members[index].user!,
-                                constraints: BoxConstraints.tightFor(
-                                  height: 64.0,
-                                  width: 64.0,
-                                ),
-                                borderRadius: BorderRadius.circular(32.0),
-                                onlineIndicatorConstraints:
-                                    BoxConstraints.tight(Size(12.0, 12.0)),
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Column(
+                          children: [
+                            UserAvatar(
+                              user: members[index].user!,
+                              constraints: const BoxConstraints.tightFor(
+                                height: 64,
+                                width: 64,
                               ),
-                              SizedBox(
-                                height: 6.0,
-                              ),
-                              Text(
-                                members[index].user?.name ?? '',
-                                style: StreamChatTheme.of(context)
-                                    .textTheme
-                                    .footnoteBold,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                              borderRadius: BorderRadius.circular(32),
+                              onlineIndicatorConstraints:
+                                  BoxConstraints.tight(const Size(12, 12)),
+                            ),
+                            const SizedBox(
+                              height: 6,
+                            ),
+                            Text(
+                              members[index].user?.name ?? '',
+                              style: StreamChatTheme.of(context)
+                                  .textTheme
+                                  .footnoteBold,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                SizedBox(
-                  height: 24.0,
+                const SizedBox(
+                  height: 24,
                 ),
                 OptionListTile(
                   leading: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamSvgIcon.user(
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),
@@ -156,7 +155,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                 if (!channel.isDistinct)
                   OptionListTile(
                     leading: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: StreamSvgIcon.userRemove(
                         color: StreamChatTheme.of(context).colorTheme.grey,
                       ),
@@ -175,7 +174,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                 if (isOwner)
                   OptionListTile(
                     leading: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: StreamSvgIcon.delete(
                         color: StreamChatTheme.of(context).colorTheme.accentRed,
                       ),
@@ -195,7 +194,7 @@ class _ChannelBottomSheetState extends State<ChannelBottomSheet> {
                   ),
                 OptionListTile(
                   leading: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamSvgIcon.closeSmall(
                       color: StreamChatTheme.of(context).colorTheme.grey,
                     ),

@@ -26,6 +26,7 @@ class TypingIndicator extends StatelessWidget {
   /// The padding of this widget
   final EdgeInsets padding;
 
+  /// Alignment of the typing indicator
   final Alignment alignment;
 
   @override
@@ -35,41 +36,40 @@ class TypingIndicator extends StatelessWidget {
     return StreamBuilder<List<User>>(
       initialData: channelState.typingEvents,
       stream: channelState.typingEventsStream,
-      builder: (context, snapshot) {
-        return AnimatedSwitcher(
-          duration: Duration(milliseconds: 300),
-          child: snapshot.data?.isNotEmpty == true
-              ? Padding(
-                  padding: padding,
-                  child: Align(
-                    key: Key('typings'),
-                    alignment: alignment,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Lottie.asset(
-                          'animations/typing_dots.json',
-                          package: 'stream_chat_flutter',
-                          height: 4,
-                        ),
-                        Text(
-                          '  ${snapshot.data![0].name}${snapshot.data!.length == 1 ? '' : ' and ${snapshot.data!.length - 1} more'} ${snapshot.data!.length == 1 ? 'is' : 'are'} typing',
-                          maxLines: 1,
-                          style: style,
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Align(
-                  key: Key('alternative'),
+      builder: (context, snapshot) => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: snapshot.data?.isNotEmpty == true
+            ? Padding(
+                padding: padding,
+                child: Align(
+                  key: const Key('typings'),
                   alignment: alignment,
-                  child: Container(
-                    child: alternativeWidget ?? Offstage(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Lottie.asset(
+                        'animations/typing_dots.json',
+                        package: 'stream_chat_flutter',
+                        height: 4,
+                      ),
+                      Text(
+                        // ignore: lines_longer_than_80_chars
+                        '  ${snapshot.data![0].name}${snapshot.data!.length == 1 ? '' : ' and ${snapshot.data!.length - 1} more'} ${snapshot.data!.length == 1 ? 'is' : 'are'} typing',
+                        maxLines: 1,
+                        style: style,
+                      ),
+                    ],
                   ),
                 ),
-        );
-      },
+              )
+            : Align(
+                key: const Key('alternative'),
+                alignment: alignment,
+                child: Container(
+                  child: alternativeWidget ?? const Offstage(),
+                ),
+              ),
+      ),
     );
   }
 }

@@ -67,14 +67,14 @@ void main() {
           client: client,
           child: StreamChannel(
             channel: channel,
-            child: Scaffold(
+            child: const Scaffold(
               body: TypingIndicator(),
             ),
           ),
         ),
       ));
 
-      expect(find.byKey(Key('typings')), findsOneWidget);
+      expect(find.byKey(const Key('typings')), findsOneWidget);
     },
   );
 }

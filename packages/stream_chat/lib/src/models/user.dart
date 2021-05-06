@@ -83,7 +83,7 @@ class User {
   /// Shortcut for user name
   String get name {
     if (extraData.containsKey('name')) {
-      final name = extraData['name'] as String;
+      final name = extraData['name']! as String;
       if (name.isNotEmpty) return name;
     }
     return id;

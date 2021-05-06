@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// This widget is used for showing user tiles for mentions
-/// Use [title], [subtitle], [leading], [trailing] for substituting widgets in respective positions
+/// Use [title], [subtitle], [leading], [trailing] for
+/// substituting widgets in respective positions
 class MentionTile extends StatelessWidget {
+  /// Constructor for creating a [MentionTile] widget
+  const MentionTile(
+    this.member, {
+    Key? key,
+    this.title,
+    this.subtitle,
+    this.leading,
+    this.trailing,
+  }) : super(key: key);
+
   /// Member to display in the tile
   final Member member;
 
@@ -20,83 +31,72 @@ class MentionTile extends StatelessWidget {
   /// Widget at the end of tile
   final Widget? trailing;
 
-  MentionTile(
-    this.member, {
-    this.title,
-    this.subtitle,
-    this.leading,
-    this.trailing,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 56.0,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 16.0,
-          ),
-          leading ??
-              UserAvatar(
-                constraints: BoxConstraints.tight(
-                  Size(
-                    40,
-                    40,
+  Widget build(BuildContext context) => SizedBox(
+        height: 56,
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 16,
+            ),
+            leading ??
+                UserAvatar(
+                  constraints: BoxConstraints.tight(
+                    const Size(
+                      40,
+                      40,
+                    ),
                   ),
+                  user: member.user!,
                 ),
-                user: member.user!,
-              ),
-          SizedBox(
-            width: 8.0,
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  title ??
-                      Text(
-                        '${member.user!.name}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: StreamChatTheme.of(context).textTheme.bodyBold,
-                      ),
-                  SizedBox(
-                    height: 2.0,
-                  ),
-                  subtitle ??
-                      Text(
-                        '@${member.userId}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: StreamChatTheme.of(context)
-                            .textTheme
-                            .footnoteBold
-                            .copyWith(
-                              color:
-                                  StreamChatTheme.of(context).colorTheme.grey,
-                            ),
-                      ),
-                ],
+            const SizedBox(
+              width: 8,
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    title ??
+                        Text(
+                          member.user!.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: StreamChatTheme.of(context).textTheme.bodyBold,
+                        ),
+                    const SizedBox(
+                      height: 2,
+                    ),
+                    subtitle ??
+                        Text(
+                          '@${member.userId}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: StreamChatTheme.of(context)
+                              .textTheme
+                              .footnoteBold
+                              .copyWith(
+                                color:
+                                    StreamChatTheme.of(context).colorTheme.grey,
+                              ),
+                        ),
+                  ],
+                ),
               ),
             ),
-          ),
-          trailing ??
-              Padding(
-                padding: const EdgeInsets.only(
-                  right: 18.0,
-                  left: 8.0,
+            trailing ??
+                Padding(
+                  padding: const EdgeInsets.only(
+                    right: 18,
+                    left: 8,
+                  ),
+                  child: StreamSvgIcon.mentions(
+                    color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                  ),
                 ),
-                child: StreamSvgIcon.mentions(
-                  color: StreamChatTheme.of(context).colorTheme.accentBlue,
-                ),
-              ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

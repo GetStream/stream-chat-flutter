@@ -15,16 +15,14 @@ void main() {
         MaterialApp(
           home: const Material(child: Text('Home')),
           routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) {
-              return Material(
-                child: Center(
-                  child: StreamChatTheme(
-                    data: StreamChatThemeData.fromTheme(theme),
-                    child: StreamBackButton(),
+            '/next': (BuildContext context) => Material(
+                  child: Center(
+                    child: StreamChatTheme(
+                      data: StreamChatThemeData.fromTheme(theme),
+                      child: const StreamBackButton(),
+                    ),
                   ),
                 ),
-              );
-            },
           },
         ),
       );
@@ -52,7 +50,7 @@ void main() {
             child: Center(
               child: StreamChatTheme(
                 data: StreamChatThemeData.fromTheme(theme),
-                child: StreamBackButton(),
+                child: const StreamBackButton(),
               ),
             ),
           ),
@@ -78,18 +76,16 @@ void main() {
         MaterialApp(
           home: const Material(child: Text('Home')),
           routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) {
-              return Material(
-                child: Center(
-                  child: StreamChatTheme(
-                    data: StreamChatThemeData.fromTheme(theme),
-                    child: StreamBackButton(
-                      onPressed: () => customCallbackWasCalled = true,
+            '/next': (BuildContext context) => Material(
+                  child: Center(
+                    child: StreamChatTheme(
+                      data: StreamChatThemeData.fromTheme(theme),
+                      child: StreamBackButton(
+                        onPressed: () => customCallbackWasCalled = true,
+                      ),
                     ),
                   ),
                 ),
-              );
-            },
           },
         ),
       );
@@ -131,7 +127,7 @@ void main() {
             child: Center(
               child: StreamChat(
                 client: client,
-                child: StreamBackButton(
+                child: const StreamBackButton(
                   showUnreads: true,
                 ),
               ),
