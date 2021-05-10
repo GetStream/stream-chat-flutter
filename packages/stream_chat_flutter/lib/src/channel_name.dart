@@ -12,10 +12,14 @@ class ChannelName extends StatelessWidget {
   const ChannelName({
     Key? key,
     this.textStyle,
+    this.textOverflow = TextOverflow.ellipsis,
   }) : super(key: key);
 
   /// The style of the text displayed
   final TextStyle? textStyle;
+
+  /// How visual overflow should be handled.
+  final TextOverflow textOverflow;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +75,7 @@ class ChannelName extends StatelessWidget {
           return Text(
             title!,
             style: textStyle,
-            overflow: TextOverflow.ellipsis,
+            overflow: textOverflow,
           );
         },
       );
