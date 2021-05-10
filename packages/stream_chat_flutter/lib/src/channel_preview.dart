@@ -68,6 +68,8 @@ class ChannelPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final channelPreviewTheme = StreamChatTheme.of(context).channelPreviewTheme;
+    final streamChatState = StreamChat.of(context);
+
     return StreamBuilder<bool>(
         stream: channel.isMutedStream,
         initialData: channel.isMuted,
@@ -130,7 +132,7 @@ class ChannelPreview extends StatelessWidget {
                               (m) => !m.isDeleted && m.shadowed != true,
                             );
                             if (lastMessage?.user?.id ==
-                                StreamChat.of(context).user?.id) {
+                                streamChatState.user?.id) {
                               return Padding(
                                 padding: const EdgeInsets.only(right: 4),
                                 child: SendingIndicator(
@@ -194,6 +196,7 @@ class ChannelPreview extends StatelessWidget {
       );
 
   Widget _buildSubtitle(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
     if (channel.isMuted) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -203,7 +206,7 @@ class ChannelPreview extends StatelessWidget {
           ),
           Text(
             '  Channel is muted',
-            style: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+            style: chatThemeData.channelPreviewTheme.subtitle,
           ),
         ],
       );
@@ -211,7 +214,7 @@ class ChannelPreview extends StatelessWidget {
     return TypingIndicator(
       channel: channel,
       alternativeWidget: _buildLastMessage(context),
-      style: StreamChatTheme.of(context).channelPreviewTheme.subtitle,
+      style: chatThemeData.channelPreviewTheme.subtitle,
     );
   }
 
@@ -245,35 +248,24 @@ class ChannelPreview extends StatelessWidget {
 
           text = parts.join(' ');
 
+          final chatThemeData = StreamChatTheme.of(context);
           return Text.rich(
             _getDisplayText(
               text,
               lastMessage.mentionedUsers,
               lastMessage.attachments,
-              StreamChatTheme.of(context)
-                  .channelPreviewTheme
-                  .subtitle
-                  ?.copyWith(
-                      color: StreamChatTheme.of(context)
-                          .channelPreviewTheme
-                          .subtitle
-                          ?.color,
-                      fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                          ? FontStyle.italic
-                          : FontStyle.normal),
-              StreamChatTheme.of(context)
-                  .channelPreviewTheme
-                  .subtitle
-                  ?.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .channelPreviewTheme
-                        .subtitle
-                        ?.color,
-                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                        ? FontStyle.italic
-                        : FontStyle.normal,
-                    fontWeight: FontWeight.bold,
-                  ),
+              chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+                  color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                  fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                      ? FontStyle.italic
+                      : FontStyle.normal),
+              chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+                color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
