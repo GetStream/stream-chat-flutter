@@ -97,65 +97,60 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
 
   @override
-  Widget build(BuildContext context) => AppBar(
-        automaticallyImplyLeading: false,
-        brightness: Theme.of(context).brightness,
-        elevation: 1,
-        leading: leading ??
-            (showBackButton
-                ? StreamBackButton(
-                    cid: StreamChannel.of(context).channel.cid,
-                    onPressed: onBackPressed,
-                    showUnreads: true,
-                  )
-                : const SizedBox()),
-        backgroundColor:
-            StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-        centerTitle: true,
-        actions: actions,
-        title: InkWell(
-          onTap: onTitleTap,
-          child: SizedBox(
-            height: preferredSize.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                title ??
-                    Text(
-                      'Thread Reply',
-                      style: StreamChatTheme.of(context)
-                          .channelTheme
-                          .channelHeaderTheme
-                          .title,
-                    ),
-                const SizedBox(height: 2),
-                subtitle ??
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'with ',
-                          style: StreamChatTheme.of(context)
-                              .channelTheme
-                              .channelHeaderTheme
-                              .subtitle,
+  Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return AppBar(
+      automaticallyImplyLeading: false,
+      brightness: Theme.of(context).brightness,
+      elevation: 1,
+      leading: leading ??
+          (showBackButton
+              ? StreamBackButton(
+                  cid: StreamChannel.of(context).channel.cid,
+                  onPressed: onBackPressed,
+                  showUnreads: true,
+                )
+              : const SizedBox()),
+      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
+      centerTitle: true,
+      actions: actions,
+      title: InkWell(
+        onTap: onTitleTap,
+        child: SizedBox(
+          height: preferredSize.height,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              title ??
+                  Text(
+                    'Thread Reply',
+                    style: chatThemeData.channelTheme.channelHeaderTheme.title,
+                  ),
+              const SizedBox(height: 2),
+              subtitle ??
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'with ',
+                        style: chatThemeData
+                            .channelTheme.channelHeaderTheme.subtitle,
+                      ),
+                      Flexible(
+                        child: ChannelName(
+                          textStyle: chatThemeData
+                              .channelTheme.channelHeaderTheme.subtitle,
                         ),
-                        Flexible(
-                          child: ChannelName(
-                            textStyle: StreamChatTheme.of(context)
-                                .channelTheme
-                                .channelHeaderTheme
-                                .subtitle,
-                          ),
-                        ),
-                      ],
-                    ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 
   @override
   final Size preferredSize;

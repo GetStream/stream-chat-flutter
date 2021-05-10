@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_widget.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/swipeable.dart';
 import 'package:stream_chat_flutter/src/system_message.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/swipeable.dart';
 
 /// Widget builder for message
 typedef MessageBuilder = Widget Function(
@@ -274,15 +274,15 @@ class _MessageListViewState extends State<MessageListView> {
   bool _showScrollToBottom = false;
   late final ItemPositionsListener _itemPositionListener;
   int? _messageListLength;
-  StreamChannelState? streamChannel;
+  late StreamChannelState streamChannel;
 
   int? get _initialIndex {
     if (widget.initialScrollIndex != null) return widget.initialScrollIndex;
-    if (streamChannel!.initialMessageId != null) {
-      final messages = streamChannel!.channel.state!.messages;
+    if (streamChannel.initialMessageId != null) {
+      final messages = streamChannel.channel.state!.messages;
       final totalMessages = messages.length;
       final messageIndex =
-          messages.indexWhere((e) => e.id == streamChannel!.initialMessageId);
+          messages.indexWhere((e) => e.id == streamChannel.initialMessageId);
       final index = totalMessages - messageIndex;
       if (index != 0) return index - 1;
       return index;
@@ -295,9 +295,9 @@ class _MessageListViewState extends State<MessageListView> {
     return 0;
   }
 
-  bool _isInitialMessage(String id) => streamChannel!.initialMessageId == id;
+  bool _isInitialMessage(String id) => streamChannel.initialMessageId == id;
 
-  bool get _upToDate => streamChannel!.channel.state!.isUpToDate;
+  bool get _upToDate => streamChannel.channel.state!.isUpToDate;
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
@@ -316,46 +316,37 @@ class _MessageListViewState extends State<MessageListView> {
   final MessageListController _messageListController = MessageListController();
 
   @override
-  Widget build(BuildContext context) => MessageListCore(
-        messageFilter: widget.messageFilter,
-        loadingBuilder: widget.loadingBuilder ??
-            (context) => const Center(
-                  child: CircularProgressIndicator(),
+  Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return MessageListCore(
+      messageFilter: widget.messageFilter,
+      loadingBuilder: widget.loadingBuilder ??
+          (context) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+      emptyBuilder: widget.emptyBuilder ??
+          (context) => Center(
+                child: Text(
+                  'No chats here yet...',
+                  style: chatThemeData.textTheme.footnote.copyWith(
+                      color: chatThemeData.colorTheme.black.withOpacity(.5)),
                 ),
-        emptyBuilder: widget.emptyBuilder ??
-            (context) => Center(
-                  child: Text(
-                    'No chats here yet...',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .footnote
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(.5)),
-                  ),
+              ),
+      messageListBuilder:
+          widget.messageListBuilder ?? (context, list) => _buildListView(list),
+      messageListController: _messageListController,
+      parentMessage: widget.parentMessage,
+      showScrollToBottom: widget.showScrollToBottom,
+      errorWidgetBuilder: widget.errorWidgetBuilder ??
+          (BuildContext context, Object error) => Center(
+                child: Text(
+                  'Something went wrong',
+                  style: chatThemeData.textTheme.footnote.copyWith(
+                      color: chatThemeData.colorTheme.black.withOpacity(.5)),
                 ),
-        messageListBuilder: widget.messageListBuilder ??
-            (context, list) => _buildListView(list),
-        messageListController: _messageListController,
-        parentMessage: widget.parentMessage,
-        showScrollToBottom: widget.showScrollToBottom,
-        errorWidgetBuilder: widget.errorWidgetBuilder ??
-            (BuildContext context, Object error) => Center(
-                  child: Text(
-                    'Something went wrong',
-                    style: StreamChatTheme.of(context)
-                        .textTheme
-                        .footnote
-                        .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(.5)),
-                  ),
-                ),
-      );
+              ),
+    );
+  }
 
   Widget _buildListView(List<Message> data) {
     messages = data;
@@ -448,10 +439,10 @@ class _MessageListViewState extends State<MessageListView> {
                     if (i == 0) return const SizedBox(height: 30);
                     if (i == messages.length + 1) {
                       final replyCount = widget.parentMessage!.replyCount;
+                      final chatThemeData = StreamChatTheme.of(context);
                       return Container(
                         decoration: BoxDecoration(
-                          gradient:
-                              StreamChatTheme.of(context).colorTheme.bgGradient,
+                          gradient: chatThemeData.colorTheme.bgGradient,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8),
@@ -459,10 +450,8 @@ class _MessageListViewState extends State<MessageListView> {
                             // ignore: lines_longer_than_80_chars
                             '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
                             textAlign: TextAlign.center,
-                            style: StreamChatTheme.of(context)
-                                .channelTheme
-                                .channelHeaderTheme
-                                .subtitle,
+                            style: chatThemeData
+                                .channelTheme.channelHeaderTheme.subtitle,
                           ),
                         ),
                       );
@@ -616,8 +605,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
         stream: Rx.combineLatest2(
-          streamChannel!.channel.state!.isUpToDateStream,
-          streamChannel!.channel.state!.unreadCountStream,
+          streamChannel.channel.state!.isUpToDateStream,
+          streamChannel.channel.state!.unreadCountStream,
           (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
         ),
         builder: (_, snapshot) {
@@ -633,8 +622,9 @@ class _MessageListViewState extends State<MessageListView> {
           }
           final unreadCount = snapshot.data!.item2;
           final showUnreadCount = unreadCount > 0 &&
-              streamChannel!.channel.state!.members.any((e) =>
-                  e.userId == streamChannel!.channel.client.state.user!.id);
+              streamChannel.channel.state!.members.any((e) =>
+                  e.userId == streamChannel.channel.client.state.user!.id);
+          final chatThemeData = StreamChatTheme.of(context);
           return Positioned(
             bottom: 8,
             right: 8,
@@ -644,15 +634,15 @@ class _MessageListViewState extends State<MessageListView> {
               clipBehavior: Clip.none,
               children: [
                 FloatingActionButton(
-                  backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+                  backgroundColor: chatThemeData.colorTheme.white,
                   onPressed: () {
                     if (unreadCount > 0) {
-                      streamChannel!.channel.markRead();
+                      streamChannel.channel.markRead();
                     }
                     if (!_upToDate) {
                       _bottomPaginationActive = false;
                       _topPaginationActive = false;
-                      streamChannel!.reloadChannel();
+                      streamChannel.reloadChannel();
                     } else {
                       setState(() => _showScrollToBottom = false);
                       _scrollController!.scrollTo(
@@ -663,7 +653,7 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                   },
                   child: StreamSvgIcon.down(
-                    color: StreamChatTheme.of(context).colorTheme.black,
+                    color: chatThemeData.colorTheme.black,
                   ),
                 ),
                 if (showUnreadCount)
@@ -692,12 +682,12 @@ class _MessageListViewState extends State<MessageListView> {
       );
 
   Widget _buildLoadingIndicator(
-    StreamChannelState? streamChannel,
+    StreamChannelState streamChannel,
     QueryDirection direction,
   ) {
     final stream = direction == QueryDirection.top
-        ? streamChannel!.queryTopMessages
-        : streamChannel!.queryBottomMessages;
+        ? streamChannel.queryTopMessages
+        : streamChannel.queryBottomMessages;
     return StreamBuilder<bool>(
       key: const Key('LOADING-INDICATOR'),
       stream: stream,
@@ -764,7 +754,7 @@ class _MessageListViewState extends State<MessageListView> {
     BuildContext context,
     Message message,
     List<Message> messages,
-    StreamChannelState? streamChannel,
+    StreamChannelState streamChannel,
   ) {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
@@ -790,7 +780,7 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         final isVisible = visibility.visibleBounds != Rect.zero;
         if (isVisible) {
-          final channel = streamChannel!.channel;
+          final channel = streamChannel.channel;
           if (_upToDate &&
               channel.config?.readEvents == true &&
               channel.state!.unreadCount! > 0) {
@@ -811,6 +801,7 @@ class _MessageListViewState extends State<MessageListView> {
     final isMyMessage = message.user!.id == StreamChat.of(context).user!.id;
     final isOnlyEmoji = message.text!.isOnlyEmoji;
 
+    final chatThemeData = StreamChatTheme.of(context);
     return MessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
@@ -837,8 +828,8 @@ class _MessageListViewState extends State<MessageListView> {
       borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
-          ? StreamChatTheme.of(context).ownMessageTheme
-          : StreamChatTheme.of(context).otherMessageTheme,
+          ? chatThemeData.ownMessageTheme
+          : chatThemeData.otherMessageTheme,
       onShowMessage: widget.onShowMessage,
       onReturnAction: (action) {
         switch (action) {
@@ -897,7 +888,7 @@ class _MessageListViewState extends State<MessageListView> {
       );
     }
 
-    final channel = streamChannel!.channel;
+    final channel = streamChannel.channel;
     final readList = channel.state?.read?.where((read) {
           if (read.user.id == userId) return false;
           return read.lastRead.isAfter(message.createdAt) ||
@@ -946,6 +937,7 @@ class _MessageListViewState extends State<MessageListView> {
             ? BorderSide.none
             : null;
 
+    final chatThemeData = StreamChatTheme.of(context);
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
@@ -970,7 +962,7 @@ class _MessageListViewState extends State<MessageListView> {
         if (messages.map((e) => e.id).contains(quotedMessageId)) {
           scrollToIndex();
         } else {
-          await streamChannel!.loadChannelAtMessage(quotedMessageId).then((_) {
+          await streamChannel.loadChannelAtMessage(quotedMessageId).then((_) {
             WidgetsBinding.instance!.addPostFrameCallback((_) {
               if (messages.map((e) => e.id).contains(quotedMessageId)) {
                 scrollToIndex();
@@ -1013,8 +1005,8 @@ class _MessageListViewState extends State<MessageListView> {
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage
-          ? StreamChatTheme.of(context).ownMessageTheme
-          : StreamChatTheme.of(context).otherMessageTheme,
+          ? chatThemeData.ownMessageTheme
+          : chatThemeData.otherMessageTheme,
       readList: readList,
       allRead: allRead,
       onShowMessage: widget.onShowMessage,
@@ -1054,7 +1046,7 @@ class _MessageListViewState extends State<MessageListView> {
             widget.onMessageSwiped?.call(message);
           },
           backgroundIcon: StreamSvgIcon.reply(
-            color: StreamChatTheme.of(context).colorTheme.accentBlue,
+            color: chatThemeData.colorTheme.accentBlue,
           ),
           child: child,
         ),
@@ -1064,7 +1056,7 @@ class _MessageListViewState extends State<MessageListView> {
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
         _isInitialMessage(message.id)) {
-      final colorTheme = StreamChatTheme.of(context).colorTheme;
+      final colorTheme = chatThemeData.colorTheme;
       final highlightColor =
           widget.messageHighlightColor ?? colorTheme.highlight;
       child = TweenAnimationBuilder<Color?>(
@@ -1100,14 +1092,23 @@ class _MessageListViewState extends State<MessageListView> {
     initialIndex = _initialIndex;
     initialAlignment = _initialAlignment;
 
+    _getOnThreadTap();
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    streamChannel = StreamChannel.of(context);
+
+    _messageNewListener?.cancel();
     _messageNewListener =
-        streamChannel!.channel.on(EventType.messageNew).listen((event) {
+        streamChannel.channel.on(EventType.messageNew).listen((event) {
       if (_upToDate) {
         _bottomPaginationActive = false;
         _topPaginationActive = false;
       }
       if (event.message!.user!.id ==
-          streamChannel!.channel.client.state.user!.id) {
+          streamChannel.channel.client.state.user!.id) {
         WidgetsBinding.instance!.addPostFrameCallback((_) {
           _scrollController?.jumpTo(
             index: 0,
@@ -1117,11 +1118,9 @@ class _MessageListViewState extends State<MessageListView> {
     });
 
     if (_isThreadConversation) {
-      streamChannel!.getReplies(widget.parentMessage!.id);
+      streamChannel.getReplies(widget.parentMessage!.id);
     }
-
-    _getOnThreadTap();
-    super.initState();
+    super.didChangeDependencies();
   }
 
   void _getOnThreadTap() {
@@ -1139,12 +1138,12 @@ class _MessageListViewState extends State<MessageListView> {
           context,
           MaterialPageRoute(
             builder: (_) => StreamBuilder<Message>(
-              stream: streamChannel!.channel.state!.messagesStream.map(
+              stream: streamChannel.channel.state!.messagesStream.map(
                   (messages) =>
                       messages!.firstWhere((m) => m.id == message.id)),
               initialData: message,
               builder: (_, snapshot) => StreamChannel(
-                channel: streamChannel!.channel,
+                channel: streamChannel.channel,
                 child: widget.threadBuilder!(context, snapshot.data),
               ),
             ),
@@ -1157,7 +1156,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   void dispose() {
     if (!_upToDate) {
-      streamChannel!.reloadChannel();
+      streamChannel.reloadChannel();
     }
     _messageNewListener?.cancel();
     super.dispose();

@@ -38,26 +38,29 @@ class InfoTile extends StatelessWidget {
   final Color? backgroundColor;
 
   @override
-  Widget build(BuildContext context) => PortalEntry(
-        visible: showMessage,
-        portalAnchor: tileAnchor ?? Alignment.topCenter,
-        childAnchor: childAnchor ?? Alignment.bottomCenter,
-        portal: Container(
-          height: 25,
-          color: backgroundColor ??
-              StreamChatTheme.of(context).colorTheme.grey.withOpacity(0.9),
-          child: Center(
-            child: Text(
-              message,
-              style: textStyle ??
-                  StreamChatTheme.of(context).textTheme.body.copyWith(
-                        color: Colors.white,
-                      ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+  Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return PortalEntry(
+      visible: showMessage,
+      portalAnchor: tileAnchor ?? Alignment.topCenter,
+      childAnchor: childAnchor ?? Alignment.bottomCenter,
+      portal: Container(
+        height: 25,
+        color:
+            backgroundColor ?? chatThemeData.colorTheme.grey.withOpacity(0.9),
+        child: Center(
+          child: Text(
+            message,
+            style: textStyle ??
+                chatThemeData.textTheme.body.copyWith(
+                  color: Colors.white,
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        child: child,
-      );
+      ),
+      child: child,
+    );
+  }
 }

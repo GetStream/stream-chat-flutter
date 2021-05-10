@@ -35,6 +35,7 @@ class MessageSearchItem extends StatelessWidget {
     final channel = getMessageResponse.channel;
     final channelName = channel?.extraData['name'];
     final user = message.user!;
+    final chatThemeData = StreamChatTheme.of(context);
     return ListTile(
       onTap: onTap,
       leading: UserAvatar(
@@ -49,21 +50,18 @@ class MessageSearchItem extends StatelessWidget {
         children: [
           Text(
             user.id == StreamChat.of(context).user?.id ? 'You' : user.name,
-            style: StreamChatTheme.of(context).channelPreviewTheme.title,
+            style: chatThemeData.channelPreviewTheme.title,
           ),
           if (channelName != null) ...[
             Text(
               ' in ',
-              style: StreamChatTheme.of(context)
-                  .channelPreviewTheme
-                  .title
-                  ?.copyWith(
-                    fontWeight: FontWeight.normal,
-                  ),
+              style: chatThemeData.channelPreviewTheme.title?.copyWith(
+                fontWeight: FontWeight.normal,
+              ),
             ),
             Text(
               channelName as String,
-              style: StreamChatTheme.of(context).channelPreviewTheme.title,
+              style: chatThemeData.channelPreviewTheme.title,
             ),
           ],
         ],
@@ -121,22 +119,23 @@ class MessageSearchItem extends StatelessWidget {
       text = parts.join(' ');
     }
 
+    final chatThemeData = StreamChatTheme.of(context);
     return Text.rich(
       _getDisplayText(
         text!,
         message.mentionedUsers,
         message.attachments,
-        StreamChatTheme.of(context).channelPreviewTheme.subtitle?.copyWith(
-              fontStyle: (message.isSystem || message.isDeleted)
-                  ? FontStyle.italic
-                  : FontStyle.normal,
-            ),
-        StreamChatTheme.of(context).channelPreviewTheme.subtitle?.copyWith(
-              fontStyle: (message.isSystem || message.isDeleted)
-                  ? FontStyle.italic
-                  : FontStyle.normal,
-              fontWeight: FontWeight.bold,
-            ),
+        chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+          fontStyle: (message.isSystem || message.isDeleted)
+              ? FontStyle.italic
+              : FontStyle.normal,
+        ),
+        chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+          fontStyle: (message.isSystem || message.isDeleted)
+              ? FontStyle.italic
+              : FontStyle.normal,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,

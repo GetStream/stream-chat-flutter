@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/reaction_picker.png)
@@ -33,7 +33,8 @@ class _ReactionPickerState extends State<ReactionPicker>
 
   @override
   Widget build(BuildContext context) {
-    final reactionIcons = StreamChatTheme.of(context).reactionIcons;
+    final chatThemeData = StreamChatTheme.of(context);
+    final reactionIcons = chatThemeData.reactionIcons;
 
     if (animations.isEmpty && reactionIcons.isNotEmpty) {
       reactionIcons.forEach((element) {
@@ -57,7 +58,7 @@ class _ReactionPickerState extends State<ReactionPicker>
               scale: val,
               child: Material(
                 borderRadius: BorderRadius.circular(24),
-                color: StreamChatTheme.of(context).colorTheme.white,
+                color: chatThemeData.colorTheme.white,
                 clipBehavior: Clip.hardEdge,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -119,9 +120,8 @@ class _ReactionPickerState extends State<ReactionPicker>
                                             animations[index].value * 24.0,
                                           ),
                                           color: ownReactionIndex != -1
-                                              ? StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .accentBlue
+                                              ? chatThemeData
+                                                  .colorTheme.accentBlue
                                               : Theme.of(context)
                                                   .iconTheme
                                                   .color!

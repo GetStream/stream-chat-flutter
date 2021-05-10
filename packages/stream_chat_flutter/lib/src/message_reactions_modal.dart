@@ -1,13 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
 import 'package:stream_chat_flutter/src/user_avatar.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Modal widget for displaying message reactions
 class MessageReactionsModal extends StatelessWidget {
@@ -176,8 +176,9 @@ class MessageReactionsModal extends StatelessWidget {
 
   Widget _buildReactionCard(BuildContext context) {
     final currentUser = StreamChat.of(context).user;
+    final chatThemeData = StreamChatTheme.of(context);
     return Card(
-      color: StreamChatTheme.of(context).colorTheme.white,
+      color: chatThemeData.colorTheme.white,
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -190,7 +191,7 @@ class MessageReactionsModal extends StatelessWidget {
           children: [
             Text(
               'Message Reactions',
-              style: StreamChatTheme.of(context).textTheme.headlineBold,
+              style: chatThemeData.textTheme.headlineBold,
             ),
             const SizedBox(height: 16),
             Flexible(
@@ -220,6 +221,7 @@ class MessageReactionsModal extends StatelessWidget {
     BuildContext context,
   ) {
     final isCurrentUser = reaction.user?.id == currentUser.id;
+    final chatThemeData = StreamChatTheme.of(context);
     return ConstrainedBox(
       constraints: BoxConstraints.loose(const Size(
         64,
@@ -258,7 +260,7 @@ class MessageReactionsModal extends StatelessWidget {
                         messageTheme.reactionsBorderColor ?? Colors.transparent,
                     backgroundColor: messageTheme.reactionsBackgroundColor ??
                         Colors.transparent,
-                    maskColor: StreamChatTheme.of(context).colorTheme.white,
+                    maskColor: chatThemeData.colorTheme.white,
                     tailCirclesSpacing: 1,
                     highlightOwnReactions: false,
                   ),
@@ -269,7 +271,7 @@ class MessageReactionsModal extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             reaction.user!.name.split(' ')[0],
-            style: StreamChatTheme.of(context).textTheme.footnoteBold,
+            style: chatThemeData.textTheme.footnoteBold,
             textAlign: TextAlign.center,
           ),
         ],

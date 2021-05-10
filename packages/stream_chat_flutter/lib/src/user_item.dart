@@ -48,47 +48,52 @@ class UserItem extends StatelessWidget {
   final bool showLastOnline;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-        onTap: () {
-          if (onTap != null) {
-            onTap!(user);
+  Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return ListTile(
+      onTap: () {
+        if (onTap != null) {
+          onTap!(user);
+        }
+      },
+      onLongPress: () {
+        if (onLongPress != null) {
+          onLongPress!(user);
+        }
+      },
+      leading: UserAvatar(
+        user: user,
+        onTap: (user) {
+          if (onImageTap != null) {
+            onImageTap!(user);
           }
         },
-        onLongPress: () {
-          if (onLongPress != null) {
-            onLongPress!(user);
-          }
-        },
-        leading: UserAvatar(
-          user: user,
-          onTap: (user) {
-            if (onImageTap != null) {
-              onImageTap!(user);
-            }
-          },
-          constraints: const BoxConstraints.tightFor(
-            height: 40,
-            width: 40,
-          ),
+        constraints: const BoxConstraints.tightFor(
+          height: 40,
+          width: 40,
         ),
-        trailing: selected
-            ? StreamSvgIcon.checkSend(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
-              )
-            : null,
-        title: Text(
-          user.name,
-          style: StreamChatTheme.of(context).textTheme.bodyBold,
-        ),
-        subtitle: showLastOnline ? _buildLastActive(context) : null,
-      );
+      ),
+      trailing: selected
+          ? StreamSvgIcon.checkSend(
+              color: chatThemeData.colorTheme.accentBlue,
+            )
+          : null,
+      title: Text(
+        user.name,
+        style: chatThemeData.textTheme.bodyBold,
+      ),
+      subtitle: showLastOnline ? _buildLastActive(context) : null,
+    );
+  }
 
-  Widget _buildLastActive(context) => Text(
-        user.online == true
-            ? 'Online'
-            : 'Last online ${Jiffy(user.lastActive).fromNow()}',
-        style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(.5)),
-      );
+  Widget _buildLastActive(context) {
+    final chatTheme = StreamChatTheme.of(context);
+    return Text(
+      user.online == true
+          ? 'Online'
+          : 'Last online ${Jiffy(user.lastActive).fromNow()}',
+      style: chatTheme.textTheme.footnote
+          .copyWith(color: chatTheme.colorTheme.black.withOpacity(.5)),
+    );
+  }
 }

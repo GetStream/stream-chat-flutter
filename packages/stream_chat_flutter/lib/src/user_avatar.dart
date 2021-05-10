@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget that displays a user avatar
 class UserAvatar extends StatelessWidget {
@@ -95,8 +95,7 @@ class UserAvatar extends StatelessWidget {
         child: Container(
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
-          color: selectionColor ??
-              StreamChatTheme.of(context).colorTheme.accentBlue,
+          color: selectionColor ?? streamChatTheme.colorTheme.accentBlue,
           child: Padding(
             padding: EdgeInsets.all(selectionThickness),
             child: avatar,

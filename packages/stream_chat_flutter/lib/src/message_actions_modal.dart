@@ -3,12 +3,12 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Constructs a modal with actions for a message
 class MessageActionsModal extends StatefulWidget {
@@ -108,7 +108,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   Widget build(BuildContext context) => _showMessageOptionsModal();
 
   Widget _showMessageOptionsModal() {
-    final size = MediaQuery.of(context).size;
+    final mediaQueryData = MediaQuery.of(context);
+    final size = mediaQueryData.size;
     final user = StreamChat.of(context).user;
 
     final roughMaxSize = 2 * size.width / 3;
@@ -133,6 +134,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     final hasFileAttachment =
         widget.message.attachments.any((it) => it.type == 'file') == true;
 
+    final streamChatThemeData = StreamChatTheme.of(context);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.maybePop(context),
@@ -145,7 +147,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 sigmaY: 10,
               ),
               child: Container(
-                color: StreamChatTheme.of(context).colorTheme.overlay,
+                color: streamChatThemeData.colorTheme.overlay,
               ),
             ),
           ),
@@ -226,11 +228,9 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               left: widget.reverse ? 0 : 40,
                             ),
                             child: SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.75,
+                              width: mediaQueryData.size.width * 0.75,
                               child: Material(
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .whiteSnow,
+                                color: streamChatThemeData.colorTheme.whiteSnow,
                                 clipBehavior: Clip.hardEdge,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -266,9 +266,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                   ].insertBetween(
                                     Container(
                                       height: 1,
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .greyWhisper,
+                                      color: streamChatThemeData
+                                          .colorTheme.greyWhisper,
                                     ),
                                   ),
                                 ),
@@ -310,11 +309,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   void _showFlagDialog() async {
     final client = StreamChat.of(context).client;
 
+    final streamChatThemeData = StreamChatTheme.of(context);
     final answer = await showConfirmationDialog(
       context,
       title: 'Flag Message',
       icon: StreamSvgIcon.flag(
-        color: StreamChatTheme.of(context).colorTheme.accentRed,
+        color: streamChatThemeData.colorTheme.accentRed,
         size: 24,
       ),
       question:
@@ -324,7 +324,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
       cancelText: 'CANCEL',
     );
 
-    final theme = StreamChatTheme.of(context);
+    final theme = streamChatThemeData;
     if (answer == true) {
       try {
         await client.flagMessage(widget.message.id);
@@ -400,48 +400,54 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildReplyButton(BuildContext context) => InkWell(
-        onTap: () {
-          Navigator.pop(context);
-          if (widget.onReplyTap != null) {
-            widget.onReplyTap!(widget.message);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              StreamSvgIcon.reply(
-                color: StreamChatTheme.of(context).primaryIconTheme.color,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Reply',
-                style: StreamChatTheme.of(context).textTheme.body,
-              ),
-            ],
-          ),
+  Widget _buildReplyButton(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        if (widget.onReplyTap != null) {
+          widget.onReplyTap!(widget.message);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.reply(
+              color: streamChatThemeData.primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Reply',
+              style: streamChatThemeData.textTheme.body,
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
-  Widget _buildFlagButton(BuildContext context) => InkWell(
-        onTap: _showFlagDialog,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              StreamSvgIcon.iconFlag(
-                color: StreamChatTheme.of(context).primaryIconTheme.color,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Flag Message',
-                style: StreamChatTheme.of(context).textTheme.body,
-              ),
-            ],
-          ),
+  Widget _buildFlagButton(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return InkWell(
+      onTap: _showFlagDialog,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.iconFlag(
+              color: streamChatThemeData.primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Flag Message',
+              style: streamChatThemeData.textTheme.body,
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildDeleteButton(BuildContext context) {
     final isDeleteFailed =
@@ -469,54 +475,61 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildCopyButton(BuildContext context) => InkWell(
-        onTap: () async {
-          widget.onCopyTap?.call(widget.message);
-          Navigator.pop(context);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              StreamSvgIcon.copy(
-                size: 24,
-                color: StreamChatTheme.of(context).primaryIconTheme.color,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Copy Message',
-                style: StreamChatTheme.of(context).textTheme.body,
-              ),
-            ],
-          ),
+  Widget _buildCopyButton(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return InkWell(
+      onTap: () async {
+        widget.onCopyTap?.call(widget.message);
+        Navigator.pop(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.copy(
+              size: 24,
+              color: streamChatThemeData.primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Copy Message',
+              style: streamChatThemeData.textTheme.body,
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
-  Widget _buildEditMessage(BuildContext context) => InkWell(
-        onTap: () async {
-          Navigator.pop(context);
-          _showEditBottomSheet(context);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              StreamSvgIcon.edit(
-                color: StreamChatTheme.of(context).primaryIconTheme.color,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Edit Message',
-                style: StreamChatTheme.of(context).textTheme.body,
-              ),
-            ],
-          ),
+  Widget _buildEditMessage(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return InkWell(
+      onTap: () async {
+        Navigator.pop(context);
+        _showEditBottomSheet(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.edit(
+              color: streamChatThemeData.primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Edit Message',
+              style: streamChatThemeData.textTheme.body,
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildResendMessage(BuildContext context) {
     final isUpdateFailed =
         widget.message.status == MessageSendingStatus.failed_update;
+    final streamChatThemeData = StreamChatTheme.of(context);
     return InkWell(
       onTap: () {
         Navigator.pop(context);
@@ -532,12 +545,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         child: Row(
           children: [
             StreamSvgIcon.circleUp(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              color: streamChatThemeData.colorTheme.accentBlue,
             ),
             const SizedBox(width: 16),
             Text(
               isUpdateFailed ? 'Resend Edited Message' : 'Resend',
-              style: StreamChatTheme.of(context).textTheme.body,
+              style: streamChatThemeData.textTheme.body,
             ),
           ],
         ),
@@ -547,13 +560,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
 
   void _showEditBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
+    final streamChatThemeData = StreamChatTheme.of(context);
     showModalBottomSheet(
       context: context,
       elevation: 2,
       clipBehavior: Clip.hardEdge,
       isScrollControlled: true,
-      backgroundColor:
-          StreamChatTheme.of(context).messageInputTheme.inputBackground,
+      backgroundColor: streamChatThemeData.messageInputTheme.inputBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
@@ -575,8 +588,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                   Padding(
                     padding: const EdgeInsets.all(8),
                     child: StreamSvgIcon.edit(
-                      color:
-                          StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                      color: streamChatThemeData.colorTheme.greyGainsboro,
                     ),
                   ),
                   const Text(
@@ -608,27 +620,30 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     );
   }
 
-  Widget _buildThreadReplyButton(BuildContext context) => InkWell(
-        onTap: () {
-          Navigator.pop(context);
-          if (widget.onThreadReplyTap != null) {
-            widget.onThreadReplyTap!(widget.message);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
-          child: Row(
-            children: [
-              StreamSvgIcon.thread(
-                color: StreamChatTheme.of(context).primaryIconTheme.color,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Thread Reply',
-                style: StreamChatTheme.of(context).textTheme.body,
-              ),
-            ],
-          ),
+  Widget _buildThreadReplyButton(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        if (widget.onThreadReplyTap != null) {
+          widget.onThreadReplyTap!(widget.message);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.thread(
+              color: streamChatThemeData.primaryIconTheme.color,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              'Thread Reply',
+              style: streamChatThemeData.textTheme.body,
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

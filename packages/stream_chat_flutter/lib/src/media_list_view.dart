@@ -56,6 +56,7 @@ class _MediaListViewState extends State<MediaListView> {
             position,
           ) {
             final media = _media.elementAt(position);
+            final chatThemeData = StreamChatTheme.of(context);
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
               child: InkWell(
@@ -89,10 +90,8 @@ class _MediaListViewState extends State<MediaListView> {
                                   ? 1.0
                                   : 0.0,
                           child: Container(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .black
-                                .withOpacity(0.5),
+                            color:
+                                chatThemeData.colorTheme.black.withOpacity(0.5),
                             alignment: Alignment.topRight,
                             padding: const EdgeInsets.only(
                               top: 8,
@@ -100,13 +99,10 @@ class _MediaListViewState extends State<MediaListView> {
                             ),
                             child: CircleAvatar(
                               radius: 12,
-                              backgroundColor:
-                                  StreamChatTheme.of(context).colorTheme.white,
+                              backgroundColor: chatThemeData.colorTheme.white,
                               child: StreamSvgIcon.check(
                                 size: 24,
-                                color: StreamChatTheme.of(context)
-                                    .colorTheme
-                                    .black,
+                                color: chatThemeData.colorTheme.black,
                               ),
                             ),
                           ),
@@ -128,7 +124,7 @@ class _MediaListViewState extends State<MediaListView> {
                         child: Text(
                           media.videoDuration.format(),
                           style: TextStyle(
-                            color: StreamChatTheme.of(context).colorTheme.white,
+                            color: chatThemeData.colorTheme.white,
                           ),
                         ),
                       ),
