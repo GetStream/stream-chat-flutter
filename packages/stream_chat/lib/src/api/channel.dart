@@ -1588,7 +1588,7 @@ class ChannelClientState {
             readList.add(Read(
               user: event.user!,
               lastRead: event.createdAt!,
-              unreadMessages: event.totalUnreadCount!,
+              unreadMessages: event.totalUnreadCount ?? 0,
             ));
             _channelState = _channelState.copyWith(read: readList);
           }
