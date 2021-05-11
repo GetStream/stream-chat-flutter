@@ -1087,9 +1087,6 @@ class _MessageListViewState extends State<MessageListView> {
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
 
-    initialIndex = _initialIndex;
-    initialAlignment = _initialAlignment;
-
     _getOnThreadTap();
     super.initState();
   }
@@ -1099,7 +1096,9 @@ class _MessageListViewState extends State<MessageListView> {
     streamChannel = StreamChannel.of(context);
 
     if (_messageNewListener == null) {
-      _messageNewListener?.cancel();
+      initialIndex = _initialIndex;
+      initialAlignment = _initialAlignment;
+
       _messageNewListener =
           streamChannel.channel.on(EventType.messageNew).listen((event) {
         if (_upToDate) {
