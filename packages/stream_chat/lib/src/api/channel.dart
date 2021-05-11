@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:collection/collection.dart' show IterableExtension, ListEquality;
+import 'package:collection/collection.dart'
+    show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -1778,7 +1779,8 @@ class ChannelClientState {
   final Debounce _debouncedUpdatePersistenceChannelState;
 
   set _channelState(ChannelState v) {
-    if(!const ListEquality().equals(_messageListController.value, v.messages)) {
+    if (!const ListEquality()
+        .equals(_messageListController.value, v.messages)) {
       _messageListController.add(v.messages);
     }
     _channelStateController.add(v);
