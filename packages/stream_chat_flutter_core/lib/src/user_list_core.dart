@@ -122,9 +122,14 @@ class UserListCore extends StatefulWidget {
 /// The current state of the [UserListCore].
 class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
+  var _initialized = false;
+
   @override
   void didChangeDependencies() {
-    loadData();
+    if (!_initialized) {
+      loadData();
+      _initialized = true;
+    }
     if (widget.userListController != null) {
       widget.userListController!.loadData = loadData;
       widget.userListController!.paginateData = paginateData;

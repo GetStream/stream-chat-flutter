@@ -1087,8 +1087,6 @@ class _MessageListViewState extends State<MessageListView> {
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
 
-    streamChannel = StreamChannel.of(context);
-
     initialIndex = _initialIndex;
     initialAlignment = _initialAlignment;
 
@@ -1100,25 +1098,27 @@ class _MessageListViewState extends State<MessageListView> {
   void didChangeDependencies() {
     streamChannel = StreamChannel.of(context);
 
-    _messageNewListener?.cancel();
-    _messageNewListener =
-        streamChannel.channel.on(EventType.messageNew).listen((event) {
-      if (_upToDate) {
-        _bottomPaginationActive = false;
-        _topPaginationActive = false;
-      }
-      if (event.message!.user!.id ==
-          streamChannel.channel.client.state.user!.id) {
-        WidgetsBinding.instance!.addPostFrameCallback((_) {
-          _scrollController?.jumpTo(
-            index: 0,
-          );
-        });
-      }
-    });
+    if (_messageNewListener == null) {
+      _messageNewListener?.cancel();
+      _messageNewListener =
+          streamChannel.channel.on(EventType.messageNew).listen((event) {
+        if (_upToDate) {
+          _bottomPaginationActive = false;
+          _topPaginationActive = false;
+        }
+        if (event.message!.user!.id ==
+            streamChannel.channel.client.state.user!.id) {
+          WidgetsBinding.instance!.addPostFrameCallback((_) {
+            _scrollController?.jumpTo(
+              index: 0,
+            );
+          });
+        }
+      });
 
-    if (_isThreadConversation) {
-      streamChannel.getReplies(widget.parentMessage!.id);
+      if (_isThreadConversation) {
+        streamChannel.getReplies(widget.parentMessage!.id);
+      }
     }
     super.didChangeDependencies();
   }

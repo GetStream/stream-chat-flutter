@@ -149,59 +149,62 @@ class ChannelsBlocState extends State<ChannelsBloc>
     _streamChatCoreState = StreamChatCore.of(context);
     final client = _streamChatCoreState.client;
 
-    _cancelSubscriptions();
-    if (!widget.lockChannelsOrder) {
-      _subscriptions.add(client
-          .on(
-        EventType.messageNew,
-      )
-          .listen((e) {
-        final newChannels = List<Channel>.from(channels ?? []);
-        final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index != -1) {
-          if (index > 0) {
-            final channel = newChannels.removeAt(index);
-            newChannels.insert(0, channel);
-          }
-        } else if (widget.shouldAddChannel?.call(e) == true) {
-          final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
-          if (hiddenIndex != -1) {
-            newChannels.insert(0, _hiddenChannels[hiddenIndex]);
-            _hiddenChannels.removeAt(hiddenIndex);
-          } else {
-            if (client.state.channels[e.cid] != null) {
-              newChannels.insert(0, client.state.channels[e.cid]!);
+    if (_subscriptions.isEmpty) {
+      if (!widget.lockChannelsOrder) {
+        _subscriptions.add(client
+            .on(
+          EventType.messageNew,
+        )
+            .listen((e) {
+          final newChannels = List<Channel>.from(channels ?? []);
+          final index = newChannels.indexWhere((c) => c.cid == e.cid);
+          if (index != -1) {
+            if (index > 0) {
+              final channel = newChannels.removeAt(index);
+              newChannels.insert(0, channel);
+            }
+          } else if (widget.shouldAddChannel?.call(e) == true) {
+            final hiddenIndex =
+                _hiddenChannels.indexWhere((c) => c.cid == e.cid);
+            if (hiddenIndex != -1) {
+              newChannels.insert(0, _hiddenChannels[hiddenIndex]);
+              _hiddenChannels.removeAt(hiddenIndex);
+            } else {
+              if (client.state.channels[e.cid] != null) {
+                newChannels.insert(0, client.state.channels[e.cid]!);
+              }
             }
           }
-        }
 
-        if (widget.channelsComparator != null) {
-          newChannels.sort(widget.channelsComparator);
-        }
-        _channelsController.add(newChannels);
-      }));
-    }
-
-    _subscriptions
-      ..add(client.on(EventType.channelHidden).listen((event) async {
-        final newChannels = List<Channel>.from(channels ?? []);
-        final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
-        if (channelIndex > -1) {
-          final channel = newChannels.removeAt(channelIndex);
-          _hiddenChannels.add(channel);
+          if (widget.channelsComparator != null) {
+            newChannels.sort(widget.channelsComparator);
+          }
           _channelsController.add(newChannels);
-        }
-      }))
-      ..add(client
-          .on(
-        EventType.channelDeleted,
-        EventType.notificationRemovedFromChannel,
-      )
-          .listen((e) {
-        final channel = e.channel;
-        _channelsController.add(List.from(
-            (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
-      }));
+        }));
+      }
+
+      _subscriptions
+        ..add(client.on(EventType.channelHidden).listen((event) async {
+          final newChannels = List<Channel>.from(channels ?? []);
+          final channelIndex =
+              newChannels.indexWhere((c) => c.cid == event.cid);
+          if (channelIndex > -1) {
+            final channel = newChannels.removeAt(channelIndex);
+            _hiddenChannels.add(channel);
+            _channelsController.add(newChannels);
+          }
+        }))
+        ..add(client
+            .on(
+          EventType.channelDeleted,
+          EventType.notificationRemovedFromChannel,
+        )
+            .listen((e) {
+          final channel = e.channel;
+          _channelsController.add(List.from(
+              (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
+        }));
+    }
 
     super.didChangeDependencies();
   }

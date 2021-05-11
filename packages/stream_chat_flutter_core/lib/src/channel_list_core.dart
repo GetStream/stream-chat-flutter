@@ -178,18 +178,16 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
     if (_subscription == null) {
       loadData();
+      final client = _streamChatCoreState.client;
+      _subscription = client
+          .on(
+            EventType.connectionRecovered,
+            EventType.notificationAddedToChannel,
+            EventType.notificationMessageNew,
+            EventType.channelVisible,
+          )
+          .listen((event) => loadData());
     }
-
-    final client = _streamChatCoreState.client;
-    _subscription?.cancel();
-    _subscription = client
-        .on(
-          EventType.connectionRecovered,
-          EventType.notificationAddedToChannel,
-          EventType.notificationMessageNew,
-          EventType.channelVisible,
-        )
-        .listen((event) => loadData());
 
     super.didChangeDependencies();
   }

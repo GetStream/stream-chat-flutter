@@ -107,10 +107,17 @@ class MessageSearchListCore extends StatefulWidget {
 class MessageSearchListCoreState extends State<MessageSearchListCore> {
   late MessageSearchBlocState _messageSearchBloc;
 
+  var _initialized = false;
+
   @override
   void didChangeDependencies() {
     _messageSearchBloc = MessageSearchBloc.of(context);
-    loadData();
+
+    if (!_initialized) {
+      loadData();
+      _initialized = true;
+    }
+
     if (widget.messageSearchListController != null) {
       widget.messageSearchListController!.loadData = loadData;
       widget.messageSearchListController!.paginateData = paginateData;

@@ -173,10 +173,13 @@ class MessageListCoreState extends State<MessageListCore> {
     }
   }
 
+  var _initialized = false;
+
   @override
   void didChangeDependencies() {
     _streamChannel = StreamChannel.of(context);
-    if (_isThreadConversation) {
+    if (!_initialized && _isThreadConversation) {
+      _initialized = true;
       _streamChannel.getReplies(widget.parentMessage!.id);
     }
     super.didChangeDependencies();
