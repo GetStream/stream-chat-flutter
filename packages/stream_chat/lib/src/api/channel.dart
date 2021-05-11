@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:collection/collection.dart' show IterableExtension;
+import 'package:collection/collection.dart' show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -1296,6 +1296,8 @@ class ChannelClientState {
 
     _channelStateController = BehaviorSubject.seeded(channelState);
 
+    _messageListController = BehaviorSubject.seeded(channelState.messages);
+
     _listenTypingEvents();
 
     _listenMessageNew();
@@ -1601,8 +1603,7 @@ class ChannelClientState {
   List<Message> get messages => _channelState.messages;
 
   /// Channel message list as a stream
-  Stream<List<Message>?> get messagesStream =>
-      channelStateStream.map((cs) => cs.messages);
+  Stream<List<Message>?> get messagesStream => _messageListController.stream;
 
   /// Channel pinned message list
   List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();
@@ -1772,10 +1773,14 @@ class ChannelClientState {
   /// The channel state related to this client
   ChannelState get channelState => _channelStateController.value!;
   late BehaviorSubject<ChannelState> _channelStateController;
+  late BehaviorSubject<List<Message>> _messageListController;
 
   final Debounce _debouncedUpdatePersistenceChannelState;
 
   set _channelState(ChannelState v) {
+    if(!const ListEquality().equals(_messageListController.value, v.messages)) {
+      _messageListController.add(v.messages);
+    }
     _channelStateController.add(v);
     _debouncedUpdatePersistenceChannelState.call([v]);
   }
@@ -1933,6 +1938,7 @@ class ChannelClientState {
     retryQueue!.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _channelStateController.close();
+    _messageListController.close();
     _isUpToDateController.close();
     _threadsController.close();
     _cleaningTimer.cancel();
