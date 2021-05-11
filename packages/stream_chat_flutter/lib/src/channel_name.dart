@@ -41,12 +41,14 @@ class ChannelName extends StatelessWidget {
   ) =>
       LayoutBuilder(
         builder: (context, constraints) {
-          String? title;
+          var title = 'No title';
           if (extraData['name'] == null) {
             final otherMembers =
                 members?.where((member) => member.userId != client.user!.id);
             if (otherMembers?.length == 1) {
-              title = otherMembers!.first.user?.name;
+              if (otherMembers!.first.user != null) {
+                title = otherMembers.first.user!.name;
+              }
             } else if (otherMembers?.isNotEmpty == true) {
               final maxWidth = constraints.maxWidth;
               final maxChars = maxWidth / (textStyle?.fontSize ?? 1);
@@ -65,15 +67,13 @@ class ChannelName extends StatelessWidget {
                   otherMembers.length - currentMembers.length;
               title = '${currentMembers.map((e) => e.user?.name).join(', ')} '
                   '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
-            } else {
-              title = 'No title';
             }
           } else {
             title = extraData['name'];
           }
 
           return Text(
-            title!,
+            title,
             style: textStyle,
             overflow: textOverflow,
           );
