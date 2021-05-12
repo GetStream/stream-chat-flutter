@@ -52,68 +52,64 @@ class ReactionBubble extends StatelessWidget {
     final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     final totalReactions = reactions.length;
     final offset = totalReactions > 1 ? 16.0 : 2.0;
-    return Transform(
-      transform: Matrix4.rotationY(reverse ? pi : 0),
+    return Stack(
       alignment: Alignment.center,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Transform.translate(
-            offset: Offset(reverse ? offset : -offset, 0),
+      children: [
+        Transform.translate(
+          offset: Offset(reverse ? offset : -offset, 0),
+          child: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: maskColor,
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
+            ),
             child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: maskColor,
-                borderRadius: const BorderRadius.all(Radius.circular(16)),
+              padding: EdgeInsets.symmetric(
+                vertical: 4,
+                horizontal: totalReactions > 1 ? 4 : 0,
               ),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  vertical: 4,
-                  horizontal: totalReactions > 1 ? 4 : 0,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: borderColor,
                 ),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: borderColor,
-                  ),
-                  color: backgroundColor,
-                  borderRadius: const BorderRadius.all(Radius.circular(14)),
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) => Flex(
-                    direction: Axis.horizontal,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (constraints.maxWidth < double.infinity)
-                        ...reactions
-                            .take((constraints.maxWidth) ~/ 24)
-                            .map((reaction) => _buildReaction(
-                                  reactionIcons,
-                                  reaction,
-                                  context,
-                                ))
-                            .toList(),
-                      if (constraints.maxWidth == double.infinity)
-                        ...reactions
-                            .map((reaction) => _buildReaction(
-                                  reactionIcons,
-                                  reaction,
-                                  context,
-                                ))
-                            .toList(),
-                    ],
-                  ),
+                color: backgroundColor,
+                borderRadius: const BorderRadius.all(Radius.circular(14)),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) => Flex(
+                  direction: Axis.horizontal,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (constraints.maxWidth < double.infinity)
+                      ...reactions
+                          .take((constraints.maxWidth) ~/ 24)
+                          .map((reaction) => _buildReaction(
+                                reactionIcons,
+                                reaction,
+                                context,
+                              ))
+                          .toList(),
+                    if (constraints.maxWidth == double.infinity)
+                      ...reactions
+                          .map((reaction) => _buildReaction(
+                                reactionIcons,
+                                reaction,
+                                context,
+                              ))
+                          .toList(),
+                  ],
                 ),
               ),
             ),
           ),
-          Positioned(
-            bottom: 2,
-            left: reverse ? null : 13,
-            right: !reverse ? null : 13,
-            child: _buildReactionsTail(context),
-          ),
-        ],
-      ),
+        ),
+        Positioned(
+          bottom: 2,
+          left: reverse ? null : 13,
+          right: !reverse ? null : 13,
+          child: _buildReactionsTail(context),
+        ),
+      ],
     );
   }
 
@@ -166,11 +162,7 @@ class ReactionBubble extends StatelessWidget {
         tailCirclesSpace: tailCirclesSpacing,
       ),
     );
-    return Transform(
-      transform: Matrix4.rotationY(flipTail ? 0 : pi),
-      alignment: Alignment.center,
-      child: tail,
-    );
+    return tail;
   }
 }
 

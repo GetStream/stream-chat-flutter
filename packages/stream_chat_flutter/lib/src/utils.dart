@@ -347,10 +347,6 @@ Widget wrapAttachmentWidget(
         clipBehavior: Clip.antiAlias,
         shape: attachmentShape,
         type: MaterialType.transparency,
-        child: Transform(
-          transform: Matrix4.rotationY(reverse ? pi : 0),
-          alignment: Alignment.center,
-          child: attachmentWidget,
-        ),
+        child: attachmentWidget,
       ),
     );

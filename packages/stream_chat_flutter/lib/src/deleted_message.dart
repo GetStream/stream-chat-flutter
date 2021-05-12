@@ -31,42 +31,34 @@ class DeletedMessage extends StatelessWidget {
   final bool reverse;
 
   @override
-  Widget build(BuildContext context) => Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
-        alignment: Alignment.center,
-        child: Material(
-          color: messageTheme.messageBackgroundColor,
-          shape: shape ??
-              RoundedRectangleBorder(
-                borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
-                side: borderSide ??
-                    BorderSide(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? StreamChatTheme.of(context)
-                              .colorTheme
-                              .white
-                              .withAlpha(24)
-                          : StreamChatTheme.of(context)
-                              .colorTheme
-                              .black
-                              .withAlpha(24),
-                    ),
-              ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 8,
-              horizontal: 16,
+  Widget build(BuildContext context) => Material(
+        color: messageTheme.messageBackgroundColor,
+        shape: shape ??
+            RoundedRectangleBorder(
+              borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
+              side: borderSide ??
+                  BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? StreamChatTheme.of(context)
+                            .colorTheme
+                            .white
+                            .withAlpha(24)
+                        : StreamChatTheme.of(context)
+                            .colorTheme
+                            .black
+                            .withAlpha(24),
+                  ),
             ),
-            child: Transform(
-              transform: Matrix4.rotationY(reverse ? pi : 0),
-              alignment: Alignment.center,
-              child: Text(
-                'Message deleted',
-                style: messageTheme.messageText?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: messageTheme.createdAt?.color,
-                ),
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 16,
+          ),
+          child: Text(
+            'Message deleted',
+            style: messageTheme.messageText?.copyWith(
+              fontStyle: FontStyle.italic,
+              color: messageTheme.createdAt?.color,
             ),
           ),
         ),

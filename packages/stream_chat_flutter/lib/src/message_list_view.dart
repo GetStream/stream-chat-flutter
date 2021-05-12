@@ -1000,13 +1000,23 @@ class _MessageListViewState extends State<MessageListView> {
       attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
       borderRadiusGeometry: BorderRadius.only(
         topLeft: const Radius.circular(16),
-        bottomLeft: Radius.circular(
-          (timeDiff >= 1 || !isNextUserSame) && !(hasReplies || isThreadMessage)
-              ? 0
-              : 16,
-        ),
+        bottomLeft: isMyMessage
+            ? const Radius.circular(16)
+            : Radius.circular(
+                (timeDiff >= 1 || !isNextUserSame) &&
+                        !(hasReplies || isThreadMessage)
+                    ? 0
+                    : 16,
+              ),
         topRight: const Radius.circular(16),
-        bottomRight: const Radius.circular(16),
+        bottomRight: isMyMessage
+            ? Radius.circular(
+                (timeDiff >= 1 || !isNextUserSame) &&
+                        !(hasReplies || isThreadMessage)
+                    ? 0
+                    : 16,
+              )
+            : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
         vertical: 8,
