@@ -56,7 +56,7 @@ class ReactionBubble extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Transform.translate(
-          offset: Offset(reverse ? offset : -offset, 0),
+          offset: Offset(reverse ? -offset : offset, 0),
           child: Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(

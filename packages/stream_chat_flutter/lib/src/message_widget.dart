@@ -466,18 +466,25 @@ class _MessageWidgetState extends State<MessageWidget>
           child: Padding(
             padding: widget.padding ?? const EdgeInsets.all(8),
             child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
+              alignment:
+                  widget.reverse ? Alignment.centerRight : Alignment.centerLeft,
               widthFactor: 0.78,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: widget.reverse
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Stack(
                     clipBehavior: Clip.none,
-                    alignment: AlignmentDirectional.bottomStart,
+                    alignment: widget.reverse
+                        ? AlignmentDirectional.bottomEnd
+                        : AlignmentDirectional.bottomStart,
                     children: [
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: widget.reverse
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
@@ -501,7 +508,8 @@ class _MessageWidgetState extends State<MessageWidget>
                                     child: _buildReactionIndicator(context),
                                   ),
                                   portalAnchor: const Alignment(-1, -1),
-                                  childAnchor: const Alignment(1, -1),
+                                  childAnchor:
+                                      Alignment(widget.reverse ? -1 : 1, -1),
                                   child: Stack(
                                     clipBehavior: Clip.none,
                                     children: [
@@ -736,6 +744,8 @@ class _MessageWidgetState extends State<MessageWidget>
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment:
+          widget.reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         if (showThreadTail)
           Container(
