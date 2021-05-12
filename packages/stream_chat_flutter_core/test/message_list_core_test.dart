@@ -148,6 +148,56 @@ void main() {
   );
 
   testWidgets(
+    'should assign paginateData callback and paginate data correctly if a MessageListController is passed',
+    (tester) async {
+      const messageListCoreKey = Key('messageListCore');
+      final controller = MessageListController();
+      final messageListCore = MessageListCore(
+        key: messageListCoreKey,
+        messageListBuilder: (_, __) => Offstage(),
+        loadingBuilder: (BuildContext context) => Offstage(),
+        emptyBuilder: (BuildContext context) => Offstage(),
+        errorWidgetBuilder: (BuildContext context, Object error) => Offstage(),
+        messageListController: controller,
+      );
+
+      expect(controller.paginateData, isNull);
+
+      final mockChannel = MockChannel();
+
+      when(() => mockChannel.state.isUpToDate).thenReturn(true);
+      // when(() => mockChannel.query(
+      //       messagesPagination: any(named: 'messagesPagination'),
+      //       preferOffline: any(named: 'preferOffline'),
+      //     )).thenAnswer((_) => mockChannel.state);
+      final messages = _generateMessages();
+      when(() => mockChannel.state.messages).thenReturn(messages);
+      when(() => mockChannel.state.messagesStream)
+          .thenAnswer((_) => Stream.value(messages));
+      when(() => mockChannel.initialized).thenAnswer((_) => Future.value(true));
+
+      await tester.pumpWidget(
+        StreamChannel(
+          channel: mockChannel,
+          child: messageListCore,
+        ),
+      );
+
+      final finder = find.byKey(messageListCoreKey);
+      final coreState = tester.firstState<MessageListCoreState>(finder);
+      expect(finder, findsOneWidget);
+      expect(controller.paginateData, isNotNull);
+
+      await coreState.paginateData();
+
+      verify(() => mockChannel.query(
+            messagesPagination: any(named: 'messagesPagination'),
+            preferOffline: any(named: 'preferOffline'),
+          )).called(1);
+    },
+  );
+
+  testWidgets(
     'should build error widget if messagesStream emits error',
     (tester) async {
       const messageListCoreKey = Key('messageListCore');
