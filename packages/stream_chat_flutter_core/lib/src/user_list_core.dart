@@ -130,6 +130,10 @@ class UserListCoreState extends State<UserListCore>
     if (newUsersBloc != _usersBloc) {
       _usersBloc = newUsersBloc;
       loadData();
+      if (widget.userListController != null) {
+        widget.userListController!.loadData = loadData;
+        widget.userListController!.paginateData = paginateData;
+      }
     }
     super.didChangeDependencies();
   }

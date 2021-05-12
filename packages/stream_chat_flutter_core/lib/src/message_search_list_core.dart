@@ -114,6 +114,10 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
     if (newMessageSearchBloc != _messageSearchBloc) {
       _messageSearchBloc = newMessageSearchBloc;
       loadData();
+      if (widget.messageSearchListController != null) {
+        widget.messageSearchListController!.loadData = loadData;
+        widget.messageSearchListController!.paginateData = paginateData;
+      }
     }
 
     super.didChangeDependencies();

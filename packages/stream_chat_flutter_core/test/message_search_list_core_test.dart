@@ -107,6 +107,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       expect(find.byKey(messageSearchListCoreKey), findsOneWidget);
       expect(controller.loadData, isNotNull);
