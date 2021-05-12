@@ -120,7 +120,7 @@ class ChannelListCore extends StatefulWidget {
 /// The current state of the [ChannelListCore].
 class ChannelListCoreState extends State<ChannelListCore> {
   late ChannelsBlocState _channelsBloc;
-  late StreamChatCoreState _streamChatCoreState;
+  StreamChatCoreState? _streamChatCoreState;
 
   @override
   Widget build(BuildContext context) => _buildListView(_channelsBloc);
@@ -174,11 +174,13 @@ class ChannelListCoreState extends State<ChannelListCore> {
   @override
   void didChangeDependencies() {
     _channelsBloc = ChannelsBloc.of(context);
-    _streamChatCoreState = StreamChatCore.of(context);
+    final newStreamChatCoreState = StreamChatCore.of(context);
 
-    if (_subscription == null) {
+    if (newStreamChatCoreState != _streamChatCoreState) {
+      _streamChatCoreState = newStreamChatCoreState;
       loadData();
-      final client = _streamChatCoreState.client;
+      final client = _streamChatCoreState!.client;
+      _subscription?.cancel();
       _subscription = client
           .on(
             EventType.connectionRecovered,

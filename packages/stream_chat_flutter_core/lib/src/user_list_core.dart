@@ -122,34 +122,25 @@ class UserListCore extends StatefulWidget {
 /// The current state of the [UserListCore].
 class UserListCoreState extends State<UserListCore>
     with WidgetsBindingObserver {
-  var _initialized = false;
+  UsersBlocState? _usersBloc;
 
   @override
   void didChangeDependencies() {
-    if (!_initialized) {
+    final newUsersBloc = UsersBloc.of(context);
+    if (newUsersBloc != _usersBloc) {
+      _usersBloc = newUsersBloc;
       loadData();
-      _initialized = true;
-    }
-    if (widget.userListController != null) {
-      widget.userListController!.loadData = loadData;
-      widget.userListController!.paginateData = paginateData;
     }
     super.didChangeDependencies();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final _usersBloc = UsersBloc.of(context);
-    return _buildListView(_usersBloc);
-  }
+  Widget build(BuildContext context) => _buildListView();
 
   bool get _isListAlreadySorted =>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
-  Stream<List<ListItem>> _buildUserStream(
-    UsersBlocState usersBlocState,
-  ) =>
-      usersBlocState.usersStream.map(
+  Stream<List<ListItem>> _buildUserStream() => _usersBloc!.usersStream.map(
         (users) {
           if (widget.groupAlphabetically) {
             var temp = users;
@@ -174,11 +165,8 @@ class UserListCoreState extends State<UserListCore>
         },
       );
 
-  StreamBuilder<List<ListItem>> _buildListView(
-    UsersBlocState usersBlocState,
-  ) =>
-      StreamBuilder(
-        stream: _buildUserStream(usersBlocState),
+  StreamBuilder<List<ListItem>> _buildListView() => StreamBuilder(
+        stream: _buildUserStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return widget.errorBuilder(snapshot.error!);
@@ -195,28 +183,22 @@ class UserListCoreState extends State<UserListCore>
       );
 
   // ignore: public_member_api_docs
-  Future<void> loadData() {
-    final _usersBloc = UsersBloc.of(context);
-    return _usersBloc.queryUsers(
-      filter: widget.filter,
-      sort: widget.sort,
-      pagination: widget.pagination,
-      options: widget.options,
-    );
-  }
+  Future<void> loadData() => _usersBloc!.queryUsers(
+        filter: widget.filter,
+        sort: widget.sort,
+        pagination: widget.pagination,
+        options: widget.options,
+      );
 
   // ignore: public_member_api_docs
-  Future<void> paginateData() {
-    final _usersBloc = UsersBloc.of(context);
-    return _usersBloc.queryUsers(
-      filter: widget.filter,
-      sort: widget.sort,
-      pagination: widget.pagination!.copyWith(
-        offset: _usersBloc.users?.length ?? 0,
-      ),
-      options: widget.options,
-    );
-  }
+  Future<void> paginateData() => _usersBloc!.queryUsers(
+        filter: widget.filter,
+        sort: widget.sort,
+        pagination: widget.pagination!.copyWith(
+          offset: _usersBloc!.users?.length ?? 0,
+        ),
+        options: widget.options,
+      );
 
   @override
   void didUpdateWidget(UserListCore oldWidget) {

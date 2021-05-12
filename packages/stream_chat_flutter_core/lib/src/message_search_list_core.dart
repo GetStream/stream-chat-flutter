@@ -105,28 +105,22 @@ class MessageSearchListCore extends StatefulWidget {
 
 /// The current state of the [MessageSearchListCore].
 class MessageSearchListCoreState extends State<MessageSearchListCore> {
-  late MessageSearchBlocState _messageSearchBloc;
-
-  var _initialized = false;
+  MessageSearchBlocState? _messageSearchBloc;
 
   @override
   void didChangeDependencies() {
-    _messageSearchBloc = MessageSearchBloc.of(context);
+    final newMessageSearchBloc = MessageSearchBloc.of(context);
 
-    if (!_initialized) {
+    if (newMessageSearchBloc != _messageSearchBloc) {
+      _messageSearchBloc = newMessageSearchBloc;
       loadData();
-      _initialized = true;
     }
 
-    if (widget.messageSearchListController != null) {
-      widget.messageSearchListController!.loadData = loadData;
-      widget.messageSearchListController!.paginateData = paginateData;
-    }
     super.didChangeDependencies();
   }
 
   @override
-  Widget build(BuildContext context) => _buildListView(_messageSearchBloc);
+  Widget build(BuildContext context) => _buildListView(_messageSearchBloc!);
 
   Widget _buildListView(MessageSearchBlocState messageSearchBloc) =>
       StreamBuilder<List<GetMessageResponse>>(
@@ -147,7 +141,7 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
       );
 
   /// Fetches initial messages and updates the widget
-  Future<void> loadData() => _messageSearchBloc.search(
+  Future<void> loadData() => _messageSearchBloc!.search(
         filter: widget.filters,
         sort: widget.sortOptions,
         query: widget.messageQuery,
@@ -156,11 +150,11 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
       );
 
   /// Fetches more messages with updated pagination and updates the widget
-  Future<void> paginateData() => _messageSearchBloc.search(
+  Future<void> paginateData() => _messageSearchBloc!.search(
         filter: widget.filters,
         sort: widget.sortOptions,
         pagination: widget.paginationParams!.copyWith(
-          offset: _messageSearchBloc.messageResponses?.length ?? 0,
+          offset: _messageSearchBloc!.messageResponses?.length ?? 0,
         ),
         query: widget.messageQuery,
         messageFilter: widget.messageFilters,

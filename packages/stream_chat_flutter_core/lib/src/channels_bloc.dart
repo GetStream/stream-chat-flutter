@@ -62,7 +62,7 @@ class ChannelsBloc extends StatefulWidget {
 /// The current state of the [ChannelsBloc].
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
-  late StreamChatCoreState _streamChatCoreState;
+  StreamChatCoreState? _streamChatCoreState;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
     PaginationParams paginationParams = const PaginationParams(limit: 30),
     Map<String, dynamic>? options,
   }) async {
-    final client = _streamChatCoreState.client;
+    final client = _streamChatCoreState!.client;
 
     final clear = paginationParams.offset == 0;
 
@@ -146,10 +146,13 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   @override
   void didChangeDependencies() {
-    _streamChatCoreState = StreamChatCore.of(context);
-    final client = _streamChatCoreState.client;
+    final newStreamChatCoreState = StreamChatCore.of(context);
 
-    if (_subscriptions.isEmpty) {
+    if (newStreamChatCoreState != _streamChatCoreState) {
+      _streamChatCoreState = newStreamChatCoreState;
+      final client = _streamChatCoreState!.client;
+
+      _cancelSubscriptions();
       if (!widget.lockChannelsOrder) {
         _subscriptions.add(client
             .on(

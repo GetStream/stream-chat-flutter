@@ -109,23 +109,23 @@ class MessageListCore extends StatefulWidget {
 
 /// The current state of the [MessageListCore].
 class MessageListCoreState extends State<MessageListCore> {
-  late StreamChannelState _streamChannel;
+  StreamChannelState? _streamChannel;
 
-  bool get _upToDate => _streamChannel.channel.state?.isUpToDate ?? true;
+  bool get _upToDate => _streamChannel!.channel.state?.isUpToDate ?? true;
 
   bool get _isThreadConversation => widget.parentMessage != null;
 
-  OwnUser? get _currentUser => _streamChannel.channel.client.state.user;
+  OwnUser? get _currentUser => _streamChannel!.channel.client.state.user;
 
   var _messages = <Message>[];
 
   @override
   Widget build(BuildContext context) {
     final messagesStream = _isThreadConversation
-        ? _streamChannel.channel.state?.threadsStream
+        ? _streamChannel!.channel.state?.threadsStream
             .where((threads) => threads.containsKey(widget.parentMessage!.id))
             .map((threads) => threads[widget.parentMessage!.id])
-        : _streamChannel.channel.state?.messagesStream;
+        : _streamChannel!.channel.state?.messagesStream;
 
     bool defaultFilter(Message m) {
       final isMyMessage = m.user?.id == _currentUser?.id;
@@ -167,21 +167,23 @@ class MessageListCoreState extends State<MessageListCore> {
     QueryDirection direction = QueryDirection.top,
   }) {
     if (!_isThreadConversation) {
-      return _streamChannel.queryMessages(direction: direction);
+      return _streamChannel!.queryMessages(direction: direction);
     } else {
-      return _streamChannel.getReplies(widget.parentMessage!.id);
+      return _streamChannel!.getReplies(widget.parentMessage!.id);
     }
   }
 
-  var _initialized = false;
-
   @override
   void didChangeDependencies() {
-    _streamChannel = StreamChannel.of(context);
-    if (!_initialized && _isThreadConversation) {
-      _initialized = true;
-      _streamChannel.getReplies(widget.parentMessage!.id);
+    final newStreamChannel = StreamChannel.of(context);
+
+    if (newStreamChannel != _streamChannel) {
+      _streamChannel = newStreamChannel;
+      if (_isThreadConversation) {
+        _streamChannel!.getReplies(widget.parentMessage!.id);
+      }
     }
+
     super.didChangeDependencies();
   }
 
@@ -210,7 +212,7 @@ class MessageListCoreState extends State<MessageListCore> {
   @override
   void dispose() {
     if (!_upToDate) {
-      _streamChannel.reloadChannel();
+      _streamChannel!.reloadChannel();
     }
     super.dispose();
   }
