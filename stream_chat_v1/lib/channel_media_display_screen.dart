@@ -7,23 +7,23 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
   /// Sorting is based on field and direction, multiple sorting options can be provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
   /// Direction can be ascending or descending.
-  final List<SortOption> sortOptions;
+  final List<SortOption>? sortOptions;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams paginationParams;
+  final PaginationParams? paginationParams;
 
   /// The builder used when the file list is empty.
-  final WidgetBuilder emptyBuilder;
+  final WidgetBuilder? emptyBuilder;
 
-  final ShowMessageCallback onShowMessage;
+  final ShowMessageCallback? onShowMessage;
 
   final MessageTheme messageTheme;
 
   const ChannelMediaDisplayScreen({
-    @required this.messageTheme,
+    required this.messageTheme,
     this.sortOptions,
     this.paginationParams,
     this.emptyBuilder,
@@ -36,7 +36,7 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 }
 
 class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
-  Map<String, VideoPlayerController> controllerCache = {};
+  Map<String?, VideoPlayerController?> controllerCache = {};
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     messageSearchBloc.search(
       filter: Filter.in_(
         'cid',
-        [StreamChannel.of(context).channel.cid],
+        [StreamChannel.of(context).channel.cid!],
       ),
       messageFilter: Filter.in_(
         'attachments.type',
@@ -103,9 +103,9 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
           );
         }
 
-        if (snapshot.data.isEmpty) {
+        if (snapshot.data!.isEmpty) {
           if (widget.emptyBuilder != null) {
-            return widget.emptyBuilder(context);
+            return widget.emptyBuilder!(context);
           }
           return Center(
             child: Column(
@@ -142,18 +142,18 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 
         final media = <_AssetPackage>[];
 
-        for (var item in snapshot.data) {
+        for (var item in snapshot.data!) {
           item.message.attachments
               .where((e) =>
                   (e.type == 'image' || e.type == 'video') &&
                   e.ogScrapeUrl == null)
               .forEach((e) {
-            VideoPlayerController controller;
+            VideoPlayerController? controller;
             if (e.type == 'video') {
               var cachedController = controllerCache[e.assetUrl];
 
               if (cachedController == null) {
-                controller = VideoPlayerController.network(e.assetUrl);
+                controller = VideoPlayerController.network(e.assetUrl!);
                 controller.initialize();
                 controllerCache[e.assetUrl] = controller;
               } else {
@@ -168,14 +168,14 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
           onEndOfPage: () => messageSearchBloc.search(
             filter: Filter.in_(
               'cid',
-              [StreamChannel.of(context).channel.cid],
+              [StreamChannel.of(context).channel.cid!],
             ),
             messageFilter: Filter.in_(
               'attachments.type',
               ['image', 'video'],
             ),
             sort: widget.sortOptions,
-            pagination: widget.paginationParams.copyWith(
+            pagination: widget.paginationParams!.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
           ),
@@ -198,7 +198,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                 media.map((e) => e.attachment).toList(),
                             startIndex: position,
                             message: media[position].message,
-                            userName: media[position].message.user.name,
+                            userName: media[position].message.user!.name,
                             onShowMessage: widget.onShowMessage,
                           ),
                         ),
@@ -218,7 +218,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                             messageTheme: widget.messageTheme,
                           ),
                         )
-                      : VideoPlayer(media[position].videoPlayer),
+                      : VideoPlayer(media[position].videoPlayer!),
                 ),
               );
             },
@@ -234,7 +234,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
   void dispose() {
     super.dispose();
     for (var c in controllerCache.values) {
-      c.dispose();
+      c!.dispose();
     }
   }
 }
@@ -242,7 +242,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 class _AssetPackage {
   Attachment attachment;
   Message message;
-  VideoPlayerController videoPlayer;
+  VideoPlayerController? videoPlayer;
 
   _AssetPackage(this.attachment, this.message, this.videoPlayer);
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:example/chat_info_screen.dart';
 import 'package:example/choose_user_page.dart';
 import 'package:example/group_info_screen.dart';
@@ -38,15 +39,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
-  InitData _initData;
+  InitData? _initData;
   bool _animCompleted = false;
-  Animation<double> _animation, _scaleAnimation;
-  AnimationController _animationController, _scaleAnimationController;
-  Animation<Color> _colorAnimation;
-  int timeOfStartMs;
+  Animation<double>? _animation, _scaleAnimation;
+  AnimationController? _animationController, _scaleAnimationController;
+  Animation<Color?>? _colorAnimation;
+  late int timeOfStartMs;
 
   Future<InitData> _initConnection() async {
-    String apiKey, userId, token;
+    String? apiKey, userId, token;
 
     if (!kIsWeb) {
       final secureStorage = FlutterSecureStorage();
@@ -84,7 +85,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       begin: 1.0,
       end: 1.5,
     ).animate(CurvedAnimation(
-      parent: _scaleAnimationController,
+      parent: _scaleAnimationController!,
       curve: Curves.easeInOutBack,
     ));
 
@@ -98,21 +99,21 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       begin: 0.0,
       end: 1000.0,
     ).animate(CurvedAnimation(
-      parent: _animationController,
+      parent: _animationController!,
       curve: Curves.easeInOut,
     ));
     _colorAnimation = ColorTween(
       begin: Color(0xff005FFF),
       end: Color(0xff005FFF),
     ).animate(CurvedAnimation(
-      parent: _animationController,
+      parent: _animationController!,
       curve: Curves.easeInOut,
     ));
     _colorAnimation = ColorTween(
       begin: Color(0xff005FFF),
       end: Colors.transparent,
     ).animate(CurvedAnimation(
-      parent: _animationController,
+      parent: _animationController!,
       curve: Curves.easeInOut,
     ));
   }
@@ -132,22 +133,22 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
         var now = DateTime.now().millisecondsSinceEpoch;
 
         if (now - timeOfStartMs > 1500) {
-          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            _scaleAnimationController.forward().whenComplete(() {
-              _animationController.forward();
+          SchedulerBinding.instance!.addPostFrameCallback((timeStamp) {
+            _scaleAnimationController?.forward().whenComplete(() {
+              _animationController?.forward();
             });
           });
         } else {
           Future.delayed(Duration(milliseconds: 1500)).then((value) {
-            _scaleAnimationController.forward().whenComplete(() {
-              _animationController.forward();
+            _scaleAnimationController?.forward().whenComplete(() {
+              _animationController?.forward();
             });
           });
         }
 
         if (!kIsWeb) {
-          _initData.client.state?.totalUnreadCountStream?.listen((count) {
-            if (count > 0) {
+          _initData!.client.state.totalUnreadCountStream.listen((count) {
+            if (count! > 0) {
               FlutterAppBadger.updateBadgeCount(count);
             } else {
               FlutterAppBadger.removeBadge();
@@ -156,7 +157,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
         }
       },
     );
-    _animationController.addStatusListener((status) {
+    _animationController?.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
           _animCompleted = true;
@@ -174,20 +175,20 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
         alignment: Alignment.center,
         children: [
           AnimatedBuilder(
-            animation: _scaleAnimation,
+            animation: _scaleAnimation!,
             builder: (context, _) {
               return Transform.scale(
-                scale: _scaleAnimation.value,
+                scale: _scaleAnimation!.value,
                 child: AnimatedBuilder(
-                    animation: _colorAnimation,
+                    animation: _colorAnimation!,
                     builder: (context, snapshot) {
                       return Container(
                         alignment: Alignment.center,
                         constraints: BoxConstraints.expand(),
                         color: _colorAnimation == null
                             ? Color(0xff005FFF)
-                            : _colorAnimation.value,
-                        child: !_animationController.isAnimating
+                            : _colorAnimation!.value,
+                        child: !_animationController!.isAnimating
                             ? Lottie.asset(
                                 'assets/floating_boat.json',
                                 alignment: Alignment.center,
@@ -199,16 +200,16 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
             },
           ),
           AnimatedBuilder(
-            animation: _animation,
+            animation: _animation!,
             builder: (context, snapshot) {
               return Transform.scale(
-                scale: _animation.value,
+                scale: _animation!.value,
                 child: Container(
                   width: 1.0,
                   height: 1.0,
                   decoration: BoxDecoration(
                     color: Colors.white
-                        .withOpacity(1 - _animationController.value),
+                        .withOpacity(1 - _animationController!.value),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -227,19 +228,19 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       children: [
         if (_initData != null)
           PreferenceBuilder<int>(
-            preference: _initData.preferences.getInt(
+            preference: _initData!.preferences.getInt(
               'theme',
               defaultValue: 0,
             ),
             builder: (context, snapshot) => MaterialApp(
               builder: (context, child) {
                 return StreamChat(
-                  client: _initData.client,
-                  onBackgroundEventReceived: (e) =>
-                      showLocalNotification(e, _initData.client.state.user.id),
+                  client: _initData!.client,
+                  onBackgroundEventReceived: (e) => showLocalNotification(
+                      e, _initData!.client.state.user!.id),
                   child: Builder(
                     builder: (context) => AnnotatedRegion<SystemUiOverlayStyle>(
-                      child: child,
+                      child: child!,
                       value: SystemUiOverlayStyle(
                         systemNavigationBarColor:
                             StreamChatTheme.of(context).colorTheme.white,
@@ -260,7 +261,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
                 1: ThemeMode.light,
               }[snapshot],
               onGenerateRoute: AppRoutes.generateRoute,
-              initialRoute: _initData.client.state.user == null
+              initialRoute: _initData!.client.state.user == null
                   ? Routes.CHOOSE_USER
                   : Routes.HOME,
             ),
@@ -319,7 +320,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).user!;
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: ChannelListHeader(
@@ -495,7 +496,7 @@ class _HomePageState extends State<HomePage> {
 class UserMentionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final user = StreamChat.of(context).user;
+    final user = StreamChat.of(context).user!;
     return MessageSearchBloc(
       child: MessageSearchListView(
         filters: Filter.in_('members', [user.id]),
@@ -555,8 +556,8 @@ class UserMentionPage extends StatelessWidget {
           final client = StreamChat.of(context).client;
           final message = messageResponse.message;
           final channel = client.channel(
-            messageResponse.channel.type,
-            id: messageResponse.channel.id,
+            messageResponse.channel!.type,
+            id: messageResponse.channel!.id,
           );
           if (channel.state == null) {
             await channel.watch();
@@ -581,20 +582,20 @@ class ChannelListPage extends StatefulWidget {
 }
 
 class _ChannelListPageState extends State<ChannelListPage> {
-  TextEditingController _controller;
+  TextEditingController? _controller;
 
   String _channelQuery = '';
 
   bool _isSearchActive = false;
 
-  Timer _debounce;
+  Timer? _debounce;
 
   void _channelQueryListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
         setState(() {
-          _channelQuery = _controller.text;
+          _channelQuery = _controller!.text;
           _isSearchActive = _channelQuery.isNotEmpty;
         });
       }
@@ -620,7 +621,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     return WillPopScope(
       onWillPop: () async {
         if (_isSearchActive) {
-          _controller.clear();
+          _controller!.clear();
           setState(() => _isSearchActive = false);
           return false;
         }
@@ -647,7 +648,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                     ? MessageSearchListView(
                         showErrorTile: true,
                         messageQuery: _channelQuery,
-                        filters: Filter.in_('members', [user.id]),
+                        filters: Filter.in_('members', [user!.id]),
                         sortOptions: [
                           SortOption(
                             'created_at',
@@ -691,8 +692,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
                           final client = StreamChat.of(context).client;
                           final message = messageResponse.message;
                           final channel = client.channel(
-                            messageResponse.channel.type,
-                            id: messageResponse.channel.id,
+                            messageResponse.channel!.type,
+                            id: messageResponse.channel!.id,
                           );
                           if (channel.state == null) {
                             await channel.watch();
@@ -712,7 +713,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                           Navigator.pushNamed(context, Routes.NEW_CHAT);
                         },
                         swipeToAction: true,
-                        filter: Filter.in_('members', [user.id]),
+                        filter: Filter.in_('members', [user!.id]),
                         options: {
                           'presence': true,
                         },
@@ -731,10 +732,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                   child: ChatInfoScreen(
                                     messageTheme: StreamChatTheme.of(context)
                                         .ownMessageTheme,
-                                    user: channel.state.members
+                                    user: channel.state!.members
                                         .where((m) =>
                                             m.userId !=
-                                            channel.client.state.user.id)
+                                            channel.client.state.user!.id)
                                         .first
                                         .user,
                                   ),
@@ -767,8 +768,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
 }
 
 class ChannelPageArgs {
-  final Channel channel;
-  final Message initialMessage;
+  final Channel? channel;
+  final Message? initialMessage;
 
   const ChannelPageArgs({
     this.channel,
@@ -777,12 +778,12 @@ class ChannelPageArgs {
 }
 
 class ChannelPage extends StatefulWidget {
-  final int initialScrollIndex;
-  final double initialAlignment;
+  final int? initialScrollIndex;
+  final double? initialAlignment;
   final bool highlightInitialMessage;
 
   const ChannelPage({
-    Key key,
+    Key? key,
     this.initialScrollIndex,
     this.initialAlignment,
     this.highlightInitialMessage = false,
@@ -793,8 +794,8 @@ class ChannelPage extends StatefulWidget {
 }
 
 class _ChannelPageState extends State<ChannelPage> {
-  Message _quotedMessage;
-  FocusNode _focusNode;
+  Message? _quotedMessage;
+  FocusNode? _focusNode;
 
   @override
   void initState() {
@@ -804,14 +805,14 @@ class _ChannelPageState extends State<ChannelPage> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    _focusNode!.dispose();
     super.dispose();
   }
 
   void _reply(Message message) {
     setState(() => _quotedMessage = message);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _focusNode.requestFocus();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      _focusNode!.requestFocus();
     });
   }
 
@@ -826,9 +827,8 @@ class _ChannelPageState extends State<ChannelPage> {
 
           if (channel.memberCount == 2 && channel.isDistinct) {
             final currentUser = StreamChat.of(context).user;
-            final otherUser = channel.state.members.firstWhere(
-              (element) => element.user.id != currentUser.id,
-              orElse: () => null,
+            final otherUser = channel.state!.members.firstWhereOrNull(
+              (element) => element.user!.id != currentUser!.id,
             );
             if (otherUser != null) {
               final pop = await Navigator.push(
@@ -932,7 +932,7 @@ class _ChannelPageState extends State<ChannelPage> {
             quotedMessage: _quotedMessage,
             onQuotedMessageCleared: () {
               setState(() => _quotedMessage = null);
-              _focusNode.unfocus();
+              _focusNode!.unfocus();
             },
           ),
         ],
@@ -942,12 +942,12 @@ class _ChannelPageState extends State<ChannelPage> {
 }
 
 class ThreadPage extends StatefulWidget {
-  final Message parent;
-  final int initialScrollIndex;
-  final double initialAlignment;
+  final Message? parent;
+  final int? initialScrollIndex;
+  final double? initialAlignment;
 
   ThreadPage({
-    Key key,
+    Key? key,
     this.parent,
     this.initialScrollIndex,
     this.initialAlignment,
@@ -958,7 +958,7 @@ class ThreadPage extends StatefulWidget {
 }
 
 class _ThreadPageState extends State<ThreadPage> {
-  Message _quotedMessage;
+  Message? _quotedMessage;
   FocusNode _focusNode = FocusNode();
 
   @override
@@ -969,7 +969,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
   void _reply(Message message) {
     setState(() => _quotedMessage = message);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       _focusNode.requestFocus();
     });
   }
@@ -979,7 +979,7 @@ class _ThreadPageState extends State<ThreadPage> {
     return Scaffold(
       backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
       appBar: ThreadHeader(
-        parent: widget.parent,
+        parent: widget.parent!,
       ),
       body: Column(
         children: <Widget>[
@@ -992,7 +992,7 @@ class _ThreadPageState extends State<ThreadPage> {
               onReplyTap: _reply,
             ),
           ),
-          if (widget.parent.type != 'deleted')
+          if (widget.parent!.type != 'deleted')
             MessageInput(
               parentMessage: widget.parent,
               focusNode: _focusNode,
@@ -1017,8 +1017,8 @@ class InitData {
 
 class HolePainter extends CustomPainter {
   HolePainter({
-    @required this.color,
-    @required this.holeSize,
+    required this.color,
+    required this.holeSize,
   });
 
   Color color;

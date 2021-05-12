@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.5.4+1
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter_app_badger: ^1.2.0
@@ -27,6 +27,7 @@ dependencies:
   uuid: ^3.0.4
   streaming_shared_preferences: ^2.0.0
   lottie: ^1.0.1
+  collection: ^1.15.0-nullsafety.4
 
 dependency_overrides:
   stream_chat:

@@ -16,9 +16,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
   final _chipInputTextFieldStateKey =
       GlobalKey<ChipInputTextFieldState<User>>();
 
-  TextEditingController _controller;
+  late TextEditingController _controller;
 
-  ChipInputTextFieldState get _chipInputTextFieldState =>
+  ChipInputTextFieldState? get _chipInputTextFieldState =>
       _chipInputTextFieldStateKey.currentState;
 
   String _userNameQuery = '';
@@ -30,14 +30,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   bool _isSearchActive = false;
 
-  Channel channel;
+  Channel? channel;
 
-  Timer _debounce;
+  Timer? _debounce;
 
   bool _showUserList = true;
 
   void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted)
         setState(() {
@@ -73,7 +73,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
           filter: Filter.and([
             Filter.equal('members', [
               ..._selectedUsers.map((e) => e.id),
-              chatState.user.id,
+              chatState.user!.id,
             ]),
             Filter.equal('distinct', true),
           ]),
@@ -86,14 +86,14 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final _channelExisted = res.length == 1;
         if (_channelExisted) {
           channel = res.first;
-          await channel.watch();
+          await channel!.watch();
         } else {
           channel = chatState.client.channel(
             'messaging',
             extraData: {
               'members': [
                 ..._selectedUsers.map((e) => e.id),
-                chatState.user.id,
+                chatState.user!.id,
               ],
             },
           );
@@ -110,9 +110,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
   void dispose() {
     _searchFocusNode.dispose();
     _messageInputFocusNode.dispose();
-    _controller?.clear();
-    _controller?.removeListener(_userNameListener);
-    _controller?.dispose();
+    _controller.clear();
+    _controller.removeListener(_userNameListener);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -158,7 +158,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
             message: statusString,
             child: StreamChannel(
               showLoading: false,
-              channel: channel,
+              channel: channel!,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -169,7 +169,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                     chipBuilder: (context, user) {
                       return GestureDetector(
                         onTap: () {
-                          _chipInputTextFieldState.removeItem(user);
+                          _chipInputTextFieldState?.removeItem(user);
                           _searchFocusNode.requestFocus();
                         },
                         child: Stack(
@@ -299,10 +299,10 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   _controller.clear();
                                   if (!_selectedUsers.contains(user)) {
                                     _chipInputTextFieldState
-                                      ..addItem(user)
+                                      ?..addItem(user)
                                       ..pauseItemAddition();
                                   } else {
-                                    _chipInputTextFieldState.removeItem(user);
+                                    _chipInputTextFieldState!.removeItem(user);
                                   }
                                 },
                                 pagination: PaginationParams(
@@ -312,7 +312,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   if (_userNameQuery.isNotEmpty)
                                     Filter.autoComplete('name', _userNameQuery),
                                   Filter.notEqual(
-                                      'id', StreamChat.of(context).user.id),
+                                      'id', StreamChat.of(context).user!.id),
                                 ]),
                                 sort: [
                                   SortOption(
@@ -367,7 +367,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                             ),
                           )
                         : FutureBuilder<bool>(
-                            future: channel.initialized,
+                            future: channel!.initialized,
                             builder: (context, snapshot) {
                               if (snapshot.data == true) {
                                 return MessageListView();
@@ -391,7 +391,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                   MessageInput(
                     focusNode: _messageInputFocusNode,
                     preMessageSending: (message) async {
-                      await channel.watch();
+                      await channel!.watch();
                       return message;
                     },
                     onMessageSent: (m) {

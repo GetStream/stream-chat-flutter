@@ -17,13 +17,13 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _apiKeyController = TextEditingController();
-  String _apiKeyError;
+  String? _apiKeyError;
 
   final TextEditingController _userIdController = TextEditingController();
-  String _userIdError;
+  String? _userIdError;
 
   final TextEditingController _userTokenController = TextEditingController();
-  String _userTokenError;
+  String? _userTokenError;
 
   final TextEditingController _usernameController = TextEditingController();
 
@@ -73,7 +73,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       }
                     },
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         setState(() {
                           _apiKeyError =
                               'Please enter the Chat API Key'.toUpperCase();
@@ -119,7 +119,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       }
                     },
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         setState(() {
                           _userIdError =
                               'Please enter the User ID'.toUpperCase();
@@ -165,7 +165,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     },
                     controller: _userTokenController,
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         setState(() {
                           _userTokenError =
                               'Please enter the user token'.toUpperCase();
@@ -243,7 +243,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                       if (loading) {
                         return;
                       }
-                      if (_formKey.currentState.validate()) {
+                      if (_formKey.currentState!.validate()) {
                         final apiKey = _apiKeyController.text;
                         final userId = _userIdController.text;
                         final userToken = _userTokenController.text;
