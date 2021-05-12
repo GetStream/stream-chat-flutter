@@ -178,10 +178,10 @@ class MessageListCoreState extends State<MessageListCore> {
     final newStreamChannel = StreamChannel.of(context);
 
     if (newStreamChannel != _streamChannel) {
-      _streamChannel = newStreamChannel;
-      if (_isThreadConversation) {
+      if (_streamChannel == null /*only first time*/ && _isThreadConversation) {
         _streamChannel!.getReplies(widget.parentMessage!.id);
       }
+      _streamChannel = newStreamChannel;
     }
 
     super.didChangeDependencies();
@@ -193,6 +193,12 @@ class MessageListCoreState extends State<MessageListCore> {
 
     if (widget.messageListController != oldWidget.messageListController) {
       _setupController();
+    }
+
+    if (widget.parentMessage?.id != widget.parentMessage?.id) {
+      if (_isThreadConversation) {
+        _streamChannel!.getReplies(widget.parentMessage!.id);
+      }
     }
   }
 
