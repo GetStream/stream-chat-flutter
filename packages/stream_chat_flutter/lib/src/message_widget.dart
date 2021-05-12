@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
+import 'package:stream_chat_flutter/src/image_group.dart';
 import 'package:stream_chat_flutter/src/message_action.dart';
 import 'package:stream_chat_flutter/src/message_actions_modal.dart';
 import 'package:stream_chat_flutter/src/message_reactions_modal.dart';
@@ -15,8 +17,6 @@ import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:stream_chat_flutter/src/image_group.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Widget builder for building attachments
 typedef AttachmentBuilder = Widget Function(
@@ -109,6 +109,7 @@ class MessageWidget extends StatefulWidget {
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
 
+            final mediaQueryData = MediaQuery.of(context);
             if (attachments.length > 1) {
               return Padding(
                 padding: attachmentPadding,
@@ -118,8 +119,8 @@ class MessageWidget extends StatefulWidget {
                     color: messageTheme.messageBackgroundColor,
                     child: ImageGroup(
                       size: Size(
-                        MediaQuery.of(context).size.width * 0.8,
-                        MediaQuery.of(context).size.height * 0.3,
+                        mediaQueryData.size.width * 0.8,
+                        mediaQueryData.size.height * 0.3,
                       ),
                       images: attachments,
                       message: message,
@@ -142,8 +143,8 @@ class MessageWidget extends StatefulWidget {
                 message: message,
                 messageTheme: messageTheme,
                 size: Size(
-                  MediaQuery.of(context).size.width * 0.8,
-                  MediaQuery.of(context).size.height * 0.3,
+                  mediaQueryData.size.width * 0.8,
+                  mediaQueryData.size.height * 0.3,
                 ),
                 onShowMessage: onShowMessage,
                 onReturnAction: onReturnAction,
@@ -167,24 +168,25 @@ class MessageWidget extends StatefulWidget {
             return wrapAttachmentWidget(
               context,
               Column(
-                children: attachments
-                    .map((attachment) => VideoAttachment(
-                          attachment: attachment,
-                          messageTheme: messageTheme,
-                          size: Size(
-                            MediaQuery.of(context).size.width * 0.8,
-                            MediaQuery.of(context).size.height * 0.3,
-                          ),
-                          message: message,
-                          onShowMessage: onShowMessage,
-                          onReturnAction: onReturnAction,
-                          onAttachmentTap: onAttachmentTap != null
-                              ? () {
-                                  onAttachmentTap(message, attachment);
-                                }
-                              : null,
-                        ))
-                    .toList(),
+                children: attachments.map((attachment) {
+                  final mediaQueryData = MediaQuery.of(context);
+                  return VideoAttachment(
+                    attachment: attachment,
+                    messageTheme: messageTheme,
+                    size: Size(
+                      mediaQueryData.size.width * 0.8,
+                      mediaQueryData.size.height * 0.3,
+                    ),
+                    message: message,
+                    onShowMessage: onShowMessage,
+                    onReturnAction: onReturnAction,
+                    onAttachmentTap: onAttachmentTap != null
+                        ? () {
+                            onAttachmentTap(message, attachment);
+                          }
+                        : null,
+                  );
+                }).toList(),
               ),
               border,
               reverse,
@@ -200,18 +202,19 @@ class MessageWidget extends StatefulWidget {
             return wrapAttachmentWidget(
               context,
               Column(
-                children: attachments
-                    .map((attachment) => GiphyAttachment(
-                          attachment: attachment,
-                          message: message,
-                          size: Size(
-                            MediaQuery.of(context).size.width * 0.8,
-                            MediaQuery.of(context).size.height * 0.3,
-                          ),
-                          onShowMessage: onShowMessage,
-                          onReturnAction: onReturnAction,
-                        ))
-                    .toList(),
+                children: attachments.map((attachment) {
+                  final mediaQueryData = MediaQuery.of(context);
+                  return GiphyAttachment(
+                    attachment: attachment,
+                    message: message,
+                    size: Size(
+                      mediaQueryData.size.width * 0.8,
+                      mediaQueryData.size.height * 0.3,
+                    ),
+                    onShowMessage: onShowMessage,
+                    onReturnAction: onReturnAction,
+                  );
+                }).toList(),
               ),
               border,
               reverse,
@@ -230,21 +233,24 @@ class MessageWidget extends StatefulWidget {
 
             return Column(
               children: attachments
-                  .map<Widget>((attachment) => wrapAttachmentWidget(
-                        context,
-                        FileAttachment(
-                          message: message,
-                          attachment: attachment,
-                          size: Size(
-                            MediaQuery.of(context).size.width * 0.8,
-                            MediaQuery.of(context).size.height * 0.3,
-                          ),
+                  .map<Widget>((attachment) {
+                    final mediaQueryData = MediaQuery.of(context);
+                    return wrapAttachmentWidget(
+                      context,
+                      FileAttachment(
+                        message: message,
+                        attachment: attachment,
+                        size: Size(
+                          mediaQueryData.size.width * 0.8,
+                          mediaQueryData.size.height * 0.3,
                         ),
-                        border,
-                        reverse,
-                        attachmentBorderRadiusGeometry as BorderRadius? ??
-                            BorderRadius.zero,
-                      ))
+                      ),
+                      border,
+                      reverse,
+                      attachmentBorderRadiusGeometry as BorderRadius? ??
+                          BorderRadius.zero,
+                    );
+                  })
                   .insertBetween(SizedBox(
                     height: attachmentPadding.vertical / 2,
                   ))
@@ -658,12 +664,13 @@ class _MessageWidgetState extends State<MessageWidget>
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap!(widget.message.quotedMessageId)
         : null;
+    final chatThemeData = StreamChatTheme.of(context);
     return QuotedMessageWidget(
       onTap: onTap,
       message: widget.message.quotedMessage!,
       messageTheme: isMyMessage
-          ? StreamChatTheme.of(context).otherMessageTheme
-          : StreamChatTheme.of(context).ownMessageTheme,
+          ? chatThemeData.otherMessageTheme
+          : chatThemeData.ownMessageTheme,
       reverse: widget.reverse,
       padding: EdgeInsets.only(
           right: 8, left: 8, top: 8, bottom: hasNonUrlAttachments ? 8 : 0),
@@ -672,6 +679,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget get _bottomRow {
     if (isDeleted) {
+      final chatThemeData = StreamChatTheme.of(context);
       return Transform(
         transform: Matrix4.rotationY(widget.reverse ? pi : 0),
         alignment: Alignment.center,
@@ -679,16 +687,14 @@ class _MessageWidgetState extends State<MessageWidget>
           mainAxisSize: MainAxisSize.min,
           children: [
             StreamSvgIcon.eye(
-              color: StreamChatTheme.of(context).colorTheme.grey,
+              color: chatThemeData.colorTheme.grey,
               size: 16,
             ),
             const SizedBox(width: 8),
             Text(
               'Only visible to you',
-              style: StreamChatTheme.of(context)
-                  .textTheme
-                  .footnote
-                  .copyWith(color: StreamChatTheme.of(context).colorTheme.grey),
+              style: chatThemeData.textTheme.footnote
+                  .copyWith(color: chatThemeData.colorTheme.grey),
             ),
           ],
         ),

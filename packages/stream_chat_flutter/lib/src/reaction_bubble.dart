@@ -126,6 +126,8 @@ class ReactionBubble extends StatelessWidget {
       (r) => r.type == reaction.type,
     );
 
+    final chatThemeData = StreamChatTheme.of(context);
+    final userId = StreamChat.of(context).user?.id;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 4,
@@ -135,24 +137,16 @@ class ReactionBubble extends StatelessWidget {
               assetName: reactionIcon.assetName,
               width: 16,
               height: 16,
-              color: (!highlightOwnReactions ||
-                      reaction.user?.id == StreamChat.of(context).user?.id)
-                  ? StreamChatTheme.of(context).colorTheme.accentBlue
-                  : StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(.5),
+              color: (!highlightOwnReactions || reaction.user?.id == userId)
+                  ? chatThemeData.colorTheme.accentBlue
+                  : chatThemeData.colorTheme.black.withOpacity(.5),
             )
           : Icon(
               Icons.help_outline_rounded,
               size: 16,
-              color: (!highlightOwnReactions ||
-                      reaction.user?.id == StreamChat.of(context).user?.id)
-                  ? StreamChatTheme.of(context).colorTheme.accentBlue
-                  : StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(.5),
+              color: (!highlightOwnReactions || reaction.user?.id == userId)
+                  ? chatThemeData.colorTheme.accentBlue
+                  : chatThemeData.colorTheme.black.withOpacity(.5),
             ),
     );
   }

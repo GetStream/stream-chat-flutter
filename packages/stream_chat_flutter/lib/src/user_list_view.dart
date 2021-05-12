@@ -295,21 +295,24 @@ class _UserListViewState extends State<UserListView>
     if (i < items.length) {
       final item = items[i];
       return item.when(
-        headerItem: (header) => Container(
-          key: ValueKey<String>('HEADER-$header'),
-          color: StreamChatTheme.of(context).colorTheme.black.withOpacity(0.05),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Text(
-              header,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14.5,
-                color: StreamChatTheme.of(context).colorTheme.grey,
+        headerItem: (header) {
+          final chatThemeData = StreamChatTheme.of(context);
+          return Container(
+            key: ValueKey<String>('HEADER-$header'),
+            color: chatThemeData.colorTheme.black.withOpacity(0.05),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Text(
+                header,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.5,
+                  color: chatThemeData.colorTheme.grey,
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
         userItem: (user) {
           final selected = widget.selectedUsers?.contains(user) ?? false;
           return Container(

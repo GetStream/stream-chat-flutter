@@ -30,11 +30,12 @@ class UsersBloc extends StatefulWidget {
 
     state = context.findAncestorStateOfType<UsersBlocState>();
 
-    if (state == null) {
-      throw Exception('You must have a UsersBloc widget as ancestor');
-    }
+    assert(
+      state != null,
+      'You must have a UsersBloc widget as ancestor',
+    );
 
-    return state;
+    return state!;
   }
 }
 
@@ -54,6 +55,8 @@ class UsersBlocState extends State<UsersBloc>
   /// The stream notifying the state of queryUsers call
   Stream<bool> get queryUsersLoading => _queryUsersLoadingController.stream;
 
+  late StreamChatCoreState _streamChatCore;
+
   /// The Query Users method allows you to search for users and see if they are
   /// online/offline.
   /// [API Reference](https://getstream.io/chat/docs/flutter-dart/query_users/?language=dart)
@@ -63,7 +66,7 @@ class UsersBlocState extends State<UsersBloc>
     Map<String, dynamic>? options,
     PaginationParams? pagination,
   }) async {
-    final client = StreamChatCore.of(context).client;
+    final client = _streamChatCore.client;
 
     if (_queryUsersLoadingController.value == true) return;
 
@@ -99,6 +102,12 @@ class UsersBlocState extends State<UsersBloc>
         _usersController.addError(e, stk);
       }
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    _streamChatCore = StreamChatCore.of(context);
+    super.didChangeDependencies();
   }
 
   @override

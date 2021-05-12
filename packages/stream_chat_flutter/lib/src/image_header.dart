@@ -50,59 +50,58 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   final int currentIndex;
 
   @override
-  Widget build(BuildContext context) => AppBar(
-        brightness: Theme.of(context).brightness,
-        elevation: 1,
-        leading: showBackButton
-            ? IconButton(
-                icon: StreamSvgIcon.close(
-                  color: StreamChatTheme.of(context).colorTheme.black,
-                  size: 24,
-                ),
-                onPressed: onBackPressed,
-              )
-            : const SizedBox(),
-        backgroundColor:
-            StreamChatTheme.of(context).channelTheme.channelHeaderTheme.color,
-        actions: <Widget>[
-          if (message.type != 'ephemeral')
-            IconButton(
-              icon: StreamSvgIcon.iconMenuPoint(
-                color: StreamChatTheme.of(context).colorTheme.black,
+  Widget build(BuildContext context) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return AppBar(
+      brightness: Theme.of(context).brightness,
+      elevation: 1,
+      leading: showBackButton
+          ? IconButton(
+              icon: StreamSvgIcon.close(
+                color: chatThemeData.colorTheme.black,
+                size: 24,
               ),
-              onPressed: () {
-                _showMessageActionModalBottomSheet(context);
-              },
+              onPressed: onBackPressed,
+            )
+          : const SizedBox(),
+      backgroundColor: chatThemeData.channelTheme.channelHeaderTheme.color,
+      actions: <Widget>[
+        if (message.type != 'ephemeral')
+          IconButton(
+            icon: StreamSvgIcon.iconMenuPoint(
+              color: chatThemeData.colorTheme.black,
             ),
-        ],
-        centerTitle: true,
-        title: message.type != 'ephemeral'
-            ? InkWell(
-                onTap: onTitleTap,
-                child: SizedBox(
-                  height: preferredSize.height,
-                  width: preferredSize.width,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        userName,
-                        style:
-                            StreamChatTheme.of(context).textTheme.headlineBold,
-                      ),
-                      Text(
-                        sentAt,
-                        style: StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .subtitle,
-                      ),
-                    ],
-                  ),
+            onPressed: () {
+              _showMessageActionModalBottomSheet(context);
+            },
+          ),
+      ],
+      centerTitle: true,
+      title: message.type != 'ephemeral'
+          ? InkWell(
+              onTap: onTitleTap,
+              child: SizedBox(
+                height: preferredSize.height,
+                width: preferredSize.width,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      userName,
+                      style: chatThemeData.textTheme.headlineBold,
+                    ),
+                    Text(
+                      sentAt,
+                      style: chatThemeData.channelPreviewTheme.subtitle,
+                    ),
+                  ],
                 ),
-              )
-            : const SizedBox(),
-      );
+              ),
+            )
+          : const SizedBox(),
+    );
+  }
 
   @override
   final Size preferredSize;

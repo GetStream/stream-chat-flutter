@@ -46,7 +46,9 @@ class ChannelInfo extends StatelessWidget {
   }
 
   Widget _buildConnectedTitleState(
-      BuildContext context, List<Member>? members) {
+    BuildContext context,
+    List<Member>? members,
+  ) {
     Widget? alternativeWidget;
 
     if (channel.memberCount != null && channel.memberCount! > 2) {
@@ -61,8 +63,9 @@ class ChannelInfo extends StatelessWidget {
             .subtitle,
       );
     } else {
+      final userId = StreamChat.of(context).user?.id;
       final otherMember = members?.firstWhereOrNull(
-        (element) => element.userId != StreamChat.of(context).user?.id,
+        (element) => element.userId != userId,
       );
 
       if (otherMember != null) {

@@ -44,18 +44,19 @@ class DateDivider extends StatelessWidget {
 
     if (uppercase) dayInfo = dayInfo.toUpperCase();
 
+    final chatThemeData = StreamChatTheme.of(context);
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
         decoration: BoxDecoration(
-          color: StreamChatTheme.of(context).colorTheme.overlayDark,
+          color: chatThemeData.colorTheme.overlayDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           dayInfo,
-          style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.white,
-              ),
+          style: chatThemeData.textTheme.footnote.copyWith(
+            color: chatThemeData.colorTheme.white,
+          ),
         ),
       ),
     );

@@ -77,16 +77,18 @@ class _ImageFooterState extends State<ImageFooter> {
   @override
   Widget build(BuildContext context) {
     final showShareButton = !kIsWeb;
+    final mediaQueryData = MediaQuery.of(context);
+    final chatThemeData = StreamChatTheme.of(context);
     return SizedBox.fromSize(
       size: Size(
-        MediaQuery.of(context).size.width,
-        MediaQuery.of(context).padding.bottom + widget.preferredSize.height,
+        mediaQueryData.size.width,
+        mediaQueryData.padding.bottom + widget.preferredSize.height,
       ),
       child: MediaQuery.removePadding(
         context: context,
         removeTop: true,
         child: BottomAppBar(
-          color: StreamChatTheme.of(context).colorTheme.white,
+          color: chatThemeData.colorTheme.white,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -98,7 +100,7 @@ class _ImageFooterState extends State<ImageFooter> {
                 IconButton(
                   icon: StreamSvgIcon.iconShare(
                     size: 24,
-                    color: StreamChatTheme.of(context).colorTheme.black,
+                    color: chatThemeData.colorTheme.black,
                   ),
                   onPressed: () async {
                     final attachment =
@@ -134,8 +136,7 @@ class _ImageFooterState extends State<ImageFooter> {
                     children: <Widget>[
                       Text(
                         '${widget.currentPage + 1} of ${widget.totalPages}',
-                        style:
-                            StreamChatTheme.of(context).textTheme.headlineBold,
+                        style: chatThemeData.textTheme.headlineBold,
                       ),
                     ],
                   ),
@@ -143,7 +144,7 @@ class _ImageFooterState extends State<ImageFooter> {
               ),
               IconButton(
                 icon: StreamSvgIcon.iconGrid(
-                  color: StreamChatTheme.of(context).colorTheme.black,
+                  color: chatThemeData.colorTheme.black,
                 ),
                 onPressed: () => _showPhotosModal(context),
               ),
@@ -155,10 +156,11 @@ class _ImageFooterState extends State<ImageFooter> {
   }
 
   void _showPhotosModal(context) {
+    final chatThemeData = StreamChatTheme.of(context);
     showModalBottomSheet(
       context: context,
-      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      barrierColor: chatThemeData.colorTheme.overlay,
+      backgroundColor: chatThemeData.colorTheme.white,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -189,9 +191,7 @@ class _ImageFooterState extends State<ImageFooter> {
                         padding: const EdgeInsets.all(16),
                         child: Text(
                           'Photos',
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .headlineBold,
+                          style: chatThemeData.textTheme.headlineBold,
                         ),
                       ),
                     ),
@@ -199,7 +199,7 @@ class _ImageFooterState extends State<ImageFooter> {
                       alignment: Alignment.centerRight,
                       child: IconButton(
                         icon: StreamSvgIcon.close(
-                          color: StreamChatTheme.of(context).colorTheme.black,
+                          color: chatThemeData.colorTheme.black,
                         ),
                         onPressed: () => Navigator.maybePop(context),
                       ),
@@ -262,9 +262,7 @@ class _ImageFooterState extends State<ImageFooter> {
                                   boxShadow: [
                                     BoxShadow(
                                       blurRadius: 8,
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .black
+                                      color: chatThemeData.colorTheme.black
                                           .withOpacity(0.3),
                                     ),
                                   ],

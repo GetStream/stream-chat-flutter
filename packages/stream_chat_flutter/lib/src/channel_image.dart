@@ -88,6 +88,7 @@ class ChannelImage extends StatelessWidget {
       initialData: channel.extraData,
       builder: (context, snapshot) {
         String? image;
+        final chatThemeData = StreamChatTheme.of(context);
         if (snapshot.data!.containsKey('image') == true) {
           image = snapshot.data!['image'];
         } else if (channel.state?.members.length == 2) {
@@ -99,20 +100,16 @@ class ChannelImage extends StatelessWidget {
               initialData: otherMember!.user,
               builder: (context, snapshot) => UserAvatar(
                     borderRadius: borderRadius ??
-                        StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .avatarTheme
-                            ?.borderRadius,
+                        chatThemeData
+                            .channelPreviewTheme.avatarTheme?.borderRadius,
                     user: snapshot.data ?? otherMember.user!,
                     constraints: constraints ??
-                        StreamChatTheme.of(context)
-                            .channelPreviewTheme
-                            .avatarTheme
-                            ?.constraints,
+                        chatThemeData
+                            .channelPreviewTheme.avatarTheme?.constraints,
                     onTap: onTap != null ? (_) => onTap!() : null,
                     selected: selected,
-                    selectionColor: selectionColor ??
-                        StreamChatTheme.of(context).colorTheme.accentBlue,
+                    selectionColor:
+                        selectionColor ?? chatThemeData.colorTheme.accentBlue,
                     selectionThickness: selectionThickness,
                   ));
         } else {
@@ -127,37 +124,25 @@ class ChannelImage extends StatelessWidget {
           return GroupImage(
             images: images ?? [],
             borderRadius: borderRadius ??
-                StreamChatTheme.of(context)
-                    .channelPreviewTheme
-                    .avatarTheme
-                    ?.borderRadius,
+                chatThemeData.channelPreviewTheme.avatarTheme?.borderRadius,
             constraints: constraints ??
-                StreamChatTheme.of(context)
-                    .channelPreviewTheme
-                    .avatarTheme
-                    ?.constraints,
+                chatThemeData.channelPreviewTheme.avatarTheme?.constraints,
             onTap: onTap,
             selected: selected,
-            selectionColor: selectionColor ??
-                StreamChatTheme.of(context).colorTheme.accentBlue,
+            selectionColor:
+                selectionColor ?? chatThemeData.colorTheme.accentBlue,
             selectionThickness: selectionThickness,
           );
         }
 
         Widget child = ClipRRect(
           borderRadius: borderRadius ??
-              StreamChatTheme.of(context)
-                  .channelPreviewTheme
-                  .avatarTheme
-                  ?.borderRadius,
+              chatThemeData.channelPreviewTheme.avatarTheme?.borderRadius,
           child: Container(
             constraints: constraints ??
-                StreamChatTheme.of(context)
-                    .channelPreviewTheme
-                    .avatarTheme
-                    ?.constraints,
+                chatThemeData.channelPreviewTheme.avatarTheme?.constraints,
             decoration: BoxDecoration(
-              color: StreamChatTheme.of(context).colorTheme.accentBlue,
+              color: chatThemeData.colorTheme.accentBlue,
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -172,7 +157,7 @@ class ChannelImage extends StatelessWidget {
                             ? snapshot.data!['name'][0]
                             : '',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context).colorTheme.white,
+                          color: chatThemeData.colorTheme.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -180,7 +165,7 @@ class ChannelImage extends StatelessWidget {
                     fit: BoxFit.cover,
                   )
                 else
-                  StreamChatTheme.of(context).defaultChannelImage(
+                  chatThemeData.defaultChannelImage(
                     context,
                     channel,
                   ),
@@ -198,20 +183,13 @@ class ChannelImage extends StatelessWidget {
           child = ClipRRect(
             key: const Key('selectedImage'),
             borderRadius: (borderRadius ??
-                    StreamChatTheme.of(context)
-                        .ownMessageTheme
-                        .avatarTheme
-                        ?.borderRadius ??
+                    chatThemeData.ownMessageTheme.avatarTheme?.borderRadius ??
                     BorderRadius.zero) +
                 BorderRadius.circular(selectionThickness),
             child: Container(
               constraints: constraints ??
-                  StreamChatTheme.of(context)
-                      .ownMessageTheme
-                      .avatarTheme
-                      ?.constraints,
-              color: selectionColor ??
-                  StreamChatTheme.of(context).colorTheme.accentBlue,
+                  chatThemeData.ownMessageTheme.avatarTheme?.constraints,
+              color: selectionColor ?? chatThemeData.colorTheme.accentBlue,
               child: Padding(
                 padding: EdgeInsets.all(selectionThickness),
                 child: child,

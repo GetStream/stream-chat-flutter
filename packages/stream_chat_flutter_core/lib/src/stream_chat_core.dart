@@ -70,12 +70,12 @@ class StreamChatCore extends StatefulWidget {
 
     streamChatState = context.findAncestorStateOfType<StreamChatCoreState>();
 
-    if (streamChatState == null) {
-      throw Exception(
-          'You must have a StreamChat widget at the top of your widget tree');
-    }
+    assert(
+      streamChatState != null,
+      'You must have a StreamChat widget at the top of your widget tree',
+    );
 
-    return streamChatState;
+    return streamChatState!;
   }
 }
 

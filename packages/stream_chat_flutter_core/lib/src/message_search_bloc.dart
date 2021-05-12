@@ -29,17 +29,20 @@ class MessageSearchBloc extends StatefulWidget {
 
     state = context.findAncestorStateOfType<MessageSearchBlocState>();
 
-    if (state == null) {
-      throw Exception('You must have a MessageSearchBloc widget as ancestor');
-    }
+    assert(
+      state != null,
+      'You must have a MessageSearchBloc widget as ancestor',
+    );
 
-    return state;
+    return state!;
   }
 }
 
 /// The current state of the [MessageSearchBloc]
 class MessageSearchBlocState extends State<MessageSearchBloc>
     with AutomaticKeepAliveClientMixin {
+  late StreamChatCoreState _streamChatCoreState;
+
   /// The current messages list
   List<GetMessageResponse>? get messageResponses => _messageResponses.value;
 
@@ -64,7 +67,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
     String? query,
     PaginationParams? pagination,
   }) async {
-    final client = StreamChatCore.of(context).client;
+    final client = _streamChatCoreState.client;
 
     if (_queryMessagesLoadingController.value == true) return;
 
@@ -107,6 +110,12 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
+  }
+
+  @override
+  void didChangeDependencies() {
+    _streamChatCoreState = StreamChatCore.of(context);
+    super.didChangeDependencies();
   }
 
   @override

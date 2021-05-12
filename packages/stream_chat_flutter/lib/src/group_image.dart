@@ -46,18 +46,12 @@ class GroupImage extends StatelessWidget {
       onTap: onTap,
       child: ClipRRect(
         borderRadius: borderRadius ??
-            StreamChatTheme.of(context)
-                .ownMessageTheme
-                .avatarTheme
-                ?.borderRadius,
+            streamChatTheme.ownMessageTheme.avatarTheme?.borderRadius,
         child: Container(
           constraints: constraints ??
-              StreamChatTheme.of(context)
-                  .ownMessageTheme
-                  .avatarTheme
-                  ?.constraints,
+              streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
           decoration: BoxDecoration(
-            color: StreamChatTheme.of(context).colorTheme.accentBlue,
+            color: streamChatTheme.colorTheme.accentBlue,
           ),
           child: Flex(
             direction: Axis.vertical,
@@ -125,8 +119,7 @@ class GroupImage extends StatelessWidget {
                 BorderRadius.zero) +
             BorderRadius.circular(selectionThickness),
         child: Container(
-          color: selectionColor ??
-              StreamChatTheme.of(context).colorTheme.accentBlue,
+          color: selectionColor ?? streamChatTheme.colorTheme.accentBlue,
           height: 64,
           width: 64,
           child: Padding(
