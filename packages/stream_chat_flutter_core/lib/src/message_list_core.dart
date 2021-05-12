@@ -179,7 +179,7 @@ class MessageListCoreState extends State<MessageListCore> {
 
     if (newStreamChannel != _streamChannel) {
       if (_streamChannel == null /*only first time*/ && _isThreadConversation) {
-        _streamChannel!.getReplies(widget.parentMessage!.id);
+        newStreamChannel.getReplies(widget.parentMessage!.id);
       }
       _streamChannel = newStreamChannel;
     }
