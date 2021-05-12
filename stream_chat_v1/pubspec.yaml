@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
-  flutter_app_badger: ^1.1.2
+  flutter_app_badger: ^1.2.0
   flutter:
     sdk: flutter
   stream_chat_flutter:
@@ -20,13 +20,13 @@ dependencies:
       url: https://github.com/GetStream/stream-chat-flutter.git
       ref: develop
       path: packages/stream_chat_persistence
-  flutter_local_notifications: ^2.0.2
-  flutter_svg: ^0.19.3
-  flutter_secure_storage: ^3.3.5
-  yaml: ^2.2.1
-  uuid: ^2.2.2
-  streaming_shared_preferences: ^1.0.2
-  lottie: ^0.7.0+1
+  flutter_local_notifications: ^5.0.0+4
+  flutter_svg: ^0.22.0
+  flutter_secure_storage: ^4.2.0
+  yaml: ^3.1.0
+  uuid: ^3.0.4
+  streaming_shared_preferences: ^2.0.0
+  lottie: ^1.0.1
 
 dependency_overrides:
   stream_chat:
@@ -41,7 +41,7 @@ dependency_overrides:
       path: packages/stream_chat_flutter_core
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.8.1
+  flutter_launcher_icons: ^0.9.0
   test: any
 
 flutter:

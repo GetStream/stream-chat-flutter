@@ -74,16 +74,19 @@ class AppRoutes {
       case Routes.CHAT_INFO_SCREEN:
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.CHAT_INFO_SCREEN),
-            builder: (_) {
+            builder: (context) {
               return ChatInfoScreen(
                 user: args,
+                messageTheme: StreamChatTheme.of(context).ownMessageTheme,
               );
             });
       case Routes.GROUP_INFO_SCREEN:
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.GROUP_INFO_SCREEN),
-            builder: (_) {
-              return GroupInfoScreen();
+            builder: (context) {
+              return GroupInfoScreen(
+                messageTheme: StreamChatTheme.of(context).ownMessageTheme,
+              );
             });
       // Default case, should not reach here.
       default:

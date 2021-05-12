@@ -244,15 +244,11 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     pagination: PaginationParams(
                       limit: 25,
                     ),
-                    filter: {
+                    filter: Filter.and([
                       if (_userNameQuery.isNotEmpty)
-                        'name': {
-                          r'$autocomplete': _userNameQuery,
-                        },
-                      'id': {
-                        r'$ne': StreamChat.of(context).user.id,
-                      }
-                    },
+                        Filter.autoComplete('name', _userNameQuery),
+                      Filter.notEqual('id', StreamChat.of(context).user.id),
+                    ]),
                     sort: [
                       SortOption(
                         'name',

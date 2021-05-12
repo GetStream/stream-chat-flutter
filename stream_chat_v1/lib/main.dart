@@ -498,16 +498,12 @@ class UserMentionPage extends StatelessWidget {
     final user = StreamChat.of(context).user;
     return MessageSearchBloc(
       child: MessageSearchListView(
-        filters: {
-          'members': {
-            r'$in': [user.id],
-          },
-        },
-        messageFilters: {
-          'mentioned_users.id': {
-            r'$contains': user.id,
-          },
-        },
+        filters: Filter.in_('members', [user.id]),
+        messageFilters: Filter.custom(
+          operator: 'contains',
+          key: 'mentioned_users.id',
+          value: user.id,
+        ),
         sortOptions: [
           SortOption(
             'created_at',
@@ -651,11 +647,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                     ? MessageSearchListView(
                         showErrorTile: true,
                         messageQuery: _channelQuery,
-                        filters: {
-                          'members': {
-                            r'$in': [user.id]
-                          },
-                        },
+                        filters: Filter.in_('members', [user.id]),
                         sortOptions: [
                           SortOption(
                             'created_at',
@@ -720,11 +712,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                           Navigator.pushNamed(context, Routes.NEW_CHAT);
                         },
                         swipeToAction: true,
-                        filter: {
-                          'members': {
-                            r'$in': [user.id],
-                          },
-                        },
+                        filter: Filter.in_('members', [user.id]),
                         options: {
                           'presence': true,
                         },
@@ -741,6 +729,8 @@ class _ChannelListPageState extends State<ChannelListPage> {
                                 builder: (context) => StreamChannel(
                                   channel: channel,
                                   child: ChatInfoScreen(
+                                    messageTheme: StreamChatTheme.of(context)
+                                        .ownMessageTheme,
                                     user: channel.state.members
                                         .where((m) =>
                                             m.userId !=
@@ -757,7 +747,10 @@ class _ChannelListPageState extends State<ChannelListPage> {
                               MaterialPageRoute(
                                 builder: (context) => StreamChannel(
                                   channel: channel,
-                                  child: GroupInfoScreen(),
+                                  child: GroupInfoScreen(
+                                    messageTheme: StreamChatTheme.of(context)
+                                        .ownMessageTheme,
+                                  ),
                                 ),
                               ),
                             );
@@ -843,6 +836,7 @@ class _ChannelPageState extends State<ChannelPage> {
                 MaterialPageRoute(
                   builder: (context) => StreamChannel(
                     child: ChatInfoScreen(
+                      messageTheme: StreamChatTheme.of(context).ownMessageTheme,
                       user: otherUser.user,
                     ),
                     channel: channel,
@@ -859,7 +853,9 @@ class _ChannelPageState extends State<ChannelPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => StreamChannel(
-                  child: GroupInfoScreen(),
+                  child: GroupInfoScreen(
+                    messageTheme: StreamChatTheme.of(context).ownMessageTheme,
+                  ),
                   channel: channel,
                 ),
               ),

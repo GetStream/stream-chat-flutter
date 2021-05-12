@@ -13,7 +13,13 @@ class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
   final User user;
 
-  const ChatInfoScreen({Key key, this.user}) : super(key: key);
+  final MessageTheme messageTheme;
+
+  const ChatInfoScreen({
+    Key key,
+    @required this.messageTheme,
+    this.user,
+  }) : super(key: key);
 
   @override
   _ChatInfoScreenState createState() => _ChatInfoScreenState();
@@ -217,6 +223,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   channel: channel,
                   child: MessageSearchBloc(
                     child: ChannelMediaDisplayScreen(
+                      messageTheme: widget.messageTheme,
                       sortOptions: [
                         SortOption(
                           'created_at',
@@ -445,20 +452,10 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
       ),
       body: StreamBuilder<List<Channel>>(
         stream: chat.client.queryChannels(
-          filter: {
-            r'$and': [
-              {
-                'members': {
-                  r'$in': [widget.otherUser.id],
-                },
-              },
-              {
-                'members': {
-                  r'$in': [widget.mainUser.id],
-                },
-              }
-            ],
-          },
+          filter: Filter.and([
+            Filter.in_('members', [widget.otherUser.id]),
+            Filter.in_('members', [widget.mainUser.id]),
+          ]),
         ),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {

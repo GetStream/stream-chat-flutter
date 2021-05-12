@@ -14,6 +14,13 @@ import 'main.dart';
 import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
+  final MessageTheme messageTheme;
+
+  const GroupInfoScreen({
+    Key key,
+    @required this.messageTheme,
+  }) : super(key: key);
+
   @override
   _GroupInfoScreenState createState() => _GroupInfoScreenState();
 }
@@ -502,6 +509,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                   channel: channel,
                   child: MessageSearchBloc(
                     child: ChannelMediaDisplayScreen(
+                      messageTheme: widget.messageTheme,
                       sortOptions: [
                         SortOption(
                           'created_at',
@@ -657,18 +665,16 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           pagination: PaginationParams(
                             limit: 25,
                           ),
-                          filter: {
-                            if (_searchController.text.isNotEmpty)
-                              'name': {
-                                r'$autocomplete': _userNameQuery,
-                              },
-                            'id': {
-                              r'$nin': [
+                          filter: Filter.and(
+                            [
+                              if (_searchController.text.isNotEmpty)
+                                Filter.autoComplete('name', _userNameQuery),
+                              Filter.notIn('id', [
                                 StreamChat.of(context).user.id,
                                 ...channel.state.members.map((e) => e.userId),
-                              ],
-                            },
-                          },
+                              ]),
+                            ],
+                          ),
                           sort: [
                             SortOption(
                               'name',
@@ -848,6 +854,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           builder: (context) => StreamChannel(
                             channel: c,
                             child: ChatInfoScreen(
+                              messageTheme: widget.messageTheme,
                               user: user,
                             ),
                           ),

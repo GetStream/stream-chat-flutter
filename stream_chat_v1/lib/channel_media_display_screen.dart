@@ -20,7 +20,10 @@ class ChannelMediaDisplayScreen extends StatefulWidget {
 
   final ShowMessageCallback onShowMessage;
 
+  final MessageTheme messageTheme;
+
   const ChannelMediaDisplayScreen({
+    @required this.messageTheme,
     this.sortOptions,
     this.paginationParams,
     this.emptyBuilder,
@@ -40,16 +43,14 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     super.initState();
     final messageSearchBloc = MessageSearchBloc.of(context);
     messageSearchBloc.search(
-      filter: {
-        'cid': {
-          r'$in': [StreamChannel.of(context).channel.cid],
-        }
-      },
-      messageFilter: {
-        'attachments.type': {
-          r'$in': ['image', 'video']
-        },
-      },
+      filter: Filter.in_(
+        'cid',
+        [StreamChannel.of(context).channel.cid],
+      ),
+      messageFilter: Filter.in_(
+        'attachments.type',
+        ['image', 'video'],
+      ),
       sort: widget.sortOptions,
       pagination: widget.paginationParams,
     );
@@ -165,16 +166,14 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
 
         return LazyLoadScrollView(
           onEndOfPage: () => messageSearchBloc.search(
-            filter: {
-              'cid': {
-                r'$in': [StreamChannel.of(context).channel.cid]
-              }
-            },
-            messageFilter: {
-              'attachments.type': {
-                r'$in': ['image', 'video']
-              },
-            },
+            filter: Filter.in_(
+              'cid',
+              [StreamChannel.of(context).channel.cid],
+            ),
+            messageFilter: Filter.in_(
+              'attachments.type',
+              ['image', 'video'],
+            ),
             sort: widget.sortOptions,
             pagination: widget.paginationParams.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
@@ -199,7 +198,6 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                                 media.map((e) => e.attachment).toList(),
                             startIndex: position,
                             message: media[position].message,
-                            sentAt: media[position].message.createdAt,
                             userName: media[position].message.user.name,
                             onShowMessage: widget.onShowMessage,
                           ),
@@ -217,6 +215,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
                               MediaQuery.of(context).size.width * 0.8,
                               MediaQuery.of(context).size.height * 0.3,
                             ),
+                            messageTheme: widget.messageTheme,
                           ),
                         )
                       : VideoPlayer(media[position].videoPlayer),

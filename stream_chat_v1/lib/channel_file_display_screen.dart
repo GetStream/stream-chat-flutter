@@ -34,16 +34,14 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
     super.initState();
     final messageSearchBloc = MessageSearchBloc.of(context);
     messageSearchBloc.search(
-      filter: {
-        'cid': {
-          r'$in': [StreamChannel.of(context).channel.cid]
-        }
-      },
-      messageFilter: {
-        'attachments.type': {
-          r'$in': ['file'],
-        },
-      },
+      filter: Filter.in_(
+        'cid',
+        [StreamChannel.of(context).channel.cid],
+      ),
+      messageFilter: Filter.in_(
+        'attachments.type',
+        ['file'],
+      ),
       sort: widget.sortOptions,
       pagination: widget.paginationParams,
     );
@@ -142,16 +140,14 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
 
         return LazyLoadScrollView(
           onEndOfPage: () => messageSearchBloc.search(
-            filter: {
-              'cid': {
-                r'$in': [StreamChannel.of(context).channel.cid]
-              }
-            },
-            messageFilter: {
-              'attachments.type': {
-                r'$in': ['file']
-              },
-            },
+            filter: Filter.in_(
+              'cid',
+              [StreamChannel.of(context).channel.cid],
+            ),
+            messageFilter: Filter.in_(
+              'attachments.type',
+              ['file'],
+            ),
             sort: widget.sortOptions,
             pagination: widget.paginationParams.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,

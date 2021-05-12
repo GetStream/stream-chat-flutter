@@ -70,13 +70,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
             'state': false,
             'watch': false,
           },
-          filter: {
-            'members': [
+          filter: Filter.and([
+            Filter.equal('members', [
               ..._selectedUsers.map((e) => e.id),
               chatState.user.id,
-            ],
-            'distinct': true,
-          },
+            ]),
+            Filter.equal('distinct', true),
+          ]),
           messageLimit: 0,
           paginationParams: PaginationParams(
             limit: 1,
@@ -308,15 +308,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 pagination: PaginationParams(
                                   limit: 25,
                                 ),
-                                filter: {
+                                filter: Filter.and([
                                   if (_userNameQuery.isNotEmpty)
-                                    'name': {
-                                      r'$autocomplete': _userNameQuery,
-                                    },
-                                  'id': {
-                                    r'$ne': StreamChat.of(context).user.id,
-                                  },
-                                },
+                                    Filter.autoComplete('name', _userNameQuery),
+                                  Filter.notEqual(
+                                      'id', StreamChat.of(context).user.id),
+                                ]),
                                 sort: [
                                   SortOption(
                                     'name',
