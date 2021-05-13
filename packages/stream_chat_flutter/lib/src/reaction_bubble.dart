@@ -56,7 +56,7 @@ class ReactionBubble extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Transform.translate(
-          offset: Offset(reverse ? -offset : offset, 0),
+          offset: Offset(-offset, 0),
           child: Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
@@ -106,7 +106,6 @@ class ReactionBubble extends StatelessWidget {
         Positioned(
           bottom: 2,
           left: reverse ? null : 13,
-          right: !reverse ? null : 13,
           child: _buildReactionsTail(context),
         ),
       ],
@@ -160,6 +159,7 @@ class ReactionBubble extends StatelessWidget {
         borderColor,
         maskColor,
         tailCirclesSpace: tailCirclesSpacing,
+        flipTail: !flipTail,
       ),
     );
     return tail;
@@ -174,6 +174,7 @@ class ReactionBubblePainter extends CustomPainter {
     this.borderColor,
     this.maskColor, {
     this.tailCirclesSpace = 0,
+    this.flipTail = false,
   });
 
   /// Color of bubble
@@ -187,6 +188,9 @@ class ReactionBubblePainter extends CustomPainter {
 
   /// Tail circle space
   final double tailCirclesSpace;
+
+  /// Flip tail
+  final bool flipTail;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -211,8 +215,9 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addOval(
         Rect.fromCircle(
-          center:
-              const Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
+          center: const Offset(4, 3).mirrorConditionally(flipTail) +
+              Offset(tailCirclesSpace, tailCirclesSpace)
+                  .mirrorConditionally(flipTail),
           radius: 4,
         ),
       );
@@ -228,8 +233,9 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addOval(
         Rect.fromCircle(
-          center:
-              const Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
+          center: const Offset(4, 3).mirrorConditionally(flipTail) +
+              Offset(tailCirclesSpace, tailCirclesSpace)
+                  .mirrorConditionally(flipTail),
           radius: 2,
         ),
       );
@@ -243,7 +249,9 @@ class ReactionBubblePainter extends CustomPainter {
 
     final path = Path()
       ..addOval(Rect.fromCircle(
-        center: const Offset(4, 3) + Offset(tailCirclesSpace, tailCirclesSpace),
+        center: const Offset(4, 3).mirrorConditionally(flipTail) +
+            Offset(tailCirclesSpace, tailCirclesSpace)
+                .mirrorConditionally(flipTail),
         radius: 2,
       ));
     canvas.drawPath(path, paint);
@@ -261,7 +269,7 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addArc(
         Rect.fromCircle(
-          center: const Offset(1, dy),
+          center: const Offset(1, dy).mirrorConditionally(flipTail),
           radius: 4,
         ),
         -pi * startAngle,
@@ -281,7 +289,7 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addArc(
         Rect.fromCircle(
-          center: const Offset(1, dy),
+          center: const Offset(1, dy).mirrorConditionally(flipTail),
           radius: 4,
         ),
         -pi * startAngle,
@@ -302,7 +310,7 @@ class ReactionBubblePainter extends CustomPainter {
     final path = Path()
       ..addArc(
         Rect.fromCircle(
-          center: const Offset(1, dy),
+          center: const Offset(1, dy).mirrorConditionally(flipTail),
           radius: 6,
         ),
         -pi * startAngle,
@@ -313,4 +321,11 @@ class ReactionBubblePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
+
+/// Extension on [Offset]
+extension YTransformer on Offset {
+  /// Flips x coordinate when flip is true
+  // ignore: avoid_positional_boolean_parameters
+  Offset mirrorConditionally(bool flip) => Offset(flip ? -dx : dx, dy);
 }
