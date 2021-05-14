@@ -1099,7 +1099,7 @@ class Channel {
   }) async {
     final payload = <String, dynamic>{
       'sort': sort,
-      'filter_conditions': filter,
+      'filter_conditions': filter ?? {},
       'type': type,
     };
 
