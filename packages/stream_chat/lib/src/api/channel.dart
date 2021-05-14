@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:collection/collection.dart' show IterableExtension;
+import 'package:collection/collection.dart'
+    show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -1601,8 +1602,9 @@ class ChannelClientState {
   List<Message> get messages => _channelState.messages;
 
   /// Channel message list as a stream
-  Stream<List<Message>?> get messagesStream =>
-      channelStateStream.map((cs) => cs.messages);
+  Stream<List<Message>?> get messagesStream => channelStateStream
+      .map((cs) => cs.messages)
+      .distinct((prev, next) => const ListEquality().equals(prev, next));
 
   /// Channel pinned message list
   List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();

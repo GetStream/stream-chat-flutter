@@ -35,27 +35,12 @@ void main() {
     'messageSearchBlocState.search() should throw if used where '
     'StreamChat is not present in the widget tree',
     (tester) async {
-      const messageSearchBlocKey = Key('messageSearchBloc');
-      const childKey = Key('child');
       final messageSearchBloc = MessageSearchBloc(
-        key: messageSearchBlocKey,
-        child: Offstage(key: childKey),
+        child: Offstage(),
       );
 
       await tester.pumpWidget(messageSearchBloc);
-
-      expect(find.byKey(messageSearchBlocKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
-
-      final usersBlocState = tester.state<MessageSearchBlocState>(
-        find.byKey(messageSearchBlocKey),
-      );
-
-      try {
-        await usersBlocState.search(filter: testFilter);
-      } catch (e) {
-        expect(e, isInstanceOf<Exception>());
-      }
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 

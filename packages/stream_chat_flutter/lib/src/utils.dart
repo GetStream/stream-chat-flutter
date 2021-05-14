@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Launch URL
 Future<void> launchURL(BuildContext context, String? url) async {
@@ -27,89 +27,81 @@ Future<bool?> showConfirmationDialog(
   Widget? icon,
   String? question,
   String? cancelText,
-}) =>
-    showModalBottomSheet(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
-        context: context,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        )),
-        builder: (context) {
-          final effect = StreamChatTheme.of(context).colorTheme.borderTop;
-          return SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 26),
-                if (icon != null) icon,
-                const SizedBox(height: 26),
+}) {
+  final chatThemeData = StreamChatTheme.of(context);
+  return showModalBottomSheet(
+      backgroundColor: chatThemeData.colorTheme.white,
+      context: context,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+      )),
+      builder: (context) {
+        final effect = chatThemeData.colorTheme.borderTop;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 26),
+              if (icon != null) icon,
+              const SizedBox(height: 26),
+              Text(
+                title,
+                style: chatThemeData.textTheme.headlineBold,
+              ),
+              const SizedBox(height: 7),
+              if (question != null)
                 Text(
-                  title,
-                  style: StreamChatTheme.of(context).textTheme.headlineBold,
+                  question,
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 7),
-                if (question != null)
-                  Text(
-                    question,
-                    textAlign: TextAlign.center,
-                  ),
-                const SizedBox(height: 36),
-                Container(
-                  color: effect.color!.withOpacity(effect.alpha ?? 1),
-                  height: 1,
-                ),
-                Row(
-                  children: [
-                    if (cancelText != null)
-                      Flexible(
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(false);
-                            },
-                            child: Text(
-                              cancelText,
-                              style: StreamChatTheme.of(context)
-                                  .textTheme
-                                  .bodyBold
-                                  .copyWith(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .black
-                                          .withOpacity(0.5)),
-                            ),
-                          ),
-                        ),
-                      ),
+              const SizedBox(height: 36),
+              Container(
+                color: effect.color!.withOpacity(effect.alpha ?? 1),
+                height: 1,
+              ),
+              Row(
+                children: [
+                  if (cancelText != null)
                     Flexible(
                       child: Container(
                         alignment: Alignment.center,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pop(context, true);
+                            Navigator.of(context).pop(false);
                           },
                           child: Text(
-                            okText,
-                            style: StreamChatTheme.of(context)
-                                .textTheme
-                                .bodyBold
-                                .copyWith(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .accentRed),
+                            cancelText,
+                            style: chatThemeData.textTheme.bodyBold.copyWith(
+                                color: chatThemeData.colorTheme.black
+                                    .withOpacity(0.5)),
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        });
+                  Flexible(
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                        child: Text(
+                          okText,
+                          style: chatThemeData.textTheme.bodyBold.copyWith(
+                              color: chatThemeData.colorTheme.accentRed),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      });
+}
 
 /// Shows info dialog
 Future<bool?> showInfoDialog(
@@ -119,63 +111,64 @@ Future<bool?> showInfoDialog(
   Widget? icon,
   String? details,
   StreamChatThemeData? theme,
-}) =>
-    showModalBottomSheet(
-      backgroundColor: theme?.colorTheme.white ??
-          StreamChatTheme.of(context).colorTheme.white,
-      context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      )),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              height: 26,
-            ),
-            if (icon != null) icon,
-            const SizedBox(
-              height: 26,
-            ),
-            Text(
-              title,
-              style: theme?.textTheme.headlineBold ??
-                  StreamChatTheme.of(context).textTheme.headlineBold,
-            ),
-            const SizedBox(
-              height: 7,
-            ),
-            if (details != null) Text(details),
-            const SizedBox(
-              height: 36,
-            ),
-            Container(
-              color: theme?.colorTheme.black.withOpacity(.08) ??
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
-              height: 1,
-            ),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  okText,
-                  style: TextStyle(
-                    color: theme?.colorTheme.black.withOpacity(0.5) ??
-                        StreamChatTheme.of(context).colorTheme.accentBlue,
-                    fontWeight: FontWeight.w400,
-                  ),
+}) {
+  final chatThemeData = StreamChatTheme.of(context);
+  return showModalBottomSheet(
+    backgroundColor: theme?.colorTheme.white ?? chatThemeData.colorTheme.white,
+    context: context,
+    shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
+    )),
+    builder: (context) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            height: 26,
+          ),
+          if (icon != null) icon,
+          const SizedBox(
+            height: 26,
+          ),
+          Text(
+            title,
+            style: theme?.textTheme.headlineBold ??
+                chatThemeData.textTheme.headlineBold,
+          ),
+          const SizedBox(
+            height: 7,
+          ),
+          if (details != null) Text(details),
+          const SizedBox(
+            height: 36,
+          ),
+          Container(
+            color: theme?.colorTheme.black.withOpacity(.08) ??
+                chatThemeData.colorTheme.black.withOpacity(.08),
+            height: 1,
+          ),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                okText,
+                style: TextStyle(
+                  color: theme?.colorTheme.black.withOpacity(0.5) ??
+                      chatThemeData.colorTheme.accentBlue,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
+    ),
+  );
+}
 
 /// Get random png with initials
 String getRandomPicUrl(User user) =>

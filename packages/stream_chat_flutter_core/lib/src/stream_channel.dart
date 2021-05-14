@@ -47,13 +47,12 @@ class StreamChannel extends StatefulWidget {
 
     streamChannelState = context.findAncestorStateOfType<StreamChannelState>();
 
-    if (streamChannelState == null) {
-      throw Exception(
-        'You must have a StreamChannel widget at the top of your widget tree',
-      );
-    }
+    assert(
+      streamChannelState != null,
+      'You must have a StreamChannel widget at the top of your widget tree',
+    );
 
-    return streamChannelState;
+    return streamChannelState!;
   }
 
   @override

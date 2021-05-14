@@ -46,7 +46,7 @@ void main() {
       await tester.pumpWidget(channelListCore);
 
       expect(find.byKey(channelListCoreKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 

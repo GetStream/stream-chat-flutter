@@ -46,7 +46,7 @@ void main() {
 
       expect(find.byKey(channelsBlocKey), findsNothing);
       expect(find.byKey(childKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 

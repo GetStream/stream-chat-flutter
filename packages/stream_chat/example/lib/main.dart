@@ -79,21 +79,21 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messages = channel.state!.channelStateStream;
+    final messages = channel.state!.messagesStream;
     return Scaffold(
       appBar: AppBar(
         title: Text('Channel: ${channel.id}'),
       ),
       body: SafeArea(
-        child: StreamBuilder<ChannelState?>(
+        child: StreamBuilder<List<Message>?>(
           stream: messages,
           builder: (
             BuildContext context,
-            AsyncSnapshot<ChannelState?> snapshot,
+            AsyncSnapshot<List<Message>?> snapshot,
           ) {
             if (snapshot.hasData && snapshot.data != null) {
               return MessageView(
-                messages: snapshot.data!.messages.reversed.toList(),
+                messages: snapshot.data!.reversed.toList(),
                 channel: channel,
               );
             } else if (snapshot.hasError) {

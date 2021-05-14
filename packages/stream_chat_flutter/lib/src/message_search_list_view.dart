@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/info_tile.dart';
 import 'package:stream_chat_flutter/src/message_search_item.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Callback called when tapping on a user
 typedef MessageSearchItemTapCallback = void Function(GetMessageResponse);
@@ -270,12 +270,13 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
     );
 
     if (widget.showResultCount) {
+      final chatThemeData = StreamChatTheme.of(context);
       child = Column(
         children: [
           Container(
             width: double.maxFinite,
             decoration: BoxDecoration(
-              gradient: StreamChatTheme.of(context).colorTheme.bgGradient,
+              gradient: chatThemeData.colorTheme.bgGradient,
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -285,7 +286,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               child: Text(
                 '${items.length} results',
                 style: TextStyle(
-                  color: StreamChatTheme.of(context).colorTheme.grey,
+                  color: chatThemeData.colorTheme.grey,
                 ),
               ),
             ),

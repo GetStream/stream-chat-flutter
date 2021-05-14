@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/media_list_view.dart';
 import 'package:stream_chat_flutter/src/message_list_view.dart';
 import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
@@ -19,11 +20,10 @@ import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/src/video_service.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:video_compress/video_compress.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// Builder for attachment thumbnails
 typedef AttachmentThumbnailBuilder = Widget Function(
@@ -299,8 +299,9 @@ class MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
     Widget child = Container(
-      color: StreamChatTheme.of(context).messageInputTheme.inputBackground,
+      color: streamChatThemeData.messageInputTheme.inputBackground,
       child: SafeArea(
         child: GestureDetector(
           onPanUpdate: (details) {
@@ -325,9 +326,7 @@ class MessageInputState extends State<MessageInput> {
                       Padding(
                         padding: const EdgeInsets.all(8),
                         child: StreamSvgIcon.reply(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .greyGainsboro,
+                          color: streamChatThemeData.colorTheme.greyGainsboro,
                         ),
                       ),
                       const Text(
@@ -385,68 +384,65 @@ class MessageInputState extends State<MessageInput> {
         ],
       );
 
-  Widget _buildDmCheckbox() => Row(
-        children: [
-          Container(
-            height: 16,
-            width: 16,
-            foregroundDecoration: BoxDecoration(
-              border: _sendAsDm
-                  ? null
-                  : Border.all(
-                      color: StreamChatTheme.of(context)
-                          .colorTheme
-                          .black
-                          .withOpacity(.5),
-                      width: 2,
-                    ),
+  Widget _buildDmCheckbox() {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return Row(
+      children: [
+        Container(
+          height: 16,
+          width: 16,
+          foregroundDecoration: BoxDecoration(
+            border: _sendAsDm
+                ? null
+                : Border.all(
+                    color: streamChatThemeData.colorTheme.black.withOpacity(.5),
+                    width: 2,
+                  ),
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Center(
+            child: Material(
               borderRadius: BorderRadius.circular(3),
-            ),
-            child: Center(
-              child: Material(
-                borderRadius: BorderRadius.circular(3),
-                color: _sendAsDm
-                    ? StreamChatTheme.of(context).colorTheme.accentBlue
-                    : StreamChatTheme.of(context).colorTheme.white,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _sendAsDm = !_sendAsDm;
-                    });
-                  },
-                  child: AnimatedCrossFade(
-                    duration: const Duration(milliseconds: 300),
-                    reverseDuration: const Duration(milliseconds: 300),
-                    crossFadeState: _sendAsDm
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    firstChild: StreamSvgIcon.check(
-                      size: 16,
-                      color: StreamChatTheme.of(context).colorTheme.white,
-                    ),
-                    secondChild: const SizedBox(
-                      height: 16,
-                      width: 16,
-                    ),
+              color: _sendAsDm
+                  ? streamChatThemeData.colorTheme.accentBlue
+                  : streamChatThemeData.colorTheme.white,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _sendAsDm = !_sendAsDm;
+                  });
+                },
+                child: AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 300),
+                  reverseDuration: const Duration(milliseconds: 300),
+                  crossFadeState: _sendAsDm
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: StreamSvgIcon.check(
+                    size: 16,
+                    color: streamChatThemeData.colorTheme.white,
+                  ),
+                  secondChild: const SizedBox(
+                    height: 16,
+                    width: 16,
                   ),
                 ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              'Also send as direct message',
-              style: StreamChatTheme.of(context).textTheme.footnote.copyWith(
-                    color: StreamChatTheme.of(context)
-                        .colorTheme
-                        .black
-                        .withOpacity(0.5),
-                  ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'Also send as direct message',
+            style: streamChatThemeData.textTheme.footnote.copyWith(
+              color: streamChatThemeData.colorTheme.black.withOpacity(0.5),
             ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 
   Widget _animateSendButton(BuildContext context) {
     final sendButton = widget.activeSendButton != null
@@ -636,12 +632,9 @@ class MessageInputState extends State<MessageInput> {
                         ),
                         Text(
                           _chosenCommand?.name.toUpperCase() ?? '',
-                          style: StreamChatTheme.of(context)
-                              .textTheme
-                              .footnoteBold
-                              .copyWith(
-                                color: Colors.white,
-                              ),
+                          style: theme.textTheme.footnoteBold.copyWith(
+                            color: Colors.white,
+                          ),
                         ),
                       ],
                     ),
@@ -839,116 +832,110 @@ class MessageInputState extends State<MessageInput> {
                   tween: Tween(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOutExpo,
-                  builder: (context, val, wid) => Transform.scale(
-                        scale: val,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            color: StreamChatTheme.of(context).colorTheme.white,
-                            clipBehavior: Clip.antiAlias,
-                            child: Container(
-                              constraints: BoxConstraints.loose(
-                                  const Size.fromHeight(400)),
-                              decoration: BoxDecoration(
-                                  color: StreamChatTheme.of(context)
-                                      .colorTheme
-                                      .white,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: ListView(
-                                padding: const EdgeInsets.all(0),
-                                shrinkWrap: true,
-                                children: [
-                                  if (commands.isNotEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8),
-                                      child: Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                            ),
-                                            child: StreamSvgIcon.lightning(
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .accentBlue,
-                                            ),
+                  builder: (context, val, wid) {
+                    final streamChatThemeData = StreamChatTheme.of(context);
+                    return Transform.scale(
+                      scale: val,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          color: streamChatThemeData.colorTheme.white,
+                          clipBehavior: Clip.antiAlias,
+                          child: Container(
+                            constraints: BoxConstraints.loose(
+                                const Size.fromHeight(400)),
+                            decoration: BoxDecoration(
+                                color: streamChatThemeData.colorTheme.white,
+                                borderRadius: BorderRadius.circular(8)),
+                            child: ListView(
+                              padding: const EdgeInsets.all(0),
+                              shrinkWrap: true,
+                              children: [
+                                if (commands.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
                                           ),
-                                          Text(
-                                            'Instant Commands',
-                                            style: TextStyle(
-                                              color: StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .black
-                                                  .withOpacity(.5),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  ...commands
-                                      .map(
-                                        (c) => InkWell(
-                                          onTap: () {
-                                            _setCommand(c);
-                                          },
-                                          child: SizedBox(
-                                            height: 40,
-                                            child: Row(
-                                              children: [
-                                                const SizedBox(
-                                                  width: 16,
-                                                ),
-                                                _buildCommandIcon(c.name),
-                                                const SizedBox(
-                                                  width: 8,
-                                                ),
-                                                Text.rich(
-                                                  TextSpan(
-                                                    text: c.name.capitalize(),
-                                                    style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                    children: [
-                                                      TextSpan(
-                                                        text:
-                                                            '   /${c.name} ${c.args}',
-                                                        style:
-                                                            StreamChatTheme.of(
-                                                                    context)
-                                                                .textTheme
-                                                                .body
-                                                                .copyWith(
-                                                                  // ignore: lines_longer_than_80_chars
-                                                                  color: StreamChatTheme.of(
-                                                                          // ignore: lines_longer_than_80_chars
-                                                                          context)
-                                                                      // ignore: lines_longer_than_80_chars
-                                                                      .colorTheme
-                                                                      .grey,
-                                                                ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                          child: StreamSvgIcon.lightning(
+                                            color: streamChatThemeData
+                                                .colorTheme.accentBlue,
                                           ),
                                         ),
-                                      )
-                                      .toList(),
-                                ],
-                              ),
+                                        Text(
+                                          'Instant Commands',
+                                          style: TextStyle(
+                                            color: streamChatThemeData
+                                                .colorTheme.black
+                                                .withOpacity(.5),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                ...commands
+                                    .map(
+                                      (c) => InkWell(
+                                        onTap: () {
+                                          _setCommand(c);
+                                        },
+                                        child: SizedBox(
+                                          height: 40,
+                                          child: Row(
+                                            children: [
+                                              const SizedBox(
+                                                width: 16,
+                                              ),
+                                              _buildCommandIcon(c.name),
+                                              const SizedBox(
+                                                width: 8,
+                                              ),
+                                              Text.rich(
+                                                TextSpan(
+                                                  text: c.name.capitalize(),
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                  children: [
+                                                    TextSpan(
+                                                      text:
+                                                          '   /${c.name} ${c.args}',
+                                                      style: streamChatThemeData
+                                                          .textTheme.body
+                                                          .copyWith(
+                                                        // ignore: lines_longer_than_80_chars
+                                                        color: streamChatThemeData
+                                                            // ignore: lines_longer_than_80_chars
+                                                            .colorTheme
+                                                            .grey,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ],
                             ),
                           ),
                         ),
-                      )),
+                      ),
+                    );
+                  }),
             ));
   }
 
@@ -956,37 +943,30 @@ class MessageInputState extends State<MessageInput> {
     final _attachmentContainsFile =
         _attachments.values.any((it) => it.type == 'file');
 
+    final chatThemeData = StreamChatTheme.of(context);
     Color _getIconColor(int index) {
+      final streamChatThemeData = chatThemeData;
       switch (index) {
         case 0:
           return _attachments.isEmpty
-              ? StreamChatTheme.of(context).colorTheme.accentBlue
+              ? streamChatThemeData.colorTheme.accentBlue
               : (!_attachmentContainsFile
-                  ? StreamChatTheme.of(context).colorTheme.accentBlue
-                  : StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.2));
+                  ? streamChatThemeData.colorTheme.accentBlue
+                  : streamChatThemeData.colorTheme.black.withOpacity(0.2));
         case 1:
           return _attachmentContainsFile
-              ? StreamChatTheme.of(context).colorTheme.accentBlue
+              ? streamChatThemeData.colorTheme.accentBlue
               : (_attachments.isEmpty
-                  ? StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.5)
-                  : StreamChatTheme.of(context)
-                      .colorTheme
-                      .black
-                      .withOpacity(0.2));
+                  ? streamChatThemeData.colorTheme.black.withOpacity(0.5)
+                  : streamChatThemeData.colorTheme.black.withOpacity(0.2));
         case 2:
           return _attachmentContainsFile && _attachments.isNotEmpty
-              ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
-              : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
+              ? streamChatThemeData.colorTheme.black.withOpacity(0.2)
+              : streamChatThemeData.colorTheme.black.withOpacity(0.5);
         case 3:
           return _attachmentContainsFile && _attachments.isNotEmpty
-              ? StreamChatTheme.of(context).colorTheme.black.withOpacity(0.2)
-              : StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5);
+              ? streamChatThemeData.colorTheme.black.withOpacity(0.2)
+              : streamChatThemeData.colorTheme.black.withOpacity(0.5);
         default:
           return Colors.black;
       }
@@ -997,7 +977,7 @@ class MessageInputState extends State<MessageInput> {
           _animateContainer ? const Duration(milliseconds: 300) : Duration.zero,
       height: _openFilePickerSection ? _filePickerSize : 0,
       child: Material(
-        color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+        color: chatThemeData.colorTheme.whiteSmoke,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1061,7 +1041,7 @@ class MessageInputState extends State<MessageInput> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: StreamChatTheme.of(context).colorTheme.white,
+                  color: chatThemeData.colorTheme.white,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -1076,8 +1056,7 @@ class MessageInputState extends State<MessageInput> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color:
-                              StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                          color: chatThemeData.colorTheme.whiteSmoke,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -1090,7 +1069,7 @@ class MessageInputState extends State<MessageInput> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: StreamChatTheme.of(context).colorTheme.white,
+                    color: chatThemeData.colorTheme.white,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: _PickerWidget(
@@ -1166,6 +1145,7 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildCommandIcon(String iconType) {
+    final chatThemeData = StreamChatTheme.of(context);
     switch (iconType) {
       case 'giphy':
         return CircleAvatar(
@@ -1176,7 +1156,7 @@ class MessageInputState extends State<MessageInput> {
         );
       case 'ban':
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: StreamSvgIcon.iconUserDelete(
             size: 16,
@@ -1185,7 +1165,7 @@ class MessageInputState extends State<MessageInput> {
         );
       case 'flag':
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: StreamSvgIcon.flag(
             size: 14,
@@ -1194,7 +1174,7 @@ class MessageInputState extends State<MessageInput> {
         );
       case 'imgur':
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: ClipOval(
             child: StreamSvgIcon.imgur(
@@ -1204,7 +1184,7 @@ class MessageInputState extends State<MessageInput> {
         );
       case 'mute':
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: StreamSvgIcon.mute(
             size: 16,
@@ -1213,7 +1193,7 @@ class MessageInputState extends State<MessageInput> {
         );
       case 'unban':
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: StreamSvgIcon.userAdd(
             size: 16,
@@ -1222,7 +1202,7 @@ class MessageInputState extends State<MessageInput> {
         );
       case 'unmute':
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: StreamSvgIcon.volumeUp(
             size: 16,
@@ -1231,7 +1211,7 @@ class MessageInputState extends State<MessageInput> {
         );
       default:
         return CircleAvatar(
-          backgroundColor: StreamChatTheme.of(context).colorTheme.accentBlue,
+          backgroundColor: chatThemeData.colorTheme.accentBlue,
           radius: 12,
           child: StreamSvgIcon.lightning(
             size: 16,
@@ -1249,17 +1229,14 @@ class MessageInputState extends State<MessageInput> {
 
     Future<List<Member>>? queryMembers;
 
+    final channelState = StreamChannel.of(context);
     if (query.isNotEmpty) {
-      queryMembers = StreamChannel.of(context)
-          .channel
+      queryMembers = channelState.channel
           .queryMembers(filter: Filter.autoComplete('name', query))
           .then((res) => res.members);
     }
 
-    final members = StreamChannel.of(context)
-            .channel
-            .state
-            ?.members
+    final members = channelState.channel.state?.members
             .where((m) => m.user?.name.toLowerCase().contains(query) == true)
             .toList() ??
         [];
@@ -1281,76 +1258,78 @@ class MessageInputState extends State<MessageInput> {
           tween: Tween(begin: 0, end: 1),
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOutExpo,
-          builder: (context, val, wid) => Transform.scale(
-            scale: val,
-            child: Card(
-              margin: const EdgeInsets.all(8),
-              elevation: 2,
-              color: StreamChatTheme.of(context).colorTheme.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Container(
-                constraints: BoxConstraints.loose(const Size.fromHeight(240)),
-                decoration: BoxDecoration(
-                  color: StreamChatTheme.of(context).colorTheme.white,
+          builder: (context, val, wid) {
+            final chatThemeData = StreamChatTheme.of(context);
+            return Transform.scale(
+              scale: val,
+              child: Card(
+                margin: const EdgeInsets.all(8),
+                elevation: 2,
+                color: chatThemeData.colorTheme.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: FutureBuilder<List<Member>>(
-                  future: queryMembers ?? Future.value(members),
-                  initialData: members,
-                  builder: (context, snapshot) => ListView(
-                    padding: const EdgeInsets.all(0),
-                    shrinkWrap: true,
-                    children: [
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      ...snapshot.data!
-                          .where((it) => it.user != null)
-                          .map(
-                            (m) => Material(
-                              color:
-                                  StreamChatTheme.of(context).colorTheme.white,
-                              child: InkWell(
-                                onTap: () {
-                                  if (m.user != null) {
-                                    _mentionedUsers.add(m.user!);
-                                  }
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  constraints: BoxConstraints.loose(const Size.fromHeight(240)),
+                  decoration: BoxDecoration(
+                    color: chatThemeData.colorTheme.white,
+                  ),
+                  child: FutureBuilder<List<Member>>(
+                    future: queryMembers ?? Future.value(members),
+                    initialData: members,
+                    builder: (context, snapshot) => ListView(
+                      padding: const EdgeInsets.all(0),
+                      shrinkWrap: true,
+                      children: [
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        ...snapshot.data!
+                            .where((it) => it.user != null)
+                            .map(
+                              (m) => Material(
+                                color: chatThemeData.colorTheme.white,
+                                child: InkWell(
+                                  onTap: () {
+                                    if (m.user != null) {
+                                      _mentionedUsers.add(m.user!);
+                                    }
 
-                                  splits[splits.length - 1] = m.user!.name;
-                                  final rejoin = splits.join('@');
+                                    splits[splits.length - 1] = m.user!.name;
+                                    final rejoin = splits.join('@');
 
-                                  textEditingController.value =
-                                      TextEditingValue(
-                                    text: rejoin +
-                                        textEditingController.text.substring(
-                                            textEditingController
-                                                .selection.start),
-                                    selection: TextSelection.collapsed(
-                                      offset: rejoin.length,
-                                    ),
-                                  );
-                                  _debounce!.cancel();
-                                  _mentionsOverlay?.remove();
-                                  _mentionsOverlay = null;
-                                },
-                                child: widget.mentionsTileBuilder != null
-                                    ? widget.mentionsTileBuilder!(context, m)
-                                    : MentionTile(m),
+                                    textEditingController.value =
+                                        TextEditingValue(
+                                      text: rejoin +
+                                          textEditingController.text.substring(
+                                              textEditingController
+                                                  .selection.start),
+                                      selection: TextSelection.collapsed(
+                                        offset: rejoin.length,
+                                      ),
+                                    );
+                                    _debounce!.cancel();
+                                    _mentionsOverlay?.remove();
+                                    _mentionsOverlay = null;
+                                  },
+                                  child: widget.mentionsTileBuilder != null
+                                      ? widget.mentionsTileBuilder!(context, m)
+                                      : MentionTile(m),
+                                ),
                               ),
-                            ),
-                          )
-                          .toList(),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                    ],
+                            )
+                            .toList(),
+                        const SizedBox(
+                          height: 8,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -1379,91 +1358,88 @@ class MessageInputState extends State<MessageInput> {
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
 
-    return OverlayEntry(
-        builder: (context) => Positioned(
-              bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
-              left: 0,
-              right: 0,
-              child: Card(
-                margin: const EdgeInsets.all(8),
-                elevation: 2,
-                color: StreamChatTheme.of(context).colorTheme.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+    return OverlayEntry(builder: (context) {
+      final chatThemeData = StreamChatTheme.of(context);
+      return Positioned(
+        bottom: size.height + MediaQuery.of(context).viewInsets.bottom,
+        left: 0,
+        right: 0,
+        child: Card(
+          margin: const EdgeInsets.all(8),
+          elevation: 2,
+          color: chatThemeData.colorTheme.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            constraints: BoxConstraints.loose(const Size.fromHeight(200)),
+            decoration: BoxDecoration(
+              boxShadow: const [
+                BoxShadow(
+                  spreadRadius: -8,
+                  blurRadius: 5,
+                  offset: Offset(0, -4),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  constraints: BoxConstraints.loose(const Size.fromHeight(200)),
-                  decoration: BoxDecoration(
-                    boxShadow: const [
-                      BoxShadow(
-                        spreadRadius: -8,
-                        blurRadius: 5,
-                        offset: Offset(0, -4),
-                      ),
-                    ],
-                    color: StreamChatTheme.of(context).colorTheme.white,
-                  ),
-                  child: ListView.builder(
-                      padding: const EdgeInsets.all(0),
-                      shrinkWrap: true,
-                      itemCount: emojis.length + 1,
-                      itemBuilder: (context, i) {
-                        if (i == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 8, top: 8),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: StreamSvgIcon.smile(
-                                    color: StreamChatTheme.of(context)
-                                        .colorTheme
-                                        .accentBlue,
-                                  ),
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    'Emoji matching "$query"',
-                                    style: TextStyle(
-                                      color: StreamChatTheme.of(context)
-                                          .colorTheme
-                                          .black
-                                          .withOpacity(.5),
-                                    ),
-                                  ),
-                                )
-                              ],
+              ],
+              color: chatThemeData.colorTheme.white,
+            ),
+            child: ListView.builder(
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                itemCount: emojis.length + 1,
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 8),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: StreamSvgIcon.smile(
+                              color: chatThemeData.colorTheme.accentBlue,
                             ),
-                          );
-                        }
-
-                        final emoji = emojis.elementAt(i - 1)!;
-                        return ListTile(
-                          title: SubstringHighlight(
-                            text:
-                                // ignore: lines_longer_than_80_chars
-                                "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
-                            term: query,
-                            textStyleHighlight:
-                                Theme.of(context).textTheme.headline6!.copyWith(
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                            textStyle:
-                                Theme.of(context).textTheme.headline6!.copyWith(
-                                      fontSize: 14.5,
-                                    ),
                           ),
-                          onTap: () {
-                            _chooseEmoji(splits, emoji);
-                          },
-                        );
-                      }),
-                ),
-              ),
-            ));
+                          Flexible(
+                            child: Text(
+                              'Emoji matching "$query"',
+                              style: TextStyle(
+                                color: chatThemeData.colorTheme.black
+                                    .withOpacity(.5),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  }
+
+                  final emoji = emojis.elementAt(i - 1)!;
+                  final themeData = Theme.of(context);
+                  return ListTile(
+                    title: SubstringHighlight(
+                      text:
+                          // ignore: lines_longer_than_80_chars
+                          "${emoji.char} ${emoji.name!.replaceAll('_', ' ')}",
+                      term: query,
+                      textStyleHighlight:
+                          themeData.textTheme.headline6!.copyWith(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textStyle: themeData.textTheme.headline6!.copyWith(
+                        fontSize: 14.5,
+                      ),
+                    ),
+                    onTap: () {
+                      _chooseEmoji(splits, emoji);
+                    },
+                  );
+                }),
+          ),
+        ),
+      );
+    });
   }
 
   void _chooseEmoji(List<String> splits, Emoji emoji) {
@@ -1589,30 +1565,32 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildRemoveButton(Attachment attachment) => SizedBox(
-        height: 24,
-        width: 24,
-        child: RawMaterialButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 0,
-          highlightElevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          onPressed: () {
-            setState(() => _attachments.remove(attachment.id));
-          },
-          fillColor:
-              StreamChatTheme.of(context).colorTheme.black.withOpacity(.5),
-          child: Center(
-            child: StreamSvgIcon.close(
-              size: 24,
-              color: StreamChatTheme.of(context).colorTheme.white,
-            ),
+  Widget _buildRemoveButton(Attachment attachment) {
+    final chatThemeData = StreamChatTheme.of(context);
+    return SizedBox(
+      height: 24,
+      width: 24,
+      child: RawMaterialButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        highlightElevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        onPressed: () {
+          setState(() => _attachments.remove(attachment.id));
+        },
+        fillColor: chatThemeData.colorTheme.black.withOpacity(.5),
+        child: Center(
+          child: StreamSvgIcon.close(
+            size: 24,
+            color: chatThemeData.colorTheme.white,
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildAttachment(Attachment attachment) {
     if (widget.attachmentThumbnailBuilders?.containsKey(attachment.type) ==
@@ -1642,18 +1620,18 @@ class MessageInputState extends State<MessageInput> {
                 fit: BoxFit.cover,
                 errorWidget: (_, obj, trace) =>
                     getFileTypeImage(attachment.extraData['other'] as String?),
-                progressIndicatorBuilder: (context, _, progress) =>
-                    Shimmer.fromColors(
-                  baseColor:
-                      StreamChatTheme.of(context).colorTheme.greyGainsboro,
-                  highlightColor:
-                      StreamChatTheme.of(context).colorTheme.whiteSmoke,
-                  child: Image.asset(
-                    'images/placeholder.png',
-                    fit: BoxFit.cover,
-                    package: 'stream_chat_flutter',
-                  ),
-                ),
+                progressIndicatorBuilder: (context, _, progress) {
+                  final chatThemeData = StreamChatTheme.of(context);
+                  return Shimmer.fromColors(
+                    baseColor: chatThemeData.colorTheme.greyGainsboro,
+                    highlightColor: chatThemeData.colorTheme.whiteSmoke,
+                    child: Image.asset(
+                      'images/placeholder.png',
+                      fit: BoxFit.cover,
+                      package: 'stream_chat_flutter',
+                    ),
+                  );
+                },
               );
       case 'video':
         return Stack(
@@ -1685,17 +1663,14 @@ class MessageInputState extends State<MessageInput> {
   Widget _buildCommandButton() {
     final s = textEditingController.text.trim();
 
+    final chatThemeData = StreamChatTheme.of(context);
     return IconButton(
       icon: StreamSvgIcon.lightning(
         color: s.isNotEmpty
-            ? StreamChatTheme.of(context).colorTheme.greyGainsboro
+            ? chatThemeData.colorTheme.greyGainsboro
             : (_commandsOverlay != null
-                ? StreamChatTheme.of(context)
-                    .messageInputTheme
-                    .actionButtonColor
-                : StreamChatTheme.of(context)
-                    .messageInputTheme
-                    .actionButtonIdleColor),
+                ? chatThemeData.messageInputTheme.actionButtonColor
+                : chatThemeData.messageInputTheme.actionButtonIdleColor),
       ),
       padding: const EdgeInsets.all(0),
       constraints: const BoxConstraints.tightFor(
@@ -1730,39 +1705,40 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildAttachmentButton() => IconButton(
-        icon: StreamSvgIcon.attach(
-          color: _openFilePickerSection
-              ? StreamChatTheme.of(context).messageInputTheme.actionButtonColor
-              : StreamChatTheme.of(context)
-                  .messageInputTheme
-                  .actionButtonIdleColor,
-        ),
-        padding: const EdgeInsets.all(0),
-        constraints: const BoxConstraints.tightFor(
-          height: 24,
-          width: 24,
-        ),
-        splashRadius: 24,
-        onPressed: () async {
-          _emojiOverlay?.remove();
-          _emojiOverlay = null;
-          _commandsOverlay?.remove();
-          _commandsOverlay = null;
-          _mentionsOverlay?.remove();
-          _mentionsOverlay = null;
+  Widget _buildAttachmentButton() {
+    final chatThemeData = StreamChatTheme.of(context);
+    return IconButton(
+      icon: StreamSvgIcon.attach(
+        color: _openFilePickerSection
+            ? chatThemeData.messageInputTheme.actionButtonColor
+            : chatThemeData.messageInputTheme.actionButtonIdleColor,
+      ),
+      padding: const EdgeInsets.all(0),
+      constraints: const BoxConstraints.tightFor(
+        height: 24,
+        width: 24,
+      ),
+      splashRadius: 24,
+      onPressed: () async {
+        _emojiOverlay?.remove();
+        _emojiOverlay = null;
+        _commandsOverlay?.remove();
+        _commandsOverlay = null;
+        _mentionsOverlay?.remove();
+        _mentionsOverlay = null;
 
-          if (_openFilePickerSection) {
-            setState(() {
-              _animateContainer = true;
-              _openFilePickerSection = false;
-              _filePickerSize = _kMinMediaPickerSize;
-            });
-          } else {
-            showAttachmentModal();
-          }
-        },
-      );
+        if (_openFilePickerSection) {
+          setState(() {
+            _animateContainer = true;
+            _openFilePickerSection = false;
+            _filePickerSize = _kMinMediaPickerSize;
+          });
+        } else {
+          showAttachmentModal();
+        }
+      },
+    );
+  }
 
   /// Show the attachment modal, making the user choose where to
   /// pick a media from
@@ -2103,8 +2079,9 @@ class MessageInputState extends State<MessageInput> {
   StreamSubscription? _keyboardListener;
 
   void _showErrorAlert(String description) {
+    final chatThemeData = StreamChatTheme.of(context);
     showModalBottomSheet(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      backgroundColor: chatThemeData.colorTheme.white,
       context: context,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -2118,7 +2095,7 @@ class MessageInputState extends State<MessageInput> {
             height: 26,
           ),
           StreamSvgIcon.error(
-            color: StreamChatTheme.of(context).colorTheme.accentRed,
+            color: chatThemeData.colorTheme.accentRed,
             size: 24,
           ),
           const SizedBox(
@@ -2126,7 +2103,7 @@ class MessageInputState extends State<MessageInput> {
           ),
           Text(
             'Something went wrong',
-            style: StreamChatTheme.of(context).textTheme.headlineBold,
+            style: chatThemeData.textTheme.headlineBold,
           ),
           const SizedBox(
             height: 7,
@@ -2142,8 +2119,7 @@ class MessageInputState extends State<MessageInput> {
             height: 36,
           ),
           Container(
-            color:
-                StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+            color: chatThemeData.colorTheme.black.withOpacity(.08),
             height: 1,
           ),
           Row(
@@ -2155,13 +2131,8 @@ class MessageInputState extends State<MessageInput> {
                 },
                 child: Text(
                   'OK',
-                  style: StreamChatTheme.of(context)
-                      .textTheme
-                      .bodyBold
-                      .copyWith(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .accentBlue),
+                  style: chatThemeData.textTheme.bodyBold
+                      .copyWith(color: chatThemeData.colorTheme.accentBlue),
                 ),
               ),
             ],
@@ -2291,6 +2262,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
             return const Center(child: CircularProgressIndicator());
           }
 
+          final chatThemeData = StreamChatTheme.of(context);
           if (snapshot.data!) {
             if (widget.containsFile) {
               return GestureDetector(
@@ -2299,12 +2271,12 @@ class __PickerWidgetState extends State<_PickerWidget> {
                 },
                 child: Container(
                   constraints: const BoxConstraints.expand(),
-                  color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+                  color: chatThemeData.colorTheme.whiteSmoke,
                   alignment: Alignment.center,
                   child: Text(
                     'Add more files',
                     style: TextStyle(
-                      color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                      color: chatThemeData.colorTheme.accentBlue,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -2322,7 +2294,7 @@ class __PickerWidgetState extends State<_PickerWidget> {
               PhotoManager.openSetting();
             },
             child: Container(
-              color: StreamChatTheme.of(context).colorTheme.whiteSmoke,
+              color: chatThemeData.colorTheme.whiteSmoke,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2331,27 +2303,22 @@ class __PickerWidgetState extends State<_PickerWidget> {
                     'svgs/icon_picture_empty_state.svg',
                     package: 'stream_chat_flutter',
                     height: 140,
-                    color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                    color: chatThemeData.colorTheme.greyGainsboro,
                   ),
                   Text(
                     // ignore: lines_longer_than_80_chars
                     'Please enable access to your photos \nand videos so you can share them with friends.',
-                    style: StreamChatTheme.of(context).textTheme.body.copyWith(
-                        color: StreamChatTheme.of(context).colorTheme.grey),
+                    style: chatThemeData.textTheme.body
+                        .copyWith(color: chatThemeData.colorTheme.grey),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
                   Center(
                     child: Text(
                       'Allow access to your gallery',
-                      style: StreamChatTheme.of(context)
-                          .textTheme
-                          .bodyBold
-                          .copyWith(
-                            color: StreamChatTheme.of(context)
-                                .colorTheme
-                                .accentBlue,
-                          ),
+                      style: chatThemeData.textTheme.bodyBold.copyWith(
+                        color: chatThemeData.colorTheme.accentBlue,
+                      ),
                     ),
                   ),
                 ],

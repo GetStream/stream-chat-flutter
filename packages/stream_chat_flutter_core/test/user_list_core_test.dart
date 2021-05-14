@@ -49,7 +49,7 @@ void main() {
       await tester.pumpWidget(userListCore);
 
       expect(find.byKey(userListCoreKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 

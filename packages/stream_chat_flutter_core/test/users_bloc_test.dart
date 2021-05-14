@@ -35,27 +35,12 @@ void main() {
     'usersBlocState.queryUsers() should throw if used where '
     'StreamChat is not present in the widget tree',
     (tester) async {
-      const usersBlocKey = Key('usersBloc');
-      const childKey = Key('child');
       final usersBloc = UsersBloc(
-        key: usersBlocKey,
-        child: Offstage(key: childKey),
+        child: Offstage(),
       );
 
       await tester.pumpWidget(usersBloc);
-
-      expect(find.byKey(usersBlocKey), findsOneWidget);
-      expect(find.byKey(childKey), findsOneWidget);
-
-      final usersBlocState = tester.state<UsersBlocState>(
-        find.byKey(usersBlocKey),
-      );
-
-      try {
-        await usersBlocState.queryUsers();
-      } catch (e) {
-        expect(e, isInstanceOf<Exception>());
-      }
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 

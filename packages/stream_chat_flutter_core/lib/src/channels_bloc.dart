@@ -50,17 +50,20 @@ class ChannelsBloc extends StatefulWidget {
 
     streamChatState = context.findAncestorStateOfType<ChannelsBlocState>();
 
-    if (streamChatState == null) {
-      throw Exception('You must have a ChannelsBloc widget as ancestor');
-    }
+    assert(
+      streamChatState != null,
+      'You must have a ChannelsBloc widget as ancestor',
+    );
 
-    return streamChatState;
+    return streamChatState!;
   }
 }
 
 /// The current state of the [ChannelsBloc].
 class ChannelsBlocState extends State<ChannelsBloc>
     with AutomaticKeepAliveClientMixin {
+  StreamChatCoreState? _streamChatCoreState;
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -86,6 +89,8 @@ class ChannelsBlocState extends State<ChannelsBloc>
 
   bool _paginationEnded = false;
 
+  final List<StreamSubscription> _subscriptions = [];
+
   /// Calls [client.queryChannels] updating [queryChannelsLoading] stream
   Future<void> queryChannels({
     Filter? filter,
@@ -93,7 +98,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
     PaginationParams paginationParams = const PaginationParams(limit: 30),
     Map<String, dynamic>? options,
   }) async {
-    final client = StreamChatCore.of(context).client;
+    final client = _streamChatCoreState!.client;
 
     final clear = paginationParams.offset == 0;
 
@@ -139,75 +144,86 @@ class ChannelsBlocState extends State<ChannelsBloc>
     }
   }
 
-  final List<StreamSubscription> _subscriptions = [];
-
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    final newStreamChatCoreState = StreamChatCore.of(context);
 
-    final client = StreamChatCore.of(context).client;
+    if (newStreamChatCoreState != _streamChatCoreState) {
+      _streamChatCoreState = newStreamChatCoreState;
+      final client = _streamChatCoreState!.client;
 
-    if (!widget.lockChannelsOrder) {
-      _subscriptions.add(client
-          .on(
-        EventType.messageNew,
-      )
-          .listen((e) {
-        final newChannels = List<Channel>.from(channels ?? []);
-        final index = newChannels.indexWhere((c) => c.cid == e.cid);
-        if (index != -1) {
-          if (index > 0) {
-            final channel = newChannels.removeAt(index);
-            newChannels.insert(0, channel);
-          }
-        } else if (widget.shouldAddChannel?.call(e) == true) {
-          final hiddenIndex = _hiddenChannels.indexWhere((c) => c.cid == e.cid);
-          if (hiddenIndex != -1) {
-            newChannels.insert(0, _hiddenChannels[hiddenIndex]);
-            _hiddenChannels.removeAt(hiddenIndex);
-          } else {
-            if (client.state.channels[e.cid] != null) {
-              newChannels.insert(0, client.state.channels[e.cid]!);
+      _cancelSubscriptions();
+      if (!widget.lockChannelsOrder) {
+        _subscriptions.add(client
+            .on(
+          EventType.messageNew,
+        )
+            .listen((e) {
+          final newChannels = List<Channel>.from(channels ?? []);
+          final index = newChannels.indexWhere((c) => c.cid == e.cid);
+          if (index != -1) {
+            if (index > 0) {
+              final channel = newChannels.removeAt(index);
+              newChannels.insert(0, channel);
+            }
+          } else if (widget.shouldAddChannel?.call(e) == true) {
+            final hiddenIndex =
+                _hiddenChannels.indexWhere((c) => c.cid == e.cid);
+            if (hiddenIndex != -1) {
+              newChannels.insert(0, _hiddenChannels[hiddenIndex]);
+              _hiddenChannels.removeAt(hiddenIndex);
+            } else {
+              if (client.state.channels[e.cid] != null) {
+                newChannels.insert(0, client.state.channels[e.cid]!);
+              }
             }
           }
-        }
 
-        if (widget.channelsComparator != null) {
-          newChannels.sort(widget.channelsComparator);
-        }
-        _channelsController.add(newChannels);
-      }));
+          if (widget.channelsComparator != null) {
+            newChannels.sort(widget.channelsComparator);
+          }
+          _channelsController.add(newChannels);
+        }));
+      }
+
+      _subscriptions
+        ..add(client.on(EventType.channelHidden).listen((event) async {
+          final newChannels = List<Channel>.from(channels ?? []);
+          final channelIndex =
+              newChannels.indexWhere((c) => c.cid == event.cid);
+          if (channelIndex > -1) {
+            final channel = newChannels.removeAt(channelIndex);
+            _hiddenChannels.add(channel);
+            _channelsController.add(newChannels);
+          }
+        }))
+        ..add(client
+            .on(
+          EventType.channelDeleted,
+          EventType.notificationRemovedFromChannel,
+        )
+            .listen((e) {
+          final channel = e.channel;
+          _channelsController.add(List.from(
+              (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
+        }));
     }
 
-    _subscriptions.add(client.on(EventType.channelHidden).listen((event) async {
-      final newChannels = List<Channel>.from(channels ?? []);
-      final channelIndex = newChannels.indexWhere((c) => c.cid == event.cid);
-      if (channelIndex > -1) {
-        final channel = newChannels.removeAt(channelIndex);
-        _hiddenChannels.add(channel);
-        _channelsController.add(newChannels);
-      }
-    }));
-    // ignore: cascade_invocations
-    _subscriptions.add(client
-        .on(
-      EventType.channelDeleted,
-      EventType.notificationRemovedFromChannel,
-    )
-        .listen((e) {
-      // ignore: cascade_invocations
-      final channel = e.channel;
-      _channelsController.add(List.from(
-          (channels ?? [])..removeWhere((c) => c.cid == channel?.cid)));
-    }));
+    super.didChangeDependencies();
   }
 
   @override
   void dispose() {
     _channelsController.close();
     _queryChannelsLoadingController.close();
-    _subscriptions.forEach((s) => s.cancel());
+    _cancelSubscriptions();
     super.dispose();
+  }
+
+  void _cancelSubscriptions() {
+    _subscriptions
+      ..forEach((s) => s.cancel())
+      ..clear();
   }
 
   @override

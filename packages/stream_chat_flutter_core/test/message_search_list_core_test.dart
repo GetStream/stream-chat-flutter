@@ -45,7 +45,7 @@ void main() {
       await tester.pumpWidget(messageSearchListCore);
 
       expect(find.byKey(messageSearchListCoreKey), findsNothing);
-      expect(tester.takeException(), isInstanceOf<Exception>());
+      expect(tester.takeException(), isInstanceOf<AssertionError>());
     },
   );
 
@@ -107,6 +107,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       expect(find.byKey(messageSearchListCoreKey), findsOneWidget);
       expect(controller.loadData, isNotNull);

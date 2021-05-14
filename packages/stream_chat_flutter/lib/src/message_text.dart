@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Text widget to display in message
 class MessageText extends StatelessWidget {
@@ -31,6 +31,7 @@ class MessageText extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = _replaceMentions(message.text ?? '').replaceAll('\n', '\\\n');
 
+    final themeData = Theme.of(context);
     return MarkdownBody(
       data: text,
       onTapLink: (
@@ -60,14 +61,14 @@ class MessageText extends StatelessWidget {
         }
       },
       styleSheet: MarkdownStyleSheet.fromTheme(
-        Theme.of(context).copyWith(
-          textTheme: Theme.of(context).textTheme.apply(
-                bodyColor: messageTheme.messageText?.color,
-                decoration: messageTheme.messageText?.decoration,
-                decorationColor: messageTheme.messageText?.decorationColor,
-                decorationStyle: messageTheme.messageText?.decorationStyle,
-                fontFamily: messageTheme.messageText?.fontFamily,
-              ),
+        themeData.copyWith(
+          textTheme: themeData.textTheme.apply(
+            bodyColor: messageTheme.messageText?.color,
+            decoration: messageTheme.messageText?.decoration,
+            decorationColor: messageTheme.messageText?.decorationColor,
+            decorationStyle: messageTheme.messageText?.decorationStyle,
+            fontFamily: messageTheme.messageText?.fontFamily,
+          ),
         ),
       ).copyWith(
         a: messageTheme.messageLinks,
