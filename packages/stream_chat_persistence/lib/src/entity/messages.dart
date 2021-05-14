@@ -81,7 +81,7 @@ class Messages extends Table {
       'NULLABLE REFERENCES channels(cid) ON DELETE CASCADE')();
 
   /// Message custom extraData
-  TextColumn get extraData => text().nullable().map(MapConverter<Object>())();
+  TextColumn get extraData => text().nullable().map(MapConverter<Object?>())();
 
   @override
   Set<Column> get primaryKey => {id};
