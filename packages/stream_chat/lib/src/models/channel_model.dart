@@ -87,7 +87,7 @@ class ChannelModel {
     includeIfNull: false,
     defaultValue: {},
   )
-  final Map<String, Object> extraData;
+  final Map<String, Object?> extraData;
 
   /// The team the channel belongs to
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -132,7 +132,7 @@ class ChannelModel {
     DateTime? updatedAt,
     DateTime? deletedAt,
     int? memberCount,
-    Map<String, Object>? extraData,
+    Map<String, Object?>? extraData,
     String? team,
   }) =>
       ChannelModel(

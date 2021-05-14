@@ -114,7 +114,7 @@ class Attachment extends Equatable {
     includeIfNull: false,
     defaultValue: {},
   )
-  final Map<String, Object> extraData;
+  final Map<String, Object?> extraData;
 
   /// The attachment ID.
   ///
@@ -183,7 +183,7 @@ class Attachment extends Equatable {
     List<Action>? actions,
     AttachmentFile? file,
     UploadState? uploadState,
-    Map<String, Object>? extraData,
+    Map<String, Object?>? extraData,
   }) =>
       Attachment(
         id: id ?? this.id,

@@ -38,10 +38,7 @@ Event _$EventFromJson(Map<String, dynamic> json) {
     channelId: json['channel_id'] as String?,
     channelType: json['channel_type'] as String?,
     parentId: json['parent_id'] as String?,
-    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
-          (k, e) => MapEntry(k, e as Object),
-        ) ??
-        {},
+    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
     isLocal: json['is_local'] as bool? ?? false,
   );
 }
@@ -89,10 +86,7 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['deleted_at'] as String),
     memberCount: json['member_count'] as int? ?? 0,
-    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
-          (k, e) => MapEntry(k, e as Object),
-        ) ??
-        {},
+    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
   );
 }
 

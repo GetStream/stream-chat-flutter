@@ -1194,7 +1194,7 @@ class StreamChatClient {
   Channel channel(
     String type, {
     String? id,
-    Map<String, Object> extraData = const {},
+    Map<String, Object?> extraData = const {},
   }) {
     if (id != null && state.channels.containsKey('$type:$id')) {
       return state.channels['$type:$id']!;

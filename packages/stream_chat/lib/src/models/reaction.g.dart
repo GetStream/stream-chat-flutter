@@ -18,9 +18,7 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) {
         : User.fromJson(json['user'] as Map<String, dynamic>),
     userId: json['user_id'] as String?,
     score: json['score'] as int? ?? 0,
-    extraData: (json['extra_data'] as Map<String, dynamic>?)?.map(
-      (k, e) => MapEntry(k, e as Object),
-    ),
+    extraData: json['extra_data'] as Map<String, dynamic>?,
   );
 }
 
