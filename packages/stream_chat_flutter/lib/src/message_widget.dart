@@ -507,13 +507,14 @@ class _MessageWidgetState extends State<MessageWidget>
                               Flexible(
                                 child: PortalEntry(
                                   portal: Container(
-                                    transform:
-                                        Matrix4.translationValues(-12, 0, 0),
+                                    transform: Matrix4.translationValues(
+                                        widget.reverse ? 12 : -12, 0, 0),
                                     constraints: const BoxConstraints(
                                         maxWidth: 22 * 6.0),
                                     child: _buildReactionIndicator(context),
                                   ),
-                                  portalAnchor: const Alignment(-1, -1),
+                                  portalAnchor:
+                                      Alignment(widget.reverse ? 1 : -1, -1),
                                   childAnchor:
                                       Alignment(widget.reverse ? -1 : 1, -1),
                                   child: Stack(

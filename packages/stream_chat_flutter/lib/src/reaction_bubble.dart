@@ -51,7 +51,8 @@ class ReactionBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final reactionIcons = StreamChatTheme.of(context).reactionIcons;
     final totalReactions = reactions.length;
-    final offset = totalReactions > 1 ? 16.0 : 2.0;
+    final offset =
+        totalReactions > 1 ? 16.0.mirrorConditionally(flipTail) : 2.0;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -66,7 +67,7 @@ class ReactionBubble extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(
                 vertical: 4,
-                horizontal: totalReactions > 1 ? 4 : 0,
+                horizontal: totalReactions > 1 ? 4.0 : 0,
               ),
               decoration: BoxDecoration(
                 border: Border.all(
@@ -106,6 +107,7 @@ class ReactionBubble extends StatelessWidget {
         Positioned(
           bottom: 2,
           left: reverse ? null : 13,
+          right: reverse ? 13 : null,
           child: _buildReactionsTail(context),
         ),
       ],
@@ -322,4 +324,11 @@ extension YTransformer on Offset {
   /// Flips x coordinate when flip is true
   // ignore: avoid_positional_boolean_parameters
   Offset mirrorConditionally(bool flip) => Offset(flip ? -dx : dx, dy);
+}
+
+/// Extension on [Offset]
+extension IntTransformer on double {
+  /// Flips x coordinate when flip is true
+  // ignore: avoid_positional_boolean_parameters
+  double mirrorConditionally(bool flip) => flip ? -this : this;
 }
