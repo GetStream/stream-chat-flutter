@@ -18,7 +18,7 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) {
         : User.fromJson(json['user'] as Map<String, dynamic>),
     userId: json['user_id'] as String?,
     score: json['score'] as int? ?? 0,
-    extraData: json['extra_data'] as Map<String, dynamic>?,
+    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
   );
 }
 
@@ -38,6 +38,6 @@ Map<String, dynamic> _$ReactionToJson(Reaction instance) {
   writeNotNull('user', readonly(instance.user));
   val['score'] = instance.score;
   writeNotNull('user_id', readonly(instance.userId));
-  writeNotNull('extra_data', instance.extraData);
+  val['extra_data'] = instance.extraData;
   return val;
 }

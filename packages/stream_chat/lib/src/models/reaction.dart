@@ -15,7 +15,7 @@ class Reaction {
     this.user,
     String? userId,
     this.score = 0,
-    this.extraData,
+    this.extraData = const {},
   })  : userId = userId ?? user?.id,
         createdAt = createdAt ?? DateTime.now();
 
@@ -49,8 +49,11 @@ class Reaction {
   final String? userId;
 
   /// Reaction custom extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, Object?>? extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object?> extraData;
 
   /// Map of custom user extraData
   static const topLevelFields = [
