@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
