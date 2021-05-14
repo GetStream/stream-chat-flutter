@@ -755,7 +755,7 @@ class _MessageWidgetState extends State<MessageWidget>
       mainAxisAlignment:
           widget.reverse ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        if (showThreadTail)
+        if (showThreadTail && !widget.reverse)
           Container(
             margin: EdgeInsets.only(
               bottom: context.textScaleFactor *
@@ -766,6 +766,7 @@ class _MessageWidgetState extends State<MessageWidget>
               painter: _ThreadReplyPainter(
                 context: context,
                 color: widget.messageTheme.messageBorderColor,
+                reverse: widget.reverse,
               ),
             ),
           ),
@@ -781,6 +782,21 @@ class _MessageWidgetState extends State<MessageWidget>
             return mappedChild;
           },
         ),
+        if (showThreadTail && widget.reverse)
+          Container(
+            margin: EdgeInsets.only(
+              bottom: context.textScaleFactor *
+                  ((widget.messageTheme.replies?.fontSize ?? 1) / 2),
+            ),
+            child: CustomPaint(
+              size: const Size(16, 32) * context.textScaleFactor,
+              painter: _ThreadReplyPainter(
+                context: context,
+                color: widget.messageTheme.messageBorderColor,
+                reverse: widget.reverse,
+              ),
+            ),
+          ),
       ].insertBetween(const SizedBox(width: 8)),
     );
   }
@@ -1148,10 +1164,15 @@ class _MessageWidgetState extends State<MessageWidget>
 }
 
 class _ThreadReplyPainter extends CustomPainter {
-  const _ThreadReplyPainter({this.context, required this.color});
+  const _ThreadReplyPainter({
+    this.context,
+    required this.color,
+    this.reverse = false,
+  });
 
   final Color? color;
   final BuildContext? context;
+  final bool reverse;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1162,12 +1183,13 @@ class _ThreadReplyPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final path = Path()
-      ..moveTo(0, 0)
-      ..quadraticBezierTo(0, size.height * 0.38, 0, size.height * 0.50)
+      ..moveTo(reverse ? size.width : 0, 0)
+      ..quadraticBezierTo(reverse ? size.width : 0, size.height * 0.38,
+          reverse ? size.width : 0, size.height * 0.50)
       ..quadraticBezierTo(
-        0,
+        reverse ? size.width : 0,
         size.height,
-        size.width,
+        reverse ? 0 : size.width,
         size.height,
       );
     canvas.drawPath(path, paint);
