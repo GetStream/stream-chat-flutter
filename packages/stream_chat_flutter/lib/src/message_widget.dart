@@ -602,7 +602,8 @@ class _MessageWidgetState extends State<MessageWidget>
                                       ),
                                       if (widget.showReactionPickerIndicator)
                                         Positioned(
-                                          right: 4,
+                                          right: widget.reverse ? null : 4,
+                                          left: widget.reverse ? 4 : null,
                                           top: -8,
                                           child: CustomPaint(
                                             painter: ReactionBubblePainter(
