@@ -1,7 +1,5 @@
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 
 const _groupOperators = [
@@ -166,7 +164,15 @@ class Filter extends Equatable {
     String? key,
   }) = Filter.__;
 
-  /// Creates a custom [Filter] from a raw value
+  /// Creates a custom [Filter] from a raw map value
+  ///
+  /// ```dart
+  /// final filter = Filter.raw(
+  ///   {
+  ///     'members': [user1.id, user2.id],
+  ///   }
+  /// )
+  /// ```
   const factory Filter.raw({
     required Map<String, Object?> value,
   }) = Filter.__;
