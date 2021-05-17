@@ -87,8 +87,8 @@ extension FilterOperatorX on FilterOperator {
 /// See <a href="https://getstream.io/chat/docs/query_channels/?language=dart" target="_top">Query Channels Documentation</a>
 class Filter extends Equatable {
   const Filter.__({
-    required this.operator,
     required this.value,
+    this.operator,
     this.key,
   });
 
@@ -159,13 +159,13 @@ class Filter extends Equatable {
 
   /// Creates a custom [Filter] if there isn't one already available.
   const factory Filter.custom({
-    required String operator,
     required Object value,
+    String? operator,
     String? key,
   }) = Filter.__;
 
   /// An operator used for the filter. The operator string must start with `$`
-  final String operator;
+  final String? operator;
 
   /// The "left-hand" side of the filter.
   /// Specifies the name of the field the filter should match.
@@ -188,7 +188,7 @@ class Filter extends Equatable {
     final groupOperators = _groupOperators.map((it) => it.rawValue);
 
     assert(
-      groupOperators.contains(operator) || key != null,
+      (operator != null && groupOperators.contains(operator)) || key != null,
       'Filter must contain the `key` when the operator is not a '
       'group operator.',
     );
@@ -196,11 +196,13 @@ class Filter extends Equatable {
     if (groupOperators.contains(operator)) {
       // Filters with group operators are encoded in the following form:
       // { $<operator>: [ <filter 1>, <filter 2> ] }
-      json[operator] = value;
-    } else {
+      json[operator!] = value;
+    } else if (operator != null) {
       // Normal filters are encoded in the following form:
       // { key: { $<operator>: <value> } }
       json[key!] = {operator: value};
+    } else {
+      json[key!] = value;
     }
 
     return json;
