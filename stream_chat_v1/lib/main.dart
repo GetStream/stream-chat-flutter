@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
 
     final client = StreamChatClient(
       apiKey ?? kDefaultStreamApiKey,
-      logLevel: Level.SEVERE,
+      logLevel: Level.INFO,
     )..chatPersistenceClient = chatPersistentClient;
 
     if (userId != null) {
@@ -501,7 +501,7 @@ class UserMentionPage extends StatelessWidget {
       child: MessageSearchListView(
         filters: Filter.in_('members', [user.id]),
         messageFilters: Filter.custom(
-          operator: 'contains',
+          operator: r'$contains',
           key: 'mentioned_users.id',
           value: user.id,
         ),
