@@ -180,6 +180,19 @@ void main() {
           '{"$key":{"${FilterOperator.in_.rawValue}":${json.encode(values)}}}',
         );
       });
+
+      test('custom with no operator', () {
+        const key = 'testKey';
+        const values = ['testValue'];
+        final filter = Filter.custom(key: key, value: values);
+        final encoded = json.encode(filter);
+        expect(
+          encoded,
+          '{"$key":${json.encode(values)}}',
+        );
+        print('asdasda');
+        print('{"$key":${json.encode(values)}}');
+      });
     });
 
     test('groupedFilter', () {
