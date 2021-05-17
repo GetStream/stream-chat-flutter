@@ -463,58 +463,57 @@ class MessageInputState extends State<MessageInput> {
     );
   }
 
-  Widget _buildExpandActionsButton() => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: AnimatedCrossFade(
-          crossFadeState: _actionsShrunk
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          firstChild: IconButton(
-            onPressed: () => setState(() => _actionsShrunk = false),
-            icon: Transform.rotate(
-              angle: (widget.actionsLocation == ActionsLocation.right ||
-                      widget.actionsLocation == ActionsLocation.rightInside)
-                  ? pi
-                  : 0,
-              child: StreamSvgIcon.emptyCircleLeft(
-                color: StreamChatTheme.of(context)
-                    .messageInputTheme
-                    .expandButtonColor,
-              ),
+  Widget _buildExpandActionsButton() {
+    final channel = StreamChannel.of(context).channel;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: AnimatedCrossFade(
+        crossFadeState: _actionsShrunk
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
+        firstChild: IconButton(
+          onPressed: () => setState(() => _actionsShrunk = false),
+          icon: Transform.rotate(
+            angle: (widget.actionsLocation == ActionsLocation.right ||
+                    widget.actionsLocation == ActionsLocation.rightInside)
+                ? pi
+                : 0,
+            child: StreamSvgIcon.emptyCircleLeft(
+              color: StreamChatTheme.of(context)
+                  .messageInputTheme
+                  .expandButtonColor,
             ),
-            padding: const EdgeInsets.all(0),
-            constraints: const BoxConstraints.tightFor(
-              height: 24,
-              width: 24,
-            ),
-            splashRadius: 24,
           ),
-          secondChild: widget.disableAttachments &&
-                  !widget.showCommandsButton &&
-                  widget.actions?.isNotEmpty != true
-              ? const Offstage()
-              : FittedBox(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      if (!widget.disableAttachments) _buildAttachmentButton(),
-                      if (widget.showCommandsButton &&
-                          widget.editMessage == null &&
-                          StreamChannel.of(context)
-                                  .channel
-                                  .config
-                                  ?.commands
-                                  .isNotEmpty ==
-                              true)
-                        _buildCommandButton(),
-                      ...widget.actions ?? [],
-                    ].insertBetween(const SizedBox(width: 8)),
-                  ),
-                ),
-          duration: const Duration(milliseconds: 300),
-          alignment: Alignment.center,
+          padding: const EdgeInsets.all(0),
+          constraints: const BoxConstraints.tightFor(
+            height: 24,
+            width: 24,
+          ),
+          splashRadius: 24,
         ),
-      );
+        secondChild: widget.disableAttachments &&
+                !widget.showCommandsButton &&
+                widget.actions?.isNotEmpty != true
+            ? const Offstage()
+            : FittedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    if (!widget.disableAttachments) _buildAttachmentButton(),
+                    if (widget.showCommandsButton &&
+                        widget.editMessage == null &&
+                        channel.state != null &&
+                        channel.config?.commands.isNotEmpty == true)
+                      _buildCommandButton(),
+                    ...widget.actions ?? [],
+                  ].insertBetween(const SizedBox(width: 8)),
+                ),
+              ),
+        duration: const Duration(milliseconds: 300),
+        alignment: Alignment.center,
+      ),
+    );
+  }
 
   Expanded _buildTextInput(BuildContext context) {
     final theme = StreamChatTheme.of(context);
