@@ -156,6 +156,7 @@ class ReactionBubble extends StatelessWidget {
         maskColor,
         tailCirclesSpace: tailCirclesSpacing,
         flipTail: !flipTail,
+        numberOfReactions: reactions.length,
       ),
     );
     return tail;
@@ -171,6 +172,7 @@ class ReactionBubblePainter extends CustomPainter {
     this.maskColor, {
     this.tailCirclesSpace = 0,
     this.flipTail = false,
+    this.numberOfReactions = 0,
   });
 
   /// Color of bubble
@@ -187,6 +189,9 @@ class ReactionBubblePainter extends CustomPainter {
 
   /// Flip tail
   final bool flipTail;
+
+  /// Number of reactions on the page
+  final int numberOfReactions;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -261,7 +266,7 @@ class ReactionBubblePainter extends CustomPainter {
 
     const dy = -2.2;
     final startAngle = flipTail ? -0.1 : 1.1;
-    final sweepAngle = flipTail ? -1.2 : 1.2;
+    final sweepAngle = flipTail ? -1.2 : (numberOfReactions > 1 ? 1.2 : 0.9);
     final path = Path()
       ..addArc(
         Rect.fromCircle(
