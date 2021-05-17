@@ -306,7 +306,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)

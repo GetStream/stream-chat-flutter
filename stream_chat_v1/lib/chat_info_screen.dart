@@ -56,7 +56,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             'admin',
             'owner',
           ].contains(channel.state!.members
-              .firstWhereOrNull((m) => m.userId == channel.client.state.user!.id)
+              .firstWhereOrNull(
+                  (m) => m.userId == channel.client.state.user!.id)
               ?.role))
             _buildDeleteListTile(),
         ],

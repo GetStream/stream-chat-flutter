@@ -221,14 +221,22 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                     ),
                   ),
                   Spacer(),
-                  RaisedButton(
-                    color: Theme.of(context).brightness == Brightness.light
-                        ? StreamChatTheme.of(context).colorTheme.accentBlue
-                        : Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Theme.of(context).brightness == Brightness.light
+                              ? StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .accentBlue
+                              : Colors.white),
+                      elevation: MaterialStateProperty.all<double>(0),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                          const EdgeInsets.symmetric(vertical: 16)),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                      ),
                     ),
                     child: Text(
                       'Login',
