@@ -20,9 +20,7 @@ User _$UserFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['last_active'] as String),
     online: json['online'] as bool? ?? false,
-    extraData: (json['extra_data'] as Map<String, dynamic>).map(
-      (k, e) => MapEntry(k, e as Object),
-    ),
+    extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
     banned: json['banned'] as bool? ?? false,
     teams:
         (json['teams'] as List<dynamic>?)?.map((e) => e as String).toList() ??

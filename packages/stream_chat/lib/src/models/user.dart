@@ -74,8 +74,11 @@ class User {
   final bool banned;
 
   /// Map of custom user extraData
-  @JsonKey(includeIfNull: false)
-  final Map<String, Object> extraData;
+  @JsonKey(
+    includeIfNull: false,
+    defaultValue: {},
+  )
+  final Map<String, Object?> extraData;
 
   @override
   int get hashCode => id.hashCode;
@@ -107,7 +110,7 @@ class User {
     DateTime? updatedAt,
     DateTime? lastActive,
     bool? online,
-    Map<String, Object>? extraData,
+    Map<String, Object?>? extraData,
     bool? banned,
     List<String>? teams,
   }) =>

@@ -22,7 +22,7 @@ class Channel {
     this._client,
     this._type,
     this._id, {
-    Map<String, Object> extraData = const {},
+    Map<String, Object?> extraData = const {},
   })  : _cid = _id != null ? '$_type:$_id' : null,
         _extraData = extraData {
     _client.logger.info('New Channel instance not initialized created');
@@ -630,7 +630,7 @@ class Channel {
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
-    Map<String, Object> extraData = const {},
+    Map<String, Object?> extraData = const {},
     bool enforceUnique = false,
   }) async {
     _checkInitialized();

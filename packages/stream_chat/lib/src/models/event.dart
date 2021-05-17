@@ -93,7 +93,7 @@ class Event {
 
   /// Map of custom channel extraData
   @JsonKey(defaultValue: {})
-  final Map<String, Object> extraData;
+  final Map<String, Object?> extraData;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -140,7 +140,7 @@ class Event {
     int? unreadChannels,
     bool? online,
     String? parentId,
-    Map<String, Object>? extraData,
+    Map<String, Object?>? extraData,
   }) =>
       Event(
         type: type ?? this.type,
@@ -180,7 +180,7 @@ class EventChannel extends ChannelModel {
     required DateTime updatedAt,
     DateTime? deletedAt,
     required int memberCount,
-    Map<String, Object>? extraData,
+    Map<String, Object?>? extraData,
   }) : super(
           id: id,
           type: type,

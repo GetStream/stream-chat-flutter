@@ -42,6 +42,8 @@ extension MessageEntityX on MessageEntity {
         pinnedAt: pinnedAt,
         pinExpires: pinExpires,
         pinnedBy: pinnedBy,
+        mentionedUsers:
+            mentionedUsers.map((e) => User.fromJson(jsonDecode(e))).toList(),
       );
 }
 
