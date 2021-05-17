@@ -130,6 +130,14 @@ void main() {
       expect(filter.operator, operator);
     });
 
+    test('raw', () {
+      const value = {
+        'test': ['a', 'b'],
+      };
+      const filter = Filter.raw(value: value);
+      expect(filter.value, value);
+    });
+
     group('groupedOperator', () {
       final filter1 = Filter.equal('testKey', 'testValue');
       final filter2 = Filter.in_('testKey', const ['testValue']);
@@ -189,6 +197,19 @@ void main() {
         expect(
           encoded,
           '{"$key":${json.encode(values)}}',
+        );
+      });
+
+      test('raw', () {
+        const value = {
+          'test': ['a', 'b'],
+        };
+        const filter = Filter.raw(value: value);
+
+        final encoded = json.encode(filter);
+        expect(
+          encoded,
+          json.encode(value),
         );
       });
     });

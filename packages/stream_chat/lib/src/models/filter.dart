@@ -1,5 +1,7 @@
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 
 const _groupOperators = [
@@ -164,6 +166,11 @@ class Filter extends Equatable {
     String? key,
   }) = Filter.__;
 
+  /// Creates a custom [Filter] from a raw value
+  const factory Filter.raw({
+    required Map<String, Object?> value,
+  }) = Filter.__;
+
   /// An operator used for the filter. The operator string must start with `$`
   final String? operator;
 
@@ -183,15 +190,9 @@ class Filter extends Equatable {
   List<Object?> get props => [operator, key, value];
 
   /// Serializes to json object
-  Map<String, Object> toJson() {
-    final json = <String, Object>{};
+  Map<String, Object?> toJson() {
+    final json = <String, Object?>{};
     final groupOperators = _groupOperators.map((it) => it.rawValue);
-
-    assert(
-      (operator != null && groupOperators.contains(operator)) || key != null,
-      'Filter must contain the `key` when the operator is not a '
-      'group operator.',
-    );
 
     if (groupOperators.contains(operator)) {
       // Filters with group operators are encoded in the following form:
@@ -201,8 +202,10 @@ class Filter extends Equatable {
       // Normal filters are encoded in the following form:
       // { key: { $<operator>: <value> } }
       json[key!] = {operator: value};
-    } else {
+    } else if (key != null) {
       json[key!] = value;
+    } else {
+      return value as Map<String, Object?>;
     }
 
     return json;
