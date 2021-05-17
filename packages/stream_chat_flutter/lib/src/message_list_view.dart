@@ -270,7 +270,7 @@ class MessageListView extends StatefulWidget {
 
 class _MessageListViewState extends State<MessageListView> {
   ItemScrollController? _scrollController;
-  Function? _onThreadTap;
+  void Function(Message)? _onThreadTap;
   bool _showScrollToBottom = false;
   late final ItemPositionsListener _itemPositionListener;
   int? _messageListLength;
@@ -814,7 +814,7 @@ class _MessageListViewState extends State<MessageListView> {
       showUsername: !isMyMessage,
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
-      onThreadTap: _onThreadTap as void Function(Message)?,
+      onThreadTap: _onThreadTap,
       borderRadiusGeometry: const BorderRadius.only(
         topLeft: Radius.circular(16),
         bottomLeft: Radius.circular(2),
@@ -976,7 +976,7 @@ class _MessageListViewState extends State<MessageListView> {
       showThreadReplyMessage: !isThreadMessage,
       showFlagButton: !isMyMessage,
       borderSide: borderSide,
-      onThreadTap: _onThreadTap as void Function(Message)?,
+      onThreadTap: _onThreadTap,
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
