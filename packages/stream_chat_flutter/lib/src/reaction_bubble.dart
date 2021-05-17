@@ -260,8 +260,8 @@ class ReactionBubblePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     const dy = -2.2;
-    const startAngle = 1.1;
-    const sweepAngle = 1.2;
+    final startAngle = flipTail ? -0.1 : 1.1;
+    final sweepAngle = flipTail ? -1.2 : 1.2;
     final path = Path()
       ..addArc(
         Rect.fromCircle(
@@ -280,8 +280,8 @@ class ReactionBubblePainter extends CustomPainter {
       ..strokeWidth = 1;
 
     const dy = -2.2;
-    const startAngle = 1;
-    const sweepAngle = 1.3;
+    final startAngle = flipTail ? -0.0 : 1.0;
+    final sweepAngle = flipTail ? -1.3 : 1.3;
     final path = Path()
       ..addArc(
         Rect.fromCircle(
@@ -301,8 +301,8 @@ class ReactionBubblePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     const dy = -2.2;
-    const startAngle = 1.1;
-    const sweepAngle = 1.2;
+    final startAngle = flipTail ? -0.1 : 1.1;
+    final sweepAngle = flipTail ? -1.2 : 1.2;
     final path = Path()
       ..addArc(
         Rect.fromCircle(
