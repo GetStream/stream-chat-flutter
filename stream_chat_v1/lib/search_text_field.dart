@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class SearchTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
   final String hintText;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool showCloseButton;
 
   const SearchTextField({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.onChanged,
     this.onTap,
     this.hintText = 'Search',
@@ -76,11 +76,11 @@ class SearchTextField extends StatelessWidget {
                 ),
                 splashRadius: 24,
                 onPressed: () {
-                  if (controller.text.isNotEmpty) {
+                  if (controller!.text.isNotEmpty) {
                     Future.microtask(
                       () => [
-                        controller.clear(),
-                        if (onChanged != null) onChanged(''),
+                        controller!.clear(),
+                        if (onChanged != null) onChanged!(''),
                       ],
                     );
                   }

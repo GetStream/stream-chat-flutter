@@ -7,7 +7,7 @@ void showLocalNotification(Event event, String currentUserId) async {
         EventType.messageNew,
         EventType.notificationMessageNew,
       ].contains(event.type) ||
-      event.user.id == currentUserId) {
+      event.user!.id == currentUserId) {
     return;
   }
   if (event.message == null) return;
@@ -21,9 +21,9 @@ void showLocalNotification(Event event, String currentUserId) async {
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   await flutterLocalNotificationsPlugin.show(
-    event.message.id.hashCode,
-    event.message.user.name,
-    event.message.text,
+    event.message!.id.hashCode,
+    event.message!.user!.name,
+    event.message!.text,
     NotificationDetails(
       android: AndroidNotificationDetails(
         'message channel',

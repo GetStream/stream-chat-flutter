@@ -6,16 +6,16 @@ class ChannelFileDisplayScreen extends StatefulWidget {
   /// Sorting is based on field and direction, multiple sorting options can be provided.
   /// You can sort based on last_updated, last_message_at, updated_at, created_at or member_count.
   /// Direction can be ascending or descending.
-  final List<SortOption> sortOptions;
+  final List<SortOption>? sortOptions;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams paginationParams;
+  final PaginationParams? paginationParams;
 
   /// The builder used when the file list is empty.
-  final WidgetBuilder emptyBuilder;
+  final WidgetBuilder? emptyBuilder;
 
   const ChannelFileDisplayScreen({
     this.sortOptions,
@@ -34,16 +34,14 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
     super.initState();
     final messageSearchBloc = MessageSearchBloc.of(context);
     messageSearchBloc.search(
-      filter: {
-        'cid': {
-          r'$in': [StreamChannel.of(context).channel.cid]
-        }
-      },
-      messageFilter: {
-        'attachments.type': {
-          r'$in': ['file'],
-        },
-      },
+      filter: Filter.in_(
+        'cid',
+        [StreamChannel.of(context).channel.cid!],
+      ),
+      messageFilter: Filter.in_(
+        'attachments.type',
+        ['file'],
+      ),
       sort: widget.sortOptions,
       pagination: widget.paginationParams,
     );
@@ -95,9 +93,9 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
           );
         }
 
-        if (snapshot.data.isEmpty) {
+        if (snapshot.data!.isEmpty) {
           if (widget.emptyBuilder != null) {
-            return widget.emptyBuilder(context);
+            return widget.emptyBuilder!(context);
           }
           return Center(
             child: Column(
@@ -134,7 +132,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
 
         final media = <Attachment, Message>{};
 
-        for (var item in snapshot.data) {
+        for (var item in snapshot.data!) {
           item.message.attachments.where((e) => e.type == 'file').forEach((e) {
             media[e] = item.message;
           });
@@ -142,18 +140,16 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
 
         return LazyLoadScrollView(
           onEndOfPage: () => messageSearchBloc.search(
-            filter: {
-              'cid': {
-                r'$in': [StreamChannel.of(context).channel.cid]
-              }
-            },
-            messageFilter: {
-              'attachments.type': {
-                r'$in': ['file']
-              },
-            },
+            filter: Filter.in_(
+              'cid',
+              [StreamChannel.of(context).channel.cid!],
+            ),
+            messageFilter: Filter.in_(
+              'attachments.type',
+              ['file'],
+            ),
             sort: widget.sortOptions,
-            pagination: widget.paginationParams.copyWith(
+            pagination: widget.paginationParams!.copyWith(
               offset: messageSearchBloc.messageResponses?.length ?? 0,
             ),
           ),

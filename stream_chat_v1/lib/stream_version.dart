@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class StreamVersion extends StatelessWidget {
   const StreamVersion({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -20,13 +20,13 @@ class StreamVersion extends StatelessWidget {
             return SizedBox();
           }
 
-          final pubspec = snapshot.data;
+          final pubspec = snapshot.data!;
           final yaml = loadYaml(pubspec);
           final streamChatDep =
               yaml['packages']['stream_chat_flutter']['version'];
 
           return Text(
-            'Stream SDK v ${streamChatDep}',
+            'Stream SDK v $streamChatDep',
             style: TextStyle(
               fontSize: 14,
               color: StreamChatTheme.of(context).colorTheme.greyGainsboro,

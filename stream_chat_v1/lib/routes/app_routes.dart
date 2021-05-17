@@ -12,7 +12,7 @@ import '../group_info_screen.dart';
 
 class AppRoutes {
   /// Add entry for new route here
-  static Route<dynamic> generateRoute(RouteSettings settings) {
+  static Route<dynamic>? generateRoute(RouteSettings settings) {
     final args = settings.arguments;
     switch (settings.name) {
       case Routes.APP:
@@ -44,7 +44,7 @@ class AppRoutes {
             builder: (_) {
               final arg = args as ChannelPageArgs;
               return StreamChannel(
-                channel: arg.channel,
+                channel: arg.channel!,
                 initialMessageId: arg.initialMessage?.id,
                 child: ChannelPage(
                   highlightInitialMessage: arg.initialMessage != null,
@@ -68,22 +68,25 @@ class AppRoutes {
             settings: const RouteSettings(name: Routes.NEW_GROUP_CHAT_DETAILS),
             builder: (_) {
               return GroupChatDetailsScreen(
-                selectedUsers: args,
+                selectedUsers: args as List<User>?,
               );
             });
       case Routes.CHAT_INFO_SCREEN:
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.CHAT_INFO_SCREEN),
-            builder: (_) {
+            builder: (context) {
               return ChatInfoScreen(
-                user: args,
+                user: args as User?,
+                messageTheme: StreamChatTheme.of(context).ownMessageTheme,
               );
             });
       case Routes.GROUP_INFO_SCREEN:
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.GROUP_INFO_SCREEN),
-            builder: (_) {
-              return GroupInfoScreen();
+            builder: (context) {
+              return GroupInfoScreen(
+                messageTheme: StreamChatTheme.of(context).ownMessageTheme,
+              );
             });
       // Default case, should not reach here.
       default:

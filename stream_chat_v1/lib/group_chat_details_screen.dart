@@ -6,11 +6,11 @@ import 'main.dart';
 import 'routes/routes.dart';
 
 class GroupChatDetailsScreen extends StatefulWidget {
-  final List<User> selectedUsers;
+  final List<User>? selectedUsers;
 
   const GroupChatDetailsScreen({
-    Key key,
-    @required this.selectedUsers,
+    Key? key,
+    required this.selectedUsers,
   }) : super(key: key);
 
   @override
@@ -20,14 +20,14 @@ class GroupChatDetailsScreen extends StatefulWidget {
 class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   final _selectedUsers = <User>[];
 
-  TextEditingController _groupNameController;
+  TextEditingController? _groupNameController;
 
   bool _isGroupNameEmpty = true;
 
   int get _totalUsers => _selectedUsers.length;
 
   void _groupNameListener() {
-    final name = _groupNameController.text;
+    final name = _groupNameController!.text;
     if (mounted) {
       setState(() {
         _isGroupNameEmpty = name.isEmpty;
@@ -38,7 +38,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedUsers.addAll(widget.selectedUsers);
+    _selectedUsers.addAll(widget.selectedUsers!);
     _groupNameController = TextEditingController()
       ..addListener(_groupNameListener);
   }
@@ -124,13 +124,13 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     ? null
                     : () async {
                         try {
-                          final groupName = _groupNameController.text;
+                          final groupName = _groupNameController!.text;
                           final client = StreamChat.of(context).client;
                           final channel = client.channel('messaging',
                               id: Uuid().v4(),
                               extraData: {
                                 'members': [
-                                  client.state.user.id,
+                                  client.state.user!.id,
                                   ..._selectedUsers.map((e) => e.id),
                                 ],
                                 'name': groupName,
@@ -306,7 +306,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   child: Text(
                     'OK',
                     style: StreamChatTheme.of(context)

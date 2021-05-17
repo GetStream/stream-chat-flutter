@@ -12,7 +12,7 @@ class NewGroupChatScreen extends StatefulWidget {
 }
 
 class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
-  TextEditingController _controller;
+  TextEditingController? _controller;
 
   String _userNameQuery = '';
 
@@ -20,14 +20,14 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   bool _isSearchActive = false;
 
-  Timer _debounce;
+  Timer? _debounce;
 
   void _userNameListener() {
-    if (_debounce?.isActive ?? false) _debounce.cancel();
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
       if (mounted) {
         setState(() {
-          _userNameQuery = _controller.text;
+          _userNameQuery = _controller!.text;
           _isSearchActive = _userNameQuery.isNotEmpty;
         });
       }
@@ -80,7 +80,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                   setState(() {
                     _selectedUsers
                       ..clear()
-                      ..addAll(updatedList);
+                      ..addAll(updatedList as Iterable<User>);
                   });
                 }
               },
@@ -244,15 +244,11 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                     pagination: PaginationParams(
                       limit: 25,
                     ),
-                    filter: {
+                    filter: Filter.and([
                       if (_userNameQuery.isNotEmpty)
-                        'name': {
-                          r'$autocomplete': _userNameQuery,
-                        },
-                      'id': {
-                        r'$ne': StreamChat.of(context).user.id,
-                      }
-                    },
+                        Filter.autoComplete('name', _userNameQuery),
+                      Filter.notEqual('id', StreamChat.of(context).user!.id),
+                    ]),
                     sort: [
                       SortOption(
                         'name',
@@ -315,8 +311,8 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   final double height;
 
   const _HeaderDelegate({
-    @required this.child,
-    @required this.height,
+    required this.child,
+    required this.height,
   });
 
   @override

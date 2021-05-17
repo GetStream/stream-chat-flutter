@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
@@ -11,16 +12,22 @@ import 'routes/routes.dart';
 /// Detail screen for a 1:1 chat correspondence
 class ChatInfoScreen extends StatefulWidget {
   /// User in consideration
-  final User user;
+  final User? user;
 
-  const ChatInfoScreen({Key key, this.user}) : super(key: key);
+  final MessageTheme messageTheme;
+
+  const ChatInfoScreen({
+    Key? key,
+    required this.messageTheme,
+    this.user,
+  }) : super(key: key);
 
   @override
   _ChatInfoScreenState createState() => _ChatInfoScreenState();
 }
 
 class _ChatInfoScreenState extends State<ChatInfoScreen> {
-  ValueNotifier<bool> mutedBool = ValueNotifier(false);
+  ValueNotifier<bool?> mutedBool = ValueNotifier(false);
 
   @override
   void initState() {
@@ -48,9 +55,9 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           if ([
             'admin',
             'owner',
-          ].contains(channel.state.members
-              .firstWhere((m) => m.userId == channel.client.state.user.id,
-                  orElse: () => null)
+          ].contains(channel.state!.members
+              .firstWhereOrNull(
+                  (m) => m.userId == channel.client.state.user!.id)
               ?.role))
             _buildDeleteListTile(),
         ],
@@ -70,7 +77,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: UserAvatar(
-                    user: widget.user,
+                    user: widget.user!,
                     constraints: BoxConstraints(
                       maxWidth: 72.0,
                       maxHeight: 72.0,
@@ -80,19 +87,19 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   ),
                 ),
                 Text(
-                  widget.user.name,
+                  widget.user!.name,
                   style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 7.0),
                 _buildConnectedTitleState(),
                 SizedBox(height: 15.0),
                 OptionListTile(
-                  title: '@${widget.user.id}',
+                  title: '@${widget.user!.id}',
                   tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
                   trailing: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      widget.user.name,
+                      widget.user!.name,
                       style: TextStyle(
                           color: StreamChatTheme.of(context)
                               .colorTheme
@@ -155,15 +162,15 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                 ),
                 trailing: snapshot.data == null
                     ? CircularProgressIndicator()
-                    : ValueListenableBuilder<bool>(
+                    : ValueListenableBuilder<bool?>(
                         valueListenable: mutedBool,
                         builder: (context, value, _) {
                           return CupertinoSwitch(
-                            value: value,
+                            value: value!,
                             onChanged: (val) {
                               mutedBool.value = val;
 
-                              if (snapshot.data) {
+                              if (snapshot.data!) {
                                 channel.channel.unmute();
                               } else {
                                 channel.channel.mute();
@@ -217,6 +224,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
                   channel: channel,
                   child: MessageSearchBloc(
                     child: ChannelMediaDisplayScreen(
+                      messageTheme: widget.messageTheme,
                       sortOptions: [
                         SortOption(
                           'created_at',
@@ -387,7 +395,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (widget.user.online)
+        if (widget.user!.online)
           Material(
             type: MaterialType.circle,
             child: Container(
@@ -404,7 +412,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
             color: StreamChatTheme.of(context).colorTheme.white,
           ),
         alternativeWidget,
-        if (widget.user.online)
+        if (widget.user!.online)
           SizedBox(
             width: 24.0,
           ),
@@ -414,8 +422,8 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
 }
 
 class _SharedGroupsScreen extends StatefulWidget {
-  final User mainUser;
-  final User otherUser;
+  final User? mainUser;
+  final User? otherUser;
 
   _SharedGroupsScreen(this.mainUser, this.otherUser);
 
@@ -445,20 +453,10 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
       ),
       body: StreamBuilder<List<Channel>>(
         stream: chat.client.queryChannels(
-          filter: {
-            r'$and': [
-              {
-                'members': {
-                  r'$in': [widget.otherUser.id],
-                },
-              },
-              {
-                'members': {
-                  r'$in': [widget.mainUser.id],
-                },
-              }
-            ],
-          },
+          filter: Filter.and([
+            Filter.in_('members', [widget.otherUser!.id]),
+            Filter.in_('members', [widget.mainUser!.id]),
+          ]),
         ),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -467,7 +465,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             );
           }
 
-          if (snapshot.data.isEmpty) {
+          if (snapshot.data!.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -501,11 +499,11 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             );
           }
 
-          final channels = snapshot.data
+          final channels = snapshot.data!
               .where((c) =>
-                  c.state.members.any((m) =>
-                      m.userId != widget.mainUser.id &&
-                      m.userId != widget.otherUser.id) ||
+                  c.state!.members.any((m) =>
+                      m.userId != widget.mainUser!.id &&
+                      m.userId != widget.otherUser!.id) ||
                   !c.isDistinct)
               .toList();
 
@@ -525,24 +523,24 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
 
   Widget _buildListTile(Channel channel) {
     var extraData = channel.extraData;
-    var members = channel.state.members;
+    var members = channel.state!.members;
 
     var textStyle = TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold);
 
     return Container(
       height: 64.0,
       child: LayoutBuilder(builder: (context, constraints) {
-        String title;
+        String? title;
         if (extraData['name'] == null) {
           final otherMembers = members.where(
-              (member) => member.userId != StreamChat.of(context).user.id);
+              (member) => member.userId != StreamChat.of(context).user!.id);
           if (otherMembers.isNotEmpty) {
             final maxWidth = constraints.maxWidth;
-            final maxChars = maxWidth / textStyle.fontSize;
+            final maxChars = maxWidth / textStyle.fontSize!;
             var currentChars = 0;
             final currentMembers = <Member>[];
             otherMembers.forEach((element) {
-              final newLength = currentChars + element.user.name.length;
+              final newLength = currentChars + element.user!.name.length;
               if (newLength < maxChars) {
                 currentChars = newLength;
                 currentMembers.add(element);
@@ -552,7 +550,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             final exceedingMembers =
                 otherMembers.length - currentMembers.length;
             title =
-                '${currentMembers.map((e) => e.user.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
+                '${currentMembers.map((e) => e.user!.name).join(', ')} ${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
           } else {
             title = 'No title';
           }
@@ -575,7 +573,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                   ),
                   Expanded(
                       child: Text(
-                    title,
+                    title!,
                     style: textStyle,
                   )),
                   Padding(
