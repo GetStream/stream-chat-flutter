@@ -190,8 +190,6 @@ void main() {
           encoded,
           '{"$key":${json.encode(values)}}',
         );
-        print('asdasda');
-        print('{"$key":${json.encode(values)}}');
       });
     });
 
