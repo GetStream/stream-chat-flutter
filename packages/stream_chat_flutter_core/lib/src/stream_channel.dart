@@ -159,7 +159,7 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (_topPaginationEnded ||
-        _queryTopMessagesController.value! ||
+        _queryTopMessagesController.value == true ||
         channel.state == null) return;
     _queryTopMessagesController.add(true);
 
