@@ -70,13 +70,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
             'state': false,
             'watch': false,
           },
-          filter: Filter.and([
-            Filter.equal('members', [
+          filter: Filter.raw(value: {
+            'members': [
               ..._selectedUsers.map((e) => e.id),
               chatState.user!.id,
-            ]),
-            Filter.equal('distinct', true),
-          ]),
+            ],
+            'distinct': true,
+          }),
           messageLimit: 0,
           paginationParams: PaginationParams(
             limit: 1,
