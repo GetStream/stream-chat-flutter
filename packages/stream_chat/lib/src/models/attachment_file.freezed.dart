@@ -132,9 +132,8 @@ class _$PreparingCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
   Preparing get _value => super._value as Preparing;
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$Preparing implements Preparing {
   const _$Preparing();
 
@@ -253,9 +252,8 @@ class _$InProgressCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$InProgress implements InProgress {
   const _$InProgress({required this.uploaded, required this.total});
 
@@ -382,9 +380,8 @@ class _$SuccessCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
   Success get _value => super._value as Success;
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$Success implements Success {
   const _$Success();
 
@@ -497,9 +494,8 @@ class _$FailedCopyWithImpl<$Res> extends _$UploadStateCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$Failed implements Failed {
   const _$Failed({required this.error});
 

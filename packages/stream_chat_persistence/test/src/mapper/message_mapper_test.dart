@@ -48,7 +48,9 @@ void main() {
         (prev, curr) =>
             prev?..update(curr.type, (value) => value + 1, ifAbsent: () => 1),
       ),
-      mentionedUsers: const [],
+      mentionedUsers: [
+        jsonEncode(User(id: 'testuser')),
+      ],
       status: MessageSendingStatus.sent,
       updatedAt: DateTime.now(),
       extraData: {'extra_test_data': 'extraData'},
@@ -77,6 +79,11 @@ void main() {
     expect(message.createdAt, isSameDateAs(entity.createdAt));
     expect(message.shadowed, entity.shadowed);
     expect(message.showInChannel, entity.showInChannel);
+    for (var i = 0; i < message.mentionedUsers.length; i++) {
+      final entityMentionedUser =
+          User.fromJson(jsonDecode(entity.mentionedUsers[i]));
+      expect(message.mentionedUsers[i].id, entityMentionedUser.id);
+    }
     expect(message.replyCount, entity.replyCount);
     expect(message.reactionScores, entity.reactionScores);
     expect(message.reactionCounts, entity.reactionCounts);
@@ -135,6 +142,9 @@ void main() {
       shadowed: math.Random().nextBool(),
       showInChannel: math.Random().nextBool(),
       replyCount: 33,
+      mentionedUsers: [
+        User(id: 'testuser'),
+      ],
       reactionScores: {for (final r in reactions) r.type: r.score},
       reactionCounts: reactions.fold(
         {},
@@ -163,6 +173,8 @@ void main() {
     expect(entity.shadowed, message.shadowed);
     expect(entity.showInChannel, message.showInChannel);
     expect(entity.replyCount, message.replyCount);
+    expect(entity.mentionedUsers,
+        message.mentionedUsers.map((e) => jsonEncode(e)).toList());
     expect(entity.reactionScores, message.reactionScores);
     expect(entity.reactionCounts, message.reactionCounts);
     expect(entity.status, message.status);

@@ -159,11 +159,11 @@ class StreamChannelState extends State<StreamChannel> {
     bool preferOffline = false,
   }) async {
     if (_topPaginationEnded ||
-        _queryTopMessagesController.value! ||
+        _queryTopMessagesController.value == true ||
         channel.state == null) return;
     _queryTopMessagesController.add(true);
 
-    late Message message;
+    Message? message;
     if (channel.state!.threads.containsKey(parentId)) {
       final thread = channel.state!.threads[parentId]!;
       if (thread.isNotEmpty) {
@@ -175,7 +175,7 @@ class StreamChannelState extends State<StreamChannel> {
       final response = await channel.getReplies(
         parentId,
         PaginationParams(
-          lessThan: message.id,
+          lessThan: message?.id,
           limit: limit,
         ),
         preferOffline: preferOffline,

@@ -87,8 +87,8 @@ extension FilterOperatorX on FilterOperator {
 /// See <a href="https://getstream.io/chat/docs/query_channels/?language=dart" target="_top">Query Channels Documentation</a>
 class Filter extends Equatable {
   const Filter.__({
-    required this.operator,
     required this.value,
+    this.operator,
     this.key,
   });
 
@@ -159,13 +159,26 @@ class Filter extends Equatable {
 
   /// Creates a custom [Filter] if there isn't one already available.
   const factory Filter.custom({
-    required String operator,
     required Object value,
+    String? operator,
     String? key,
   }) = Filter.__;
 
+  /// Creates a custom [Filter] from a raw map value
+  ///
+  /// ```dart
+  /// final filter = Filter.raw(
+  ///   {
+  ///     'members': [user1.id, user2.id],
+  ///   }
+  /// )
+  /// ```
+  const factory Filter.raw({
+    required Map<String, Object?> value,
+  }) = Filter.__;
+
   /// An operator used for the filter. The operator string must start with `$`
-  final String operator;
+  final String? operator;
 
   /// The "left-hand" side of the filter.
   /// Specifies the name of the field the filter should match.
@@ -183,24 +196,22 @@ class Filter extends Equatable {
   List<Object?> get props => [operator, key, value];
 
   /// Serializes to json object
-  Map<String, Object> toJson() {
-    final json = <String, Object>{};
+  Map<String, Object?> toJson() {
+    final json = <String, Object?>{};
     final groupOperators = _groupOperators.map((it) => it.rawValue);
-
-    assert(
-      groupOperators.contains(operator) || key != null,
-      'Filter must contain the `key` when the operator is not a '
-      'group operator.',
-    );
 
     if (groupOperators.contains(operator)) {
       // Filters with group operators are encoded in the following form:
       // { $<operator>: [ <filter 1>, <filter 2> ] }
-      json[operator] = value;
-    } else {
+      json[operator!] = value;
+    } else if (operator != null) {
       // Normal filters are encoded in the following form:
       // { key: { $<operator>: <value> } }
       json[key!] = {operator: value};
+    } else if (key != null) {
+      json[key!] = value;
+    } else {
+      return value as Map<String, Object?>;
     }
 
     return json;

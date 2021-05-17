@@ -125,6 +125,7 @@ class MessageWidget extends StatefulWidget {
                       message: message,
                       messageTheme: messageTheme,
                       onShowMessage: onShowMessage,
+                      onReturnAction: onReturnAction,
                     ),
                   ),
                   border,

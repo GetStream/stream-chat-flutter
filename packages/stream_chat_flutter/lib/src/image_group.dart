@@ -12,11 +12,15 @@ class ImageGroup extends StatelessWidget {
     required this.message,
     required this.messageTheme,
     required this.size,
+    this.onReturnAction,
     this.onShowMessage,
   }) : super(key: key);
 
   /// List of attachments to show
   final List<Attachment> images;
+
+  /// Callback when attachment is returned to from other screens
+  final ValueChanged<ReturnActionType>? onReturnAction;
 
   /// Message which images are attached to
   final Message message;
@@ -111,10 +115,10 @@ class ImageGroup extends StatelessWidget {
   void _onTap(
     BuildContext context,
     int index,
-  ) {
+  ) async {
     final channel = StreamChannel.of(context).channel;
 
-    Navigator.push(
+    final res = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => StreamChannel(
@@ -129,6 +133,7 @@ class ImageGroup extends StatelessWidget {
         ),
       ),
     );
+    if (res != null) onReturnAction?.call(res);
   }
 
   Widget _buildImage(BuildContext context, int index) => ImageAttachment(
