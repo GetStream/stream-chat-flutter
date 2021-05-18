@@ -175,17 +175,18 @@ class StreamChatThemeData {
   }) =>
       StreamChatThemeData.raw(
         channelListHeaderTheme:
-            channelListHeaderTheme ?? this.channelListHeaderTheme,
-        textTheme: textTheme ?? this.textTheme,
-        colorTheme: colorTheme ?? this.colorTheme,
-        primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
+            this.channelListHeaderTheme.merge(channelListHeaderTheme),
+        textTheme: this.textTheme.merge(textTheme),
+        colorTheme: this.colorTheme.merge(colorTheme),
+        primaryIconTheme: this.primaryIconTheme.merge(primaryIconTheme),
         defaultChannelImage: defaultChannelImage ?? this.defaultChannelImage,
         defaultUserImage: defaultUserImage ?? this.defaultUserImage,
-        channelPreviewTheme: channelPreviewTheme ?? this.channelPreviewTheme,
-        channelTheme: channelTheme ?? this.channelTheme,
-        ownMessageTheme: ownMessageTheme ?? this.ownMessageTheme,
-        otherMessageTheme: otherMessageTheme ?? this.otherMessageTheme,
-        messageInputTheme: messageInputTheme ?? this.messageInputTheme,
+        channelPreviewTheme:
+            this.channelPreviewTheme.merge(channelPreviewTheme),
+        channelTheme: this.channelTheme.merge(channelTheme),
+        ownMessageTheme: this.ownMessageTheme.merge(ownMessageTheme),
+        otherMessageTheme: this.otherMessageTheme.merge(otherMessageTheme),
+        messageInputTheme: this.messageInputTheme.merge(messageInputTheme),
         reactionIcons: reactionIcons ?? this.reactionIcons,
       );
 
