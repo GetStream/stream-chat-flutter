@@ -28,7 +28,7 @@ This repo includes a fully functional example app with setup instructions.
 The example is available under the [example](https://github.com/GetStream/stream-chat-flutter-core/tree/master/example) folder.
 
 ## Add dependency
-Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_flutter.svg)](https://pub.dartlang.org/packages/stream_chat_flutter)
+Add this to your package's pubspec.yaml file, use the latest version [![Pub](https://img.shields.io/pub/v/stream_chat_flutter_core.svg)](https://pub.dartlang.org/packages/stream_chat_flutter_core)
 ```yaml
 dependencies:
  stream_chat_flutter_core: ^latest_version
