@@ -144,7 +144,9 @@ class MessageReactionsModal extends StatelessWidget {
                               attachmentShape: attachmentShape,
                               padding: const EdgeInsets.all(0),
                               attachmentBorderRadiusGeometry:
-                                  attachmentBorderRadiusGeometry,
+                                  attachmentBorderRadiusGeometry
+                                      ?.mirrorBorderIfReversed(
+                                          reverse: reverse),
                               attachmentPadding: EdgeInsets.all(
                                 hasFileAttachment ? 4 : 2,
                               ),

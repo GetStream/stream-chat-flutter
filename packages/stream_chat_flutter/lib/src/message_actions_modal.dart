@@ -189,8 +189,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             child: MessageWidget(
                               key: const Key('MessageWidget'),
                               reverse: widget.reverse,
-                              attachmentBorderRadiusGeometry:
-                                  widget.attachmentBorderRadiusGeometry,
+                              attachmentBorderRadiusGeometry: widget
+                                  .attachmentBorderRadiusGeometry
+                                  ?.mirrorBorderIfReversed(
+                                      reverse: widget.reverse),
                               message: widget.message.copyWith(
                                 text: widget.message.text!.length > 200
                                     // ignore: lines_longer_than_80_chars

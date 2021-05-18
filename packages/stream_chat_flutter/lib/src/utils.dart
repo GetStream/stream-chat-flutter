@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:stream_chat_flutter/src/extension.dart';
 
 /// Launch URL
 Future<void> launchURL(BuildContext context, String? url) async {
@@ -333,7 +334,7 @@ Widget wrapAttachmentWidget(
   BorderRadius borderRadius,
 ) =>
     ClipRRect(
-      borderRadius: borderRadius,
+      borderRadius: borderRadius.mirrorBorderIfReversed(reverse: reverse),
       child: Material(
         clipBehavior: Clip.antiAlias,
         shape: attachmentShape,

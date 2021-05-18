@@ -16,6 +16,7 @@ import 'package:stream_chat_flutter/src/quoted_message_widget.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/url_attachment.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'extension.dart';
 
 /// Widget builder for building attachments
 typedef AttachmentBuilder = Widget Function(
