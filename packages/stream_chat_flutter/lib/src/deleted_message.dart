@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 
@@ -33,36 +31,28 @@ class DeletedMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
-    return Transform(
-      transform: Matrix4.rotationY(reverse ? pi : 0),
-      alignment: Alignment.center,
-      child: Material(
-        color: messageTheme.messageBackgroundColor,
-        shape: shape ??
-            RoundedRectangleBorder(
-              borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
-              side: borderSide ??
-                  BorderSide(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? chatThemeData.colorTheme.white.withAlpha(24)
-                        : chatThemeData.colorTheme.black.withAlpha(24),
-                  ),
-            ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 8,
-            horizontal: 16,
+    return Material(
+      color: messageTheme.messageBackgroundColor,
+      shape: shape ??
+          RoundedRectangleBorder(
+            borderRadius: borderRadiusGeometry ?? BorderRadius.zero,
+            side: borderSide ??
+                BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? chatThemeData.colorTheme.white.withAlpha(24)
+                      : chatThemeData.colorTheme.black.withAlpha(24),
+                ),
           ),
-          child: Transform(
-            transform: Matrix4.rotationY(reverse ? pi : 0),
-            alignment: Alignment.center,
-            child: Text(
-              'Message deleted',
-              style: messageTheme.messageText?.copyWith(
-                fontStyle: FontStyle.italic,
-                color: messageTheme.createdAt?.color,
-              ),
-            ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 16,
+        ),
+        child: Text(
+          'Message deleted',
+          style: messageTheme.messageText?.copyWith(
+            fontStyle: FontStyle.italic,
+            color: messageTheme.createdAt?.color,
           ),
         ),
       ),

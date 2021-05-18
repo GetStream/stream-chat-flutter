@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -332,18 +330,10 @@ Widget wrapAttachmentWidget(
   ShapeBorder attachmentShape,
   // ignore: avoid_positional_boolean_parameters
   bool reverse,
-  BorderRadius borderRadius,
 ) =>
-    ClipRRect(
-      borderRadius: borderRadius,
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        shape: attachmentShape,
-        type: MaterialType.transparency,
-        child: Transform(
-          transform: Matrix4.rotationY(reverse ? pi : 0),
-          alignment: Alignment.center,
-          child: attachmentWidget,
-        ),
-      ),
+    Material(
+      clipBehavior: Clip.antiAlias,
+      shape: attachmentShape,
+      type: MaterialType.transparency,
+      child: attachmentWidget,
     );

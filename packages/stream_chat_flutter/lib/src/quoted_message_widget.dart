@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -133,21 +131,17 @@ class QuotedMessageWidget extends StatelessWidget {
       if (_hasAttachments) _parseAttachments(context),
       if (msg.text!.isNotEmpty)
         Flexible(
-          child: Transform(
-            transform: Matrix4.rotationY(reverse ? pi : 0),
-            alignment: Alignment.center,
-            child: MessageText(
-              message: msg,
-              messageTheme: isOnlyEmoji && _containsText
-                  ? messageTheme.copyWith(
-                      messageText: messageTheme.messageText?.copyWith(
-                      fontSize: 32,
-                    ))
-                  : messageTheme.copyWith(
-                      messageText: messageTheme.messageText?.copyWith(
-                      fontSize: 12,
-                    )),
-            ),
+          child: MessageText(
+            message: msg,
+            messageTheme: isOnlyEmoji && _containsText
+                ? messageTheme.copyWith(
+                    messageText: messageTheme.messageText?.copyWith(
+                    fontSize: 32,
+                  ))
+                : messageTheme.copyWith(
+                    messageText: messageTheme.messageText?.copyWith(
+                    fontSize: 12,
+                  )),
           ),
         ),
     ].insertBetween(const SizedBox(width: 8));
@@ -218,15 +212,11 @@ class QuotedMessageWidget extends StatelessWidget {
       }
     }
     child = AbsorbPointer(child: child);
-    return Transform(
-      transform: Matrix4.rotationY(reverse ? pi : 0),
-      alignment: Alignment.center,
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        type: MaterialType.transparency,
-        shape: attachment.type == 'file' ? null : _getDefaultShape(context),
-        child: child,
-      ),
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      type: MaterialType.transparency,
+      shape: attachment.type == 'file' ? null : _getDefaultShape(context),
+      child: child,
     );
   }
 
@@ -235,17 +225,13 @@ class QuotedMessageWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       );
 
-  Widget _buildUserAvatar() => Transform(
-        transform: Matrix4.rotationY(reverse ? pi : 0),
-        alignment: Alignment.center,
-        child: UserAvatar(
-          user: message.user!,
-          constraints: const BoxConstraints.tightFor(
-            height: 24,
-            width: 24,
-          ),
-          showOnlineStatus: false,
+  Widget _buildUserAvatar() => UserAvatar(
+        user: message.user!,
+        constraints: const BoxConstraints.tightFor(
+          height: 24,
+          width: 24,
         ),
+        showOnlineStatus: false,
       );
 
   Map<String, QuotedMessageAttachmentThumbnailBuilder>

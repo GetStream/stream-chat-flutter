@@ -173,12 +173,12 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             Align(
                               alignment: Alignment(
                                   user?.id == widget.message.user?.id
-                                      ? (divFactor > 1.0
-                                          ? 0.0
-                                          : (1.0 - divFactor))
-                                      : (divFactor > 1.0
-                                          ? 0.0
-                                          : -(1.0 - divFactor)),
+                                      ? (divFactor >= 1.0
+                                          ? -0.2
+                                          : (1.2 - divFactor))
+                                      : (divFactor >= 1.0
+                                          ? 0.2
+                                          : -(1.2 - divFactor)),
                                   0),
                               child: ReactionPicker(
                                 message: widget.message,
@@ -189,8 +189,10 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                             child: MessageWidget(
                               key: const Key('MessageWidget'),
                               reverse: widget.reverse,
-                              attachmentBorderRadiusGeometry:
-                                  widget.attachmentBorderRadiusGeometry,
+                              attachmentBorderRadiusGeometry: widget
+                                  .attachmentBorderRadiusGeometry
+                                  ?.mirrorBorderIfReversed(
+                                      reverse: !widget.reverse),
                               message: widget.message.copyWith(
                                 text: widget.message.text!.length > 200
                                     // ignore: lines_longer_than_80_chars

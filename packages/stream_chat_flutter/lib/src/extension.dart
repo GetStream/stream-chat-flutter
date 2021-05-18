@@ -104,3 +104,15 @@ extension BuildContextX on BuildContext {
   double get textScaleFactor =>
       MediaQuery.maybeOf(this)?.textScaleFactor ?? 1.0;
 }
+
+/// Extension on [BorderRadius]
+extension FlipBorder on BorderRadius {
+  /// Flips borders (Y)
+  BorderRadius mirrorBorderIfReversed({bool reverse = true}) => reverse
+      ? BorderRadius.only(
+          topLeft: topRight,
+          topRight: topLeft,
+          bottomLeft: bottomRight,
+          bottomRight: bottomLeft)
+      : this;
+}
