@@ -131,8 +131,6 @@ class MessageWidget extends StatefulWidget {
                   ),
                   border,
                   reverse,
-                  attachmentBorderRadiusGeometry as BorderRadius? ??
-                      BorderRadius.zero,
                 ),
               );
             }
@@ -157,8 +155,6 @@ class MessageWidget extends StatefulWidget {
               ),
               border,
               reverse,
-              attachmentBorderRadiusGeometry as BorderRadius? ??
-                  BorderRadius.zero,
             );
           },
           'video': (context, message, attachments) {
@@ -191,8 +187,6 @@ class MessageWidget extends StatefulWidget {
               ),
               border,
               reverse,
-              attachmentBorderRadiusGeometry as BorderRadius? ??
-                  BorderRadius.zero,
             );
           },
           'giphy': (context, message, attachments) {
@@ -219,8 +213,6 @@ class MessageWidget extends StatefulWidget {
               ),
               border,
               reverse,
-              attachmentBorderRadiusGeometry as BorderRadius? ??
-                  BorderRadius.zero,
             );
           },
           'file': (context, message, attachments) {
@@ -248,8 +240,6 @@ class MessageWidget extends StatefulWidget {
                       ),
                       border,
                       reverse,
-                      attachmentBorderRadiusGeometry as BorderRadius? ??
-                          BorderRadius.zero,
                     );
                   })
                   .insertBetween(SizedBox(

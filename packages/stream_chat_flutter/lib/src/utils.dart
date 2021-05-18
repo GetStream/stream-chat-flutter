@@ -331,14 +331,10 @@ Widget wrapAttachmentWidget(
   ShapeBorder attachmentShape,
   // ignore: avoid_positional_boolean_parameters
   bool reverse,
-  BorderRadius borderRadius,
 ) =>
-    ClipRRect(
-      borderRadius: borderRadius.mirrorBorderIfReversed(reverse: reverse),
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        shape: attachmentShape,
-        type: MaterialType.transparency,
-        child: attachmentWidget,
-      ),
+    Material(
+      clipBehavior: Clip.antiAlias,
+      shape: attachmentShape,
+      type: MaterialType.transparency,
+      child: attachmentWidget,
     );

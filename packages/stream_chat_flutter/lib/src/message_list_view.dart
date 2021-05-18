@@ -980,14 +980,23 @@ class _MessageListViewState extends State<MessageListView> {
       onReplyTap: widget.onReplyTap,
       attachmentBorderRadiusGeometry: BorderRadius.only(
         topLeft: Radius.circular(attachmentBorderRadius),
-        bottomLeft: Radius.circular(
-          (timeDiff >= 1 || !isNextUserSame) &&
-                  !(hasReplies || isThreadMessage || hasFileAttachment)
-              ? 0
-              : attachmentBorderRadius,
-        ),
+        bottomLeft: isMyMessage
+            ? Radius.circular(attachmentBorderRadius)
+            : Radius.circular(
+                (timeDiff >= 1 || !isNextUserSame) &&
+                        !(hasReplies || isThreadMessage || hasFileAttachment)
+                    ? 0
+                    : attachmentBorderRadius,
+              ),
         topRight: Radius.circular(attachmentBorderRadius),
-        bottomRight: Radius.circular(attachmentBorderRadius),
+        bottomRight: isMyMessage
+            ? Radius.circular(
+                (timeDiff >= 1 || !isNextUserSame) &&
+                        !(hasReplies || isThreadMessage || hasFileAttachment)
+                    ? 0
+                    : attachmentBorderRadius,
+              )
+            : Radius.circular(attachmentBorderRadius),
       ),
       attachmentPadding: EdgeInsets.all(hasFileAttachment ? 4 : 2),
       borderRadiusGeometry: BorderRadius.only(
