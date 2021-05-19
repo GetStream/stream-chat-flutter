@@ -132,8 +132,6 @@ class ChannelListCoreState extends State<ChannelListCore> {
         stream: channelsBlocState.channelsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            print(snapshot.error);
-            print(snapshot.stackTrace);
             return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
