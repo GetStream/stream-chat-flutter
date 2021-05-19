@@ -93,8 +93,7 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
         final temp = oldMessages + messages.results;
         _messageResponses.add(temp);
       }
-      if (_messageResponses.hasValue &&
-          _queryMessagesLoadingController.value!) {
+      if (_messageResponses.hasValue && _queryMessagesLoadingController.value) {
         _queryMessagesLoadingController.add(false);
       }
     } catch (e, stk) {

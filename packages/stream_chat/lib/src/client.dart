@@ -1495,7 +1495,7 @@ class ClientState {
   Stream<OwnUser?> get userStream => _userController.stream;
 
   /// The current user
-  Map<String?, User?> get users => _usersController.value!;
+  Map<String?, User?> get users => _usersController.value;
 
   /// The current user as a stream
   Stream<Map<String?, User?>> get usersStream => _usersController.stream;
@@ -1517,7 +1517,7 @@ class ClientState {
       _channelsController.stream;
 
   /// The current list of channels in memory
-  Map<String, Channel> get channels => _channelsController.value!;
+  Map<String, Channel> get channels => _channelsController.value;
 
   set channels(Map<String, Channel> v) {
     _channelsController.add(v);

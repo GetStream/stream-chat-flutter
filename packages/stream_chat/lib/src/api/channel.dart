@@ -1427,7 +1427,7 @@ class ChannelClientState {
   /// This flag should be managed by UI sdks.
   /// When false, any new message (received by WebSocket event
   /// - [EventType.messageNew]) will not be pushed on to message list.
-  bool get isUpToDate => _isUpToDateController.value ?? true;
+  bool get isUpToDate => _isUpToDateController.value;
 
   set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
 
@@ -1528,7 +1528,7 @@ class ChannelClientState {
       }
 
       if (_countMessageAsUnread(message)) {
-        _unreadCountController.add(_unreadCountController.value! + 1);
+        _unreadCountController.add(_unreadCountController.value + 1);
       }
     }));
   }
@@ -1766,13 +1766,13 @@ class ChannelClientState {
       a.createdAt.compareTo(b.createdAt);
 
   /// The channel state related to this client
-  ChannelState get _channelState => _channelStateController.value!;
+  ChannelState get _channelState => _channelStateController.value;
 
   /// The channel state related to this client as a stream
   Stream<ChannelState> get channelStateStream => _channelStateController.stream;
 
   /// The channel state related to this client
-  ChannelState get channelState => _channelStateController.value!;
+  ChannelState get channelState => _channelStateController.value;
   late BehaviorSubject<ChannelState> _channelStateController;
 
   final Debounce _debouncedUpdatePersistenceChannelState;
@@ -1784,7 +1784,7 @@ class ChannelClientState {
 
   /// The channel threads related to this channel
   Map<String, List<Message>> get threads =>
-      _threadsController.value!.map((key, value) => MapEntry(key, value));
+      _threadsController.value.map((key, value) => MapEntry(key, value));
 
   /// The channel threads related to this channel as a stream
   Stream<Map<String, List<Message>>> get threadsStream =>
@@ -1801,7 +1801,7 @@ class ChannelClientState {
   }
 
   /// Channel related typing users last value
-  List<User> get typingEvents => _typingEventsController.value!;
+  List<User> get typingEvents => _typingEventsController.value;
 
   /// Channel related typing users stream
   Stream<List<User>> get typingEventsStream => _typingEventsController.stream;

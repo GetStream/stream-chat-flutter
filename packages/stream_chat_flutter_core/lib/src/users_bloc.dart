@@ -92,7 +92,7 @@ class UsersBlocState extends State<UsersBloc>
         final temp = oldUsers + usersResponse.users;
         _usersController.add(temp);
       }
-      if (_usersController.hasValue && _queryUsersLoadingController.value!) {
+      if (_usersController.hasValue && _queryUsersLoadingController.value) {
         _queryUsersLoadingController.add(false);
       }
     } catch (e, stk) {
