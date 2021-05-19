@@ -1489,7 +1489,7 @@ class ClientState {
   void _updateUser(User? user) => _updateUsers([user]);
 
   /// The current user
-  OwnUser? get user => _userController.value;
+  OwnUser? get user => _userController.valueOrNull;
 
   /// The current user as a stream
   Stream<OwnUser?> get userStream => _userController.stream;
@@ -1501,13 +1501,13 @@ class ClientState {
   Stream<Map<String?, User?>> get usersStream => _usersController.stream;
 
   /// The current unread channels count
-  int? get unreadChannels => _unreadChannelsController.value;
+  int? get unreadChannels => _unreadChannelsController.valueOrNull;
 
   /// The current unread channels count as a stream
   Stream<int?> get unreadChannelsStream => _unreadChannelsController.stream;
 
   /// The current total unread messages count
-  int? get totalUnreadCount => _totalUnreadCountController.value;
+  int? get totalUnreadCount => _totalUnreadCountController.valueOrNull;
 
   /// The current total unread messages count as a stream
   Stream<int?> get totalUnreadCountStream => _totalUnreadCountController.stream;
