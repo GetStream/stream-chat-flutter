@@ -1474,7 +1474,6 @@ class MessageInputState extends State<MessageInput> {
             .any((element) => element.ogScrapeUrl != null) ==
         true;
     return QuotedMessageWidget(
-      reverse: true,
       showBorder: !containsUrl,
       message: widget.quotedMessage!,
       messageTheme: StreamChatTheme.of(context).otherMessageTheme,
