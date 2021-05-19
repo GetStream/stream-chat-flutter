@@ -157,10 +157,11 @@ class QuotedMessageWidget extends StatelessWidget {
                 color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
               )
             : null,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(12),
-          topLeft: Radius.circular(12),
-          bottomLeft: Radius.circular(12),
+        borderRadius: BorderRadius.only(
+          topRight: const Radius.circular(12),
+          topLeft: const Radius.circular(12),
+          bottomRight: reverse ? const Radius.circular(12) : Radius.zero,
+          bottomLeft: reverse ? Radius.zero : const Radius.circular(12),
         ),
       ),
       padding: const EdgeInsets.all(8),
