@@ -1,3 +1,9 @@
+## 2.0.0-nullsafety.2
+
+* Update llc dependency
+* Minor fixes and improvements
+* Fixed bug not saving message.mentioned_users
+
 ## 2.0.0-nullsafety.1
 
 * Migrate this package to null safety

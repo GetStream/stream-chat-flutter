@@ -1,3 +1,9 @@
+## 2.0.0-nullsafety.4
+
+- Minor fixes and improvements
+- Updated `stream_chat_core` dependency
+- Improved performance of `MessageWidget` component
+
 ## 2.0.0-nullsafety.3
 
 - Fix MessageInput overflow when there are no actions

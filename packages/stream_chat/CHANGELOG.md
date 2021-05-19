@@ -1,3 +1,9 @@
+## 2.0.0-nullsafety.2
+
+- Added new `Filter.raw` constructor
+- Changed extraData
+- Minor fixes
+
 ## 2.0.0-nullsafety.1
 
 - Migrate this package to null safety
