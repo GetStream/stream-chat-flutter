@@ -1473,16 +1473,12 @@ class MessageInputState extends State<MessageInput> {
     final containsUrl = widget.quotedMessage!.attachments
             .any((element) => element.ogScrapeUrl != null) ==
         true;
-    return Transform(
-      transform: Matrix4.rotationY(pi),
-      alignment: Alignment.center,
-      child: QuotedMessageWidget(
-        reverse: true,
-        showBorder: !containsUrl,
-        message: widget.quotedMessage!,
-        messageTheme: StreamChatTheme.of(context).otherMessageTheme,
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      ),
+    return QuotedMessageWidget(
+      reverse: true,
+      showBorder: !containsUrl,
+      message: widget.quotedMessage!,
+      messageTheme: StreamChatTheme.of(context).otherMessageTheme,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
     );
   }
 
