@@ -44,7 +44,8 @@ class MessageSearchBlocState extends State<MessageSearchBloc>
   late StreamChatCoreState _streamChatCoreState;
 
   /// The current messages list
-  List<GetMessageResponse>? get messageResponses => _messageResponses.value;
+  List<GetMessageResponse>? get messageResponses =>
+      _messageResponses.valueOrNull;
 
   /// The current messages list as a stream
   Stream<List<GetMessageResponse>> get messagesStream =>
