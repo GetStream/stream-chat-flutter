@@ -3,12 +3,14 @@ import 'package:stream_chat_persistence/src/dao/channel_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
+import '../../stream_chat_persistence_client_test.dart';
+
 void main() {
   late ChannelDao channelDao;
   late MoorChatDatabase database;
 
   setUp(() {
-    database = MoorChatDatabase.testable('testUserId');
+    database = testDatabaseProvider('testUserId');
     channelDao = database.channelDao;
   });
 

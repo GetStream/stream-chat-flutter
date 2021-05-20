@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -45,10 +43,6 @@ class MoorChatDatabase extends _$MoorChatDatabase {
     this._userId,
     DatabaseConnection connection,
   ) : super.connect(connection);
-
-  /// Custom constructor used only for testing
-  @visibleForTesting
-  MoorChatDatabase.testable(this._userId) : super(VmDatabase.memory());
 
   final String _userId;
 
