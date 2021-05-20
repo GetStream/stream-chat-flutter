@@ -670,8 +670,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                 Filter.autoComplete('name', _userNameQuery),
                               Filter.notIn('id', [
                                 StreamChat.of(context).user!.id,
-                                ...channel.state!.members.map(((e) => e.userId!)
-                                    as Object Function(Member)),
+                                ...channel.state!.members
+                                    .map<String?>(((e) => e.userId))
+                                    .whereType<String>(),
                               ]),
                             ],
                           ),
@@ -893,18 +894,18 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                       );
                     },
                   ),
-                if (!channel.isDistinct &&
-                    StreamChat.of(context).user!.id != user.id &&
-                    isUserAdmin)
-                  _buildModalListTile(
-                      context,
-                      StreamSvgIcon.iconUserSettings(
-                        color: StreamChatTheme.of(context).colorTheme.grey,
-                        size: 24.0,
-                      ),
-                      'Make Owner', () {
-                    // TODO: Add make owner implementation (Remaining from backend)
-                  }),
+                // if (!channel.isDistinct &&
+                //     StreamChat.of(context).user!.id != user.id &&
+                //     isUserAdmin)
+                //   _buildModalListTile(
+                //       context,
+                //       StreamSvgIcon.iconUserSettings(
+                //         color: StreamChatTheme.of(context).colorTheme.grey,
+                //         size: 24.0,
+                //       ),
+                //       'Make Owner', () {
+                //     // TODO: Add make owner implementation (Remaining from backend)
+                //   }),
                 if (!channel.isDistinct &&
                     StreamChat.of(context).user!.id != user.id &&
                     isUserAdmin)
@@ -915,7 +916,17 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         size: 24.0,
                       ),
                       'Remove From Group', () async {
-                    await channel.removeMembers([user.id]);
+                    final res = await showConfirmationDialog(
+                      context,
+                      title: 'Remove member',
+                      okText: 'REMOVE',
+                      question: 'Are you sure you want to remove this member?',
+                      cancelText: 'CANCEL',
+                    );
+
+                    if (res == true) {
+                      await channel.removeMembers([user.id]);
+                    }
                     Navigator.pop(context);
                   }, color: StreamChatTheme.of(context).colorTheme.accentRed),
                 _buildModalListTile(
