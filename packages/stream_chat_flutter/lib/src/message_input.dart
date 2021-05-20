@@ -155,7 +155,8 @@ class MessageInput extends StatefulWidget {
   final Message? editMessage;
 
   /// Max attachment size in bytes
-  /// If you're using our default CDN do not set it
+  /// Defaults to 20 MB
+  /// do not set it if you're using our default CDN
   final int maxAttachmentSize;
 
   /// Message to start with
