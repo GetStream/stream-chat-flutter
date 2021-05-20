@@ -1114,8 +1114,8 @@ class MessageInputState extends State<MessageInput> {
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (medium.type == AssetType.video) {
-        final mediaInfo = await (VideoService.compressVideo(file.path)
+      if (medium.type == AssetType.video && file.path != null) {
+        final mediaInfo = await (VideoService.compressVideo(file.path!)
             as FutureOr<MediaInfo>);
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
@@ -1510,7 +1510,9 @@ class MessageInputState extends State<MessageInput> {
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: FileAttachment(
-                          message: Message(), // dummy message
+                          message: Message(
+                            status: MessageSendingStatus.sending,
+                          ), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1898,12 +1900,13 @@ class MessageInputState extends State<MessageInput> {
     final attachment = Attachment(
       file: file,
       type: attachmentType,
+      uploadState: const UploadState.preparing(),
       extraData: extraDataMap,
     );
 
     if (file.size! > widget.maxAttachmentSize) {
-      if (attachmentType == 'Video') {
-        final mediaInfo = await (VideoService.compressVideo(file.path)
+      if (attachmentType == 'video' && file.path != null) {
+        final mediaInfo = await (VideoService.compressVideo(file.path!)
             as FutureOr<MediaInfo>);
 
         if (mediaInfo.filesize! > widget.maxAttachmentSize) {
