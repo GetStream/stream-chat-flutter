@@ -76,7 +76,7 @@ enum SendButtonLocation {
 
 const _kMinMediaPickerSize = 360.0;
 
-const _kMaxAttachmentSize = 20971520; // 20MB in Bytes
+const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -148,10 +148,15 @@ class MessageInput extends StatefulWidget {
     this.activeSendButton,
     this.showCommandsButton = true,
     this.mentionsTileBuilder,
+    this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
   }) : super(key: key);
 
   /// Message to edit
   final Message? editMessage;
+
+  /// Max attachment size in bytes
+  /// If you're using our default CDN do not set it
+  final int maxAttachmentSize;
 
   /// Message to start with
   final Message? initialMessage;
@@ -1108,12 +1113,12 @@ class MessageInputState extends State<MessageInput> {
       bytes: mediaFile.readAsBytesSync(),
     );
 
-    if (file.size! > _kMaxAttachmentSize) {
+    if (file.size! > widget.maxAttachmentSize) {
       if (medium.type == AssetType.video) {
         final mediaInfo = await (VideoService.compressVideo(file.path)
             as FutureOr<MediaInfo>);
 
-        if (mediaInfo.filesize! > _kMaxAttachmentSize) {
+        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
             // ignore: lines_longer_than_80_chars
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
@@ -1896,12 +1901,12 @@ class MessageInputState extends State<MessageInput> {
       extraData: extraDataMap,
     );
 
-    if (file.size! > _kMaxAttachmentSize) {
+    if (file.size! > widget.maxAttachmentSize) {
       if (attachmentType == 'Video') {
         final mediaInfo = await (VideoService.compressVideo(file.path)
             as FutureOr<MediaInfo>);
 
-        if (mediaInfo.filesize! > _kMaxAttachmentSize) {
+        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
             // ignore: lines_longer_than_80_chars
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
