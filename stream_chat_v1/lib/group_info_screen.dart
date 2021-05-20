@@ -787,158 +787,164 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   void _showUserInfoModal(User? user, bool isUserAdmin) {
     var channel = StreamChannel.of(context).channel;
+    final color = StreamChatTheme.of(context).colorTheme.white;
 
     showModalBottomSheet(
       context: context,
       clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
+      backgroundColor: color,
       builder: (context) {
-        return StreamChannel(
-          channel: channel,
-          child: Material(
-            color: StreamChatTheme.of(context).colorTheme.white,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 24.0,
-                ),
-                Center(
-                  child: Text(
-                    user!.name,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+        return SafeArea(
+          child: StreamChannel(
+            channel: channel,
+            child: Material(
+              color: color,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 24.0,
                   ),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                _buildConnectedTitleState(user)!,
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: UserAvatar(
-                      user: user,
-                      constraints: BoxConstraints(
-                        maxHeight: 64.0,
-                        minHeight: 64.0,
+                  Center(
+                    child: Text(
+                      user!.name,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
                       ),
-                      borderRadius: BorderRadius.circular(32.0),
                     ),
                   ),
-                ),
-                if (StreamChat.of(context).user!.id != user.id)
-                  _buildModalListTile(
-                    context,
-                    StreamSvgIcon.user(
-                      color: StreamChatTheme.of(context).colorTheme.grey,
-                      size: 24.0,
-                    ),
-                    'View info',
-                    () async {
-                      var client = StreamChat.of(context).client;
-
-                      var c = client.channel('messaging', extraData: {
-                        'members': [
-                          user.id,
-                          StreamChat.of(context).user!.id,
-                        ],
-                      });
-
-                      await c.watch();
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StreamChannel(
-                            channel: c,
-                            child: ChatInfoScreen(
-                              messageTheme: widget.messageTheme,
-                              user: user,
-                            ),
-                          ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  _buildConnectedTitleState(user)!,
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: UserAvatar(
+                        user: user,
+                        constraints: BoxConstraints(
+                          maxHeight: 64.0,
+                          minHeight: 64.0,
                         ),
-                      );
-                    },
-                  ),
-                if (StreamChat.of(context).user!.id != user.id)
-                  _buildModalListTile(
-                    context,
-                    StreamSvgIcon.message(
-                      color: StreamChatTheme.of(context).colorTheme.grey,
-                      size: 24.0,
+                        borderRadius: BorderRadius.circular(32.0),
+                      ),
                     ),
-                    'Message',
-                    () async {
-                      var client = StreamChat.of(context).client;
-
-                      var c = client.channel('messaging', extraData: {
-                        'members': [
-                          user.id,
-                          StreamChat.of(context).user!.id,
-                        ],
-                      });
-
-                      await c.watch();
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StreamChannel(
-                            channel: c,
-                            child: ChannelPage(),
-                          ),
-                        ),
-                      );
-                    },
                   ),
-                // if (!channel.isDistinct &&
-                //     StreamChat.of(context).user!.id != user.id &&
-                //     isUserAdmin)
-                //   _buildModalListTile(
-                //       context,
-                //       StreamSvgIcon.iconUserSettings(
-                //         color: StreamChatTheme.of(context).colorTheme.grey,
-                //         size: 24.0,
-                //       ),
-                //       'Make Owner', () {
-                //     // TODO: Add make owner implementation (Remaining from backend)
-                //   }),
-                if (!channel.isDistinct &&
-                    StreamChat.of(context).user!.id != user.id &&
-                    isUserAdmin)
-                  _buildModalListTile(
+                  if (StreamChat.of(context).user!.id != user.id)
+                    _buildModalListTile(
                       context,
-                      StreamSvgIcon.userRemove(
-                        color: StreamChatTheme.of(context).colorTheme.accentRed,
+                      StreamSvgIcon.user(
+                        color: StreamChatTheme.of(context).colorTheme.grey,
                         size: 24.0,
                       ),
-                      'Remove From Group', () async {
-                    final res = await showConfirmationDialog(
-                      context,
-                      title: 'Remove member',
-                      okText: 'REMOVE',
-                      question: 'Are you sure you want to remove this member?',
-                      cancelText: 'CANCEL',
-                    );
+                      'View info',
+                      () async {
+                        var client = StreamChat.of(context).client;
 
-                    if (res == true) {
-                      await channel.removeMembers([user.id]);
-                    }
-                    Navigator.pop(context);
-                  }, color: StreamChatTheme.of(context).colorTheme.accentRed),
-                _buildModalListTile(
-                    context,
-                    StreamSvgIcon.closeSmall(
-                      color: StreamChatTheme.of(context).colorTheme.grey,
-                      size: 24.0,
+                        var c = client.channel('messaging', extraData: {
+                          'members': [
+                            user.id,
+                            StreamChat.of(context).user!.id,
+                          ],
+                        });
+
+                        await c.watch();
+
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StreamChannel(
+                              channel: c,
+                              child: ChatInfoScreen(
+                                messageTheme: widget.messageTheme,
+                                user: user,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    'Cancel', () {
-                  Navigator.pop(context);
-                }),
-              ],
+                  if (StreamChat.of(context).user!.id != user.id)
+                    _buildModalListTile(
+                      context,
+                      StreamSvgIcon.message(
+                        color: StreamChatTheme.of(context).colorTheme.grey,
+                        size: 24.0,
+                      ),
+                      'Message',
+                      () async {
+                        var client = StreamChat.of(context).client;
+
+                        var c = client.channel('messaging', extraData: {
+                          'members': [
+                            user.id,
+                            StreamChat.of(context).user!.id,
+                          ],
+                        });
+
+                        await c.watch();
+
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StreamChannel(
+                              channel: c,
+                              child: ChannelPage(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  // if (!channel.isDistinct &&
+                  //     StreamChat.of(context).user!.id != user.id &&
+                  //     isUserAdmin)
+                  //   _buildModalListTile(
+                  //       context,
+                  //       StreamSvgIcon.iconUserSettings(
+                  //         color: StreamChatTheme.of(context).colorTheme.grey,
+                  //         size: 24.0,
+                  //       ),
+                  //       'Make Owner', () {
+                  //     // TODO: Add make owner implementation (Remaining from backend)
+                  //   }),
+                  if (!channel.isDistinct &&
+                      StreamChat.of(context).user!.id != user.id &&
+                      isUserAdmin)
+                    _buildModalListTile(
+                        context,
+                        StreamSvgIcon.userRemove(
+                          color:
+                              StreamChatTheme.of(context).colorTheme.accentRed,
+                          size: 24.0,
+                        ),
+                        'Remove From Group', () async {
+                      final res = await showConfirmationDialog(
+                        context,
+                        title: 'Remove member',
+                        okText: 'REMOVE',
+                        question:
+                            'Are you sure you want to remove this member?',
+                        cancelText: 'CANCEL',
+                      );
+
+                      if (res == true) {
+                        await channel.removeMembers([user.id]);
+                      }
+                      Navigator.pop(context);
+                    }, color: StreamChatTheme.of(context).colorTheme.accentRed),
+                  _buildModalListTile(
+                      context,
+                      StreamSvgIcon.closeSmall(
+                        color: StreamChatTheme.of(context).colorTheme.grey,
+                        size: 24.0,
+                      ),
+                      'Cancel', () {
+                    Navigator.pop(context);
+                  }),
+                ],
+              ),
             ),
           ),
         );
