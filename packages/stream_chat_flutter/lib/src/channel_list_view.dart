@@ -450,12 +450,13 @@ class _ChannelListViewState extends State<ChannelListView> {
 
   Widget _listItemBuilder(BuildContext context, int i, List<Channel> channels) {
     final channelsBloc = ChannelsBloc.of(context);
+    final onTap = _getChannelTap(context);
+    final chatThemeData = StreamChatTheme.of(context);
+    final backgroundColor = chatThemeData.colorTheme.whiteSmoke;
+
     if (i < channels.length) {
       final channel = channels[i];
-      final onTap = _getChannelTap(context);
 
-      final chatThemeData = StreamChatTheme.of(context);
-      final backgroundColor = chatThemeData.colorTheme.whiteSmoke;
       return StreamChannel(
         key: ValueKey<String>('CHANNEL-${channel.id}'),
         channel: channel,
