@@ -29,8 +29,11 @@ class ChannelName extends StatelessWidget {
     return StreamBuilder<Map<String, dynamic>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
-      builder: (context, snapshot) =>
-          _buildName(snapshot.data!, channel.state?.members, client),
+      builder: (context, snapshot) => _buildName(
+        snapshot.data!,
+        channel.state?.members,
+        client,
+      ),
     );
   }
 
