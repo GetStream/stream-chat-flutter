@@ -517,7 +517,7 @@ class Channel {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
-    }(), 'Check for invalid token or expiration date');
+    }(), 'Check whether time out is valid');
 
     DateTime? pinExpires;
     if (timeoutOrExpirationDate is DateTime) {
