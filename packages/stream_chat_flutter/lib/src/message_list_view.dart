@@ -432,6 +432,7 @@ class _MessageListViewState extends State<MessageListView> {
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: true,
+                  addAutomaticKeepAlives: false,
                   itemCount:
                       messages.length + 2 + (_isThreadConversation ? 1 : 0),
                   separatorBuilder: (context, i) {
