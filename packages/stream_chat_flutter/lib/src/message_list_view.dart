@@ -815,11 +815,13 @@ class _MessageListViewState extends State<MessageListView> {
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap,
-      borderRadiusGeometry: const BorderRadius.only(
-        topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(2),
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
+      borderRadiusGeometry: BorderRadius.only(
+        topLeft: const Radius.circular(16),
+        bottomLeft:
+            isMyMessage ? const Radius.circular(16) : const Radius.circular(2),
+        topRight: const Radius.circular(16),
+        bottomRight:
+            isMyMessage ? const Radius.circular(2) : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
         vertical: 8,

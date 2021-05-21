@@ -5,12 +5,14 @@ import 'package:stream_chat_persistence/src/dao/reaction_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
+import '../../stream_chat_persistence_client_test.dart';
+
 void main() {
   late ReactionDao reactionDao;
   late MoorChatDatabase database;
 
   setUp(() {
-    database = MoorChatDatabase.testable('testUserId');
+    database = testDatabaseProvider('testUserId');
     reactionDao = database.reactionDao;
   });
 

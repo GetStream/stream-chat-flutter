@@ -71,7 +71,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
   }
 
   /// The current channel list
-  List<Channel>? get channels => _channelsController.value;
+  List<Channel>? get channels => _channelsController.valueOrNull;
 
   /// The current channel list as a stream
   Stream<List<Channel>> get channelsStream => _channelsController.stream;
@@ -128,7 +128,7 @@ class ChannelsBlocState extends State<ChannelsBloc>
           _channelsController.add(temp);
         }
         if (_channelsController.hasValue &&
-            _queryChannelsLoadingController.value!) {
+            _queryChannelsLoadingController.value) {
           _queryChannelsLoadingController.sink.add(false);
         }
       }
