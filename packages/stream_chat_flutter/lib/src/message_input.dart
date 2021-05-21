@@ -691,6 +691,8 @@ class MessageInputState extends State<MessageInput> {
   String? _previousValue;
 
   void _onChanged(BuildContext context, String s) {
+    _parsePastedImages(s);
+
     if (s == _previousValue) {
       return;
     }
@@ -728,6 +730,53 @@ class MessageInputState extends State<MessageInput> {
         _checkEmoji(s, context);
       },
     );
+  }
+
+  void _parsePastedImages(String s) {
+    final metaRegExp = RegExp(
+      r'<meta.*\/>',
+      multiLine: true,
+      caseSensitive: false,
+    );
+    final imageUrlRegExp = RegExp(
+      r'(https?:\/\/.*\.(?:png|jpg|jpeg|gif))',
+      multiLine: true,
+      caseSensitive: false,
+    );
+
+    String? imageUrl;
+
+    if (metaRegExp.hasMatch(s) &&
+        (_previousValue == null || !metaRegExp.hasMatch(_previousValue!))) {
+      final match = RegExp(
+        '(?<=")(.*?)(?=")',
+        caseSensitive: false,
+        multiLine: true,
+      ).firstMatch(s);
+      imageUrl = match?.group(0);
+      final newString = s.replaceAll(metaRegExp, '');
+      textEditingController.value = TextEditingValue(
+        text: newString,
+        selection: TextSelection.collapsed(offset: newString.length),
+      );
+    } else if (imageUrlRegExp.hasMatch(s) &&
+        (_previousValue == null || !imageUrlRegExp.hasMatch(_previousValue!))) {
+      final match = imageUrlRegExp.firstMatch(s);
+      imageUrl = match?.group(0);
+      final newString = s.replaceAll(imageUrlRegExp, '');
+      textEditingController.value = TextEditingValue(
+        text: newString,
+        selection: TextSelection.collapsed(offset: newString.length),
+      );
+    }
+
+    if (imageUrl != null) {
+      addAttachment(Attachment(
+        type: 'image',
+        imageUrl: imageUrl,
+        uploadState: const UploadState.success(),
+      ));
+    }
   }
 
   String _getHint() {
