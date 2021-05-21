@@ -101,6 +101,7 @@ class ThreadHeader extends StatelessWidget implements PreferredSizeWidget {
     final chatThemeData = StreamChatTheme.of(context);
     return AppBar(
       automaticallyImplyLeading: false,
+      textTheme: Theme.of(context).textTheme,
       brightness: Theme.of(context).brightness,
       elevation: 1,
       leading: leading ??

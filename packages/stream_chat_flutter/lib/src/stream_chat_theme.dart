@@ -230,22 +230,23 @@ class StreamChatThemeData {
         ),
       ),
       channelPreviewTheme: ChannelPreviewTheme(
-          unreadCounterColor: colorTheme.accentRed,
-          avatarTheme: AvatarTheme(
-            borderRadius: BorderRadius.circular(20),
-            constraints: const BoxConstraints.tightFor(
-              height: 40,
-              width: 40,
-            ),
+        unreadCounterColor: colorTheme.accentRed,
+        avatarTheme: AvatarTheme(
+          borderRadius: BorderRadius.circular(20),
+          constraints: const BoxConstraints.tightFor(
+            height: 40,
+            width: 40,
           ),
-          title: textTheme.bodyBold,
-          subtitle: textTheme.footnote.copyWith(
-            color: const Color(0xff7A7A7A),
-          ),
-          lastMessageAt: textTheme.footnote.copyWith(
-            color: colorTheme.black.withOpacity(.5),
-          ),
-          indicatorIconSize: 16),
+        ),
+        title: textTheme.bodyBold,
+        subtitle: textTheme.footnote.copyWith(
+          color: const Color(0xff7A7A7A),
+        ),
+        lastMessageAt: textTheme.footnote.copyWith(
+          color: colorTheme.black.withOpacity(.5),
+        ),
+        indicatorIconSize: 16,
+      ),
       channelListHeaderTheme: ChannelListHeaderTheme(
         avatarTheme: AvatarTheme(
           borderRadius: BorderRadius.circular(20),
@@ -1186,7 +1187,8 @@ class MessageInputTheme {
       actionButtonIdleColor: other.actionButtonIdleColor,
       sendButtonColor: other.sendButtonColor,
       sendButtonIdleColor: other.sendButtonIdleColor,
-      inputTextStyle: other.inputTextStyle,
+      inputTextStyle:
+          inputTextStyle?.merge(other.inputTextStyle) ?? other.inputTextStyle,
       inputDecoration: inputDecoration?.merge(other.inputDecoration) ??
           other.inputDecoration,
       activeBorderGradient: other.activeBorderGradient,
