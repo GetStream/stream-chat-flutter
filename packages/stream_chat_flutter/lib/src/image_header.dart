@@ -53,6 +53,7 @@ class ImageHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
     return AppBar(
+      textTheme: Theme.of(context).textTheme,
       brightness: Theme.of(context).brightness,
       elevation: 1,
       leading: showBackButton
