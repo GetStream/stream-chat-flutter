@@ -1361,12 +1361,13 @@ class StreamChatClient {
   /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
   /// to be added to [DateTime.now]
   Future<UpdateMessageResponse> pinMessage(
-    Message message,
-    Object timeoutOrExpirationDate,
-  ) {
+    Message message, [
+    Object? timeoutOrExpirationDate,
+  ]) {
     assert(() {
       if (timeoutOrExpirationDate is! DateTime &&
-          timeoutOrExpirationDate is! num) {
+          timeoutOrExpirationDate is! num &&
+          timeoutOrExpirationDate != null) {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
@@ -1383,13 +1384,19 @@ class StreamChatClient {
           .toUtc();
     }
     return updateMessage(
-      message.copyWith(pinned: true, pinExpires: pinExpires),
+      message.copyWith(
+        pinned: true,
+        pinExpires: pinExpires,
+      ),
     );
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(Message message) =>
-      updateMessage(message.copyWith(pinned: false));
+  Future<UpdateMessageResponse> unpinMessage(Message message) => updateMessage(
+        message.copyWith(
+          pinned: false,
+        ),
+      );
 }
 
 /// The class that handles the state of the channel listening to the events
