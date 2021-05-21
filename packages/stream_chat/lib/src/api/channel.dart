@@ -507,9 +507,9 @@ class Channel {
 
   /// Pins provided message
   Future<UpdateMessageResponse> pinMessage(
-    Message message,
+    Message message, [
     Object? timeoutOrExpirationDate,
-  ) {
+  ]) {
     assert(() {
       if (timeoutOrExpirationDate is! DateTime &&
           timeoutOrExpirationDate != null &&
