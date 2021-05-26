@@ -27,6 +27,8 @@ class MessageActionsModal extends StatefulWidget {
     this.showResendMessage = true,
     this.showThreadReplyMessage = true,
     this.showFlagButton = true,
+    this.showPinButton = true,
+    this.showPinHighlight = false,
     this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
     this.messageShape,
@@ -78,6 +80,12 @@ class MessageActionsModal extends StatefulWidget {
 
   /// Flag for showing flag action
   final bool showFlagButton;
+
+  /// Flag for showing pin action
+  final bool showPinButton;
+
+  /// Display Pin Highlight
+  final bool showPinHighlight;
 
   /// Flag for reversing message
   final bool reverse;
@@ -222,6 +230,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               showSendingIndicator: false,
                               shape: widget.messageShape,
                               attachmentShape: widget.attachmentShape,
+                              showPinHighlight: false,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -258,6 +267,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                                       _buildCopyButton(context),
                                     if (widget.showFlagButton)
                                       _buildFlagButton(context),
+                                    if (widget.showPinButton)
+                                      _buildPinButton(context),
                                     if (widget.showDeleteMessage)
                                       _buildDeleteButton(context),
                                     ...widget.customActions
@@ -359,6 +370,21 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
     }
   }
 
+  void _togglePin() async {
+    final channel = StreamChannel.of(context).channel;
+
+    try {
+      if (!widget.message.pinned) {
+        await channel.pinMessage(widget.message);
+      } else {
+        await channel.unpinMessage(widget.message);
+      }
+      Navigator.pop(context);
+    } catch (e) {
+      _showErrorAlert();
+    }
+  }
+
   void _showDeleteDialog() async {
     setState(() {
       _showActions = false;
@@ -443,6 +469,29 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
             const SizedBox(width: 16),
             Text(
               'Flag Message',
+              style: streamChatThemeData.textTheme.body,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPinButton(BuildContext context) {
+    final streamChatThemeData = StreamChatTheme.of(context);
+    return InkWell(
+      onTap: _togglePin,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+        child: Row(
+          children: [
+            StreamSvgIcon.pin(
+              color: streamChatThemeData.primaryIconTheme.color,
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Text(
+              '${widget.message.pinned ? 'Unpin from' : 'Pin to'} Conversation',
               style: streamChatThemeData.textTheme.body,
             ),
           ],

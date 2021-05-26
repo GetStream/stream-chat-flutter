@@ -83,6 +83,8 @@ class MessageWidget extends StatefulWidget {
     this.showResendMessage = true,
     this.showCopyMessage = true,
     this.showFlagButton = true,
+    this.showPinButton = true,
+    this.showPinHighlight = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -367,6 +369,12 @@ class MessageWidget extends StatefulWidget {
   /// Show flag action
   final bool showFlagButton;
 
+  /// Show flag action
+  final bool showPinButton;
+
+  /// Display Pin Highlight
+  final bool showPinHighlight;
+
   /// Builder for respective attachment types
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
@@ -450,7 +458,12 @@ class _MessageWidgetState extends State<MessageWidget>
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
-      type: MaterialType.transparency,
+      type: widget.message.pinned && widget.showPinHighlight
+          ? MaterialType.card
+          : MaterialType.transparency,
+      color: widget.message.pinned && widget.showPinHighlight
+          ? StreamChatTheme.of(context).colorTheme.highlight
+          : null,
       child: Portal(
         child: InkWell(
           onTap: () {
@@ -483,6 +496,10 @@ class _MessageWidgetState extends State<MessageWidget>
                             : CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (widget.message.pinned &&
+                              widget.message.pinnedBy != null &&
+                              widget.showPinHighlight)
+                            _buildPinnedMessage(widget.message),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisSize: MainAxisSize.min,
@@ -918,6 +935,7 @@ class _MessageWidgetState extends State<MessageWidget>
                     !isFailedState &&
                     widget.onThreadTap != null,
                 showFlagButton: widget.showFlagButton,
+                showPinButton: widget.showPinButton,
                 customActions: widget.customActions,
               ),
             ));
@@ -1113,7 +1131,37 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  Widget _buildPinnedMessage(Message message) {
+    final pinnedBy = message.pinnedBy;
+    final pinnedByMe = StreamChat.of(context).user!.id == pinnedBy!.id;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StreamSvgIcon.pin(
+            size: 16,
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Text(
+            'Pinned by ${pinnedByMe ? 'You' : pinnedBy.name}',
+            style: TextStyle(
+              color: StreamChatTheme.of(context).colorTheme.grey,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   bool get isOnlyEmoji => widget.message.text!.isOnlyEmoji;
+
+  bool get isPinned => widget.message.pinned;
 
   Color? _getBackgroundColor() {
     if (hasQuotedMessage) {

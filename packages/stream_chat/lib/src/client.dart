@@ -315,7 +315,7 @@ class StreamChatClient {
         await connectUser(User(id: userId), newToken);
 
         try {
-          handler.resolve(
+          return handler.resolve(
             await httpClient.request(
               err.requestOptions.path,
               cancelToken: err.requestOptions.cancelToken,
@@ -343,10 +343,12 @@ class StreamChatClient {
             ),
           );
         } on DioError {
-          handler.reject(err);
+          return handler.reject(err);
         }
       }
     }
+
+    return handler.next(err);
   }
 
   LogHandlerFunction _getDefaultLogHandler() {
