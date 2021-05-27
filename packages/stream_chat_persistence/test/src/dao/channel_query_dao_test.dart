@@ -5,6 +5,7 @@ import 'package:stream_chat_persistence/src/dao/channel_query_dao.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 
+import '../../stream_chat_persistence_client_test.dart';
 import '../utils/date_matcher.dart';
 
 void main() {
@@ -12,7 +13,7 @@ void main() {
   late ChannelQueryDao channelQueryDao;
 
   setUp(() {
-    database = MoorChatDatabase.testable('testUserId');
+    database = testDatabaseProvider('testUserId');
     channelQueryDao = database.channelQueryDao;
   });
 

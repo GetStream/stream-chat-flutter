@@ -102,21 +102,24 @@ class QuotedMessageWidget extends StatelessWidget {
   bool get _containsText => message.text?.isNotEmpty == true;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: padding,
-        child: InkWell(
-          onTap: onTap,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(child: _buildMessage(context)),
-              const SizedBox(width: 8),
-              if (message.user != null) _buildUserAvatar(),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    final children = [
+      Flexible(child: _buildMessage(context)),
+      const SizedBox(width: 8),
+      if (message.user != null) _buildUserAvatar(),
+    ];
+    return Padding(
+      padding: padding,
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: reverse ? children.reversed.toList() : children,
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildMessage(BuildContext context) {
     final isOnlyEmoji = message.text!.isOnlyEmoji;
@@ -154,10 +157,11 @@ class QuotedMessageWidget extends StatelessWidget {
                 color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
               )
             : null,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(12),
-          topLeft: Radius.circular(12),
-          bottomLeft: Radius.circular(12),
+        borderRadius: BorderRadius.only(
+          topRight: const Radius.circular(12),
+          topLeft: const Radius.circular(12),
+          bottomRight: reverse ? const Radius.circular(12) : Radius.zero,
+          bottomLeft: reverse ? Radius.zero : const Radius.circular(12),
         ),
       ),
       padding: const EdgeInsets.all(8),

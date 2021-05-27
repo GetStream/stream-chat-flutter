@@ -5,12 +5,14 @@ import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:test/test.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import '../../stream_chat_persistence_client_test.dart';
+
 void main() {
   late UserDao userDao;
   late MoorChatDatabase database;
 
   setUp(() {
-    database = MoorChatDatabase.testable('testUserId');
+    database = testDatabaseProvider('testUserId');
     userDao = database.userDao;
   });
 

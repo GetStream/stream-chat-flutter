@@ -1,3 +1,8 @@
+## 2.0.0-nullsafety.3
+
+* Update llc dependency
+* Minor fixes and improvements
+
 ## 2.0.0-nullsafety.2
 
 * Fix ChannelsBloc not performing calls if pagination ended

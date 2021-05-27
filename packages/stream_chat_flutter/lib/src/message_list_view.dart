@@ -570,9 +570,9 @@ class _MessageListViewState extends State<MessageListView> {
                 return const SizedBox();
               }
 
-              var index = _getTopElement(values).index;
+              var index = _getTopElement(values)?.index;
 
-              if (index > messages.length) {
+              if (index == null || index > messages.length) {
                 return const SizedBox();
               }
 
@@ -598,10 +598,17 @@ class _MessageListViewState extends State<MessageListView> {
           StreamChannelState? channel, QueryDirection direction) =>
       _messageListController.paginateData!(direction: direction);
 
-  ItemPosition _getTopElement(Iterable<ItemPosition> values) => values
-      .where((ItemPosition position) => position.itemLeadingEdge < 0.9)
-      .reduce((ItemPosition max, ItemPosition position) =>
-          position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
+  ItemPosition? _getTopElement(Iterable<ItemPosition> values) {
+    final inView =
+        values.where((ItemPosition position) => position.itemLeadingEdge < 0.9);
+
+    if (inView.isEmpty) {
+      return null;
+    }
+
+    return inView.reduce((ItemPosition max, ItemPosition position) =>
+        position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
+  }
 
   Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
         stream: Rx.combineLatest2(
@@ -815,11 +822,13 @@ class _MessageListViewState extends State<MessageListView> {
       padding: const EdgeInsets.all(8),
       showSendingIndicator: false,
       onThreadTap: _onThreadTap,
-      borderRadiusGeometry: const BorderRadius.only(
-        topLeft: Radius.circular(16),
-        bottomLeft: Radius.circular(2),
-        topRight: Radius.circular(16),
-        bottomRight: Radius.circular(16),
+      borderRadiusGeometry: BorderRadius.only(
+        topLeft: const Radius.circular(16),
+        bottomLeft:
+            isMyMessage ? const Radius.circular(16) : const Radius.circular(2),
+        topRight: const Radius.circular(16),
+        bottomRight:
+            isMyMessage ? const Radius.circular(2) : const Radius.circular(16),
       ),
       textPadding: EdgeInsets.symmetric(
         vertical: 8,

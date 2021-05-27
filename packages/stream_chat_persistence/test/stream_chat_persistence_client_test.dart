@@ -1,4 +1,5 @@
 import 'package:mocktail/mocktail.dart';
+import 'package:moor/ffi.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
@@ -6,8 +7,8 @@ import 'package:test/test.dart';
 import 'mock_chat_database.dart';
 import 'src/utils/date_matcher.dart';
 
-MoorChatDatabase _testDatabaseProvider(String userId, ConnectionMode mode) =>
-    MoorChatDatabase.testable(userId);
+MoorChatDatabase testDatabaseProvider(String userId, [ConnectionMode? mode]) =>
+    MoorChatDatabase(userId, VmDatabase.memory());
 
 void main() {
   group('connect', () {
@@ -15,7 +16,7 @@ void main() {
     test('successfully connects with the Database', () async {
       final client = StreamChatPersistenceClient(logLevel: Level.ALL);
       expect(client.db, isNull);
-      await client.connect(userId, databaseProvider: _testDatabaseProvider);
+      await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.db, isNotNull);
       expect(client.db, isA<MoorChatDatabase>());
       expect(client.db!.userId, userId);
@@ -28,13 +29,13 @@ void main() {
     test('throws if already connected', () async {
       final client = StreamChatPersistenceClient(logLevel: Level.ALL);
       expect(client.db, isNull);
-      await client.connect(userId, databaseProvider: _testDatabaseProvider);
+      await client.connect(userId, databaseProvider: testDatabaseProvider);
       expect(client.db, isNotNull);
       expect(client.db, isNotNull);
       expect(client.db, isA<MoorChatDatabase>());
       expect(client.db!.userId, userId);
       expect(
-        () => client.connect(userId, databaseProvider: _testDatabaseProvider),
+        () => client.connect(userId, databaseProvider: testDatabaseProvider),
         throwsException,
       );
 
@@ -47,7 +48,7 @@ void main() {
   test('disconnect', () async {
     const userId = 'testUserId';
     final client = StreamChatPersistenceClient(logLevel: Level.ALL);
-    await client.connect(userId, databaseProvider: _testDatabaseProvider);
+    await client.connect(userId, databaseProvider: testDatabaseProvider);
     expect(client.db, isNotNull);
     await client.disconnect(flush: true);
     expect(client.db, isNull);

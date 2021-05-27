@@ -76,7 +76,7 @@ enum SendButtonLocation {
 
 const _kMinMediaPickerSize = 360.0;
 
-const _kMaxAttachmentSize = 20971520; // 20MB in Bytes
+const _kDefaultMaxAttachmentSize = 20971520; // 20MB in Bytes
 
 /// Inactive state
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_input.png)
@@ -148,10 +148,16 @@ class MessageInput extends StatefulWidget {
     this.activeSendButton,
     this.showCommandsButton = true,
     this.mentionsTileBuilder,
+    this.maxAttachmentSize = _kDefaultMaxAttachmentSize,
   }) : super(key: key);
 
   /// Message to edit
   final Message? editMessage;
+
+  /// Max attachment size in bytes
+  /// Defaults to 20 MB
+  /// do not set it if you're using our default CDN
+  final int maxAttachmentSize;
 
   /// Message to start with
   final Message? initialMessage;
@@ -1108,12 +1114,12 @@ class MessageInputState extends State<MessageInput> {
       bytes: mediaFile.readAsBytesSync(),
     );
 
-    if (file.size! > _kMaxAttachmentSize) {
-      if (medium.type == AssetType.video) {
-        final mediaInfo = await (VideoService.compressVideo(file.path)
+    if (file.size! > widget.maxAttachmentSize) {
+      if (medium.type == AssetType.video && file.path != null) {
+        final mediaInfo = await (VideoService.compressVideo(file.path!)
             as FutureOr<MediaInfo>);
 
-        if (mediaInfo.filesize! > _kMaxAttachmentSize) {
+        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
             // ignore: lines_longer_than_80_chars
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',
@@ -1473,16 +1479,12 @@ class MessageInputState extends State<MessageInput> {
     final containsUrl = widget.quotedMessage!.attachments
             .any((element) => element.ogScrapeUrl != null) ==
         true;
-    return Transform(
-      transform: Matrix4.rotationY(pi),
-      alignment: Alignment.center,
-      child: QuotedMessageWidget(
-        reverse: true,
-        showBorder: !containsUrl,
-        message: widget.quotedMessage!,
-        messageTheme: StreamChatTheme.of(context).otherMessageTheme,
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      ),
+    return QuotedMessageWidget(
+      reverse: true,
+      showBorder: !containsUrl,
+      message: widget.quotedMessage!,
+      messageTheme: StreamChatTheme.of(context).otherMessageTheme,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
     );
   }
 
@@ -1509,7 +1511,9 @@ class MessageInputState extends State<MessageInput> {
                       (e) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: FileAttachment(
-                          message: Message(), // dummy message
+                          message: Message(
+                            status: MessageSendingStatus.sending,
+                          ), // dummy message
                           attachment: e,
                           size: Size(
                             MediaQuery.of(context).size.width * 0.65,
@@ -1897,15 +1901,16 @@ class MessageInputState extends State<MessageInput> {
     final attachment = Attachment(
       file: file,
       type: attachmentType,
+      uploadState: const UploadState.preparing(),
       extraData: extraDataMap,
     );
 
-    if (file.size! > _kMaxAttachmentSize) {
-      if (attachmentType == 'Video') {
-        final mediaInfo = await (VideoService.compressVideo(file.path)
+    if (file.size! > widget.maxAttachmentSize) {
+      if (attachmentType == 'video' && file.path != null) {
+        final mediaInfo = await (VideoService.compressVideo(file.path!)
             as FutureOr<MediaInfo>);
 
-        if (mediaInfo.filesize! > _kMaxAttachmentSize) {
+        if (mediaInfo.filesize! > widget.maxAttachmentSize) {
           _showErrorAlert(
             // ignore: lines_longer_than_80_chars
             'The file is too large to upload. The file size limit is 20MB. We tried compressing it, but it was not enough.',

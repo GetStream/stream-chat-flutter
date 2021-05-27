@@ -1112,6 +1112,28 @@ void main() {
               data: {'message': anything})).called(1);
         });
 
+        test('should complete successfully with a null value', () async {
+          final message = Message(text: 'Hello');
+
+          when(
+            () => mockDio.post<String>(
+              '/messages/${message.id}',
+              data: anything,
+            ),
+          ).thenAnswer(
+            (_) async => Response(
+              data: jsonEncode({'message': message}),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ),
+          );
+
+          await client.pinMessage(message);
+
+          verify(() => mockDio.post<String>('/messages/${message.id}',
+              data: {'message': anything})).called(1);
+        });
+
         test('should unpin message successfully', () async {
           final message = Message(text: 'Hello');
 

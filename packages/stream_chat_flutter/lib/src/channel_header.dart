@@ -137,6 +137,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
           showMessage: showConnectionStateTile ? showStatus : false,
           message: statusString,
           child: AppBar(
+            textTheme: Theme.of(context).textTheme,
             brightness: Theme.of(context).brightness,
             elevation: 1,
             leading: leadingWidget,

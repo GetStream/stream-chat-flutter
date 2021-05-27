@@ -159,6 +159,7 @@ class FileAttachment extends AttachmentWidget {
         shape: _getDefaultShape(context),
         child: source.when(
           local: () => VideoThumbnailImage(
+            fit: BoxFit.cover,
             video: attachment.file!.path!,
             placeholderBuilder: (_) => const Center(
               child: SizedBox(
@@ -169,6 +170,7 @@ class FileAttachment extends AttachmentWidget {
             ),
           ),
           network: () => VideoThumbnailImage(
+            fit: BoxFit.cover,
             video: attachment.assetUrl!,
             placeholderBuilder: (_) => const Center(
               child: SizedBox(
@@ -212,50 +214,42 @@ class FileAttachment extends AttachmentWidget {
     final attachmentId = attachment.id;
     var trailingWidget = trailing;
     trailingWidget ??= attachment.uploadState.when(
-          preparing: () => Padding(
-            padding: const EdgeInsets.all(8),
-            child: _buildButton(
-              icon: StreamSvgIcon.close(color: theme.colorTheme.white),
-              fillColor: theme.colorTheme.overlayDark,
-              onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-            ),
+      preparing: () => Padding(
+        padding: const EdgeInsets.all(8),
+        child: _buildButton(
+          icon: StreamSvgIcon.close(color: theme.colorTheme.white),
+          fillColor: theme.colorTheme.overlayDark,
+          onPressed: () => channel.cancelAttachmentUpload(attachmentId),
+        ),
+      ),
+      inProgress: (_, __) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: _buildButton(
+          icon: StreamSvgIcon.close(color: theme.colorTheme.white),
+          fillColor: theme.colorTheme.overlayDark,
+          onPressed: () => channel.cancelAttachmentUpload(attachmentId),
+        ),
+      ),
+      success: () => Padding(
+        padding: const EdgeInsets.all(8),
+        child: CircleAvatar(
+          backgroundColor: theme.colorTheme.accentBlue,
+          maxRadius: 12,
+          child: StreamSvgIcon.check(color: theme.colorTheme.white),
+        ),
+      ),
+      failed: (_) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: _buildButton(
+          icon: StreamSvgIcon.retry(color: theme.colorTheme.white),
+          fillColor: theme.colorTheme.overlayDark,
+          onPressed: () => channel.retryAttachmentUpload(
+            message.id,
+            attachmentId,
           ),
-          inProgress: (_, __) => Padding(
-            padding: const EdgeInsets.all(8),
-            child: _buildButton(
-              icon: StreamSvgIcon.close(color: theme.colorTheme.white),
-              fillColor: theme.colorTheme.overlayDark,
-              onPressed: () => channel.cancelAttachmentUpload(attachmentId),
-            ),
-          ),
-          success: () => Padding(
-            padding: const EdgeInsets.all(8),
-            child: CircleAvatar(
-              backgroundColor: theme.colorTheme.accentBlue,
-              maxRadius: 12,
-              child: StreamSvgIcon.check(color: theme.colorTheme.white),
-            ),
-          ),
-          failed: (_) => Padding(
-            padding: const EdgeInsets.all(8),
-            child: _buildButton(
-              icon: StreamSvgIcon.retry(color: theme.colorTheme.white),
-              fillColor: theme.colorTheme.overlayDark,
-              onPressed: () => channel.retryAttachmentUpload(
-                message.id,
-                attachmentId,
-              ),
-            ),
-          ),
-        ) ??
-        IconButton(
-          icon: StreamSvgIcon.cloudDownload(color: theme.colorTheme.black),
-          visualDensity: VisualDensity.compact,
-          splashRadius: 16,
-          onPressed: () {
-            launchURL(context, attachment.assetUrl);
-          },
-        );
+        ),
+      ),
+    );
 
     if (message.status == MessageSendingStatus.sent) {
       trailingWidget = IconButton(
@@ -281,25 +275,17 @@ class FileAttachment extends AttachmentWidget {
       color: theme.colorTheme.grey,
     );
     return attachment.uploadState.when(
-          preparing: () => UploadProgressIndicator(
-            uploaded: 0,
-            total: double.maxFinite.toInt(),
-            showBackground: false,
-            padding: EdgeInsets.zero,
-            textStyle: textStyle,
-            progressIndicatorColor: theme.colorTheme.accentBlue,
-          ),
-          inProgress: (sent, total) => UploadProgressIndicator(
-            uploaded: sent,
-            total: total,
-            showBackground: false,
-            padding: EdgeInsets.zero,
-            textStyle: textStyle,
-            progressIndicatorColor: theme.colorTheme.accentBlue,
-          ),
-          success: () => Text(fileSize(size), style: textStyle),
-          failed: (_) => Text('UPLOAD ERROR', style: textStyle),
-        ) ??
-        Text(fileSize(size), style: textStyle);
+      preparing: () => Text(fileSize(size), style: textStyle),
+      inProgress: (sent, total) => UploadProgressIndicator(
+        uploaded: sent,
+        total: total,
+        showBackground: false,
+        padding: EdgeInsets.zero,
+        textStyle: textStyle,
+        progressIndicatorColor: theme.colorTheme.accentBlue,
+      ),
+      success: () => Text(fileSize(size), style: textStyle),
+      failed: (_) => Text('UPLOAD ERROR', style: textStyle),
+    );
   }
 }

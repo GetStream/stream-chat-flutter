@@ -28,9 +28,9 @@ class IVideoService {
   /// );
   /// debugPrint(info.toJson());
   /// ```
-  Future<MediaInfo?> compressVideo(String? path) async => _lock.synchronized(
+  Future<MediaInfo?> compressVideo(String path) async => _lock.synchronized(
         () => VideoCompress.compressVideo(
-          path!,
+          path,
         ),
       );
 

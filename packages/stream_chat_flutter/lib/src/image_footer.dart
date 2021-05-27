@@ -76,7 +76,7 @@ class _ImageFooterState extends State<ImageFooter> {
 
   @override
   Widget build(BuildContext context) {
-    final showShareButton = !kIsWeb;
+    const showShareButton = !kIsWeb;
     final mediaQueryData = MediaQuery.of(context);
     final chatThemeData = StreamChatTheme.of(context);
     return SizedBox.fromSize(

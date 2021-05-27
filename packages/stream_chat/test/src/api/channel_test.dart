@@ -449,6 +449,51 @@ void main() {
             .called(1);
       });
 
+      test('should be pinned successfully with null timeout', () async {
+        final mockDio = MockDio();
+
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = StreamChatClient(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
+        final channelClient = client.channel('messaging', id: 'testid');
+        final message = Message(text: 'Hello', id: 'test');
+
+        when(() => mockDio.post<String>(
+              any(),
+              data: any(named: 'data'),
+            )).thenAnswer((_) async => Response(
+              data: jsonEncode(ChannelState()),
+              statusCode: 200,
+              requestOptions: FakeRequestOptions(),
+            ));
+
+        await channelClient.watch();
+
+        when(
+          () => mockDio.post<String>(
+            '/messages/${message.id}',
+            data: anything,
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': message}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
+
+        await channelClient.pinMessage(message);
+
+        verify(() =>
+                mockDio.post<String>('/messages/${message.id}', data: anything))
+            .called(1);
+      });
+
       test('should be unpinned successfully', () async {
         final mockDio = MockDio();
 
