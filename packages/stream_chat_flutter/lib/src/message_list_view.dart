@@ -158,6 +158,7 @@ class MessageListView extends StatefulWidget {
     this.onAttachmentTap,
     this.textBuilder,
     this.onLinkTap,
+    this.pinPermissions = const [],
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -263,6 +264,9 @@ class MessageListView extends StatefulWidget {
 
   /// Callback for when link is tapped
   final void Function(String link)? onLinkTap;
+
+  /// A List of user types that have permission to pin messages
+  final List<String> pinPermissions;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -800,6 +804,10 @@ class _MessageListViewState extends State<MessageListView> {
   ) {
     final isMyMessage = message.user!.id == StreamChat.of(context).user!.id;
     final isOnlyEmoji = message.text!.isOnlyEmoji;
+    final currentUser = StreamChat.of(context).user;
+    final members = StreamChannel.of(context).channel.state?.members ?? [];
+    final currentUserMember =
+        members.firstWhere((e) => e.user!.id == currentUser!.id);
 
     final chatThemeData = StreamChatTheme.of(context);
     return MessageWidget(
@@ -853,6 +861,7 @@ class _MessageListViewState extends State<MessageListView> {
       textBuilder:
           widget.textBuilder as Widget Function(BuildContext, Message)?,
       onLinkTap: widget.onLinkTap,
+      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
     );
   }
 
@@ -938,6 +947,11 @@ class _MessageListViewState extends State<MessageListView> {
         isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)
             ? BorderSide.none
             : null;
+
+    final currentUser = StreamChat.of(context).user;
+    final members = StreamChannel.of(context).channel.state?.members ?? [];
+    final currentUserMember =
+        members.firstWhere((e) => e.user!.id == currentUser!.id);
 
     final chatThemeData = StreamChatTheme.of(context);
     Widget child = MessageWidget(
@@ -1052,6 +1066,7 @@ class _MessageListViewState extends State<MessageListView> {
       textBuilder:
           widget.textBuilder as Widget Function(BuildContext, Message)?,
       onLinkTap: widget.onLinkTap,
+      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
     );
 
     if (!message.isDeleted &&
