@@ -4,7 +4,6 @@ import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 final chatPersistentClient = StreamChatPersistenceClient(
   logLevel: Level.INFO,
-  connectionMode: ConnectionMode.background,
 );
 
 void main() async {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -43,6 +44,7 @@ class StreamChatCore extends StatefulWidget {
     required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.connectivityStream,
   }) : super(key: key);
 
   /// Instance of Stream Chat Client containing information about the current
@@ -60,6 +62,11 @@ class StreamChatCore extends StatefulWidget {
   /// is in background. Can be used to display various notifications depending
   /// upon the [Event.type]
   final EventHandler? onBackgroundEventReceived;
+
+  /// Stream of connectivity result
+  /// Visible for testing
+  @visibleForTesting
+  final Stream<ConnectivityResult>? connectivityStream;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -96,43 +103,76 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// The current user as a stream
   Stream<User?> get userStream => client.state.userStream;
 
+  late final StreamSubscription<ConnectivityResult> _connectivitySubscription;
+
+  var _isInForeground = true;
+  var _isConnectionAvailable = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
+    _connectivitySubscription =
+        (widget.connectivityStream ?? Connectivity().onConnectivityChanged)
+            .listen((ConnectivityResult result) async {
+      _isConnectionAvailable = result != ConnectivityResult.none;
+      if (!_isInForeground) {
+        return;
+      }
+      if (_isConnectionAvailable) {
+        if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
+          await client.connect();
+        }
+      } else {
+        if (client.wsConnectionStatus == ConnectionStatus.connected) {
+          await client.disconnect();
+        }
+      }
+    });
   }
 
   StreamSubscription? _eventSubscription;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isInForeground = state == AppLifecycleState.resumed;
     if (user != null) {
-      if (state == AppLifecycleState.paused) {
-        if (widget.onBackgroundEventReceived == null) {
-          client.disconnect();
-          return;
-        }
-        _eventSubscription = client.on().listen(
-              widget.onBackgroundEventReceived,
-            );
-
-        void onTimerComplete() {
-          _eventSubscription?.cancel();
-          client.disconnect();
-        }
-
-        _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
-      } else if (state == AppLifecycleState.resumed) {
-        if (_disconnectTimer?.isActive == true) {
-          _eventSubscription?.cancel();
-          _disconnectTimer?.cancel();
-        } else {
-          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
-            client.connect();
-          }
-        }
+      if (!_isInForeground) {
+        _onBackground();
+      } else {
+        _onForeground();
       }
     }
+  }
+
+  void _onForeground() {
+    if (_disconnectTimer?.isActive == true) {
+      _eventSubscription?.cancel();
+      _disconnectTimer?.cancel();
+    } else if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+        _isConnectionAvailable) {
+      client.connect();
+    }
+  }
+
+  void _onBackground() {
+    if (widget.onBackgroundEventReceived == null) {
+      if (client.wsConnectionStatus != ConnectionStatus.disconnected) {
+        client.disconnect();
+      }
+      return;
+    }
+    _eventSubscription = client.on().listen(
+          widget.onBackgroundEventReceived,
+        );
+
+    void onTimerComplete() {
+      _eventSubscription?.cancel();
+      client.disconnect();
+    }
+
+    _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
+    return;
   }
 
   @override
@@ -140,6 +180,7 @@ class StreamChatCoreState extends State<StreamChatCore>
     WidgetsBinding.instance?.removeObserver(this);
     _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 }
