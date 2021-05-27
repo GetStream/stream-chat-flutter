@@ -1136,7 +1136,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final pinnedByMe = StreamChat.of(context).user!.id == pinnedBy!.id;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
