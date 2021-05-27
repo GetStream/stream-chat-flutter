@@ -29,8 +29,9 @@ class ConnectionEventDao extends DatabaseAccessor<MoorChatDatabase>
         return into(connectionEvents).insert(
           ConnectionEventEntity(
             id: 1,
+            type: event.type,
             lastSyncAt: connectionInfo?.lastSyncAt,
-            lastEventAt: event.createdAt ?? connectionInfo?.lastEventAt,
+            lastEventAt: event.createdAt,
             totalUnreadCount:
                 event.totalUnreadCount ?? connectionInfo?.totalUnreadCount,
             ownUser: event.me?.toJson() ?? connectionInfo?.ownUser,

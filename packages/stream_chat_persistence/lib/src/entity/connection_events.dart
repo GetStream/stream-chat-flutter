@@ -8,6 +8,9 @@ class ConnectionEvents extends Table {
   /// event id
   IntColumn get id => integer()();
 
+  /// event type
+  TextColumn get type => text()();
+
   /// User object of the current user
   TextColumn get ownUser => text().nullable().map(MapConverter())();
 

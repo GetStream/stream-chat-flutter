@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart'
@@ -10,9 +9,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/extensions/rate_limit.dart';
-import 'package:stream_chat/src/models/attachment_file.dart';
-import 'package:stream_chat/src/models/channel_state.dart';
-import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/core/models/attachment_file.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// This a the class that manages a specific channel.
@@ -213,8 +212,6 @@ class Channel {
   /// The main Stream chat client
   StreamChatClient get client => _client;
   final StreamChatClient _client;
-
-  String get _channelURL => '/channels/$type/$id';
 
   final Completer<bool> _initializedCompleter = Completer();
 
@@ -492,7 +489,7 @@ class Channel {
 
       state?.addMessage(message);
 
-      final response = await _client.deleteMessage(message);
+      final response = await _client.deleteMessage(message.id);
 
       state?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
 
@@ -507,9 +504,9 @@ class Channel {
 
   /// Pins provided message
   Future<UpdateMessageResponse> pinMessage(
-    Message message,
-    Object? timeoutOrExpirationDate,
-  ) {
+    Message message, {
+    Object? /*num|DateTime*/ timeoutOrExpirationDate,
+  }) {
     assert(() {
       if (timeoutOrExpirationDate is! DateTime &&
           timeoutOrExpirationDate != null &&
@@ -517,7 +514,7 @@ class Channel {
         throw ArgumentError('Invalid timeout or Expiration date');
       }
       return true;
-    }(), 'Check for invalid token or expiration date');
+    }(), 'Check for invalid timeout or expiration date');
 
     DateTime? pinExpires;
     if (timeoutOrExpirationDate is DateTime) {
@@ -619,10 +616,7 @@ class Channel {
   /// Send an event on this channel
   Future<EmptyResponse> sendEvent(Event event) {
     _checkInitialized();
-    return _client.post(
-      '$_channelURL/event',
-      data: {'event': event.toJson()},
-    ).then((res) => _client.decode(res.data, EmptyResponse.fromJson)!);
+    return _client.sendEvent(id!, type, event);
   }
 
   /// Send a reaction to this channel
@@ -674,21 +668,13 @@ class Channel {
 
     state?.addMessage(newMessage);
 
-    final data = Map<String, dynamic>.from(extraData)
-      ..addAll({
-        'type': type,
-      });
-
     try {
-      final res = await _client.post(
-        '/messages/$messageId/reaction',
-        data: {
-          'reaction': data,
-          'enforce_unique': enforceUnique,
-        },
+      final reactionResp = await _client.sendReaction(
+        messageId,
+        type,
+        extraData: extraData,
+        enforceUnique: enforceUnique,
       );
-      final reactionResp =
-          _client.decode(res.data, SendReactionResponse.fromJson);
       return reactionResp;
     } catch (_) {
       // Reset the message if the update fails
@@ -731,9 +717,11 @@ class Channel {
     state?.addMessage(newMessage);
 
     try {
-      final res = await client
-          .delete('/messages/${message.id}/reaction/${reaction.type}');
-      return _client.decode(res.data, EmptyResponse.fromJson);
+      final deleteResponse = await _client.deleteReaction(
+        message.id,
+        reaction.type,
+      );
+      return deleteResponse;
     } catch (_) {
       // Reset the message if the update fails
       state?.addMessage(message);
@@ -746,45 +734,45 @@ class Channel {
     Map<String, dynamic> channelData, [
     Message? updateMessage,
   ]) async {
-    final response = await _client.post(_channelURL, data: {
-      if (updateMessage != null)
-        'message': updateMessage.copyWith(updatedAt: DateTime.now()).toJson(),
-      'data': channelData,
-    });
-    return _client.decode(response.data, UpdateChannelResponse.fromJson);
+    _checkInitialized();
+    return _client.updateChannel(
+      id!,
+      type,
+      channelData,
+      message: updateMessage,
+    );
   }
 
   /// Edit the channel custom data
   Future<PartialUpdateChannelResponse> updatePartial(
-      Map<String, dynamic> channelData) async {
-    final response = await _client.patch(_channelURL, data: channelData);
-    return _client.decode(response.data, PartialUpdateChannelResponse.fromJson);
+    Map<String, dynamic> channelData,
+  ) async {
+    _checkInitialized();
+    return _client.updateChannelPartial(id!, type, channelData);
   }
 
   /// Delete this channel. Messages are permanently removed.
   Future<EmptyResponse> delete() async {
-    final response = await _client.delete(_channelURL);
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    _checkInitialized();
+    return _client.deleteChannel(id!, type);
   }
 
   /// Removes all messages from the channel
   Future<EmptyResponse> truncate() async {
-    final response = await _client.post('$_channelURL/truncate');
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    _checkInitialized();
+    return _client.truncateChannel(id!, type);
   }
 
   /// Accept invitation to the channel
   Future<AcceptInviteResponse> acceptInvite([Message? message]) async {
-    final res = await _client.post(_channelURL,
-        data: {'accept_invite': true, 'message': message?.toJson()});
-    return _client.decode(res.data, AcceptInviteResponse.fromJson);
+    _checkInitialized();
+    return _client.acceptChannelInvite(id!, type, message: message);
   }
 
   /// Reject invitation to the channel
   Future<RejectInviteResponse> rejectInvite([Message? message]) async {
-    final res = await _client.post(_channelURL,
-        data: {'reject_invite': true, 'message': message?.toJson()});
-    return _client.decode(res.data, RejectInviteResponse.fromJson);
+    _checkInitialized();
+    return _client.rejectChannelInvite(id!, type, message: message);
   }
 
   /// Add members to the channel
@@ -792,11 +780,8 @@ class Channel {
     List<String> memberIds, [
     Message? message,
   ]) async {
-    final res = await _client.post(_channelURL, data: {
-      'add_members': memberIds,
-      'message': message?.toJson(),
-    });
-    return _client.decode(res.data, AddMembersResponse.fromJson);
+    _checkInitialized();
+    return _client.addChannelMembers(id!, type, memberIds, message: message);
   }
 
   /// Invite members to the channel
@@ -804,11 +789,8 @@ class Channel {
     List<String> memberIds, [
     Message? message,
   ]) async {
-    final res = await _client.post(_channelURL, data: {
-      'invites': memberIds,
-      'message': message?.toJson(),
-    });
-    return _client.decode(res.data, InviteMembersResponse.fromJson);
+    _checkInitialized();
+    return _client.inviteChannelMembers(id!, type, memberIds, message: message);
   }
 
   /// Remove members from the channel
@@ -816,11 +798,8 @@ class Channel {
     List<String> memberIds, [
     Message? message,
   ]) async {
-    final res = await _client.post(_channelURL, data: {
-      'remove_members': memberIds,
-      'message': message?.toJson(),
-    });
-    return _client.decode(res.data, RemoveMembersResponse.fromJson);
+    _checkInitialized();
+    return _client.removeChannelMembers(id!, type, memberIds, message: message);
   }
 
   /// Send action for a specific message of this channel
@@ -829,16 +808,8 @@ class Channel {
     Map<String, dynamic> formData,
   ) async {
     _checkInitialized();
-
     final messageId = message.id;
-    final response = await _client.post('/messages/$messageId/action', data: {
-      'id': id,
-      'type': type,
-      'form_data': formData,
-      'message_id': messageId,
-    });
-
-    final res = _client.decode(response.data, SendActionResponse.fromJson);
+    final res = await _client.sendAction(id!, type, messageId, formData);
 
     if (res.message != null) {
       state!.addMessage(res.message!);
@@ -867,21 +838,20 @@ class Channel {
               state!.threads[oldMessage.parentId!]!..remove(oldMessage));
         }
       }
-
       await _client.chatPersistenceClient?.deleteMessageById(messageId);
     }
-
     return res;
   }
 
-  /// Mark all channel messages as read
-  Future<EmptyResponse> markRead() async {
+  /// Mark all messages as read
+  /// Optionally provide a [messageId] if you want to mark a
+  /// particular message as read
+  Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
     client.state.totalUnreadCount = max(
         0, (client.state.totalUnreadCount ?? 0) - (state!.unreadCount ?? 0));
     state!._unreadCountController.add(0);
-    final response = await _client.post('$_channelURL/read', data: {});
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
   /// Loads the initial channel state and watches for changes
@@ -924,11 +894,8 @@ class Channel {
 
   /// Stop watching the channel
   Future<EmptyResponse> stopWatching() async {
-    final response = await _client.post(
-      '$_channelURL/stop-watching',
-      data: {},
-    );
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    _checkInitialized();
+    return _client.stopChannelWatching(id!, type);
   }
 
   /// List the message replies for a parent message
@@ -949,50 +916,29 @@ class Channel {
         return QueryRepliesResponse()..messages = cachedReplies;
       }
     }
-
-    final response = await _client.get('/messages/$parentId/replies',
-        queryParameters: options.toJson());
-
-    final repliesResponse = _client.decode<QueryRepliesResponse>(
-      response.data,
-      QueryRepliesResponse.fromJson,
-    );
-
+    final repliesResponse = await _client.getReplies(parentId, options);
     state?.updateThreadInfo(parentId, repliesResponse.messages);
-
     return repliesResponse;
   }
 
   /// List the reactions for a message in the channel
   Future<QueryReactionsResponse> getReactions(
-    String messageID,
+    String messageId,
     PaginationParams options,
-  ) async {
-    final response = await _client.get(
-      '/messages/$messageID/reactions',
-      queryParameters: options.toJson(),
-    );
-    return _client.decode<QueryReactionsResponse>(
-        response.data, QueryReactionsResponse.fromJson);
-  }
+  ) =>
+      _client.getReactions(
+        messageId,
+        options,
+      );
 
   /// Retrieves a list of messages by ID
   Future<GetMessagesByIdResponse> getMessagesById(
-      List<String> messageIDs) async {
-    final response = await _client.get(
-      '$_channelURL/messages',
-      queryParameters: {'ids': messageIDs.join(',')},
-    );
-
-    final res = _client.decode<GetMessagesByIdResponse>(
-      response.data,
-      GetMessagesByIdResponse.fromJson,
-    );
-
+    List<String> messageIDs,
+  ) async {
+    _checkInitialized();
+    final res = await _client.getMessagesById(id!, type, messageIDs);
     final messages = res.messages;
-
     state?.updateChannelState(ChannelState(messages: messages));
-
     return res;
   }
 
@@ -1000,18 +946,11 @@ class Channel {
   Future<TranslateMessageResponse> translateMessage(
     String messageId,
     String language,
-  ) async {
-    final response = await _client.post(
-      '/messages/$messageId/translate',
-      data: {
-        'language': language,
-      },
-    );
-    return _client.decode<TranslateMessageResponse>(
-      response.data,
-      TranslateMessageResponse.fromJson,
-    );
-  }
+  ) =>
+      _client.translateMessage(
+        messageId,
+        language,
+      );
 
   /// Creates a new channel
   Future<ChannelState> create() async => query(options: {
@@ -1030,36 +969,10 @@ class Channel {
     PaginationParams? watchersPagination,
     bool preferOffline = false,
   }) async {
-    var path = '/channels/$type';
-    if (id != null) path = '$path/$id';
-    path = '$path/query';
-
-    final payload = Map<String, dynamic>.from({
-      'state': true,
-    })
-      ..addAll(options);
-
-    if (_extraData.isNotEmpty) {
-      payload['data'] = _extraData;
-    }
-
-    if (messagesPagination != null) {
-      payload['messages'] = messagesPagination.toJson();
-    }
-    if (membersPagination != null) {
-      payload['members'] = membersPagination.toJson();
-    }
-    if (watchersPagination != null) {
-      payload['watchers'] = watchersPagination.toJson();
-    }
-
     if (preferOffline && cid != null) {
-      final updatedState =
-          (await _client.chatPersistenceClient?.getChannelStateByCid(
-        cid!,
-        messagePagination: messagesPagination,
-      ))!;
-      if (updatedState.messages.isNotEmpty) {
+      final updatedState = await _client.chatPersistenceClient
+          ?.getChannelStateByCid(cid!, messagePagination: messagesPagination);
+      if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
           _initState(updatedState);
         } else {
@@ -1070,8 +983,14 @@ class Channel {
     }
 
     try {
-      final response = await _client.post(path, data: payload);
-      final updatedState = _client.decode(response.data, ChannelState.fromJson);
+      final updatedState = await _client.queryChannel(
+        type,
+        channelId: id,
+        channelData: _extraData,
+        messagesPagination: messagesPagination,
+        membersPagination: membersPagination,
+        watchersPagination: watchersPagination,
+      );
 
       if (_id == null) {
         _id = updatedState.channel!.id;
@@ -1096,45 +1015,26 @@ class Channel {
     Filter? filter,
     List<SortOption>? sort,
     PaginationParams? pagination,
-  }) async {
-    final payload = <String, dynamic>{
-      'sort': sort,
-      'filter_conditions': filter ?? {},
-      'type': type,
-    };
-
-    if (pagination != null) {
-      payload.addAll(pagination.toJson());
-    }
-
-    if (id != null) {
-      payload['id'] = id;
-    } else if (state?.members.isNotEmpty == true) {
-      payload['members'] = state!.members;
-    }
-
-    final rawRes = await _client.get('/members', queryParameters: {
-      'payload': jsonEncode(payload),
-    });
-    final response = _client.decode(rawRes.data, QueryMembersResponse.fromJson);
-    return response;
-  }
+  }) =>
+      _client.queryMembers(
+        type,
+        channelId: id,
+        filter: filter,
+        members: state?.members,
+        sort: sort,
+        pagination: pagination,
+      );
 
   /// Mutes the channel
-  Future<EmptyResponse> mute({Duration? expiration}) async {
-    final response = await _client.post('/moderation/mute/channel', data: {
-      'channel_cid': cid,
-      if (expiration != null) 'expiration': expiration.inMilliseconds,
-    });
-    return _client.decode(response.data, EmptyResponse.fromJson);
+  Future<EmptyResponse> mute({Duration? expiration}) {
+    _checkInitialized();
+    return _client.muteChannel(cid!, expiration: expiration);
   }
 
   /// Unmutes the channel
-  Future<EmptyResponse> unmute() async {
-    final response = await _client.post('/moderation/unmute/channel', data: {
-      'channel_cid': cid,
-    });
-    return _client.decode(response.data, EmptyResponse.fromJson);
+  Future<EmptyResponse> unmute() {
+    _checkInitialized();
+    return _client.unmuteChannel(cid!);
   }
 
   /// Bans a user from the channel
@@ -1188,9 +1088,11 @@ class Channel {
   /// will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();
-    final response = await _client
-        .post('$_channelURL/hide', data: {'clear_history': clearHistory});
-
+    final response = await _client.hideChannel(
+      id!,
+      type,
+      clearHistory: clearHistory,
+    );
     if (clearHistory == true) {
       state!.truncate();
       final cid = _cid;
@@ -1198,15 +1100,13 @@ class Channel {
         await _client.chatPersistenceClient?.deleteMessageByCid(cid);
       }
     }
-
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return response;
   }
 
   /// Removes the hidden status for the channel
   Future<EmptyResponse> show() async {
     _checkInitialized();
-    final response = await _client.post('$_channelURL/show');
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return _client.showChannel(id!, type);
   }
 
   /// Stream of [Event] coming from websocket connection specific for the
@@ -1588,7 +1488,7 @@ class ChannelClientState {
             }
             readList.add(Read(
               user: event.user!,
-              lastRead: event.createdAt!,
+              lastRead: event.createdAt,
               unreadMessages: event.totalUnreadCount ?? 0,
             ));
             _channelState = _channelState.copyWith(read: readList);
@@ -1793,7 +1693,7 @@ class ChannelClientState {
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> v) {
-    _channel._client.chatPersistenceClient?.updateMessages(
+    _channel.client.chatPersistenceClient?.updateMessages(
       _channel.cid!,
       v.values.expand((v) => v).toList(),
     );

@@ -63,7 +63,11 @@ class ChannelListCore extends StatefulWidget {
     required this.loadingBuilder,
     required this.listBuilder,
     this.filter,
-    this.options,
+    this.state = true,
+    this.watch = true,
+    this.presence = false,
+    this.memberLimit,
+    this.messageLimit,
     this.sort,
     this.pagination = const PaginationParams(
       limit: 25,
@@ -94,11 +98,11 @@ class ChannelListCore extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
+  //    bool state = true,
+  //     bool watch = true,
+  //     bool presence = false,
+  //     int? memberLimit,
+  //     int? messageLimit,
 
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
@@ -106,6 +110,17 @@ class ChannelListCore extends StatefulWidget {
   /// You can sort based on last_updated, last_message_at, updated_at, created
   /// _at or member_count. Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
+
+  /// If true returns the Channel state
+  final bool state;
+
+  /// If true listen to changes to this Channel in real time.
+  final bool watch;
+
+  final bool presence;
+
+  final int? memberLimit;
+  final int? messageLimit;
 
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
@@ -149,18 +164,26 @@ class ChannelListCoreState extends State<ChannelListCore> {
   Future<void> loadData() => _channelsBloc.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
+        state: widget.state,
+        watch: widget.watch,
+        presence: widget.presence,
+        memberLimit: widget.memberLimit,
+        messageLimit: widget.messageLimit,
         paginationParams: widget.pagination,
-        options: widget.options,
       );
 
   /// Fetches more channels with updated pagination and updates the widget
   Future<void> paginateData() => _channelsBloc.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
+        state: widget.state,
+        watch: widget.watch,
+        presence: widget.presence,
+        memberLimit: widget.memberLimit,
+        messageLimit: widget.messageLimit,
         paginationParams: widget.pagination.copyWith(
           offset: _channelsBloc.channels?.length ?? 0,
         ),
-        options: widget.options,
       );
 
   StreamSubscription<Event>? _subscription;
@@ -200,7 +223,11 @@ class ChannelListCoreState extends State<ChannelListCore> {
 
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
-        widget.options?.toString() != oldWidget.options?.toString() ||
+        widget.state != oldWidget.state ||
+        widget.watch != oldWidget.watch ||
+        widget.presence != oldWidget.presence ||
+        widget.messageLimit != oldWidget.messageLimit ||
+        widget.memberLimit != oldWidget.memberLimit ||
         widget.pagination.toJson().toString() !=
             oldWidget.pagination.toJson().toString()) {
       loadData();

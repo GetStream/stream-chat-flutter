@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dio/native_imp.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/api/requests.dart';
+import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/models/event.dart';
-import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/own_user.dart';
-import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/own_user.dart';
+import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 

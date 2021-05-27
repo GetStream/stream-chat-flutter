@@ -6,7 +6,7 @@ import 'package:stream_chat/src/api/channel.dart';
 import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/exceptions.dart';
-import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// The retry queue associated to a channel

@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/api/connection_status.dart';
-import 'package:stream_chat/src/api/websocket.dart';
-import 'package:stream_chat/src/models/event.dart';
-import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/ws/connection_status.dart';
+import 'package:stream_chat/src/ws/websocket.dart';
+import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -39,7 +39,7 @@ void main() {
       final ws = WebSocket(
         baseUrl: 'baseurl',
         user: User(id: 'testid'),
-        logger: Logger('ws'),
+        _logger: Logger('ws'),
         connectParams: {'test': 'true'},
         connectPayload: {'payload': 'test'},
         handler: print,
@@ -77,7 +77,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: handleFunc,
@@ -113,7 +113,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: handleFunc,
@@ -153,7 +153,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: handleFunc,
@@ -189,7 +189,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: handleFunc,
@@ -235,7 +235,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: handleFunc,
@@ -280,7 +280,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: handleFunc,
@@ -318,7 +318,7 @@ void main() {
     final ws = WebSocket(
       baseUrl: 'baseurl',
       user: User(id: 'testid'),
-      logger: Logger('ws'),
+      _logger: Logger('ws'),
       connectParams: {'test': 'true'},
       connectPayload: {'payload': 'test'},
       handler: print,

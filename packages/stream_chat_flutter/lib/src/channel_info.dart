@@ -132,10 +132,9 @@ class ChannelInfo extends StatelessWidget {
                 vertical: VisualDensity.minimumDensity,
               ),
             ),
-            onPressed: () async {
-              await client.disconnect();
-              await client.connect();
-            },
+            onPressed: () => client
+              ..closeConnection()
+              ..openConnection(),
             child: Text(
               'Try Again',
               style: textStyle?.copyWith(

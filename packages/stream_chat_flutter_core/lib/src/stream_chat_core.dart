@@ -109,7 +109,7 @@ class StreamChatCoreState extends State<StreamChatCore>
     if (user != null) {
       if (state == AppLifecycleState.paused) {
         if (widget.onBackgroundEventReceived == null) {
-          client.disconnect();
+          client.closeConnection();
           return;
         }
         _eventSubscription = client.on().listen(
@@ -118,7 +118,7 @@ class StreamChatCoreState extends State<StreamChatCore>
 
         void onTimerComplete() {
           _eventSubscription?.cancel();
-          client.disconnect();
+          client.closeConnection();
         }
 
         _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
@@ -128,7 +128,7 @@ class StreamChatCoreState extends State<StreamChatCore>
           _disconnectTimer?.cancel();
         } else {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
-            client.connect();
+            client.openConnection();
           }
         }
       }

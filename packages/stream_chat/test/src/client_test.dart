@@ -6,13 +6,13 @@ import 'package:dio/dio.dart';
 import 'package:dio/native_imp.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/api/requests.dart';
+import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
-import 'package:stream_chat/src/models/filter.dart';
-import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -55,8 +55,8 @@ void main() {
         expect(client.baseURL, 'chat-us-east-1.stream-io-api.com');
         expect(client.apiKey, 'api-key');
         expect(client.logLevel, Level.WARNING);
-        expect(client.httpClient.options.connectTimeout, 6000);
-        expect(client.httpClient.options.receiveTimeout, 6000);
+        expect(client.httpClient._options.connectTimeout, 6000);
+        expect(client.httpClient._options.receiveTimeout, 6000);
       });
 
       test('should create the object correctly', overridePrint(() {
@@ -76,8 +76,8 @@ void main() {
         expect(client.baseURL, 'test.com');
         expect(client.apiKey, 'api-key');
         expect(Logger.root.level, Level.INFO);
-        expect(client.httpClient.options.connectTimeout, 10000);
-        expect(client.httpClient.options.receiveTimeout, 12000);
+        expect(client.httpClient._options.connectTimeout, 10000);
+        expect(client.httpClient._options.receiveTimeout, 12000);
 
         client.logger.warning('test');
         client.logger.config('test config');
@@ -170,7 +170,7 @@ void main() {
         await client.queryChannelsOnline(
           filter: queryFilter,
           sort: sortOptions,
-          options: options,
+          _options: options,
           paginationParams: paginationParams,
           waitForConnect: false,
         );
@@ -419,7 +419,7 @@ void main() {
         await client.queryUsers(
           filter: queryFilter,
           sort: sortOptions,
-          options: options,
+          _options: options,
         );
 
         verify(() =>

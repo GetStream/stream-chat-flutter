@@ -142,7 +142,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).thenThrow(error);
 
@@ -162,7 +166,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).called(1);
     },
@@ -191,7 +199,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).thenAnswer((_) => Stream.value(channels));
 
@@ -211,7 +223,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).called(1);
     },
@@ -240,7 +256,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).thenAnswer((_) => Stream.value(channels));
 
@@ -260,7 +280,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).called(1);
     },
@@ -297,7 +321,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).thenAnswer((_) => Stream.value(channels));
 
@@ -321,7 +349,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).called(1);
 
@@ -335,7 +367,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: updatedPagination,
           )).thenAnswer((_) => Stream.value(paginatedChannels));
 
@@ -355,7 +391,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: updatedPagination,
           )).called(1);
     },
@@ -396,7 +436,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).thenAnswer((_) => Stream.value(channels));
 
@@ -424,7 +468,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: pagination,
           )).called(1);
 
@@ -436,7 +484,11 @@ void main() {
       when(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: updatedPagination,
           )).thenAnswer((_) => Stream.value(updatedChannels));
 
@@ -451,7 +503,11 @@ void main() {
       verify(() => mockClient.queryChannels(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
             paginationParams: updatedPagination,
           )).called(1);
     },

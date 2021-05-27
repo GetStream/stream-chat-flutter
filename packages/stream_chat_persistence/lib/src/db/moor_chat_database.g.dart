@@ -60,31 +60,30 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final boolType = db.typeSystem.forDartType<bool>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    final intType = db.typeSystem.forDartType<int>();
     return ChannelEntity(
-      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      cid: stringType.mapFromDatabaseResponse(data['${effectivePrefix}cid'])!,
-      config: $ChannelsTable.$converter0.mapToDart(stringType
+      id: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      cid: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}cid'])!,
+      config: $ChannelsTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}config']))!,
-      frozen:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}frozen'])!,
-      lastMessageAt: dateTimeType
+      frozen: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}frozen'])!,
+      lastMessageAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_message_at']),
-      createdAt: dateTimeType
+      createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: dateTimeType
+      updatedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deletedAt: dateTimeType
+      deletedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
-      memberCount: intType
+      memberCount: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}member_count'])!,
-      createdById: stringType
+      createdById: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_by_id']),
-      extraData: $ChannelsTable.$converter1.mapToDart(stringType
+      extraData: $ChannelsTable.$converter1.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -226,7 +225,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
                                           $mrjc(createdById.hashCode,
                                               extraData.hashCode))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ChannelEntity &&
           other.id == this.id &&
@@ -742,56 +741,54 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
-    final boolType = db.typeSystem.forDartType<bool>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return MessageEntity(
-      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      messageText: stringType
+      id: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      messageText: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
-      attachments: $MessagesTable.$converter0.mapToDart(stringType
+      attachments: $MessagesTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}attachments']))!,
-      status: $MessagesTable.$converter1.mapToDart(
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      mentionedUsers: $MessagesTable.$converter2.mapToDart(stringType
+      status: $MessagesTable.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      mentionedUsers: $MessagesTable.$converter2.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}mentioned_users']))!,
-      reactionCounts: $MessagesTable.$converter3.mapToDart(stringType
+      reactionCounts: $MessagesTable.$converter3.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $MessagesTable.$converter4.mapToDart(stringType
+      reactionScores: $MessagesTable.$converter4.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reaction_scores'])),
-      parentId: stringType
+      parentId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
-      quotedMessageId: stringType
+      quotedMessageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}quoted_message_id']),
-      replyCount: intType
+      replyCount: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
-      showInChannel: boolType
+      showInChannel: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}show_in_channel']),
-      shadowed:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}shadowed'])!,
-      command:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}command']),
-      createdAt: dateTimeType
+      shadowed: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}shadowed'])!,
+      command: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}command']),
+      createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: dateTimeType
+      updatedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deletedAt: dateTimeType
+      deletedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
-      userId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      pinned:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}pinned'])!,
-      pinnedAt: dateTimeType
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      pinned: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}pinned'])!,
+      pinnedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_at']),
-      pinExpires: dateTimeType
+      pinExpires: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pin_expires']),
-      pinnedByUserId: stringType
+      pinnedByUserId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
-      channelCid: stringType
+      channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
-      extraData: $MessagesTable.$converter5.mapToDart(stringType
+      extraData: $MessagesTable.$converter5.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -1066,7 +1063,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
                                                                               pinned.hashCode,
                                                                               $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, extraData.hashCode))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageEntity &&
           other.id == this.id &&
@@ -1923,56 +1920,57 @@ class PinnedMessageEntity extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
-    final boolType = db.typeSystem.forDartType<bool>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return PinnedMessageEntity(
-      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      messageText: stringType
+      id: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      messageText: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
-      attachments: $PinnedMessagesTable.$converter0.mapToDart(stringType
+      attachments: $PinnedMessagesTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}attachments']))!,
-      status: $PinnedMessagesTable.$converter1.mapToDart(
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      mentionedUsers: $PinnedMessagesTable.$converter2.mapToDart(stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}mentioned_users']))!,
-      reactionCounts: $PinnedMessagesTable.$converter3.mapToDart(stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $PinnedMessagesTable.$converter4.mapToDart(stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}reaction_scores'])),
-      parentId: stringType
+      status: $PinnedMessagesTable.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      mentionedUsers: $PinnedMessagesTable.$converter2.mapToDart(
+          const StringType().mapFromDatabaseResponse(
+              data['${effectivePrefix}mentioned_users']))!,
+      reactionCounts: $PinnedMessagesTable.$converter3.mapToDart(
+          const StringType().mapFromDatabaseResponse(
+              data['${effectivePrefix}reaction_counts'])),
+      reactionScores: $PinnedMessagesTable.$converter4.mapToDart(
+          const StringType().mapFromDatabaseResponse(
+              data['${effectivePrefix}reaction_scores'])),
+      parentId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
-      quotedMessageId: stringType
+      quotedMessageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}quoted_message_id']),
-      replyCount: intType
+      replyCount: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
-      showInChannel: boolType
+      showInChannel: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}show_in_channel']),
-      shadowed:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}shadowed'])!,
-      command:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}command']),
-      createdAt: dateTimeType
+      shadowed: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}shadowed'])!,
+      command: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}command']),
+      createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: dateTimeType
+      updatedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      deletedAt: dateTimeType
+      deletedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
-      userId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      pinned:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}pinned'])!,
-      pinnedAt: dateTimeType
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      pinned: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}pinned'])!,
+      pinnedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_at']),
-      pinExpires: dateTimeType
+      pinExpires: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pin_expires']),
-      pinnedByUserId: stringType
+      pinnedByUserId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pinned_by_user_id']),
-      channelCid: stringType
+      channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
-      extraData: $PinnedMessagesTable.$converter5.mapToDart(stringType
+      extraData: $PinnedMessagesTable.$converter5.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -2247,7 +2245,7 @@ class PinnedMessageEntity extends DataClass
                                                                               pinned.hashCode,
                                                                               $mrjc(pinnedAt.hashCode, $mrjc(pinExpires.hashCode, $mrjc(pinnedByUserId.hashCode, $mrjc(channelCid.hashCode, extraData.hashCode))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PinnedMessageEntity &&
           other.id == this.id &&
@@ -3031,19 +3029,18 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    final intType = db.typeSystem.forDartType<int>();
     return ReactionEntity(
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      createdAt: dateTimeType
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      score: intType.mapFromDatabaseResponse(data['${effectivePrefix}score'])!,
-      extraData: $ReactionsTable.$converter0.mapToDart(stringType
+      score: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}score'])!,
+      extraData: $ReactionsTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
@@ -3125,7 +3122,7 @@ class ReactionEntity extends DataClass implements Insertable<ReactionEntity> {
               $mrjc(createdAt.hashCode,
                   $mrjc(score.hashCode, extraData.hashCode))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ReactionEntity &&
           other.userId == this.userId &&
@@ -3395,23 +3392,22 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   factory UserEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    final boolType = db.typeSystem.forDartType<bool>();
     return UserEntity(
-      id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      role: stringType.mapFromDatabaseResponse(data['${effectivePrefix}role']),
-      createdAt: dateTimeType
+      id: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      role: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}role']),
+      createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: dateTimeType
+      updatedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
-      lastActive: dateTimeType
+      lastActive: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_active']),
-      online:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}online'])!,
-      banned:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
-      extraData: $UsersTable.$converter0.mapToDart(stringType
+      online: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}online'])!,
+      banned: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
+      extraData: $UsersTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data']))!,
     );
   }
@@ -3513,7 +3509,7 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
                       $mrjc(online.hashCode,
                           $mrjc(banned.hashCode, extraData.hashCode))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserEntity &&
           other.id == this.id &&
@@ -3841,30 +3837,28 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
   factory MemberEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    final boolType = db.typeSystem.forDartType<bool>();
     return MemberEntity(
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      channelCid: stringType
+      channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      role: stringType.mapFromDatabaseResponse(data['${effectivePrefix}role']),
-      inviteAcceptedAt: dateTimeType.mapFromDatabaseResponse(
+      role: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}role']),
+      inviteAcceptedAt: const DateTimeType().mapFromDatabaseResponse(
           data['${effectivePrefix}invite_accepted_at']),
-      inviteRejectedAt: dateTimeType.mapFromDatabaseResponse(
+      inviteRejectedAt: const DateTimeType().mapFromDatabaseResponse(
           data['${effectivePrefix}invite_rejected_at']),
-      invited:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}invited'])!,
-      banned:
-          boolType.mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
-      shadowBanned: boolType
+      invited: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}invited'])!,
+      banned: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}banned'])!,
+      shadowBanned: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}shadow_banned'])!,
-      isModerator: boolType
+      isModerator: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}is_moderator'])!,
-      createdAt: dateTimeType
+      createdAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      updatedAt: dateTimeType
+      updatedAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])!,
     );
   }
@@ -3997,7 +3991,7 @@ class MemberEntity extends DataClass implements Insertable<MemberEntity> {
                                       $mrjc(createdAt.hashCode,
                                           updatedAt.hashCode)))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MemberEntity &&
           other.userId == this.userId &&
@@ -4396,17 +4390,14 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
   factory ReadEntity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return ReadEntity(
-      lastRead: dateTimeType
+      lastRead: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_read'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      channelCid: stringType
+      channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
-      unreadMessages: intType
+      unreadMessages: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}unread_messages'])!,
     );
   }
@@ -4469,7 +4460,7 @@ class ReadEntity extends DataClass implements Insertable<ReadEntity> {
       $mrjc(userId.hashCode,
           $mrjc(channelCid.hashCode, unreadMessages.hashCode))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ReadEntity &&
           other.lastRead == this.lastRead &&
@@ -4666,11 +4657,10 @@ class ChannelQueryEntity extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return ChannelQueryEntity(
-      queryHash: stringType
+      queryHash: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}query_hash'])!,
-      channelCid: stringType
+      channelCid: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid'])!,
     );
   }
@@ -4716,7 +4706,7 @@ class ChannelQueryEntity extends DataClass
   @override
   int get hashCode => $mrjf($mrjc(queryHash.hashCode, channelCid.hashCode));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ChannelQueryEntity &&
           other.queryHash == this.queryHash &&
@@ -4851,6 +4841,9 @@ class ConnectionEventEntity extends DataClass
   /// event id
   final int id;
 
+  /// event type
+  final String type;
+
   /// User object of the current user
   final Map<String, dynamic>? ownUser;
 
@@ -4867,6 +4860,7 @@ class ConnectionEventEntity extends DataClass
   final DateTime? lastSyncAt;
   ConnectionEventEntity(
       {required this.id,
+      required this.type,
       this.ownUser,
       this.totalUnreadCount,
       this.unreadChannels,
@@ -4876,20 +4870,20 @@ class ConnectionEventEntity extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final intType = db.typeSystem.forDartType<int>();
-    final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return ConnectionEventEntity(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      ownUser: $ConnectionEventsTable.$converter0.mapToDart(stringType
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      ownUser: $ConnectionEventsTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}own_user'])),
-      totalUnreadCount: intType.mapFromDatabaseResponse(
+      totalUnreadCount: const IntType().mapFromDatabaseResponse(
           data['${effectivePrefix}total_unread_count']),
-      unreadChannels: intType
+      unreadChannels: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}unread_channels']),
-      lastEventAt: dateTimeType
+      lastEventAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_event_at']),
-      lastSyncAt: dateTimeType
+      lastSyncAt: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_sync_at']),
     );
   }
@@ -4897,6 +4891,7 @@ class ConnectionEventEntity extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['type'] = Variable<String>(type);
     if (!nullToAbsent || ownUser != null) {
       final converter = $ConnectionEventsTable.$converter0;
       map['own_user'] = Variable<String?>(converter.mapToSql(ownUser));
@@ -4921,6 +4916,7 @@ class ConnectionEventEntity extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return ConnectionEventEntity(
       id: serializer.fromJson<int>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
       ownUser: serializer.fromJson<Map<String, dynamic>?>(json['ownUser']),
       totalUnreadCount: serializer.fromJson<int?>(json['totalUnreadCount']),
       unreadChannels: serializer.fromJson<int?>(json['unreadChannels']),
@@ -4933,6 +4929,7 @@ class ConnectionEventEntity extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'type': serializer.toJson<String>(type),
       'ownUser': serializer.toJson<Map<String, dynamic>?>(ownUser),
       'totalUnreadCount': serializer.toJson<int?>(totalUnreadCount),
       'unreadChannels': serializer.toJson<int?>(unreadChannels),
@@ -4943,6 +4940,7 @@ class ConnectionEventEntity extends DataClass
 
   ConnectionEventEntity copyWith(
           {int? id,
+          String? type,
           Value<Map<String, dynamic>?> ownUser = const Value.absent(),
           Value<int?> totalUnreadCount = const Value.absent(),
           Value<int?> unreadChannels = const Value.absent(),
@@ -4950,6 +4948,7 @@ class ConnectionEventEntity extends DataClass
           Value<DateTime?> lastSyncAt = const Value.absent()}) =>
       ConnectionEventEntity(
         id: id ?? this.id,
+        type: type ?? this.type,
         ownUser: ownUser.present ? ownUser.value : this.ownUser,
         totalUnreadCount: totalUnreadCount.present
             ? totalUnreadCount.value
@@ -4963,6 +4962,7 @@ class ConnectionEventEntity extends DataClass
   String toString() {
     return (StringBuffer('ConnectionEventEntity(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
           ..write('ownUser: $ownUser, ')
           ..write('totalUnreadCount: $totalUnreadCount, ')
           ..write('unreadChannels: $unreadChannels, ')
@@ -4976,16 +4976,19 @@ class ConnectionEventEntity extends DataClass
   int get hashCode => $mrjf($mrjc(
       id.hashCode,
       $mrjc(
-          ownUser.hashCode,
+          type.hashCode,
           $mrjc(
-              totalUnreadCount.hashCode,
-              $mrjc(unreadChannels.hashCode,
-                  $mrjc(lastEventAt.hashCode, lastSyncAt.hashCode))))));
+              ownUser.hashCode,
+              $mrjc(
+                  totalUnreadCount.hashCode,
+                  $mrjc(unreadChannels.hashCode,
+                      $mrjc(lastEventAt.hashCode, lastSyncAt.hashCode)))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConnectionEventEntity &&
           other.id == this.id &&
+          other.type == this.type &&
           other.ownUser == this.ownUser &&
           other.totalUnreadCount == this.totalUnreadCount &&
           other.unreadChannels == this.unreadChannels &&
@@ -4995,6 +4998,7 @@ class ConnectionEventEntity extends DataClass
 
 class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   final Value<int> id;
+  final Value<String> type;
   final Value<Map<String, dynamic>?> ownUser;
   final Value<int?> totalUnreadCount;
   final Value<int?> unreadChannels;
@@ -5002,6 +5006,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   final Value<DateTime?> lastSyncAt;
   const ConnectionEventsCompanion({
     this.id = const Value.absent(),
+    this.type = const Value.absent(),
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
@@ -5010,14 +5015,16 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   });
   ConnectionEventsCompanion.insert({
     this.id = const Value.absent(),
+    required String type,
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
     this.lastEventAt = const Value.absent(),
     this.lastSyncAt = const Value.absent(),
-  });
+  }) : type = Value(type);
   static Insertable<ConnectionEventEntity> custom({
     Expression<int>? id,
+    Expression<String>? type,
     Expression<Map<String, dynamic>?>? ownUser,
     Expression<int?>? totalUnreadCount,
     Expression<int?>? unreadChannels,
@@ -5026,6 +5033,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (type != null) 'type': type,
       if (ownUser != null) 'own_user': ownUser,
       if (totalUnreadCount != null) 'total_unread_count': totalUnreadCount,
       if (unreadChannels != null) 'unread_channels': unreadChannels,
@@ -5036,6 +5044,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
 
   ConnectionEventsCompanion copyWith(
       {Value<int>? id,
+      Value<String>? type,
       Value<Map<String, dynamic>?>? ownUser,
       Value<int?>? totalUnreadCount,
       Value<int?>? unreadChannels,
@@ -5043,6 +5052,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
       Value<DateTime?>? lastSyncAt}) {
     return ConnectionEventsCompanion(
       id: id ?? this.id,
+      type: type ?? this.type,
       ownUser: ownUser ?? this.ownUser,
       totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
       unreadChannels: unreadChannels ?? this.unreadChannels,
@@ -5056,6 +5066,9 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
     }
     if (ownUser.present) {
       final converter = $ConnectionEventsTable.$converter0;
@@ -5080,6 +5093,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   String toString() {
     return (StringBuffer('ConnectionEventsCompanion(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
           ..write('ownUser: $ownUser, ')
           ..write('totalUnreadCount: $totalUnreadCount, ')
           ..write('unreadChannels: $unreadChannels, ')
@@ -5101,6 +5115,17 @@ class $ConnectionEventsTable extends ConnectionEvents
   GeneratedIntColumn _constructId() {
     return GeneratedIntColumn(
       'id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedTextColumn type = _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn(
+      'type',
       $tableName,
       false,
     );
@@ -5165,8 +5190,15 @@ class $ConnectionEventsTable extends ConnectionEvents
   }
 
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, ownUser, totalUnreadCount, unreadChannels, lastEventAt, lastSyncAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        type,
+        ownUser,
+        totalUnreadCount,
+        unreadChannels,
+        lastEventAt,
+        lastSyncAt
+      ];
   @override
   $ConnectionEventsTable get asDslTable => this;
   @override
@@ -5181,6 +5213,12 @@ class $ConnectionEventsTable extends ConnectionEvents
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
     }
     context.handle(_ownUserMeta, const VerificationResult.success());
     if (data.containsKey('total_unread_count')) {

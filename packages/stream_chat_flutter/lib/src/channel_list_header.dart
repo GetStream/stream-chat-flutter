@@ -253,10 +253,9 @@ class ChannelListHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         TextButton(
-          onPressed: () async {
-            await client.disconnect();
-            await client.connect();
-          },
+          onPressed: () => client
+            ..closeConnection()
+            ..openConnection(),
           child: Text(
             'Try Again',
             style: chatThemeData.channelListHeaderTheme.title?.copyWith(

@@ -63,8 +63,8 @@ class UserListCore extends StatefulWidget {
     required this.listBuilder,
     Key? key,
     this.filter,
-    this.options,
     this.sort,
+    this.presence,
     this.pagination,
     this.groupAlphabetically = false,
     this.userListController,
@@ -92,17 +92,14 @@ class UserListCore extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
-
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can be
   /// provided. You can sort based on last_updated, last_message_at, updated_at,
   /// created_at or member_count. Direction can be ascending or descending.
   final List<SortOption>? sort;
+
+  ///
+  final bool? presence;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
@@ -186,22 +183,22 @@ class UserListCoreState extends State<UserListCore>
         },
       );
 
-  // ignore: public_member_api_docs
+  /// Fetches initial users and updates the widget
   Future<void> loadData() => _usersBloc!.queryUsers(
         filter: widget.filter,
         sort: widget.sort,
+        presence: widget.presence,
         pagination: widget.pagination,
-        options: widget.options,
       );
 
-  // ignore: public_member_api_docs
+  /// Fetches more users with updated pagination and updates the widget
   Future<void> paginateData() => _usersBloc!.queryUsers(
         filter: widget.filter,
         sort: widget.sort,
+        presence: widget.presence,
         pagination: widget.pagination!.copyWith(
           offset: _usersBloc!.users?.length ?? 0,
         ),
-        options: widget.options,
       );
 
   @override
@@ -209,7 +206,7 @@ class UserListCoreState extends State<UserListCore>
     super.didUpdateWidget(oldWidget);
     if (widget.filter?.toString() != oldWidget.filter?.toString() ||
         jsonEncode(widget.sort) != jsonEncode(oldWidget.sort) ||
-        widget.options?.toString() != oldWidget.options?.toString() ||
+        widget.presence != oldWidget.presence ||
         widget.pagination?.toJson().toString() !=
             oldWidget.pagination?.toJson().toString()) {
       loadData();
