@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
+import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 
 import 'package:stream_chat/src/core/http/token_manager.dart';
@@ -10,9 +11,9 @@ import 'package:stream_chat/src/errors/stream_chat_error.dart';
 ///
 class AuthInterceptor extends Interceptor {
   ///
-  AuthInterceptor(this._httpClient, this._tokenManager);
+  AuthInterceptor(this._client, this._tokenManager);
 
-  final Dio _httpClient;
+  final StreamHttpClient _client;
 
   ///
   final TokenManager _tokenManager;
@@ -52,12 +53,12 @@ class AuthInterceptor extends Interceptor {
     if (data != null) error = ErrorResponse.fromJson(data);
     if (error?.code == ChatErrorCode.tokenExpired.code) {
       if (_tokenManager.isStatic) return handler.next(err);
-      _httpClient.lock();
+      _client.lock();
       await _tokenManager.loadToken(refresh: true);
-      _httpClient.unlock();
+      _client.unlock();
       try {
         final options = err.requestOptions;
-        final response = await _httpClient.request(
+        final response = await _client.request(
           options.path,
           cancelToken: options.cancelToken,
           data: options.data,

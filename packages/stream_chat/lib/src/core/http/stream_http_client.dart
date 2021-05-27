@@ -40,7 +40,7 @@ class StreamHttpClient {
         'Content-Encoding': 'application/gzip',
       }
       ..interceptors.addAll([
-        if (tokenManager != null) AuthInterceptor(httpClient, tokenManager),
+        if (tokenManager != null) AuthInterceptor(this, tokenManager),
         if (connectionIdManager != null)
           ConnectionIdInterceptor(connectionIdManager),
         if (logger != null && logger.level != Level.OFF)
@@ -74,9 +74,23 @@ class StreamHttpClient {
   @visibleForTesting
   final Dio httpClient;
 
-  /// Shuts down the [httpClient].
+  /// Lock the current [StreamHttpClient] instance.
   ///
-  /// If [force] is `false` (the default) the [httpClient] will be kept alive
+  /// [StreamHttpClient] will enqueue the incoming request tasks instead
+  /// send them directly when [interceptor.requestOptions] is locked.
+  void lock() => httpClient.lock();
+
+  /// Unlock the current [StreamHttpClient] instance.
+  ///
+  /// [StreamHttpClient] instance dequeue the request task。
+  void unlock() => httpClient.unlock();
+
+  ///Clear the current [StreamHttpClient] instance waiting queue.
+  void clear() => httpClient.close();
+
+  /// Shuts down the [StreamHttpClient].
+  ///
+  /// If [force] is `false` the [StreamHttpClient] will be kept alive
   /// until all active connections are done. If [force] is `true` any active
   /// connections will be closed to immediately release all resources. These
   /// closed connections will receive an error event to indicate that the client
@@ -236,5 +250,31 @@ class StreamHttpClient {
       cancelToken: cancelToken,
     );
     return response;
+  }
+
+  /// Handy method to make generic http request with error parsing.
+  Future<Response<T>> request<T>(
+    String path, {
+    Object? data,
+    Map<String, Object?>? queryParameters,
+    Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final response = await httpClient.request<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+        cancelToken: cancelToken,
+      );
+      return response;
+    } on DioError catch (error) {
+      throw _parseError(error);
+    }
   }
 }
