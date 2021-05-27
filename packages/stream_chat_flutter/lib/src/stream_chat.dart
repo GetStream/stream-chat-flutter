@@ -39,6 +39,7 @@ class StreamChat extends StatefulWidget {
     this.streamChatThemeData,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.connectivityStream,
   }) : super(key: key);
 
   /// Client to do chat ops with
@@ -58,6 +59,11 @@ class StreamChat extends StatefulWidget {
   /// is in background. Can be used to display various notifications depending
   /// upon the [Event.type]
   final EventHandler? onBackgroundEventReceived;
+
+  /// Stream of connectivity result
+  /// Visible for testing
+  @visibleForTesting
+  final Stream<ConnectivityResult>? connectivityStream;
 
   @override
   StreamChatState createState() => StreamChatState();
@@ -102,6 +108,7 @@ class StreamChatState extends State<StreamChat> {
                 client: client,
                 onBackgroundEventReceived: widget.onBackgroundEventReceived,
                 backgroundKeepAlive: widget.backgroundKeepAlive,
+                connectivityStream: widget.connectivityStream,
                 child: widget.child ?? const Offstage(),
               ),
             );
