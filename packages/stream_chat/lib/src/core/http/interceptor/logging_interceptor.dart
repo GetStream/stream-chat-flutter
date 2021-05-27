@@ -309,12 +309,12 @@ class LoggingInterceptor extends Interceptor {
     });
   }
 
-  bool _canFlattenMap(Map map) =>
+/*  bool _canFlattenMap(Map map) =>
       map.values.where((dynamic val) => val is Map || val is List).isEmpty &&
       map.toString().length < maxWidth;
 
   bool _canFlattenList(List list) =>
-      list.length < 10 && list.toString().length < maxWidth;
+      list.length < 10 && list.toString().length < maxWidth;*/
 
   void _printMapAsTable(
     void Function(Object) logPrint,

@@ -99,7 +99,7 @@ class WebSocket with TimerHelper {
       _connectionStatusController.add(status);
 
   /// The current connection status value
-  ConnectionStatus get connectionStatus => _connectionStatusController.value!;
+  ConnectionStatus get connectionStatus => _connectionStatusController.value;
 
   /// This notifies of connection status changes
   Stream<ConnectionStatus> get connectionStatusStream =>
