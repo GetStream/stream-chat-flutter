@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/channel.dart';
+import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';

@@ -1,35 +1,5 @@
 part of 'stream_http_client.dart';
 
-///
-enum Location {
-  ///
-  usEast,
-
-  ///
-  euWest,
-
-  ///
-  mumbai,
-
-  ///
-  sydney,
-
-  ///
-  singapore,
-}
-
-///
-extension LocationX on Location {
-  ///
-  String get name => {
-        Location.usEast: 'us-east',
-        Location.euWest: 'dublin',
-        Location.mumbai: 'mumbai',
-        Location.sydney: 'sydney',
-        Location.singapore: 'singapore',
-      }[this]!;
-}
-
 const _defaultBaseURL = 'https://chat-us-east-1.stream-io-api.com';
 
 /// Client options to modify [StreamHttpClient]

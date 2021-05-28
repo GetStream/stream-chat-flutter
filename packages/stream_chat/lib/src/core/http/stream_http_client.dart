@@ -9,6 +9,7 @@ import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/errors/stream_chat_error.dart';
+import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/platform_detector/platform_detector.dart';
 import 'package:stream_chat/version.dart';
 
