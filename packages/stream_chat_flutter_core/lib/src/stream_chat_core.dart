@@ -103,7 +103,7 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// The current user as a stream
   Stream<User?> get userStream => client.state.userStream;
 
-  late final StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
   var _isInForeground = true;
   var _isConnectionAvailable = true;
@@ -112,23 +112,46 @@ class StreamChatCoreState extends State<StreamChatCore>
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    _connectivitySubscription =
-        (widget.connectivityStream ?? Connectivity().onConnectivityChanged)
-            .listen((ConnectivityResult result) async {
-      _isConnectionAvailable = result != ConnectivityResult.none;
-      if (!_isInForeground) {
-        return;
-      }
-      if (_isConnectionAvailable) {
-        if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
-          await client.connect();
+    _subscribeToConnectivityChange(widget.connectivityStream);
+  }
+
+  void _subscribeToConnectivityChange([
+    Stream<ConnectivityResult>? connectivityStream,
+  ]) {
+    if (_connectivitySubscription == null) {
+      connectivityStream ??= Connectivity().onConnectivityChanged;
+      _connectivitySubscription =
+          connectivityStream.distinct().listen((result) {
+        _isConnectionAvailable = result != ConnectivityResult.none;
+        if (!_isInForeground) return;
+        if (_isConnectionAvailable) {
+          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
+            client.connect();
+          }
+        } else {
+          if (client.wsConnectionStatus == ConnectionStatus.connected) {
+            client.disconnect();
+          }
         }
-      } else {
-        if (client.wsConnectionStatus == ConnectionStatus.connected) {
-          await client.disconnect();
-        }
-      }
-    });
+      });
+    }
+  }
+
+  void _unsubscribeFromConnectivityChange() {
+    if (_connectivitySubscription != null) {
+      _connectivitySubscription?.cancel();
+      _connectivitySubscription = null;
+    }
+  }
+
+  @override
+  void didUpdateWidget(StreamChatCore oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final connectivityStream = widget.connectivityStream;
+    if (connectivityStream != oldWidget.connectivityStream) {
+      _unsubscribeFromConnectivityChange();
+      _subscribeToConnectivityChange(connectivityStream);
+    }
   }
 
   StreamSubscription? _eventSubscription;
@@ -137,10 +160,10 @@ class StreamChatCoreState extends State<StreamChatCore>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _isInForeground = state == AppLifecycleState.resumed;
     if (user != null) {
-      if (!_isInForeground) {
-        _onBackground();
-      } else {
+      if (_isInForeground) {
         _onForeground();
+      } else {
+        _onBackground();
       }
     }
   }
@@ -162,9 +185,8 @@ class StreamChatCoreState extends State<StreamChatCore>
       }
       return;
     }
-    _eventSubscription = client.on().listen(
-          widget.onBackgroundEventReceived,
-        );
+
+    _eventSubscription = client.on().listen(widget.onBackgroundEventReceived);
 
     void onTimerComplete() {
       _eventSubscription?.cancel();
@@ -178,9 +200,9 @@ class StreamChatCoreState extends State<StreamChatCore>
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
+    _unsubscribeFromConnectivityChange();
     _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
-    _connectivitySubscription.cancel();
     super.dispose();
   }
 }
