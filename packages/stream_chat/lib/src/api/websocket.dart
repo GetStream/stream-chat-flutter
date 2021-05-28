@@ -100,7 +100,7 @@ class WebSocket {
   /// connection unhealthy
   final int reconnectionMonitorTimeout;
 
-  final _connectionStatusController =
+  final BehaviorSubject<ConnectionStatus> _connectionStatusController =
       BehaviorSubject.seeded(ConnectionStatus.disconnected);
 
   set _connectionStatus(ConnectionStatus status) =>
