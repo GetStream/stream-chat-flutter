@@ -10,6 +10,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
+import 'pinned_messages_screen.dart';
 import 'chat_info_screen.dart';
 import 'main.dart';
 import 'routes/routes.dart';
@@ -482,6 +483,65 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 onTap: () {},
               );
             }),
+        OptionListTile(
+          title: 'Pinned Messages',
+          tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+          titleTextStyle: StreamChatTheme.of(context).textTheme.body,
+          leading: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: StreamSvgIcon.pictures(
+              size: 32.0,
+              color:
+                  StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
+            ),
+          ),
+          trailing: StreamSvgIcon.right(
+            color: StreamChatTheme.of(context).colorTheme.grey,
+          ),
+          onTap: () {
+            final channel = StreamChannel.of(context).channel;
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StreamChannel(
+                  channel: channel,
+                  child: MessageSearchBloc(
+                    child: PinnedMessagesScreen(
+                      messageTheme: widget.messageTheme,
+                      sortOptions: [
+                        SortOption(
+                          'created_at',
+                          direction: SortOption.ASC,
+                        ),
+                      ],
+                      paginationParams: PaginationParams(limit: 20),
+                      onShowMessage: (m, c) async {
+                        final client = StreamChat.of(context).client;
+                        final message = m;
+                        final channel = client.channel(
+                          c.type,
+                          id: c.id,
+                        );
+                        if (channel.state == null) {
+                          await channel.watch();
+                        }
+                        Navigator.pushNamed(
+                          context,
+                          Routes.CHANNEL_PAGE,
+                          arguments: ChannelPageArgs(
+                            channel: channel,
+                            initialMessage: message,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
         OptionListTile(
           tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           separatorColor: StreamChatTheme.of(context).colorTheme.greyGainsboro,
