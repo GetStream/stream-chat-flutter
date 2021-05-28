@@ -222,11 +222,3 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
     }
   }
 }
-
-class _AssetPackage {
-  Attachment attachment;
-  Message message;
-  VideoPlayerController? videoPlayer;
-
-  _AssetPackage(this.attachment, this.message, this.videoPlayer);
-}
