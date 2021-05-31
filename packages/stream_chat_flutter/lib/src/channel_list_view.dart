@@ -529,6 +529,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                               title: 'Delete Conversation',
                               okText: 'DELETE',
                               question:
+                                  // ignore: lines_longer_than_80_chars
                                   'Are you sure you want to delete this conversation?',
                               cancelText: 'CANCEL',
                               icon: StreamSvgIcon.delete(
