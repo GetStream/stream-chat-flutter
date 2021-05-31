@@ -662,14 +662,21 @@ class _ChannelListViewState extends State<ChannelListView> {
   }
 }
 
+/// Class for slidable action
 class SwipeAction {
-  Color? color;
-  Widget iconWidget;
-  VoidCallback? onTap;
-
+  /// Constructor for creating [SwipeAction]
   SwipeAction({
     this.color,
     required this.iconWidget,
     this.onTap,
   });
+
+  /// Background color of action
+  Color? color;
+
+  /// Widget to display as icon
+  Widget iconWidget;
+
+  /// Callback when icon is tapped
+  VoidCallback? onTap;
 }
