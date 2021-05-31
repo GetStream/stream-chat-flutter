@@ -80,6 +80,7 @@ class ChannelListView extends StatefulWidget {
     this.listBuilder,
     this.onMoreDetailsPressed,
     this.onDeletePressed,
+    this.swipeActions,
   }) : super(key: key);
 
   /// If true a default swipe to action behaviour will be added to this widget
@@ -165,6 +166,9 @@ class ChannelListView extends StatefulWidget {
 
   /// Callback used when the delete slidable option is pressed
   final VoidCallback? onDeletePressed;
+
+  /// List of actions for slidable
+  final List<SwipeAction>? swipeActions;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -473,63 +477,70 @@ class _ChannelListViewState extends State<ChannelListView> {
             enabled: widget.swipeToAction,
             actionPane: const SlidableBehindActionPane(),
             actionExtentRatio: 0.12,
-            secondaryActions: <Widget>[
-              IconSlideAction(
-                color: backgroundColor,
-                icon: Icons.more_horiz,
-                onTap: widget.onMoreDetailsPressed ??
-                    () {
-                      showModalBottomSheet(
-                        clipBehavior: Clip.hardEdge,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(32),
-                            topRight: Radius.circular(32),
-                          ),
-                        ),
-                        context: context,
-                        builder: (context) => StreamChannel(
-                          channel: channel,
-                          child: ChannelBottomSheet(
-                            onViewInfoTap: () {
-                              widget.onViewInfoTap?.call(channel);
-                            },
-                          ),
-                        ),
-                      );
-                    },
-              ),
-              if ([
-                'admin',
-                'owner',
-              ].contains(channel.state!.members
-                  .firstWhereOrNull(
-                      (m) => m.userId == channel.client.state.user?.id)
-                  ?.role))
-                IconSlideAction(
-                  color: backgroundColor,
-                  iconWidget: StreamSvgIcon.delete(
-                    color: chatThemeData.colorTheme.accentRed,
+            secondaryActions: widget.swipeActions
+                    ?.map((e) => IconSlideAction(
+                          color: e.color,
+                          iconWidget: e.iconWidget,
+                          onTap: e.onTap,
+                        ))
+                    .toList() ??
+                <Widget>[
+                  IconSlideAction(
+                    color: backgroundColor,
+                    icon: Icons.more_horiz,
+                    onTap: widget.onMoreDetailsPressed ??
+                        () {
+                          showModalBottomSheet(
+                            clipBehavior: Clip.hardEdge,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                              ),
+                            ),
+                            context: context,
+                            builder: (context) => StreamChannel(
+                              channel: channel,
+                              child: ChannelBottomSheet(
+                                onViewInfoTap: () {
+                                  widget.onViewInfoTap?.call(channel);
+                                },
+                              ),
+                            ),
+                          );
+                        },
                   ),
-                  onTap: widget.onDeletePressed ??
-                      () async {
-                        final res = await showConfirmationDialog(
-                          context,
-                          title: 'Delete Conversation',
-                          okText: 'DELETE',
-                          question:
-                              'Are you sure you want to delete this conversation?',
-                          cancelText: 'CANCEL',
-                          icon: StreamSvgIcon.delete(
-                            color: chatThemeData.colorTheme.accentRed,
-                          ),
-                        );
-                        if (res == true) {
-                          await channel.delete();
-                        }
-                      },
-                ),
-            ],
+                  if ([
+                    'admin',
+                    'owner',
+                  ].contains(channel.state!.members
+                      .firstWhereOrNull(
+                          (m) => m.userId == channel.client.state.user?.id)
+                      ?.role))
+                    IconSlideAction(
+                      color: backgroundColor,
+                      iconWidget: StreamSvgIcon.delete(
+                        color: chatThemeData.colorTheme.accentRed,
+                      ),
+                      onTap: widget.onDeletePressed ??
+                          () async {
+                            final res = await showConfirmationDialog(
+                              context,
+                              title: 'Delete Conversation',
+                              okText: 'DELETE',
+                              question:
+                                  'Are you sure you want to delete this conversation?',
+                              cancelText: 'CANCEL',
+                              icon: StreamSvgIcon.delete(
+                                color: chatThemeData.colorTheme.accentRed,
+                              ),
+                            );
+                            if (res == true) {
+                              await channel.delete();
+                            }
+                          },
+                    ),
+                ],
             child: Container(
               color: chatThemeData.colorTheme.whiteSnow,
               child: widget.channelPreviewBuilder?.call(context, channel) ??
@@ -649,4 +660,16 @@ class _ChannelListViewState extends State<ChannelListView> {
       color: effect.color!.withOpacity(effect.alpha ?? 1.0),
     );
   }
+}
+
+class SwipeAction {
+  Color? color;
+  Widget iconWidget;
+  VoidCallback? onTap;
+
+  SwipeAction({
+    this.color,
+    required this.iconWidget,
+    this.onTap,
+  });
 }
