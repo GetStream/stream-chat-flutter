@@ -78,6 +78,8 @@ class ChannelListView extends StatefulWidget {
     this.emptyBuilder,
     this.loadingBuilder,
     this.listBuilder,
+    this.onMoreDetailsPressed,
+    this.onDeletePressed,
   }) : super(key: key);
 
   /// If true a default swipe to action behaviour will be added to this widget
@@ -157,6 +159,12 @@ class ChannelListView extends StatefulWidget {
 
   /// The builder used when the channel list is empty.
   final WidgetBuilder? emptyBuilder;
+
+  /// Callback used when the more details slidable option is pressed
+  final VoidCallback? onMoreDetailsPressed;
+
+  /// Callback used when the delete slidable option is pressed
+  final VoidCallback? onDeletePressed;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -469,7 +477,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               IconSlideAction(
                 color: backgroundColor,
                 icon: Icons.more_horiz,
-                onTap: () {
+                onTap: widget.onMoreDetailsPressed ?? () {
                   showModalBottomSheet(
                     clipBehavior: Clip.hardEdge,
                     shape: const RoundedRectangleBorder(
@@ -502,7 +510,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   iconWidget: StreamSvgIcon.delete(
                     color: chatThemeData.colorTheme.accentRed,
                   ),
-                  onTap: () async {
+                  onTap: widget.onDeletePressed ?? () async {
                     final res = await showConfirmationDialog(
                       context,
                       title: 'Delete Conversation',
