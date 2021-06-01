@@ -26,11 +26,14 @@ class ChannelName extends StatelessWidget {
     final client = StreamChat.of(context);
     final channel = StreamChannel.of(context).channel;
 
-    return StreamBuilder<Map<String, dynamic>>(
+    return BetterStreamBuilder<Map<String, Object?>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
-      builder: (context, snapshot) =>
-          _buildName(snapshot.data!, channel.state?.members, client),
+      builder: (context, snapshot) => _buildName(
+        snapshot,
+        channel.state?.members,
+        client,
+      ),
     );
   }
 

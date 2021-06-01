@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget to show the current list of typing users
@@ -41,11 +42,12 @@ class TypingIndicator extends StatelessWidget {
         child: alternativeWidget ?? const Offstage(),
       ),
     );
-    return StreamBuilder<List<User>>(
+    return BetterStreamBuilder<List<User>>(
+      initialData: channelState.typingEvents,
       stream: channelState.typingEventsStream,
       builder: (context, snapshot) => AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: snapshot.data?.isNotEmpty == true
+        child: snapshot.isNotEmpty == true
             ? Padding(
                 padding: padding,
                 child: Align(
@@ -61,7 +63,7 @@ class TypingIndicator extends StatelessWidget {
                       ),
                       Text(
                         // ignore: lines_longer_than_80_chars
-                        '  ${snapshot.data![0].name}${snapshot.data!.length == 1 ? '' : ' and ${snapshot.data!.length - 1} more'} ${snapshot.data!.length == 1 ? 'is' : 'are'} typing',
+                        '  ${snapshot[0].name}${snapshot.length == 1 ? '' : ' and ${snapshot.length - 1} more'} ${snapshot.length == 1 ? 'is' : 'are'} typing',
                         maxLines: 1,
                         style: style,
                       ),

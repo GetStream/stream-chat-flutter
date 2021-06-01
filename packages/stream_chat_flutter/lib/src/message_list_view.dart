@@ -606,8 +606,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
         stream: Rx.combineLatest2(
-          streamChannel!.channel.state!.isUpToDateStream,
-          streamChannel!.channel.state!.unreadCountStream,
+          streamChannel!.channel.state!.isUpToDateStream.distinct(),
+          streamChannel!.channel.state!.unreadCountStream.distinct(),
           (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
         ),
         builder: (_, snapshot) {
@@ -689,23 +689,18 @@ class _MessageListViewState extends State<MessageListView> {
     final stream = direction == QueryDirection.top
         ? streamChannel.queryTopMessages
         : streamChannel.queryBottomMessages;
-    return StreamBuilder<bool>(
+    return BetterStreamBuilder<bool>(
       key: Key('LOADING-INDICATOR $direction'),
       stream: stream,
       initialData: false,
+      errorBuilder: (context, error) => Container(
+        color: StreamChatTheme.of(context).colorTheme.accentRed.withOpacity(.2),
+        child: const Center(
+          child: Text('Error loading messages'),
+        ),
+      ),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Container(
-            color: StreamChatTheme.of(context)
-                .colorTheme
-                .accentRed
-                .withOpacity(.2),
-            child: const Center(
-              child: Text('Error loading messages'),
-            ),
-          );
-        }
-        if (!snapshot.data!) {
+        if (!snapshot) {
           if (!_isThreadConversation && direction == QueryDirection.top) {
             return const SizedBox(
               height: 52,
@@ -1163,14 +1158,14 @@ class _MessageListViewState extends State<MessageListView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => StreamBuilder<Message>(
+            builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
                   (messages) =>
                       messages!.firstWhere((m) => m.id == message.id)),
               initialData: message,
               builder: (_, snapshot) => StreamChannel(
                 channel: streamChannel!.channel,
-                child: widget.threadBuilder!(context, snapshot.data),
+                child: widget.threadBuilder!(context, snapshot),
               ),
             ),
           ),

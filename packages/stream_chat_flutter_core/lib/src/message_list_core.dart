@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_flutter_core/src/better_stream_builder.dart';
 import 'package:stream_chat_flutter_core/src/stream_channel.dart';
 import 'package:stream_chat_flutter_core/src/typedef.dart';
 
@@ -127,6 +129,10 @@ class MessageListCoreState extends State<MessageListCore> {
             .map((threads) => threads[widget.parentMessage!.id])
         : _streamChannel!.channel.state?.messagesStream;
 
+    final initialData = _isThreadConversation
+        ? _streamChannel!.channel.state?.threads[widget.parentMessage!.id]
+        : _streamChannel!.channel.state?.messages;
+
     bool defaultFilter(Message m) {
       final isMyMessage = m.user?.id == _currentUser?.id;
       final isDeletedOrShadowed = m.isDeleted == true || m.shadowed == true;
@@ -134,30 +140,27 @@ class MessageListCoreState extends State<MessageListCore> {
       return true;
     }
 
-    return StreamBuilder<List<Message>?>(
-      stream: messagesStream?.map(
+    return BetterStreamBuilder<List<Message>?>(
+      initialData: initialData,
+      comparator: const ListEquality().equals,
+      stream: messagesStream!.map(
         (messages) =>
             messages?.where(widget.messageFilter ?? defaultFilter).toList(
                   growable: false,
                 ),
       ),
+      errorBuilder: widget.errorWidgetBuilder,
+      loadingBuilder: widget.loadingBuilder,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return widget.errorWidgetBuilder(context, snapshot.error!);
-        } else if (!snapshot.hasData) {
-          return widget.loadingBuilder(context);
-        } else {
-          final messageList =
-              snapshot.data?.reversed.toList(growable: false) ?? [];
-          if (messageList.isEmpty && !_isThreadConversation) {
-            if (_upToDate) {
-              return widget.emptyBuilder(context);
-            }
-          } else {
-            _messages = messageList;
+        final messageList = snapshot?.reversed.toList(growable: false) ?? [];
+        if (messageList.isEmpty && !_isThreadConversation) {
+          if (_upToDate) {
+            return widget.emptyBuilder(context);
           }
-          return widget.messageListBuilder(context, _messages);
+        } else {
+          _messages = messageList;
         }
+        return widget.messageListBuilder(context, _messages);
       },
     );
   }

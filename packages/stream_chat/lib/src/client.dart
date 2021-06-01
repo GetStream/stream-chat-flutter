@@ -213,7 +213,7 @@ class StreamChatClient {
       _wsConnectionStatusController.add(status);
 
   /// The current status value of the websocket connection
-  ConnectionStatus? get wsConnectionStatus =>
+  ConnectionStatus get wsConnectionStatus =>
       _wsConnectionStatusController.value;
 
   /// This notifies the connection status of the websocket connection.

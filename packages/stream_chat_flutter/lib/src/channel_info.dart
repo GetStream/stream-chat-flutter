@@ -25,13 +25,14 @@ class ChannelInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
-    return StreamBuilder<List<Member>>(
-      stream: channel.state?.membersStream,
+    return BetterStreamBuilder<List<Member>>(
+      stream: channel.state!.membersStream,
+      initialData: channel.state!.members,
       builder: (context, snapshot) => ConnectionStatusBuilder(
         statusBuilder: (context, status) {
           switch (status) {
             case ConnectionStatus.connected:
-              return _buildConnectedTitleState(context, snapshot.data);
+              return _buildConnectedTitleState(context, snapshot);
             case ConnectionStatus.connecting:
               return _buildConnectingTitleState(context);
             case ConnectionStatus.disconnected:

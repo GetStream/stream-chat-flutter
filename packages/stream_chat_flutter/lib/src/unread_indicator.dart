@@ -17,7 +17,7 @@ class UnreadIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
     return IgnorePointer(
-      child: StreamBuilder<int?>(
+      child: BetterStreamBuilder<int?>(
         stream: cid != null
             ? client.state.channels[cid]?.state?.unreadCountStream
             : client.state.totalUnreadCountStream,
@@ -25,8 +25,8 @@ class UnreadIndicator extends StatelessWidget {
             ? client.state.channels[cid]?.state?.unreadCount
             : client.state.totalUnreadCount,
         builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data == 0) {
-            return const SizedBox();
+          if (snapshot == null || snapshot == 0) {
+            return const Offstage();
           }
           return Material(
             borderRadius: BorderRadius.circular(8),
@@ -42,7 +42,7 @@ class UnreadIndicator extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  '${snapshot.data! > 99 ? '99+' : snapshot.data}',
+                  '${snapshot > 99 ? '99+' : snapshot}',
                   style: const TextStyle(
                     fontSize: 11,
                     color: Colors.white,

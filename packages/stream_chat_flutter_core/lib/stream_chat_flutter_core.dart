@@ -2,6 +2,7 @@ library stream_chat_flutter_core;
 
 export 'package:stream_chat/stream_chat.dart';
 
+export 'src/better_stream_builder.dart';
 export 'src/channel_list_core.dart' hide ChannelListCoreState;
 export 'src/channels_bloc.dart';
 export 'src/lazy_load_scroll_view.dart';
