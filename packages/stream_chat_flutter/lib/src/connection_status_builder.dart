@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -39,7 +40,6 @@ class ConnectionStatusBuilder extends StatelessWidget {
     final stream = connectionStatusStream ??
         StreamChat.of(context).client.wsConnectionStatusStream;
     return StreamBuilder<ConnectionStatus>(
-      initialData: initialStatus,
       stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {

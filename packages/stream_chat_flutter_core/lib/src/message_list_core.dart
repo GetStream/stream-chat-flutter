@@ -135,10 +135,12 @@ class MessageListCoreState extends State<MessageListCore> {
     }
 
     return StreamBuilder<List<Message>?>(
-      stream: messagesStream?.map((messages) =>
-          messages?.where(widget.messageFilter ?? defaultFilter).toList(
-                growable: false,
-              )),
+      stream: messagesStream?.map(
+        (messages) =>
+            messages?.where(widget.messageFilter ?? defaultFilter).toList(
+                  growable: false,
+                ),
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return widget.errorWidgetBuilder(context, snapshot.error!);

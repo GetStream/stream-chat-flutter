@@ -70,8 +70,11 @@ class Channel {
       true;
 
   /// Returns true if the channel is muted as a stream
-  Stream<bool>? get isMutedStream => _client.state.userStream.map((event) =>
-      event!.channelMutes.any((element) => element.channel.cid == cid) == true);
+  Stream<bool>? get isMutedStream => _client.state.userStream
+      .map((event) =>
+          event!.channelMutes.any((element) => element.channel.cid == cid) ==
+          true)
+      .distinct();
 
   /// True if the channel is a group
   bool get isGroup => memberCount != 2;
@@ -1604,7 +1607,7 @@ class ChannelClientState {
   /// Channel message list as a stream
   Stream<List<Message>?> get messagesStream => channelStateStream
       .map((cs) => cs.messages)
-      .distinct((prev, next) => const ListEquality().equals(prev, next));
+      .distinct(const ListEquality().equals);
 
   /// Channel pinned message list
   List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();
@@ -1634,7 +1637,7 @@ class ChannelClientState {
         _channel.client.state.usersStream,
         (members, users) =>
             members!.map((e) => e!.copyWith(user: users[e.user!.id])).toList(),
-      );
+      ).distinct(const ListEquality().equals);
 
   /// Channel watcher count
   int? get watcherCount => _channelState.watcherCount;
@@ -1804,7 +1807,9 @@ class ChannelClientState {
   List<User> get typingEvents => _typingEventsController.value;
 
   /// Channel related typing users stream
-  Stream<List<User>> get typingEventsStream => _typingEventsController.stream;
+  Stream<List<User>> get typingEventsStream =>
+      _typingEventsController.stream.distinct(const ListEquality().equals);
+
   final BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 

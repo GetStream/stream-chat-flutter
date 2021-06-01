@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/user.dart';
 
@@ -6,7 +7,7 @@ part 'member.g.dart';
 /// The class that contains the information about the user membership
 /// in a channel
 @JsonSerializable()
-class Member {
+class Member extends Equatable {
   /// Constructor used for json serialization
   Member({
     this.user,
@@ -98,4 +99,19 @@ class Member {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$MemberToJson(this);
+
+  @override
+  List<Object?> get props => [
+        user,
+        inviteAcceptedAt,
+        inviteRejectedAt,
+        invited,
+        role,
+        userId,
+        isModerator,
+        banned,
+        shadowBanned,
+        createdAt,
+        updatedAt,
+      ];
 }

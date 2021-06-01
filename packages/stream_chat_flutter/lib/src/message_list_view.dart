@@ -690,7 +690,7 @@ class _MessageListViewState extends State<MessageListView> {
         ? streamChannel.queryTopMessages
         : streamChannel.queryBottomMessages;
     return StreamBuilder<bool>(
-      key: const Key('LOADING-INDICATOR'),
+      key: Key('LOADING-INDICATOR $direction'),
       stream: stream,
       initialData: false,
       builder: (context, snapshot) {
@@ -789,7 +789,9 @@ class _MessageListViewState extends State<MessageListView> {
           }
         }
         if (mounted) {
-          setState(() => _showScrollToBottom = !isVisible);
+          if (_showScrollToBottom == isVisible) {
+            setState(() => _showScrollToBottom = !isVisible);
+          }
         }
       },
       child: messageWidget,

@@ -219,7 +219,7 @@ class StreamChatClient {
   /// This notifies the connection status of the websocket connection.
   /// Listen to this to get notified when the websocket tries to reconnect.
   Stream<ConnectionStatus> get wsConnectionStatusStream =>
-      _wsConnectionStatusController.stream;
+      _wsConnectionStatusController.stream.distinct();
 
   /// The current user token
   String? token;

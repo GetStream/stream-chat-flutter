@@ -33,8 +33,15 @@ class TypingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final channelState =
         channel?.state ?? StreamChannel.of(context).channel.state!;
+
+    final altWidget = Align(
+      key: const Key('alternative'),
+      alignment: alignment,
+      child: Container(
+        child: alternativeWidget ?? const Offstage(),
+      ),
+    );
     return StreamBuilder<List<User>>(
-      initialData: channelState.typingEvents,
       stream: channelState.typingEventsStream,
       builder: (context, snapshot) => AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
@@ -62,13 +69,7 @@ class TypingIndicator extends StatelessWidget {
                   ),
                 ),
               )
-            : Align(
-                key: const Key('alternative'),
-                alignment: alignment,
-                child: Container(
-                  child: alternativeWidget ?? const Offstage(),
-                ),
-              ),
+            : altWidget,
       ),
     );
   }
