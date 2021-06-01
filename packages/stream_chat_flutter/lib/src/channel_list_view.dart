@@ -12,6 +12,9 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// Callback called when tapping on a channel
 typedef ChannelTapCallback = void Function(Channel, Widget?);
 
+/// Callback called when tapping on a channel
+typedef ChannelInfoCallback = void Function(Channel);
+
 /// Builder used to create a custom [ChannelPreview] from a [Channel]
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, Channel);
 
@@ -162,10 +165,10 @@ class ChannelListView extends StatefulWidget {
   final WidgetBuilder? emptyBuilder;
 
   /// Callback used when the more details slidable option is pressed
-  final VoidCallback? onMoreDetailsPressed;
+  final ChannelInfoCallback? onMoreDetailsPressed;
 
   /// Callback used when the delete slidable option is pressed
-  final VoidCallback? onDeletePressed;
+  final ChannelInfoCallback? onDeletePressed;
 
   /// List of actions for slidable
   final List<SwipeAction>? swipeActions;
@@ -481,34 +484,39 @@ class _ChannelListViewState extends State<ChannelListView> {
                     ?.map((e) => IconSlideAction(
                           color: e.color,
                           iconWidget: e.iconWidget,
-                          onTap: e.onTap,
+                          onTap: () {
+                            e.onTap?.call(channel);
+                          },
                         ))
                     .toList() ??
                 <Widget>[
                   IconSlideAction(
                     color: backgroundColor,
                     icon: Icons.more_horiz,
-                    onTap: widget.onMoreDetailsPressed ??
-                        () {
-                          showModalBottomSheet(
-                            clipBehavior: Clip.hardEdge,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(32),
-                                topRight: Radius.circular(32),
+                    onTap: widget.onMoreDetailsPressed != null
+                        ? () {
+                            widget.onMoreDetailsPressed!(channel);
+                          }
+                        : () {
+                            showModalBottomSheet(
+                              clipBehavior: Clip.hardEdge,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(32),
+                                  topRight: Radius.circular(32),
+                                ),
                               ),
-                            ),
-                            context: context,
-                            builder: (context) => StreamChannel(
-                              channel: channel,
-                              child: ChannelBottomSheet(
-                                onViewInfoTap: () {
-                                  widget.onViewInfoTap?.call(channel);
-                                },
+                              context: context,
+                              builder: (context) => StreamChannel(
+                                channel: channel,
+                                child: ChannelBottomSheet(
+                                  onViewInfoTap: () {
+                                    widget.onViewInfoTap?.call(channel);
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
                   ),
                   if ([
                     'admin',
@@ -522,24 +530,27 @@ class _ChannelListViewState extends State<ChannelListView> {
                       iconWidget: StreamSvgIcon.delete(
                         color: chatThemeData.colorTheme.accentRed,
                       ),
-                      onTap: widget.onDeletePressed ??
-                          () async {
-                            final res = await showConfirmationDialog(
-                              context,
-                              title: 'Delete Conversation',
-                              okText: 'DELETE',
-                              question:
-                                  // ignore: lines_longer_than_80_chars
-                                  'Are you sure you want to delete this conversation?',
-                              cancelText: 'CANCEL',
-                              icon: StreamSvgIcon.delete(
-                                color: chatThemeData.colorTheme.accentRed,
-                              ),
-                            );
-                            if (res == true) {
-                              await channel.delete();
+                      onTap: widget.onDeletePressed != null
+                          ? () {
+                              widget.onDeletePressed!(channel);
                             }
-                          },
+                          : () async {
+                              final res = await showConfirmationDialog(
+                                context,
+                                title: 'Delete Conversation',
+                                okText: 'DELETE',
+                                question:
+                                    // ignore: lines_longer_than_80_chars
+                                    'Are you sure you want to delete this conversation?',
+                                cancelText: 'CANCEL',
+                                icon: StreamSvgIcon.delete(
+                                  color: chatThemeData.colorTheme.accentRed,
+                                ),
+                              );
+                              if (res == true) {
+                                await channel.delete();
+                              }
+                            },
                     ),
                 ],
             child: Container(
@@ -679,5 +690,5 @@ class SwipeAction {
   Widget iconWidget;
 
   /// Callback when icon is tapped
-  VoidCallback? onTap;
+  ChannelInfoCallback? onTap;
 }
