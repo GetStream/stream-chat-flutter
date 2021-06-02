@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'mocks.dart';
@@ -100,6 +102,7 @@ void main() {
           child: Offstage(key: childKey),
           onBackgroundEventReceived: mockOnBackgroundEventReceived,
           backgroundKeepAlive: backgroundKeepAlive,
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
         );
 
         await tester.pumpWidget(streamChatCore);
@@ -191,6 +194,7 @@ void main() {
           key: streamChatCoreKey,
           client: mockClient,
           child: Offstage(key: childKey),
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
         );
 
         await tester.pumpWidget(streamChatCore);
@@ -218,6 +222,51 @@ void main() {
             .didChangeAppLifecycleState(AppLifecycleState.resumed);
 
         verify(() => mockClient.openConnection()).called(1);
+      });
+    },
+  );
+
+  testWidgets(
+    'didChangeAppLifecycleState should not call client.connect() '
+    'if connection is not available in case the '
+    'widget lifestyle changes to AppLifecycleState.resume',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+          connectivityStream: Stream.value(ConnectivityResult.none),
+        );
+
+        await tester.pumpWidget(streamChatCore);
+
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
+        final streamChatCoreState = tester.state<StreamChatCoreState>(
+          find.byKey(streamChatCoreKey),
+        );
+
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.paused);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.resumed);
+
+        verifyNever(() => mockClient.connect());
       });
     },
   );
@@ -261,6 +310,126 @@ void main() {
         addTearDown(() {
           userController.close();
         });
+      });
+    },
+  );
+
+  testWidgets(
+    'should call connect if in foreground and connection is back',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final _connectivityController =
+            BehaviorSubject.seeded(ConnectivityResult.none);
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+          connectivityStream: _connectivityController.stream,
+        );
+
+        await tester.pumpWidget(streamChatCore);
+
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
+        _connectivityController.add(ConnectivityResult.mobile);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verify(() => mockClient.connect()).called(1);
+      });
+    },
+  );
+
+  testWidgets(
+    'should call disconnect if in foreground and connection goes away',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final _connectivityController =
+            BehaviorSubject.seeded(ConnectivityResult.mobile);
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+          connectivityStream: _connectivityController.stream,
+        );
+
+        await tester.pumpWidget(streamChatCore);
+
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.connected);
+
+        _connectivityController.add(ConnectivityResult.none);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verify(() => mockClient.disconnect()).called(1);
+      });
+    },
+  );
+
+  testWidgets(
+    'should ignore connectivity in background',
+    (tester) async {
+      await tester.runAsync(() async {
+        final mockClient = MockClient();
+        const streamChatCoreKey = Key('streamChatCore');
+        const childKey = Key('child');
+        final _connectivityController =
+            BehaviorSubject.seeded(ConnectivityResult.none);
+        final streamChatCore = StreamChatCore(
+          key: streamChatCoreKey,
+          client: mockClient,
+          child: Offstage(key: childKey),
+          connectivityStream: _connectivityController.stream,
+        );
+
+        await tester.pumpWidget(streamChatCore);
+
+        expect(find.byKey(streamChatCoreKey), findsOneWidget);
+        expect(find.byKey(childKey), findsOneWidget);
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
+        final streamChatCoreState = tester.state<StreamChatCoreState>(
+          find.byKey(streamChatCoreKey),
+        );
+
+        streamChatCoreState
+            .didChangeAppLifecycleState(AppLifecycleState.paused);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        _connectivityController.add(ConnectivityResult.mobile);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verifyNever(() => mockClient.disconnect());
       });
     },
   );

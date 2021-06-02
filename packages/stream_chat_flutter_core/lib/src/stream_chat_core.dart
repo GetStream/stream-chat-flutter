@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -43,6 +44,7 @@ class StreamChatCore extends StatefulWidget {
     required this.child,
     this.onBackgroundEventReceived,
     this.backgroundKeepAlive = const Duration(minutes: 1),
+    this.connectivityStream,
   }) : super(key: key);
 
   /// Instance of Stream Chat Client containing information about the current
@@ -60,6 +62,11 @@ class StreamChatCore extends StatefulWidget {
   /// is in background. Can be used to display various notifications depending
   /// upon the [Event.type]
   final EventHandler? onBackgroundEventReceived;
+
+  /// Stream of connectivity result
+  /// Visible for testing
+  @visibleForTesting
+  final Stream<ConnectivityResult>? connectivityStream;
 
   @override
   StreamChatCoreState createState() => StreamChatCoreState();
@@ -96,48 +103,104 @@ class StreamChatCoreState extends State<StreamChatCore>
   /// The current user as a stream
   Stream<User?> get userStream => client.state.userStream;
 
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+
+  var _isInForeground = true;
+  var _isConnectionAvailable = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
+    _subscribeToConnectivityChange(widget.connectivityStream);
+  }
+
+  void _subscribeToConnectivityChange([
+    Stream<ConnectivityResult>? connectivityStream,
+  ]) {
+    if (_connectivitySubscription == null) {
+      connectivityStream ??= Connectivity().onConnectivityChanged;
+      _connectivitySubscription =
+          connectivityStream.distinct().listen((result) {
+        _isConnectionAvailable = result != ConnectivityResult.none;
+        if (!_isInForeground) return;
+        if (_isConnectionAvailable) {
+          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
+            client.openConnection();
+          }
+        } else {
+          if (client.wsConnectionStatus == ConnectionStatus.connected) {
+            client.closeConnection();
+          }
+        }
+      });
+    }
+  }
+
+  void _unsubscribeFromConnectivityChange() {
+    if (_connectivitySubscription != null) {
+      _connectivitySubscription?.cancel();
+      _connectivitySubscription = null;
+    }
+  }
+
+  @override
+  void didUpdateWidget(StreamChatCore oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final connectivityStream = widget.connectivityStream;
+    if (connectivityStream != oldWidget.connectivityStream) {
+      _unsubscribeFromConnectivityChange();
+      _subscribeToConnectivityChange(connectivityStream);
+    }
   }
 
   StreamSubscription? _eventSubscription;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isInForeground = state == AppLifecycleState.resumed;
     if (user != null) {
-      if (state == AppLifecycleState.paused) {
-        if (widget.onBackgroundEventReceived == null) {
-          client.closeConnection();
-          return;
-        }
-        _eventSubscription = client.on().listen(
-              widget.onBackgroundEventReceived,
-            );
-
-        void onTimerComplete() {
-          _eventSubscription?.cancel();
-          client.closeConnection();
-        }
-
-        _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
-      } else if (state == AppLifecycleState.resumed) {
-        if (_disconnectTimer?.isActive == true) {
-          _eventSubscription?.cancel();
-          _disconnectTimer?.cancel();
-        } else {
-          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
-            client.openConnection();
-          }
-        }
+      if (_isInForeground) {
+        _onForeground();
+      } else {
+        _onBackground();
       }
     }
+  }
+
+  void _onForeground() {
+    if (_disconnectTimer?.isActive == true) {
+      _eventSubscription?.cancel();
+      _disconnectTimer?.cancel();
+    } else if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+        _isConnectionAvailable) {
+      client.openConnection();
+    }
+  }
+
+  void _onBackground() {
+    if (widget.onBackgroundEventReceived == null) {
+      if (client.wsConnectionStatus != ConnectionStatus.disconnected) {
+        client.closeConnection();
+      }
+      return;
+    }
+
+    _eventSubscription = client.on().listen(widget.onBackgroundEventReceived);
+
+    void onTimerComplete() {
+      _eventSubscription?.cancel();
+      client.closeConnection();
+    }
+
+    _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);
+    return;
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
+    _unsubscribeFromConnectivityChange();
     _eventSubscription?.cancel();
     _disconnectTimer?.cancel();
     super.dispose();
