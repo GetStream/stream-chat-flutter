@@ -27,12 +27,12 @@ class AuthInterceptor extends Interceptor {
     try {
       token = await _tokenManager.loadToken();
     } catch (_) {
-      final error = StreamChatError(ChatErrorCode.undefinedToken);
+      final error = StreamChatNetworkError(ChatErrorCode.undefinedToken);
       final dioError = StreamChatDioError(
         error: error,
         requestOptions: options,
       );
-      return handler.reject(dioError);
+      return handler.reject(dioError, true);
     }
     final params = {'user_id': token.userId};
     final headers = {

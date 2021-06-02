@@ -1,91 +1,166 @@
-///
-enum ChatErrorCode {
-  // client error codes
-  networkFailed,
-  parserError,
-  socketClosed,
-  socketFailure,
-  cantParseConnectionEvent,
-  cantParseEvent,
-  invalidToken,
-  undefinedToken,
-  unableToParseSocketEvent,
-  noErrorBody,
+// ignore_for_file: lines_longer_than_80_chars
 
-  // server error codes
+import 'package:collection/collection.dart';
+
+/// Complete list of errors that are returned by the API
+/// together with the description and API code.
+enum ChatErrorCode {
+  // Client errors
+
+  /// Unauthenticated, token not defined
+  undefinedToken,
+
+  // Bad Request
+
+  /// Wrong data/parameter is sent to the API
+  inputError,
+
+  /// Duplicate username is sent while enforce_unique_usernames is enabled
+  duplicateUsername,
+
+  /// Message is too long
+  messageTooLong,
+
+  /// Event is not supported
+  eventNotSupported,
+
+  /// The feature is currently disabled
+  /// on the dashboard (i.e. Reactions & Replies)
+  channelFeatureNotSupported,
+
+  /// Multiple Levels Reply is not supported
+  /// the API only supports 1 level deep reply threads
+  multipleNestling,
+
+  /// Custom Command handler returned an error
+  customCommandEndpointCall,
+
+  /// App config does not have custom_action_handler_url
+  customCommandEndpointMissing,
+
+  // Unauthorised
+
+  /// Unauthenticated, problem with authentication
   authenticationError,
+
+  /// Unauthenticated, token expired
   tokenExpired,
+
+  /// Unauthenticated, token date incorrect
+  tokenBeforeIssuedAt,
+
+  /// Unauthenticated, token not valid yet
   tokenNotValid,
-  tokenDateIncorrect,
-  tokenSignatureIncorrect,
-  apiKeyNotFound,
+
+  /// Unauthenticated, token signature invalid
+  tokenSignatureInvalid,
+
+  /// Access Key invalid
+  accessKeyError,
+
+  // Forbidden
+
+  /// Unauthorised / forbidden to make request
+  notAllowed,
+
+  /// App suspended
+  appSuspended,
+
+  /// User tried to post a message during the cooldown period
+  cooldownError,
+
+  // Miscellaneous
+
+  /// Resource not found
+  doesNotExist,
+
+  /// Request timed out
+  requestTimeout,
+
+  /// Payload too big
+  payloadTooBig,
+
+  /// Too many requests in a certain time frame
+  rateLimitError,
+
+  /// Request headers are too large
+  maximumHeaderSizeExceeded,
+
+  /// Something goes wrong in the system
+  internalSystemError,
+
+  /// No access to requested channels
+  noAccessToChannels
 }
+
+const _errorCodeWithDescription = {
+  ChatErrorCode.undefinedToken:
+      MapEntry(1000, 'Unauthorised, token not defined'),
+  ChatErrorCode.inputError:
+      MapEntry(4, 'Wrong data/parameter is sent to the API'),
+  ChatErrorCode.duplicateUsername: MapEntry(6,
+      'Duplicate username is sent while enforce_unique_usernames is enabled'),
+  ChatErrorCode.messageTooLong: MapEntry(20, 'Message is too long'),
+  ChatErrorCode.eventNotSupported: MapEntry(18, 'Event is not supported'),
+  ChatErrorCode.channelFeatureNotSupported: MapEntry(19,
+      'The feature is currently disabled on the dashboard (i.e. Reactions & Replies)'),
+  ChatErrorCode.multipleNestling: MapEntry(21,
+      'Multiple Levels Reply is not supported - the API only supports 1 level deep reply threads'),
+  ChatErrorCode.customCommandEndpointCall:
+      MapEntry(45, 'Custom Command handler returned an error'),
+  ChatErrorCode.customCommandEndpointMissing:
+      MapEntry(44, 'App config does not have custom_action_handler_url'),
+  ChatErrorCode.authenticationError:
+      MapEntry(5, 'Unauthenticated, problem with authentication'),
+  ChatErrorCode.tokenExpired: MapEntry(40, 'Unauthenticated, token expired'),
+  ChatErrorCode.tokenBeforeIssuedAt:
+      MapEntry(42, 'Unauthenticated, token date incorrect'),
+  ChatErrorCode.tokenNotValid:
+      MapEntry(41, 'Unauthenticated, token not valid yet'),
+  ChatErrorCode.tokenSignatureInvalid:
+      MapEntry(43, 'Unauthenticated, token signature invalid'),
+  ChatErrorCode.accessKeyError: MapEntry(2, 'Access Key invalid'),
+  ChatErrorCode.notAllowed:
+      MapEntry(17, 'Unauthorised / forbidden to make request'),
+  ChatErrorCode.appSuspended: MapEntry(99, 'App suspended'),
+  ChatErrorCode.cooldownError:
+      MapEntry(60, 'User tried to post a message during the cooldown period'),
+  ChatErrorCode.doesNotExist: MapEntry(16, 'Resource not found'),
+  ChatErrorCode.requestTimeout: MapEntry(23, 'Request timed out'),
+  ChatErrorCode.payloadTooBig: MapEntry(22, 'Payload too big'),
+  ChatErrorCode.rateLimitError:
+      MapEntry(9, 'Too many requests in a certain time frame'),
+  ChatErrorCode.maximumHeaderSizeExceeded:
+      MapEntry(24, 'Request headers are too large'),
+  ChatErrorCode.internalSystemError:
+      MapEntry(-1, 'Something goes wrong in the system'),
+  ChatErrorCode.noAccessToChannels:
+      MapEntry(70, 'No access to requested channels'),
+};
+
+const _authenticationErrors = [
+  ChatErrorCode.undefinedToken,
+  ChatErrorCode.authenticationError,
+  ChatErrorCode.tokenExpired,
+  ChatErrorCode.tokenBeforeIssuedAt,
+  ChatErrorCode.tokenNotValid,
+  ChatErrorCode.tokenSignatureInvalid,
+  ChatErrorCode.accessKeyError,
+  ChatErrorCode.noAccessToChannels,
+];
+
+///
+ChatErrorCode? chatErrorCodeFromCode(int code) => _errorCodeWithDescription.keys
+    .firstWhereOrNull((key) => _errorCodeWithDescription[key]!.key == code);
 
 ///
 extension ChatErrorCodeX on ChatErrorCode {
   ///
-  String get message => {
-        // client error message
-        ChatErrorCode.networkFailed: 'Response is failed. See cause',
-        ChatErrorCode.parserError: 'Unable to parse error',
-        ChatErrorCode.socketClosed: 'Server closed connection',
-        ChatErrorCode.socketFailure: 'See stack trace in logs. '
-            'Intercept error in error handler of setUser',
-        ChatErrorCode.cantParseConnectionEvent:
-            'Unable to parse connection event',
-        ChatErrorCode.cantParseEvent: 'Unable to parse event',
-        ChatErrorCode.invalidToken: 'Invalid token',
-        ChatErrorCode.undefinedToken:
-            'No defined token. Check if client.setUser was called and finished',
-        ChatErrorCode.unableToParseSocketEvent:
-            'Socket event payload either invalid or null',
-        ChatErrorCode.noErrorBody: 'No error body. See http status code',
-
-        // server error message
-        ChatErrorCode.authenticationError:
-            'Unauthenticated, problem with authentication',
-        ChatErrorCode.tokenExpired: 'Token expired, new one must be requested.',
-        ChatErrorCode.tokenNotValid: 'Unauthenticated, token not valid yet',
-        ChatErrorCode.tokenDateIncorrect:
-            'Unauthenticated, token date incorrect',
-        ChatErrorCode.tokenSignatureIncorrect:
-            'Unauthenticated, token signature invalid',
-        ChatErrorCode.apiKeyNotFound:
-            "Api key is not found, verify it if it's correct or was created.",
-      }[this]!;
+  String get message => _errorCodeWithDescription[this]!.value;
 
   ///
-  int get code => {
-        // client error codes
-        ChatErrorCode.networkFailed: 1000,
-        ChatErrorCode.parserError: 1001,
-        ChatErrorCode.socketClosed: 1002,
-        ChatErrorCode.socketFailure: 1003,
-        ChatErrorCode.cantParseConnectionEvent: 1004,
-        ChatErrorCode.cantParseEvent: 1005,
-        ChatErrorCode.invalidToken: 1006,
-        ChatErrorCode.undefinedToken: 1007,
-        ChatErrorCode.unableToParseSocketEvent: 1008,
-        ChatErrorCode.noErrorBody: 1009,
-
-        // server error codes
-        ChatErrorCode.authenticationError: 5,
-        ChatErrorCode.tokenExpired: 40,
-        ChatErrorCode.tokenNotValid: 41,
-        ChatErrorCode.tokenDateIncorrect: 42,
-        ChatErrorCode.tokenSignatureIncorrect: 43,
-        ChatErrorCode.apiKeyNotFound: 2,
-      }[this]!;
+  int get code => _errorCodeWithDescription[this]!.key;
 
   ///
-  Set<int> get authenticationErrors => {
-        ChatErrorCode.authenticationError,
-        ChatErrorCode.tokenExpired,
-        ChatErrorCode.tokenNotValid,
-        ChatErrorCode.tokenDateIncorrect,
-        ChatErrorCode.tokenSignatureIncorrect,
-      }.map((it) => it.code).toSet();
-
-  ///
-  bool isAuthenticationError(int code) => authenticationErrors.contains(code);
+  bool get isAuthenticationError => _authenticationErrors.contains(this);
 }

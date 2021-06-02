@@ -17,5 +17,5 @@ class StreamChatDioError extends DioError {
         );
 
   @override
-  final StreamChatError error;
+  final StreamChatNetworkError error;
 }

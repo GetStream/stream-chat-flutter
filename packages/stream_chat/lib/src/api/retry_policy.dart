@@ -1,5 +1,5 @@
 import 'package:stream_chat/src/client.dart';
-import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/errors/stream_chat_error.dart';
 
 /// The retry options
 class RetryPolicy {
@@ -7,32 +7,25 @@ class RetryPolicy {
   RetryPolicy({
     required this.shouldRetry,
     required this.retryTimeout,
-    this.attempt = 0,
+    this.maxRetryAttempts = 6,
   });
 
-  /// The number of attempts tried so far
-  int attempt = 0;
+  /// Hard limit on maximum retry attempts before giving up, defaults to 6
+  /// Resets once connection recovers.
+  final int maxRetryAttempts;
 
   /// This function evaluates if we should retry the failure
-  final bool Function(StreamChatClient client, int attempt, ApiError? apiError)
-      shouldRetry;
+  final bool Function(
+    StreamChatClient client,
+    int attempt,
+    StreamChatError? error,
+  ) shouldRetry;
 
   /// In the case that we want to retry a failed request the retryTimeout
   /// method is called to determine the timeout
   final Duration Function(
-      StreamChatClient client, int attempt, ApiError? apiError) retryTimeout;
-
-  /// Creates a copy of [RetryPolicy] with specified attributes overridden.
-  RetryPolicy copyWith({
-    bool Function(StreamChatClient client, int attempt, ApiError? apiError)?
-        shouldRetry,
-    Duration Function(StreamChatClient client, int attempt, ApiError? apiError)?
-        retryTimeout,
-    int? attempt,
-  }) =>
-      RetryPolicy(
-        retryTimeout: retryTimeout ?? this.retryTimeout,
-        shouldRetry: shouldRetry ?? this.shouldRetry,
-        attempt: attempt ?? this.attempt,
-      );
+    StreamChatClient client,
+    int attempt,
+    StreamChatError? error,
+  ) retryTimeout;
 }

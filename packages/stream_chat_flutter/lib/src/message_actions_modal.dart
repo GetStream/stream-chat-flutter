@@ -341,7 +341,8 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           okText: 'OK',
         );
       } catch (err) {
-        if (err is ApiError && json.decode(err.body ?? '{}')['code'] == 4) {
+        if (err is StreamChatNetworkError &&
+            err.errorCode == ChatErrorCode.inputError) {
           await showInfoDialog(
             context,
             icon: StreamSvgIcon.flag(

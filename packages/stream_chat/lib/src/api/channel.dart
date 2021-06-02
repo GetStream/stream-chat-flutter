@@ -7,6 +7,8 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
+import 'package:stream_chat/src/core/utils.dart';
+import 'package:stream_chat/src/errors/stream_chat_error.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/extensions/rate_limit.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
@@ -233,12 +235,14 @@ class Channel {
   }) {
     final cancelToken = _cancelableAttachmentUploadRequest[attachmentId];
     if (cancelToken == null) {
-      throw Exception(
-        "Upload request for this Attachment hasn't started yet or else "
+      throw const StreamChatError(
+        "Upload request for this Attachment hasn't started yet or maybe "
         'Already completed',
       );
     }
-    if (cancelToken.isCancelled) throw Exception('Already cancelled');
+    if (cancelToken.isCancelled) {
+      throw const StreamChatError('Upload request already cancelled');
+    }
     cancelToken.cancel(reason);
   }
 
@@ -255,7 +259,7 @@ class Channel {
     );
 
     if (message == null) {
-      throw Exception('Error, Message not found');
+      throw const StreamChatError('Error, Message not found');
     }
 
     final attachments = message.attachments.where((it) {
@@ -396,9 +400,9 @@ class Channel {
       final response = await _client.sendMessage(message, id!, type);
       state!.addMessage(response.message);
       return response;
-    } catch (error) {
-      if (error is DioError && error.type != DioErrorType.response) {
-        state!.retryQueue?.add([message]);
+    } catch (e) {
+      if (e is StreamChatNetworkError && e.isRetriable) {
+        state!._retryQueue.add([message]);
       }
       rethrow;
     }
@@ -453,9 +457,9 @@ class Channel {
       state?.addMessage(m);
 
       return response;
-    } catch (error) {
-      if (error is DioError && error.type != DioErrorType.response) {
-        state?.retryQueue?.add([message]);
+    } catch (e) {
+      if (e is StreamChatNetworkError && e.isRetriable) {
+        state!._retryQueue.add([message]);
       }
       rethrow;
     }
@@ -494,9 +498,9 @@ class Channel {
       state?.addMessage(message.copyWith(status: MessageSendingStatus.sent));
 
       return response;
-    } catch (error) {
-      if (error is DioError && error.type != DioErrorType.response) {
-        state?.retryQueue?.add([message]);
+    } catch (e) {
+      if (e is StreamChatNetworkError && e.isRetriable) {
+        state!._retryQueue.add([message]);
       }
       rethrow;
     }
@@ -1188,9 +1192,11 @@ class ChannelClientState {
                 _channel._client.chatPersistenceClient
                     ?.updateChannelState(state))
             .debounced(const Duration(seconds: 1)) {
-    retryQueue = RetryQueue(
+    _retryQueue = RetryQueue(
       channel: _channel,
-      logger: Logger('RETRY QUEUE ${_channel.cid}'),
+      logger: _channel.client.detachedLogger(
+        '⟳ (${generateHash([_channel.cid])})',
+      ),
     );
 
     _checkExpiredAttachmentMessages(channelState);
@@ -1338,7 +1344,7 @@ class ChannelClientState {
       BehaviorSubject.seeded(true);
 
   /// The retry queue associated to this channel
-  RetryQueue? retryQueue;
+  late final RetryQueue _retryQueue;
 
   /// Retry failed message
   Future<void> retryFailedMessages() async {
@@ -1357,7 +1363,7 @@ class ChannelClientState {
             )
             .toList();
 
-    retryQueue!.add(failedMessages);
+    _retryQueue.add(failedMessages);
   }
 
   void _listenReactionDeleted() {
@@ -1832,7 +1838,7 @@ class ChannelClientState {
   void dispose() {
     _debouncedUpdatePersistenceChannelState.cancel();
     _unreadCountController.close();
-    retryQueue!.dispose();
+    _retryQueue.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _channelStateController.close();
     _isUpToDateController.close();

@@ -5,13 +5,14 @@ import 'dart:math' as math;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/errors/chat_error_code.dart';
+import 'package:stream_chat/src/errors/stream_chat_error.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/ws/socket_error.dart';
 import 'package:stream_chat/src/ws/timer_helper.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
@@ -26,8 +27,6 @@ typedef WebSocketChannelProvider = WebSocketChannel Function(
   Uri uri, {
   Iterable<String>? protocols,
 });
-
-const _tokenExpiredErrorCode = 40;
 
 /// A WebSocket connection that reconnects upon failure.
 class WebSocket with TimerHelper {
@@ -174,7 +173,7 @@ class WebSocket with TimerHelper {
   /// Connect the WS using the parameters passed in the constructor
   Future<Event> connect(User user) async {
     if (_connectRequestInProgress) {
-      throw Exception('''
+      throw const StreamWebSocketError('''
         You've called connect twice,
         can only attempt 1 connection at the time,
         ''');
@@ -195,7 +194,7 @@ class WebSocket with TimerHelper {
   int _reconnectAttempt = 0;
   bool _reconnectRequestInProgress = false;
 
-  Future<void> _reconnect({bool refreshToken = false}) async {
+  void _reconnect({bool refreshToken = false}) async {
     _logger?.info('Retrying connection : $_reconnectAttempt');
     if (_reconnectRequestInProgress) return;
     _reconnectRequestInProgress = true;
@@ -270,10 +269,35 @@ class WebSocket with TimerHelper {
     _connectionStatus = ConnectionStatus.connected;
   }
 
+  void _handleStreamError(Map<String, Object?> errorResponse) {
+    // resetting connect, reconnect request flag
+    _resetRequestFlags();
+
+    final error = StreamWebSocketError.fromStreamError(errorResponse);
+    final isTokenExpired = error.errorCode == ChatErrorCode.tokenExpired;
+    if (isTokenExpired && !tokenManager.isStatic) {
+      _logger?.warning('Connection failed, token expired');
+      return _reconnect(refreshToken: true);
+    }
+
+    _logger?.severe('Connection failed', error);
+
+    final completer = connectionCompleter;
+    // complete with error if not yet completed
+    if (completer != null && !completer.isCompleted) {
+      // complete the connection with error
+      completer.completeError(error);
+      // disconnect the web-socket connection
+      return disconnect();
+    }
+
+    return _reconnect();
+  }
+
   void _onDataReceived(dynamic data) {
-    final jsonData = json.decode(data);
-    final error = jsonData['error'];
-    if (error != null) return _onConnectionError(error);
+    final jsonData = json.decode(data) as Map<String, Object?>;
+    final error = jsonData['error'] as Map<String, Object?>?;
+    if (error != null) return _handleStreamError(error);
 
     // resetting connect, reconnect request flag
     _resetRequestFlags(resetAttempts: true);
@@ -300,25 +324,18 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.severe('Error occurred', error, stacktrace);
+    _logger?.warning('Error occurred', error, stacktrace);
 
     // resetting connect, reconnect request flag
     _resetRequestFlags();
 
-    var refreshToken = false;
-    try {
-      final socketError = SocketError.fromJson(json.decode(error));
-      refreshToken = socketError.code == _tokenExpiredErrorCode;
-    } catch (_) {}
-
-    // refresh token in case it is expired
-    _reconnect(refreshToken: refreshToken);
+    _reconnect();
   }
 
   bool _manuallyClosed = false;
 
   void _onConnectionClosed() {
-    _logger?.info('Connection closed : $connectionId');
+    _logger?.warning('Connection closed : $connectionId');
 
     // resetting connect, reconnect request flag
     _resetRequestFlags();
@@ -381,7 +398,7 @@ class WebSocket with TimerHelper {
     if (connectionStatus == ConnectionStatus.disconnected) return;
     _connectionStatus = ConnectionStatus.disconnected;
 
-    _logger?.info('Disconnecting $connectionId');
+    _logger?.info('Disconnecting web-socket connection');
 
     // resetting user
     _user = null;

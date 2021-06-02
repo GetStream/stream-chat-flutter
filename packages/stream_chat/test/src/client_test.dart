@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
-import 'package:stream_chat/src/exceptions.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';

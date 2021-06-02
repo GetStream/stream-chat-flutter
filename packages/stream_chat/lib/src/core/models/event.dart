@@ -29,7 +29,7 @@ class Event {
     this.parentId,
     this.extraData = const {},
     this.isLocal = true,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
 
   /// Create a new instance from a json
   factory Event.fromJson(Map<String, dynamic> json) =>

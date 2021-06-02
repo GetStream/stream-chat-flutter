@@ -100,14 +100,15 @@ class StreamHttpClient {
   void close({bool force = false}) => httpClient.close(force: force);
 
   StreamChatNetworkError _parseError(DioError err) {
+    StreamChatNetworkError error;
     // locally thrown dio error
     if (err is StreamChatDioError) {
-      final code = err.error.code;
-      final message = err.error.message;
-      return StreamChatNetworkError.raw(code: code, message: message);
+      error = err.error;
+    } else {
+      // real network request dio error
+      error = StreamChatNetworkError.fromDioError(err);
     }
-    // real network request dio error
-    return StreamChatNetworkError.fromDioError(err);
+    return error..stackTrace = err.stackTrace;
   }
 
   /// Handy method to make http GET request with error parsing.

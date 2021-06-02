@@ -7,6 +7,8 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/channel.dart';
+import 'package:stream_chat/src/core/utils.dart';
+import 'package:stream_chat/src/errors/stream_chat_error.dart';
 import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
@@ -92,7 +94,7 @@ class StreamChatClient {
           tokenManager: _tokenManager,
           connectionIdManager: _connectionIdManager,
           attachmentFileUploader: attachmentFileUploader,
-          logger: _detachedLogger('🕸️'),
+          logger: detachedLogger('🕸️'),
         );
 
     _ws = WebSocket(
@@ -100,13 +102,13 @@ class StreamChatClient {
       baseUrl: options.baseUrl,
       tokenManager: _tokenManager,
       handler: handleEvent,
-      logger: _detachedLogger('🔌'),
+      logger: detachedLogger('🔌'),
     );
 
     _retryPolicy = retryPolicy ??
         RetryPolicy(
-          retryTimeout: (_, int attempt, __) => Duration(seconds: 1 * attempt),
-          shouldRetry: (_, int attempt, __) => attempt < 5,
+          shouldRetry: (_, attempt, __) => attempt < 5,
+          retryTimeout: (_, attempt, __) => Duration(seconds: attempt),
         );
 
     state = ClientState(this);
@@ -137,7 +139,7 @@ class StreamChatClient {
   /// Whether the chat persistence is available or not
   bool get persistenceEnabled => _chatPersistenceClient != null;
 
-  RetryPolicy? _retryPolicy;
+  late final RetryPolicy _retryPolicy;
 
   // sync state of the channels present inside state, defaults to false
   bool _synced = false;
@@ -146,7 +148,7 @@ class StreamChatClient {
   DateTime? _lastSyncedAt;
 
   /// The retry policy options getter
-  RetryPolicy? get retryPolicy => _retryPolicy;
+  RetryPolicy get retryPolicy => _retryPolicy;
 
   /// By default the Chat client will write all messages with level Warn or
   /// Error to stdout.
@@ -217,7 +219,8 @@ class StreamChatClient {
         if (record.stackTrace != null) print(record.stackTrace);
       };
 
-  Logger _detachedLogger(
+  ///
+  Logger detachedLogger(
     String name,
   ) =>
       Logger.detached(name)
@@ -303,7 +306,7 @@ class StreamChatClient {
     TokenProvider? provider,
   }) async {
     if (_ws.connectionCompleter?.isCompleted == false) {
-      throw Exception(
+      throw const StreamChatError(
         'User already getting connected, try calling `disconnectUser` '
         'before trying to connect again',
       );
@@ -346,11 +349,11 @@ class StreamChatClient {
     logger.info('Opening web-socket connection for ${user.id}');
 
     if (wsConnectionStatus == ConnectionStatus.connecting) {
-      throw Exception('Connection already in progress for ${user.id}');
+      throw StreamChatError('Connection already in progress for ${user.id}');
     }
 
     if (wsConnectionStatus == ConnectionStatus.connected) {
-      throw Exception('Connection already connected for ${user.id}');
+      throw StreamChatError('Connection already connected for ${user.id}');
     }
 
     _wsConnectionStatus = ConnectionStatus.connecting;
@@ -486,13 +489,6 @@ class StreamChatClient {
     }
   }
 
-  String _generateHash(List<Object?> objects) {
-    final payload = json.encode(objects);
-    final payloadBytes = utf8.encode(payload);
-    final payloadB64 = base64.encode(payloadBytes);
-    return payloadB64;
-  }
-
   final _queryChannelsStreams = <String, Future<List<Channel>>>{};
 
   /// Requests channels with a given query.
@@ -512,7 +508,7 @@ class StreamChatClient {
       watch = false;
     }
 
-    final hash = _generateHash([
+    final hash = generateHash([
       filter,
       sort,
       state,
@@ -575,7 +571,7 @@ class StreamChatClient {
         await _ws.connectionCompleter?.future;
       }
       if (wsConnectionStatus != ConnectionStatus.connected) {
-        throw Exception(
+        throw const StreamChatError(
           'You cannot use queryChannels without an active connection. '
           'Please call `connectUser` to connect the client.',
         );
