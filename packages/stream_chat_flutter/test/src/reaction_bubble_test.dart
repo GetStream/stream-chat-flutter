@@ -60,6 +60,7 @@ void main() {
               maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
         ),
         surfaceSize: const Size(100, 100),
       );
@@ -96,6 +97,7 @@ void main() {
               maskColor: theme.ownMessageTheme.reactionsMaskColor!,
             ),
           ),
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
         ),
         surfaceSize: const Size(100, 100),
       );
@@ -118,6 +120,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
           child: Container(
             color: Colors.black,
             child: ReactionBubble(
@@ -162,6 +165,7 @@ void main() {
         StreamChat(
           client: client,
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
           child: Container(
             color: Colors.black,
             child: ReactionBubble(
@@ -204,6 +208,7 @@ void main() {
       await tester.pumpWidgetBuilder(
         StreamChat(
           client: client,
+          connectivityStream: Stream.value(ConnectivityResult.mobile),
           streamChatThemeData: StreamChatThemeData.fromTheme(themeData),
           child: SizedBox(
             child: ReactionBubble(
