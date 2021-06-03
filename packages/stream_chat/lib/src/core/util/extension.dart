@@ -9,10 +9,13 @@ extension IterableX<T> on Iterable<T?> {
 }
 
 /// Useful extension functions for [Map]
-extension MapX<K, V> on Map<K, V> {
+extension MapX<K, V> on Map<K?, V?> {
   /// Returns a new map with null keys or values removed
-  Map<K, V> get nullProtected =>
-      Map.from(this)..removeWhere((key, value) => key == null || value == null);
+  Map<K, V> get nullProtected {
+    final nullProtected = {...this}
+      ..removeWhere((key, value) => key == null || value == null);
+    return nullProtected.cast();
+  }
 }
 
 /// Useful extension functions for [String]

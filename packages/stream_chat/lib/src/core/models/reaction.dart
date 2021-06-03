@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
 part 'reaction.g.dart';
@@ -21,7 +21,7 @@ class Reaction {
 
   /// Create a new instance from a json
   factory Reaction.fromJson(Map<String, dynamic> json) =>
-      _$ReactionFromJson(Serialization.moveToExtraDataFromRoot(
+      _$ReactionFromJson(Serializer.moveToExtraDataFromRoot(
         json,
         topLevelFields,
       ));
@@ -33,11 +33,11 @@ class Reaction {
   final String type;
 
   /// The date of the reaction
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime createdAt;
 
   /// The user that sent the reaction
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final User? user;
 
   /// The score of the reaction (ie. number of reactions sent)
@@ -45,7 +45,7 @@ class Reaction {
   final int score;
 
   /// The userId that sent the reaction
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? userId;
 
   /// Reaction custom extraData
@@ -66,7 +66,7 @@ class Reaction {
   ];
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$ReactionToJson(this),
       );
 

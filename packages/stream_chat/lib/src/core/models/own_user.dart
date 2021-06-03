@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/mute.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
 part 'own_user.g.dart';
@@ -38,7 +38,7 @@ class OwnUser extends User {
 
   /// Create a new instance from a json
   factory OwnUser.fromJson(Map<String, dynamic> json) => _$OwnUserFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+      Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Create a new instance from [User] object
   factory OwnUser.fromUser(User user) => OwnUser(
@@ -55,35 +55,35 @@ class OwnUser extends User {
   /// List of user devices
   @JsonKey(
       includeIfNull: false,
-      toJson: Serialization.readOnly,
+      toJson: Serializer.readOnly,
       defaultValue: <Device>[])
   final List<Device> devices;
 
   /// List of users muted by the user
   @JsonKey(
       includeIfNull: false,
-      toJson: Serialization.readOnly,
+      toJson: Serializer.readOnly,
       defaultValue: <Mute>[])
   final List<Mute> mutes;
 
   /// List of users muted by the user
   @JsonKey(
       includeIfNull: false,
-      toJson: Serialization.readOnly,
+      toJson: Serializer.readOnly,
       defaultValue: <Mute>[])
   final List<Mute> channelMutes;
 
   /// Total unread messages by the user
   @JsonKey(
-      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: 0)
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
   final int totalUnreadCount;
 
   /// Total unread channels by the user
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final int? unreadChannels;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static final topLevelFields = [
     'devices',
     'mutes',
@@ -95,7 +95,7 @@ class OwnUser extends User {
 
   /// Serialize to json
   @override
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$OwnUserToJson(this),
       );
 }

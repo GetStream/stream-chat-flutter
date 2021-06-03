@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:uuid/uuid.dart';
 
 part 'attachment.g.dart';
@@ -49,11 +49,11 @@ class Attachment extends Equatable {
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
       _$AttachmentFromJson(
-          Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+          Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Create a new instance from a db data
   factory Attachment.fromData(Map<String, dynamic> json) =>
-      _$AttachmentFromJson(Serialization.moveToExtraDataFromRoot(
+      _$AttachmentFromJson(Serializer.moveToExtraDataFromRoot(
           json, topLevelFields + dbSpecificTopLevelFields));
 
   ///The attachment type based on the URL resource. This can be: audio,
@@ -122,7 +122,7 @@ class Attachment extends Equatable {
   final String id;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static const topLevelFields = [
     'type',
     'title_link',
@@ -145,7 +145,7 @@ class Attachment extends Equatable {
   ];
 
   /// Known db specific top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static const dbSpecificTopLevelFields = [
     'id',
     'upload_state',
@@ -154,12 +154,12 @@ class Attachment extends Equatable {
 
   /// Serialize to json
   Map<String, dynamic> toJson() =>
-      Serialization.moveFromExtraDataToRoot(_$AttachmentToJson(this))
+      Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this))
         ..removeWhere((key, value) => dbSpecificTopLevelFields.contains(key));
 
   /// Serialize to db data
   Map<String, dynamic> toData() =>
-      Serialization.moveFromExtraDataToRoot(_$AttachmentToJson(this));
+      Serializer.moveFromExtraDataToRoot(_$AttachmentToJson(this));
 
   Attachment copyWith({
     String? id,

@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'user.g.dart';
 
@@ -22,10 +22,10 @@ class User {
 
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+      Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static const topLevelFields = [
     'id',
     'role',
@@ -41,36 +41,36 @@ class User {
   final String id;
 
   /// User role
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? role;
 
   /// User role
   @JsonKey(
       includeIfNull: false,
-      toJson: Serialization.readOnly,
+      toJson: Serializer.readOnly,
       defaultValue: <String>[])
   final List<String> teams;
 
   /// Date of user creation
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime createdAt;
 
   /// Date of last user update
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime updatedAt;
 
   /// Date of last user connection
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime? lastActive;
 
   /// True if user is online
   @JsonKey(
-      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: false)
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: false)
   final bool online;
 
   /// True if user is banned from the chat
   @JsonKey(
-      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: false)
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: false)
   final bool banned;
 
   /// Map of custom user extraData
@@ -102,7 +102,7 @@ class User {
       other is User && runtimeType == other.runtimeType && id == other.id;
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$UserToJson(this),
       );
 

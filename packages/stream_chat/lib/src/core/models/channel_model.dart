@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
 part 'channel_model.g.dart';
@@ -37,7 +37,7 @@ class ChannelModel {
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) =>
       _$ChannelModelFromJson(
-          Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+          Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// The id of this channel
   final String id;
@@ -46,15 +46,15 @@ class ChannelModel {
   final String type;
 
   /// The cid of this channel
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String cid;
 
   /// The channel configuration data
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final ChannelConfig config;
 
   /// The user that created this channel
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final User? createdBy;
 
   /// True if this channel is frozen
@@ -62,24 +62,24 @@ class ChannelModel {
   final bool frozen;
 
   /// The date of the last message
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime? lastMessageAt;
 
   /// The date of channel creation
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime createdAt;
 
   /// The date of the last channel update
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime updatedAt;
 
   /// The date of channel deletion
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime? deletedAt;
 
   /// The count of this channel members
   @JsonKey(
-      includeIfNull: false, toJson: Serialization.readOnly, defaultValue: 0)
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
   final int memberCount;
 
   /// Map of custom channel extraData
@@ -90,11 +90,11 @@ class ChannelModel {
   final Map<String, Object?> extraData;
 
   /// The team the channel belongs to
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? team;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static const topLevelFields = [
     'id',
     'type',
@@ -115,7 +115,7 @@ class ChannelModel {
       extraData.containsKey('name') ? extraData['name']! as String : cid;
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$ChannelModelToJson(this),
       );
 

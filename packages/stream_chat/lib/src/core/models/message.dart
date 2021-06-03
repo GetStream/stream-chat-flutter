@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:uuid/uuid.dart';
 
@@ -81,7 +81,7 @@ class Message extends Equatable {
 
   /// Create a new instance from a json
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
-      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
+      Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// The message ID. This is either created by Stream or set client side when
   /// the message is added.
@@ -97,7 +97,7 @@ class Message extends Equatable {
   /// The message type
   @JsonKey(
     includeIfNull: false,
-    toJson: Serialization.readOnly,
+    toJson: Serializer.readOnly,
     defaultValue: 'regular',
   )
   final String type;
@@ -118,37 +118,37 @@ class Message extends Equatable {
   final List<User> mentionedUsers;
 
   /// A map describing the count of number of every reaction
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final Map<String, int>? reactionCounts;
 
   /// A map describing the count of score of every reaction
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final Map<String, int>? reactionScores;
 
   /// The latest reactions to the message created by any user.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final List<Reaction>? latestReactions;
 
   /// The reactions added to the message by the current user.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final List<Reaction>? ownReactions;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
 
   /// A quoted reply message
-  @JsonKey(toJson: Serialization.readOnly)
+  @JsonKey(toJson: Serializer.readOnly)
   final Message? quotedMessage;
 
   /// The ID of the quoted message, if the message is a quoted reply.
   final String? quotedMessageId;
 
   /// Reserved field indicating the number of replies for this message.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final int? replyCount;
 
   /// Reserved field indicating the thread participants for this message.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final List<User>? threadParticipants;
 
   /// Check if this message needs to show in the channel.
@@ -165,25 +165,25 @@ class Message extends Equatable {
   /// If true the message is shadowed
   @JsonKey(
     includeIfNull: false,
-    toJson: Serialization.readOnly,
+    toJson: Serializer.readOnly,
     defaultValue: false,
   )
   final bool shadowed;
 
   /// A used command name.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final String? command;
 
   /// Reserved field indicating when the message was created.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime createdAt;
 
   /// Reserved field indicating when the message was updated last time.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime updatedAt;
 
   /// User who sent the message
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final User? user;
 
   /// If true the message is pinned
@@ -191,7 +191,7 @@ class Message extends Equatable {
   final bool pinned;
 
   /// Reserved field indicating when the message was pinned
-  @JsonKey(toJson: Serialization.readOnly)
+  @JsonKey(toJson: Serializer.readOnly)
   final DateTime? pinnedAt;
 
   /// Reserved field indicating when the message will expire
@@ -200,7 +200,7 @@ class Message extends Equatable {
   final DateTime? pinExpires;
 
   /// Reserved field indicating who pinned the message
-  @JsonKey(toJson: Serialization.readOnly)
+  @JsonKey(toJson: Serializer.readOnly)
   final User? pinnedBy;
 
   /// Message custom extraData
@@ -220,11 +220,11 @@ class Message extends Equatable {
   bool get isEphemeral => type == 'ephemeral';
 
   /// Reserved field indicating when the message was deleted.
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime? deletedAt;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static const topLevelFields = [
     'id',
     'text',
@@ -257,7 +257,7 @@ class Message extends Equatable {
   ];
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$MessageToJson(this),
       );
 
@@ -412,14 +412,14 @@ class TranslatedMessage extends Message {
   /// Create a new instance from a json
   factory TranslatedMessage.fromJson(Map<String, dynamic> json) =>
       _$TranslatedMessageFromJson(
-        Serialization.moveToExtraDataFromRoot(json, topLevelFields),
+        Serializer.moveToExtraDataFromRoot(json, topLevelFields),
       );
 
   /// A Map of
   final Map<String, String>? i18n;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static final topLevelFields = [
     'i18n',
     ...Message.topLevelFields,
@@ -427,7 +427,7 @@ class TranslatedMessage extends Message {
 
   /// Serialize to json
   @override
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$TranslatedMessageToJson(this),
       );
 }

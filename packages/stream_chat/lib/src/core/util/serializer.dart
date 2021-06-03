@@ -3,7 +3,7 @@
 Null readonly(_) => null;
 
 /// Helper class for serialization to and from json
-class Serialization {
+class Serializer {
   /// Used to avoid to serialize properties to json
   static const Function readOnly = readonly;
 

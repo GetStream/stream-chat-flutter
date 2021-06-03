@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/message.dart';
-import 'package:stream_chat/src/core/util/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 part 'event.g.dart';
@@ -33,7 +33,7 @@ class Event {
 
   /// Create a new instance from a json
   factory Event.fromJson(Map<String, dynamic> json) =>
-      _$EventFromJson(Serialization.moveToExtraDataFromRoot(
+      _$EventFromJson(Serializer.moveToExtraDataFromRoot(
         json,
         topLevelFields,
       ));
@@ -96,7 +96,7 @@ class Event {
   final Map<String, Object?> extraData;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static final topLevelFields = [
     'type',
     'cid',
@@ -118,7 +118,7 @@ class Event {
   ];
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$EventToJson(this),
       );
 
@@ -198,7 +198,7 @@ class EventChannel extends ChannelModel {
 
   /// Create a new instance from a json
   factory EventChannel.fromJson(Map<String, dynamic> json) =>
-      _$EventChannelFromJson(Serialization.moveToExtraDataFromRoot(
+      _$EventChannelFromJson(Serializer.moveToExtraDataFromRoot(
         json,
         topLevelFields,
       ));
@@ -207,7 +207,7 @@ class EventChannel extends ChannelModel {
   final List<Member>? members;
 
   /// Known top level fields.
-  /// Useful for [Serialization] methods.
+  /// Useful for [Serializer] methods.
   static final topLevelFields = [
     'members',
     ...ChannelModel.topLevelFields,
@@ -215,7 +215,7 @@ class EventChannel extends ChannelModel {
 
   /// Serialize to json
   @override
-  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
         _$EventChannelToJson(this),
       );
 }
