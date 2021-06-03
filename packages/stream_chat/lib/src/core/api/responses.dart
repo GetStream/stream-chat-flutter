@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/client.dart';
+import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
@@ -9,7 +9,7 @@ import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/errors/stream_chat_error.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 
 part 'responses.g.dart';
 

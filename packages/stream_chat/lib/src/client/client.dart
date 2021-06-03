@@ -1,20 +1,19 @@
 // ignore_for_file: unnecessary_getters_setters
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat/src/api/channel.dart';
-import 'package:stream_chat/src/core/utils.dart';
-import 'package:stream_chat/src/errors/stream_chat_error.dart';
+import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/core/util/utils.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/location.dart';
 import 'package:stream_chat/src/ws/connection_status.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/api/retry_policy.dart';
+import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';

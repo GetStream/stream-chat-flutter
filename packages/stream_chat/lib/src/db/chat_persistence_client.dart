@@ -8,7 +8,7 @@ import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/extensions/iterable_extension.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {

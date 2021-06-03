@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/extensions/string_extension.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 
 /// Class responsible for uploading images and files to a given channel

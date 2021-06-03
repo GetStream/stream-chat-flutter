@@ -1,5 +1,5 @@
-import 'package:stream_chat/src/client.dart';
-import 'package:stream_chat/src/errors/stream_chat_error.dart';
+import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 
 /// The retry options
 class RetryPolicy {

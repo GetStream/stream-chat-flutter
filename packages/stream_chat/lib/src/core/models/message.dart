@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
-import 'package:stream_chat/src/core/models/serialization.dart';
+import 'package:stream_chat/src/core/util/serialization.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:uuid/uuid.dart';
 
@@ -112,7 +112,7 @@ class Message extends Equatable {
 
   /// The list of user mentioned in the message
   @JsonKey(
-    toJson: Serialization.userIds,
+    toJson: User.toIds,
     defaultValue: [],
   )
   final List<User> mentionedUsers;

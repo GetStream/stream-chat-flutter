@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/core/models/serialization.dart';
+import 'package:stream_chat/src/core/util/serialization.dart';
 
 part 'user.g.dart';
 
@@ -91,6 +91,10 @@ class User {
     }
     return id;
   }
+
+  /// List of users to list of userIds
+  static List<String>? toIds(List<User>? users) =>
+      users?.map((u) => u.id).toList();
 
   @override
   bool operator ==(Object other) =>

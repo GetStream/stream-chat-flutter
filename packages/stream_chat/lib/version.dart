@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/client.dart';
+import 'package:stream_chat/src/client/client.dart';
 
 /// Current package version
 /// Used in [StreamChatClient] to build the `x-stream-client` header

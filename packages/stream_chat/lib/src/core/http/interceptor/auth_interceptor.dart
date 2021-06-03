@@ -5,8 +5,8 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 
 import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/errors/chat_error_code.dart';
-import 'package:stream_chat/src/errors/stream_chat_error.dart';
+import 'package:stream_chat/src/core/error/error.dart';
+
 
 ///
 class AuthInterceptor extends Interceptor {

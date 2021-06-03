@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:stream_chat/src/errors/stream_chat_error.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 
 ///
 class StreamChatDioError extends DioError {

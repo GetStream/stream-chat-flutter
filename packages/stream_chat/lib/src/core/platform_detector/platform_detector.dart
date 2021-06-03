@@ -1,4 +1,4 @@
-import 'package:stream_chat/src/platform_detector/platform_detector_stub.dart'
+import 'package:stream_chat/src/core/platform_detector/platform_detector_stub.dart'
     if (dart.library.html) 'platform_detector_web.dart'
     if (dart.library.io) 'platform_detector_io.dart';
 

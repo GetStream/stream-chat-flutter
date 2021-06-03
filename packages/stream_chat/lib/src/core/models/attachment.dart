@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
-import 'package:stream_chat/src/core/models/serialization.dart';
+import 'package:stream_chat/src/core/util/serialization.dart';
 import 'package:uuid/uuid.dart';
 
 part 'attachment.g.dart';
