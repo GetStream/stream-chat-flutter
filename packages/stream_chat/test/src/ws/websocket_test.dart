@@ -45,11 +45,10 @@ void main() {
       webSocketController.add(invocation.positionalArguments.first);
     });
     when(() => webSocketSink.close(any(), any())).thenAnswer(
-      (_) {
-        final res = webSocketController.close();
+      (_) async {
+        webSocketController.close();
         // re-initializing for future events
         webSocketController = StreamController<String>.broadcast();
-        return res;
       },
     );
   });
