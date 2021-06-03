@@ -18,7 +18,7 @@ class _BaseResponse {
 }
 
 /// Model response for [StreamChatNetworkError] data
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class ErrorResponse extends _BaseResponse {
   ///
   int? code;
@@ -36,6 +36,9 @@ class ErrorResponse extends _BaseResponse {
   /// Create a new instance from a json
   static ErrorResponse fromJson(Map<String, dynamic> json) =>
       _$ErrorResponseFromJson(json);
+
+  /// Serialize to json
+  Map<String, dynamic> toJson() => _$ErrorResponseToJson(this);
 
   @override
   String toString() => 'ErrorResponse(code: $code, '

@@ -15,6 +15,15 @@ ErrorResponse _$ErrorResponseFromJson(Map<String, dynamic> json) {
     ..moreInfo = json['more_info'] as String?;
 }
 
+Map<String, dynamic> _$ErrorResponseToJson(ErrorResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'code': instance.code,
+      'message': instance.message,
+      'StatusCode': instance.statusCode,
+      'more_info': instance.moreInfo,
+    };
+
 SyncResponse _$SyncResponseFromJson(Map<String, dynamic> json) {
   return SyncResponse()
     ..duration = json['duration'] as String?
