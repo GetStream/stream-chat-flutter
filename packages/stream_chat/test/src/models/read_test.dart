@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:test/test.dart';
-import 'package:stream_chat/src/models/read.dart';
-import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/src/core/models/read.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 
 void main() {
   group('src/models/read', () {

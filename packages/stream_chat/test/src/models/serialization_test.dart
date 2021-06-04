@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:stream_chat/src/models/serialization.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 
 void main() {
   group('src/models/serialization', () {
@@ -9,7 +9,7 @@ void main() {
         'prop2': 123,
         'prop3': true,
       };
-      final result = Serialization.moveToExtraDataFromRoot(json, [
+      final result = Serializer.moveToExtraDataFromRoot(json, [
         'prop1',
         'prop2',
       ]);
@@ -30,7 +30,7 @@ void main() {
     });
 
     test('should have empty extraData', () {
-      final result = Serialization.moveToExtraDataFromRoot({
+      final result = Serializer.moveToExtraDataFromRoot({
         'prop1': 'test',
         'prop2': 123,
         'prop3': true,
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('should return null', () {
-      final result = Serialization.moveToExtraDataFromRoot({}, [
+      final result = Serializer.moveToExtraDataFromRoot({}, [
         'prop1',
         'prop2',
       ]);

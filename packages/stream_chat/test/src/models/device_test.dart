@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:test/test.dart';
-import 'package:stream_chat/src/models/device.dart';
+import 'package:stream_chat/src/core/models/device.dart';
 
 void main() {
   group('src/models/device', () {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:stream_chat/src/models/command.dart';
+import 'package:stream_chat/src/core/models/command.dart';
 import 'package:test/test.dart';
 
 void main() {

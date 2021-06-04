@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:stream_chat/src/models/action.dart';
-import 'package:stream_chat/src/models/attachment.dart';
+import 'package:stream_chat/src/core/models/action.dart';
+import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:test/test.dart';
 
 void main() {
