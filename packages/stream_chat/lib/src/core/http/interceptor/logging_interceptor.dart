@@ -1,4 +1,5 @@
 // ignore_for_file: lines_longer_than_80_chars
+// coverage:ignore-file
 
 import 'dart:math' as math;
 

@@ -46,6 +46,9 @@ class StreamWebSocketError extends StreamChatError {
   final ErrorResponse? data;
 
   @override
+  List<Object?> get props => [...super.props, code];
+
+  @override
   String toString() {
     var params = 'message: $message';
     if (data != null) params += ', data: $data';
