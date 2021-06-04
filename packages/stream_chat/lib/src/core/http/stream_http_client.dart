@@ -86,8 +86,8 @@ class StreamHttpClient {
   /// [StreamHttpClient] instance dequeue the request task。
   void unlock() => httpClient.unlock();
 
-  ///Clear the current [StreamHttpClient] instance waiting queue.
-  void clear() => httpClient.close();
+  /// Clear the current [StreamHttpClient] instance waiting queue.
+  void clear() => httpClient.clear();
 
   /// Shuts down the [StreamHttpClient].
   ///

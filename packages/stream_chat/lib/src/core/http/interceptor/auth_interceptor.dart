@@ -7,7 +7,6 @@ import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 
-
 ///
 class AuthInterceptor extends Interceptor {
   ///
@@ -84,7 +83,7 @@ class AuthInterceptor extends Interceptor {
         );
         return handler.resolve(response);
       } on DioError catch (error) {
-        return handler.reject(error);
+        return handler.next(error);
       }
     }
     return handler.next(err);
