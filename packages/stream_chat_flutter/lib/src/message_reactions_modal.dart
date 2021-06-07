@@ -23,6 +23,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
     this.attachmentBorderRadiusGeometry,
+    this.textBuilder,
   }) : super(key: key);
 
   /// Message to display reactions of
@@ -51,6 +52,9 @@ class MessageReactionsModal extends StatelessWidget {
 
   /// [BorderRadius] to apply to attachments
   final BorderRadius? attachmentBorderRadiusGeometry;
+
+  /// Customize the MessageWidget textBuilder
+  final Widget Function(BuildContext context, Message message)? textBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +161,7 @@ class MessageReactionsModal extends StatelessWidget {
                               ),
                               showReactionPickerIndicator: showReactions &&
                                   (message.status == MessageSendingStatus.sent),
+                              textBuilder: textBuilder,
                             ),
                           ),
                           if (message.latestReactions?.isNotEmpty == true) ...[

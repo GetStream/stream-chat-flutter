@@ -35,6 +35,7 @@ class MessageActionsModal extends StatefulWidget {
     this.customActions = const [],
     this.attachmentBorderRadiusGeometry,
     this.onCopyTap,
+    this.textBuilder,
   }) : super(key: key);
 
   /// Builder for edit message
@@ -96,6 +97,9 @@ class MessageActionsModal extends StatefulWidget {
 
   /// List of custom actions
   final List<MessageAction> customActions;
+
+  /// Customize the MessageWidget textBuilder
+  final Widget Function(BuildContext context, Message message)? textBuilder;
 
   @override
   _MessageActionsModalState createState() => _MessageActionsModalState();
@@ -222,6 +226,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                               showSendingIndicator: false,
                               shape: widget.messageShape,
                               attachmentShape: widget.attachmentShape,
+                              textBuilder: widget.textBuilder,
                             ),
                           ),
                           const SizedBox(height: 8),
