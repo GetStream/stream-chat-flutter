@@ -411,7 +411,8 @@ class Channel {
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
   Future<UpdateMessageResponse> updateMessage(Message message) async {
-    var currentMessage = state?.messages.firstWhere((e) => e.id == message.id);
+    final currentMessage =
+        state?.messages.firstWhere((e) => e.id == message.id);
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.

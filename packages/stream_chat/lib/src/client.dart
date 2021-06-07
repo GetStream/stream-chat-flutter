@@ -1353,7 +1353,7 @@ class StreamChatClient {
   Future<UpdateMessageResponse> partiallyUpdateMessage(
       String id, Map data) async {
     final response = await put(
-      '/messages/${id}',
+      '/messages/$id',
       data: data,
     );
     return decode(response.data, UpdateMessageResponse.fromJson);
