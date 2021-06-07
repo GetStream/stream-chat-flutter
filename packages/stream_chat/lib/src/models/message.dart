@@ -366,6 +366,7 @@ class Message extends Equatable {
         pinnedAt: other.pinnedAt,
         pinExpires: other.pinExpires,
         pinnedBy: other.pinnedBy,
+        skipPush: other.skipPush,
       );
 
   @override
