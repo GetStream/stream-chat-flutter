@@ -1142,14 +1142,14 @@ void main() {
           await client.pinMessage(message, timeout);
 
           verify(() => mockDio.put<String>('/messages/${message.id}',
-              data: {'message': anything})).called(1);
+              data: {'set': anything})).called(1);
         });
 
         test('should complete successfully with a null value', () async {
           final message = Message(text: 'Hello');
 
           when(
-            () => mockDio.post<String>(
+            () => mockDio.put<String>(
               '/messages/${message.id}',
               data: anything,
             ),
@@ -1163,15 +1163,15 @@ void main() {
 
           await client.pinMessage(message);
 
-          verify(() => mockDio.post<String>('/messages/${message.id}',
-              data: {'message': anything})).called(1);
+          verify(() => mockDio.put<String>('/messages/${message.id}',
+              data: {'set': anything})).called(1);
         });
 
         test('should unpin message successfully', () async {
           final message = Message(text: 'Hello');
 
           when(
-            () => mockDio.post<String>(
+            () => mockDio.put<String>(
               '/messages/${message.id}',
               data: anything,
             ),
@@ -1185,7 +1185,7 @@ void main() {
 
           await client.unpinMessage(message);
 
-          verify(() => mockDio.post<String>('/messages/${message.id}',
+          verify(() => mockDio.put<String>('/messages/${message.id}',
               data: anything)).called(1);
         });
       });
