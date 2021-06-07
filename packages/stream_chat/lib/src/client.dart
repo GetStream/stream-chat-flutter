@@ -1351,7 +1351,9 @@ class StreamChatClient {
   /// Use 'set' in map to set values
   /// User 'unset' in map to unset values
   Future<UpdateMessageResponse> partiallyUpdateMessage(
-      String id, Map data) async {
+    String id,
+    Map data,
+  ) async {
     final response = await put(
       '/messages/$id',
       data: data,
