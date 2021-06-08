@@ -10,7 +10,8 @@ enum PushProvider {
   apn
 }
 
-extension on PushProvider {
+/// Helper extension for [PushProvider]
+extension PushProviderX on PushProvider {
   /// Returns the string notion for [PushProvider].
   String get name => {
         PushProvider.apn: 'apn',

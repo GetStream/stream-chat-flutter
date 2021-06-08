@@ -1,9 +1,13 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart' show MultipartFile;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_chat/src/core/platform_detector/platform_detector.dart';
+import 'package:stream_chat/src/core/util/extension.dart';
 
 part 'attachment_file.freezed.dart';
+
 part 'attachment_file.g.dart';
 
 /// Union class to hold various [UploadState] of a attachment.
@@ -58,14 +62,18 @@ String? _toString(Uint8List? bytes) {
 @JsonSerializable()
 class AttachmentFile {
   /// Creates a new [AttachmentFile] instance.
-  const AttachmentFile({
+  AttachmentFile({
     required this.size,
     this.path,
     this.name,
     this.bytes,
-  }) : assert(
+  })  : assert(
           path != null || bytes != null,
           'Either path or bytes should be != null',
+        ),
+        assert(
+          !CurrentPlatform.isWeb || bytes != null,
+          'File by path is not supported in web, Please provide bytes',
         );
 
   /// Create a new instance from a json
@@ -95,4 +103,27 @@ class AttachmentFile {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$AttachmentFileToJson(this);
+
+  /// Converts this into a [MultipartFile]
+  Future<MultipartFile> toMultipartFile() async {
+    final filename = path?.split('/').last ?? name;
+    final mimeType = filename?.mimeType;
+
+    late MultipartFile multiPartFile;
+
+    if (CurrentPlatform.isWeb) {
+      multiPartFile = MultipartFile.fromBytes(
+        bytes!,
+        filename: filename,
+        contentType: mimeType,
+      );
+    } else {
+      multiPartFile = await MultipartFile.fromFile(
+        path!,
+        filename: filename,
+        contentType: mimeType,
+      );
+    }
+    return multiPartFile;
+  }
 }

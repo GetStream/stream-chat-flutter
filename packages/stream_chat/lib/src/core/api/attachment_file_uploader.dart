@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
-import 'package:stream_chat/src/core/util/extension.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 
 /// Class responsible for uploading images and files to a given channel
@@ -70,29 +69,10 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
-    final filename = file.path?.split('/').last ?? file.name;
-    final mimeType = filename?.mimeType;
-
-    MultipartFile? multiPartFile;
-    if (file.path != null) {
-      multiPartFile = await MultipartFile.fromFile(
-        file.path!,
-        filename: filename,
-        contentType: mimeType,
-      );
-    } else if (file.bytes != null) {
-      multiPartFile = MultipartFile.fromBytes(
-        file.bytes!,
-        filename: filename,
-        contentType: mimeType,
-      );
-    }
-
-    final response = await _client.post(
+    final multiPartFile = await file.toMultipartFile();
+    final response = await _client.postFile(
       '/channels/$channelType/$channelId/image',
-      data: FormData.fromMap({
-        'file': multiPartFile,
-      }),
+      multiPartFile,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );
@@ -107,29 +87,10 @@ class StreamAttachmentFileUploader implements AttachmentFileUploader {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
   }) async {
-    final filename = file.path?.split('/').last ?? file.name;
-    final mimeType = filename?.mimeType;
-
-    MultipartFile? multiPartFile;
-    if (file.path != null) {
-      multiPartFile = await MultipartFile.fromFile(
-        file.path!,
-        filename: filename,
-        contentType: mimeType,
-      );
-    } else if (file.bytes != null) {
-      multiPartFile = MultipartFile.fromBytes(
-        file.bytes!,
-        filename: filename,
-        contentType: mimeType,
-      );
-    }
-
-    final response = await _client.post(
+    final multiPartFile = await file.toMultipartFile();
+    final response = await _client.postFile(
       '/channels/$channelType/$channelId/file',
-      data: FormData.fromMap({
-        'file': multiPartFile,
-      }),
+      multiPartFile,
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );

@@ -38,10 +38,6 @@ import 'package:stream_chat/src/core/models/member.dart';
 /// [LogRecord] as the only parameter.
 typedef LogHandlerFunction = void Function(LogRecord record);
 
-/// A function which can be used to request a Stream Chat API token from your
-/// own backend server. Function requires a single [userId].
-typedef TokenProvider = Future<String> Function(String userId);
-
 final _levelEmojiMapper = {
   Level.INFO: 'ℹ️',
   Level.WARNING: '⚠️',
@@ -583,7 +579,6 @@ class StreamChatClient {
     }
 
     logger.info('Query channel start');
-    print('Query Channel Started : ${DateTime.now()}');
     final res = await _chatApi.channel.queryChannels(
       filter: filter,
       sort: sort,
@@ -594,7 +589,6 @@ class StreamChatClient {
       messageLimit: messageLimit,
       paginationParams: paginationParams,
     );
-    print('Query Channel Completed : ${DateTime.now()}');
 
     if (res.channels.isEmpty && paginationParams.offset == 0) {
       logger.warning('''

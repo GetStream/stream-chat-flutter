@@ -59,7 +59,6 @@ class ChannelApi {
     bool presence = false,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
-    print('Query Channel Started 2 : ${DateTime.now()}');
     final response = await _client.get(
       '/channels',
       queryParameters: {
@@ -80,7 +79,6 @@ class ChannelApi {
         })
       },
     );
-    print('Query Channel Completed 2 : ${DateTime.now()}');
     return QueryChannelsResponse.fromJson(response.data);
   }
 
