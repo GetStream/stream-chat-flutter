@@ -162,6 +162,7 @@ class MessageReactionsModal extends StatelessWidget {
                               showReactionPickerIndicator: showReactions &&
                                   (message.status == MessageSendingStatus.sent),
                               textBuilder: textBuilder,
+                              showPinHighlight: false,
                             ),
                           ),
                           if (message.latestReactions?.isNotEmpty == true) ...[

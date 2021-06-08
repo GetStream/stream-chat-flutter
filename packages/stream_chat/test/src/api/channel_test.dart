@@ -434,7 +434,7 @@ void main() {
         await channelClient.watch();
 
         when(
-          () => mockDio.post<String>(
+          () => mockDio.put<String>(
             '/messages/${message.id}',
             data: anything,
           ),
@@ -449,7 +449,7 @@ void main() {
         await channelClient.pinMessage(message, 30);
 
         verify(() =>
-                mockDio.post<String>('/messages/${message.id}', data: anything))
+                mockDio.put<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
 
@@ -479,7 +479,7 @@ void main() {
         await channelClient.watch();
 
         when(
-          () => mockDio.post<String>(
+          () => mockDio.put<String>(
             '/messages/${message.id}',
             data: anything,
           ),
@@ -494,7 +494,7 @@ void main() {
         await channelClient.pinMessage(message);
 
         verify(() =>
-                mockDio.post<String>('/messages/${message.id}', data: anything))
+                mockDio.put<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
 
@@ -524,7 +524,7 @@ void main() {
         await channelClient.watch();
 
         when(
-          () => mockDio.post<String>(
+          () => mockDio.put<String>(
             '/messages/${message.id}',
             data: anything,
           ),
@@ -539,7 +539,7 @@ void main() {
         await channelClient.unpinMessage(message);
 
         verify(() =>
-                mockDio.post<String>('/messages/${message.id}', data: anything))
+                mockDio.put<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
     });

@@ -420,6 +420,9 @@ class Channel {
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
   Future<UpdateMessageResponse> updateMessage(Message message) async {
+    final currentMessage =
+        state?.messages.firstWhere((e) => e.id == message.id);
+
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
@@ -457,6 +460,31 @@ class Channel {
       }
 
       final response = await _client.updateMessage(message);
+
+      final m = response.message.copyWith(
+        ownReactions: message.ownReactions,
+      );
+
+      state?.addMessage(m);
+
+      return response;
+    } catch (error) {
+      if (error is DioError && error.type != DioErrorType.response) {
+        state?.retryQueue?.add([message]);
+      } else if (error is ApiError) {
+        if (currentMessage != null) {
+          state?.addMessage(currentMessage);
+        }
+      }
+      rethrow;
+    }
+  }
+
+  /// Partially updates the [message] in this channel.
+  Future<UpdateMessageResponse> partiallyUpdateMessage(
+      Message message, Map data) async {
+    try {
+      final response = await _client.partiallyUpdateMessage(message.id, data);
 
       final m = response.message.copyWith(
         ownReactions: message.ownReactions,
@@ -536,17 +564,21 @@ class Channel {
         Duration(seconds: timeoutOrExpirationDate.toInt()),
       );
     }
-    return updateMessage(
-      message.copyWith(
-        pinned: true,
-        pinExpires: pinExpires,
-      ),
-    );
+    return partiallyUpdateMessage(message, {
+      'set': {
+        'pinned': true,
+        if (pinExpires != null) 'pin_expires': pinExpires.toIso8601String(),
+      }
+    });
   }
 
   /// Unpins provided message
   Future<UpdateMessageResponse> unpinMessage(Message message) =>
-      updateMessage(message.copyWith(pinned: false));
+      partiallyUpdateMessage(message, {
+        'set': {
+          'pinned': false,
+        }
+      });
 
   /// Send a file to this channel
   Future<SendFileResponse> sendFile(
