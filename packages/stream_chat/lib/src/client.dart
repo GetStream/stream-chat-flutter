@@ -1329,11 +1329,15 @@ class StreamChatClient {
   Future<SendMessageResponse> sendMessage(
     Message message,
     String channelId,
-    String channelType,
-  ) async {
+    String channelType, {
+    bool skipPush = false,
+  }) async {
     final response = await post(
       '/channels/$channelType/$channelId/message',
-      data: {'message': message.toJson()},
+      data: {
+        'message': message.toJson(),
+        'skip_push': skipPush,
+      },
     );
     return decode(response.data, SendMessageResponse.fromJson);
   }
