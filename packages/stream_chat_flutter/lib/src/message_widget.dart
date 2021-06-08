@@ -102,6 +102,7 @@ class MessageWidget extends StatefulWidget {
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
+    this.usernameBuilder,
   })  : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
@@ -264,6 +265,9 @@ class MessageWidget extends StatefulWidget {
 
   /// Widget builder for building text
   final Widget Function(BuildContext, Message)? textBuilder;
+
+  /// Widget builder for building username
+  final Widget Function(BuildContext, Message)? usernameBuilder;
 
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
@@ -721,14 +725,7 @@ class _MessageWidgetState extends State<MessageWidget>
           child: Text(msg, style: widget.messageTheme.replies),
         ),
       ],
-      if (showUsername)
-        Text(
-          widget.message.user!.name,
-          maxLines: 1,
-          key: usernameKey,
-          style: widget.messageTheme.messageAuthor,
-          overflow: TextOverflow.ellipsis,
-        ),
+      if (showUsername) _buildUsername(usernameKey),
       if (showTimeStamp)
         Text(
           Jiffy(widget.message.createdAt.toLocal()).jm,
@@ -788,6 +785,19 @@ class _MessageWidgetState extends State<MessageWidget>
             ),
           ),
       ].insertBetween(const SizedBox(width: 8)),
+    );
+  }
+
+  Widget _buildUsername(Key usernameKey) {
+    if (widget.usernameBuilder != null) {
+      return widget.usernameBuilder!(context, widget.message);
+    }
+    return Text(
+      widget.message.user!.name,
+      maxLines: 1,
+      key: usernameKey,
+      style: widget.messageTheme.messageAuthor,
+      overflow: TextOverflow.ellipsis,
     );
   }
 
@@ -882,6 +892,7 @@ class _MessageWidgetState extends State<MessageWidget>
         builder: (context) => StreamChannel(
               channel: channel,
               child: MessageActionsModal(
+                textBuilder: widget.textBuilder,
                 onCopyTap: (message) =>
                     Clipboard.setData(ClipboardData(text: message.text)),
                 attachmentBorderRadiusGeometry:
@@ -931,6 +942,7 @@ class _MessageWidgetState extends State<MessageWidget>
       builder: (context) => StreamChannel(
         channel: channel,
         child: MessageReactionsModal(
+          textBuilder: widget.textBuilder,
           attachmentBorderRadiusGeometry:
               widget.attachmentBorderRadiusGeometry as BorderRadius?,
           showUserAvatar:
