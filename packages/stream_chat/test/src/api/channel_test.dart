@@ -52,7 +52,10 @@ void main() {
         when(
           () => mockDio.post<String>(
             '/channels/messaging/testid/message',
-            data: {'message': message.toJson()},
+            data: {
+              'message': message.toJson(),
+              'skip_push': false,
+            },
           ),
         ).thenAnswer(
           (_) async => Response(
@@ -67,6 +70,7 @@ void main() {
         verify(() =>
             mockDio.post<String>('/channels/messaging/testid/message', data: {
               'message': message.toJson(),
+              'skip_push': false,
             })).called(1);
       });
 
@@ -430,7 +434,7 @@ void main() {
         await channelClient.watch();
 
         when(
-          () => mockDio.post<String>(
+          () => mockDio.put<String>(
             '/messages/${message.id}',
             data: anything,
           ),
@@ -445,7 +449,7 @@ void main() {
         await channelClient.pinMessage(message, 30);
 
         verify(() =>
-                mockDio.post<String>('/messages/${message.id}', data: anything))
+                mockDio.put<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
 
@@ -475,7 +479,7 @@ void main() {
         await channelClient.watch();
 
         when(
-          () => mockDio.post<String>(
+          () => mockDio.put<String>(
             '/messages/${message.id}',
             data: anything,
           ),
@@ -490,7 +494,7 @@ void main() {
         await channelClient.pinMessage(message);
 
         verify(() =>
-                mockDio.post<String>('/messages/${message.id}', data: anything))
+                mockDio.put<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
 
@@ -520,7 +524,7 @@ void main() {
         await channelClient.watch();
 
         when(
-          () => mockDio.post<String>(
+          () => mockDio.put<String>(
             '/messages/${message.id}',
             data: anything,
           ),
@@ -535,7 +539,7 @@ void main() {
         await channelClient.unpinMessage(message);
 
         verify(() =>
-                mockDio.post<String>('/messages/${message.id}', data: anything))
+                mockDio.put<String>('/messages/${message.id}', data: anything))
             .called(1);
       });
     });

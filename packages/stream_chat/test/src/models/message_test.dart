@@ -133,7 +133,6 @@ void main() {
             "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
             "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
             "silent": false,
-            "skip_push": false,
             "attachments": [
               {
                 "type": "video",

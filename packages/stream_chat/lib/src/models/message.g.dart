@@ -67,7 +67,6 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    skipPush: json['skip_push'] as bool? ?? false,
   );
 }
 
@@ -97,7 +96,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('thread_participants', readonly(instance.threadParticipants));
   val['show_in_channel'] = instance.showInChannel;
   val['silent'] = instance.silent;
-  val['skip_push'] = instance.skipPush;
   writeNotNull('shadowed', readonly(instance.shadowed));
   writeNotNull('command', readonly(instance.command));
   writeNotNull('created_at', readonly(instance.createdAt));

@@ -315,7 +315,7 @@ class StreamChatClient {
         await connectUser(User(id: userId), newToken);
 
         try {
-          handler.resolve(
+          return handler.resolve(
             await httpClient.request(
               err.requestOptions.path,
               cancelToken: err.requestOptions.cancelToken,
@@ -343,10 +343,12 @@ class StreamChatClient {
             ),
           );
         } on DioError {
-          handler.reject(err);
+          return handler.reject(err);
         }
       }
     }
+
+    return handler.next(err);
   }
 
   LogHandlerFunction _getDefaultLogHandler() {
@@ -1327,11 +1329,15 @@ class StreamChatClient {
   Future<SendMessageResponse> sendMessage(
     Message message,
     String channelId,
-    String channelType,
-  ) async {
+    String channelType, {
+    bool skipPush = false,
+  }) async {
     final response = await post(
       '/channels/$channelType/$channelId/message',
-      data: {'message': message.toJson()},
+      data: {
+        'message': message.toJson(),
+        'skip_push': skipPush,
+      },
     );
     return decode(response.data, SendMessageResponse.fromJson);
   }
@@ -1341,6 +1347,20 @@ class StreamChatClient {
     final response = await post(
       '/messages/${message.id}',
       data: {'message': message.toJson()},
+    );
+    return decode(response.data, UpdateMessageResponse.fromJson);
+  }
+
+  /// Partially update the given message
+  /// Use 'set' in map to set values
+  /// User 'unset' in map to unset values
+  Future<UpdateMessageResponse> partiallyUpdateMessage(
+    String id,
+    Map data,
+  ) async {
+    final response = await put(
+      '/messages/$id',
+      data: data,
     );
     return decode(response.data, UpdateMessageResponse.fromJson);
   }
@@ -1383,20 +1403,21 @@ class StreamChatClient {
           )
           .toUtc();
     }
-    return updateMessage(
-      message.copyWith(
-        pinned: true,
-        pinExpires: pinExpires,
-      ),
-    );
+    return partiallyUpdateMessage(message.id, {
+      'set': {
+        'pinned': true,
+        if (pinExpires != null) 'pin_expires': pinExpires.toIso8601String(),
+      }
+    });
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(Message message) => updateMessage(
-        message.copyWith(
-          pinned: false,
-        ),
-      );
+  Future<UpdateMessageResponse> unpinMessage(Message message) =>
+      partiallyUpdateMessage(message.id, {
+        'set': {
+          'pinned': false,
+        }
+      });
 }
 
 /// The class that handles the state of the channel listening to the events

@@ -745,6 +745,39 @@ void main() {
             data: {'message': anything})).called(1);
       });
 
+      test('partiallyUpdateMessage', () async {
+        final mockDio = MockDio();
+
+        when(() => mockDio.options).thenReturn(BaseOptions());
+        when(() => mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = StreamChatClient('api-key', httpClient: mockDio);
+        final message = Message(
+          id: 'test',
+          text: 'demo',
+        );
+
+        when(
+          () => mockDio.put<String>(
+            '/messages/${message.id}',
+            data: {'set': anything},
+          ),
+        ).thenAnswer(
+          (_) async => Response(
+            data: jsonEncode({'message': message}),
+            statusCode: 200,
+            requestOptions: FakeRequestOptions(),
+          ),
+        );
+
+        await client.partiallyUpdateMessage(message.id, {
+          'set': {'text': message.text}
+        });
+
+        verify(() => mockDio.put<String>('/messages/${message.id}',
+            data: {'set': anything})).called(1);
+      });
+
       test('deleteMessage', () async {
         final mockDio = MockDio();
 
@@ -1094,7 +1127,7 @@ void main() {
           final message = Message(text: 'Hello');
 
           when(
-            () => mockDio.post<String>(
+            () => mockDio.put<String>(
               '/messages/${message.id}',
               data: anything,
             ),
@@ -1108,15 +1141,15 @@ void main() {
 
           await client.pinMessage(message, timeout);
 
-          verify(() => mockDio.post<String>('/messages/${message.id}',
-              data: {'message': anything})).called(1);
+          verify(() => mockDio.put<String>('/messages/${message.id}',
+              data: {'set': anything})).called(1);
         });
 
         test('should complete successfully with a null value', () async {
           final message = Message(text: 'Hello');
 
           when(
-            () => mockDio.post<String>(
+            () => mockDio.put<String>(
               '/messages/${message.id}',
               data: anything,
             ),
@@ -1130,15 +1163,15 @@ void main() {
 
           await client.pinMessage(message);
 
-          verify(() => mockDio.post<String>('/messages/${message.id}',
-              data: {'message': anything})).called(1);
+          verify(() => mockDio.put<String>('/messages/${message.id}',
+              data: {'set': anything})).called(1);
         });
 
         test('should unpin message successfully', () async {
           final message = Message(text: 'Hello');
 
           when(
-            () => mockDio.post<String>(
+            () => mockDio.put<String>(
               '/messages/${message.id}',
               data: anything,
             ),
@@ -1152,7 +1185,7 @@ void main() {
 
           await client.unpinMessage(message);
 
-          verify(() => mockDio.post<String>('/messages/${message.id}',
+          verify(() => mockDio.put<String>('/messages/${message.id}',
               data: anything)).called(1);
         });
       });

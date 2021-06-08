@@ -156,8 +156,10 @@ class MessageListView extends StatefulWidget {
     this.onMessageTap,
     this.onSystemMessageTap,
     this.onAttachmentTap,
-    this.textBuilder,
     this.onLinkTap,
+    this.pinPermissions = const [],
+    this.textBuilder,
+    this.usernameBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -259,10 +261,16 @@ class MessageListView extends StatefulWidget {
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
   /// Customize the MessageWidget textBuilder
-  final void Function(BuildContext context, Message message)? textBuilder;
+  final Widget Function(BuildContext context, Message message)? textBuilder;
+
+  /// Customize the MessageWidget usernameBuilder
+  final Widget Function(BuildContext context, Message message)? usernameBuilder;
 
   /// Callback for when link is tapped
   final void Function(String link)? onLinkTap;
+
+  /// A List of user types that have permission to pin messages
+  final List<String> pinPermissions;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -805,6 +813,10 @@ class _MessageListViewState extends State<MessageListView> {
   ) {
     final isMyMessage = message.user!.id == StreamChat.of(context).user!.id;
     final isOnlyEmoji = message.text!.isOnlyEmoji;
+    final currentUser = StreamChat.of(context).user;
+    final members = StreamChannel.of(context).channel.state?.members ?? [];
+    final currentUserMember =
+        members.firstWhere((e) => e.user!.id == currentUser!.id);
 
     final chatThemeData = StreamChatTheme.of(context);
     return MessageWidget(
@@ -855,9 +867,10 @@ class _MessageListViewState extends State<MessageListView> {
         }
         FocusScope.of(context).unfocus();
       },
-      textBuilder:
-          widget.textBuilder as Widget Function(BuildContext, Message)?,
+      textBuilder: widget.textBuilder,
+      usernameBuilder: widget.usernameBuilder,
       onLinkTap: widget.onLinkTap,
+      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
     );
   }
 
@@ -943,6 +956,11 @@ class _MessageListViewState extends State<MessageListView> {
         isOnlyEmoji || hasUrlAttachment || (isMyMessage && !hasFileAttachment)
             ? BorderSide.none
             : null;
+
+    final currentUser = StreamChat.of(context).user;
+    final members = StreamChannel.of(context).channel.state?.members ?? [];
+    final currentUserMember =
+        members.firstWhere((e) => e.user!.id == currentUser!.id);
 
     final chatThemeData = StreamChatTheme.of(context);
     Widget child = MessageWidget(
@@ -1054,9 +1072,10 @@ class _MessageListViewState extends State<MessageListView> {
         FocusScope.of(context).unfocus();
       },
       onAttachmentTap: widget.onAttachmentTap,
-      textBuilder:
-          widget.textBuilder as Widget Function(BuildContext, Message)?,
+      textBuilder: widget.textBuilder,
+      usernameBuilder: widget.usernameBuilder,
       onLinkTap: widget.onLinkTap,
+      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
     );
 
     if (!message.isDeleted &&
