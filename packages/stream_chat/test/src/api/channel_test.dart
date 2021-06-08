@@ -52,7 +52,10 @@ void main() {
         when(
           () => mockDio.post<String>(
             '/channels/messaging/testid/message',
-            data: {'message': message.toJson()},
+            data: {
+              'message': message.toJson(),
+              'skip_push': false,
+            },
           ),
         ).thenAnswer(
           (_) async => Response(
@@ -67,6 +70,7 @@ void main() {
         verify(() =>
             mockDio.post<String>('/channels/messaging/testid/message', data: {
               'message': message.toJson(),
+              'skip_push': false,
             })).called(1);
       });
 

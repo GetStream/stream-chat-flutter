@@ -351,9 +351,13 @@ class Channel {
   }
 
   /// Send a [message] to this channel.
+  /// If [skipPush] is true the message will not send a push notification
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually sending the message.
-  Future<SendMessageResponse> sendMessage(Message message) async {
+  Future<SendMessageResponse> sendMessage(
+    Message message, {
+    bool skipPush = false,
+  }) async {
     _checkInitialized();
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
@@ -396,7 +400,12 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.sendMessage(message, id!, type);
+      final response = await _client.sendMessage(
+        message,
+        id!,
+        type,
+        skipPush: skipPush,
+      );
       state!.addMessage(response.message);
       return response;
     } catch (error) {
