@@ -1110,7 +1110,7 @@ class _MessageListViewState extends State<MessageListView> {
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
     _itemPositionStream =
-        valueListenableToStreamAdapter(_itemPositionListener.itemPositions);
+        _valueListenableToStreamAdapter(_itemPositionListener.itemPositions);
 
     _getOnThreadTap();
     super.initState();
@@ -1241,11 +1241,12 @@ class _LoadingIndicator extends StatelessWidget {
   }
 }
 
-Stream<T> valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
-  late StreamController<T> controller;
+Stream<T> _valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
+  // ignore: close_sinks
+  late StreamController<T> _controller;
 
   void listener() {
-    controller.add(listenable.value);
+    _controller.add(listenable.value);
   }
 
   void start() {
@@ -1256,12 +1257,12 @@ Stream<T> valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
     listenable.removeListener(listener);
   }
 
-  controller = StreamController<T>(
+  _controller = StreamController<T>(
     onListen: start,
     onPause: end,
     onResume: start,
     onCancel: end,
   );
 
-  return controller.stream;
+  return _controller.stream;
 }
