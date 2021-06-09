@@ -1532,13 +1532,15 @@ class ClientState {
   int? get unreadChannels => _unreadChannelsController.valueOrNull;
 
   /// The current unread channels count as a stream
-  Stream<int?> get unreadChannelsStream => _unreadChannelsController.stream;
+  Stream<int?> get unreadChannelsStream =>
+      _unreadChannelsController.stream.distinct();
 
   /// The current total unread messages count
   int? get totalUnreadCount => _totalUnreadCountController.valueOrNull;
 
   /// The current total unread messages count as a stream
-  Stream<int?> get totalUnreadCountStream => _totalUnreadCountController.stream;
+  Stream<int?> get totalUnreadCountStream =>
+      _totalUnreadCountController.stream.distinct();
 
   /// The current list of channels in memory as a stream
   Stream<Map<String?, Channel>?> get channelsStream =>

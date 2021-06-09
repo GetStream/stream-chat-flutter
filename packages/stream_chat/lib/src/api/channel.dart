@@ -1709,7 +1709,7 @@ class ChannelClientState {
   final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
 
   /// Unread count getter as a stream
-  Stream<int> get unreadCountStream => _unreadCountController.stream;
+  Stream<int> get unreadCountStream => _unreadCountController.stream.distinct();
 
   /// Unread count getter
   int? get unreadCount => _unreadCountController.value;

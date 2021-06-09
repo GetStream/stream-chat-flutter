@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget to show the current list of typing users
-class TypingIndicator extends StatelessWidget {
+class TypingIndicator extends StatefulWidget {
   /// Instantiate a new TypingIndicator
   const TypingIndicator({
     Key? key,
@@ -31,15 +30,20 @@ class TypingIndicator extends StatelessWidget {
   final Alignment alignment;
 
   @override
+  _TypingIndicatorState createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<TypingIndicator> {
+  @override
   Widget build(BuildContext context) {
     final channelState =
-        channel?.state ?? StreamChannel.of(context).channel.state!;
+        widget.channel?.state ?? StreamChannel.of(context).channel.state!;
 
     final altWidget = Align(
       key: const Key('alternative'),
-      alignment: alignment,
+      alignment: widget.alignment,
       child: Container(
-        child: alternativeWidget ?? const Offstage(),
+        child: widget.alternativeWidget ?? const Offstage(),
       ),
     );
     return BetterStreamBuilder<List<User>>(
@@ -49,10 +53,11 @@ class TypingIndicator extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         child: snapshot.isNotEmpty == true
             ? Padding(
-                padding: padding,
+                key: const Key('main'),
+                padding: widget.padding,
                 child: Align(
                   key: const Key('typings'),
-                  alignment: alignment,
+                  alignment: widget.alignment,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -65,7 +70,7 @@ class TypingIndicator extends StatelessWidget {
                         // ignore: lines_longer_than_80_chars
                         '  ${snapshot[0].name}${snapshot.length == 1 ? '' : ' and ${snapshot.length - 1} more'} ${snapshot.length == 1 ? 'is' : 'are'} typing',
                         maxLines: 1,
-                        style: style,
+                        style: widget.style,
                       ),
                     ],
                   ),

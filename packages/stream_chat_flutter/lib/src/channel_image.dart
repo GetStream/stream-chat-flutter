@@ -94,15 +94,17 @@ class ChannelImage extends StatelessWidget {
         } else if (channel.state?.members.length == 2) {
           final otherMember = channel.state?.members
               .firstWhere((member) => member.user?.id != streamChat.user?.id);
-          return StreamBuilder<User>(
-              stream: streamChat.client.state.usersStream.map(
-                  (users) => users[otherMember?.userId] ?? otherMember!.user!),
+          return BetterStreamBuilder<User?>(
+              stream: streamChat.client.state.usersStream
+                  .map((users) =>
+                      users[otherMember?.userId] ?? otherMember!.user!)
+                  .distinct(),
               initialData: otherMember!.user,
               builder: (context, snapshot) => UserAvatar(
                     borderRadius: borderRadius ??
                         chatThemeData
                             .channelPreviewTheme.avatarTheme?.borderRadius,
-                    user: snapshot.data ?? otherMember.user!,
+                    user: snapshot ?? otherMember.user!,
                     constraints: constraints ??
                         chatThemeData
                             .channelPreviewTheme.avatarTheme?.constraints,

@@ -40,6 +40,9 @@ class InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chatThemeData = StreamChatTheme.of(context);
+    if (!showMessage) {
+      return child;
+    }
     return PortalEntry(
       visible: showMessage,
       portalAnchor: tileAnchor ?? Alignment.topCenter,

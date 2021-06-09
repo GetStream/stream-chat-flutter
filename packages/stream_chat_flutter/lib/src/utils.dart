@@ -334,7 +334,7 @@ Widget wrapAttachmentWidget(
   bool reverse,
 ) =>
     Material(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       shape: attachmentShape,
       type: MaterialType.transparency,
       child: attachmentWidget,

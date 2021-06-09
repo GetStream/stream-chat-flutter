@@ -1,4 +1,5 @@
-import 'package:collection/collection.dart' show IterableExtension;
+import 'package:collection/collection.dart'
+    show IterableExtension, ListEquality;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jiffy/jiffy.dart';
@@ -69,12 +70,12 @@ class ChannelPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final channelPreviewTheme = StreamChatTheme.of(context).channelPreviewTheme;
     final streamChatState = StreamChat.of(context);
-
-    return StreamBuilder<bool>(
+    return BetterStreamBuilder<bool>(
         stream: channel.isMutedStream,
         initialData: channel.isMuted,
-        builder: (context, snapshot) => Opacity(
-              opacity: snapshot.data! ? 0.5 : 1,
+        builder: (context, snapshot) => AnimatedOpacity(
+              opacity: snapshot ? 0.5 : 1,
+              duration: const Duration(milliseconds: 300),
               child: ListTile(
                 visualDensity: VisualDensity.compact,
                 contentPadding: const EdgeInsets.symmetric(
@@ -103,14 +104,16 @@ class ChannelPreview extends StatelessWidget {
                             textStyle: channelPreviewTheme.title,
                           ),
                     ),
-                    StreamBuilder<List<Member>>(
+                    BetterStreamBuilder<List<Member>?>(
                       stream: channel.state?.membersStream,
                       initialData: channel.state?.members,
+                      comparator: const ListEquality().equals,
                       builder: (context, snapshot) {
-                        if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty ||
-                            !snapshot.data!.any((Member e) =>
-                                e.user!.id == channel.client.state.user?.id)) {
+                        if (snapshot?.isEmpty == true ||
+                            snapshot?.any((Member e) =>
+                                    e.user!.id ==
+                                    channel.client.state.user?.id) !=
+                                true) {
                           return const SizedBox();
                         }
                         return UnreadIndicator(
@@ -159,14 +162,14 @@ class ChannelPreview extends StatelessWidget {
             ));
   }
 
-  Widget _buildDate(BuildContext context) => StreamBuilder<DateTime?>(
+  Widget _buildDate(BuildContext context) => BetterStreamBuilder<DateTime?>(
         stream: channel.lastMessageAtStream,
         initialData: channel.lastMessageAt,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const SizedBox();
+          if (snapshot == null) {
+            return const Offstage();
           }
-          final lastMessageAt = snapshot.data!.toLocal();
+          final lastMessageAt = snapshot.toLocal();
 
           String stringDate;
           final now = DateTime.now();
@@ -219,11 +222,11 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildLastMessage(BuildContext context) =>
-      StreamBuilder<List<Message>?>(
+      BetterStreamBuilder<List<Message>?>(
         stream: channel.state!.messagesStream,
         initialData: channel.state!.messages,
         builder: (context, snapshot) {
-          final lastMessage = snapshot.data
+          final lastMessage = snapshot
               ?.lastWhereOrNull((m) => m.shadowed != true && !m.isDeleted);
           if (lastMessage == null) {
             return const SizedBox();

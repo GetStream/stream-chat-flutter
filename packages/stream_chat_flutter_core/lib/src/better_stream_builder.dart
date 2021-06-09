@@ -25,29 +25,31 @@ class BetterStreamBuilder<T> extends StatefulWidget {
 }
 
 class _BetterStreamBuilderState<T> extends State<BetterStreamBuilder<T>> {
-  Widget? _child;
   T? _lastEvent;
   StreamSubscription? _subscription;
   Object? _lastError;
 
   @override
-  Widget build(BuildContext context) => _child ?? const Offstage();
+  Widget build(BuildContext context) {
+    if (_lastError != null) {
+      return widget.errorBuilder!(context, _lastError!);
+    }
+
+    if (_lastEvent == null) {
+      return widget.loadingBuilder?.call(context) ?? const Offstage();
+    }
+    return widget.builder(context, _lastEvent ?? widget.initialData);
+  }
 
   bool _firstTime = true;
   @override
   void didChangeDependencies() {
     if (_firstTime) {
-      if (widget.initialData == null && widget.loadingBuilder != null) {
-        _child = widget.loadingBuilder!(context);
-      } else {
-        _onEvent(widget.initialData);
-      }
       _lastEvent = widget.initialData;
       _subscription = widget.stream?.listen(
         _onEvent,
         onError: _onError,
       );
-
       _firstTime = false;
     }
     super.didChangeDependencies();
@@ -55,12 +57,6 @@ class _BetterStreamBuilderState<T> extends State<BetterStreamBuilder<T>> {
 
   @override
   void didUpdateWidget(covariant BetterStreamBuilder<T> oldWidget) {
-    if (_lastError != null && oldWidget.errorBuilder != widget.errorBuilder) {
-      _onError(_lastError);
-    } else if (oldWidget.builder != widget.builder) {
-      _onEvent(_lastEvent);
-    }
-
     if (oldWidget.stream != widget.stream) {
       _subscription?.cancel();
       _subscription = widget.stream?.listen(
@@ -79,21 +75,22 @@ class _BetterStreamBuilderState<T> extends State<BetterStreamBuilder<T>> {
 
   void _onError(error) {
     if (widget.errorBuilder != null && error != _lastError) {
-      setState(() {
-        _child = widget.errorBuilder!(context, error);
-      });
+      if (mounted) {
+        setState(() {});
+      }
       _lastError = error;
     }
   }
 
-  void _onEvent(event) {
+  void _onEvent(T event) {
     _lastError = null;
-    if (widget.comparator != null
+    final isEqual = widget.comparator != null
         ? widget.comparator!(_lastEvent, event)
-        : event != _lastEvent) {
-      setState(() {
-        _child = widget.builder(context, event);
-      });
+        : event == _lastEvent;
+    if (!isEqual) {
+      if (mounted) {
+        setState(() {});
+      }
       _lastEvent = event;
     }
   }

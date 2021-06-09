@@ -3,10 +3,10 @@ analyzer:
     - extension-methods
   exclude:
     - lib/**/*.g.dart
-#    - example/**
+    - example/**
     - lib/src/emoji
     - lib/**/*.freezed.dart
-#    - test/**
+    - test/**
 
 linter:
   rules:

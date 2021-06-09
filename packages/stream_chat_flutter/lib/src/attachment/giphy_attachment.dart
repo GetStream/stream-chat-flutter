@@ -53,7 +53,7 @@ class GiphyAttachment extends AttachmentWidget {
         Card(
           color: StreamChatTheme.of(context).colorTheme.white,
           elevation: 2,
-          clipBehavior: Clip.antiAlias,
+          clipBehavior: Clip.hardEdge,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
               topRight: Radius.circular(16),
