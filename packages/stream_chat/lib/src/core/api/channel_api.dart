@@ -92,7 +92,7 @@ class ChannelApi {
   Future<UpdateChannelResponse> updateChannel(
     String channelId,
     String channelType,
-    Map<String, dynamic> data, {
+    Map<String, Object?> data, {
     Message? message,
   }) async {
     final response = await _client.post(

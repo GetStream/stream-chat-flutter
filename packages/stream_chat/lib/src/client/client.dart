@@ -757,7 +757,7 @@ class StreamChatClient {
   Future<UpdateChannelResponse> updateChannel(
     String channelId,
     String channelType,
-    Map<String, dynamic> data, {
+    Map<String, Object?> data, {
     Message? message,
   }) =>
       _chatApi.channel.updateChannel(

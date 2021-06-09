@@ -51,9 +51,9 @@ class Channel {
 
   String? _id;
   String? _cid;
-  final Map<String, dynamic> _extraData;
+  final Map<String, Object?> _extraData;
 
-  set extraData(Map<String, dynamic> extraData) {
+  set extraData(Map<String, Object?> extraData) {
     if (_initializedCompleter.isCompleted) {
       throw StateError(
         'Once the channel is initialized you should use channel.update '
@@ -734,7 +734,7 @@ class Channel {
 
   /// Edit the channel custom data
   Future<UpdateChannelResponse> update(
-    Map<String, dynamic> channelData, [
+    Map<String, Object?> channelData, [
     Message? updateMessage,
   ]) async {
     _checkInitialized();
@@ -814,19 +814,24 @@ class Channel {
     final messageId = message.id;
     final res = await _client.sendAction(id!, type, messageId, formData);
 
+    // update the passed message with response message
     if (res.message != null) {
       state!.addMessage(res.message!);
     } else {
+      // remove the passed message if response does
+      // not contain message
       final oldIndex = state!.messages.indexWhere((m) => m.id == messageId);
 
-      Message? oldMessage;
+      // remove regular message if present
       if (oldIndex != -1) {
-        oldMessage = state!.messages[oldIndex];
+        final oldMessage = state!.messages[oldIndex];
         state!.updateChannelState(state!._channelState.copyWith(
           messages: state?.messages?..remove(oldMessage),
         ));
       } else {
-        oldMessage = state!.threads.values
+        // remove thread message if present
+        // also reduces total reply count
+        final oldMessage = state!.threads.values
             .expand((messages) => messages)
             .firstWhereOrNull((m) => m.id == messageId);
         if (oldMessage?.parentId != null) {
@@ -858,18 +863,11 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes
-  Future<ChannelState> watch([Map<String, dynamic> options = const {}]) async {
-    final watchOptions = Map<String, dynamic>.from({
-      'state': true,
-      'watch': true,
-      'presence': false,
-    })
-      ..addAll(options);
-
+  Future<ChannelState> watch() async {
     ChannelState response;
 
     try {
-      response = await query(options: watchOptions);
+      response = await query(watch: true);
     } catch (error, stackTrace) {
       if (!_initializedCompleter.isCompleted) {
         _initializedCompleter.completeError(error, stackTrace);
@@ -956,17 +954,15 @@ class Channel {
       );
 
   /// Creates a new channel
-  Future<ChannelState> create() async => query(options: {
-        'watch': false,
-        'state': false,
-        'presence': false,
-      });
+  Future<ChannelState> create() async => query(state: false);
 
   /// Query the API, get messages, members or other channel fields
   /// Set [preferOffline] to true to avoid the api call if the data is already
   /// in the offline storage
   Future<ChannelState> query({
-    Map<String, dynamic> options = const {},
+    bool state = true,
+    bool watch = false,
+    bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
@@ -976,10 +972,10 @@ class Channel {
       final updatedState = await _client.chatPersistenceClient
           ?.getChannelStateByCid(cid!, messagePagination: messagesPagination);
       if (updatedState != null && updatedState.messages.isNotEmpty) {
-        if (state == null) {
+        if (this.state == null) {
           _initState(updatedState);
         } else {
-          state?.updateChannelState(updatedState);
+          this.state?.updateChannelState(updatedState);
         }
         return updatedState;
       }
@@ -990,6 +986,9 @@ class Channel {
         type,
         channelId: id,
         channelData: _extraData,
+        state: state,
+        watch: watch,
+        presence: presence,
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
@@ -1000,7 +999,7 @@ class Channel {
         _cid = updatedState.channel!.cid;
       }
 
-      state?.updateChannelState(updatedState);
+      this.state?.updateChannelState(updatedState);
       return updatedState;
     } catch (e) {
       if (!_client.persistenceEnabled) {
@@ -1775,7 +1774,7 @@ class ChannelClientState {
       );
   }
 
-  late Timer _cleaningTimer;
+  Timer? _cleaningTimer;
 
   void _startCleaning() {
     if (_channelState.channel?.config.typingEvents == false) {
@@ -1842,7 +1841,7 @@ class ChannelClientState {
     _channelStateController.close();
     _isUpToDateController.close();
     _threadsController.close();
-    _cleaningTimer.cancel();
+    _cleaningTimer?.cancel();
     _pinnedMessagesTimer.cancel();
     _typingEventsController.close();
   }

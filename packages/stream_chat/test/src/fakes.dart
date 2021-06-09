@@ -82,3 +82,24 @@ class FakeChatApi extends Fake implements StreamChatApi {
   AttachmentFileUploader get fileUploader =>
       _fileUploader ??= MockAttachmentFileUploader();
 }
+
+class FakeClientState extends Fake implements ClientState {
+  @override
+  OwnUser? get user => OwnUser(id: 'test-user-id');
+
+  var _totalUnreadCount = 0;
+
+  @override
+  int? get totalUnreadCount => _totalUnreadCount;
+
+  @override
+  set totalUnreadCount(int? unreadCount) {
+    _totalUnreadCount += unreadCount ?? 0;
+  }
+}
+
+class FakeMessage extends Fake implements Message {}
+
+class FakeAttachmentFile extends Fake implements AttachmentFile {}
+
+class FakeEvent extends Fake implements Event {}
