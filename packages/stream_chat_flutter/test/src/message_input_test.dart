@@ -53,15 +53,6 @@ void main() {
             )
           ]));
 
-      when(() => channelState.typingEvents).thenAnswer((i) => [
-            User(id: 'other-user', extraData: {'name': 'demo'})
-          ]);
-      when(() => channelState.typingEventsStream)
-          .thenAnswer((i) => Stream.value([
-                User(id: 'other-user', extraData: {'name': 'demo'}),
-                User(id: 'other-user', extraData: {'name': 'demo'}),
-              ]));
-
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,
@@ -75,7 +66,6 @@ void main() {
       ));
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.byType(StreamSvgIcon), findsNWidgets(8));
       expect(find.byKey(const Key('messageInputText')), findsOneWidget);
     },
   );

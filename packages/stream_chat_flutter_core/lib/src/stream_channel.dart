@@ -346,40 +346,36 @@ class StreamChannelState extends State<StreamChannel> {
 
   @override
   Widget build(BuildContext context) {
-    var child = widget.child;
-    if (widget.showLoading &&
-        (initialMessageId != null || channel.state == null)) {
-      child = FutureBuilder<List<bool>>(
-        future: Future.wait(_futures),
-        initialData: [
-          channel.state != null,
-          if (initialMessageId != null) false,
-        ],
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            var message = snapshot.error.toString();
-            if (snapshot.error is DioError) {
-              final dioError = snapshot.error as DioError?;
-              if (dioError?.type == DioErrorType.response) {
-                message = dioError!.message;
-              } else {
-                message = 'Check your connection and retry';
-              }
+    Widget child = FutureBuilder<List<bool>>(
+      future: Future.wait(_futures),
+      initialData: [
+        channel.state != null,
+        if (initialMessageId != null) false,
+      ],
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          var message = snapshot.error.toString();
+          if (snapshot.error is DioError) {
+            final dioError = snapshot.error as DioError?;
+            if (dioError?.type == DioErrorType.response) {
+              message = dioError!.message;
+            } else {
+              message = 'Check your connection and retry';
             }
-            return Center(child: Text(message));
           }
-          final initialized = snapshot.data![0];
-          final dataLoaded = initialMessageId == null || snapshot.data![1];
-          if (!initialized || !dataLoaded) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return widget.child;
-        },
-      );
-    }
-
+          return Center(child: Text(message));
+        }
+        final initialized = snapshot.data![0];
+        // ignore: avoid_bool_literals_in_conditional_expressions
+        final dataLoaded = initialMessageId == null ? true : snapshot.data![1];
+        if (widget.showLoading && (!initialized || !dataLoaded)) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return widget.child;
+      },
+    );
     if (initialMessageId != null) {
       child = Material(child: child);
     }
