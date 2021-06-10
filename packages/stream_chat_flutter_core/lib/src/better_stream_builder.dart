@@ -2,7 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+/// A more efficient [StreamBuilder]
+/// It requires [initialData] and will rebuild
+/// only when the new data is different than the current data
+/// The [comparator] is used to check if the new data is different
 class BetterStreamBuilder<T> extends StatefulWidget {
+  /// Creates a new BetterStreamBuilder
   const BetterStreamBuilder({
     required this.stream,
     required this.initialData,
@@ -13,11 +18,22 @@ class BetterStreamBuilder<T> extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
+  /// The stream to listen to
   final Stream<T>? stream;
+
+  /// The initial data available
   final T initialData;
+
+  /// Comparator used to check if the new data is different than the last one
   final bool Function(T?, T)? comparator;
+
+  /// Builder that builds based on the new snapshot
   final Widget Function(BuildContext context, T data) builder;
+
+  /// Builder that builds when the data is null
   final Widget Function(BuildContext context)? loadingBuilder;
+
+  /// Builder used when there is an error
   final Widget Function(BuildContext context, Object error)? errorBuilder;
 
   @override
