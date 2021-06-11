@@ -110,7 +110,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StreamSvgIcon.message(
+                StreamSvgIcon.pin(
                   size: 136.0,
                   color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
                 ),
