@@ -366,13 +366,13 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
   void _togglePin() async {
     final channel = StreamChannel.of(context).channel;
 
+    Navigator.pop(context);
     try {
       if (!widget.message.pinned) {
         await channel.pinMessage(widget.message);
       } else {
         await channel.unpinMessage(widget.message);
       }
-      Navigator.pop(context);
     } catch (e) {
       _showErrorAlert();
     }
