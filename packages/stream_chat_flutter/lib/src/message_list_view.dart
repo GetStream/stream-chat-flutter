@@ -162,6 +162,7 @@ class MessageListView extends StatefulWidget {
     this.textBuilder,
     this.usernameBuilder,
     this.showFloatingDateDivider = true,
+    this.threadSeparatorBuilder,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -276,6 +277,9 @@ class MessageListView extends StatefulWidget {
 
   /// A List of user types that have permission to pin messages
   final List<String> pinPermissions;
+
+  /// Builder used to build the thread separator in case it's a thread view
+  final WidgetBuilder? threadSeparatorBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -450,22 +454,7 @@ class _MessageListViewState extends State<MessageListView> {
                     if (i == messages.length) return const Offstage();
                     if (i == 0) return const SizedBox(height: 30);
                     if (i == messages.length + 1) {
-                      final replyCount = widget.parentMessage!.replyCount;
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: _streamTheme.colorTheme.bgGradient,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
-                            // ignore: lines_longer_than_80_chars
-                            '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
-                            textAlign: TextAlign.center,
-                            style: _streamTheme
-                                .channelTheme.channelHeaderTheme.subtitle,
-                          ),
-                        ),
-                      );
+                      return _buildThreadSeparator();
                     }
 
                     final message = messages[i];
@@ -573,6 +562,28 @@ class _MessageListViewState extends State<MessageListView> {
         if (widget.showScrollToBottom) _buildScrollToBottom(),
         if (widget.showFloatingDateDivider) _buildFloatingDateDivider(),
       ],
+    );
+  }
+
+  Widget _buildThreadSeparator() {
+    if (widget.threadSeparatorBuilder != null) {
+      return widget.threadSeparatorBuilder!.call(context);
+    }
+
+    final replyCount = widget.parentMessage!.replyCount;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: _streamTheme.colorTheme.bgGradient,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(
+          // ignore: lines_longer_than_80_chars
+          '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
+          textAlign: TextAlign.center,
+          style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
+        ),
+      ),
     );
   }
 
