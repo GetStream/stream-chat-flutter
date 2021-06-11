@@ -489,7 +489,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: StreamSvgIcon.pictures(
+            child: StreamSvgIcon.pin(
               size: 32.0,
               color:
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),

@@ -206,7 +206,7 @@ class _ChatInfoScreenState extends State<ChatInfoScreen> {
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: StreamSvgIcon.pictures(
+            child: StreamSvgIcon.pin(
               size: 36.0,
               color:
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
