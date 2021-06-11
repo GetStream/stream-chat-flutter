@@ -40,7 +40,7 @@ class UrlAttachment extends StatelessWidget {
         children: [
           if (urlAttachment.imageUrl != null)
             Container(
-              clipBehavior: Clip.antiAliasWithSaveLayer,
+              clipBehavior: Clip.hardEdge,
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),

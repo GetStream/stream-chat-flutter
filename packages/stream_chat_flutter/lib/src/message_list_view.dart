@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:rxdart/rxdart.dart';
@@ -281,8 +282,10 @@ class _MessageListViewState extends State<MessageListView> {
   void Function(Message)? _onThreadTap;
   bool _showScrollToBottom = false;
   late final ItemPositionsListener _itemPositionListener;
+  late final Stream<Iterable<ItemPosition>> _itemPositionStream;
   int? _messageListLength;
   StreamChannelState? streamChannel;
+  late StreamChatThemeData _streamTheme;
 
   int? get _initialIndex {
     if (widget.initialScrollIndex != null) return widget.initialScrollIndex;
@@ -324,37 +327,34 @@ class _MessageListViewState extends State<MessageListView> {
   final MessageListController _messageListController = MessageListController();
 
   @override
-  Widget build(BuildContext context) {
-    final chatThemeData = StreamChatTheme.of(context);
-    return MessageListCore(
-      messageFilter: widget.messageFilter,
-      loadingBuilder: widget.loadingBuilder ??
-          (context) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-      emptyBuilder: widget.emptyBuilder ??
-          (context) => Center(
-                child: Text(
-                  'No chats here yet...',
-                  style: chatThemeData.textTheme.footnote.copyWith(
-                      color: chatThemeData.colorTheme.black.withOpacity(.5)),
+  Widget build(BuildContext context) => MessageListCore(
+        messageFilter: widget.messageFilter,
+        loadingBuilder: widget.loadingBuilder ??
+            (context) => const Center(
+                  child: CircularProgressIndicator(),
                 ),
-              ),
-      messageListBuilder:
-          widget.messageListBuilder ?? (context, list) => _buildListView(list),
-      messageListController: _messageListController,
-      parentMessage: widget.parentMessage,
-      showScrollToBottom: widget.showScrollToBottom,
-      errorWidgetBuilder: widget.errorWidgetBuilder ??
-          (BuildContext context, Object error) => Center(
-                child: Text(
-                  'Something went wrong',
-                  style: chatThemeData.textTheme.footnote.copyWith(
-                      color: chatThemeData.colorTheme.black.withOpacity(.5)),
+        emptyBuilder: widget.emptyBuilder ??
+            (context) => Center(
+                  child: Text(
+                    'No chats here yet...',
+                    style: _streamTheme.textTheme.footnote.copyWith(
+                        color: _streamTheme.colorTheme.black.withOpacity(.5)),
+                  ),
                 ),
-              ),
-    );
-  }
+        messageListBuilder: widget.messageListBuilder ??
+            (context, list) => _buildListView(list),
+        messageListController: _messageListController,
+        parentMessage: widget.parentMessage,
+        showScrollToBottom: widget.showScrollToBottom,
+        errorWidgetBuilder: widget.errorWidgetBuilder ??
+            (BuildContext context, Object error) => Center(
+                  child: Text(
+                    'Something went wrong',
+                    style: _streamTheme.textTheme.footnote.copyWith(
+                        color: _streamTheme.colorTheme.black.withOpacity(.5)),
+                  ),
+                ),
+      );
 
   Widget _buildListView(List<Message> data) {
     messages = data;
@@ -400,8 +400,7 @@ class _MessageListViewState extends State<MessageListView> {
             }
 
             return InfoTile(
-              // ignore: avoid_bool_literals_in_conditional_expressions
-              showMessage: widget.showConnectionStateTile ? showStatus : false,
+              showMessage: widget.showConnectionStateTile && showStatus,
               tileAnchor: Alignment.topCenter,
               childAnchor: Alignment.topCenter,
               message: statusString,
@@ -440,6 +439,7 @@ class _MessageListViewState extends State<MessageListView> {
                   physics: widget.scrollPhysics,
                   itemScrollController: _scrollController,
                   reverse: true,
+                  addAutomaticKeepAlives: false,
                   itemCount:
                       messages.length + 2 + (_isThreadConversation ? 1 : 0),
                   separatorBuilder: (context, i) {
@@ -447,10 +447,9 @@ class _MessageListViewState extends State<MessageListView> {
                     if (i == 0) return const SizedBox(height: 30);
                     if (i == messages.length + 1) {
                       final replyCount = widget.parentMessage!.replyCount;
-                      final chatThemeData = StreamChatTheme.of(context);
                       return Container(
                         decoration: BoxDecoration(
-                          gradient: chatThemeData.colorTheme.bgGradient,
+                          gradient: _streamTheme.colorTheme.bgGradient,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8),
@@ -458,7 +457,7 @@ class _MessageListViewState extends State<MessageListView> {
                             // ignore: lines_longer_than_80_chars
                             '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
                             textAlign: TextAlign.center,
-                            style: chatThemeData
+                            style: _streamTheme
                                 .channelTheme.channelHeaderTheme.subtitle,
                           ),
                         ),
@@ -570,9 +569,18 @@ class _MessageListViewState extends State<MessageListView> {
         if (widget.showScrollToBottom) _buildScrollToBottom(),
         Positioned(
           top: 20,
-          child: ValueListenableBuilder<Iterable<ItemPosition>>(
-            valueListenable: _itemPositionListener.itemPositions,
-            builder: (context, values, _) {
+          child: BetterStreamBuilder<Iterable<ItemPosition>>(
+            initialData: _itemPositionListener.itemPositions.value,
+            stream: _itemPositionStream,
+            comparator: (a, b) {
+              if (a == null) {
+                return false;
+              }
+              final aTop = _getTopElement(a)?.index;
+              final bTop = _getTopElement(b)?.index;
+              return aTop == bTop;
+            },
+            builder: (context, values) {
               final items = _itemPositionListener.itemPositions.value;
               if (items.isEmpty || messages.isEmpty) {
                 return const SizedBox();
@@ -620,8 +628,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
         stream: Rx.combineLatest2(
-          streamChannel!.channel.state!.isUpToDateStream,
-          streamChannel!.channel.state!.unreadCountStream,
+          streamChannel!.channel.state!.isUpToDateStream.distinct(),
+          streamChannel!.channel.state!.unreadCountStream.distinct(),
           (bool isUpToDate, int unreadCount) => Tuple2(isUpToDate, unreadCount),
         ),
         builder: (_, snapshot) {
@@ -639,7 +647,6 @@ class _MessageListViewState extends State<MessageListView> {
           final showUnreadCount = unreadCount > 0 &&
               streamChannel!.channel.state!.members.any((e) =>
                   e.userId == streamChannel!.channel.client.state.user!.id);
-          final chatThemeData = StreamChatTheme.of(context);
           return Positioned(
             bottom: 8,
             right: 8,
@@ -649,7 +656,7 @@ class _MessageListViewState extends State<MessageListView> {
               clipBehavior: Clip.none,
               children: [
                 FloatingActionButton(
-                  backgroundColor: chatThemeData.colorTheme.white,
+                  backgroundColor: _streamTheme.colorTheme.white,
                   onPressed: () {
                     if (unreadCount > 0) {
                       streamChannel!.channel.markRead();
@@ -668,7 +675,7 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                   },
                   child: StreamSvgIcon.down(
-                    color: chatThemeData.colorTheme.black,
+                    color: _streamTheme.colorTheme.black,
                   ),
                 ),
                 if (showUnreadCount)
@@ -699,44 +706,13 @@ class _MessageListViewState extends State<MessageListView> {
   Widget _buildLoadingIndicator(
     StreamChannelState streamChannel,
     QueryDirection direction,
-  ) {
-    final stream = direction == QueryDirection.top
-        ? streamChannel.queryTopMessages
-        : streamChannel.queryBottomMessages;
-    return StreamBuilder<bool>(
-      key: const Key('LOADING-INDICATOR'),
-      stream: stream,
-      initialData: false,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Container(
-            color: StreamChatTheme.of(context)
-                .colorTheme
-                .accentRed
-                .withOpacity(.2),
-            child: const Center(
-              child: Text('Error loading messages'),
-            ),
-          );
-        }
-        if (!snapshot.data!) {
-          if (!_isThreadConversation && direction == QueryDirection.top) {
-            return const SizedBox(
-              height: 52,
-              width: double.infinity,
-            );
-          }
-          return const Offstage();
-        }
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
-    );
-  }
+  ) =>
+      _LoadingIndicator(
+        direction: direction,
+        streamTheme: _streamTheme,
+        streamChannel: streamChannel,
+        isThreadConversation: _isThreadConversation,
+      );
 
   Widget _buildTopMessage(
     BuildContext context,
@@ -803,7 +779,9 @@ class _MessageListViewState extends State<MessageListView> {
           }
         }
         if (mounted) {
-          setState(() => _showScrollToBottom = !isVisible);
+          if (_showScrollToBottom == isVisible) {
+            setState(() => _showScrollToBottom = !isVisible);
+          }
         }
       },
       child: messageWidget,
@@ -820,7 +798,6 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhere((e) => e.user!.id == currentUser!.id);
 
-    final chatThemeData = StreamChatTheme.of(context);
     return MessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
@@ -849,8 +826,8 @@ class _MessageListViewState extends State<MessageListView> {
       borderSide: isMyMessage || isOnlyEmoji ? BorderSide.none : null,
       showUserAvatar: isMyMessage ? DisplayWidget.gone : DisplayWidget.show,
       messageTheme: isMyMessage
-          ? chatThemeData.ownMessageTheme
-          : chatThemeData.otherMessageTheme,
+          ? _streamTheme.ownMessageTheme
+          : _streamTheme.otherMessageTheme,
       onShowMessage: widget.onShowMessage,
       onReturnAction: (action) {
         switch (action) {
@@ -964,7 +941,6 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhere((e) => e.user!.id == currentUser!.id);
 
-    final chatThemeData = StreamChatTheme.of(context);
     Widget child = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
@@ -1051,8 +1027,8 @@ class _MessageListViewState extends State<MessageListView> {
         horizontal: isOnlyEmoji ? 0 : 16.0,
       ),
       messageTheme: isMyMessage
-          ? chatThemeData.ownMessageTheme
-          : chatThemeData.otherMessageTheme,
+          ? _streamTheme.ownMessageTheme
+          : _streamTheme.otherMessageTheme,
       readList: readList,
       allRead: allRead,
       onShowMessage: widget.onShowMessage,
@@ -1093,7 +1069,7 @@ class _MessageListViewState extends State<MessageListView> {
             widget.onMessageSwiped?.call(message);
           },
           backgroundIcon: StreamSvgIcon.reply(
-            color: chatThemeData.colorTheme.accentBlue,
+            color: _streamTheme.colorTheme.accentBlue,
           ),
           child: child,
         ),
@@ -1103,7 +1079,7 @@ class _MessageListViewState extends State<MessageListView> {
     if (!initialMessageHighlightComplete &&
         widget.highlightInitialMessage &&
         _isInitialMessage(message.id)) {
-      final colorTheme = chatThemeData.colorTheme;
+      final colorTheme = _streamTheme.colorTheme;
       final highlightColor =
           widget.messageHighlightColor ?? colorTheme.highlight;
       child = TweenAnimationBuilder<Color?>(
@@ -1133,6 +1109,8 @@ class _MessageListViewState extends State<MessageListView> {
     _scrollController = widget.scrollController ?? ItemScrollController();
     _itemPositionListener =
         widget.itemPositionListener ?? ItemPositionsListener.create();
+    _itemPositionStream =
+        _valueListenableToStreamAdapter(_itemPositionListener.itemPositions);
 
     _getOnThreadTap();
     super.initState();
@@ -1141,6 +1119,7 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   void didChangeDependencies() {
     final newStreamChannel = StreamChannel.of(context);
+    _streamTheme = StreamChatTheme.of(context);
 
     if (newStreamChannel != streamChannel) {
       streamChannel = newStreamChannel;
@@ -1186,14 +1165,14 @@ class _MessageListViewState extends State<MessageListView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => StreamBuilder<Message>(
+            builder: (_) => BetterStreamBuilder<Message>(
               stream: streamChannel!.channel.state!.messagesStream.map(
                   (messages) =>
                       messages!.firstWhere((m) => m.id == message.id)),
               initialData: message,
-              builder: (_, snapshot) => StreamChannel(
+              builder: (_, data) => StreamChannel(
                 channel: streamChannel!.channel,
-                child: widget.threadBuilder!(context, snapshot.data),
+                child: widget.threadBuilder!(context, data),
               ),
             ),
           ),
@@ -1210,4 +1189,80 @@ class _MessageListViewState extends State<MessageListView> {
     _messageNewListener?.cancel();
     super.dispose();
   }
+}
+
+class _LoadingIndicator extends StatelessWidget {
+  const _LoadingIndicator({
+    Key? key,
+    required this.streamTheme,
+    required this.isThreadConversation,
+    required this.direction,
+    required this.streamChannel,
+  }) : super(key: key);
+
+  final StreamChatThemeData streamTheme;
+  final bool isThreadConversation;
+  final QueryDirection direction;
+  final StreamChannelState streamChannel;
+
+  @override
+  Widget build(BuildContext context) {
+    final stream = direction == QueryDirection.top
+        ? streamChannel.queryTopMessages
+        : streamChannel.queryBottomMessages;
+    return BetterStreamBuilder<bool>(
+      key: Key('LOADING-INDICATOR $direction'),
+      stream: stream,
+      initialData: false,
+      errorBuilder: (context, error) => Container(
+        color: streamTheme.colorTheme.accentRed.withOpacity(.2),
+        child: const Center(
+          child: Text('Error loading messages'),
+        ),
+      ),
+      builder: (context, data) {
+        if (!data) {
+          if (!isThreadConversation && direction == QueryDirection.top) {
+            return const SizedBox(
+              height: 52,
+              width: double.infinity,
+            );
+          }
+          return const Offstage();
+        }
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+Stream<T> _valueListenableToStreamAdapter<T>(ValueListenable<T> listenable) {
+  // ignore: close_sinks
+  late StreamController<T> _controller;
+
+  void listener() {
+    _controller.add(listenable.value);
+  }
+
+  void start() {
+    listenable.addListener(listener);
+  }
+
+  void end() {
+    listenable.removeListener(listener);
+  }
+
+  _controller = StreamController<T>(
+    onListen: start,
+    onPause: end,
+    onResume: start,
+    onCancel: end,
+  );
+
+  return _controller.stream;
 }

@@ -33,13 +33,22 @@ class TypingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final channelState =
         channel?.state ?? StreamChannel.of(context).channel.state!;
-    return StreamBuilder<List<User>>(
+
+    final altWidget = Align(
+      key: const Key('alternative'),
+      alignment: alignment,
+      child: Container(
+        child: alternativeWidget ?? const Offstage(),
+      ),
+    );
+    return BetterStreamBuilder<List<User>>(
       initialData: channelState.typingEvents,
       stream: channelState.typingEventsStream,
-      builder: (context, snapshot) => AnimatedSwitcher(
+      builder: (context, data) => AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: snapshot.data?.isNotEmpty == true
+        child: data.isNotEmpty == true
             ? Padding(
+                key: const Key('main'),
                 padding: padding,
                 child: Align(
                   key: const Key('typings'),
@@ -54,7 +63,7 @@ class TypingIndicator extends StatelessWidget {
                       ),
                       Text(
                         // ignore: lines_longer_than_80_chars
-                        '  ${snapshot.data![0].name}${snapshot.data!.length == 1 ? '' : ' and ${snapshot.data!.length - 1} more'} ${snapshot.data!.length == 1 ? 'is' : 'are'} typing',
+                        '  ${data[0].name}${data.length == 1 ? '' : ' and ${data.length - 1} more'} ${data.length == 1 ? 'is' : 'are'} typing',
                         maxLines: 1,
                         style: style,
                       ),
@@ -62,13 +71,7 @@ class TypingIndicator extends StatelessWidget {
                   ),
                 ),
               )
-            : Align(
-                key: const Key('alternative'),
-                alignment: alignment,
-                child: Container(
-                  child: alternativeWidget ?? const Offstage(),
-                ),
-              ),
+            : altWidget,
       ),
     );
   }

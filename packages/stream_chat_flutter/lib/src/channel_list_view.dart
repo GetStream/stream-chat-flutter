@@ -1,11 +1,10 @@
-import 'package:collection/collection.dart' show IterableExtension;
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/channel_bottom_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
-import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
@@ -245,10 +244,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       }
     }
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      child: child,
-    );
+    return child;
   }
 
   Widget _buildEmptyWidget(BuildContext context) => LayoutBuilder(
@@ -465,104 +461,105 @@ class _ChannelListViewState extends State<ChannelListView> {
 
   Widget _listItemBuilder(BuildContext context, int i, List<Channel> channels) {
     final channelsBloc = ChannelsBloc.of(context);
+    final onTap = _getChannelTap(context);
+    final chatThemeData = StreamChatTheme.of(context);
+    final backgroundColor = chatThemeData.colorTheme.whiteSmoke;
+
     if (i < channels.length) {
       final channel = channels[i];
-      final onTap = _getChannelTap(context);
 
-      final chatThemeData = StreamChatTheme.of(context);
-      final backgroundColor = chatThemeData.colorTheme.whiteSmoke;
       return StreamChannel(
-        key: ValueKey<String>('CHANNEL-${channel.id}'),
+        key: ValueKey<String>('CHANNEL-${channel.cid}'),
         channel: channel,
-        child: Builder(
-          builder: (context) => Slidable(
-            controller: _slideController,
-            enabled: widget.swipeToAction,
-            actionPane: const SlidableBehindActionPane(),
-            actionExtentRatio: 0.12,
-            secondaryActions: widget.swipeActions
-                    ?.map((e) => IconSlideAction(
-                          color: e.color,
-                          iconWidget: e.iconWidget,
-                          onTap: () {
-                            e.onTap?.call(channel);
-                          },
-                        ))
-                    .toList() ??
-                <Widget>[
+        child: Slidable(
+          controller: _slideController,
+          enabled: widget.swipeToAction,
+          actionPane: const SlidableBehindActionPane(),
+          actionExtentRatio: 0.12,
+          secondaryActions: widget.swipeActions
+                  ?.map((e) => IconSlideAction(
+                        color: e.color,
+                        iconWidget: e.iconWidget,
+                        onTap: () {
+                          e.onTap?.call(channel);
+                        },
+                      ))
+                  .toList() ??
+              <Widget>[
+                IconSlideAction(
+                  color: backgroundColor,
+                  icon: Icons.more_horiz,
+                  onTap: widget.onMoreDetailsPressed != null
+                      ? () {
+                          widget.onMoreDetailsPressed!(channel);
+                        }
+                      : () {
+                          showModalBottomSheet(
+                            clipBehavior: Clip.hardEdge,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                              ),
+                            ),
+                            context: context,
+                            builder: (context) => StreamChannel(
+                              channel: channel,
+                              child: ChannelBottomSheet(
+                                onViewInfoTap: () {
+                                  widget.onViewInfoTap?.call(channel);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                ),
+                if ([
+                  'admin',
+                  'owner',
+                ].contains(channel.state!.members
+                    .firstWhereOrNull(
+                        (m) => m.userId == channel.client.state.user?.id)
+                    ?.role))
                   IconSlideAction(
                     color: backgroundColor,
-                    icon: Icons.more_horiz,
-                    onTap: widget.onMoreDetailsPressed != null
+                    iconWidget: StreamSvgIcon.delete(
+                      color: chatThemeData.colorTheme.accentRed,
+                    ),
+                    onTap: widget.onDeletePressed != null
                         ? () {
-                            widget.onMoreDetailsPressed!(channel);
+                            widget.onDeletePressed!(channel);
                           }
-                        : () {
-                            showModalBottomSheet(
-                              clipBehavior: Clip.hardEdge,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(32),
-                                  topRight: Radius.circular(32),
-                                ),
-                              ),
-                              context: context,
-                              builder: (context) => StreamChannel(
-                                channel: channel,
-                                child: ChannelBottomSheet(
-                                  onViewInfoTap: () {
-                                    widget.onViewInfoTap?.call(channel);
-                                  },
-                                ),
+                        : () async {
+                            final res = await showConfirmationDialog(
+                              context,
+                              title: 'Delete Conversation',
+                              okText: 'DELETE',
+                              question:
+                                  // ignore: lines_longer_than_80_chars
+                                  'Are you sure you want to delete this conversation?',
+                              cancelText: 'CANCEL',
+                              icon: StreamSvgIcon.delete(
+                                color: chatThemeData.colorTheme.accentRed,
                               ),
                             );
+                            if (res == true) {
+                              await channel.delete();
+                            }
                           },
                   ),
-                  if ([
-                    'admin',
-                    'owner',
-                  ].contains(channel.state!.members
-                      .firstWhereOrNull(
-                          (m) => m.userId == channel.client.state.user?.id)
-                      ?.role))
-                    IconSlideAction(
-                      color: backgroundColor,
-                      iconWidget: StreamSvgIcon.delete(
-                        color: chatThemeData.colorTheme.accentRed,
-                      ),
-                      onTap: widget.onDeletePressed != null
-                          ? () {
-                              widget.onDeletePressed!(channel);
-                            }
-                          : () async {
-                              final res = await showConfirmationDialog(
-                                context,
-                                title: 'Delete Conversation',
-                                okText: 'DELETE',
-                                question:
-                                    // ignore: lines_longer_than_80_chars
-                                    'Are you sure you want to delete this conversation?',
-                                cancelText: 'CANCEL',
-                                icon: StreamSvgIcon.delete(
-                                  color: chatThemeData.colorTheme.accentRed,
-                                ),
-                              );
-                              if (res == true) {
-                                await channel.delete();
-                              }
-                            },
-                    ),
-                ],
-            child: Container(
+              ],
+          child: DecoratedBox(
+            decoration: BoxDecoration(
               color: chatThemeData.colorTheme.whiteSnow,
-              child: widget.channelPreviewBuilder?.call(context, channel) ??
-                  ChannelPreview(
-                    onLongPress: widget.onChannelLongPress,
-                    channel: channel,
-                    onImageTap: () => widget.onImageTap?.call(channel),
-                    onTap: (channel) => onTap(channel, widget.channelWidget),
-                  ),
             ),
+            child: widget.channelPreviewBuilder?.call(context, channel) ??
+                ChannelPreview(
+                  onLongPress: widget.onChannelLongPress,
+                  channel: channel,
+                  onImageTap: () => widget.onImageTap?.call(channel),
+                  onTap: (channel) => onTap(channel, widget.channelWidget),
+                ),
           ),
         ),
       );
@@ -636,12 +633,10 @@ class _ChannelListViewState extends State<ChannelListView> {
     context,
     ChannelsBlocState channelsProvider,
   ) =>
-      StreamBuilder<bool>(
+      BetterStreamBuilder<bool>(
           stream: channelsProvider.queryChannelsLoading,
           initialData: false,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Container(
+          errorBuilder: (context, err) => Container(
                 color: StreamChatTheme.of(context)
                     .colorTheme
                     .accentRed
@@ -652,17 +647,15 @@ class _ChannelListViewState extends State<ChannelListView> {
                     child: Text('Error loading channels'),
                   ),
                 ),
-              );
-            }
-            return snapshot.data!
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : const Offstage();
-          });
+              ),
+          builder: (context, data) => data
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : const Offstage());
 
   Widget _separatorBuilder(context, i) {
     final effect = StreamChatTheme.of(context).colorTheme.borderBottom;

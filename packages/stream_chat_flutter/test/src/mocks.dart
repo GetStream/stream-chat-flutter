@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-class MockClient extends Mock implements StreamChatClient {}
+class MockClient extends Mock implements StreamChatClient {
+  MockClient() {
+    when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
+  }
+}
 
 class MockClientState extends Mock implements ClientState {}
 
@@ -17,7 +21,12 @@ class MockChannel extends Mock implements Channel {
   }
 }
 
-class MockChannelState extends Mock implements ChannelClientState {}
+class MockChannelState extends Mock implements ChannelClientState {
+  MockChannelState() {
+    when(() => typingEvents).thenReturn([]);
+    when(() => typingEventsStream).thenAnswer((_) => Stream.value([]));
+  }
+}
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 

@@ -107,6 +107,8 @@ void main() {
       ]);
       when(() => client.wsConnectionStatusStream)
           .thenAnswer((_) => Stream.value(ConnectionStatus.disconnected));
+      when(() => client.wsConnectionStatus)
+          .thenReturn(ConnectionStatus.disconnected);
       when(() => clientState.totalUnreadCountStream)
           .thenAnswer((i) => Stream.value(1));
 

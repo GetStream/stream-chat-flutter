@@ -12,14 +12,10 @@ class ConnectionStatusBuilder extends StatelessWidget {
   const ConnectionStatusBuilder({
     Key? key,
     required this.statusBuilder,
-    this.initialStatus = ConnectionStatus.disconnected,
     this.connectionStatusStream,
     this.errorBuilder,
     this.loadingBuilder,
   }) : super(key: key);
-
-  /// The connection status that will be used to create the initial snapshot.
-  final ConnectionStatus initialStatus;
 
   /// The asynchronous computation to which this builder is currently connected.
   final Stream<ConnectionStatus>? connectionStatusStream;
@@ -38,22 +34,18 @@ class ConnectionStatusBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final stream = connectionStatusStream ??
         StreamChat.of(context).client.wsConnectionStatusStream;
-    return StreamBuilder<ConnectionStatus>(
-      initialData: initialStatus,
+    final client = StreamChat.of(context).client;
+    return BetterStreamBuilder<ConnectionStatus>(
+      initialData: client.wsConnectionStatus,
       stream: stream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          if (errorBuilder != null) {
-            return errorBuilder!(context, snapshot.error);
-          }
-          return const Offstage();
+      loadingBuilder: loadingBuilder,
+      errorBuilder: (context, error) {
+        if (errorBuilder != null) {
+          return errorBuilder!(context, error);
         }
-        if (!snapshot.hasData) {
-          if (loadingBuilder != null) return loadingBuilder!(context);
-          return const Offstage();
-        }
-        return statusBuilder(context, snapshot.data!);
+        return const Offstage();
       },
+      builder: statusBuilder,
     );
   }
 }

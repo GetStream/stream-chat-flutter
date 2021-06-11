@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/serialization.dart';
 
@@ -5,7 +6,7 @@ part 'user.g.dart';
 
 /// The class that defines the user model
 @JsonSerializable()
-class User {
+class User extends Equatable {
   /// Constructor used for json serialization
   User({
     required this.id,
@@ -125,4 +126,17 @@ class User {
         banned: banned ?? this.banned,
         teams: teams ?? this.teams,
       );
+
+  @override
+  List<Object?> get props => [
+        id,
+        role,
+        teams,
+        createdAt,
+        updatedAt,
+        lastActive,
+        online,
+        banned,
+        extraData,
+      ];
 }

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stream_chat_flutter/src/stream_chat_theme.dart';
 import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
+import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
 import 'package:stream_chat_flutter/src/utils.dart';
 import 'package:stream_chat_flutter/src/video_thumbnail_image.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:stream_chat_flutter/src/upload_progress_indicator.dart';
 
 // ignore: always_use_package_imports
 import 'attachment_widget.dart';
@@ -103,7 +103,7 @@ class FileAttachment extends AttachmentWidget {
   Widget _getFileTypeImage(BuildContext context) {
     if (isImageAttachment) {
       return Material(
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: Clip.hardEdge,
         type: MaterialType.transparency,
         shape: _getDefaultShape(context),
         child: source.when(
@@ -154,7 +154,7 @@ class FileAttachment extends AttachmentWidget {
 
     if (isVideoAttachment) {
       return Material(
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: Clip.hardEdge,
         type: MaterialType.transparency,
         shape: _getDefaultShape(context),
         child: source.when(
