@@ -86,11 +86,11 @@ class ChannelImage extends StatelessWidget {
     return BetterStreamBuilder<Map<String, dynamic>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
-      builder: (context, snapshot) {
+      builder: (context, data) {
         String? image;
         final chatThemeData = StreamChatTheme.of(context);
-        if (snapshot.containsKey('image') == true) {
-          image = snapshot['image'];
+        if (data.containsKey('image') == true) {
+          image = data['image'];
         } else if (channel.state?.members.length == 2) {
           final otherMember = channel.state?.members
               .firstWhere((member) => member.user?.id != streamChat.user?.id);
@@ -100,11 +100,11 @@ class ChannelImage extends StatelessWidget {
                       users[otherMember?.userId] ?? otherMember!.user!)
                   .distinct(),
               initialData: otherMember!.user,
-              builder: (context, snapshot) => UserAvatar(
+              builder: (context, user) => UserAvatar(
                     borderRadius: borderRadius ??
                         chatThemeData
                             .channelPreviewTheme.avatarTheme?.borderRadius,
-                    user: snapshot ?? otherMember.user!,
+                    user: user ?? otherMember.user!,
                     constraints: constraints ??
                         chatThemeData
                             .channelPreviewTheme.avatarTheme?.constraints,
@@ -155,7 +155,7 @@ class ChannelImage extends StatelessWidget {
                     imageUrl: image,
                     errorWidget: (_, __, ___) => Center(
                       child: Text(
-                        snapshot.containsKey('name') ? snapshot['name'][0] : '',
+                        data.containsKey('name') ? data['name'][0] : '',
                         style: TextStyle(
                           color: chatThemeData.colorTheme.white,
                           fontWeight: FontWeight.bold,

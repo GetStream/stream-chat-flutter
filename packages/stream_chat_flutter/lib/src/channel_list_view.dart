@@ -648,7 +648,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   ),
                 ),
               ),
-          builder: (context, snapshot) => snapshot
+          builder: (context, data) => data
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16),

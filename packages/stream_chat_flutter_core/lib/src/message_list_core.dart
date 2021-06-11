@@ -151,8 +151,8 @@ class MessageListCoreState extends State<MessageListCore> {
       ),
       errorBuilder: widget.errorWidgetBuilder,
       loadingBuilder: widget.loadingBuilder,
-      builder: (context, snapshot) {
-        final messageList = snapshot?.reversed.toList(growable: false) ?? [];
+      builder: (context, data) {
+        final messageList = data?.reversed.toList(growable: false) ?? [];
         if (messageList.isEmpty && !_isThreadConversation) {
           if (_upToDate) {
             return widget.emptyBuilder(context);

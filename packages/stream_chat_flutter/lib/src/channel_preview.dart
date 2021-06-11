@@ -73,8 +73,8 @@ class ChannelPreview extends StatelessWidget {
     return BetterStreamBuilder<bool>(
         stream: channel.isMutedStream,
         initialData: channel.isMuted,
-        builder: (context, snapshot) => AnimatedOpacity(
-              opacity: snapshot ? 0.5 : 1,
+        builder: (context, data) => AnimatedOpacity(
+              opacity: data ? 0.5 : 1,
               duration: const Duration(milliseconds: 300),
               child: ListTile(
                 visualDensity: VisualDensity.compact,
@@ -108,9 +108,9 @@ class ChannelPreview extends StatelessWidget {
                       stream: channel.state?.membersStream,
                       initialData: channel.state?.members,
                       comparator: const ListEquality().equals,
-                      builder: (context, snapshot) {
-                        if (snapshot?.isEmpty == true ||
-                            snapshot?.any((Member e) =>
+                      builder: (context, members) {
+                        if (members?.isEmpty == true ||
+                            members?.any((Member e) =>
                                     e.user!.id ==
                                     channel.client.state.user?.id) !=
                                 true) {
@@ -165,11 +165,11 @@ class ChannelPreview extends StatelessWidget {
   Widget _buildDate(BuildContext context) => BetterStreamBuilder<DateTime?>(
         stream: channel.lastMessageAtStream,
         initialData: channel.lastMessageAt,
-        builder: (context, snapshot) {
-          if (snapshot == null) {
+        builder: (context, data) {
+          if (data == null) {
             return const Offstage();
           }
-          final lastMessageAt = snapshot.toLocal();
+          final lastMessageAt = data.toLocal();
 
           String stringDate;
           final now = DateTime.now();
@@ -225,9 +225,9 @@ class ChannelPreview extends StatelessWidget {
       BetterStreamBuilder<List<Message>?>(
         stream: channel.state!.messagesStream,
         initialData: channel.state!.messages,
-        builder: (context, snapshot) {
-          final lastMessage = snapshot
-              ?.lastWhereOrNull((m) => m.shadowed != true && !m.isDeleted);
+        builder: (context, data) {
+          final lastMessage =
+              data?.lastWhereOrNull((m) => m.shadowed != true && !m.isDeleted);
           if (lastMessage == null) {
             return const SizedBox();
           }

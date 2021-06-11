@@ -49,9 +49,9 @@ class _TypingIndicatorState extends State<TypingIndicator> {
     return BetterStreamBuilder<List<User>>(
       initialData: channelState.typingEvents,
       stream: channelState.typingEventsStream,
-      builder: (context, snapshot) => AnimatedSwitcher(
+      builder: (context, data) => AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: snapshot.isNotEmpty == true
+        child: data.isNotEmpty == true
             ? Padding(
                 key: const Key('main'),
                 padding: widget.padding,
@@ -68,7 +68,7 @@ class _TypingIndicatorState extends State<TypingIndicator> {
                       ),
                       Text(
                         // ignore: lines_longer_than_80_chars
-                        '  ${snapshot[0].name}${snapshot.length == 1 ? '' : ' and ${snapshot.length - 1} more'} ${snapshot.length == 1 ? 'is' : 'are'} typing',
+                        '  ${data[0].name}${data.length == 1 ? '' : ' and ${data.length - 1} more'} ${data.length == 1 ? 'is' : 'are'} typing',
                         maxLines: 1,
                         style: widget.style,
                       ),

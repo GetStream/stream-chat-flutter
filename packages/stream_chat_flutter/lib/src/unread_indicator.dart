@@ -24,8 +24,8 @@ class UnreadIndicator extends StatelessWidget {
         initialData: cid != null
             ? client.state.channels[cid]?.state?.unreadCount
             : client.state.totalUnreadCount,
-        builder: (context, snapshot) {
-          if (snapshot == null || snapshot == 0) {
+        builder: (context, data) {
+          if (data == null || data == 0) {
             return const Offstage();
           }
           return Material(
@@ -42,7 +42,7 @@ class UnreadIndicator extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  '${snapshot > 99 ? '99+' : snapshot}',
+                  '${data > 99 ? '99+' : data}',
                   style: const TextStyle(
                     fontSize: 11,
                     color: Colors.white,

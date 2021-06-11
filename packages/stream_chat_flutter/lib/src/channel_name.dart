@@ -29,8 +29,8 @@ class ChannelName extends StatelessWidget {
     return BetterStreamBuilder<Map<String, Object?>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
-      builder: (context, snapshot) => _buildName(
-        snapshot,
+      builder: (context, data) => _buildName(
+        data,
         channel.state?.members,
         client,
       ),

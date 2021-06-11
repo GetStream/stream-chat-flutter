@@ -1170,9 +1170,9 @@ class _MessageListViewState extends State<MessageListView> {
                   (messages) =>
                       messages!.firstWhere((m) => m.id == message.id)),
               initialData: message,
-              builder: (_, snapshot) => StreamChannel(
+              builder: (_, data) => StreamChannel(
                 channel: streamChannel!.channel,
-                child: widget.threadBuilder!(context, snapshot),
+                child: widget.threadBuilder!(context, data),
               ),
             ),
           ),
@@ -1220,8 +1220,8 @@ class _LoadingIndicator extends StatelessWidget {
           child: Text('Error loading messages'),
         ),
       ),
-      builder: (context, snapshot) {
-        if (!snapshot) {
+      builder: (context, data) {
+        if (!data) {
           if (!isThreadConversation && direction == QueryDirection.top) {
             return const SizedBox(
               height: 52,

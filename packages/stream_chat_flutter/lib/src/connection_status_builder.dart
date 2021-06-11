@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -8,19 +7,15 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// The widget will use the closest [StreamChatClient.wsConnectionStatusStream]
 /// in case no stream is provided.
-class ConnectionStatusBuilder extends StatefulWidget {
+class ConnectionStatusBuilder extends StatelessWidget {
   /// Creates a new ConnectionStatusBuilder
   const ConnectionStatusBuilder({
     Key? key,
     required this.statusBuilder,
-    this.initialStatus,
     this.connectionStatusStream,
     this.errorBuilder,
     this.loadingBuilder,
   }) : super(key: key);
-
-  /// The connection status that will be used to create the initial snapshot.
-  final ConnectionStatus? initialStatus;
 
   /// The asynchronous computation to which this builder is currently connected.
   final Stream<ConnectionStatus>? connectionStatusStream;
@@ -36,32 +31,21 @@ class ConnectionStatusBuilder extends StatefulWidget {
       statusBuilder;
 
   @override
-  _ConnectionStatusBuilderState createState() =>
-      _ConnectionStatusBuilderState();
-}
-
-class _ConnectionStatusBuilderState extends State<ConnectionStatusBuilder> {
-  late StreamChatClient client;
-  late Stream<ConnectionStatus> stream;
-
-  @override
-  Widget build(BuildContext context) => BetterStreamBuilder<ConnectionStatus>(
-        initialData: widget.initialStatus ?? client.wsConnectionStatus,
-        stream: stream,
-        loadingBuilder: widget.loadingBuilder,
-        errorBuilder: (context, error) {
-          if (widget.errorBuilder != null) {
-            return widget.errorBuilder!(context, error);
-          }
-          return const Offstage();
-        },
-        builder: widget.statusBuilder,
-      );
-
-  @override
-  void didChangeDependencies() {
-    client = StreamChat.of(context).client;
-    stream = widget.connectionStatusStream ?? client.wsConnectionStatusStream;
-    super.didChangeDependencies();
+  Widget build(BuildContext context) {
+    final stream = connectionStatusStream ??
+        StreamChat.of(context).client.wsConnectionStatusStream;
+    final client = StreamChat.of(context).client;
+    return BetterStreamBuilder<ConnectionStatus>(
+      initialData: client.wsConnectionStatus,
+      stream: stream,
+      loadingBuilder: loadingBuilder,
+      errorBuilder: (context, error) {
+        if (errorBuilder != null) {
+          return errorBuilder!(context, error);
+        }
+        return const Offstage();
+      },
+      builder: statusBuilder,
+    );
   }
 }
