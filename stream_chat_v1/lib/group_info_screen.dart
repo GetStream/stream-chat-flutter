@@ -488,9 +488,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
           tileColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
           titleTextStyle: StreamChatTheme.of(context).textTheme.body,
           leading: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: StreamSvgIcon.pin(
-              size: 32.0,
+              size: 24.0,
               color:
                   StreamChatTheme.of(context).colorTheme.black.withOpacity(0.5),
             ),
