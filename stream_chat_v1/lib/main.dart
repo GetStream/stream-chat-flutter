@@ -898,6 +898,7 @@ class _ChannelPageState extends State<ChannelPage> {
                       ),
                     );
                   },
+                  pinPermissions: ['owner', 'admin', 'member'],
                 ),
                 Positioned(
                   bottom: 0,
@@ -990,6 +991,7 @@ class _ThreadPageState extends State<ThreadPage> {
               initialAlignment: widget.initialAlignment,
               onMessageSwiped: _reply,
               onReplyTap: _reply,
+              pinPermissions: ['owner', 'admin', 'member'],
             ),
           ),
           if (widget.parent!.type != 'deleted')
