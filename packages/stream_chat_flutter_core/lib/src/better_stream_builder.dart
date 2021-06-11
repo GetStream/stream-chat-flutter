@@ -57,18 +57,14 @@ class _BetterStreamBuilderState<T> extends State<BetterStreamBuilder<T>> {
     return widget.builder(context, _lastEvent ?? widget.initialData);
   }
 
-  bool _firstTime = true;
   @override
-  void didChangeDependencies() {
-    if (_firstTime) {
-      _lastEvent = widget.initialData;
-      _subscription = widget.stream?.listen(
-        _onEvent,
-        onError: _onError,
-      );
-      _firstTime = false;
-    }
-    super.didChangeDependencies();
+  void initState() {
+    _lastEvent = widget.initialData;
+    _subscription = widget.stream?.listen(
+      _onEvent,
+      onError: _onError,
+    );
+    super.initState();
   }
 
   @override
