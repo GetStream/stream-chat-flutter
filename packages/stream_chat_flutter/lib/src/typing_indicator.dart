@@ -3,7 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 /// Widget to show the current list of typing users
-class TypingIndicator extends StatefulWidget {
+class TypingIndicator extends StatelessWidget {
   /// Instantiate a new TypingIndicator
   const TypingIndicator({
     Key? key,
@@ -30,20 +30,15 @@ class TypingIndicator extends StatefulWidget {
   final Alignment alignment;
 
   @override
-  _TypingIndicatorState createState() => _TypingIndicatorState();
-}
-
-class _TypingIndicatorState extends State<TypingIndicator> {
-  @override
   Widget build(BuildContext context) {
     final channelState =
-        widget.channel?.state ?? StreamChannel.of(context).channel.state!;
+        channel?.state ?? StreamChannel.of(context).channel.state!;
 
     final altWidget = Align(
       key: const Key('alternative'),
-      alignment: widget.alignment,
+      alignment: alignment,
       child: Container(
-        child: widget.alternativeWidget ?? const Offstage(),
+        child: alternativeWidget ?? const Offstage(),
       ),
     );
     return BetterStreamBuilder<List<User>>(
@@ -54,10 +49,10 @@ class _TypingIndicatorState extends State<TypingIndicator> {
         child: data.isNotEmpty == true
             ? Padding(
                 key: const Key('main'),
-                padding: widget.padding,
+                padding: padding,
                 child: Align(
                   key: const Key('typings'),
-                  alignment: widget.alignment,
+                  alignment: alignment,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -70,7 +65,7 @@ class _TypingIndicatorState extends State<TypingIndicator> {
                         // ignore: lines_longer_than_80_chars
                         '  ${data[0].name}${data.length == 1 ? '' : ' and ${data.length - 1} more'} ${data.length == 1 ? 'is' : 'are'} typing',
                         maxLines: 1,
-                        style: widget.style,
+                        style: style,
                       ),
                     ],
                   ),
