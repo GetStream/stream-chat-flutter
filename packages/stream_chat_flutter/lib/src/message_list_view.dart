@@ -161,6 +161,7 @@ class MessageListView extends StatefulWidget {
     this.pinPermissions = const [],
     this.textBuilder,
     this.usernameBuilder,
+    this.showFloatingDateDivider = true,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -226,6 +227,9 @@ class MessageListView extends StatefulWidget {
 
   /// Flag for showing tile on header
   final bool showConnectionStateTile;
+
+  /// Flag for showing the floating date divider
+  final bool showFloatingDateDivider;
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
@@ -567,48 +571,50 @@ class _MessageListViewState extends State<MessageListView> {
           },
         ),
         if (widget.showScrollToBottom) _buildScrollToBottom(),
-        Positioned(
-          top: 20,
-          child: BetterStreamBuilder<Iterable<ItemPosition>>(
-            initialData: _itemPositionListener.itemPositions.value,
-            stream: _itemPositionStream,
-            comparator: (a, b) {
-              if (a == null) {
-                return false;
-              }
-              final aTop = _getTopElement(a)?.index;
-              final bTop = _getTopElement(b)?.index;
-              return aTop == bTop;
-            },
-            builder: (context, values) {
-              final items = _itemPositionListener.itemPositions.value;
-              if (items.isEmpty || messages.isEmpty) {
-                return const SizedBox();
-              }
-
-              var index = _getTopElement(values)?.index;
-
-              if (index == null || index > messages.length) {
-                return const SizedBox();
-              }
-
-              if (index == messages.length) {
-                index = max(index - 1, 0);
-              }
-
-              return widget.dateDividerBuilder != null
-                  ? widget.dateDividerBuilder!(
-                      messages[index].createdAt.toLocal(),
-                    )
-                  : DateDivider(
-                      dateTime: messages[index].createdAt.toLocal(),
-                    );
-            },
-          ),
-        ),
+        if (widget.showFloatingDateDivider) _buildFloatingDateDivider(),
       ],
     );
   }
+
+  Positioned _buildFloatingDateDivider() => Positioned(
+        top: 20,
+        child: BetterStreamBuilder<Iterable<ItemPosition>>(
+          initialData: _itemPositionListener.itemPositions.value,
+          stream: _itemPositionStream,
+          comparator: (a, b) {
+            if (a == null) {
+              return false;
+            }
+            final aTop = _getTopElement(a)?.index;
+            final bTop = _getTopElement(b)?.index;
+            return aTop == bTop;
+          },
+          builder: (context, values) {
+            final items = _itemPositionListener.itemPositions.value;
+            if (items.isEmpty || messages.isEmpty) {
+              return const SizedBox();
+            }
+
+            var index = _getTopElement(values)?.index;
+
+            if (index == null || index > messages.length) {
+              return const SizedBox();
+            }
+
+            if (index == messages.length) {
+              index = max(index - 1, 0);
+            }
+
+            return widget.dateDividerBuilder != null
+                ? widget.dateDividerBuilder!(
+                    messages[index].createdAt.toLocal(),
+                  )
+                : DateDivider(
+                    dateTime: messages[index].createdAt.toLocal(),
+                  );
+          },
+        ),
+      );
 
   Future<void> _paginateData(
           StreamChannelState? channel, QueryDirection direction) =>
