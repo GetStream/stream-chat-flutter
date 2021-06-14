@@ -343,68 +343,67 @@ class StreamChatThemeData {
       reactionIcons: [
         ReactionIcon(
           type: 'love',
-          builder: (context, highlighted, size) => StreamSvgIcon.loveReaction(
-            color: highlighted
-                ? colorTheme.accentBlue
-                : iconTheme.color!.withOpacity(.5),
-            size: size,
-          ),
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.loveReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'like',
-          builder: (context, highlighted, size) =>
-              StreamSvgIcon.thumbsUpReaction(
-            color: highlighted
-                ? colorTheme.accentBlue
-                : iconTheme.color!.withOpacity(.5),
-            size: size,
-          ),
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.thumbsUpReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'sad',
-          builder: (context, highlighted, size) =>
-              StreamSvgIcon.thumbsDownReaction(
-            color: highlighted
-                ? colorTheme.accentBlue
-                : iconTheme.color!.withOpacity(.5),
-            size: size,
-          ),
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.thumbsDownReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'haha',
-          builder: (context, highlighted, size) => StreamSvgIcon.lolReaction(
-            color: highlighted
-                ? colorTheme.accentBlue
-                : iconTheme.color!.withOpacity(.5),
-            size: size,
-          ),
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.lolReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'wow',
-          builder: (context, highlighted, size) => StreamSvgIcon.wutReaction(
-            color: highlighted
-                ? colorTheme.accentBlue
-                : iconTheme.color!.withOpacity(.5),
-            size: size,
-          ),
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.wutReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
       ],
     );
   }
-}
-
-class ReactionTheme {
-  final double singleSize;
-  final double size;
-  final Color ownReactionColor;
-  final Color otherReactionColor;
-
-  const ReactionTheme({
-    required this.singleSize,
-    required this.size,
-    required this.ownReactionColor,
-    required this.otherReactionColor,
-  });
 }
 
 /// Class for holding text theme
