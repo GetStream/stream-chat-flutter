@@ -80,6 +80,10 @@ class MessageReactionsModal extends StatelessWidget {
     final hasFileAttachment =
         message.attachments.any((it) => it.type == 'file') == true;
 
+    final numberOfReactions = StreamChatTheme.of(context).reactionIcons.length;
+    final shiftFactor =
+        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
+
     final child = Center(
       child: SingleChildScrollView(
         child: Padding(
@@ -93,8 +97,12 @@ class MessageReactionsModal extends StatelessWidget {
                 Align(
                   alignment: Alignment(
                       user!.id == message.user!.id
-                          ? (divFactor >= 1.0 ? -0.2 : (1.2 - divFactor))
-                          : (divFactor >= 1.0 ? 0.2 : -(1.2 - divFactor)),
+                          ? (divFactor >= 1.0
+                              ? -0.2 - shiftFactor
+                              : (1.2 - divFactor))
+                          : (divFactor >= 1.0
+                              ? 0.2 + shiftFactor
+                              : -(1.2 - divFactor)),
                       0),
                   child: ReactionPicker(
                     message: message,

@@ -217,10 +217,11 @@ class StreamChatThemeData {
     TextTheme textTheme,
   ) {
     final accentColor = colorTheme.accentBlue;
+    final iconTheme = IconThemeData(color: colorTheme.black.withOpacity(.5));
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
+      primaryIconTheme: iconTheme,
       defaultChannelImage: (context, channel) => const SizedBox(),
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
@@ -342,27 +343,68 @@ class StreamChatThemeData {
       reactionIcons: [
         ReactionIcon(
           type: 'love',
-          assetName: 'Icon_love_reaction.svg',
+          builder: (context, highlighted, size) => StreamSvgIcon.loveReaction(
+            color: highlighted
+                ? colorTheme.accentBlue
+                : iconTheme.color!.withOpacity(.5),
+            size: size,
+          ),
         ),
         ReactionIcon(
           type: 'like',
-          assetName: 'Icon_thumbs_up_reaction.svg',
+          builder: (context, highlighted, size) =>
+              StreamSvgIcon.thumbsUpReaction(
+            color: highlighted
+                ? colorTheme.accentBlue
+                : iconTheme.color!.withOpacity(.5),
+            size: size,
+          ),
         ),
         ReactionIcon(
           type: 'sad',
-          assetName: 'Icon_thumbs_down_reaction.svg',
+          builder: (context, highlighted, size) =>
+              StreamSvgIcon.thumbsDownReaction(
+            color: highlighted
+                ? colorTheme.accentBlue
+                : iconTheme.color!.withOpacity(.5),
+            size: size,
+          ),
         ),
         ReactionIcon(
           type: 'haha',
-          assetName: 'Icon_LOL_reaction.svg',
+          builder: (context, highlighted, size) => StreamSvgIcon.lolReaction(
+            color: highlighted
+                ? colorTheme.accentBlue
+                : iconTheme.color!.withOpacity(.5),
+            size: size,
+          ),
         ),
         ReactionIcon(
           type: 'wow',
-          assetName: 'Icon_wut_reaction.svg',
+          builder: (context, highlighted, size) => StreamSvgIcon.wutReaction(
+            color: highlighted
+                ? colorTheme.accentBlue
+                : iconTheme.color!.withOpacity(.5),
+            size: size,
+          ),
         ),
       ],
     );
   }
+}
+
+class ReactionTheme {
+  final double singleSize;
+  final double size;
+  final Color ownReactionColor;
+  final Color otherReactionColor;
+
+  const ReactionTheme({
+    required this.singleSize,
+    required this.size,
+    required this.ownReactionColor,
+    required this.otherReactionColor,
+  });
 }
 
 /// Class for holding text theme

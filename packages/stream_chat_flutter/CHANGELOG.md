@@ -5,6 +5,7 @@
 - Performance improvements
 - Added pinMessage ui support
 - Added `MessageListView.threadSeparatorBuilder` property
+
 ## 2.0.0-nullsafety.4
 
 - Minor fixes and improvements
