@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
@@ -84,3 +86,22 @@ class MockStreamChatClientWithPersistence extends Mock
 }
 
 class MockChannelConfig extends Mock implements ChannelConfig {}
+
+class MockRetryQueueChannel extends Mock implements Channel {
+  final channelId = 'test-channel-id';
+  final channelType = 'test-channel-type';
+
+  @override
+  String? get id => channelId;
+
+  @override
+  String get type => channelType;
+
+  @override
+  String? get cid => '$channelType:$channelId';
+
+  StreamChatClient? _client;
+
+  @override
+  StreamChatClient get client => _client ??= MockStreamChatClient();
+}

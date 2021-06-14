@@ -177,6 +177,9 @@ class RetryQueue {
     }
   }
 
+  /// Whether our [_messageQueue] has messages or not
+  bool get hasMessages => _messageQueue.isNotEmpty;
+
   /// Call this method to dispose this object
   void dispose() {
     _messageQueue.clear();
