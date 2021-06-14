@@ -256,7 +256,10 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    final message = state!.messages.firstWhereOrNull(
+    final message = [
+      ...state!.messages,
+      ...state!.threads.values.expand((element) => element),
+    ].firstWhereOrNull(
       (it) => it.id == messageId,
     );
 
