@@ -258,7 +258,7 @@ class Channel {
   ) {
     final message = [
       ...state!.messages,
-      ...state!.threads.values.expand((element) => element),
+      ...state!.threads.values.expand((messages) => messages),
     ].firstWhereOrNull(
       (it) => it.id == messageId,
     );
