@@ -50,6 +50,66 @@ class StreamSvgIcon extends StatelessWidget {
       );
 
   /// [StreamSvgIcon] type
+  factory StreamSvgIcon.loveReaction({
+    double? size,
+    Color? color,
+  }) =>
+      StreamSvgIcon(
+        assetName: 'Icon_love_reaction.svg',
+        color: color,
+        width: size,
+        height: size,
+      );
+
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.thumbsUpReaction({
+    double? size,
+    Color? color,
+  }) =>
+      StreamSvgIcon(
+        assetName: 'Icon_thumbs_up_reaction.svg',
+        color: color,
+        width: size,
+        height: size,
+      );
+
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.thumbsDownReaction({
+    double? size,
+    Color? color,
+  }) =>
+      StreamSvgIcon(
+        assetName: 'Icon_thumbs_down_reaction.svg',
+        color: color,
+        width: size,
+        height: size,
+      );
+
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.lolReaction({
+    double? size,
+    Color? color,
+  }) =>
+      StreamSvgIcon(
+        assetName: 'Icon_LOL_reaction.svg',
+        color: color,
+        width: size,
+        height: size,
+      );
+
+  /// [StreamSvgIcon] type
+  factory StreamSvgIcon.wutReaction({
+    double? size,
+    Color? color,
+  }) =>
+      StreamSvgIcon(
+        assetName: 'Icon_wut_reaction.svg',
+        color: color,
+        width: size,
+        height: size,
+      );
+
+  /// [StreamSvgIcon] type
   factory StreamSvgIcon.smile({
     double? size,
     Color? color,

@@ -1,7 +1,6 @@
 import 'package:ezanimation/ezanimation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/extension.dart';
-import 'package:stream_chat_flutter/src/stream_svg_icon.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/reaction_picker.png)
@@ -69,11 +68,10 @@ class _ReactionPickerState extends State<ReactionPicker>
                     -1;
                 final index = reactionIcons.indexOf(reactionIcon);
 
-                final child = StreamSvgIcon(
-                  assetName: reactionIcon.assetName,
-                  color: ownReactionIndex != -1
-                      ? chatThemeData.colorTheme.accentBlue
-                      : Theme.of(context).iconTheme.color!.withOpacity(.5),
+                final child = reactionIcon.builder(
+                  context,
+                  ownReactionIndex != -1,
+                  24,
                 );
 
                 return ConstrainedBox(
