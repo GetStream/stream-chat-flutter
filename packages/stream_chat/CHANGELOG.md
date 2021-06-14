@@ -3,6 +3,7 @@
 - Minor fixes
 - Performance improvements
 - Fixed `skip_push` in `client.sendMessage`
+- Added partial message update method
 
 ## 2.0.0-nullsafety.2
 
