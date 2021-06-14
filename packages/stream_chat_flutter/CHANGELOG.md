@@ -1,3 +1,10 @@
+## 2.0.0-nullsafety.5
+
+- Minor fixes and improvements
+- Updated `stream_chat_core` dependency
+- Performance improvements
+- Added pinMessage ui support
+- Added `MessageListView.threadSeparatorBuilder` property
 ## 2.0.0-nullsafety.4
 
 - Minor fixes and improvements

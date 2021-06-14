@@ -1,3 +1,9 @@
+## 2.0.0-nullsafety.5
+
+- Minor fixes
+- Performance improvements
+- Fixed `skip_push` in `client.sendMessage`
+
 ## 2.0.0-nullsafety.2
 
 - Added new `Filter.raw` constructor
