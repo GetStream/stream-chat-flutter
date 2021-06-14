@@ -229,37 +229,16 @@ class StreamChatClient {
     logger.info('logger setup');
   }
 
-  /// Set the current user, this triggers a connection to the API.
-  /// Set the current user, this triggers a connection to the API.
-  /// It returns a [Future] that resolves when the connection is setup.
-  @Deprecated('Use `connectUser` instead. Will be removed in Future releases')
-  Future<Event> setUser(User user, String token) => connectUser(user, token);
-
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> connectUser(User user, String token) =>
       _connectUser(user, token: Token.fromRawValue(token));
-
-  /// Set the current user using the [tokenProvider] to fetch the token.
-  /// It returns a [Future] that resolves when the connection is setup.
-  @Deprecated(
-    'Use `connectUserWithProvider` instead. Will be removed in Future releases',
-  )
-  Future<Event> setUserWithProvider(User user, TokenProvider tokenProvider) =>
-      connectUserWithProvider(user, tokenProvider);
 
   /// Connects the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> connectUserWithProvider(
           User user, TokenProvider tokenProvider) =>
       _connectUser(user, provider: tokenProvider);
-
-  /// Set the current user with an anonymous id, this triggers a connection to
-  /// the API. It returns a [Future] that resolves when the connection is setup.
-  @Deprecated(
-    'Use `connectAnonymousUser` instead. Will be removed in Future releases',
-  )
-  Future<Event> setAnonymousUser() => connectAnonymousUser();
 
   /// Connects the current user with an anonymous id, this triggers a connection
   /// to the API. It returns a [Future] that resolves when the connection is
@@ -269,13 +248,6 @@ class StreamChatClient {
     final user = OwnUser(id: token.userId);
     return _connectUser(user, token: token);
   }
-
-  /// Set the current user as guest, this triggers a connection to the API.
-  /// It returns a [Future] that resolves when the connection is setup.
-  @Deprecated(
-    'Use `connectGuestUser` instead. Will be removed in Future releases',
-  )
-  Future<Event> setGuestUser(User user) => connectGuestUser(user);
 
   /// Connects the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
