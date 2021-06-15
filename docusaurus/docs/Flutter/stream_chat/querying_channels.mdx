@@ -4,3 +4,36 @@ sidebar_position: 7
 title: Querying Channels
 ---
 
+If you’re building a similar application to Facebook Messenger or Intercom, you’ll want to show a list of Channels.
+The Chat API supports MongoDB style queries to make this easy to implement.
+
+You can query channels based on built-in fields as well as any custom field you add to channels.
+Multiple filters can be combined using AND, OR logical operators, each filter can use its comparison (equality, inequality, greater than, greater or equal, etc.). You can find the complete list of supported operators in the query syntax section of the docs.
+
+As an example, let's say that you want to query the last conversations I participated in sorted by `last_message_at`.
+
+Here’s an example of how you can query the list of channels:
+
+```dart
+final filter = Filter.in_('members', ['thierry']);
+
+final sort = [SortOption("last_message_at", direction: SortOption.DESC)];
+
+final channels = await client.queryChannels(
+  filter: filter,
+  sort: sort,
+  options: {
+    "watch": true,
+    "state": true,
+  },
+);
+
+channels.forEach((Channel c) {
+  print("${c.extraData['name']} ${c.cid}");
+});
+```
+
+The query channels endpoint will only return channels that the user can read,
+you should make sure that the query uses a filter that includes such logic.
+For example: messaging channels are readable only to their members,
+such requirement can be included in the query filter (see below).
