@@ -1,3 +1,8 @@
+## 2.0.0-nullsafety.6
+
+* Update llc dependency
+* Minor fixes and improvements
+
 ## 2.0.0-nullsafety.5
 
 * Update llc dependency
