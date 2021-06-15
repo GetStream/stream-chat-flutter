@@ -320,7 +320,7 @@ class StreamChatClient {
     }
 
     if (wsConnectionStatus == ConnectionStatus.connected) {
-      throw StreamChatError('Connection already connected for ${user.id}');
+      throw StreamChatError('Connection already available for ${user.id}');
     }
 
     _wsConnectionStatus = ConnectionStatus.connecting;
@@ -343,6 +343,9 @@ class StreamChatClient {
   /// This will not trigger default auto-retry mechanism for reconnection.
   /// You need to call [openConnection] to reconnect to [_ws].
   void closeConnection() {
+    if (wsConnectionStatus == ConnectionStatus.disconnected) return;
+
+    logger.info('Closing web-socket connection for ${state.user?.id}');
     _wsConnectionStatus = ConnectionStatus.disconnected;
 
     _connectionStatusSubscription?.cancel();
@@ -1225,6 +1228,8 @@ class StreamChatClient {
   /// If [flushChatPersistence] is true the client deletes all offline
   /// user's data.
   Future<void> disconnectUser({bool flushChatPersistence = false}) async {
+    logger.info('Disconnecting user : ${state.user?.id}');
+
     // resetting state
     state.dispose();
     state = ClientState(this);
@@ -1243,15 +1248,19 @@ class StreamChatClient {
 
   /// Call this function to dispose the client
   Future<void> dispose() async {
+    logger.info('Disposing new StreamChatClient');
+
+    // disposing state
     state.dispose();
-    await _eventController.close();
-    await _wsConnectionStatusController.close();
 
     // disconnecting persistence client
     await _chatPersistenceClient?.disconnect();
 
     // closing web-socket connection
     closeConnection();
+
+    await _eventController.close();
+    await _wsConnectionStatusController.close();
   }
 }
 
