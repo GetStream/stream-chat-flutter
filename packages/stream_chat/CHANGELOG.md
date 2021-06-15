@@ -1,3 +1,8 @@
+## 2.0.0-nullsafety.6
+
+- Fix thread reply not working with attachments
+- Minor fixes
+
 ## 2.0.0-nullsafety.5
 
 - Minor fixes
