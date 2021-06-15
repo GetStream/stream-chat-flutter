@@ -1,3 +1,10 @@
+## 2.0.0-nullsafety.5
+
+* Update llc dependency
+* Minor fixes and improvements
+* Performance improvements
+* Monitor connection using `connectivity_plus` package
+
 ## 2.0.0-nullsafety.3
 
 * Update llc dependency

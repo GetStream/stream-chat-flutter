@@ -109,12 +109,16 @@ class ChannelApi {
   /// Updates the [channelId] of type [ChannelType] data with [data]
   Future<PartialUpdateChannelResponse> updateChannelPartial(
     String channelId,
-    String channelType,
-    Map<String, dynamic> data,
-  ) async {
+    String channelType, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
     final response = await _client.patch(
       _getChannelUrl(channelId, channelType),
-      data: data,
+      data: {
+        if (set != null) 'set': set,
+        if (unset != null) 'unset': unset,
+      },
     );
     return PartialUpdateChannelResponse.fromJson(response.data);
   }

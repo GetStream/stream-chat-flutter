@@ -217,10 +217,11 @@ class StreamChatThemeData {
     TextTheme textTheme,
   ) {
     final accentColor = colorTheme.accentBlue;
+    final iconTheme = IconThemeData(color: colorTheme.black.withOpacity(.5));
     return StreamChatThemeData.raw(
       textTheme: textTheme,
       colorTheme: colorTheme,
-      primaryIconTheme: IconThemeData(color: colorTheme.black.withOpacity(.5)),
+      primaryIconTheme: iconTheme,
       defaultChannelImage: (context, channel) => const SizedBox(),
       defaultUserImage: (context, user) => Center(
         child: CachedNetworkImage(
@@ -342,23 +343,63 @@ class StreamChatThemeData {
       reactionIcons: [
         ReactionIcon(
           type: 'love',
-          assetName: 'Icon_love_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.loveReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'like',
-          assetName: 'Icon_thumbs_up_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.thumbsUpReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'sad',
-          assetName: 'Icon_thumbs_down_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.thumbsDownReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'haha',
-          assetName: 'Icon_LOL_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.lolReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
         ReactionIcon(
           type: 'wow',
-          assetName: 'Icon_wut_reaction.svg',
+          builder: (context, highlighted, size) {
+            final theme = StreamChatTheme.of(context);
+            return StreamSvgIcon.wutReaction(
+              color: highlighted
+                  ? theme.colorTheme.accentBlue
+                  : theme.primaryIconTheme.color!.withOpacity(.5),
+              size: size,
+            );
+          },
         ),
       ],
     );

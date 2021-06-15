@@ -110,6 +110,40 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('partialUpdateMessage', () async {
+    const messageId = 'test-message-id';
+
+    const set = {'text': 'Update Message text'};
+    const unset = ['pinExpires'];
+
+    const path = '/messages/$messageId';
+    final message = Message(id: 'test-message-id', text: set['text']);
+
+    when(() => client.put(
+          path,
+          data: {'set': set, 'unset': unset},
+        )).thenAnswer(
+      (_) async => successResponse(path, data: {'message': message.toJson()}),
+    );
+
+    final res = await messageApi.partialUpdateMessage(
+      messageId,
+      set: set,
+      unset: unset,
+    );
+
+    expect(res, isNotNull);
+    expect(res.message.id, message.id);
+    expect(res.message.text, set['text']);
+    expect(res.message.pinExpires, isNull);
+
+    verify(() => client.put(
+          path,
+          data: {'set': set, 'unset': unset},
+        )).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('deleteMessage', () async {
     const messageId = 'test-message-id';
 

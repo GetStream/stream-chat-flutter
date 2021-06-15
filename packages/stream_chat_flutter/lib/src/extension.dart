@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/emoji/emoji.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-final _emojis = Emoji.all();
+final _emojiChars = Emoji.chars();
 
 /// String extension
 extension StringExtension on String {
@@ -17,10 +17,10 @@ extension StringExtension on String {
   ///  1 to 3 emojis: big size with no text bubble.
   ///  4+ emojis or emojis+text: standard size with text bubble.
   bool get isOnlyEmoji {
+    if (isEmpty) return false;
+    if (length > 3) return false;
     final characters = trim().characters;
-    if (characters.isEmpty) return false;
-    if (characters.length > 3) return false;
-    return characters.every((c) => _emojis.map((e) => e.char).contains(c));
+    return characters.every(_emojiChars.contains);
   }
 }
 

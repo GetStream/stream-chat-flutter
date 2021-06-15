@@ -83,6 +83,8 @@ class MessageWidget extends StatefulWidget {
     this.showResendMessage = true,
     this.showCopyMessage = true,
     this.showFlagButton = true,
+    this.showPinButton = true,
+    this.showPinHighlight = true,
     this.onUserAvatarTap,
     this.onLinkTap,
     this.onMessageActions,
@@ -102,6 +104,7 @@ class MessageWidget extends StatefulWidget {
     this.onQuotedMessageTap,
     this.customActions = const [],
     this.onAttachmentTap,
+    this.usernameBuilder,
   })  : attachmentBuilders = {
           'image': (context, message, attachments) {
             final border = RoundedRectangleBorder(
@@ -265,6 +268,9 @@ class MessageWidget extends StatefulWidget {
   /// Widget builder for building text
   final Widget Function(BuildContext, Message)? textBuilder;
 
+  /// Widget builder for building username
+  final Widget Function(BuildContext, Message)? usernameBuilder;
+
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
 
@@ -367,6 +373,12 @@ class MessageWidget extends StatefulWidget {
   /// Show flag action
   final bool showFlagButton;
 
+  /// Show flag action
+  final bool showPinButton;
+
+  /// Display Pin Highlight
+  final bool showPinHighlight;
+
   /// Builder for respective attachment types
   final Map<String, AttachmentBuilder> attachmentBuilders;
 
@@ -401,37 +413,39 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get showTimeStamp => widget.showTimestamp;
 
-  bool get isMessageRead => widget.readList?.isNotEmpty == true;
+  late final bool isMessageRead = widget.readList?.isNotEmpty == true;
 
   bool get showInChannel => widget.showInChannelIndicator;
 
   bool get hasQuotedMessage => widget.message.quotedMessage != null;
 
-  bool get isSendFailed => widget.message.status == MessageSendingStatus.failed;
+  late final bool isSendFailed =
+      widget.message.status == MessageSendingStatus.failed;
 
-  bool get isUpdateFailed =>
+  late final bool isUpdateFailed =
       widget.message.status == MessageSendingStatus.failed_update;
 
-  bool get isDeleteFailed =>
+  late final bool isDeleteFailed =
       widget.message.status == MessageSendingStatus.failed_delete;
 
-  bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
+  late final bool isFailedState =
+      isSendFailed || isUpdateFailed || isDeleteFailed;
 
-  bool get isGiphy =>
+  late final bool isGiphy =
       widget.message.attachments.any((element) => element.type == 'giphy') ==
-      true;
+          true;
 
-  bool get hasNonUrlAttachments =>
-      widget.message.attachments
+  late final bool isOnlyEmoji = widget.message.text?.isOnlyEmoji == true;
+
+  late final bool hasNonUrlAttachments = widget.message.attachments
           .where((it) => it.ogScrapeUrl == null)
           .isNotEmpty ==
       true;
 
-  bool get hasUrlAttachments =>
+  late final bool hasUrlAttachments =
       widget.message.attachments.any((it) => it.ogScrapeUrl != null) == true;
 
-  bool get showBottomRow =>
-      showThreadReplyIndicator ||
+  late final bool showBottomRow = showThreadReplyIndicator ||
       showUsername ||
       showTimeStamp ||
       showInChannel ||
@@ -440,6 +454,9 @@ class _MessageWidgetState extends State<MessageWidget>
 
   @override
   bool get wantKeepAlive => widget.message.attachments.isNotEmpty == true;
+
+  late StreamChatThemeData _streamChatTheme;
+  late StreamChatState _streamChat;
 
   @override
   Widget build(BuildContext context) {
@@ -450,7 +467,12 @@ class _MessageWidgetState extends State<MessageWidget>
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
-      type: MaterialType.transparency,
+      type: widget.message.pinned && widget.showPinHighlight
+          ? MaterialType.card
+          : MaterialType.transparency,
+      color: widget.message.pinned && widget.showPinHighlight
+          ? _streamChatTheme.colorTheme.highlight
+          : null,
       child: Portal(
         child: InkWell(
           onTap: () {
@@ -477,148 +499,165 @@ class _MessageWidgetState extends State<MessageWidget>
                         ? AlignmentDirectional.bottomEnd
                         : AlignmentDirectional.bottomStart,
                     children: [
-                      Column(
-                        crossAxisAlignment: widget.reverse
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              if (widget.showUserAvatar == DisplayWidget.show &&
-                                  widget.message.user != null) ...[
-                                _buildUserAvatar(),
-                                const SizedBox(width: 4),
-                              ],
-                              if (widget.showUserAvatar == DisplayWidget.hide)
-                                SizedBox(width: avatarWidth + 4),
-                              Flexible(
-                                child: PortalEntry(
-                                  portal: Container(
-                                    transform: Matrix4.translationValues(
-                                        widget.reverse ? 12 : -12, 0, 0),
-                                    constraints: const BoxConstraints(
-                                        maxWidth: 22 * 6.0),
-                                    child: _buildReactionIndicator(context),
-                                  ),
-                                  portalAnchor:
-                                      Alignment(widget.reverse ? 1 : -1, -1),
-                                  childAnchor:
-                                      Alignment(widget.reverse ? -1 : 1, -1),
-                                  child: Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Padding(
-                                        padding: widget.showReactions
-                                            ? EdgeInsets.only(
-                                                top: widget
-                                                            .message
-                                                            .reactionCounts
-                                                            ?.isNotEmpty ==
-                                                        true
-                                                    ? 18
-                                                    : 0,
-                                              )
-                                            : EdgeInsets.zero,
-                                        child: (widget.message.isDeleted &&
-                                                !isFailedState)
-                                            ? Container(
-                                                // ignore: lines_longer_than_80_chars
-                                                margin: EdgeInsets.symmetric(
-                                                    horizontal:
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom:
+                              isPinned && widget.showPinHighlight ? 8.0 : 0.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: widget.reverse
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.message.pinned &&
+                                widget.message.pinnedBy != null &&
+                                widget.showPinHighlight)
+                              _buildPinnedMessage(widget.message),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                if (widget.showUserAvatar ==
+                                        DisplayWidget.show &&
+                                    widget.message.user != null) ...[
+                                  _buildUserAvatar(),
+                                  const SizedBox(width: 4),
+                                ],
+                                if (widget.showUserAvatar == DisplayWidget.hide)
+                                  SizedBox(width: avatarWidth + 4),
+                                Flexible(
+                                  child: PortalEntry(
+                                    portal: Container(
+                                      transform: Matrix4.translationValues(
+                                          widget.reverse ? 12 : -12, 0, 0),
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 22 * 6.0,
+                                      ),
+                                      child: _buildReactionIndicator(context),
+                                    ),
+                                    portalAnchor:
+                                        Alignment(widget.reverse ? 1 : -1, -1),
+                                    childAnchor:
+                                        Alignment(widget.reverse ? -1 : 1, -1),
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Padding(
+                                          padding: widget.showReactions
+                                              ? EdgeInsets.only(
+                                                  top: widget
+                                                              .message
+                                                              .reactionCounts
+                                                              ?.isNotEmpty ==
+                                                          true
+                                                      ? 18
+                                                      : 0,
+                                                )
+                                              : EdgeInsets.zero,
+                                          child: (widget.message.isDeleted &&
+                                                  !isFailedState)
+                                              ? Container(
+                                                  // ignore: lines_longer_than_80_chars
+                                                  margin: EdgeInsets.symmetric(
+                                                      horizontal:
+                                                          // ignore: lines_longer_than_80_chars
+                                                          widget.showUserAvatar ==
+                                                                  // ignore: lines_longer_than_80_chars
+                                                                  DisplayWidget.gone
+                                                              ? 0
+                                                              : 4.0),
+                                                  child: DeletedMessage(
+                                                    borderRadiusGeometry: widget
+                                                        .borderRadiusGeometry,
+                                                    borderSide:
+                                                        widget.borderSide,
+                                                    shape: widget.shape,
+                                                    messageTheme:
+                                                        widget.messageTheme,
+                                                  ),
+                                                )
+                                              : Card(
+                                                  clipBehavior: Clip.hardEdge,
+                                                  elevation: 0,
+                                                  margin: EdgeInsets.symmetric(
+                                                    horizontal: (isFailedState
+                                                            ? 15.0
+                                                            : 0.0) +
                                                         // ignore: lines_longer_than_80_chars
-                                                        widget.showUserAvatar ==
-                                                                // ignore: lines_longer_than_80_chars
+                                                        (widget.showUserAvatar ==
                                                                 DisplayWidget
                                                                     .gone
                                                             ? 0
                                                             : 4.0),
-                                                child: DeletedMessage(
-                                                  borderRadiusGeometry: widget
-                                                      .borderRadiusGeometry,
-                                                  borderSide: widget.borderSide,
-                                                  shape: widget.shape,
-                                                  messageTheme:
-                                                      widget.messageTheme,
+                                                  ),
+                                                  shape: widget.shape ??
+                                                      RoundedRectangleBorder(
+                                                        side: widget
+                                                                .borderSide ??
+                                                            BorderSide(
+                                                              color: widget
+                                                                      // ignore: lines_longer_than_80_chars
+                                                                      .messageTheme
+                                                                      // ignore: lines_longer_than_80_chars
+                                                                      .messageBorderColor ??
+                                                                  Colors.grey,
+                                                            ),
+                                                        borderRadius: widget
+                                                                // ignore: lines_longer_than_80_chars
+                                                                .borderRadiusGeometry ??
+                                                            BorderRadius.zero,
+                                                      ),
+                                                  color: _getBackgroundColor(),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: <Widget>[
+                                                      if (hasQuotedMessage)
+                                                        _buildQuotedMessage(),
+                                                      if (hasNonUrlAttachments)
+                                                        _parseAttachments(),
+                                                      if (!isGiphy)
+                                                        _buildTextBubble(),
+                                                    ],
+                                                  ),
                                                 ),
-                                              )
-                                            : Card(
-                                                clipBehavior: Clip.antiAlias,
-                                                elevation: 0,
-                                                margin: EdgeInsets.symmetric(
-                                                  horizontal: (isFailedState
-                                                          ? 15.0
-                                                          : 0.0) +
-                                                      // ignore: lines_longer_than_80_chars
-                                                      (widget.showUserAvatar ==
-                                                              DisplayWidget.gone
-                                                          ? 0
-                                                          : 4.0),
-                                                ),
-                                                shape: widget.shape ??
-                                                    RoundedRectangleBorder(
-                                                      side: widget.borderSide ??
-                                                          BorderSide(
-                                                            color: widget
-                                                                    // ignore: lines_longer_than_80_chars
-                                                                    .messageTheme
-                                                                    // ignore: lines_longer_than_80_chars
-                                                                    .messageBorderColor ??
-                                                                Colors.grey,
-                                                          ),
-                                                      borderRadius: widget
-                                                              // ignore: lines_longer_than_80_chars
-                                                              .borderRadiusGeometry ??
-                                                          BorderRadius.zero,
-                                                    ),
-                                                color: _getBackgroundColor(),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: <Widget>[
-                                                    if (hasQuotedMessage)
-                                                      _buildQuotedMessage(),
-                                                    if (hasNonUrlAttachments)
-                                                      _parseAttachments(),
-                                                    if (!isGiphy)
-                                                      _buildTextBubble(),
-                                                  ],
-                                                ),
+                                        ),
+                                        if (widget.showReactionPickerIndicator)
+                                          Positioned(
+                                            right: widget.reverse ? null : 4,
+                                            left: widget.reverse ? 4 : null,
+                                            top: -8,
+                                            child: CustomPaint(
+                                              painter: ReactionBubblePainter(
+                                                _streamChatTheme
+                                                    .colorTheme.white,
+                                                Colors.transparent,
+                                                Colors.transparent,
+                                                tailCirclesSpace: 1,
                                               ),
-                                      ),
-                                      if (widget.showReactionPickerIndicator)
-                                        Positioned(
-                                          right: widget.reverse ? null : 4,
-                                          left: widget.reverse ? 4 : null,
-                                          top: -8,
-                                          child: CustomPaint(
-                                            painter: ReactionBubblePainter(
-                                              StreamChatTheme.of(context)
-                                                  .colorTheme
-                                                  .white,
-                                              Colors.transparent,
-                                              Colors.transparent,
-                                              tailCirclesSpace: 1,
                                             ),
                                           ),
-                                        ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          if (showBottomRow)
-                            SizedBox(height: context.textScaleFactor * 18.0),
-                        ],
+                              ],
+                            ),
+                            if (showBottomRow)
+                              SizedBox(height: context.textScaleFactor * 18.0),
+                          ],
+                        ),
                       ),
                       if (showBottomRow)
                         Padding(
-                          padding: EdgeInsets.only(left: leftPadding),
+                          padding: EdgeInsets.only(
+                            left: leftPadding,
+                            bottom:
+                                isPinned && widget.showPinHighlight ? 6.0 : 0.0,
+                          ),
                           child: _bottomRow,
                         ),
                       if (isFailedState)
@@ -639,14 +678,20 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  @override
+  void didChangeDependencies() {
+    _streamChatTheme = StreamChatTheme.of(context);
+    _streamChat = StreamChat.of(context);
+    super.didChangeDependencies();
+  }
+
   Widget _buildQuotedMessage() {
-    final isMyMessage =
-        widget.message.user?.id == StreamChat.of(context).user?.id;
+    final isMyMessage = widget.message.user?.id == _streamChat.user?.id;
     final onTap = widget.message.quotedMessage?.isDeleted != true &&
             widget.onQuotedMessageTap != null
         ? () => widget.onQuotedMessageTap!(widget.message.quotedMessageId)
         : null;
-    final chatThemeData = StreamChatTheme.of(context);
+    final chatThemeData = _streamChatTheme;
     return QuotedMessageWidget(
       onTap: onTap,
       message: widget.message.quotedMessage!,
@@ -661,7 +706,7 @@ class _MessageWidgetState extends State<MessageWidget>
 
   Widget get _bottomRow {
     if (isDeleted) {
-      final chatThemeData = StreamChatTheme.of(context);
+      final chatThemeData = _streamChatTheme;
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -721,14 +766,7 @@ class _MessageWidgetState extends State<MessageWidget>
           child: Text(msg, style: widget.messageTheme.replies),
         ),
       ],
-      if (showUsername)
-        Text(
-          widget.message.user!.name,
-          maxLines: 1,
-          key: usernameKey,
-          style: widget.messageTheme.messageAuthor,
-          overflow: TextOverflow.ellipsis,
-        ),
+      if (showUsername) _buildUsername(usernameKey),
       if (showTimeStamp)
         Text(
           Jiffy(widget.message.createdAt.toLocal()).jm,
@@ -791,6 +829,19 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
+  Widget _buildUsername(Key usernameKey) {
+    if (widget.usernameBuilder != null) {
+      return widget.usernameBuilder!(context, widget.message);
+    }
+    return Text(
+      widget.message.user!.name,
+      maxLines: 1,
+      key: usernameKey,
+      style: widget.messageTheme.messageAuthor,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   Widget _buildUrlAttachment() {
     final urlAttachment = widget.message.attachments
         .firstWhere((element) => element.ogScrapeUrl != null);
@@ -809,36 +860,16 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  Widget _buildThreadParticipantsIndicator(Iterable<User> threadParticipants) {
-    var padding = 0.0;
-    return Stack(
-      children: threadParticipants.map((user) {
-        padding += 8.0;
-        return Positioned(
-          right: padding - 8,
-          bottom: 0,
-          top: 0,
-          child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: StreamChatTheme.of(context).colorTheme.white,
-            ),
-            padding: const EdgeInsets.all(1),
-            child: UserAvatar(
-              user: user,
-              constraints: BoxConstraints.loose(const Size.fromRadius(7)),
-              showOnlineStatus: false,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
+  Widget _buildThreadParticipantsIndicator(Iterable<User> threadParticipants) =>
+      _ThreadParticipants(
+        streamChatTheme: _streamChatTheme,
+        threadParticipants: threadParticipants,
+      );
 
   Widget _buildReactionIndicator(
     BuildContext context,
   ) {
-    final ownId = StreamChat.of(context).user!.id;
+    final ownId = _streamChat.user!.id;
     final reactionsMap = <String, Reaction>{};
     widget.message.latestReactions?.forEach((element) {
       if (!reactionsMap.containsKey(element.type) ||
@@ -878,10 +909,11 @@ class _MessageWidgetState extends State<MessageWidget>
 
     showDialog(
         context: context,
-        barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+        barrierColor: _streamChatTheme.colorTheme.overlay,
         builder: (context) => StreamChannel(
               channel: channel,
               child: MessageActionsModal(
+                textBuilder: widget.textBuilder,
                 onCopyTap: (message) =>
                     Clipboard.setData(ClipboardData(text: message.text)),
                 attachmentBorderRadiusGeometry:
@@ -918,6 +950,7 @@ class _MessageWidgetState extends State<MessageWidget>
                     !isFailedState &&
                     widget.onThreadTap != null,
                 showFlagButton: widget.showFlagButton,
+                showPinButton: widget.showPinButton,
                 customActions: widget.customActions,
               ),
             ));
@@ -927,10 +960,11 @@ class _MessageWidgetState extends State<MessageWidget>
     final channel = StreamChannel.of(context).channel;
     showDialog(
       context: context,
-      barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
+      barrierColor: _streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(
         channel: channel,
         child: MessageReactionsModal(
+          textBuilder: widget.textBuilder,
           attachmentBorderRadiusGeometry:
               widget.attachmentBorderRadiusGeometry as BorderRadius?,
           showUserAvatar:
@@ -957,7 +991,7 @@ class _MessageWidgetState extends State<MessageWidget>
       side: hasFiles
           ? widget.attachmentBorderSide ??
               BorderSide(
-                color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+                color: _streamChatTheme.colorTheme.greyWhisper,
               )
           : BorderSide.none,
       borderRadius: widget.attachmentBorderRadiusGeometry ?? BorderRadius.zero,
@@ -967,7 +1001,7 @@ class _MessageWidgetState extends State<MessageWidget>
   ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
         side: widget.borderSide ??
             BorderSide(
-              color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+              color: _streamChatTheme.colorTheme.greyWhisper,
             ),
         borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
       );
@@ -1058,7 +1092,7 @@ class _MessageWidgetState extends State<MessageWidget>
             Text(
               widget.readList!.length.toString(),
               style: style.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                color: _streamChatTheme.colorTheme.accentBlue,
               ),
             ),
           const SizedBox(width: 2),
@@ -1113,7 +1147,35 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  bool get isOnlyEmoji => widget.message.text!.isOnlyEmoji;
+  Widget _buildPinnedMessage(Message message) {
+    final pinnedBy = message.pinnedBy;
+    final pinnedByMe = _streamChat.user!.id == pinnedBy!.id;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StreamSvgIcon.pin(
+            size: 16,
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Text(
+            'Pinned by ${pinnedByMe ? 'You' : pinnedBy.name}',
+            style: TextStyle(
+              color: _streamChatTheme.colorTheme.grey,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  late final bool isPinned = widget.message.pinned;
 
   Color? _getBackgroundColor() {
     if (hasQuotedMessage) {
@@ -1121,7 +1183,7 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     if (hasUrlAttachments) {
-      return StreamChatTheme.of(context).colorTheme.blueAlice;
+      return _streamChatTheme.colorTheme.blueAlice;
     }
 
     if (isOnlyEmoji) {
@@ -1150,6 +1212,45 @@ class _MessageWidgetState extends State<MessageWidget>
       channel.deleteMessage(widget.message);
       return;
     }
+  }
+}
+
+class _ThreadParticipants extends StatelessWidget {
+  const _ThreadParticipants({
+    Key? key,
+    required StreamChatThemeData streamChatTheme,
+    required this.threadParticipants,
+  })  : _streamChatTheme = streamChatTheme,
+        super(key: key);
+
+  final StreamChatThemeData _streamChatTheme;
+  final Iterable<User> threadParticipants;
+
+  @override
+  Widget build(BuildContext context) {
+    var padding = 0.0;
+    return Stack(
+      children: threadParticipants.map((user) {
+        padding += 8.0;
+        return Positioned(
+          right: padding - 8,
+          bottom: 0,
+          top: 0,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _streamChatTheme.colorTheme.white,
+            ),
+            padding: const EdgeInsets.all(1),
+            child: UserAvatar(
+              user: user,
+              constraints: BoxConstraints.loose(const Size.fromRadius(7)),
+              showOnlineStatus: false,
+            ),
+          ),
+        );
+      }).toList(),
+    );
   }
 }
 

@@ -196,7 +196,7 @@ class StreamChatClient {
       _wsConnectionStatusController.add(status);
 
   /// The current status value of the websocket connection
-  ConnectionStatus? get wsConnectionStatus =>
+  ConnectionStatus get wsConnectionStatus =>
       _wsConnectionStatusController.value;
 
   /// This notifies the connection status of the websocket connection.
@@ -745,13 +745,15 @@ class StreamChatClient {
   /// Updates the [channelId] of type [ChannelType] data with [data]
   Future<PartialUpdateChannelResponse> updateChannelPartial(
     String channelId,
-    String channelType,
-    Map<String, dynamic> data,
-  ) =>
+    String channelType, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) =>
       _chatApi.channel.updateChannelPartial(
         channelId,
         channelType,
-        data,
+        set: set,
+        unset: unset,
       );
 
   /// Add a device for Push Notifications.
@@ -1125,12 +1127,14 @@ class StreamChatClient {
   Future<SendMessageResponse> sendMessage(
     Message message,
     String channelId,
-    String channelType,
-  ) =>
+    String channelType, {
+    bool skipPush = false,
+  }) =>
       _chatApi.message.sendMessage(
         channelId,
         channelType,
         message,
+        skipPush: skipPush,
       );
 
   /// Lists all the message replies for the [parentId]
@@ -1156,6 +1160,20 @@ class StreamChatClient {
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(Message message) =>
       _chatApi.message.updateMessage(message);
+
+  /// Partially update the given [messageId]
+  /// Use [set] to define values to be set
+  /// Use [unset] to define values to be unset
+  Future<UpdateMessageResponse> partialUpdateMessage(
+    String messageId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) =>
+      _chatApi.message.partialUpdateMessage(
+        messageId,
+        set: set,
+        unset: unset,
+      );
 
   /// Deletes the given message
   Future<EmptyResponse> deleteMessage(String messageId) =>
@@ -1192,7 +1210,7 @@ class StreamChatClient {
   /// [timeoutOrExpirationDate] can either be a [DateTime] or a value in seconds
   /// to be added to [DateTime.now]
   Future<UpdateMessageResponse> pinMessage(
-    Message message, {
+    String messageId, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
   }) {
     assert(() {
@@ -1212,17 +1230,23 @@ class StreamChatClient {
         Duration(seconds: timeoutOrExpirationDate.toInt()),
       );
     }
-    return updateMessage(
-      message.copyWith(
-        pinned: true,
-        pinExpires: pinExpires,
-      ),
+    return partialUpdateMessage(
+      messageId,
+      set: {
+        'pinned': true,
+        'pin_expires': pinExpires?.toUtc().toIso8601String(),
+      },
     );
   }
 
   /// Unpins provided message
-  Future<UpdateMessageResponse> unpinMessage(Message message) =>
-      updateMessage(message.copyWith(pinned: false));
+  Future<UpdateMessageResponse> unpinMessage(String messageId) =>
+      partialUpdateMessage(
+        messageId,
+        set: {
+          'pinned': false,
+        },
+      );
 
   /// Closes the [_ws] connection and resets the [state]
   /// If [flushChatPersistence] is true the client deletes all offline
@@ -1275,23 +1299,25 @@ class ClientState {
           .map((e) => e.me)
           .listen((user) {
         _userController.add(user);
-        if (user?.totalUnreadCount != null) {
-          _totalUnreadCountController.add(user?.totalUnreadCount);
+        final totalUnreadCount = user?.totalUnreadCount;
+        if (totalUnreadCount != null) {
+          _totalUnreadCountController.add(totalUnreadCount);
         }
 
-        if (user?.unreadChannels != null) {
-          _unreadChannelsController.add(user?.unreadChannels);
+        final unreadChannels = user?.unreadChannels;
+        if (unreadChannels != null) {
+          _unreadChannelsController.add(unreadChannels);
         }
       }),
       _client
           .on()
-          .where((event) => event.unreadChannels != null)
-          .map((e) => e.unreadChannels)
+          .map((event) => event.unreadChannels)
+          .whereType<int>()
           .listen(_unreadChannelsController.add),
       _client
           .on()
-          .where((event) => event.totalUnreadCount != null)
-          .map((e) => e.totalUnreadCount)
+          .map((event) => event.totalUnreadCount)
+          .whereType<int>()
           .listen(_totalUnreadCountController.add),
     ]);
 
@@ -1305,8 +1331,8 @@ class ClientState {
   final _subscriptions = <StreamSubscription>[];
 
   /// Used internally for optimistic update of unread count
-  set totalUnreadCount(int? unreadCount) {
-    _totalUnreadCountController.add(unreadCount ?? 0);
+  set totalUnreadCount(int unreadCount) {
+    _totalUnreadCountController.add(unreadCount);
   }
 
   void _listenChannelHidden() {
@@ -1374,16 +1400,16 @@ class ClientState {
   Stream<Map<String, User>> get usersStream => _usersController.stream;
 
   /// The current unread channels count
-  int? get unreadChannels => _unreadChannelsController.valueOrNull;
+  int get unreadChannels => _unreadChannelsController.value;
 
   /// The current unread channels count as a stream
-  Stream<int?> get unreadChannelsStream => _unreadChannelsController.stream;
+  Stream<int> get unreadChannelsStream => _unreadChannelsController.stream;
 
   /// The current total unread messages count
-  int? get totalUnreadCount => _totalUnreadCountController.valueOrNull;
+  int get totalUnreadCount => _totalUnreadCountController.value;
 
   /// The current total unread messages count as a stream
-  Stream<int?> get totalUnreadCountStream => _totalUnreadCountController.stream;
+  Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
 
   /// The current list of channels in memory as a stream
   Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;
@@ -1399,8 +1425,8 @@ class ClientState {
   final _channelsController = BehaviorSubject<Map<String, Channel>>.seeded({});
   final _userController = BehaviorSubject<OwnUser?>();
   final _usersController = BehaviorSubject<Map<String, User>>.seeded({});
-  final _unreadChannelsController = BehaviorSubject<int?>();
-  final _totalUnreadCountController = BehaviorSubject<int?>();
+  final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
+  final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
 
   /// Call this method to dispose this object
   void dispose() {

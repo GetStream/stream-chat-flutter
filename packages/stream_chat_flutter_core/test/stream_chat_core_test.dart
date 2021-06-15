@@ -235,6 +235,14 @@ void main() {
         final mockClient = MockClient();
         const streamChatCoreKey = Key('streamChatCore');
         const childKey = Key('child');
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(() => mockClient.disconnect()).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
@@ -246,13 +254,6 @@ void main() {
 
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event();
-        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(mockClient.disconnect).thenAnswer((_) async => null);
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
           find.byKey(streamChatCoreKey),
@@ -323,6 +324,14 @@ void main() {
         const childKey = Key('child');
         final _connectivityController =
             BehaviorSubject.seeded(ConnectivityResult.none);
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(() => mockClient.disconnect()).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
@@ -334,13 +343,6 @@ void main() {
 
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event();
-        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(mockClient.disconnect).thenAnswer((_) async => null);
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
 
         _connectivityController.add(ConnectivityResult.mobile);
 
@@ -397,6 +399,14 @@ void main() {
         const childKey = Key('child');
         final _connectivityController =
             BehaviorSubject.seeded(ConnectivityResult.none);
+
+        final event = Event();
+        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
+        when(() => mockClient.connect()).thenAnswer((_) async => event);
+        when(() => mockClient.disconnect()).thenAnswer((_) async => null);
+        when(() => mockClient.wsConnectionStatus)
+            .thenReturn(ConnectionStatus.disconnected);
+
         final streamChatCore = StreamChatCore(
           key: streamChatCoreKey,
           client: mockClient,
@@ -408,13 +418,6 @@ void main() {
 
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
-
-        final event = Event();
-        when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(mockClient.disconnect).thenAnswer((_) async => null);
-        when(() => mockClient.wsConnectionStatus)
-            .thenReturn(ConnectionStatus.disconnected);
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
           find.byKey(streamChatCoreKey),

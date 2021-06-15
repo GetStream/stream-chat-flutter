@@ -190,30 +190,39 @@ void main() {
   test('updateChannelPartial', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
-    const data = {'name': 'test-channel-name'};
+    const set = {
+      'name': 'Stream Team',
+      'profile_image': 'test-profile-image',
+    };
+
+    const unset = ['tag', 'last_name'];
 
     final path = _getChannelUrl(channelId, channelType);
 
     final channelModel = ChannelModel(
       id: channelId,
       type: channelType,
-      extraData: data,
+      extraData: set,
     );
 
-    when(() => client.patch(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-            }));
+    when(
+      () => client.patch(path, data: {'set': set, 'unset': unset}),
+    ).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+        }));
 
     final res = await channelApi.updateChannelPartial(
       channelId,
       channelType,
-      data,
+      set: set,
+      unset: unset,
     );
 
     expect(res, isNotNull);
 
-    verify(() => client.patch(path, data: any(named: 'data'))).called(1);
+    verify(
+      () => client.patch(path, data: {'set': set, 'unset': unset}),
+    ).called(1);
     verifyNoMoreInteractions(client);
   });
 

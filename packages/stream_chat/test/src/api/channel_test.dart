@@ -425,6 +425,54 @@ void main() {
       });
     });
 
+    test('`.partialUpdateMessage`', () async {
+      final message = Message(id: 'test-message-id');
+
+      const set = {'text': 'Update Message text'};
+      const unset = ['pinExpires'];
+
+      final updateMessageResponse = UpdateMessageResponse()
+        ..message = message.copyWith(text: set['text'], pinExpires: null);
+
+      when(
+        () => client.partialUpdateMessage(message.id, set: set, unset: unset),
+      ).thenAnswer((_) async => updateMessageResponse);
+
+      channel.state?.messagesStream.skip(1).listen(print);
+
+      expectLater(
+        // skipping first seed message list -> [] messages
+        channel.state?.messagesStream.skip(1),
+        emitsInOrder([
+          [
+            isSameMessageAs(
+              updateMessageResponse.message.copyWith(
+                status: MessageSendingStatus.sent,
+              ),
+              matchText: true,
+              matchSendingStatus: true,
+            ),
+          ],
+        ]),
+      );
+
+      final res = await channel.partialUpdateMessage(
+        message,
+        set: set,
+        unset: unset,
+      );
+
+      expect(res, isNotNull);
+      expect(res.message.id, message.id);
+      expect(res.message.id, message.id);
+      expect(res.message.text, set['text']);
+      expect(res.message.pinExpires, isNull);
+
+      verify(
+        () => client.partialUpdateMessage(message.id, set: set, unset: unset),
+      ).called(1);
+    });
+
     group('`.deleteMessage`', () {
       test('should work fine', () async {
         const messageId = 'test-message-id';
@@ -493,21 +541,21 @@ void main() {
           () async {
         final message = Message(id: 'test-message-id');
 
-        when(() => client.updateMessage(any(that: isSameMessageAs(message))))
-            .thenAnswer((invocation) async => UpdateMessageResponse()
-              ..message = (invocation.positionalArguments.first as Message)
-                  .copyWith(status: MessageSendingStatus.sent));
+        when(() => client.partialUpdateMessage(
+              message.id,
+              set: any(named: 'set'),
+              unset: any(named: 'unset'),
+            )).thenAnswer((_) async => UpdateMessageResponse()
+          ..message = message.copyWith(
+            pinned: true,
+            pinExpires: null,
+            status: MessageSendingStatus.sent,
+          ));
 
         expectLater(
           // skipping first seed message list -> [] messages
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(status: MessageSendingStatus.updating),
-                matchSendingStatus: true,
-              ),
-            ],
             [
               isSameMessageAs(
                 message.copyWith(status: MessageSendingStatus.sent),
@@ -523,8 +571,11 @@ void main() {
         expect(res.message.pinned, isTrue);
         expect(res.message.pinExpires, isNull);
 
-        verify(() => client.updateMessage(any(that: isSameMessageAs(message))))
-            .called(1);
+        verify(() => client.partialUpdateMessage(
+              message.id,
+              set: any(named: 'set'),
+              unset: any(named: 'unset'),
+            )).called(1);
       });
 
       test(
@@ -533,21 +584,23 @@ void main() {
           final message = Message(id: 'test-message-id');
           const timeoutOrExpirationDate = 300; // 300 seconds
 
-          when(() => client.updateMessage(any(that: isSameMessageAs(message))))
-              .thenAnswer((invocation) async => UpdateMessageResponse()
-                ..message = (invocation.positionalArguments.first as Message)
-                    .copyWith(status: MessageSendingStatus.sent));
+          when(() => client.partialUpdateMessage(
+                message.id,
+                set: any(named: 'set'),
+                unset: any(named: 'unset'),
+              )).thenAnswer((_) async => UpdateMessageResponse()
+            ..message = message.copyWith(
+              pinned: true,
+              pinExpires: DateTime.now().add(
+                const Duration(seconds: timeoutOrExpirationDate),
+              ),
+              status: MessageSendingStatus.sent,
+            ));
 
           expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
-              [
-                isSameMessageAs(
-                  message.copyWith(status: MessageSendingStatus.updating),
-                  matchSendingStatus: true,
-                ),
-              ],
               [
                 isSameMessageAs(
                   message.copyWith(status: MessageSendingStatus.sent),
@@ -566,9 +619,11 @@ void main() {
           expect(res.message.pinned, isTrue);
           expect(res.message.pinExpires, isNotNull);
 
-          verify(() =>
-                  client.updateMessage(any(that: isSameMessageAs(message))))
-              .called(1);
+          verify(() => client.partialUpdateMessage(
+                message.id,
+                set: any(named: 'set'),
+                unset: any(named: 'unset'),
+              )).called(1);
         },
       );
 
@@ -579,21 +634,21 @@ void main() {
           final timeoutOrExpirationDate =
               DateTime.now().add(const Duration(days: 3)); // 3 days
 
-          when(() => client.updateMessage(any(that: isSameMessageAs(message))))
-              .thenAnswer((invocation) async => UpdateMessageResponse()
-                ..message = (invocation.positionalArguments.first as Message)
-                    .copyWith(status: MessageSendingStatus.sent));
+          when(() => client.partialUpdateMessage(
+                message.id,
+                set: any(named: 'set'),
+                unset: any(named: 'unset'),
+              )).thenAnswer((_) async => UpdateMessageResponse()
+            ..message = message.copyWith(
+              pinned: true,
+              pinExpires: timeoutOrExpirationDate,
+              status: MessageSendingStatus.sent,
+            ));
 
           expectLater(
             // skipping first seed message list -> [] messages
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
-              [
-                isSameMessageAs(
-                  message.copyWith(status: MessageSendingStatus.updating),
-                  matchSendingStatus: true,
-                ),
-              ],
               [
                 isSameMessageAs(
                   message.copyWith(status: MessageSendingStatus.sent),
@@ -613,9 +668,11 @@ void main() {
           expect(res.message.pinExpires, isNotNull);
           expect(res.message.pinExpires, timeoutOrExpirationDate.toUtc());
 
-          verify(
-            () => client.updateMessage(any(that: isSameMessageAs(message))),
-          ).called(1);
+          verify(() => client.partialUpdateMessage(
+                message.id,
+                set: any(named: 'set'),
+                unset: any(named: 'unset'),
+              )).called(1);
         },
       );
 
@@ -640,21 +697,19 @@ void main() {
     test('`.unpinMessage`', () async {
       final message = Message(id: 'test-message-id', pinned: true);
 
-      when(() => client.updateMessage(any(that: isSameMessageAs(message))))
-          .thenAnswer((invocation) async => UpdateMessageResponse()
-            ..message = (invocation.positionalArguments.first as Message)
-                .copyWith(status: MessageSendingStatus.sent));
+      when(() => client.partialUpdateMessage(
+            message.id,
+            set: {'pinned': false},
+          )).thenAnswer((_) async => UpdateMessageResponse()
+        ..message = message.copyWith(
+          pinned: false,
+          status: MessageSendingStatus.sent,
+        ));
 
       expectLater(
         // skipping first seed message list -> [] messages
         channel.state?.messagesStream.skip(1),
         emitsInOrder([
-          [
-            isSameMessageAs(
-              message.copyWith(status: MessageSendingStatus.updating),
-              matchSendingStatus: true,
-            ),
-          ],
           [
             isSameMessageAs(
               message.copyWith(status: MessageSendingStatus.sent),
@@ -669,43 +724,11 @@ void main() {
       expect(res, isNotNull);
       expect(res.message.pinned, isFalse);
 
-      verify(
-        () => client.updateMessage(any(that: isSameMessageAs(message))),
-      ).called(1);
+      verify(() => client.partialUpdateMessage(
+            message.id,
+            set: {'pinned': false},
+          )).called(1);
     });
-
-    //
-    //   /// Send a file to this channel
-    //   Future<SendFileResponse> sendFile(
-    //     AttachmentFile file, {
-    //     ProgressCallback? onSendProgress,
-    //     CancelToken? cancelToken,
-    //   }) {
-    //     _checkInitialized();
-    //     return _client.sendFile(
-    //       file,
-    //       id!,
-    //       type,
-    //       onSendProgress: onSendProgress,
-    //       cancelToken: cancelToken,
-    //     );
-    //   }
-    //
-    //   /// Send an image to this channel
-    //   Future<SendImageResponse> sendImage(
-    //     AttachmentFile file, {
-    //     ProgressCallback? onSendProgress,
-    //     CancelToken? cancelToken,
-    //   }) {
-    //     _checkInitialized();
-    //     return _client.sendImage(
-    //       file,
-    //       id!,
-    //       type,
-    //       onSendProgress: onSendProgress,
-    //       cancelToken: cancelToken,
-    //     );
-    //   }
 
     group('`.search`', () {
       final filter = Filter.in_('cid', const [channelCid]);
@@ -1123,40 +1146,44 @@ void main() {
     });
 
     test('`.updatePartial`', () async {
-      const channelData = {
+      const set = {
         'name': 'Stream Team',
         'profile_image': 'test-profile-image',
       };
+
+      const unset = ['tag', 'last_name'];
 
       final channelModel = ChannelModel(
         cid: channelCid,
         extraData: {
           'coolness': 999,
-          ...channelData,
+          ...set,
         },
       );
 
       when(() => client.updateChannelPartial(
             channelId,
             channelType,
-            channelData,
+            set: set,
+            unset: unset,
           )).thenAnswer(
         (_) async => PartialUpdateChannelResponse()..channel = channelModel,
       );
 
-      final res = await channel.updatePartial(channelData);
+      final res = await channel.updatePartial(set: set, unset: unset);
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
       expect(
         res.channel.extraData,
-        {'coolness': 999, ...channelData},
+        {'coolness': 999, ...set},
       );
 
       verify(() => client.updateChannelPartial(
             channelId,
             channelType,
-            channelData,
+            set: set,
+            unset: unset,
           )).called(1);
     });
 
@@ -1379,12 +1406,6 @@ void main() {
 
       when(() => client.markChannelRead(channelId, channelType,
           messageId: messageId)).thenAnswer((_) async => EmptyResponse());
-
-      expectLater(
-        // skipping first seed unread count -> 0 unread count
-        channel.state?.unreadCountStream.skip(1),
-        emitsInOrder([0]),
-      );
 
       final res = await channel.markRead(messageId: messageId);
 

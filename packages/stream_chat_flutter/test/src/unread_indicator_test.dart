@@ -83,7 +83,7 @@ void main() {
         ),
       ));
 
-      expect(find.byType(SizedBox), findsOneWidget);
+      expect(find.text('0'), findsNothing);
     },
   );
 

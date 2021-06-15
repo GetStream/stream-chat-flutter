@@ -83,26 +83,28 @@ class ChannelImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final streamChat = StreamChat.of(context);
     final channel = this.channel ?? StreamChannel.of(context).channel;
-    return StreamBuilder<Map<String, dynamic>>(
+    return BetterStreamBuilder<Map<String, dynamic>>(
       stream: channel.extraDataStream,
       initialData: channel.extraData,
-      builder: (context, snapshot) {
+      builder: (context, data) {
         String? image;
         final chatThemeData = StreamChatTheme.of(context);
-        if (snapshot.data!.containsKey('image') == true) {
-          image = snapshot.data!['image'];
+        if (data.containsKey('image') == true) {
+          image = data['image'];
         } else if (channel.state?.members.length == 2) {
           final otherMember = channel.state?.members
               .firstWhere((member) => member.user?.id != streamChat.user?.id);
-          return StreamBuilder<User>(
-              stream: streamChat.client.state.usersStream.map(
-                  (users) => users[otherMember?.userId] ?? otherMember!.user!),
+          return BetterStreamBuilder<User?>(
+              stream: streamChat.client.state.usersStream
+                  .map((users) =>
+                      users[otherMember?.userId] ?? otherMember!.user!)
+                  .distinct(),
               initialData: otherMember!.user,
-              builder: (context, snapshot) => UserAvatar(
+              builder: (context, user) => UserAvatar(
                     borderRadius: borderRadius ??
                         chatThemeData
                             .channelPreviewTheme.avatarTheme?.borderRadius,
-                    user: snapshot.data ?? otherMember.user!,
+                    user: user ?? otherMember.user!,
                     constraints: constraints ??
                         chatThemeData
                             .channelPreviewTheme.avatarTheme?.constraints,
@@ -153,9 +155,7 @@ class ChannelImage extends StatelessWidget {
                     imageUrl: image,
                     errorWidget: (_, __, ___) => Center(
                       child: Text(
-                        snapshot.data?.containsKey('name') ?? false
-                            ? snapshot.data!['name'][0]
-                            : '',
+                        data.containsKey('name') ? data['name'][0] : '',
                         style: TextStyle(
                           color: chatThemeData.colorTheme.white,
                           fontWeight: FontWeight.bold,

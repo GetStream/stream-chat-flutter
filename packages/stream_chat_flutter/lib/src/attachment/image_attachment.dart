@@ -74,16 +74,16 @@ class ImageAttachment extends AttachmentWidget {
           if (imageUri.host == 'stream-io-cdn.com') {
             imageUri = imageUri.replace(queryParameters: {
               ...imageUri.queryParameters,
-              'h': '500',
-              'w': '500',
+              'h': '400',
+              'w': '400',
               'crop': 'center',
               'resize': 'crop',
             });
           } else if (imageUri.host == 'stream-cloud-uploads.imgix.net') {
             imageUri = imageUri.replace(queryParameters: {
               ...imageUri.queryParameters,
-              'height': '500',
-              'width': '500',
+              'height': '400',
+              'width': '400',
               'fit': 'crop',
             });
           }
@@ -92,10 +92,10 @@ class ImageAttachment extends AttachmentWidget {
           return _buildImageAttachment(
             context,
             CachedNetworkImage(
-              cacheKey: imageUri.path,
+              cacheKey: imageUrl,
               height: size?.height,
               width: size?.width,
-              placeholder: (_, __) {
+              placeholder: (context, __) {
                 final image = Image.asset(
                   'images/placeholder.png',
                   fit: BoxFit.cover,

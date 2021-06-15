@@ -73,7 +73,6 @@ class Message extends Equatable {
     this.extraData = const {},
     this.deletedAt,
     this.status = MessageSendingStatus.sent,
-    this.skipPush = false,
   })  : id = id ?? const Uuid().v4(),
         pinExpires = pinExpires?.toUtc(),
         createdAt = createdAt ?? DateTime.now(),
@@ -157,10 +156,6 @@ class Message extends Equatable {
   /// If true the message is silent
   @JsonKey(defaultValue: false)
   final bool silent;
-
-  /// If true the message will not send a push notification
-  @JsonKey(defaultValue: false)
-  final bool skipPush;
 
   /// If true the message is shadowed
   @JsonKey(
@@ -253,7 +248,6 @@ class Message extends Equatable {
     'pinned_at',
     'pin_expires',
     'pinned_by',
-    'skip_push',
   ];
 
   /// Serialize to json
@@ -291,7 +285,6 @@ class Message extends Equatable {
     User? pinnedBy,
     Map<String, Object?>? extraData,
     MessageSendingStatus? status,
-    bool? skipPush,
   }) {
     assert(() {
       if (pinExpires is! DateTime &&
@@ -331,7 +324,6 @@ class Message extends Equatable {
       pinnedBy: pinnedBy ?? this.pinnedBy,
       pinExpires:
           pinExpires == _pinExpires ? this.pinExpires : pinExpires as DateTime?,
-      skipPush: skipPush ?? this.skipPush,
     );
   }
 
@@ -398,7 +390,6 @@ class Message extends Equatable {
         pinnedBy,
         extraData,
         status,
-        skipPush,
       ];
 }
 

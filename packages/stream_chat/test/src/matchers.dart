@@ -40,11 +40,13 @@ class _IsSameEventAs extends Matcher {
 
 Matcher isSameMessageAs(
   Message targetMessage, {
+  bool matchText = false,
   bool matchReactions = false,
   bool matchSendingStatus = false,
 }) =>
     _IsSameMessageAs(
       targetMessage: targetMessage,
+      matchText: matchText,
       matchReactions: matchReactions,
       matchSendingStatus: matchSendingStatus,
     );
@@ -52,11 +54,13 @@ Matcher isSameMessageAs(
 class _IsSameMessageAs extends Matcher {
   const _IsSameMessageAs({
     required this.targetMessage,
+    this.matchText = false,
     this.matchReactions = false,
     this.matchSendingStatus = false,
   });
 
   final Message targetMessage;
+  final bool matchText;
   final bool matchReactions;
   final bool matchSendingStatus;
 
@@ -67,6 +71,9 @@ class _IsSameMessageAs extends Matcher {
   @override
   bool matches(covariant Message message, Map matchState) {
     var matches = message.id == targetMessage.id;
+    if (matchText) {
+      matches &= message.text == targetMessage.text;
+    }
     if (matchSendingStatus) {
       matches &= message.status == targetMessage.status;
     }

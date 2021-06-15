@@ -14,11 +14,15 @@ class MessageApi {
   Future<SendMessageResponse> sendMessage(
     String channelId,
     String channelType,
-    Message message,
-  ) async {
+    Message message, {
+    bool skipPush = false,
+  }) async {
     final response = await _client.post(
       '/channels/$channelType/$channelId/message',
-      data: {'message': message},
+      data: {
+        'message': message,
+        'skip_push': skipPush,
+      },
     );
     return SendMessageResponse.fromJson(response.data);
   }
@@ -52,6 +56,24 @@ class MessageApi {
     final response = await _client.post(
       '/messages/${message.id}',
       data: {'message': message},
+    );
+    return UpdateMessageResponse.fromJson(response.data);
+  }
+
+  /// Partially update the given [messageId]
+  /// Use [set] to define values to be set
+  /// Use [unset] to define values to be unset
+  Future<UpdateMessageResponse> partialUpdateMessage(
+    String messageId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
+    final response = await _client.put(
+      '/messages/$messageId',
+      data: {
+        if (set != null) 'set': set,
+        if (unset != null) 'unset': unset,
+      },
     );
     return UpdateMessageResponse.fromJson(response.data);
   }

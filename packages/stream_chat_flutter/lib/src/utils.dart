@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -332,7 +334,7 @@ Widget wrapAttachmentWidget(
   bool reverse,
 ) =>
     Material(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       shape: attachmentShape,
       type: MaterialType.transparency,
       child: attachmentWidget,

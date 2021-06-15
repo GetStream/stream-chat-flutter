@@ -23,6 +23,7 @@ class MessageReactionsModal extends StatelessWidget {
     this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
     this.attachmentBorderRadiusGeometry,
+    this.textBuilder,
   }) : super(key: key);
 
   /// Message to display reactions of
@@ -52,6 +53,9 @@ class MessageReactionsModal extends StatelessWidget {
   /// [BorderRadius] to apply to attachments
   final BorderRadius? attachmentBorderRadiusGeometry;
 
+  /// Customize the MessageWidget textBuilder
+  final Widget Function(BuildContext context, Message message)? textBuilder;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -73,111 +77,119 @@ class MessageReactionsModal extends StatelessWidget {
     final divFactor = message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
+    final hasFileAttachment =
+        message.attachments.any((it) => it.type == 'file') == true;
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutBack,
-      builder: (context, val, snapshot) {
-        final hasFileAttachment =
-            message.attachments.any((it) => it.type == 'file') == true;
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => Navigator.maybePop(context),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 10,
-                    sigmaY: 10,
-                  ),
-                  child: Container(
-                    color: StreamChatTheme.of(context).colorTheme.overlay,
-                  ),
-                ),
-              ),
-              Transform.scale(
-                scale: val,
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          if (showReactions &&
-                              (message.status == MessageSendingStatus.sent))
-                            Align(
-                              alignment: Alignment(
-                                  user!.id == message.user!.id
-                                      ? (divFactor >= 1.0
-                                          ? -0.2
-                                          : (1.2 - divFactor))
-                                      : (divFactor >= 1.0
-                                          ? 0.2
-                                          : -(1.2 - divFactor)),
-                                  0),
-                              child: ReactionPicker(
-                                message: message,
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          IgnorePointer(
-                            child: MessageWidget(
-                              key: const Key('MessageWidget'),
-                              reverse: reverse,
-                              message: message.copyWith(
-                                text: message.text!.length > 200
-                                    ? '${message.text!.substring(0, 200)}...'
-                                    : message.text,
-                              ),
-                              messageTheme: messageTheme,
-                              showReactions: false,
-                              showUsername: false,
-                              showUserAvatar: showUserAvatar,
-                              showTimestamp: false,
-                              translateUserAvatar: false,
-                              showSendingIndicator: false,
-                              shape: messageShape,
-                              attachmentShape: attachmentShape,
-                              padding: const EdgeInsets.all(0),
-                              attachmentBorderRadiusGeometry:
-                                  attachmentBorderRadiusGeometry
-                                      ?.mirrorBorderIfReversed(
-                                          reverse: !reverse),
-                              attachmentPadding: EdgeInsets.all(
-                                hasFileAttachment ? 4 : 2,
-                              ),
-                              textPadding: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal:
-                                    message.text!.isOnlyEmoji ? 0 : 16.0,
-                              ),
-                              showReactionPickerIndicator: showReactions &&
-                                  (message.status == MessageSendingStatus.sent),
-                            ),
-                          ),
-                          if (message.latestReactions?.isNotEmpty == true) ...[
-                            const SizedBox(height: 8),
-                            _buildReactionCard(context),
-                          ]
-                        ],
-                      ),
-                    ),
+    final numberOfReactions = StreamChatTheme.of(context).reactionIcons.length;
+    final shiftFactor =
+        numberOfReactions < 5 ? (5 - numberOfReactions) * 0.1 : 0.0;
+
+    final child = Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (showReactions &&
+                  (message.status == MessageSendingStatus.sent))
+                Align(
+                  alignment: Alignment(
+                      user!.id == message.user!.id
+                          ? (divFactor >= 1.0
+                              ? -0.2 - shiftFactor
+                              : (1.2 - divFactor))
+                          : (divFactor >= 1.0
+                              ? 0.2 + shiftFactor
+                              : -(1.2 - divFactor)),
+                      0),
+                  child: ReactionPicker(
+                    message: message,
                   ),
                 ),
+              const SizedBox(height: 8),
+              IgnorePointer(
+                child: MessageWidget(
+                  key: const Key('MessageWidget'),
+                  reverse: reverse,
+                  message: message.copyWith(
+                    text: message.text!.length > 200
+                        ? '${message.text!.substring(0, 200)}...'
+                        : message.text,
+                  ),
+                  messageTheme: messageTheme,
+                  showReactions: false,
+                  showUsername: false,
+                  showUserAvatar: showUserAvatar,
+                  showTimestamp: false,
+                  translateUserAvatar: false,
+                  showSendingIndicator: false,
+                  shape: messageShape,
+                  attachmentShape: attachmentShape,
+                  padding: const EdgeInsets.all(0),
+                  attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry
+                      ?.mirrorBorderIfReversed(reverse: !reverse),
+                  attachmentPadding: EdgeInsets.all(
+                    hasFileAttachment ? 4 : 2,
+                  ),
+                  textPadding: EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: message.text!.isOnlyEmoji ? 0 : 16.0,
+                  ),
+                  showReactionPickerIndicator: showReactions &&
+                      (message.status == MessageSendingStatus.sent),
+                  textBuilder: textBuilder,
+                  showPinHighlight: false,
+                ),
               ),
+              if (message.latestReactions?.isNotEmpty == true) ...[
+                const SizedBox(height: 8),
+                _buildReactionCard(
+                  context,
+                  user,
+                ),
+              ]
             ],
           ),
-        );
-      },
+        ),
+      ),
+    );
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => Navigator.maybePop(context),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: 10,
+                sigmaY: 10,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: StreamChatTheme.of(context).colorTheme.overlay,
+                ),
+              ),
+            ),
+          ),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutBack,
+            builder: (context, val, widget) => Transform.scale(
+              scale: val,
+              child: widget,
+            ),
+            child: child,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildReactionCard(BuildContext context) {
-    final currentUser = StreamChat.of(context).user;
+  Widget _buildReactionCard(BuildContext context, User? user) {
     final chatThemeData = StreamChatTheme.of(context);
     return Card(
       color: chatThemeData.colorTheme.white,
@@ -204,7 +216,7 @@ class MessageReactionsModal extends StatelessWidget {
                   children: message.latestReactions!
                       .map((e) => _buildReaction(
                             e,
-                            currentUser!,
+                            user!,
                             context,
                           ))
                       .toList(),

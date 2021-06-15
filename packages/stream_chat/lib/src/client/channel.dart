@@ -4,15 +4,15 @@ import 'dart:math';
 import 'package:collection/collection.dart'
     show IterableExtension, ListEquality;
 import 'package:dio/dio.dart';
+import 'package:rate_limiter/rate_limiter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/retry_queue.dart';
-import 'package:stream_chat/src/core/util/utils.dart';
 import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/event_type.dart';
-import 'package:rate_limiter/rate_limiter.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/utils.dart';
+import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 /// This a the class that manages a specific channel.
@@ -70,8 +70,11 @@ class Channel {
       true;
 
   /// Returns true if the channel is muted as a stream
-  Stream<bool>? get isMutedStream => _client.state.userStream.map((event) =>
-      event!.channelMutes.any((element) => element.channel.cid == cid) == true);
+  Stream<bool>? get isMutedStream => _client.state.userStream
+      .map((event) =>
+          event!.channelMutes.any((element) => element.channel.cid == cid) ==
+          true)
+      .distinct();
 
   /// True if the channel is a group
   bool get isGroup => memberCount != 2;
@@ -253,7 +256,10 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    final message = state!.messages.firstWhereOrNull(
+    final message = [
+      ...state!.messages,
+      ...state!.threads.values.expand((messages) => messages),
+    ].firstWhereOrNull(
       (it) => it.id == messageId,
     );
 
@@ -351,9 +357,13 @@ class Channel {
   }
 
   /// Send a [message] to this channel.
+  /// If [skipPush] is true the message will not send a push notification
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually sending the message.
-  Future<SendMessageResponse> sendMessage(Message message) async {
+  Future<SendMessageResponse> sendMessage(
+    Message message, {
+    bool skipPush = false,
+  }) async {
     _checkInitialized();
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
@@ -386,7 +396,6 @@ class Channel {
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
 
-        // ignore: unawaited_futures
         _uploadAttachments(
           message.id,
           message.attachments.map((it) => it.id),
@@ -396,7 +405,12 @@ class Channel {
         message = await attachmentsUploadCompleter.future;
       }
 
-      final response = await _client.sendMessage(message, id!, type);
+      final response = await _client.sendMessage(
+        message,
+        id!,
+        type,
+        skipPush: skipPush,
+      );
       state!.addMessage(response.message);
       return response;
     } catch (e) {
@@ -411,6 +425,8 @@ class Channel {
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
   Future<UpdateMessageResponse> updateMessage(Message message) async {
+    final originalMessage = message;
+
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
     _messageAttachmentsUploadCompleter
@@ -432,12 +448,11 @@ class Channel {
     state?.addMessage(message);
 
     try {
-      if (message.attachments.any((it) => !it.uploadState.isSuccess) == true) {
+      if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] =
             attachmentsUploadCompleter;
 
-        // ignore: unawaited_futures
         _uploadAttachments(
           message.id,
           message.attachments.map((it) => it.id),
@@ -454,6 +469,40 @@ class Channel {
       );
 
       state?.addMessage(m);
+
+      return response;
+    } catch (e) {
+      if (e is StreamChatNetworkError) {
+        if (e.isRetriable) {
+          state!._retryQueue.add([message]);
+        } else {
+          state?.addMessage(originalMessage);
+        }
+      }
+      rethrow;
+    }
+  }
+
+  /// Partially updates the [message] in this channel.
+  /// Use [set] to define values to be set
+  /// Use [unset] to define values to be unset
+  Future<UpdateMessageResponse> partialUpdateMessage(
+    Message message, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
+    try {
+      final response = await _client.partialUpdateMessage(
+        message.id,
+        set: set,
+        unset: unset,
+      );
+
+      final updatedMessage = response.message.copyWith(
+        ownReactions: message.ownReactions,
+      );
+
+      state?.addMessage(updatedMessage);
 
       return response;
     } catch (e) {
@@ -527,17 +576,23 @@ class Channel {
         Duration(seconds: timeoutOrExpirationDate.toInt()),
       );
     }
-    return updateMessage(
-      message.copyWith(
-        pinned: true,
-        pinExpires: pinExpires,
-      ),
+    return partialUpdateMessage(
+      message,
+      set: {
+        'pinned': true,
+        'pin_expires': pinExpires?.toUtc().toIso8601String(),
+      },
     );
   }
 
   /// Unpins provided message
   Future<UpdateMessageResponse> unpinMessage(Message message) =>
-      updateMessage(message.copyWith(pinned: false));
+      partialUpdateMessage(
+        message,
+        set: {
+          'pinned': false,
+        },
+      );
 
   /// Send a file to this channel
   Future<SendFileResponse> sendFile(
@@ -747,11 +802,12 @@ class Channel {
   }
 
   /// Edit the channel custom data
-  Future<PartialUpdateChannelResponse> updatePartial(
-    Map<String, dynamic> channelData,
-  ) async {
+  Future<PartialUpdateChannelResponse> updatePartial({
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) async {
     _checkInitialized();
-    return _client.updateChannelPartial(id!, type, channelData);
+    return _client.updateChannelPartial(id!, type, set: set, unset: unset);
   }
 
   /// Delete this channel. Messages are permanently removed.
@@ -856,9 +912,9 @@ class Channel {
   /// particular message as read
   Future<EmptyResponse> markRead({String? messageId}) async {
     _checkInitialized();
-    client.state.totalUnreadCount = max(
-        0, (client.state.totalUnreadCount ?? 0) - (state!.unreadCount ?? 0));
-    state!._unreadCountController.add(0);
+    client.state.totalUnreadCount =
+        max(0, (client.state.totalUnreadCount) - (state!.unreadCount));
+    state!.unreadCount = 0;
     return _client.markChannelRead(id!, type, messageId: messageId);
   }
 
@@ -1252,7 +1308,7 @@ class ChannelClientState {
       (r) => r.user.id == _channel._client.state.user?.id,
     );
     if (userRead != null) {
-      _unreadCountController.add(userRead.unreadMessages);
+      unreadCount = userRead.unreadMessages;
     }
   }
 
@@ -1432,7 +1488,7 @@ class ChannelClientState {
       }
 
       if (_countMessageAsUnread(message)) {
-        _unreadCountController.add(_unreadCountController.value + 1);
+        unreadCount += 1;
       }
     }));
   }
@@ -1488,7 +1544,7 @@ class ChannelClientState {
           if (userReadIndex != null && userReadIndex != -1) {
             final userRead = readList.removeAt(userReadIndex);
             if (userRead.user.id == _channel._client.state.user!.id) {
-              _unreadCountController.add(0);
+              unreadCount = 0;
             }
             readList.add(Read(
               user: event.user!,
@@ -1508,7 +1564,7 @@ class ChannelClientState {
   /// Channel message list as a stream
   Stream<List<Message>?> get messagesStream => channelStateStream
       .map((cs) => cs.messages)
-      .distinct((prev, next) => const ListEquality().equals(prev, next));
+      .distinct(const ListEquality().equals);
 
   /// Channel pinned message list
   List<Message>? get pinnedMessages => _channelState.pinnedMessages.toList();
@@ -1538,7 +1594,7 @@ class ChannelClientState {
         _channel.client.state.usersStream,
         (members, users) =>
             members!.map((e) => e!.copyWith(user: users[e.user!.id])).toList(),
-      );
+      ).distinct(const ListEquality().equals);
 
   /// Channel watcher count
   int? get watcherCount => _channelState.watcherCount;
@@ -1568,11 +1624,13 @@ class ChannelClientState {
 
   final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
 
+  set unreadCount(int value) => _unreadCountController.add(value);
+
   /// Unread count getter as a stream
-  Stream<int> get unreadCountStream => _unreadCountController.stream;
+  Stream<int> get unreadCountStream => _unreadCountController.stream.distinct();
 
   /// Unread count getter
-  int? get unreadCount => _unreadCountController.value;
+  int get unreadCount => _unreadCountController.value;
 
   bool _countMessageAsUnread(Message message) {
     final userId = _channel.client.state.user?.id;
@@ -1708,7 +1766,9 @@ class ChannelClientState {
   List<User> get typingEvents => _typingEventsController.value;
 
   /// Channel related typing users stream
-  Stream<List<User>> get typingEventsStream => _typingEventsController.stream;
+  Stream<List<User>> get typingEventsStream =>
+      _typingEventsController.stream.distinct(const ListEquality().equals);
+
   final BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 

@@ -114325,6 +114325,9 @@ class Emoji {
   /// Get all Emojis
   static List<Emoji> all() => List.unmodifiable(_emojis);
 
+  static Iterable<String> chars() =>
+      _emojis.map((e) => e.char).whereType<String>();
+
   /// Returns Emoji by [char] and character
   static Emoji? byChar(String char) {
     return _emojis.firstWhereOrNull((Emoji emoji) => emoji.char == char);

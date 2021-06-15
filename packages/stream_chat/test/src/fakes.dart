@@ -87,15 +87,8 @@ class FakeClientState extends Fake implements ClientState {
   @override
   OwnUser? get user => OwnUser(id: 'test-user-id');
 
-  var _totalUnreadCount = 0;
-
   @override
-  int? get totalUnreadCount => _totalUnreadCount;
-
-  @override
-  set totalUnreadCount(int? unreadCount) {
-    _totalUnreadCount += unreadCount ?? 0;
-  }
+  int totalUnreadCount = 0;
 }
 
 class FakeMessage extends Fake implements Message {}
