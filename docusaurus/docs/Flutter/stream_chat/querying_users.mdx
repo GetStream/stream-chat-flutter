@@ -4,3 +4,67 @@ sidebar_position: 4
 title: Querying Users
 ---
 
+The Query Users method allows you to search for users and see if they are online/offline.
+The example below shows how you can retrieve the details for 3 users in one API call:
+
+```dart
+final _result = client.queryUsers(
+  filter: Filter.in_('id', ['john', 'jack', 'jessie']),
+);
+```
+
+You can also add sort options and pagination to the query:
+
+```dart
+final _result = client.queryUsers(
+  filter: Filter.in_('id', ['john', 'jack', 'jessie']),
+  sort: [SortOption('last_active')],
+  pagination: PaginationParams(
+    offset: 0,
+    limit: 20,
+  ),
+);
+```
+
+You can filter and sort on the custom fields you've set for your user, the user id, and when the user was last active.
+
+The options for the queryUser method are presence, limit, and offset.
+If presence is true this makes sure you receive the user.presence.changed event when a user goes online or offline.
+
+### Querying using the autocomplete operator
+
+You can autocomplete the results of your user query by username and/or ID.
+
+### By Custom Field
+
+```dart
+final _result = client.queryUsers(
+  filter: Filter.autoComplete('name', 'ro'),
+);
+```
+This would return an array of any matching users, such as:
+
+```json
+[
+    {
+        "id": "userID",
+        "name": "Curiosity Rover"
+    },
+    {
+        "id": "userID2",
+        "name": "Roxy"
+    },
+    {
+        "id": "userID3",
+        "name": "Roxanne"
+    }
+]
+```
+
+### By ID
+
+```dart
+final _result = client.queryUsers(
+  filter: Filter.autoComplete('id', 'USER_ID'),
+);
+```
