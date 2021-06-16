@@ -1,14 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/mute.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'own_user.g.dart';
 
 /// The class that defines the own user model
 /// This object can be found in [Event]
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class OwnUser extends User {
   /// Constructor used for json serialization
   OwnUser({
@@ -53,28 +53,23 @@ class OwnUser extends User {
       );
 
   /// List of user devices
-  @JsonKey(
-      includeIfNull: false,
-      toJson: Serializer.readOnly,
-      defaultValue: <Device>[])
+  @JsonKey(includeIfNull: false, defaultValue: <Device>[])
   final List<Device> devices;
 
   /// List of users muted by the user
-  @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: <Mute>[])
+  @JsonKey(includeIfNull: false, defaultValue: <Mute>[])
   final List<Mute> mutes;
 
   /// List of users muted by the user
-  @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: <Mute>[])
+  @JsonKey(includeIfNull: false, defaultValue: <Mute>[])
   final List<Mute> channelMutes;
 
   /// Total unread messages by the user
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
+  @JsonKey(includeIfNull: false, defaultValue: 0)
   final int totalUnreadCount;
 
   /// Total unread channels by the user
-  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
+  @JsonKey(includeIfNull: false)
   final int? unreadChannels;
 
   /// Known top level fields.
@@ -87,10 +82,4 @@ class OwnUser extends User {
     'channel_mutes',
     ...User.topLevelFields,
   ];
-
-  /// Serialize to json
-  @override
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$OwnUserToJson(this),
-      );
 }
