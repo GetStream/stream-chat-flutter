@@ -252,7 +252,7 @@ void main() {
               'reactions': [...reactions.map((it) => it.toJson())]
             }));
 
-    final res = await messageApi.getReactions(messageId, options);
+    final res = await messageApi.getReactions(messageId, options: options);
 
     expect(res, isNotNull);
     expect(res.reactions.length, reactions.length);
@@ -311,7 +311,7 @@ void main() {
               'messages': [...messages.map((it) => it.toJson())]
             }));
 
-    final res = await messageApi.getReplies(parentId, options);
+    final res = await messageApi.getReplies(parentId, options: options);
 
     expect(res, isNotNull);
     expect(res.messages.length, messages.length);

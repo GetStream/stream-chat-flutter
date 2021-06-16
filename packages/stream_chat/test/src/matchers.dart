@@ -1,7 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart' show MultipartFile;
+import 'package:stream_chat/src/client/channel.dart';
+import 'package:stream_chat/src/core/models/channel_model.dart';
+import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
 Matcher isSameMultipartFileAs(MultipartFile targetFile) =>
@@ -95,4 +99,36 @@ class _IsSameMessageAs extends Matcher {
     }
     return matches;
   }
+}
+
+Matcher isSameUserAs(User targetUser) => _IsSameUserAs(targetUser: targetUser);
+
+class _IsSameUserAs extends Matcher {
+  const _IsSameUserAs({required this.targetUser});
+
+  final User targetUser;
+
+  @override
+  Description describe(Description description) =>
+      description.add('is same user as $targetUser');
+
+  @override
+  bool matches(covariant User user, Map matchState) => user.id == targetUser.id;
+}
+
+Matcher isCorrectChannelFor(ChannelState channelState) =>
+    _IsCorrectChannelFor(channelState: channelState);
+
+class _IsCorrectChannelFor extends Matcher {
+  const _IsCorrectChannelFor({required this.channelState});
+
+  final ChannelState channelState;
+
+  @override
+  Description describe(Description description) =>
+      description.add('is correct channel for $channelState');
+
+  @override
+  bool matches(covariant Channel channel, Map matchState) =>
+      channel.cid == channelState.channel?.cid;
 }

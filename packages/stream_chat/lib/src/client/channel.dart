@@ -22,9 +22,9 @@ class Channel {
     this._client,
     this._type,
     this._id, {
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?>? extraData,
   })  : _cid = _id != null ? '$_type:$_id' : null,
-        _extraData = extraData {
+        _extraData = extraData ?? {} {
     _client.logger.info('New Channel instance not initialized created');
   }
 
@@ -202,8 +202,13 @@ class Channel {
   }
 
   /// Channel extra data
-  Map<String, dynamic> get extraData =>
-      state?._channelState.channel?.extraData ?? _extraData;
+  Map<String, Object?> get extraData {
+    var data = state?._channelState.channel?.extraData;
+    if (data == null || data.isEmpty) {
+      data = _extraData;
+    }
+    return data;
+  }
 
   /// Channel extra data as a stream
   Stream<Map<String, dynamic>> get extraDataStream {
@@ -942,7 +947,7 @@ class Channel {
     state = ChannelClientState(this, channelState);
 
     if (cid != null) {
-      client.state.channels[cid!] = this;
+      client.state.channels = {cid!: this};
     }
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
@@ -959,8 +964,8 @@ class Channel {
   /// Set [preferOffline] to true to avoid the api call if the data is already
   /// in the offline storage
   Future<QueryRepliesResponse> getReplies(
-    String parentId,
-    PaginationParams options, {
+    String parentId, {
+    PaginationParams? options,
     bool preferOffline = false,
   }) async {
     final cachedReplies = await _client.chatPersistenceClient?.getReplies(
@@ -973,19 +978,22 @@ class Channel {
         return QueryRepliesResponse()..messages = cachedReplies;
       }
     }
-    final repliesResponse = await _client.getReplies(parentId, options);
+    final repliesResponse = await _client.getReplies(
+      parentId,
+      options: options,
+    );
     state?.updateThreadInfo(parentId, repliesResponse.messages);
     return repliesResponse;
   }
 
   /// List the reactions for a message in the channel
   Future<QueryReactionsResponse> getReactions(
-    String messageId,
-    PaginationParams options,
-  ) =>
+    String messageId, {
+    PaginationParams? options,
+  }) =>
       _client.getReactions(
         messageId,
-        options,
+        options: options,
       );
 
   /// Retrieves a list of messages by ID

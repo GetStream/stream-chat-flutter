@@ -142,13 +142,13 @@ class MessageApi {
 
   /// Get all the reactions for a [messageId]
   Future<QueryReactionsResponse> getReactions(
-    String messageId,
-    PaginationParams options,
-  ) async {
+    String messageId, {
+    PaginationParams? options,
+  }) async {
     final response = await _client.get(
       '/messages/$messageId/reactions',
       queryParameters: {
-        ...options.toJson(),
+        if (options != null) ...options.toJson(),
       },
     );
     return QueryReactionsResponse.fromJson(response.data);
@@ -168,13 +168,13 @@ class MessageApi {
 
   /// Lists all the message replies for the [parentId]
   Future<QueryRepliesResponse> getReplies(
-    String parentId,
-    PaginationParams options,
-  ) async {
+    String parentId, {
+    PaginationParams? options,
+  }) async {
     final response = await _client.get(
       '/messages/$parentId/replies',
       queryParameters: {
-        ...options.toJson(),
+        if (options != null) ...options.toJson(),
       },
     );
     return QueryRepliesResponse.fromJson(response.data);

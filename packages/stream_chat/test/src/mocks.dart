@@ -18,6 +18,7 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
+import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'db/chat_persistence_client_test.dart';
@@ -66,7 +67,13 @@ class MockGeneralApi extends Mock implements GeneralApi {}
 class MockAttachmentFileUploader extends Mock
     implements AttachmentFileUploader {}
 
-class MockPersistenceClient extends Mock implements ChatPersistenceClient {}
+class MockPersistenceClient extends Mock implements ChatPersistenceClient {
+  @override
+  Future<void> connect(String userId) => Future.value();
+
+  @override
+  Future<void> disconnect({bool flush = false}) => Future.value();
+}
 
 class MockStreamChatClient extends Mock implements StreamChatClient {
   @override
@@ -105,3 +112,5 @@ class MockRetryQueueChannel extends Mock implements Channel {
   @override
   StreamChatClient get client => _client ??= MockStreamChatClient();
 }
+
+class MockWebSocket extends Mock implements WebSocket {}

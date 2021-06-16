@@ -63,7 +63,7 @@ class StreamChatClient {
   /// application.
   StreamChatClient(
     String apiKey, {
-    this.logLevel = Level.ALL,
+    this.logLevel = Level.WARNING,
     LogHandlerFunction? logHandlerFunction,
     RetryPolicy? retryPolicy,
     Location? location,
@@ -71,9 +71,11 @@ class StreamChatClient {
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
+    WebSocket? ws,
     AttachmentFileUploader? attachmentFileUploader,
   }) {
-    _setupLogger(logHandlerFunction);
+    this.logHandlerFunction = logHandlerFunction ?? _defaultLogHandler;
+    logger.info('Initiating new StreamChatClient');
 
     final options = StreamHttpClientOptions(
       baseUrl: baseURL,
@@ -92,13 +94,14 @@ class StreamChatClient {
           logger: detachedLogger('🕸️'),
         );
 
-    _ws = WebSocket(
-      apiKey: apiKey,
-      baseUrl: options.baseUrl,
-      tokenManager: _tokenManager,
-      handler: handleEvent,
-      logger: detachedLogger('🔌'),
-    );
+    _ws = ws ??
+        WebSocket(
+          apiKey: apiKey,
+          baseUrl: options.baseUrl,
+          tokenManager: _tokenManager,
+          handler: handleEvent,
+          logger: detachedLogger('🔌'),
+        );
 
     _retryPolicy = retryPolicy ??
         RetryPolicy(
@@ -107,8 +110,6 @@ class StreamChatClient {
         );
 
     state = ClientState(this);
-
-    logger.info('instantiating new client');
   }
 
   late final StreamChatApi _chatApi;
@@ -160,7 +161,7 @@ class StreamChatClient {
   /// Client specific logger instance.
   /// Refer to the class [Logger] to learn more about the specific
   /// implementation.
-  final Logger logger = Logger.detached('📡');
+  late final Logger logger = detachedLogger('📡');
 
   /// A function that has a parameter of type [LogRecord].
   /// This is called on every new log record.
@@ -185,7 +186,7 @@ class StreamChatClient {
 
   final _eventController = BehaviorSubject<Event>();
 
-  /// Stream of [Event] coming from websocket connection
+  /// Stream of [Event] coming from [_ws] connection
   /// Listen to this or use the [on] method to filter specific event types
   Stream<Event> get eventStream => _eventController.stream;
 
@@ -195,12 +196,12 @@ class StreamChatClient {
   set _wsConnectionStatus(ConnectionStatus status) =>
       _wsConnectionStatusController.add(status);
 
-  /// The current status value of the websocket connection
+  /// The current status value of the [_ws] connection
   ConnectionStatus get wsConnectionStatus =>
       _wsConnectionStatusController.value;
 
-  /// This notifies the connection status of the websocket connection.
-  /// Listen to this to get notified when the websocket tries to reconnect.
+  /// This notifies the connection status of the [_ws] connection.
+  /// Listen to this to get notified when the [_ws] tries to reconnect.
   Stream<ConnectionStatus> get wsConnectionStatusStream =>
       _wsConnectionStatusController.stream.distinct();
 
@@ -215,19 +216,9 @@ class StreamChatClient {
       };
 
   ///
-  Logger detachedLogger(
-    String name,
-  ) =>
-      Logger.detached(name)
-        ..level = logLevel
-        ..onRecord.listen(logHandlerFunction);
-
-  void _setupLogger(LogHandlerFunction? logHandlerFunction) {
-    logger.level = logLevel;
-    this.logHandlerFunction = logHandlerFunction ?? _defaultLogHandler;
-    logger.onRecord.listen(this.logHandlerFunction);
-    logger.info('logger setup');
-  }
+  Logger detachedLogger(String name) => Logger.detached(name)
+    ..level = logLevel
+    ..onRecord.listen(logHandlerFunction);
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
@@ -325,9 +316,13 @@ class StreamChatClient {
 
     _wsConnectionStatus = ConnectionStatus.connecting;
 
-    _connectionStatusSubscription = _ws.connectionStatusStream.listen(
-      _connectionStatusHandler,
-    );
+    // skipping `ws` seed connection status -> ConnectionStatus.disconnected
+    // otherwise `client.wsConnectionStatusStream` will emit in order
+    // 1. ConnectionStatus.disconnected -> client seed status
+    // 2. ConnectionStatus.connecting -> client connecting status
+    // 3. ConnectionStatus.disconnected -> ws seed status
+    _connectionStatusSubscription =
+        _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
       return await _ws.connect(user);
@@ -768,13 +763,13 @@ class StreamChatClient {
       _chatApi.device.removeDevice(id);
 
   /// Get a development token
-  String devToken(String userId) => Token.development(userId).rawValue;
+  Token devToken(String userId) => Token.development(userId);
 
   /// Returns a channel client with the given type, id and custom data.
   Channel channel(
     String type, {
     String? id,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?>? extraData,
   }) {
     if (id != null && state.channels.containsKey('$type:$id')) {
       return state.channels['$type:$id']!;
@@ -796,6 +791,7 @@ class StreamChatClient {
       );
 
   /// watches the provided channel
+  /// Creates first if not yet created
   Future<ChannelState> watchChannel(
     String channelType, {
     String? channelId,
@@ -809,6 +805,7 @@ class StreamChatClient {
       );
 
   /// Query the API, get messages, members or other channel fields
+  /// Creates the channel first if not yet created
   Future<ChannelState> queryChannel(
     String channelType, {
     bool state = true,
@@ -1139,22 +1136,22 @@ class StreamChatClient {
 
   /// Lists all the message replies for the [parentId]
   Future<QueryRepliesResponse> getReplies(
-    String parentId,
-    PaginationParams options,
-  ) =>
+    String parentId, {
+    PaginationParams? options,
+  }) =>
       _chatApi.message.getReplies(
         parentId,
-        options,
+        options: options,
       );
 
   /// Get all the reactions for a [messageId]
   Future<QueryReactionsResponse> getReactions(
-    String messageId,
-    PaginationParams options,
-  ) =>
+    String messageId, {
+    PaginationParams? options,
+  }) =>
       _chatApi.message.getReactions(
         messageId,
-        options,
+        options: options,
       );
 
   /// Update the given message

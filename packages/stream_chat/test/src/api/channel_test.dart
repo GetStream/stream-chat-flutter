@@ -1490,7 +1490,6 @@ void main() {
 
     test('`.getReplies`', () async {
       const parentId = 'test-parent-id';
-      const options = PaginationParams();
 
       final messages = List.generate(
         3,
@@ -1500,22 +1499,21 @@ void main() {
         ),
       );
 
-      when(() => client.getReplies(parentId, options)).thenAnswer(
+      when(() => client.getReplies(parentId)).thenAnswer(
         (_) async => QueryRepliesResponse()..messages = messages,
       );
 
-      final res = await channel.getReplies(parentId, options);
+      final res = await channel.getReplies(parentId);
 
       expect(res, isNotNull);
       expect(res.messages.length, messages.length);
       expect(res.messages.every((it) => it.parentId == parentId), isTrue);
 
-      verify(() => client.getReplies(parentId, options)).called(1);
+      verify(() => client.getReplies(parentId)).called(1);
     });
 
     test('`.getReactions`', () async {
       const messageId = 'test-message-id';
-      const options = PaginationParams();
 
       final reactions = List.generate(
         3,
@@ -1525,17 +1523,17 @@ void main() {
         ),
       );
 
-      when(() => client.getReactions(messageId, options)).thenAnswer(
+      when(() => client.getReactions(messageId)).thenAnswer(
         (_) async => QueryReactionsResponse()..reactions = reactions,
       );
 
-      final res = await channel.getReactions(messageId, options);
+      final res = await channel.getReactions(messageId);
 
       expect(res, isNotNull);
       expect(res.reactions.length, reactions.length);
       expect(res.reactions.every((it) => it.messageId == messageId), isTrue);
 
-      verify(() => client.getReactions(messageId, options)).called(1);
+      verify(() => client.getReactions(messageId)).called(1);
     });
 
     test('`.getMessagesById`', () async {

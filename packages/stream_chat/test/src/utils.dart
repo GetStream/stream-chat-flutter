@@ -13,3 +13,12 @@ Directory get currentDirectory {
   }
   return directory;
 }
+
+// Extension function to convert int into durations
+extension IntX on num {
+  Duration toDuration() => Duration(milliseconds: toInt());
+}
+
+// Top level util function to delay the code execution
+Future delay(num milliseconds) =>
+    Future.delayed(Duration(milliseconds: milliseconds.toInt()));
