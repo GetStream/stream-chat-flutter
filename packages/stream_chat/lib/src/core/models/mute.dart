@@ -1,12 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/util/serializer.dart';
 import 'package:stream_chat/src/core/models/user.dart';
+import 'package:stream_chat/src/core/util/serializer.dart';
 
 part 'mute.g.dart';
 
 /// The class that contains the information about a muted user
-@JsonSerializable()
+@JsonSerializable(
+  createToJson: false,
+)
 class Mute {
   /// Constructor used for json serialization
   Mute({
@@ -34,7 +36,4 @@ class Mute {
   /// The date of the last update
   @JsonKey(includeIfNull: false, toJson: Serializer.readOnly)
   final DateTime updatedAt;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$MuteToJson(this);
 }
