@@ -4,3 +4,30 @@ sidebar_position: 10
 title: Channel Members
 ---
 
+### Adding & Removing Channel Members
+
+Using the addMembers() method adds the given users as members, while removeMembers() removes them.
+
+```dart
+await channel.addMembers(["thierry", "josh"]);
+await channel.removeMembers(["tommaso"]);
+```
+
+You can optionally include a message object that client-side SDKs will use to populate a system message.
+This works for both add and remove members:
+
+```dart
+// using client-side client
+await channel.addMembers(['tommaso'], Message(text: 'Tommaso joined'));
+```
+
+### Leaving a channel
+
+It is possible for user to leave the channel without moderator-level permissions.
+Make sure channel members have `RemoveOwnChannelMembership` permission.
+
+```dart
+// remove own channel membership
+await channel.removeMembers(['my_user_id']);
+```
+

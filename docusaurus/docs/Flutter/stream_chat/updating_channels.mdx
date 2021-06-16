@@ -4,3 +4,43 @@ sidebar_position: 9
 title: Updating Channels
 ---
 
+There are two ways to update a channel using the Stream API - a partial or full update.
+A partial update will retain any custom key-value data, whereas a complete update is going to remove any that are unspecified in the API request.
+
+### Partial Update
+
+A partial update can be used to set and unset specific fields when it is necessary to retain additional custom data fields on the object.
+AKA a patch style update.
+
+```dart
+// Here's a channel with some custom field data that might be useful
+var channel = client.channel(type, id: id, extraData: {
+  "source": "user",
+  "source_detail" :{ "user_id": 123 },
+  "channel_detail" :{ "topic": "Plants and Animals", "rating": "pg" }
+});
+
+// let's change the source of this channel
+await channel.updatePartial({ "set" :{ "source": "system" } });
+
+// since it's system generated we no longer need source_detail
+await channel.updatePartial({ "unset": ["source_detail"] });
+
+// and finally update one of the nested fields in the channel_detail
+await channel.updatePartial({ "set": { "channel_detail.topic": "Nature" } });
+
+// and maybe we decide we no longer need a rating
+await channel.updatePartial({ "unset": ["channel_detail.rating"] });
+```
+
+### Full Update (overwrite)
+
+The update function updates all of the channel data.
+<b>Any data that is present on the channel and not included in a full update will be deleted.</b>
+
+```dart
+await channel.update({
+  "name": "myspecialchannel",
+  "color": "green",
+}, Message(text: "Thierry changed the channel color to green"));
+```
