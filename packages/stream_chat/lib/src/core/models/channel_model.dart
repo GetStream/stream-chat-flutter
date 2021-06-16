@@ -78,8 +78,7 @@ class ChannelModel {
   final DateTime? deletedAt;
 
   /// The count of this channel members
-  @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
   final int memberCount;
 
   /// Map of custom channel extraData

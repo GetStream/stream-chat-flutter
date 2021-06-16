@@ -3550,7 +3550,7 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
     required Map<String, Object?> extraData,
-  })   : id = Value(id),
+  })  : id = Value(id),
         extraData = Value(extraData);
   static Insertable<UserEntity> custom({
     Expression<String>? id,
@@ -4723,7 +4723,7 @@ class ChannelQueriesCompanion extends UpdateCompanion<ChannelQueryEntity> {
   ChannelQueriesCompanion.insert({
     required String queryHash,
     required String channelCid,
-  })   : queryHash = Value(queryHash),
+  })  : queryHash = Value(queryHash),
         channelCid = Value(channelCid);
   static Insertable<ChannelQueryEntity> custom({
     Expression<String>? queryHash,

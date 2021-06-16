@@ -61,21 +61,16 @@ class OwnUser extends User {
 
   /// List of users muted by the user
   @JsonKey(
-      includeIfNull: false,
-      toJson: Serializer.readOnly,
-      defaultValue: <Mute>[])
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: <Mute>[])
   final List<Mute> mutes;
 
   /// List of users muted by the user
   @JsonKey(
-      includeIfNull: false,
-      toJson: Serializer.readOnly,
-      defaultValue: <Mute>[])
+      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: <Mute>[])
   final List<Mute> channelMutes;
 
   /// Total unread messages by the user
-  @JsonKey(
-      includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
+  @JsonKey(includeIfNull: false, toJson: Serializer.readOnly, defaultValue: 0)
   final int totalUnreadCount;
 
   /// Total unread channels by the user

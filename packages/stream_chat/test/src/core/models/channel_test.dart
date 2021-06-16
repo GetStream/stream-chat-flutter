@@ -1,22 +1,12 @@
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('src/models/channel', () {
-    const jsonExample = '''
-      {
-        "id": "test",
-        "type": "livestream",
-        "cid": "livestream:test",
-        "cats": true,
-        "fruit": ["bananas", "apples"]
-      }      
-      ''';
-
     test('should parse json correctly', () {
-      final channel = ChannelModel.fromJson(json.decode(jsonExample));
+      final channel = ChannelModel.fromJson(jsonFixture('channel.json'));
       expect(channel.id, equals('test'));
       expect(channel.type, equals('livestream'));
       expect(channel.cid, equals('livestream:test'));

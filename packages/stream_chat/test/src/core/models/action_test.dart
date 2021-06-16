@@ -1,21 +1,12 @@
-import 'dart:convert';
-
-import 'package:test/test.dart';
 import 'package:stream_chat/src/core/models/action.dart';
+import 'package:test/test.dart';
+
+import '../../utils.dart';
 
 void main() {
   group('src/models/action', () {
-    const jsonExample = '''
-    {
-    "name": "name",
-    "style": "style",
-    "text": "text",
-    "type": "type",
-    "value": "value"
-    }''';
-
     test('should parse json correctly', () {
-      final action = Action.fromJson(json.decode(jsonExample));
+      final action = Action.fromJson(jsonFixture('action.json'));
       expect(action.name, 'name');
       expect(action.style, 'style');
       expect(action.text, 'text');

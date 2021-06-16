@@ -1,44 +1,13 @@
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('src/models/attachment', () {
-    const jsonExample = '''
-    {
-  "type": "giphy",
-  "title": "awesome",
-  "title_link": "https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti",
-  "thumb_url": "https://media0.giphy.com/media/3o7TKnCdBx5cMg0qti/giphy.gif",
-  "actions": [
-    {
-    "name": "image_action",
-    "text": "Send",
-    "style": "primary",
-    "type": "button",
-    "value": "send"
-    },
-    {
-    "name": "image_action",
-    "text": "Shuffle",
-    "style": "default",
-    "type": "button",
-    "value": "shuffle"
-    },
-    {
-    "name": "image_action",
-    "text": "Cancel",
-    "style": "default",
-    "type": "button",
-    "value": "cancel"
-    }
-  ]
-}''';
-
     test('should parse json correctly', () {
-      final attachment = Attachment.fromJson(json.decode(jsonExample));
+      final attachment = Attachment.fromJson(jsonFixture('attachment.json'));
       expect(attachment.type, 'giphy');
       expect(attachment.title, 'awesome');
       expect(
