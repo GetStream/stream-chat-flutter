@@ -125,7 +125,8 @@ class StreamChatCoreState extends State<StreamChatCore>
         _isConnectionAvailable = result != ConnectivityResult.none;
         if (!_isInForeground) return;
         if (_isConnectionAvailable) {
-          if (client.wsConnectionStatus == ConnectionStatus.disconnected) {
+          if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
+              user != null) {
             client.connect();
           }
         } else {
