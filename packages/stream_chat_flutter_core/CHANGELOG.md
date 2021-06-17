@@ -1,3 +1,7 @@
+## 2.0.0-nullsafety.7
+
+* Fixed a bug with connectivity implementation
+
 ## 2.0.0-nullsafety.6
 
 * Update llc dependency
