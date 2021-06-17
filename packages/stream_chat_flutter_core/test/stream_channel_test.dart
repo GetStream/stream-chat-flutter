@@ -165,7 +165,9 @@ void main() {
       when(() => mockChannel.initialized).thenAnswer((_) async => true);
       final messages = _generateMessages();
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: any(named: 'messagesPagination'),
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -183,7 +185,9 @@ void main() {
 
       verify(() => mockChannel.initialized).called(1);
       verify(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: any(named: 'messagesPagination'),
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -228,7 +232,9 @@ void main() {
       final messages = _generateMessages();
 
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: beforePagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -236,7 +242,9 @@ void main() {
           )).thenAnswer((_) async => ChannelState(messages: messages));
 
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: afterPagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -259,7 +267,9 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: beforePagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -267,7 +277,9 @@ void main() {
           )).called(1);
 
       verify(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: afterPagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -285,7 +297,9 @@ void main() {
       );
 
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: updatedBeforePagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -293,7 +307,9 @@ void main() {
           )).thenAnswer((_) async => ChannelState(messages: messages));
 
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: updatedAfterPagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -303,7 +319,9 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: updatedBeforePagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
@@ -311,7 +329,9 @@ void main() {
           )).called(1);
 
       verify(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             messagesPagination: updatedAfterPagination,
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),

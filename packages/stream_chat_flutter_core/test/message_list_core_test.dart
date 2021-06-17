@@ -300,7 +300,9 @@ void main() {
       when(() => mockChannel.state.isUpToDate).thenReturn(false);
       when(() => mockChannel.initialized).thenAnswer((_) async => true);
       when(() => mockChannel.query(
-            options: any(named: 'options'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
             membersPagination: any(named: 'membersPagination'),
             messagesPagination: any(named: 'messagesPagination'),
             preferOffline: any(named: 'preferOffline'),

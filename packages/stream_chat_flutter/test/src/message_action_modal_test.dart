@@ -552,10 +552,8 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.flagMessage(any())).thenThrow(ApiError(
-        '{}',
-        500,
-      ));
+      when(() => client.flagMessage(any()))
+          .thenThrow(StreamChatNetworkError(ChatErrorCode.internalSystemError));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -609,10 +607,8 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(() => client.flagMessage(any())).thenThrow(ApiError(
-        '{"code":4}',
-        400,
-      ));
+      when(() => client.flagMessage(any()))
+          .thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
@@ -719,10 +715,8 @@ void main() {
 
       when(() => client.state).thenReturn(clientState);
       when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
-      when(() => channel.deleteMessage(any())).thenThrow(ApiError(
-        '{}',
-        500,
-      ));
+      when(() => channel.deleteMessage(any()))
+          .thenThrow(StreamChatNetworkError(ChatErrorCode.internalSystemError));
 
       final themeData = ThemeData();
       final streamTheme = StreamChatThemeData.fromTheme(themeData);
