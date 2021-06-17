@@ -77,34 +77,16 @@ void main() {
         userId: 'test',
       );
 
-      expect(
-        newReaction.type,
-        'lol',
-      );
+      expect(newReaction.type, 'lol');
       expect(
         newReaction.createdAt,
         DateTime.parse('2021-01-28T22:17:31.108742Z'),
       );
-      expect(
-        newReaction.extraData,
-        {},
-      );
-      expect(
-        newReaction.messageId,
-        'test',
-      );
-      expect(
-        newReaction.score,
-        2,
-      );
-      expect(
-        newReaction.user,
-        User(id: 'test'),
-      );
-      expect(
-        newReaction.userId,
-        'test',
-      );
+      expect(newReaction.extraData, {});
+      expect(newReaction.messageId, 'test');
+      expect(newReaction.score, 2);
+      expect(newReaction.user, User(id: 'test'));
+      expect(newReaction.userId, 'test');
     });
 
     test('merge', () {
