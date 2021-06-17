@@ -89,29 +89,3 @@ EventChannel _$EventChannelFromJson(Map<String, dynamic> json) {
     extraData: json['extra_data'] as Map<String, dynamic>? ?? {},
   );
 }
-
-Map<String, dynamic> _$EventChannelToJson(EventChannel instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-    'type': instance.type,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('cid', readonly(instance.cid));
-  writeNotNull('config', readonly(instance.config));
-  writeNotNull('created_by', readonly(instance.createdBy));
-  val['frozen'] = instance.frozen;
-  writeNotNull('last_message_at', readonly(instance.lastMessageAt));
-  writeNotNull('created_at', readonly(instance.createdAt));
-  writeNotNull('updated_at', readonly(instance.updatedAt));
-  writeNotNull('deleted_at', readonly(instance.deletedAt));
-  writeNotNull('member_count', readonly(instance.memberCount));
-  val['extra_data'] = instance.extraData;
-  val['members'] = instance.members?.map((e) => e.toJson()).toList();
-  return val;
-}

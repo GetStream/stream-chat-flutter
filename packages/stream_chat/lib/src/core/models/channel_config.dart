@@ -4,7 +4,7 @@ import 'package:stream_chat/src/core/models/command.dart';
 part 'channel_config.g.dart';
 
 /// The class that contains the information about the configuration of a channel
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class ChannelConfig {
   /// Constructor used for json serialization
   ChannelConfig({
@@ -87,4 +87,7 @@ class ChannelConfig {
   /// True if urls appears as attachments
   @JsonKey(defaultValue: false)
   final bool urlEnrichment;
+
+  /// Serialize to json
+  Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);
 }

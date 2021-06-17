@@ -32,3 +32,22 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) {
     urlEnrichment: json['url_enrichment'] as bool? ?? false,
   );
 }
+
+Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) =>
+    <String, dynamic>{
+      'automod': instance.automod,
+      'commands': instance.commands.map((e) => e.toJson()).toList(),
+      'connect_events': instance.connectEvents,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+      'max_message_length': instance.maxMessageLength,
+      'message_retention': instance.messageRetention,
+      'mutes': instance.mutes,
+      'reactions': instance.reactions,
+      'read_events': instance.readEvents,
+      'replies': instance.replies,
+      'search': instance.search,
+      'typing_events': instance.typingEvents,
+      'uploads': instance.uploads,
+      'url_enrichment': instance.urlEnrichment,
+    };

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -160,11 +162,14 @@ class Event {
         channelType: channelType ?? this.channelType,
         parentId: parentId ?? this.parentId,
         extraData: extraData ?? this.extraData,
+        isLocal: isLocal,
       );
 }
 
 /// The channel embedded in the event object
-@JsonSerializable()
+@JsonSerializable(
+  createToJson: false,
+)
 class EventChannel extends ChannelModel {
   /// Constructor used for json serialization
   EventChannel({
@@ -212,10 +217,4 @@ class EventChannel extends ChannelModel {
     'members',
     ...ChannelModel.topLevelFields,
   ];
-
-  /// Serialize to json
-  @override
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-        _$EventChannelToJson(this),
-      );
 }
