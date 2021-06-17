@@ -9,8 +9,6 @@ on:
     branches:
       - master
       - develop
-    paths-ignore:
-      - 'docs/**'
 
 jobs:
   analyze:
@@ -106,35 +104,3 @@ jobs:
         with:
           path: packages/stream_chat_flutter/coverage/lcov.info
           min_coverage: 35
-
-#  test:
-#    runs-on: macos-latest
-#    timeout-minutes: 15
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          fetch-depth: 0
-#      - name: 'Install Flutter'
-#        run: ./.github/workflows/scripts/install-flutter.sh stable
-#      - name: 'Install Tools'
-#        run: |
-#          ./.github/workflows/scripts/install-tools.sh
-#          flutter pub global activate coverage
-#          flutter pub global activate remove_from_coverage
-#      - name: 'Bootstrap Workspace'
-#        run: melos bootstrap --verbose
-#      - name: 'Dart Test'
-#        run: |
-#          cd packages/stream_chat
-#          flutter pub run test --coverage coverage/
-#          format_coverage --lcov --in=coverage/ --out=coverage/lcov.info --packages=.packages --report-on=lib
-#      - name: 'Flutter Test'
-#        run: |
-#          melos exec -c 3 --flutter --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-#            flutter test --coverage
-#      - name: CodeCov
-#        run: |
-#          melos exec  -c 3 --fail-fast --dir-exists=test --ignore="*example*" --ignore="*web*" -- \
-#          "\$MELOS_ROOT_PATH/.github/workflows/scripts/coverage.sh"
-#          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
-
