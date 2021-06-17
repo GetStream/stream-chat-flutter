@@ -6,7 +6,7 @@ analyzer:
     - example/**
     - lib/src/emoji
     - lib/**/*.freezed.dart
-    - test/**
+#    - test/**
 
 linter:
   rules:

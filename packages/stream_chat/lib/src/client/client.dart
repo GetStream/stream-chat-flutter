@@ -1373,6 +1373,7 @@ class ClientState {
     _userController.add(user);
   }
 
+  /// Update all the [users] with the provided [userList]
   void updateUsers(List<User?> userList) {
     final newUsers = {
       ...users,
@@ -1382,6 +1383,7 @@ class ClientState {
     _usersController.add(newUsers);
   }
 
+  /// Update the passed [user] in state
   void updateUser(User? user) => updateUsers([user]);
 
   /// The current user

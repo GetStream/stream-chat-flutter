@@ -113,9 +113,13 @@ class ChannelListView extends StatefulWidget {
   /// If true listen to changes to this Channel in real time.
   final bool watch;
 
+  /// If true you’ll receive user presence updates via the websocket events
   final bool presence;
 
+  /// Number of members to fetch in each channel
   final int? memberLimit;
+
+  /// Number of messages to fetch in each channel
   final int? messageLimit;
 
   /// Pagination parameters

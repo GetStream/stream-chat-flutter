@@ -3,7 +3,6 @@ import 'package:logging/logging.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel.dart';
 import 'package:stream_chat/src/client/client.dart';
-import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/device_api.dart';
@@ -16,12 +15,10 @@ import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'db/chat_persistence_client_test.dart';
 
 class MockWebSocketChannel extends Mock implements WebSocketChannel {}
 
