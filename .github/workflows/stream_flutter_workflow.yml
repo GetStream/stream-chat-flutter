@@ -26,7 +26,6 @@ jobs:
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
-          flutter pub global activate tuneup
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Dart Analyze"

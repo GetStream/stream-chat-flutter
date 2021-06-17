@@ -2,11 +2,11 @@ analyzer:
   enable-experiment:
     - extension-methods
   exclude:
-    - lib/**/*.g.dart
-    - example/**
-    - lib/src/emoji
-    - lib/**/*.freezed.dart
-#    - test/**
+    - packages/*/lib/**/*.g.dart
+    - packages/*/example/**
+    - packages/*/lib/src/emoji
+    - packages/*/lib/**/*.freezed.dart
+    - packages/*/test/**
 
 linter:
   rules:
