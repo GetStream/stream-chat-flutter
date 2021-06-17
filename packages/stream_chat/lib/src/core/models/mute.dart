@@ -6,9 +6,7 @@ import 'package:stream_chat/src/core/util/serializer.dart';
 part 'mute.g.dart';
 
 /// The class that contains the information about a muted user
-@JsonSerializable(
-  createToJson: false,
-)
+@JsonSerializable(createToJson: false)
 class Mute {
   /// Constructor used for json serialization
   Mute({
