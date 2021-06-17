@@ -35,6 +35,45 @@ void main() {
     return logger;
   }
 
+  group('Non-Initialized Channel', () {
+    late final client = MockStreamChatClient();
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    late Channel channel;
+
+    setUpAll(() {
+      // detached loggers
+      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
+        final name = invocation.positionalArguments.first;
+        return _createLogger(name);
+      });
+
+      // client logger
+      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
+    });
+
+    setUp(() {
+      channel = Channel(client, channelType, channelId);
+    });
+
+    tearDown(() {
+      channel.dispose();
+    });
+
+    test('should be able to set `extraData`', () {
+      expect(channel.extraData.isEmpty, isTrue);
+
+      expect(
+        () => channel.extraData = {'name': 'test-channel-name'},
+        returnsNormally,
+      );
+
+      expect(channel.extraData.isEmpty, isFalse);
+      expect(channel.extraData.containsKey('name'), isTrue);
+      expect(channel.extraData['name'], 'test-channel-name');
+    });
+  });
+
   // TODO : test all persistence related logic in this group
   group('Initialized Channel with Persistence', () {
     late final client = MockStreamChatClientWithPersistence();
@@ -143,6 +182,14 @@ void main() {
 
     tearDown(() {
       channel.dispose();
+    });
+
+    test('should throw if trying to set `extraData`', () {
+      try {
+        channel.extraData = {'name': 'test-channel-name'};
+      } catch (e) {
+        expect(e, isA<StateError>());
+      }
     });
 
     group('`.sendMessage`', () {
