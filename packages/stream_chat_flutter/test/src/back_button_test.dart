@@ -118,8 +118,9 @@ void main() {
       final clientState = MockClientState();
 
       when(() => client.state).thenReturn(clientState);
+      when(() => clientState.totalUnreadCount).thenAnswer((_) => 0);
       when(() => clientState.totalUnreadCountStream)
-          .thenAnswer((i) => Stream.value(0));
+          .thenAnswer((_) => Stream.value(0));
 
       await tester.pumpWidget(
         MaterialApp(
