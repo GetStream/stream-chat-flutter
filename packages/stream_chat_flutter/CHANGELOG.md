@@ -1,3 +1,9 @@
+## 2.0.0-nullsafety.7
+
+- Minor fixes and improvements
+- Updated `stream_chat_core` dependency
+- Fixed a bug with connectivity implementation
+
 ## 2.0.0-nullsafety.6
 
 - Minor fixes and improvements
