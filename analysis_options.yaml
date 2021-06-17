@@ -1,6 +1,4 @@
 analyzer:
-  enable-experiment:
-    - extension-methods
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/example/**
