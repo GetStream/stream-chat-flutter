@@ -22,8 +22,8 @@ class User extends Equatable {
         updatedAt = updatedAt ?? DateTime.now();
 
   /// Create a new instance from a json
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(
-      Serializer.moveToExtraDataFromRoot(json, topLevelFields));
+  factory User.fromJson(Map<String, dynamic> json) =>
+      _$UserFromJson(Serializer.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Known top level fields.
   /// Useful for [Serializer] methods.

@@ -1,46 +1,14 @@
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('src/models/event', () {
-    const jsonExample = '''
-      {
-        "type": "type",
-        "cid": "cid",
-        "connection_id": "connectionId",
-        "created_at": "2019-04-03T18:43:33.213374Z",
-        "me": {
-         "id": "dry-meadow-0",
-         "role": "user",
-         "created_at": "2019-03-27T17:40:17.155892Z",
-         "updated_at": "2020-01-29T03:22:47.641589Z",
-         "last_active": "2020-01-29T03:22:47.63613Z",
-         "banned": false,
-         "online": false,
-         "image": "https://getstream.io/random_svg/?name=Dry+meadow",
-         "name": "Dry meadow"
-       },
-        "parent_id": null,
-        "user": {
-         "id": "dry-meadow-0",
-         "role": "user",
-         "created_at": "2019-03-27T17:40:17.155892Z",
-         "updated_at": "2020-01-29T03:22:47.641589Z",
-         "last_active": "2020-01-29T03:22:47.63613Z",
-         "banned": false,
-         "online": false,
-         "image": "https://getstream.io/random_svg/?name=Dry+meadow",
-         "name": "Dry meadow"
-       }
-      }      
-      ''';
-
     test('should parse json correctly', () {
-      final event = Event.fromJson(json.decode(jsonExample));
+      final event = Event.fromJson(jsonFixture('event.json'));
       expect(event.type, 'type');
       expect(event.cid, 'cid');
       expect(event.connectionId, 'connectionId');
@@ -85,6 +53,54 @@ void main() {
           'is_local': true,
         },
       );
+    });
+
+    test('copyWith', () {
+      final event = Event.fromJson(jsonFixture('event.json'));
+      var newEvent = event.copyWith();
+      expect(newEvent.type, 'type');
+      expect(newEvent.cid, 'cid');
+      expect(newEvent.connectionId, 'connectionId');
+      expect(newEvent.createdAt, isA<DateTime>());
+      expect(newEvent.me, isA<OwnUser>());
+      expect(newEvent.user, isA<User>());
+      expect(newEvent.isLocal, false);
+
+      newEvent = event.copyWith(
+        type: 'test',
+        cid: 'test',
+        connectionId: 'test',
+        extraData: {},
+        user: User(id: 'test'),
+        channelId: 'test',
+        totalUnreadCount: 2,
+        channelType: 'testtype',
+      );
+
+      expect(newEvent.channelType, 'testtype');
+      expect(newEvent.totalUnreadCount, 2);
+      expect(newEvent.type, 'test');
+      expect(newEvent.channelId, 'test');
+      expect(newEvent.cid, 'test');
+      expect(newEvent.connectionId, 'test');
+      expect(newEvent.extraData, {});
+      expect(newEvent.user!.id, 'test');
+    });
+
+    group('eventChannel', () {
+      test('should parse json correctly', () {
+        final eventChannel =
+            EventChannel.fromJson(jsonFixture('event_channel.json'));
+        expect(eventChannel.type, 'messaging');
+        expect(eventChannel.cid,
+            'messaging:!members-v9ktpgmYysZA-MjgC-GMoeEawFHSelkOdTu6JGxFZWU');
+        expect(eventChannel.createdBy!.id, 'super-band-9');
+        expect(eventChannel.frozen, false);
+        expect(eventChannel.members!.length, 2);
+        expect(eventChannel.memberCount, 2);
+        expect(eventChannel.config, isA<ChannelConfig>());
+        expect(eventChannel.name, 'test');
+      });
     });
   });
 }

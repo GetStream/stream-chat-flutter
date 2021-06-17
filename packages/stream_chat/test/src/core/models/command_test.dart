@@ -1,20 +1,12 @@
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/command.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('src/models/command', () {
-    const jsonExample = '''
-      {
-        "name": "giphy",
-        "description": "Post a random gif to the channel",
-        "args": "[text]"
-      }      
-      ''';
-
     test('should parse json correctly', () {
-      final command = Command.fromJson(json.decode(jsonExample));
+      final command = Command.fromJson(jsonFixture('command.json'));
       expect(command.name, 'giphy');
       expect(command.description, 'Post a random gif to the channel');
       expect(command.args, '[text]');

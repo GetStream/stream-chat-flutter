@@ -1,18 +1,12 @@
-import 'dart:convert';
-
-import 'package:test/test.dart';
 import 'package:stream_chat/src/core/models/device.dart';
+import 'package:test/test.dart';
+
+import '../../utils.dart';
 
 void main() {
   group('src/models/device', () {
-    const jsonExample = '''
-    {
-      "id": "device-id",
-      "push_provider": "push-provider"
-    }''';
-
     test('should parse json correctly', () {
-      final device = Device.fromJson(json.decode(jsonExample));
+      final device = Device.fromJson(jsonFixture('device.json'));
       expect(device.id, 'device-id');
       expect(device.pushProvider, 'push-provider');
     });

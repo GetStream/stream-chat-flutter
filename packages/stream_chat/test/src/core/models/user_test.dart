@@ -1,20 +1,14 @@
-import 'dart:convert';
-
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:test/test.dart';
 
+import '../../utils.dart';
+
 void main() {
   group('src/models/user', () {
-    const jsonExample = '''
-      {
-        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
-        "role": "test-role"
-      }     
-      ''';
-
     test('should parse json correctly', () {
-      final user = User.fromJson(json.decode(jsonExample));
+      final user = User.fromJson(jsonFixture('user.json'));
       expect(user.id, 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e');
+      expect(user.name, 'John');
     });
 
     test('should serialize to json correctly', () {
@@ -26,6 +20,27 @@ void main() {
       expect(user.toJson(), {
         'id': 'bbb19d9a-ee50-45bc-84e5-0584e79d0c9e',
       });
+    });
+
+    test('copyWith', () {
+      final user = User.fromJson(jsonFixture('user.json'));
+      var newUser = user.copyWith();
+
+      expect(newUser.id, user.id);
+      expect(newUser.role, user.role);
+      expect(newUser.name, user.name);
+
+      newUser = user.copyWith(
+        id: 'test',
+        role: 'test',
+        extraData: {
+          'name': 'test',
+        },
+      );
+
+      expect(newUser.id, 'test');
+      expect(newUser.role, 'test');
+      expect(newUser.name, 'test');
     });
   });
 }

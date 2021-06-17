@@ -38,29 +38,3 @@ OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
     banned: json['banned'] as bool? ?? false,
   );
 }
-
-Map<String, dynamic> _$OwnUserToJson(OwnUser instance) {
-  final val = <String, dynamic>{
-    'id': instance.id,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('role', readonly(instance.role));
-  writeNotNull('created_at', readonly(instance.createdAt));
-  writeNotNull('updated_at', readonly(instance.updatedAt));
-  writeNotNull('last_active', readonly(instance.lastActive));
-  writeNotNull('online', readonly(instance.online));
-  writeNotNull('banned', readonly(instance.banned));
-  val['extra_data'] = instance.extraData;
-  writeNotNull('devices', readonly(instance.devices));
-  writeNotNull('mutes', readonly(instance.mutes));
-  writeNotNull('channel_mutes', readonly(instance.channelMutes));
-  writeNotNull('total_unread_count', readonly(instance.totalUnreadCount));
-  writeNotNull('unread_channels', readonly(instance.unreadChannels));
-  return val;
-}

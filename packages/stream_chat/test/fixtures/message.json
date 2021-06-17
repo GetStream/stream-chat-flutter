@@ -1,0 +1,65 @@
+{
+  "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+  "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+  "type": "regular",
+  "silent": false,
+  "status": "SENT",
+  "user": {
+    "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+    "role": "user",
+    "created_at": "2020-01-28T22:17:30.83015Z",
+    "updated_at": "2020-01-28T22:17:31.19435Z",
+    "banned": false,
+    "online": false,
+    "image": "https://randomuser.me/api/portraits/women/2.jpg",
+    "name": "Mia Denys"
+  },
+  "attachments": [
+    {
+      "type": "video",
+      "author_name": "GIPHY",
+      "title": "The Lion King Disney GIF - Find \u0026 Share on GIPHY",
+      "title_link": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+      "text": "Discover \u0026 share this Lion King Live Action GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.",
+      "image_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+      "thumb_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+      "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4",
+      "og_scrape_url": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA"
+    }
+  ],
+  "latest_reactions": [
+    {
+      "message_id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+      "user_id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+      "user": {
+        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+        "role": "user",
+        "created_at": "2020-01-28T22:17:30.83015Z",
+        "updated_at": "2020-01-28T22:17:31.19435Z",
+        "banned": false,
+        "online": false,
+        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+        "name": "Mia Denys"
+      },
+      "type": "love",
+      "score": 1,
+      "created_at": "2020-01-28T22:17:31.128376Z",
+      "updated_at": "2020-01-28T22:17:31.128376Z"
+    }
+  ],
+  "own_reactions": [],
+  "reaction_counts": {
+    "love": 1
+  },
+  "reaction_scores": {
+    "love": 1
+  },
+  "pinned": false,
+  "pinned_at": null,
+  "pin_expires": null,
+  "pinned_by": null,
+  "reply_count": 0,
+  "created_at": "2020-01-28T22:17:31.107978Z",
+  "updated_at": "2020-01-28T22:17:31.130506Z",
+  "mentioned_users": []
+}
