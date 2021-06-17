@@ -19,7 +19,6 @@ import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-
 class MockWebSocketChannel extends Mock implements WebSocketChannel {}
 
 class MockWebSocketSink extends Mock implements WebSocketSink {}
