@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart'
-    show IterableExtension, ListEquality;
+    show IterableExtension, ListEquality, MapEquality;
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -1848,17 +1848,17 @@ class ChannelClientState {
   }
 
   /// Channel related typing users last value
-  List<User> get typingEvents => _typingEventsController.value;
+  Map<User, Event> get typingEvents => _typingEventsController.value;
 
   /// Channel related typing users stream
-  Stream<List<User>> get typingEventsStream =>
-      _typingEventsController.stream.distinct(const ListEquality().equals);
+  Stream<Map<User, Event>> get typingEventsStream =>
+      _typingEventsController.stream;
 
-  final BehaviorSubject<List<User>> _typingEventsController =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<Map<User, Event>> _typingEventsController =
+      BehaviorSubject.seeded({});
 
   final Channel _channel;
-  final Map<User, DateTime> _typings = {};
+  final Map<User, Event> _typings = {};
 
   void _listenTypingEvents() {
     if (_channelState.channel?.config.typingEvents == false) {
@@ -1872,8 +1872,8 @@ class ChannelClientState {
             if (event.user != null) {
               final user = event.user!;
               if (user.id != _channel.client.state.user?.id) {
-                _typings[user] = DateTime.now();
-                _typingEventsController.add(_typings.keys.toList());
+                _typings[user] = event;
+                _typingEventsController.add(_typings);
               }
             }
           },
@@ -1886,7 +1886,7 @@ class ChannelClientState {
               final user = event.user!;
               if (user.id != _channel.client.state.user?.id) {
                 _typings.remove(event.user);
-                _typingEventsController.add(_typings.keys.toList());
+                _typingEventsController.add(_typings);
               }
             }
           },
@@ -1964,13 +1964,14 @@ class ChannelClientState {
 
   void _clean() {
     final now = DateTime.now();
-    _typings.forEach((user, lastTypingEvent) {
-      if (now.difference(lastTypingEvent).inSeconds > 7) {
+    _typings.forEach((user, event) {
+      if (now.difference(event.createdAt!).inSeconds > 7) {
         _channel.client.handleEvent(
           Event(
             type: EventType.typingStop,
             user: user,
             cid: _channel.cid,
+            parentId: event.parentId,
           ),
         );
       }

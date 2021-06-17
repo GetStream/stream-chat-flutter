@@ -221,59 +221,62 @@ class ChannelPreview extends StatelessWidget {
     );
   }
 
-  Widget _buildLastMessage(BuildContext context) =>
-      BetterStreamBuilder<List<Message>?>(
-        stream: channel.state!.messagesStream,
-        initialData: channel.state!.messages,
-        builder: (context, data) {
-          final lastMessage =
-              data?.lastWhereOrNull((m) => m.shadowed != true && !m.isDeleted);
-          if (lastMessage == null) {
-            return const SizedBox();
-          }
+  Widget _buildLastMessage(BuildContext context) => Align(
+        alignment: Alignment.centerLeft,
+        child: BetterStreamBuilder<List<Message>?>(
+          stream: channel.state!.messagesStream,
+          initialData: channel.state!.messages,
+          builder: (context, data) {
+            final lastMessage = data
+                ?.lastWhereOrNull((m) => m.shadowed != true && !m.isDeleted);
+            if (lastMessage == null) {
+              return const SizedBox();
+            }
 
-          var text = lastMessage.text;
-          final parts = <String>[
-            ...lastMessage.attachments.map((e) {
-              if (e.type == 'image') {
-                return '📷';
-              } else if (e.type == 'video') {
-                return '🎬';
-              } else if (e.type == 'giphy') {
-                return '[GIF]';
-              }
-              return e == lastMessage.attachments.last
-                  ? (e.title ?? 'File')
-                  : '${e.title ?? 'File'} , ';
-            }),
-            lastMessage.text ?? '',
-          ];
+            var text = lastMessage.text;
+            final parts = <String>[
+              ...lastMessage.attachments.map((e) {
+                if (e.type == 'image') {
+                  return '📷';
+                } else if (e.type == 'video') {
+                  return '🎬';
+                } else if (e.type == 'giphy') {
+                  return '[GIF]';
+                }
+                return e == lastMessage.attachments.last
+                    ? (e.title ?? 'File')
+                    : '${e.title ?? 'File'} , ';
+              }),
+              lastMessage.text ?? '',
+            ];
 
-          text = parts.join(' ');
+            text = parts.join(' ');
 
-          final chatThemeData = StreamChatTheme.of(context);
-          return Text.rich(
-            _getDisplayText(
-              text,
-              lastMessage.mentionedUsers,
-              lastMessage.attachments,
-              chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+            final chatThemeData = StreamChatTheme.of(context);
+            return Text.rich(
+              _getDisplayText(
+                text,
+                lastMessage.mentionedUsers,
+                lastMessage.attachments,
+                chatThemeData.channelPreviewTheme.subtitle?.copyWith(
+                    color: chatThemeData.channelPreviewTheme.subtitle?.color,
+                    fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
+                        ? FontStyle.italic
+                        : FontStyle.normal),
+                chatThemeData.channelPreviewTheme.subtitle?.copyWith(
                   color: chatThemeData.channelPreviewTheme.subtitle?.color,
                   fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
                       ? FontStyle.italic
-                      : FontStyle.normal),
-              chatThemeData.channelPreviewTheme.subtitle?.copyWith(
-                color: chatThemeData.channelPreviewTheme.subtitle?.color,
-                fontStyle: (lastMessage.isSystem || lastMessage.isDeleted)
-                    ? FontStyle.italic
-                    : FontStyle.normal,
-                fontWeight: FontWeight.bold,
+                      : FontStyle.normal,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          );
-        },
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.start,
+            );
+          },
+        ),
       );
 
   TextSpan _getDisplayText(

@@ -700,7 +700,10 @@ class MessageInputState extends State<MessageInput> {
         if (!mounted) {
           return;
         }
-        StreamChannel.of(context).channel.keyStroke().catchError((e) {});
+        StreamChannel.of(context)
+            .channel
+            .keyStroke(widget.parentMessage?.id)
+            .catchError((e) {});
 
         setState(() {
           _messageIsPresent = s.trim().isNotEmpty;
