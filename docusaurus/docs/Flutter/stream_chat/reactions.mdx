@@ -4,3 +4,47 @@ sidebar_position: 18
 title: Reactions
 ---
 
+Stream Chat has built-in support for user Reactions. Common examples are likes, comments, loves, etc. Reactions can be customized so that you are able to use any type of reaction your application requires.
+
+
+Similar to other objects in Stream Chat, reactions allow you to add custom data to the reaction of your choice. This is helpful if you want to customize the reaction logic.
+
+<b>Note:</b> Custom data for reactions is limited to 1KB.
+
+```dart
+await channel.sendReaction("messageID", "like", extraData: {"customField": 1});
+```
+
+### Removing a Reaction
+
+```dart
+await channel.deleteReaction("messageID", "like");
+```
+
+### Paginating Reactions
+
+Messages returned by the APIs automatically include the 10 most recent reactions.
+You can also retrieve more reactions and paginate using the following logic:
+
+```dart
+// get the first 10 reactions
+await channel.getReactions("messageID", PaginationParams(limit: 10));
+
+// get 3 reactions past the first 10
+await channel.getReactions("messageID", PaginationParams(limit: 3, offset:10));
+```
+
+### Cumulative (Clap) Reactions
+
+You can use the Reactions API to build something similar to Medium's clap reactions.
+If you are not familiar with this, Medium allows you to clap articles more than once and shows the sum of all claps from all users.
+
+To do this, you only need to include a score for the reaction (ie. user X clapped 25 times) and the API will return the sum of all reaction scores as well as each user individual scores (ie. clapped 475 times, user Y clapped 14 times).
+
+```dart
+// user claps 5 times on a message
+await channel.sendReaction("messageID", "like", score: 5);
+
+// same user claps 20 times more
+await channel.sendReaction("messageID", "like", score: 25);
+```

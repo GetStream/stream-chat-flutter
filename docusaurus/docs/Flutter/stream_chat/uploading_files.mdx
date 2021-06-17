@@ -4,3 +4,98 @@ sidebar_position: 17
 title: Uploading Files
 ---
 
+The `channel.sendImage` and `channel.sendFile` methods make it easy to upload files.
+
+This functionality defaults to using the Stream CDN. If you would like, you can easily change the logic to upload to your own CDN of choice.
+The maximum file size is 20mb for the Stream Chat CDN.
+
+```dart
+final client = StreamChatClient('api-key');
+var attachment = Attachment();
+
+// Upload an image without monitoring send progress
+client.sendImage(image, channelId, channelType).then((response) {
+  // Successful upload, you can now attach this image
+  // to an message that you then send to a channel
+  final imageUrl = response.file;
+  attachment = attachment.copyWith(
+    type: 'image',
+    imageUrl: imageUrl,
+  );
+  final message = Message(attachments: [attachment]);
+  client.sendMessage(message, channelId, channelType);
+}).catchError((error, stk) {
+  // Handle error
+});
+
+// Upload an file, monitoring the progress with a onSendProgress callback
+await client.sendFile(
+  file,
+  channelId,
+  channelType,
+  onSendProgress: (sent, total) {
+    // Handle the send progress
+    attachment = attachment.copyWith(
+      uploadState: UploadState.inProgress(
+       uploaded: sent,
+       total: total,
+       ),
+    );
+  },
+ ).then((response) {
+   // Successful upload, you can now attach this file
+   // to an message that you then send to a channel
+   final fileUrl = response.file;
+   attachment = attachment.copyWith(
+     type: 'file',
+     assetUrl: fileUrl,
+     uploadState: UploadState.success(),
+   );
+   final message = Message(attachments: [attachment]);
+   client.sendMessage(message, channelId, channelType);
+ }).catchError((error, stk) {
+   // Handle error
+   attachment = attachment.copyWith(
+     uploadState: UploadState.failed(error: error),
+   );
+ });
+
+// Alternatively you can call the sendMessage directly on the channel
+// which will automatically handle all the upload process of the provided
+// attachments.
+final channel = client.channel(channelType, id: channelId);
+
+// Creating a message object with multiple local attachments
+final message = Message(text: 'Hello', attachments: [
+  Attachment(
+    type: 'image',
+    file: AttachmentFile(path: 'imagePath/imageName.png'),
+  ),
+  Attachment(
+    type: 'file',
+    file: AttachmentFile(path: 'filePath/fileName.pdf'),
+  ),
+]);
+
+// Sending the message to the channel
+await channel.sendMessage(message);
+```
+
+In the code example above, note how the message attachments are created after the files are uploaded. The React components support regular uploads, clipboard pasting, drag and drop, as well as URL enrichment via built-in open-graph scraping. As a bonus, the Stream CDN will automatically handle image resizing for you.
+
+### Using Your Own CDN
+
+All 5 SDKs make it easy to use your own CDN for uploads. The code examples below show how to change where files are uploaded:
+
+```dart
+// Set a custom FileUploader implementation when building your client
+final client = StreamChatClient(
+  'api-key',
+  attachmentFileUploader: MyFileUploader(),
+);
+```
+
+You'll have to create your own implementation of the `AttachmentFileUploader` interface,
+and any upload calls will be sent to that implementation.
+Take a look [at the interface](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat/lib/src/attachment_file_uploader.dart#L7)
+and [our own default implementation of it](https://github.com/GetStream/stream-chat-flutter/blob/master/packages/stream_chat/lib/src/attachment_file_uploader.dart#L58) for more info.
