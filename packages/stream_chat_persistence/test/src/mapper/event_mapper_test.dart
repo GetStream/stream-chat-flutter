@@ -1,7 +1,7 @@
-import 'package:test/test.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/moor_chat_database.dart';
 import 'package:stream_chat_persistence/src/mapper/event_mapper.dart';
+import 'package:test/test.dart';
 
 import '../utils/date_matcher.dart';
 
@@ -22,7 +22,7 @@ void main() {
     final event = entity.toEvent();
     expect(event, isA<Event>());
     expect(event.type, type);
-    expect(event.createdAt, isSameDateAs(now));
+    expect(event.createdAt.toUtc(), isSameDateAs(now.toUtc()));
     expect(event.me!.id, ownUser.id);
     expect(event.totalUnreadCount, entity.totalUnreadCount);
     expect(event.unreadChannels, entity.unreadChannels);
