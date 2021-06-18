@@ -289,6 +289,10 @@ class StreamChatClient {
       final event = await openConnection();
       return event;
     } catch (e, stk) {
+      if (e is StreamChatNetworkError && e.isRetriable) {
+        final event = await _chatPersistenceClient?.getConnectionInfo();
+        if (event != null) return event;
+      }
       logger.severe('error connecting user : ${ownUser.id}', e, stk);
       rethrow;
     }
