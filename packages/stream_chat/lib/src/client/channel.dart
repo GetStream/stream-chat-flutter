@@ -1888,7 +1888,7 @@ class ChannelClientState {
   void _clean() {
     final now = DateTime.now();
     _typings.forEach((user, event) {
-      if (now.difference(event.createdAt!).inSeconds > 7) {
+      if (now.difference(event.createdAt).inSeconds > 7) {
         _channel.client.handleEvent(
           Event(
             type: EventType.typingStop,
