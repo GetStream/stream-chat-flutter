@@ -44,8 +44,6 @@ dependency_overrides:
 dev_dependencies:
   flutter_launcher_icons: ^0.9.0
   test: any
-  build_runner: ^2.0.4
-  build_web_compilers: ^3.0.0
 flutter:
   assets:
     - assets/
