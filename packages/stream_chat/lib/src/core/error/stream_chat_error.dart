@@ -45,6 +45,9 @@ class StreamWebSocketError extends StreamChatError {
   /// Response body. please refer to [ErrorResponse].
   final ErrorResponse? data;
 
+  ///
+  bool get isRetriable => data == null;
+
   @override
   List<Object?> get props => [...super.props, code];
 

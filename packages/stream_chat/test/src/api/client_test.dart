@@ -330,6 +330,131 @@ void main() {
     );
   });
 
+  group('Fake web-socket connection function with failure and persistence', () {
+    const apiKey = 'test-api-key';
+    late final api = FakeChatApi();
+    late final persistence = MockPersistenceClient();
+
+    late StreamChatClient client;
+
+    setUpAll(() {
+      // fallback values
+      registerFallbackValue<User>(FakeUser());
+    });
+
+    setUp(() {
+      final ws = FakeWebSocketWithConnectionError();
+      client = StreamChatClient(apiKey, chatApi: api, ws: ws)
+        ..chatPersistenceClient = persistence;
+    });
+
+    tearDown(() {
+      client.dispose();
+    });
+
+    test(
+      '`.connectUser` should connect successfully if persistence contains event',
+      () async {
+        final user = User(id: 'test-user-id');
+        final token = Token.development(user.id).rawValue;
+
+        final event = Event(
+            type: EventType.healthCheck,
+            connectionId: 'test-connection-id',
+            me: OwnUser.fromUser(user));
+        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
+
+        final res = await client.connectUser(user, token);
+        expect(res, isNotNull);
+        expect(res.connectionId, 'test-connection-id');
+        expect(res.me?.id, user.id);
+
+        verify(persistence.getConnectionInfo).called(1);
+        verifyNoMoreInteractions(persistence);
+      },
+    );
+
+    test(
+      '`.connectUserWithProvider` should connect successfully if persistence contains event',
+      () async {
+        final user = User(id: 'test-user-id');
+        Future<String> tokenProvider(String userId) async {
+          expect(userId, user.id);
+          return Token.development(userId).rawValue;
+        }
+
+        final event = Event(
+            type: EventType.healthCheck,
+            connectionId: 'test-connection-id',
+            me: OwnUser.fromUser(user));
+        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
+
+        final res = await client.connectUserWithProvider(user, tokenProvider);
+        expect(res, isNotNull);
+        expect(res.connectionId, 'test-connection-id');
+        expect(res.me?.id, user.id);
+
+        verify(persistence.getConnectionInfo).called(1);
+        verifyNoMoreInteractions(persistence);
+      },
+    );
+
+    test(
+      '`.connectGuestUser` should connect successfully if persistence contains event',
+      () async {
+        final user = User(id: 'test-user-id');
+        final token = Token.development(user.id).rawValue;
+
+        final event = Event(
+            type: EventType.healthCheck,
+            connectionId: 'test-connection-id',
+            me: OwnUser.fromUser(user));
+        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
+
+        when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
+            .thenAnswer(
+          (_) async => ConnectGuestUserResponse()
+            ..user = user
+            ..accessToken = token,
+        );
+
+        final res = await client.connectGuestUser(user);
+        expect(res, isNotNull);
+        expect(res.connectionId, 'test-connection-id');
+        expect(res.me?.id, user.id);
+
+        verify(persistence.getConnectionInfo).called(1);
+        verifyNoMoreInteractions(persistence);
+        verify(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
+            .called(1);
+        verifyNoMoreInteractions(api.guest);
+      },
+    );
+
+    test(
+      '`.connectAnonymousUser` should connect successfully if persistence contains event',
+      () async {
+        final user = User(id: 'test-user-id');
+
+        when(persistence.getConnectionInfo).thenAnswer(
+          (invocation) async => Event(
+            type: EventType.healthCheck,
+            connectionId: 'test-connection-id',
+            me: OwnUser.fromUser(user),
+          ),
+        );
+
+        final res = await client.connectAnonymousUser();
+        expect(res, isNotNull);
+        expect(res.connectionId, 'test-connection-id');
+        expect(res.me?.id, user.id);
+
+        verify(persistence.getConnectionInfo).called(1);
+        verifyNoMoreInteractions(persistence);
+      },
+    );
+  });
+
   group('Client with connected user with persistence', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();

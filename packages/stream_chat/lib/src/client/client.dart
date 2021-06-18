@@ -289,7 +289,7 @@ class StreamChatClient {
       final event = await openConnection();
       return event;
     } catch (e, stk) {
-      if (e is StreamChatNetworkError && e.isRetriable) {
+      if (e is StreamWebSocketError && e.isRetriable) {
         final event = await _chatPersistenceClient?.getConnectionInfo();
         if (event != null) return event;
       }
