@@ -11,6 +11,7 @@ class ChannelInfo extends StatelessWidget {
     required this.channel,
     this.textStyle,
     this.showTypingIndicator = true,
+    this.parentId,
   }) : super(key: key);
 
   /// The channel about which the info is to be displayed
@@ -21,6 +22,9 @@ class ChannelInfo extends StatelessWidget {
 
   /// If true the typing indicator will be rendered if a user is typing
   final bool showTypingIndicator;
+
+  /// Id of the parent message in case of a thread
+  final String? parentId;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +92,7 @@ class ChannelInfo extends StatelessWidget {
     }
 
     return TypingIndicator(
+      parentId: parentId,
       alignment: Alignment.center,
       alternativeWidget: alternativeWidget,
       style: textStyle,

@@ -60,10 +60,6 @@ void main() {
             )
           ]));
 
-      when(() => channelState.typingEvents).thenReturn([]);
-      when(() => channelState.typingEventsStream)
-          .thenAnswer((_) => Stream.value([]));
-
       await tester.pumpWidget(MaterialApp(
         home: StreamChat(
           client: client,

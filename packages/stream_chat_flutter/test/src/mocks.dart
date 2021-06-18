@@ -23,8 +23,8 @@ class MockChannel extends Mock implements Channel {
 
 class MockChannelState extends Mock implements ChannelClientState {
   MockChannelState() {
-    when(() => typingEvents).thenReturn([]);
-    when(() => typingEventsStream).thenAnswer((_) => Stream.value([]));
+    when(() => typingEvents).thenReturn({});
+    when(() => typingEventsStream).thenAnswer((_) => Stream.value({}));
   }
 }
 
