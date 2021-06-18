@@ -26,7 +26,6 @@ jobs:
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
-          flutter pub global activate tuneup
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Dart Analyze"
@@ -78,7 +77,7 @@ jobs:
       - name: "Flutter Test"
         run: melos run test:all
       - name: "Collect Coverage"
-        run: melos run coverage:ignore-file
+        run: melos run coverage:ignore-file --no-select
       - name: "Upload Coverage"
         uses: codecov/codecov-action@v1
         with:

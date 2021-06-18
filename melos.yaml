@@ -64,8 +64,10 @@ scripts:
 
   coverage:ignore-file:
     run: |
-      melos exec -c 4 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from_coverage.sh"
+      melos exec -c 4 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
     description: Removes all the ignored files from the coverage report.
+    select-package:
+      dir-exists: coverage
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
