@@ -306,7 +306,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             key: kStreamToken,
                             value: userToken,
                           );
-                          await client.disconnect();
+                          client.closeConnection();
                         } catch (e) {
                           var errorText = 'Error connecting, retry';
                           if (e is Map) {
@@ -317,7 +317,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             _apiKeyError = errorText.toUpperCase();
                           });
                           loading = false;
-                          await client.disconnect();
+                          client.closeConnection();
                           return;
                         }
                         loading = false;

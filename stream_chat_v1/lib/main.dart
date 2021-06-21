@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
       logLevel: Level.INFO,
     )..chatPersistenceClient = chatPersistentClient;
 
-    if (userId != null) {
+    if (userId != null && token != null) {
       await client.connectUser(
         User(id: userId),
         token,
@@ -148,7 +148,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
 
         if (!kIsWeb) {
           _initData!.client.state.totalUnreadCountStream.listen((count) {
-            if (count! > 0) {
+            if (count > 0) {
               FlutterAppBadger.updateBadgeCount(count);
             } else {
               FlutterAppBadger.removeBadge();
@@ -235,6 +235,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
             builder: (context, snapshot) => MaterialApp(
               builder: (context, child) {
                 return StreamChat(
+                  backgroundKeepAlive: Duration(seconds: 5),
                   client: _initData!.client,
                   onBackgroundEventReceived: (e) => showLocalNotification(
                       e, _initData!.client.state.user!.id),
@@ -445,9 +446,7 @@ class _HomePageState extends State<HomePage> {
                           await secureStorage.deleteAll();
                         }
 
-                        StreamChat.of(context).client.disconnect(
-                              clearUser: true,
-                            );
+                        StreamChat.of(context).client.disconnectUser();
 
                         await Navigator.pushReplacementNamed(
                           context,
@@ -714,9 +713,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
                         },
                         swipeToAction: true,
                         filter: Filter.in_('members', [user!.id]),
-                        options: {
-                          'presence': true,
-                        },
+                        presence: true,
                         pagination: PaginationParams(
                           limit: 20,
                         ),

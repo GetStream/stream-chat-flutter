@@ -10,9 +10,9 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
-import 'pinned_messages_screen.dart';
 import 'chat_info_screen.dart';
 import 'main.dart';
+import 'pinned_messages_screen.dart';
 import 'routes/routes.dart';
 
 class GroupInfoScreen extends StatefulWidget {
@@ -61,7 +61,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     super.initState();
     var channel = StreamChannel.of(context);
     _nameController = TextEditingController.fromValue(
-        TextEditingValue(text: channel.channel.extraData['name'] ?? ''));
+      TextEditingValue(
+          text: (channel.channel.extraData['name'] as String?) ?? ''),
+    );
     _searchController = TextEditingController()..addListener(_userNameListener);
 
     _nameController!.addListener(() {
@@ -333,7 +335,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
   Widget _buildNameTile() {
     var channel = StreamChannel.of(context).channel;
-    var channelName = channel.extraData['name'] ?? '';
+    var channelName = (channel.extraData['name'] as String?) ?? '';
 
     return Material(
       color: StreamChatTheme.of(context).colorTheme.whiteSnow,
@@ -377,8 +379,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                 ),
               ),
             ),
-            if ((channelName == null) ||
-                (channelName != _nameController!.text.trim()))
+            if (channelName != _nameController!.text.trim())
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

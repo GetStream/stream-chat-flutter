@@ -66,10 +66,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final chatState = StreamChat.of(context);
 
         final res = await chatState.client.queryChannelsOnline(
-          options: {
-            'state': false,
-            'watch': false,
-          },
+          state: false,
+          watch: false,
           filter: Filter.raw(value: {
             'members': [
               ..._selectedUsers.map((e) => e.id),

@@ -90,7 +90,7 @@ class ChooseUserPage extends StatelessWidget {
                             );
 
                             final client = StreamChat.of(context).client;
-                            client.apiKey = kDefaultStreamApiKey;
+                            // client.apiKey = kDefaultStreamApiKey;
                             await client.connectUser(
                               user,
                               token,

@@ -6,8 +6,8 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
-import 'pinned_messages_screen.dart';
 import 'main.dart';
+import 'pinned_messages_screen.dart';
 import 'routes/routes.dart';
 
 /// Detail screen for a 1:1 chat correspondence
@@ -615,7 +615,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
             title = 'No title';
           }
         } else {
-          title = extraData['name'];
+          title = extraData['name'] as String;
         }
 
         return Column(
@@ -633,7 +633,7 @@ class __SharedGroupsScreenState extends State<_SharedGroupsScreen> {
                   ),
                   Expanded(
                       child: Text(
-                    title!,
+                    title,
                     style: textStyle,
                   )),
                   Padding(
