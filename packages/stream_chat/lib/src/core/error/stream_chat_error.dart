@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 import 'package:stream_chat/src/core/error/chat_error_code.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
