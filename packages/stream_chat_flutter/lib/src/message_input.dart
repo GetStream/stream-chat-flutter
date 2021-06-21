@@ -251,7 +251,6 @@ class MessageInputState extends State<MessageInput> {
   late final FocusNode _focusNode;
   bool _inputEnabled = true;
   bool _messageIsPresent = false;
-  bool _animateContainer = true;
   bool _commandEnabled = false;
   OverlayEntry? _commandsOverlay, _mentionsOverlay, _emojiOverlay;
   late Iterable<String> _emojiNames;
@@ -939,10 +938,6 @@ class MessageInputState extends State<MessageInput> {
   }
 
   Widget _buildFilePickerSection() {
-    if (!_openFilePickerSection) {
-      return const Offstage();
-    }
-
     final _attachmentContainsFile =
         _attachments.values.any((it) => it.type == 'file');
 
@@ -975,8 +970,7 @@ class MessageInputState extends State<MessageInput> {
     }
 
     return AnimatedContainer(
-      duration:
-          _animateContainer ? const Duration(milliseconds: 300) : Duration.zero,
+      duration: const Duration(milliseconds: 300),
       height: _openFilePickerSection ? _filePickerSize : 0,
       child: Material(
         color: _streamChatTheme.colorTheme.whiteSmoke,
@@ -1034,7 +1028,6 @@ class MessageInputState extends State<MessageInput> {
             GestureDetector(
               onVerticalDragUpdate: (update) {
                 setState(() {
-                  _animateContainer = false;
                   _filePickerSize = (_filePickerSize - update.delta.dy).clamp(
                     _kMinMediaPickerSize,
                     MediaQuery.of(context).size.height / 1.7,
@@ -1672,7 +1665,6 @@ class MessageInputState extends State<MessageInput> {
       onPressed: () async {
         if (_openFilePickerSection) {
           setState(() {
-            _animateContainer = false;
             _openFilePickerSection = false;
             _filePickerSize = _kMinMediaPickerSize;
           });
@@ -1718,7 +1710,6 @@ class MessageInputState extends State<MessageInput> {
 
           if (_openFilePickerSection) {
             setState(() {
-              _animateContainer = true;
               _openFilePickerSection = false;
               _filePickerSize = _kMinMediaPickerSize;
             });
