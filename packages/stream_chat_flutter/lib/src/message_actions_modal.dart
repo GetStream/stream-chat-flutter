@@ -625,48 +625,51 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
           topRight: Radius.circular(16),
         ),
       ),
-      builder: (context) => StreamChannel(
-        channel: channel,
-        child: Flex(
-          direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: StreamSvgIcon.edit(
-                      color: streamChatThemeData.colorTheme.greyGainsboro,
+      builder: (context) => Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: StreamChannel(
+          channel: channel,
+          child: Flex(
+            direction: Axis.vertical,
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: StreamSvgIcon.edit(
+                        color: streamChatThemeData.colorTheme.greyGainsboro,
+                      ),
                     ),
-                  ),
-                  const Text(
-                    'Edit Message',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    icon: StreamSvgIcon.closeSmall(),
-                    onPressed: Navigator.of(context).pop,
-                  ),
-                ],
+                    const Text(
+                      'Edit Message',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: StreamSvgIcon.closeSmall(),
+                      onPressed: Navigator.of(context).pop,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            if (widget.editMessageInputBuilder != null)
-              widget.editMessageInputBuilder!(context, widget.message)
-            else
-              MessageInput(
-                editMessage: widget.message,
-                preMessageSending: (m) {
-                  FocusScope.of(context).unfocus();
-                  Navigator.pop(context);
-                  return m;
-                },
-              ),
-          ],
+              if (widget.editMessageInputBuilder != null)
+                widget.editMessageInputBuilder!(context, widget.message)
+              else
+                MessageInput(
+                  editMessage: widget.message,
+                  preMessageSending: (m) {
+                    FocusScope.of(context).unfocus();
+                    Navigator.pop(context);
+                    return m;
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
