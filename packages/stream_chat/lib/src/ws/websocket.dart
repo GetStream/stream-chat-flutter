@@ -325,6 +325,20 @@ class WebSocket with TimerHelper {
   void _onConnectionError(error, [stacktrace]) {
     _logger?.warning('Error occurred', error, stacktrace);
 
+    StreamWebSocketError wsError;
+    if (error is WebSocketChannelException) {
+      wsError = StreamWebSocketError.fromWebSocketChannelError(error);
+    } else {
+      wsError = StreamWebSocketError(error.toString());
+    }
+
+    final completer = connectionCompleter;
+    // complete with error if not yet completed
+    if (completer != null && !completer.isCompleted) {
+      // complete the connection with error
+      completer.completeError(wsError);
+    }
+
     // resetting connect, reconnect request flag
     _resetRequestFlags();
 
