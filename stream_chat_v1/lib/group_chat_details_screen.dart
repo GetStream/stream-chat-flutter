@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-import 'main.dart';
+import 'channel_page.dart';
 import 'routes/routes.dart';
 
 class GroupChatDetailsScreen extends StatefulWidget {

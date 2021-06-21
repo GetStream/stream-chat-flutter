@@ -1,14 +1,17 @@
-import 'routes.dart';
 import 'package:flutter/material.dart';
-import '../choose_user_page.dart';
-import '../advanced_options_page.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import '../main.dart';
-import '../group_chat_details_screen.dart';
-import '../new_group_chat_screen.dart';
-import '../new_chat_screen.dart';
+
+import '../advanced_options_page.dart';
+import '../channel_page.dart';
 import '../chat_info_screen.dart';
+import '../choose_user_page.dart';
+import '../group_chat_details_screen.dart';
 import '../group_info_screen.dart';
+import '../home_page.dart';
+import '../main.dart';
+import '../new_chat_screen.dart';
+import '../new_group_chat_screen.dart';
+import 'routes.dart';
 
 class AppRoutes {
   /// Add entry for new route here
@@ -42,12 +45,13 @@ class AppRoutes {
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.CHANNEL_PAGE),
             builder: (_) {
-              final arg = args as ChannelPageArgs;
+              final channelPageArgs = args as ChannelPageArgs;
               return StreamChannel(
-                channel: arg.channel!,
-                initialMessageId: arg.initialMessage?.id,
+                channel: channelPageArgs.channel!,
+                initialMessageId: channelPageArgs.initialMessage?.id,
                 child: ChannelPage(
-                  highlightInitialMessage: arg.initialMessage != null,
+                  highlightInitialMessage:
+                      channelPageArgs.initialMessage != null,
                 ),
               );
             });
