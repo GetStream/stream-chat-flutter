@@ -71,7 +71,9 @@ jobs:
         with:
           channel: 'stable'
       - name: "Install Tools"
-        run: flutter pub global activate melos
+        run: |
+          flutter pub global activate melos
+          pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap
       - name: "Flutter Test"
