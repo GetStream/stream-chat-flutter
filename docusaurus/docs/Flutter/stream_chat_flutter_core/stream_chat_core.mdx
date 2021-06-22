@@ -3,3 +3,11 @@ id: stream_chat_core
 sidebar_position: 3
 title: Stream Chat Core
 ---
+
+`StreamChatCore` is a version of `StreamChat` found in stream_chat_flutter that is decoupled from 
+theme and initialisations.
+
+Widget used to provide information about the chat to the widget tree.
+This Widget is used to react to life cycle changes and system updates.
+When the app goes into the background, the websocket connection is kept
+alive for two minutes before being terminated.
