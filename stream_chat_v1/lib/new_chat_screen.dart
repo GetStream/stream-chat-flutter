@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'channel_page.dart';
 import 'chips_input_text_field.dart';
-import 'main.dart';
 import 'routes/routes.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -66,10 +66,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
         final chatState = StreamChat.of(context);
 
         final res = await chatState.client.queryChannelsOnline(
-          options: {
-            'state': false,
-            'watch': false,
-          },
+          state: false,
+          watch: false,
           filter: Filter.raw(value: {
             'members': [
               ..._selectedUsers.map((e) => e.id),
