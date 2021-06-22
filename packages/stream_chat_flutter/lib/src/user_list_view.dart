@@ -47,8 +47,8 @@ class UserListView extends StatefulWidget {
   const UserListView({
     Key? key,
     this.filter,
-    this.options,
     this.sort,
+    this.presence,
     this.pagination,
     this.onUserTap,
     this.onUserLongPress,
@@ -75,12 +75,6 @@ class UserListView extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
-
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options can
   /// be provided.
@@ -88,6 +82,9 @@ class UserListView extends StatefulWidget {
   /// at or member_count.
   /// Direction can be ascending or descending.
   final List<SortOption>? sort;
+
+  ///
+  final bool? presence;
 
   /// Pagination parameters
   /// limit: the number of users to return (max is 30)
@@ -177,9 +174,9 @@ class _UserListViewState extends State<UserListView>
       listBuilder:
           widget.listBuilder ?? (context, list) => _buildListView(list),
       pagination: widget.pagination,
-      options: widget.options,
       sort: widget.sort,
       filter: widget.filter,
+      presence: widget.presence,
       groupAlphabetically: widget.groupAlphabetically,
       userListController: _userListController,
     );

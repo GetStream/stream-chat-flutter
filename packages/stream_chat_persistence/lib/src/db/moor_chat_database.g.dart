@@ -4841,6 +4841,9 @@ class ConnectionEventEntity extends DataClass
   /// event id
   final int id;
 
+  /// event type
+  final String type;
+
   /// User object of the current user
   final Map<String, dynamic>? ownUser;
 
@@ -4857,6 +4860,7 @@ class ConnectionEventEntity extends DataClass
   final DateTime? lastSyncAt;
   ConnectionEventEntity(
       {required this.id,
+      required this.type,
       this.ownUser,
       this.totalUnreadCount,
       this.unreadChannels,
@@ -4869,6 +4873,8 @@ class ConnectionEventEntity extends DataClass
     return ConnectionEventEntity(
       id: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
       ownUser: $ConnectionEventsTable.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}own_user'])),
       totalUnreadCount: const IntType().mapFromDatabaseResponse(
@@ -4885,6 +4891,7 @@ class ConnectionEventEntity extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['type'] = Variable<String>(type);
     if (!nullToAbsent || ownUser != null) {
       final converter = $ConnectionEventsTable.$converter0;
       map['own_user'] = Variable<String?>(converter.mapToSql(ownUser));
@@ -4909,6 +4916,7 @@ class ConnectionEventEntity extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return ConnectionEventEntity(
       id: serializer.fromJson<int>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
       ownUser: serializer.fromJson<Map<String, dynamic>?>(json['ownUser']),
       totalUnreadCount: serializer.fromJson<int?>(json['totalUnreadCount']),
       unreadChannels: serializer.fromJson<int?>(json['unreadChannels']),
@@ -4921,6 +4929,7 @@ class ConnectionEventEntity extends DataClass
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'type': serializer.toJson<String>(type),
       'ownUser': serializer.toJson<Map<String, dynamic>?>(ownUser),
       'totalUnreadCount': serializer.toJson<int?>(totalUnreadCount),
       'unreadChannels': serializer.toJson<int?>(unreadChannels),
@@ -4931,6 +4940,7 @@ class ConnectionEventEntity extends DataClass
 
   ConnectionEventEntity copyWith(
           {int? id,
+          String? type,
           Value<Map<String, dynamic>?> ownUser = const Value.absent(),
           Value<int?> totalUnreadCount = const Value.absent(),
           Value<int?> unreadChannels = const Value.absent(),
@@ -4938,6 +4948,7 @@ class ConnectionEventEntity extends DataClass
           Value<DateTime?> lastSyncAt = const Value.absent()}) =>
       ConnectionEventEntity(
         id: id ?? this.id,
+        type: type ?? this.type,
         ownUser: ownUser.present ? ownUser.value : this.ownUser,
         totalUnreadCount: totalUnreadCount.present
             ? totalUnreadCount.value
@@ -4951,6 +4962,7 @@ class ConnectionEventEntity extends DataClass
   String toString() {
     return (StringBuffer('ConnectionEventEntity(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
           ..write('ownUser: $ownUser, ')
           ..write('totalUnreadCount: $totalUnreadCount, ')
           ..write('unreadChannels: $unreadChannels, ')
@@ -4964,16 +4976,19 @@ class ConnectionEventEntity extends DataClass
   int get hashCode => $mrjf($mrjc(
       id.hashCode,
       $mrjc(
-          ownUser.hashCode,
+          type.hashCode,
           $mrjc(
-              totalUnreadCount.hashCode,
-              $mrjc(unreadChannels.hashCode,
-                  $mrjc(lastEventAt.hashCode, lastSyncAt.hashCode))))));
+              ownUser.hashCode,
+              $mrjc(
+                  totalUnreadCount.hashCode,
+                  $mrjc(unreadChannels.hashCode,
+                      $mrjc(lastEventAt.hashCode, lastSyncAt.hashCode)))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConnectionEventEntity &&
           other.id == this.id &&
+          other.type == this.type &&
           other.ownUser == this.ownUser &&
           other.totalUnreadCount == this.totalUnreadCount &&
           other.unreadChannels == this.unreadChannels &&
@@ -4983,6 +4998,7 @@ class ConnectionEventEntity extends DataClass
 
 class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   final Value<int> id;
+  final Value<String> type;
   final Value<Map<String, dynamic>?> ownUser;
   final Value<int?> totalUnreadCount;
   final Value<int?> unreadChannels;
@@ -4990,6 +5006,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   final Value<DateTime?> lastSyncAt;
   const ConnectionEventsCompanion({
     this.id = const Value.absent(),
+    this.type = const Value.absent(),
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
@@ -4998,14 +5015,16 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   });
   ConnectionEventsCompanion.insert({
     this.id = const Value.absent(),
+    required String type,
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
     this.lastEventAt = const Value.absent(),
     this.lastSyncAt = const Value.absent(),
-  });
+  }) : type = Value(type);
   static Insertable<ConnectionEventEntity> custom({
     Expression<int>? id,
+    Expression<String>? type,
     Expression<Map<String, dynamic>?>? ownUser,
     Expression<int?>? totalUnreadCount,
     Expression<int?>? unreadChannels,
@@ -5014,6 +5033,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (type != null) 'type': type,
       if (ownUser != null) 'own_user': ownUser,
       if (totalUnreadCount != null) 'total_unread_count': totalUnreadCount,
       if (unreadChannels != null) 'unread_channels': unreadChannels,
@@ -5024,6 +5044,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
 
   ConnectionEventsCompanion copyWith(
       {Value<int>? id,
+      Value<String>? type,
       Value<Map<String, dynamic>?>? ownUser,
       Value<int?>? totalUnreadCount,
       Value<int?>? unreadChannels,
@@ -5031,6 +5052,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
       Value<DateTime?>? lastSyncAt}) {
     return ConnectionEventsCompanion(
       id: id ?? this.id,
+      type: type ?? this.type,
       ownUser: ownUser ?? this.ownUser,
       totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
       unreadChannels: unreadChannels ?? this.unreadChannels,
@@ -5044,6 +5066,9 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
     }
     if (ownUser.present) {
       final converter = $ConnectionEventsTable.$converter0;
@@ -5068,6 +5093,7 @@ class ConnectionEventsCompanion extends UpdateCompanion<ConnectionEventEntity> {
   String toString() {
     return (StringBuffer('ConnectionEventsCompanion(')
           ..write('id: $id, ')
+          ..write('type: $type, ')
           ..write('ownUser: $ownUser, ')
           ..write('totalUnreadCount: $totalUnreadCount, ')
           ..write('unreadChannels: $unreadChannels, ')
@@ -5089,6 +5115,17 @@ class $ConnectionEventsTable extends ConnectionEvents
   GeneratedIntColumn _constructId() {
     return GeneratedIntColumn(
       'id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedTextColumn type = _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn(
+      'type',
       $tableName,
       false,
     );
@@ -5153,8 +5190,15 @@ class $ConnectionEventsTable extends ConnectionEvents
   }
 
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, ownUser, totalUnreadCount, unreadChannels, lastEventAt, lastSyncAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        type,
+        ownUser,
+        totalUnreadCount,
+        unreadChannels,
+        lastEventAt,
+        lastSyncAt
+      ];
   @override
   $ConnectionEventsTable get asDslTable => this;
   @override
@@ -5169,6 +5213,12 @@ class $ConnectionEventsTable extends ConnectionEvents
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
     }
     context.handle(_ownUserMeta, const VerificationResult.success());
     if (data.containsKey('total_unread_count')) {

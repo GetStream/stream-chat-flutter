@@ -63,7 +63,7 @@ class UsersBlocState extends State<UsersBloc>
   Future<void> queryUsers({
     Filter? filter,
     List<SortOption>? sort,
-    Map<String, dynamic>? options,
+    bool? presence,
     PaginationParams? pagination,
   }) async {
     final client = _streamChatCore.client;
@@ -82,7 +82,7 @@ class UsersBlocState extends State<UsersBloc>
       final usersResponse = await client.queryUsers(
         filter: filter,
         sort: sort,
-        options: options,
+        presence: presence,
         pagination: pagination,
       );
 

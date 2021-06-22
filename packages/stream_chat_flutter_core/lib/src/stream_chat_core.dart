@@ -127,11 +127,11 @@ class StreamChatCoreState extends State<StreamChatCore>
         if (_isConnectionAvailable) {
           if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
               user != null) {
-            client.connect();
+            client.openConnection();
           }
         } else {
           if (client.wsConnectionStatus == ConnectionStatus.connected) {
-            client.disconnect();
+            client.closeConnection();
           }
         }
       });
@@ -175,14 +175,14 @@ class StreamChatCoreState extends State<StreamChatCore>
       _disconnectTimer?.cancel();
     } else if (client.wsConnectionStatus == ConnectionStatus.disconnected &&
         _isConnectionAvailable) {
-      client.connect();
+      client.openConnection();
     }
   }
 
   void _onBackground() {
     if (widget.onBackgroundEventReceived == null) {
       if (client.wsConnectionStatus != ConnectionStatus.disconnected) {
-        client.disconnect();
+        client.closeConnection();
       }
       return;
     }
@@ -191,7 +191,7 @@ class StreamChatCoreState extends State<StreamChatCore>
 
     void onTimerComplete() {
       _eventSubscription?.cancel();
-      client.disconnect();
+      client.closeConnection();
     }
 
     _disconnectTimer = Timer(widget.backgroundKeepAlive, onTimerComplete);

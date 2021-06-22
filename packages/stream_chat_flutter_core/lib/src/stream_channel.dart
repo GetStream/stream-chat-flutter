@@ -174,7 +174,7 @@ class StreamChannelState extends State<StreamChannel> {
     try {
       final response = await channel.getReplies(
         parentId,
-        PaginationParams(
+        options: PaginationParams(
           lessThan: message?.id,
           limit: limit,
         ),

@@ -60,9 +60,15 @@ class ChannelListView extends StatefulWidget {
   const ChannelListView({
     Key? key,
     this.filter,
-    this.options,
     this.sort,
-    this.pagination,
+    this.state = true,
+    this.watch = true,
+    this.presence = false,
+    this.memberLimit,
+    this.messageLimit,
+    this.pagination = const PaginationParams(
+      limit: 25,
+    ),
     this.onChannelTap,
     this.onChannelLongPress,
     this.channelWidget,
@@ -93,12 +99,6 @@ class ChannelListView extends StatefulWidget {
   /// You can also filter other built-in channel fields.
   final Filter? filter;
 
-  /// Query channels options.
-  ///
-  /// state: if true returns the Channel state
-  /// watch: if true listen to changes to this Channel in real time.
-  final Map<String, dynamic>? options;
-
   /// The sorting used for the channels matching the filters.
   /// Sorting is based on field and direction, multiple sorting options
   /// can be provided.
@@ -107,11 +107,26 @@ class ChannelListView extends StatefulWidget {
   /// Direction can be ascending or descending.
   final List<SortOption<ChannelModel>>? sort;
 
+  /// If true returns the Channel state
+  final bool state;
+
+  /// If true listen to changes to this Channel in real time.
+  final bool watch;
+
+  /// If true you’ll receive user presence updates via the websocket events
+  final bool presence;
+
+  /// Number of members to fetch in each channel
+  final int? memberLimit;
+
+  /// Number of messages to fetch in each channel
+  final int? messageLimit;
+
   /// Pagination parameters
   /// limit: the number of channels to return (max is 30)
   /// offset: the offset (max is 1000)
   /// message_limit: how many messages should be included to each channel
-  final PaginationParams? pagination;
+  final PaginationParams pagination;
 
   /// Function called when tapping on a channel
   /// By default it calls [Navigator.push] building a [MaterialPageRoute]
@@ -184,13 +199,14 @@ class _ChannelListViewState extends State<ChannelListView> {
   @override
   Widget build(BuildContext context) {
     Widget child = ChannelListCore(
-      pagination: widget.pagination ??
-          const PaginationParams(
-            limit: 25,
-          ),
-      options: widget.options,
-      sort: widget.sort,
       filter: widget.filter,
+      sort: widget.sort,
+      state: widget.state,
+      watch: widget.watch,
+      presence: widget.presence,
+      memberLimit: widget.memberLimit,
+      messageLimit: widget.messageLimit,
+      pagination: widget.pagination,
       channelListController: _channelListController,
       listBuilder: widget.listBuilder ?? _buildListView,
       emptyBuilder: widget.emptyBuilder ?? _buildEmptyWidget,

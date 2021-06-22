@@ -95,8 +95,13 @@ class ChannelsBlocState extends State<ChannelsBloc>
   Future<void> queryChannels({
     Filter? filter,
     List<SortOption<ChannelModel>>? sortOptions,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    int? memberLimit,
+    int? messageLimit,
+    bool waitForConnect = true,
     PaginationParams paginationParams = const PaginationParams(limit: 30),
-    Map<String, dynamic>? options,
   }) async {
     final client = _streamChatCoreState!.client;
 
@@ -117,7 +122,12 @@ class ChannelsBlocState extends State<ChannelsBloc>
       await for (final channels in client.queryChannels(
         filter: filter,
         sort: sortOptions,
-        options: options,
+        state: state,
+        watch: watch,
+        presence: presence,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        waitForConnect: waitForConnect,
         paginationParams: paginationParams,
       )) {
         newChannels = channels;

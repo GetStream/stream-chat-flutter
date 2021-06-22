@@ -134,7 +134,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenThrow(error);
 
@@ -154,7 +154,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -179,7 +179,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -199,7 +199,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -224,7 +224,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -244,7 +244,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -283,7 +283,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -310,7 +310,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
     },
@@ -352,7 +352,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -379,7 +379,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
 
@@ -393,7 +393,7 @@ void main() {
       when(() => mockClient.queryUsers(
                 filter: any(named: 'filter'),
                 sort: any(named: 'sort'),
-                options: any(named: 'options'),
+                presence: any(named: 'presence'),
                 pagination: updatedPagination,
               ))
           .thenAnswer(
@@ -411,7 +411,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: updatedPagination,
           )).called(1);
     },
@@ -457,7 +457,7 @@ void main() {
       when(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).thenAnswer((_) async => QueryUsersResponse()..users = users);
 
@@ -488,7 +488,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: any(named: 'pagination'),
           )).called(1);
 
@@ -500,7 +500,7 @@ void main() {
       when(() => mockClient.queryUsers(
                 filter: any(named: 'filter'),
                 sort: any(named: 'sort'),
-                options: any(named: 'options'),
+                presence: any(named: 'presence'),
                 pagination: updatedPagination,
               ))
           .thenAnswer((_) async => QueryUsersResponse()..users = updatedUsers);
@@ -515,7 +515,7 @@ void main() {
       verify(() => mockClient.queryUsers(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            options: any(named: 'options'),
+            presence: any(named: 'presence'),
             pagination: updatedPagination,
           )).called(1);
     },

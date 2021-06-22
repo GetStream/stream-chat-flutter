@@ -53,7 +53,7 @@ void main() {
   );
 
   testWidgets(
-    'didChangeAppLifecycleState should call client.disconnect() and return '
+    'didChangeAppLifecycleState should call client.closeConnection and return '
     'if onBackgroundEventReceived is null and the widget lifestyle changes to '
     'AppLifecycleState.paused',
     (tester) async {
@@ -71,7 +71,7 @@ void main() {
       expect(find.byKey(streamChatCoreKey), findsOneWidget);
       expect(find.byKey(childKey), findsOneWidget);
 
-      when(() => mockClient.disconnect()).thenAnswer((_) async {
+      when(() => mockClient.closeConnection()).thenAnswer((_) async {
         return;
       });
 
@@ -81,7 +81,7 @@ void main() {
 
       streamChatCoreState.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      verify(() => mockClient.disconnect()).called(1);
+      verify(() => mockClient.closeConnection()).called(1);
     },
   );
 
@@ -110,9 +110,9 @@ void main() {
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
 
-        final event = Event();
+        final event = Event(type: EventType.any);
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.disconnect()).thenAnswer((_) async {
+        when(() => mockClient.closeConnection()).thenAnswer((_) async {
           return;
         });
 
@@ -129,7 +129,7 @@ void main() {
 
         await Future.delayed(backgroundKeepAlive);
 
-        verify(() => mockClient.disconnect()).called(1);
+        verify(() => mockClient.closeConnection()).called(1);
         verifyNever(() => mockOnBackgroundEventReceived.call(event));
       });
     },
@@ -159,7 +159,7 @@ void main() {
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
 
-        final event = Event();
+        final event = Event(type: EventType.any);
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
 
         final streamChatCoreState = tester.state<StreamChatCoreState>(
@@ -202,10 +202,10 @@ void main() {
         expect(find.byKey(streamChatCoreKey), findsOneWidget);
         expect(find.byKey(childKey), findsOneWidget);
 
-        final event = Event();
+        final event = Event(type: EventType.any);
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
@@ -221,13 +221,13 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.resumed);
 
-        verify(() => mockClient.connect()).called(1);
+        verify(() => mockClient.openConnection()).called(1);
       });
     },
   );
 
   testWidgets(
-    'didChangeAppLifecycleState should not call client.connect() '
+    'didChangeAppLifecycleState should not call client.openConnection() '
     'if connection is not available in case the '
     'widget lifestyle changes to AppLifecycleState.resume',
     (tester) async {
@@ -238,8 +238,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(() => mockClient.disconnect()).thenAnswer((_) async => null);
+        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
@@ -267,7 +267,7 @@ void main() {
         streamChatCoreState
             .didChangeAppLifecycleState(AppLifecycleState.resumed);
 
-        verifyNever(() => mockClient.connect());
+        verifyNever(() => mockClient.openConnection());
       });
     },
   );
@@ -327,8 +327,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(() => mockClient.disconnect()).thenAnswer((_) async => null);
+        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
@@ -348,7 +348,7 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(() => mockClient.connect()).called(1);
+        verify(() => mockClient.openConnection()).called(1);
       });
     },
   );
@@ -376,8 +376,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(mockClient.disconnect).thenAnswer((_) async => null);
+        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.connected);
 
@@ -385,7 +385,7 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(() => mockClient.disconnect()).called(1);
+        verify(() => mockClient.closeConnection()).called(1);
       });
     },
   );
@@ -402,8 +402,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.connect()).thenAnswer((_) async => event);
-        when(() => mockClient.disconnect()).thenAnswer((_) async => null);
+        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
 
@@ -432,7 +432,7 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verifyNever(() => mockClient.disconnect());
+        verifyNever(() => mockClient.closeConnection());
       });
     },
   );

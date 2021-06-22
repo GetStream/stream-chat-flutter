@@ -791,7 +791,7 @@ class _MessageListViewState extends State<MessageListView> {
           final channel = streamChannel.channel;
           if (_upToDate &&
               channel.config?.readEvents == true &&
-              channel.state!.unreadCount! > 0) {
+              channel.state!.unreadCount > 0) {
             streamChannel.channel.markRead();
           }
         }
