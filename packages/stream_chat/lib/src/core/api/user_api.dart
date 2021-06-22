@@ -6,9 +6,9 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 
-///
+/// Defines the api dedicated to users operations
 class UserApi {
-  ///
+  /// Initialize a new user api
   UserApi(this._client);
 
   final StreamHttpClient _client;

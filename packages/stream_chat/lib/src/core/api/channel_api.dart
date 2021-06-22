@@ -9,9 +9,9 @@ import 'package:stream_chat/src/core/models/event.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 
-///
+/// Defines the api dedicated to channel operations
 class ChannelApi {
-  ///
+  /// Initialize a new channel api
   ChannelApi(this._client);
 
   final StreamHttpClient _client;

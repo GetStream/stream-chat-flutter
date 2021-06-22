@@ -6,9 +6,9 @@ import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/filter.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 
-///
+/// Defines the api dedicated to general operations
 class GeneralApi {
-  ///
+  /// Initialize a new general api
   GeneralApi(this._client);
 
   final StreamHttpClient _client;

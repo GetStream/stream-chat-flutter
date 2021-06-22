@@ -5,21 +5,22 @@ import 'package:jose/jose.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/util/utils.dart';
 
-///
+/// A function which can be used to request a Stream Chat API token from your
+/// own backend server
 typedef GuestTokenProvider = Future<String> Function(User user);
 
-///
+/// Authentication type
 enum AuthType {
-  ///
+  /// JWT token
   jwt,
 
-  ///
+  /// Anonymous user
   anonymous,
 }
 
-///
+/// Extension for returning the AuthType as a string
 extension AuthTypeX on AuthType {
-  ///
+  /// Returns the AuthType as a string
   String get raw => {
         AuthType.jwt: 'jwt',
         AuthType.anonymous: 'anonymous',
@@ -71,13 +72,13 @@ class Token extends Equatable {
     return Token.fromRawValue(rawToken);
   }
 
-  ///
+  /// Authentication type of this token
   final AuthType authType;
 
-  ///
+  /// String value of the token
   final String rawValue;
 
-  ///
+  /// User id associated with this token
   final String userId;
 
   @override

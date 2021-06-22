@@ -3,9 +3,9 @@ import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 
-///
+/// Defines the api dedicated to messages operations
 class MessageApi {
-  ///
+  /// Initialize a new message api
   MessageApi(this._client);
 
   final StreamHttpClient _client;

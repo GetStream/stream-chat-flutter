@@ -1,20 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/stream_chat_dio_error.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token.dart';
-
 import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/core/error/error.dart';
 
-///
+/// Authentication interceptor that refreshes the token if
+/// an auth error is received
 class AuthInterceptor extends Interceptor {
-  ///
+  /// Initialize a new auth interceptor
   AuthInterceptor(this._client, this._tokenManager);
 
   final StreamHttpClient _client;
 
-  ///
+  /// The token manager used in the client
   final TokenManager _tokenManager;
 
   @override

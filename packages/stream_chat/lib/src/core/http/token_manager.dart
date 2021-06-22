@@ -1,12 +1,13 @@
 import 'package:stream_chat/src/core/http/token.dart';
 
 /// A function which can be used to request a Stream Chat API token from your
-/// own backend server. Function requires a single [userId].
+/// own backend server.
+/// Function requires a single [userId].
 typedef TokenProvider = Future<String> Function(String userId);
 
-///
+/// Handles common token operations
 class TokenManager {
-  ///
+  /// Initialize a new token manager
   TokenManager({
     String? userId,
     Token? token,
@@ -25,10 +26,10 @@ class TokenManager {
   /// User id to which this TokenManager is configured to
   String? get userId => _userId;
 
-  ///
+  /// True if it's a static token
   bool get isStatic => _type == 'static';
 
-  ///
+  /// Set a token or a token provider
   Future<Token> setTokenOrProvider(
     String userId, {
     Token? token,
@@ -58,7 +59,7 @@ class TokenManager {
     return loadToken();
   }
 
-  ///
+  /// Returns the token refreshing the existing one if [refresh] is true
   Future<Token> loadToken({bool refresh = false}) async {
     assert(
       _userId != null && _type != null,
@@ -71,7 +72,7 @@ class TokenManager {
     return _token!;
   }
 
-  ///
+  /// Resets the token manager
   void reset() {
     _userId = null;
     _token = null;

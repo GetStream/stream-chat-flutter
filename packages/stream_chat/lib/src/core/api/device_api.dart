@@ -19,9 +19,9 @@ extension PushProviderX on PushProvider {
       }[this]!;
 }
 
-///
+/// Defines the api dedicated to device operations
 class DeviceApi {
-  ///
+  /// Initialize a new device api
   DeviceApi(this._client);
 
   final StreamHttpClient _client;

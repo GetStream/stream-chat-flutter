@@ -5,26 +5,26 @@ import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 
-///
+/// Step where we're logging
 enum InterceptStep {
-  ///
+  /// Request
   request,
 
-  ///
+  /// Response
   response,
 
-  ///
+  /// Error
   error,
 }
 
-///
+/// Function used to print the log
 typedef LogPrint = void Function(InterceptStep step, Object object);
 
 void _defaultLogPrint(InterceptStep step, Object object) => print(object);
 
-///
+/// Interceptor dedicated to logging
 class LoggingInterceptor extends Interceptor {
-  ///
+  /// Initialize a new logging interceptor
   LoggingInterceptor({
     this.request = true,
     this.requestHeader = false,
@@ -309,13 +309,6 @@ class LoggingInterceptor extends Interceptor {
       }
     });
   }
-
-/*  bool _canFlattenMap(Map map) =>
-      map.values.where((dynamic val) => val is Map || val is List).isEmpty &&
-      map.toString().length < maxWidth;
-
-  bool _canFlattenList(List list) =>
-      list.length < 10 && list.toString().length < maxWidth;*/
 
   void _printMapAsTable(
     void Function(Object) logPrint,

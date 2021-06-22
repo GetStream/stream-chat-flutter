@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client/client.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/device.dart';
@@ -9,7 +10,6 @@ import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/core/error/error.dart';
 
 part 'responses.g.dart';
 
@@ -20,17 +20,17 @@ class _BaseResponse {
 /// Model response for [StreamChatNetworkError] data
 @JsonSerializable()
 class ErrorResponse extends _BaseResponse {
-  ///
+  /// The http error code
   int? code;
 
-  ///
+  /// The message associated to the error code
   String? message;
 
-  ///
+  /// The backend error code
   @JsonKey(name: 'StatusCode')
   int? statusCode;
 
-  ///
+  /// A detailed message about the error
   String? moreInfo;
 
   /// Create a new instance from a json

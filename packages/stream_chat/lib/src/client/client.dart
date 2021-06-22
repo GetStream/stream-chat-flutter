@@ -6,33 +6,31 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/client/channel.dart';
-import 'package:stream_chat/src/core/util/utils.dart';
-import 'package:stream_chat/src/core/error/error.dart';
-import 'package:stream_chat/src/location.dart';
-import 'package:stream_chat/src/ws/connection_status.dart';
+import 'package:stream_chat/src/client/retry_policy.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
-import 'package:stream_chat/src/client/retry_policy.dart';
-import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/src/core/api/stream_chat_api.dart';
+import 'package:stream_chat/src/core/error/error.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
-import 'package:stream_chat/src/db/chat_persistence_client.dart';
-import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
 import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/event.dart';
+import 'package:stream_chat/src/core/models/filter.dart';
+import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-
-import 'package:stream_chat/src/core/models/filter.dart';
-
-import 'package:stream_chat/src/core/models/member.dart';
+import 'package:stream_chat/src/core/util/utils.dart';
+import 'package:stream_chat/src/db/chat_persistence_client.dart';
+import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/location.dart';
+import 'package:stream_chat/src/ws/connection_status.dart';
+import 'package:stream_chat/src/ws/websocket.dart';
 
 /// Handler function used for logging records. Function requires a single
 /// [LogRecord] as the only parameter.
@@ -137,10 +135,10 @@ class StreamChatClient {
 
   late final RetryPolicy _retryPolicy;
 
-  // sync state of the channels present inside state, defaults to false
+  /// sync state of the channels present inside state, defaults to false
   bool _synced = false;
 
-  // the last dateTime at the which all the channels were synced
+  /// the last dateTime at the which all the channels were synced
   DateTime? _lastSyncedAt;
 
   /// The retry policy options getter
