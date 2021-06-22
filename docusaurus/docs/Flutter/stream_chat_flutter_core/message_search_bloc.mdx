@@ -3,3 +3,24 @@ id: message_search_list_block
 sidebar_position: 8
 title: Message Search List Bloc
 ---
+
+`MessageSearchBloc` is used to manage a list of messages with pagination.
+This class can be used to load messages, perform queries, etc.
+
+`MessageSearchBloc` can be accessed at anytime by using the static of method
+using Flutter's BuildContext.
+
+```dart
+var _searchBloc = MessageSearchBloc.of(context);
+```
+
+The `MessageSearchBloc` widget encapsulates common functionality related to searching for messages
+across channels and also supplies them down the widget tree.
+
+Here is a basic implementation of `ChannelsBloc`:
+
+```dart
+MessageSearchBloc(
+    child: // Further Widget Tree
+),
+```

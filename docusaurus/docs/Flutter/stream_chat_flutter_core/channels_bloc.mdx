@@ -3,3 +3,74 @@ id: channels_bloc
 sidebar_position: 7
 title: Channels Bloc
 ---
+
+`ChannelsBloc` is a widget dedicated to the management of a channel list with pagination.
+`ChannelsBloc` is used together with `ChannelListCore` to manage a list of
+Channels with pagination, re-ordering, querying and other operations
+associated with Channels.
+
+`ChannelsBloc` can be accessed at anytime by using the static of method
+using Flutter's `BuildContext`.
+
+```dart
+var _channelsBloc = ChannelsBloc.of(context);
+```
+
+The `ChannelsBloc` widget encapsulates common functionality related to channel lists such as fetching
+the existing channels and querying new channels and also supplies them down the widget tree.
+
+The widget is required for the respective core widget (`ChannelListCore`) to fetch channels and hence
+must be above the core widget in the tree.
+
+Here is a basic implementation of `ChannelsBloc`:
+
+```dart
+ChannelsBloc(
+    child: // Further Widget Tree
+),
+```
+
+The `ChannelsBloc` widget allows three customisations:
+
+#### Lock Channels Order
+
+ChannelsBloc may change the order of channels when new messages arrive. To lock this order, we can
+set the `lockChannelsOrder` property to true.
+
+```dart
+ChannelsBloc(
+    lockChannelsOrder: true,
+    child: // Further Widget Tree
+),
+```
+
+#### Set custom channel order
+
+We can decide the order of the channels in the list by supplying a comparator to the `channelsComparator`
+parameter:
+
+```dart
+ChannelsBloc(
+    channelsComparator: (a, b) {
+        return a.createdAt!.millisecondsSinceEpoch >
+                          b.createdAt!.millisecondsSinceEpoch
+                      ? 1
+                      : -1;
+    },
+    child: // Further Widget Tree
+),
+```
+
+#### Decide if channel should be added on new message event
+
+When a new message arrives, a `message.new` event is created. We can decide if we want to add the channel
+to the list using the `shouldAddChannel` parameter which is a callback supplying the event data:
+
+```dart
+ChannelsBloc(
+    shouldAddChannel: (event) {
+        return event.message!.extraData['priority'] == '1';
+    },
+    child: // Further Widget Tree
+),
+```

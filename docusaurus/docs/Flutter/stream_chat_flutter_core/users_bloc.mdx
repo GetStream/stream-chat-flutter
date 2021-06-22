@@ -3,3 +3,23 @@ id: users_bloc
 sidebar_position: 9
 title: Users Bloc
 ---
+
+Widget dedicated to the management of a users list with pagination.
+
+`UsersBloc` can be accessed at anytime by using the static of method
+using Flutter's `BuildContext`.
+
+```dart
+var _userBloc_ = UsersBloc.of(context);
+```
+
+The `UsersBloc` widget encapsulates common functionality related to searching for users
+and also supplies them down the widget tree.
+
+Here is a basic implementation of `UsersBloc`:
+
+```dart
+UsersBloc(
+    child: // Further Widget Tree
+),
+```
