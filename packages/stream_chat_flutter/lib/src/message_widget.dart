@@ -908,6 +908,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final channel = StreamChannel.of(context).channel;
 
     showDialog(
+        useRootNavigator: false,
         context: context,
         barrierColor: _streamChatTheme.colorTheme.overlay,
         builder: (context) => StreamChannel(
@@ -959,6 +960,7 @@ class _MessageWidgetState extends State<MessageWidget>
   void _showMessageReactionsModalBottomSheet(BuildContext context) {
     final channel = StreamChannel.of(context).channel;
     showDialog(
+      useRootNavigator: false,
       context: context,
       barrierColor: _streamChatTheme.colorTheme.overlay,
       builder: (context) => StreamChannel(

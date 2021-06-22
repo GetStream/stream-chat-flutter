@@ -18,10 +18,6 @@ dependencies:
   rxdart: ^0.27.0
   stream_chat: ^2.0.0-nullsafety.6
 
-dependency_overrides:
-  stream_chat:
-    path: ../stream_chat
-
 dev_dependencies:
   fake_async: ^1.2.0
   flutter_test:
