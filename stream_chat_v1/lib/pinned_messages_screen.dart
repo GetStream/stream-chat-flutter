@@ -70,21 +70,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
             fontSize: 16.0,
           ),
         ),
-        leading: Center(
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Container(
-              width: 24.0,
-              height: 24.0,
-              child: StreamSvgIcon.left(
-                color: StreamChatTheme.of(context).colorTheme.black,
-                size: 24.0,
-              ),
-            ),
-          ),
-        ),
+        leading: StreamBackButton(),
         backgroundColor: StreamChatTheme.of(context).colorTheme.white,
       ),
       body: _buildMediaGrid(),

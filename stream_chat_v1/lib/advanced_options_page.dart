@@ -1,3 +1,4 @@
+import 'package:example/home_page.dart';
 import 'package:example/routes/routes.dart';
 import 'package:example/stream_version.dart';
 import 'package:flutter/material.dart';
@@ -306,7 +307,6 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             key: kStreamToken,
                             value: userToken,
                           );
-                          client.closeConnection();
                         } catch (e) {
                           var errorText = 'Error connecting, retry';
                           if (e is Map) {
@@ -317,15 +317,14 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
                             _apiKeyError = errorText.toUpperCase();
                           });
                           loading = false;
-                          client.closeConnection();
                           return;
                         }
                         loading = false;
                         await Navigator.pushNamedAndRemoveUntil(
                           context,
-                          Routes.APP,
-                          ModalRoute.withName(Routes.APP),
-                          arguments: client,
+                          Routes.HOME,
+                          ModalRoute.withName(Routes.HOME),
+                          arguments: HomePageArgs(client),
                         );
                       }
                     },

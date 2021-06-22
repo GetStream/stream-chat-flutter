@@ -1,3 +1,4 @@
+import 'package:example/channel_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -28,7 +29,10 @@ class AppRoutes {
         return MaterialPageRoute(
             settings: const RouteSettings(name: Routes.HOME),
             builder: (_) {
-              return HomePage();
+              final homePageArgs = args as HomePageArgs;
+              return HomePage(
+                chatClient: homePageArgs.chatClient,
+              );
             });
       case Routes.CHOOSE_USER:
         return MaterialPageRoute(
@@ -91,6 +95,12 @@ class AppRoutes {
               return GroupInfoScreen(
                 messageTheme: StreamChatTheme.of(context).ownMessageTheme,
               );
+            });
+      case Routes.CHANNEL_LIST_PAGE:
+        return MaterialPageRoute(
+            settings: const RouteSettings(name: Routes.CHANNEL_LIST_PAGE),
+            builder: (context) {
+              return ChannelListPage();
             });
       // Default case, should not reach here.
       default:
