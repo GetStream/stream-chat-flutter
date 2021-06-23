@@ -575,23 +575,25 @@ class _MessageListViewState extends State<MessageListView> {
                           const Offstage();
                     }
 
-                    final message = messages[i - 2];
+                    final topMessageIndex = itemCount - 4;
+                    const bottomMessageIndex = 2;
 
+                    final message = messages[i - 2];
                     Widget messageWidget;
 
-                    if (i == 2) {
-                      messageWidget = _buildBottomMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel!,
-                      );
-                    } else if (i == messages.length - 4) {
+                    if (i == topMessageIndex) {
                       messageWidget = _buildTopMessage(
                         context,
                         message,
                         messages,
                         streamChannel,
+                      );
+                    } else if (i == bottomMessageIndex) {
+                      messageWidget = _buildBottomMessage(
+                        context,
+                        message,
+                        messages,
+                        streamChannel!,
                       );
                     } else {
                       if (widget.messageBuilder != null) {
