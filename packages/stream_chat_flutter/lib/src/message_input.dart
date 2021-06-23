@@ -798,7 +798,7 @@ class MessageInputState extends State<MessageInput> {
         setState(() {
           _commandEnabled = true;
         });
-        _commandsOverlay!.remove();
+        _commandsOverlay?.remove();
         _commandsOverlay = null;
       } else {
         _commandsOverlay = _buildCommandsOverlayEntry();
