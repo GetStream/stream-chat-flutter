@@ -1,3 +1,4 @@
+// ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
 import 'dart:math';
 
@@ -147,6 +148,8 @@ class MessageListView extends StatefulWidget {
     this.messageHighlightColor,
     this.onShowMessage,
     this.showConnectionStateTile = false,
+    this.headerBuilder,
+    this.footerBuilder,
     this.loadingBuilder,
     this.emptyBuilder,
     this.systemMessageBuilder,
@@ -234,6 +237,12 @@ class MessageListView extends StatefulWidget {
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
+
+  ///
+  final WidgetBuilder? headerBuilder;
+
+  ///
+  final WidgetBuilder? footerBuilder;
 
   /// Function used to build a loading widget
   final WidgetBuilder? loadingBuilder;
@@ -407,6 +416,12 @@ class _MessageListViewState extends State<MessageListView> {
                 break;
             }
 
+            final itemCount = messages.length + // total messages
+                    2 + // top + bottom loading indicator
+                    2 + // header + footer
+                    1 // parent message
+                ;
+
             return InfoTile(
               showMessage: widget.showConnectionStateTile && showStatus,
               tileAnchor: Alignment.topCenter,
@@ -448,16 +463,49 @@ class _MessageListViewState extends State<MessageListView> {
                   itemScrollController: _scrollController,
                   reverse: true,
                   addAutomaticKeepAlives: false,
-                  itemCount:
-                      messages.length + 2 + (_isThreadConversation ? 1 : 0),
+                  itemCount: itemCount,
+
+                  // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
+                  // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
+                  //     ParentMessage  ->        7                                             (count-1)
+                  //        Separator(ThreadSeparator)          ->           6                                      (count-2)
+                  //     Header         ->        6                                             (count-2)
+                  //        Separator(Header -> 8??52)          ->           5                                      (count-3)
+                  //     TopLoader      ->        5                                             (count-3)
+                  //        Separator(2||8)                     ->           4                                      (count-4)
+                  //     Message        ->        4                                             (count-4)
+                  //        Separator(2||8)                     ->           3                                      (count-5)
+                  //     Message        ->        3                                             (count-5)
+                  //        Separator(2||8)                     ->           2                                      (count-6)
+                  //     Message        ->        2                                             (count-6)
+                  //        Separator(2||8)                     ->           1                                      (count-7)
+                  //     BottomLoader   ->        1                                             (count-7)
+                  //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
+                  //     Footer         ->        0                                             (count-8)
+
                   separatorBuilder: (context, i) {
-                    if (i == messages.length) return const Offstage();
-                    if (i == 0) return const SizedBox(height: 30);
-                    if (i == messages.length + 1) {
+                    if (i == itemCount - 2) {
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
                       return _buildThreadSeparator();
                     }
+                    if (i == itemCount - 3) {
+                      if (widget.headerBuilder == null) {
+                        return const SizedBox(height: 52);
+                      }
+                      return const SizedBox(height: 8);
+                    }
+                    if (i == 0) {
+                      if (widget.footerBuilder == null) {
+                        return const SizedBox(height: 30);
+                      }
+                      return const SizedBox(height: 8);
+                    }
 
-                    final message = messages[i];
+                    if (i == 1 || i == itemCount - 4) return const Offstage();
+
+                    final message = messages[i - 2];
                     final nextMessage = messages[i - 1];
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
@@ -494,40 +542,51 @@ class _MessageListViewState extends State<MessageListView> {
                     return const SizedBox(height: 2);
                   },
                   itemBuilder: (context, i) {
-                    if (i == messages.length + 2) {
-                      if (widget.parentMessageBuilder != null) {
-                        return widget.parentMessageBuilder!(
-                          context,
-                          widget.parentMessage,
-                        );
-                      } else {
-                        return buildParentMessage(widget.parentMessage!);
-                      }
+                    if (i == itemCount - 1) {
+                      if (widget.parentMessage == null) return const Offstage();
+                      return widget.parentMessageBuilder?.call(
+                            context,
+                            widget.parentMessage,
+                          ) ??
+                          buildParentMessage(widget.parentMessage!);
                     }
-                    if (i == messages.length + 1) {
+
+                    if (i == itemCount - 2) {
+                      return widget.headerBuilder?.call(context) ??
+                          const Offstage();
+                    }
+
+                    if (i == itemCount - 3) {
                       return _buildLoadingIndicator(
                         streamChannel!,
                         QueryDirection.top,
                       );
                     }
-                    if (i == 0) {
+
+                    if (i == 1) {
                       return _buildLoadingIndicator(
                         streamChannel!,
                         QueryDirection.bottom,
                       );
                     }
-                    final message = messages[i - 1];
+
+                    if (i == 0) {
+                      return widget.footerBuilder?.call(context) ??
+                          const Offstage();
+                    }
+
+                    final message = messages[i - 2];
 
                     Widget messageWidget;
 
-                    if (i == 1) {
+                    if (i == 2) {
                       messageWidget = _buildBottomMessage(
                         context,
                         message,
                         messages,
                         streamChannel!,
                       );
-                    } else if (i == messages.length - 1) {
+                    } else if (i == messages.length - 4) {
                       messageWidget = _buildTopMessage(
                         context,
                         message,
@@ -578,7 +637,6 @@ class _MessageListViewState extends State<MessageListView> {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Text(
-          // ignore: lines_longer_than_80_chars
           '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
           textAlign: TextAlign.center,
           style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
@@ -1238,15 +1296,7 @@ class _LoadingIndicator extends StatelessWidget {
         ),
       ),
       builder: (context, data) {
-        if (!data) {
-          if (!isThreadConversation && direction == QueryDirection.top) {
-            return const SizedBox(
-              height: 52,
-              width: double.infinity,
-            );
-          }
-          return const Offstage();
-        }
+        if (!data) return const Offstage();
         return const Center(
           child: Padding(
             padding: EdgeInsets.all(8),
