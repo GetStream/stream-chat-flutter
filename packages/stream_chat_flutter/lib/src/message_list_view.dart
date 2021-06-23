@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -813,7 +814,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUser = StreamChat.of(context).user;
     final members = StreamChannel.of(context).channel.state?.members ?? [];
     final currentUserMember =
-        members.firstWhere((e) => e.user!.id == currentUser!.id);
+        members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
     return MessageWidget(
       showReplyMessage: false,
@@ -866,7 +867,8 @@ class _MessageListViewState extends State<MessageListView> {
       textBuilder: widget.textBuilder,
       usernameBuilder: widget.usernameBuilder,
       onLinkTap: widget.onLinkTap,
-      showPinButton: widget.pinPermissions.contains(currentUserMember.role),
+      showPinButton: currentUserMember != null &&
+          widget.pinPermissions.contains(currentUserMember.role),
     );
   }
 
