@@ -4,9 +4,24 @@ sidebar_position: 1
 title: Introduction
 ---
 
+Understanding The Core Package Of The Flutter SDK
+
 This package provides business logic to fetch common things required for integrating Stream Chat into your application.
 The core package allows more customisation and hence provides business logic but no UI components.
-Please use the stream_chat_flutter package for the full fledged suite of UI components or stream_chat for the low-level client.
+Please use the `stream_chat_flutter` package for the full fledged suite of UI components or `stream_chat` for the low-level client.
+
+### Background
+
+In the early days of the Flutter SDK, the SDK was only split into the LLC (`stream_chat`) and
+the UI package (`stream_chat_flutter`). With this you could use a fully built interface with the UI package
+or a fully custom interface with the LLC. However, we soon recognised the need for a third intermediary
+package which made tasks like building and modifying a list or channels or messages easy but without
+the complexity of using low level components. The Core package (`stream_chat_flutter_core`) is a manifestation
+of the same idea and allows you to build an interface with Stream Chat without having to deal with
+low level code and architecture as well as implementing your own theme and UI effortlessly.
+
+We will now explore the components of this intermediary package and understand how it helps you build
+the experience you want your users to have.
 
 The package primarily contains three types of classes:
 
@@ -18,6 +33,10 @@ The package primarily contains three types of classes:
 
 These components allow you to have the maximum and lower-level control of the queries being executed.
 
+In BLoCs, the basic functionalities - such as queries for messages, channels or queries - are bundled up
+and passed along down the tree. Using a BLoC allows you to either create your own way to fetch and
+build UIs or use an inbuilt Core widget to do the work such as queries, pagination, etc for you.
+
 The BLoCs we provide are:
 
 * ChannelsBloc
@@ -26,7 +45,13 @@ The BLoCs we provide are:
 
 ### Core Components
 
-Core components usually are an easy way to fetch data associated with Stream Chat which are decoupled from UI and often expose UI builders. Data fetching can be controlled with the controllers of the respective core components.
+Core components usually are an easy way to fetch data associated with Stream Chat.
+Core components use functions exposed by the respective BLoCs (the ChannelListCore uses the ChannelsBloc)
+and use the respective controllers for various operations. Unlike heavier components from the UI
+package, core components are decoupled from UI and they expose builders instead to help you build
+a fully custom interface.
+
+Data fetching can be controlled with the controllers of the respective core components.
 
 * ChannelListCore (Fetch a list of channels)
 * MessageListCore (Fetch a list of messages from a channel)
