@@ -63,6 +63,14 @@ Data fetching can be controlled with the controllers of the respective core comp
 
 Core Controllers are supplied to respective CoreList widgets which allows reloading and pagination of data whenever needed.
 
+Unlike the UI package, the Core package allows a fully custom user interface built with the data. This
+in turn provides a few challenges: we do not know implicitly when to paginate your list or reload your data.
+
+While this is handled out of the box in the UI package since the List implementation is inbuilt, a controller
+needs to be used in the core package notifying the core components to reload or paginate the data existing
+currently. For this, each core component has a respective controller which you can use to call the
+specific function (reload / paginate) whenever such an event is triggered through / needed in your UI.
+
 * ChannelListController
 * MessageListController
 * MessageSearchListController
