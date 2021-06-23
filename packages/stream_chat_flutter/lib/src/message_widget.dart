@@ -413,39 +413,37 @@ class _MessageWidgetState extends State<MessageWidget>
 
   bool get showTimeStamp => widget.showTimestamp;
 
-  late final bool isMessageRead = widget.readList?.isNotEmpty == true;
+  bool get isMessageRead => widget.readList?.isNotEmpty == true;
 
   bool get showInChannel => widget.showInChannelIndicator;
 
   bool get hasQuotedMessage => widget.message.quotedMessage != null;
 
-  late final bool isSendFailed =
-      widget.message.status == MessageSendingStatus.failed;
+  bool get isSendFailed => widget.message.status == MessageSendingStatus.failed;
 
-  late final bool isUpdateFailed =
+  bool get isUpdateFailed =>
       widget.message.status == MessageSendingStatus.failed_update;
 
-  late final bool isDeleteFailed =
+  bool get isDeleteFailed =>
       widget.message.status == MessageSendingStatus.failed_delete;
 
-  late final bool isFailedState =
-      isSendFailed || isUpdateFailed || isDeleteFailed;
+  bool get isFailedState => isSendFailed || isUpdateFailed || isDeleteFailed;
 
-  late final bool isGiphy =
+  bool get isGiphy =>
       widget.message.attachments.any((element) => element.type == 'giphy') ==
-          true;
-
-  late final bool isOnlyEmoji = widget.message.text?.isOnlyEmoji == true;
-
-  late final bool hasNonUrlAttachments = widget.message.attachments
-          .where((it) => it.ogScrapeUrl == null)
-          .isNotEmpty ==
       true;
 
-  late final bool hasUrlAttachments =
+  bool get isOnlyEmoji => widget.message.text?.isOnlyEmoji == true;
+
+  bool get hasNonUrlAttachments => widget.message.attachments
+      .where((it) => it.ogScrapeUrl == null)
+      .isNotEmpty;
+
+  bool get hasUrlAttachments =>
       widget.message.attachments.any((it) => it.ogScrapeUrl != null) == true;
 
-  late final bool showBottomRow = showThreadReplyIndicator ||
+  bool get showBottomRow =>
+      showThreadReplyIndicator ||
       showUsername ||
       showTimeStamp ||
       showInChannel ||
@@ -1177,7 +1175,7 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  late final bool isPinned = widget.message.pinned;
+  bool get isPinned => widget.message.pinned;
 
   Color? _getBackgroundColor() {
     if (hasQuotedMessage) {
