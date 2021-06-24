@@ -1,5 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
 import 'dart:async';
-import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -148,6 +148,8 @@ class MessageListView extends StatefulWidget {
     this.messageHighlightColor,
     this.onShowMessage,
     this.showConnectionStateTile = false,
+    this.headerBuilder,
+    this.footerBuilder,
     this.loadingBuilder,
     this.emptyBuilder,
     this.systemMessageBuilder,
@@ -235,6 +237,12 @@ class MessageListView extends StatefulWidget {
 
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
+
+  /// Function used to build a header widget
+  final WidgetBuilder? headerBuilder;
+
+  /// Function used to build a footer widget
+  final WidgetBuilder? footerBuilder;
 
   /// Function used to build a loading widget
   final WidgetBuilder? loadingBuilder;
@@ -388,6 +396,12 @@ class _MessageListViewState extends State<MessageListView> {
 
     _messageListLength = newMessagesListLength;
 
+    final itemCount = messages.length + // total messages
+            2 + // top + bottom loading indicator
+            2 + // header + footer
+            1 // parent message
+        ;
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -449,17 +463,51 @@ class _MessageListViewState extends State<MessageListView> {
                   itemScrollController: _scrollController,
                   reverse: true,
                   addAutomaticKeepAlives: false,
-                  itemCount:
-                      messages.length + 2 + (_isThreadConversation ? 1 : 0),
+                  itemCount: itemCount,
+
+                  // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
+                  // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
+                  //     ParentMessage  ->        7                                             (count-1)
+                  //        Separator(ThreadSeparator)          ->           6                                      (count-2)
+                  //     Header         ->        6                                             (count-2)
+                  //        Separator(Header -> 8??T -> 0||52)  ->           5                                      (count-3)
+                  //     TopLoader      ->        5                                             (count-3)
+                  //        Separator(0)                        ->           4                                      (count-4)
+                  //     Message        ->        4                                             (count-4)
+                  //        Separator(2||8)                     ->           3                                      (count-5)
+                  //     Message        ->        3                                             (count-5)
+                  //        Separator(2||8)                     ->           2                                      (count-6)
+                  //     Message        ->        2                                             (count-6)
+                  //        Separator(0)                        ->           1                                      (count-7)
+                  //     BottomLoader   ->        1                                             (count-7)
+                  //        Separator(Footer -> 8??30)          ->           0                                      (count-8)
+                  //     Footer         ->        0                                             (count-8)
+
                   separatorBuilder: (context, i) {
-                    if (i == messages.length) return const Offstage();
-                    if (i == 0) return const SizedBox(height: 30);
-                    if (i == messages.length + 1) {
+                    if (i == itemCount - 2) {
+                      if (widget.parentMessage == null) {
+                        return const Offstage();
+                      }
                       return _buildThreadSeparator();
                     }
+                    if (i == itemCount - 3) {
+                      if (widget.headerBuilder == null) {
+                        if (_isThreadConversation) return const Offstage();
+                        return const SizedBox(height: 52);
+                      }
+                      return const SizedBox(height: 8);
+                    }
+                    if (i == 0) {
+                      if (widget.footerBuilder == null) {
+                        return const SizedBox(height: 30);
+                      }
+                      return const SizedBox(height: 8);
+                    }
 
-                    final message = messages[i];
-                    final nextMessage = messages[i - 1];
+                    if (i == 1 || i == itemCount - 4) return const Offstage();
+
+                    final message = messages[i - 1];
+                    final nextMessage = messages[i - 2];
                     if (!Jiffy(message.createdAt.toLocal()).isSame(
                       nextMessage.createdAt.toLocal(),
                       Units.DAY,
@@ -495,45 +543,61 @@ class _MessageListViewState extends State<MessageListView> {
                     return const SizedBox(height: 2);
                   },
                   itemBuilder: (context, i) {
-                    if (i == messages.length + 2) {
-                      if (widget.parentMessageBuilder != null) {
-                        return widget.parentMessageBuilder!(
-                          context,
-                          widget.parentMessage,
-                        );
-                      } else {
-                        return buildParentMessage(widget.parentMessage!);
-                      }
+                    if (i == itemCount - 1) {
+                      if (widget.parentMessage == null) return const Offstage();
+                      return widget.parentMessageBuilder?.call(
+                            context,
+                            widget.parentMessage,
+                          ) ??
+                          buildParentMessage(widget.parentMessage!);
                     }
-                    if (i == messages.length + 1) {
+
+                    if (i == itemCount - 2) {
+                      return widget.headerBuilder?.call(context) ??
+                          const Offstage();
+                    }
+
+                    if (i == itemCount - 3) {
                       return _buildLoadingIndicator(
                         streamChannel!,
                         QueryDirection.top,
                       );
                     }
-                    if (i == 0) {
+
+                    if (i == 1) {
                       return _buildLoadingIndicator(
                         streamChannel!,
                         QueryDirection.bottom,
                       );
                     }
-                    final message = messages[i - 1];
 
+                    if (i == 0) {
+                      return widget.footerBuilder?.call(context) ??
+                          const Offstage();
+                    }
+
+                    final topMessageIndex = itemCount -
+                        4; // 7 -> parent // 6 -> header // 5 -> loader
+                    const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
+
+                    final message = messages[i - 2];
                     Widget messageWidget;
 
-                    if (i == 1) {
-                      messageWidget = _buildBottomMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel!,
-                      );
-                    } else if (i == messages.length - 1) {
+                    if (i == topMessageIndex) {
                       messageWidget = _buildTopMessage(
                         context,
                         message,
                         messages,
                         streamChannel,
+                        i,
+                      );
+                    } else if (i == bottomMessageIndex) {
+                      messageWidget = _buildBottomMessage(
+                        context,
+                        message,
+                        messages,
+                        streamChannel!,
+                        i,
                       );
                     } else {
                       if (widget.messageBuilder != null) {
@@ -561,7 +625,8 @@ class _MessageListViewState extends State<MessageListView> {
           },
         ),
         if (widget.showScrollToBottom) _buildScrollToBottom(),
-        if (widget.showFloatingDateDivider) _buildFloatingDateDivider(),
+        if (widget.showFloatingDateDivider)
+          _buildFloatingDateDivider(itemCount),
       ],
     );
   }
@@ -579,7 +644,6 @@ class _MessageListViewState extends State<MessageListView> {
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Text(
-          // ignore: lines_longer_than_80_chars
           '$replyCount ${replyCount == 1 ? 'Reply' : 'Replies'}',
           textAlign: TextAlign.center,
           style: _streamTheme.channelTheme.channelHeaderTheme.subtitle,
@@ -588,42 +652,34 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
-  Positioned _buildFloatingDateDivider() => Positioned(
+  Positioned _buildFloatingDateDivider(int itemCount) => Positioned(
         top: 20,
         child: BetterStreamBuilder<Iterable<ItemPosition>>(
           initialData: _itemPositionListener.itemPositions.value,
           stream: _itemPositionStream,
           comparator: (a, b) {
-            if (a == null) {
+            if (a == null || b == null) {
               return false;
             }
-            final aTop = _getTopElement(a)?.index;
-            final bTop = _getTopElement(b)?.index;
+            final aTop = _getTopElementIndex(a);
+            final bTop = _getTopElementIndex(b);
             return aTop == bTop;
           },
           builder: (context, values) {
-            final items = _itemPositionListener.itemPositions.value;
-            if (items.isEmpty || messages.isEmpty) {
-              return const SizedBox();
+            if (values.isEmpty || messages.isEmpty) {
+              return const Offstage();
             }
 
-            var index = _getTopElement(values)?.index;
+            final index = _getTopElementIndex(values);
 
-            if (index == null || index > messages.length) {
-              return const SizedBox();
+            if (index == null || index <= 2 || index >= itemCount - 3) {
+              return const Offstage();
             }
 
-            if (index == messages.length) {
-              index = max(index - 1, 0);
-            }
-
+            final message = messages[index - 2];
             return widget.dateDividerBuilder != null
-                ? widget.dateDividerBuilder!(
-                    messages[index].createdAt.toLocal(),
-                  )
-                : DateDivider(
-                    dateTime: messages[index].createdAt.toLocal(),
-                  );
+                ? widget.dateDividerBuilder!(message.createdAt.toLocal())
+                : DateDivider(dateTime: message.createdAt.toLocal());
           },
         ),
       );
@@ -632,16 +688,13 @@ class _MessageListViewState extends State<MessageListView> {
           StreamChannelState? channel, QueryDirection direction) =>
       _messageListController.paginateData!(direction: direction);
 
-  ItemPosition? _getTopElement(Iterable<ItemPosition> values) {
-    final inView =
-        values.where((ItemPosition position) => position.itemLeadingEdge < 0.9);
-
-    if (inView.isEmpty) {
-      return null;
-    }
-
-    return inView.reduce((ItemPosition max, ItemPosition position) =>
-        position.itemLeadingEdge > max.itemLeadingEdge ? position : max);
+  int? _getTopElementIndex(Iterable<ItemPosition> values) {
+    final inView = values.where((position) => position.itemLeadingEdge < 1);
+    if (inView.isEmpty) return null;
+    return inView
+        .reduce((max, position) =>
+            position.itemLeadingEdge > max.itemLeadingEdge ? position : max)
+        .index;
   }
 
   Widget _buildScrollToBottom() => StreamBuilder<Tuple2<bool, int>>(
@@ -737,6 +790,7 @@ class _MessageListViewState extends State<MessageListView> {
     Message message,
     List<Message> messages,
     StreamChannelState? streamChannel,
+    int index,
   ) {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
@@ -754,7 +808,7 @@ class _MessageListViewState extends State<MessageListView> {
         ),
       );
     } else {
-      messageWidget = buildMessage(message, messages, messages.length - 1);
+      messageWidget = buildMessage(message, messages, index);
     }
     return messageWidget;
   }
@@ -764,6 +818,7 @@ class _MessageListViewState extends State<MessageListView> {
     Message message,
     List<Message> messages,
     StreamChannelState streamChannel,
+    int index,
   ) {
     Widget messageWidget;
     if (widget.messageBuilder != null) {
@@ -781,7 +836,7 @@ class _MessageListViewState extends State<MessageListView> {
         ),
       );
     } else {
-      messageWidget = buildMessage(message, messages, 0);
+      messageWidget = buildMessage(message, messages, index);
     }
 
     return VisibilityDetector(
@@ -894,7 +949,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     final userId = StreamChat.of(context).user!.id;
     final isMyMessage = message.user!.id == userId;
-    final nextMessage = index - 2 >= 0 ? messages[index - 2] : null;
+    final nextMessage = index - 3 >= 0 ? messages[index - 3] : null;
     final isNextUserSame =
         nextMessage != null && message.user!.id == nextMessage.user!.id;
 
@@ -1240,15 +1295,7 @@ class _LoadingIndicator extends StatelessWidget {
         ),
       ),
       builder: (context, data) {
-        if (!data) {
-          if (!isThreadConversation && direction == QueryDirection.top) {
-            return const SizedBox(
-              height: 52,
-              width: double.infinity,
-            );
-          }
-          return const Offstage();
-        }
+        if (!data) return const Offstage();
         return const Center(
           child: Padding(
             padding: EdgeInsets.all(8),
