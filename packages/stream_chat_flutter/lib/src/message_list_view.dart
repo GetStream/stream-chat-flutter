@@ -238,10 +238,10 @@ class MessageListView extends StatefulWidget {
   /// Function called when messages are fetched
   final Widget Function(BuildContext, List<Message>)? messageListBuilder;
 
-  ///
+  /// Function used to build a header widget
   final WidgetBuilder? headerBuilder;
 
-  ///
+  /// Function used to build a footer widget
   final WidgetBuilder? footerBuilder;
 
   /// Function used to build a loading widget
