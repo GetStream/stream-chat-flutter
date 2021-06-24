@@ -25,7 +25,7 @@ class BetterStreamBuilder<T> extends StatefulWidget {
   final T initialData;
 
   /// Comparator used to check if the new data is different than the last one
-  final bool Function(T?, T)? comparator;
+  final bool Function(T?, T?)? comparator;
 
   /// Builder that builds based on the new snapshot
   final Widget Function(BuildContext context, T data) builder;
@@ -96,9 +96,8 @@ class _BetterStreamBuilderState<T> extends State<BetterStreamBuilder<T>> {
 
   void _onEvent(T event) {
     _lastError = null;
-    final isEqual = widget.comparator != null
-        ? widget.comparator!(_lastEvent, event)
-        : event == _lastEvent;
+    final isEqual =
+        widget.comparator?.call(_lastEvent, event) ?? event == _lastEvent;
     if (!isEqual) {
       if (mounted) {
         setState(() {});
