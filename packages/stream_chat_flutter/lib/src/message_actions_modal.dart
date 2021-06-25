@@ -15,6 +15,7 @@ class MessageActionsModal extends StatefulWidget {
   const MessageActionsModal({
     Key? key,
     required this.message,
+    required this.messageWidget,
     required this.messageTheme,
     this.showReactions = true,
     this.showDeleteMessage = true,
@@ -27,17 +28,14 @@ class MessageActionsModal extends StatefulWidget {
     this.showThreadReplyMessage = true,
     this.showFlagButton = true,
     this.showPinButton = true,
-    this.showPinHighlight = false,
-    this.showUserAvatar = DisplayWidget.show,
     this.editMessageInputBuilder,
-    this.messageShape,
-    this.attachmentShape,
     this.reverse = false,
     this.customActions = const [],
-    this.attachmentBorderRadiusGeometry,
     this.onCopyTap,
-    this.textBuilder,
   }) : super(key: key);
+
+  /// Widget that shows the message
+  final Widget messageWidget;
 
   /// Builder for edit message
   final Widget Function(BuildContext, Message)? editMessageInputBuilder;
@@ -84,29 +82,11 @@ class MessageActionsModal extends StatefulWidget {
   /// Flag for showing pin action
   final bool showPinButton;
 
-  /// Display Pin Highlight
-  final bool showPinHighlight;
-
   /// Flag for reversing message
   final bool reverse;
 
-  /// [ShapeBorder] to apply to the widget
-  final ShapeBorder? messageShape;
-
-  /// [ShapeBorder] to apply to attachment
-  final ShapeBorder? attachmentShape;
-
-  /// Enum for displaying user avatar
-  final DisplayWidget showUserAvatar;
-
-  /// [BorderRadius] for attachment border
-  final BorderRadius? attachmentBorderRadiusGeometry;
-
   /// List of custom actions
   final List<MessageAction> customActions;
-
-  /// Customize the MessageWidget textBuilder
-  final Widget Function(BuildContext context, Message message)? textBuilder;
 
   @override
   _MessageActionsModalState createState() => _MessageActionsModalState();
@@ -142,9 +122,6 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
 
-    final hasFileAttachment =
-        widget.message.attachments.any((it) => it.type == 'file') == true;
-
     final streamChatThemeData = StreamChatTheme.of(context);
 
     final numberOfReactions = streamChatThemeData.reactionIcons.length;
@@ -178,41 +155,7 @@ class _MessageActionsModalState extends State<MessageActionsModal> {
                 ),
               const SizedBox(height: 8),
               IgnorePointer(
-                child: MessageWidget(
-                  key: const Key('MessageWidget'),
-                  reverse: widget.reverse,
-                  attachmentBorderRadiusGeometry: widget
-                      .attachmentBorderRadiusGeometry
-                      ?.mirrorBorderIfReversed(reverse: !widget.reverse),
-                  message: widget.message.copyWith(
-                    text: widget.message.text!.length > 200
-                        // ignore: lines_longer_than_80_chars
-                        ? '${widget.message.text!.substring(0, 200)}...'
-                        : widget.message.text,
-                  ),
-                  messageTheme: widget.messageTheme,
-                  showReactions: false,
-                  showUsername: false,
-                  showReplyMessage: false,
-                  showUserAvatar: widget.showUserAvatar,
-                  attachmentPadding: EdgeInsets.all(
-                    hasFileAttachment ? 4 : 2,
-                  ),
-                  showTimestamp: false,
-                  translateUserAvatar: false,
-                  padding: const EdgeInsets.all(0),
-                  textPadding: EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: widget.message.text!.isOnlyEmoji ? 0 : 16.0,
-                  ),
-                  showReactionPickerIndicator: widget.showReactions &&
-                      (widget.message.status == MessageSendingStatus.sent),
-                  showSendingIndicator: false,
-                  shape: widget.messageShape,
-                  attachmentShape: widget.attachmentShape,
-                  showPinHighlight: false,
-                  textBuilder: widget.textBuilder,
-                ),
+                child: widget.messageWidget,
               ),
               const SizedBox(height: 8),
               Padding(

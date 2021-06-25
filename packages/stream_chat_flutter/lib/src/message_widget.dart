@@ -1023,19 +1023,30 @@ class _MessageWidgetState extends State<MessageWidget>
         builder: (context) => StreamChannel(
               channel: channel,
               child: MessageActionsModal(
-                textBuilder: widget.textBuilder,
+                messageWidget: widget.copyWith(
+                  key: const Key('MessageWidget'),
+                  message: widget.message.copyWith(
+                    text: widget.message.text!.length > 200
+                        ? '${widget.message.text!.substring(0, 200)}...'
+                        : widget.message.text,
+                  ),
+                  showReactions: false,
+                  showUsername: false,
+                  showTimestamp: false,
+                  translateUserAvatar: false,
+                  showSendingIndicator: false,
+                  padding: const EdgeInsets.all(0),
+                  showReactionPickerIndicator: widget.showReactions &&
+                      (widget.message.status == MessageSendingStatus.sent),
+                  showPinHighlight: false,
+                  showUserAvatar:
+                      widget.message.user!.id == channel.client.state.user!.id
+                          ? DisplayWidget.gone
+                          : DisplayWidget.show,
+                ),
                 onCopyTap: (message) =>
                     Clipboard.setData(ClipboardData(text: message.text)),
-                attachmentBorderRadiusGeometry:
-                    widget.attachmentBorderRadiusGeometry as BorderRadius?,
-                showUserAvatar:
-                    widget.message.user!.id == channel.client.state.user!.id
-                        ? DisplayWidget.gone
-                        : DisplayWidget.show,
                 messageTheme: widget.messageTheme,
-                messageShape: widget.shape ?? _getDefaultShape(context),
-                attachmentShape: widget.attachmentShape ??
-                    _getDefaultAttachmentShape(context),
                 reverse: widget.reverse,
                 showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
                 message: widget.message,
@@ -1105,28 +1116,6 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
     );
   }
-
-  ShapeBorder _getDefaultAttachmentShape(BuildContext context) {
-    final hasFiles =
-        widget.message.attachments.any((it) => it.type == 'file') == true;
-    return RoundedRectangleBorder(
-      side: hasFiles
-          ? widget.attachmentBorderSide ??
-              BorderSide(
-                color: _streamChatTheme.colorTheme.greyWhisper,
-              )
-          : BorderSide.none,
-      borderRadius: widget.attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-    );
-  }
-
-  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
-        side: widget.borderSide ??
-            BorderSide(
-              color: _streamChatTheme.colorTheme.greyWhisper,
-            ),
-        borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-      );
 
   Widget _parseAttachments() {
     final attachmentGroups = <String, List<Attachment>>{};
