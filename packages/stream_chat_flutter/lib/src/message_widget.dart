@@ -397,6 +397,117 @@ class MessageWidget extends StatefulWidget {
   /// Customize onTap on attachment
   final void Function(Message message, Attachment attachment)? onAttachmentTap;
 
+  /// Creates a copy of [MessageWidget] with specified attributes overridden.
+  MessageWidget copyWith({
+    Key? key,
+    void Function(User)? onMentionTap,
+    void Function(Message)? onThreadTap,
+    void Function(Message)? onReplyTap,
+    Widget Function(BuildContext, Message)? editMessageInputBuilder,
+    Widget Function(BuildContext, Message)? textBuilder,
+    Widget Function(BuildContext, Message)? usernameBuilder,
+    void Function(BuildContext, Message)? onMessageActions,
+    Message? message,
+    MessageTheme? messageTheme,
+    bool? reverse,
+    ShapeBorder? shape,
+    ShapeBorder? attachmentShape,
+    BorderSide? borderSide,
+    BorderSide? attachmentBorderSide,
+    BorderRadiusGeometry? borderRadiusGeometry,
+    BorderRadiusGeometry? attachmentBorderRadiusGeometry,
+    EdgeInsetsGeometry? padding,
+    EdgeInsets? textPadding,
+    EdgeInsetsGeometry? attachmentPadding,
+    DisplayWidget? showUserAvatar,
+    bool? showSendingIndicator,
+    bool? showReactions,
+    bool? allRead,
+    bool? showThreadReplyIndicator,
+    bool? showInChannelIndicator,
+    void Function(User)? onUserAvatarTap,
+    void Function(String)? onLinkTap,
+    bool? showReactionPickerIndicator,
+    List<Read>? readList,
+    ShowMessageCallback? onShowMessage,
+    ValueChanged<ReturnActionType>? onReturnAction,
+    bool? showUsername,
+    bool? showTimestamp,
+    bool? showReplyMessage,
+    bool? showThreadReplyMessage,
+    bool? showEditMessage,
+    bool? showCopyMessage,
+    bool? showDeleteMessage,
+    bool? showResendMessage,
+    bool? showFlagButton,
+    bool? showPinButton,
+    bool? showPinHighlight,
+    Map<String, AttachmentBuilder>? customAttachmentBuilders,
+    bool? translateUserAvatar,
+    OnQuotedMessageTap? onQuotedMessageTap,
+    void Function(Message)? onMessageTap,
+    List<MessageAction>? customActions,
+    void Function(Message message, Attachment attachment)? onAttachmentTap,
+  }) =>
+      MessageWidget(
+        key: key ?? this.key,
+        onMentionTap: onMentionTap ?? this.onMentionTap,
+        onThreadTap: onThreadTap ?? this.onThreadTap,
+        onReplyTap: onReplyTap ?? this.onReplyTap,
+        editMessageInputBuilder:
+            editMessageInputBuilder ?? this.editMessageInputBuilder,
+        textBuilder: textBuilder ?? this.textBuilder,
+        usernameBuilder: usernameBuilder ?? this.usernameBuilder,
+        onMessageActions: onMessageActions ?? this.onMessageActions,
+        message: message ?? this.message,
+        messageTheme: messageTheme ?? this.messageTheme,
+        reverse: reverse ?? this.reverse,
+        shape: shape ?? this.shape,
+        attachmentShape: attachmentShape ?? this.attachmentShape,
+        borderSide: borderSide ?? this.borderSide,
+        attachmentBorderSide: attachmentBorderSide ?? this.attachmentBorderSide,
+        borderRadiusGeometry: borderRadiusGeometry ?? this.borderRadiusGeometry,
+        attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry ??
+            this.attachmentBorderRadiusGeometry,
+        padding: padding ?? this.padding,
+        textPadding: textPadding ?? this.textPadding,
+        attachmentPadding: attachmentPadding ?? this.attachmentPadding,
+        showUserAvatar: showUserAvatar ?? this.showUserAvatar,
+        showSendingIndicator: showSendingIndicator ?? this.showSendingIndicator,
+        showReactions: showReactions ?? this.showReactions,
+        allRead: allRead ?? this.allRead,
+        showThreadReplyIndicator:
+            showThreadReplyIndicator ?? this.showThreadReplyIndicator,
+        showInChannelIndicator:
+            showInChannelIndicator ?? this.showInChannelIndicator,
+        onUserAvatarTap: onUserAvatarTap ?? this.onUserAvatarTap,
+        onLinkTap: onLinkTap ?? this.onLinkTap,
+        showReactionPickerIndicator:
+            showReactionPickerIndicator ?? this.showReactionPickerIndicator,
+        readList: readList ?? this.readList,
+        onShowMessage: onShowMessage ?? this.onShowMessage,
+        onReturnAction: onReturnAction ?? this.onReturnAction,
+        showUsername: showUsername ?? this.showUsername,
+        showTimestamp: showTimestamp ?? this.showTimestamp,
+        showReplyMessage: showReplyMessage ?? this.showReplyMessage,
+        showThreadReplyMessage:
+            showThreadReplyMessage ?? this.showThreadReplyMessage,
+        showEditMessage: showEditMessage ?? this.showEditMessage,
+        showCopyMessage: showCopyMessage ?? this.showCopyMessage,
+        showDeleteMessage: showDeleteMessage ?? this.showDeleteMessage,
+        showResendMessage: showResendMessage ?? this.showResendMessage,
+        showFlagButton: showFlagButton ?? this.showFlagButton,
+        showPinButton: showPinButton ?? this.showPinButton,
+        showPinHighlight: showPinHighlight ?? this.showPinHighlight,
+        customAttachmentBuilders:
+            customAttachmentBuilders ?? attachmentBuilders,
+        translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
+        onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
+        onMessageTap: onMessageTap ?? this.onMessageTap,
+        customActions: customActions ?? this.customActions,
+        onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
+      );
+
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
 }
@@ -461,7 +572,7 @@ class _MessageWidgetState extends State<MessageWidget>
     super.build(context);
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    final leftPadding =
+    final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
@@ -516,7 +627,8 @@ class _MessageWidgetState extends State<MessageWidget>
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                if (widget.showUserAvatar ==
+                                if (!widget.reverse &&
+                                    widget.showUserAvatar ==
                                         DisplayWidget.show &&
                                     widget.message.user != null) ...[
                                   _buildUserAvatar(),
@@ -642,6 +754,13 @@ class _MessageWidgetState extends State<MessageWidget>
                                     ),
                                   ),
                                 ),
+                                if (widget.reverse &&
+                                    widget.showUserAvatar ==
+                                        DisplayWidget.show &&
+                                    widget.message.user != null) ...[
+                                  _buildUserAvatar(),
+                                  const SizedBox(width: 4),
+                                ]
                               ],
                             ),
                             if (showBottomRow)
@@ -652,7 +771,8 @@ class _MessageWidgetState extends State<MessageWidget>
                       if (showBottomRow)
                         Padding(
                           padding: EdgeInsets.only(
-                            left: leftPadding,
+                            left: !widget.reverse ? bottomRowPadding : 0,
+                            right: widget.reverse ? bottomRowPadding : 0,
                             bottom:
                                 isPinned && widget.showPinHighlight ? 6.0 : 0.0,
                           ),
@@ -912,19 +1032,30 @@ class _MessageWidgetState extends State<MessageWidget>
         builder: (context) => StreamChannel(
               channel: channel,
               child: MessageActionsModal(
-                textBuilder: widget.textBuilder,
+                messageWidget: widget.copyWith(
+                  key: const Key('MessageWidget'),
+                  message: widget.message.copyWith(
+                    text: widget.message.text!.length > 200
+                        ? '${widget.message.text!.substring(0, 200)}...'
+                        : widget.message.text,
+                  ),
+                  showReactions: false,
+                  showUsername: false,
+                  showTimestamp: false,
+                  translateUserAvatar: false,
+                  showSendingIndicator: false,
+                  padding: const EdgeInsets.all(0),
+                  showReactionPickerIndicator: widget.showReactions &&
+                      (widget.message.status == MessageSendingStatus.sent),
+                  showPinHighlight: false,
+                  showUserAvatar:
+                      widget.message.user!.id == channel.client.state.user!.id
+                          ? DisplayWidget.gone
+                          : DisplayWidget.show,
+                ),
                 onCopyTap: (message) =>
                     Clipboard.setData(ClipboardData(text: message.text)),
-                attachmentBorderRadiusGeometry:
-                    widget.attachmentBorderRadiusGeometry as BorderRadius?,
-                showUserAvatar:
-                    widget.message.user!.id == channel.client.state.user!.id
-                        ? DisplayWidget.gone
-                        : DisplayWidget.show,
                 messageTheme: widget.messageTheme,
-                messageShape: widget.shape ?? _getDefaultShape(context),
-                attachmentShape: widget.attachmentShape ??
-                    _getDefaultAttachmentShape(context),
                 reverse: widget.reverse,
                 showDeleteMessage: widget.showDeleteMessage || isDeleteFailed,
                 message: widget.message,
@@ -964,18 +1095,29 @@ class _MessageWidgetState extends State<MessageWidget>
       builder: (context) => StreamChannel(
         channel: channel,
         child: MessageReactionsModal(
-          textBuilder: widget.textBuilder,
-          attachmentBorderRadiusGeometry:
-              widget.attachmentBorderRadiusGeometry as BorderRadius?,
-          showUserAvatar:
-              widget.message.user!.id == channel.client.state.user!.id
-                  ? DisplayWidget.gone
-                  : DisplayWidget.show,
+          messageWidget: widget.copyWith(
+            key: const Key('MessageWidget'),
+            message: widget.message.copyWith(
+              text: widget.message.text!.length > 200
+                  ? '${widget.message.text!.substring(0, 200)}...'
+                  : widget.message.text,
+            ),
+            showReactions: false,
+            showUsername: false,
+            showTimestamp: false,
+            translateUserAvatar: false,
+            showSendingIndicator: false,
+            padding: const EdgeInsets.all(0),
+            showReactionPickerIndicator: widget.showReactions &&
+                (widget.message.status == MessageSendingStatus.sent),
+            showPinHighlight: false,
+            showUserAvatar:
+                widget.message.user!.id == channel.client.state.user!.id
+                    ? DisplayWidget.gone
+                    : DisplayWidget.show,
+          ),
           onUserAvatarTap: widget.onUserAvatarTap,
           messageTheme: widget.messageTheme,
-          messageShape: widget.shape ?? _getDefaultShape(context),
-          attachmentShape:
-              widget.attachmentShape ?? _getDefaultAttachmentShape(context),
           reverse: widget.reverse,
           message: widget.message,
           showReactions: widget.showReactions,
@@ -983,28 +1125,6 @@ class _MessageWidgetState extends State<MessageWidget>
       ),
     );
   }
-
-  ShapeBorder _getDefaultAttachmentShape(BuildContext context) {
-    final hasFiles =
-        widget.message.attachments.any((it) => it.type == 'file') == true;
-    return RoundedRectangleBorder(
-      side: hasFiles
-          ? widget.attachmentBorderSide ??
-              BorderSide(
-                color: _streamChatTheme.colorTheme.greyWhisper,
-              )
-          : BorderSide.none,
-      borderRadius: widget.attachmentBorderRadiusGeometry ?? BorderRadius.zero,
-    );
-  }
-
-  ShapeBorder _getDefaultShape(BuildContext context) => RoundedRectangleBorder(
-        side: widget.borderSide ??
-            BorderSide(
-              color: _streamChatTheme.colorTheme.greyWhisper,
-            ),
-        borderRadius: widget.borderRadiusGeometry ?? BorderRadius.zero,
-      );
 
   Widget _parseAttachments() {
     final attachmentGroups = <String, List<Attachment>>{};

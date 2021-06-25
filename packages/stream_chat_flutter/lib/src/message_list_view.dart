@@ -19,16 +19,22 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 /// Widget builder for message
+/// [defaultMessageWidget] is the default [MessageWidget] configuration
+/// Use [defaultMessageWidget.copyWith] to easily customize it
 typedef MessageBuilder = Widget Function(
   BuildContext,
   MessageDetails,
   List<Message>,
+  MessageWidget defaultMessageWidget,
 );
 
 /// Widget builder for parent message
+/// [defaultMessageWidget] is the default [MessageWidget] configuration
+/// Use [defaultMessageWidget.copyWith] to easily customize it
 typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message?,
+  MessageWidget defaultMessageWidget,
 );
 
 /// Widget builder for system message
@@ -56,12 +62,12 @@ typedef ReplyTapCallback = void Function(Message);
 class MessageDetails {
   /// Constructor for creating [MessageDetails]
   MessageDetails(
-    BuildContext context,
+    String currentUserId,
     this.message,
     List<Message> messages,
     this.index,
   ) {
-    isMyMessage = message.user?.id == StreamChat.of(context).user?.id;
+    isMyMessage = message.user?.id == currentUserId;
     isLastUser = index + 1 < messages.length &&
         message.user?.id == messages[index + 1].user?.id;
     isNextUser =
@@ -69,19 +75,19 @@ class MessageDetails {
   }
 
   /// True if the message belongs to the current user
-  bool? isMyMessage;
+  late final bool isMyMessage;
 
   /// True if the user message is the same of the previous message
-  bool? isLastUser;
+  late final bool isLastUser;
 
   /// True if the user message is the same of the next message
-  bool? isNextUser;
+  late final bool isNextUser;
 
   /// The message
-  Message message;
+  final Message message;
 
   /// The index of the message
-  int index;
+  final int index;
 }
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
@@ -545,11 +551,7 @@ class _MessageListViewState extends State<MessageListView> {
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
                       if (widget.parentMessage == null) return const Offstage();
-                      return widget.parentMessageBuilder?.call(
-                            context,
-                            widget.parentMessage,
-                          ) ??
-                          buildParentMessage(widget.parentMessage!);
+                      return buildParentMessage(widget.parentMessage!);
                     }
 
                     if (i == itemCount - 2) {
@@ -576,46 +578,21 @@ class _MessageListViewState extends State<MessageListView> {
                           const Offstage();
                     }
 
-                    final topMessageIndex = itemCount -
-                        4; // 7 -> parent // 6 -> header // 5 -> loader
                     const bottomMessageIndex = 2; // 1 -> loader // 0 -> footer
 
                     final message = messages[i - 2];
                     Widget messageWidget;
 
-                    if (i == topMessageIndex) {
-                      messageWidget = _buildTopMessage(
-                        context,
-                        message,
-                        messages,
-                        streamChannel,
-                        i,
-                      );
-                    } else if (i == bottomMessageIndex) {
+                    if (i == bottomMessageIndex) {
                       messageWidget = _buildBottomMessage(
                         context,
                         message,
                         messages,
                         streamChannel!,
-                        i,
+                        i - 2,
                       );
                     } else {
-                      if (widget.messageBuilder != null) {
-                        messageWidget = Builder(
-                          key: ValueKey<String>('MESSAGE-${message.id}'),
-                          builder: (context) => widget.messageBuilder!(
-                              context,
-                              MessageDetails(
-                                context,
-                                message,
-                                messages,
-                                i,
-                              ),
-                              messages),
-                        );
-                      } else {
-                        messageWidget = buildMessage(message, messages, i);
-                      }
+                      messageWidget = buildMessage(message, messages, i - 2);
                     }
                     return messageWidget;
                   },
@@ -785,34 +762,6 @@ class _MessageListViewState extends State<MessageListView> {
         isThreadConversation: _isThreadConversation,
       );
 
-  Widget _buildTopMessage(
-    BuildContext context,
-    Message message,
-    List<Message> messages,
-    StreamChannelState? streamChannel,
-    int index,
-  ) {
-    Widget messageWidget;
-    if (widget.messageBuilder != null) {
-      messageWidget = Builder(
-        key: const ValueKey<String>('TOP-MESSAGE'),
-        builder: (_) => widget.messageBuilder!(
-          context,
-          MessageDetails(
-            context,
-            message,
-            messages,
-            messages.length - 1,
-          ),
-          messages,
-        ),
-      );
-    } else {
-      messageWidget = buildMessage(message, messages, index);
-    }
-    return messageWidget;
-  }
-
   Widget _buildBottomMessage(
     BuildContext context,
     Message message,
@@ -820,24 +769,7 @@ class _MessageListViewState extends State<MessageListView> {
     StreamChannelState streamChannel,
     int index,
   ) {
-    Widget messageWidget;
-    if (widget.messageBuilder != null) {
-      messageWidget = Builder(
-        key: ValueKey<String>('BOTTOM-MESSAGE-${message.id}'),
-        builder: (_) => widget.messageBuilder!(
-          context,
-          MessageDetails(
-            context,
-            message,
-            messages,
-            0,
-          ),
-          messages,
-        ),
-      );
-    } else {
-      messageWidget = buildMessage(message, messages, index);
-    }
+    final messageWidget = buildMessage(message, messages, index);
 
     return VisibilityDetector(
       key: ValueKey<String>('BOTTOM-MESSAGE-${message.id}'),
@@ -871,7 +803,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
-    return MessageWidget(
+    final defaultMessageWidget = MessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -925,6 +857,16 @@ class _MessageListViewState extends State<MessageListView> {
       showPinButton: currentUserMember != null &&
           widget.pinPermissions.contains(currentUserMember.role),
     );
+
+    if (widget.parentMessageBuilder != null) {
+      return widget.parentMessageBuilder!.call(
+        context,
+        widget.parentMessage,
+        defaultMessageWidget,
+      );
+    }
+
+    return defaultMessageWidget;
   }
 
   Widget buildMessage(
@@ -1015,7 +957,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhere((e) => e.user!.id == currentUser!.id);
 
-    Widget child = MessageWidget(
+    Widget messageWidget = MessageWidget(
       key: ValueKey<String>('MESSAGE-${message.id}'),
       message: message,
       reverse: isMyMessage,
@@ -1130,6 +1072,21 @@ class _MessageListViewState extends State<MessageListView> {
       showPinButton: widget.pinPermissions.contains(currentUserMember.role),
     );
 
+    if (widget.messageBuilder != null) {
+      messageWidget = widget.messageBuilder!(
+        context,
+        MessageDetails(
+          userId,
+          message,
+          messages,
+          index,
+        ),
+        messages,
+        messageWidget as MessageWidget,
+      );
+    }
+
+    var child = messageWidget;
     if (!message.isDeleted &&
         !message.isSystem &&
         !message.isEphemeral &&
