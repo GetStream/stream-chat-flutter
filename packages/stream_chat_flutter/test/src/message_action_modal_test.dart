@@ -38,6 +38,10 @@ void main() {
                     id: 'user-id',
                   ),
                 ),
+                messageWidget: const Text(
+                  'test',
+                  key: Key('MessageWidget'),
+                ),
                 messageTheme: streamTheme.ownMessageTheme,
               ),
             ),
@@ -86,6 +90,10 @@ void main() {
                   ),
                 ),
                 messageTheme: streamTheme.ownMessageTheme,
+                messageWidget: const Text(
+                  'test',
+                  key: Key('MessageWidget'),
+                ),
               ),
             ),
           ),
@@ -123,6 +131,7 @@ void main() {
             client: client,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   text: 'test',
                   user: User(
@@ -178,6 +187,7 @@ void main() {
             client: client,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 onReplyTap: (m) {
                   tapped = true;
                 },
@@ -223,6 +233,7 @@ void main() {
             client: client,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 onThreadReplyTap: (m) {
                   tapped = true;
                 },
@@ -272,6 +283,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   text: 'test',
                   user: User(
@@ -320,6 +332,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 editMessageInputBuilder: (context, m) => const Text('test'),
                 message: Message(
                   text: 'test',
@@ -371,6 +384,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 onCopyTap: (m) => tapped = true,
                 message: Message(
                   text: 'test',
@@ -420,6 +434,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   status: MessageSendingStatus.failed,
                   text: 'test',
@@ -469,6 +484,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   status: MessageSendingStatus.failed_update,
                   text: 'test',
@@ -516,6 +532,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
                   text: 'test',
@@ -571,6 +588,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
                   text: 'test',
@@ -626,6 +644,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
                   text: 'test',
@@ -679,6 +698,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
                   text: 'test',
@@ -734,6 +754,7 @@ void main() {
             channel: channel,
             child: SizedBox(
               child: MessageActionsModal(
+                messageWidget: const Text('test'),
                 message: Message(
                   id: 'testid',
                   text: 'test',
