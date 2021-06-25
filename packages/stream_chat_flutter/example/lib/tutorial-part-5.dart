@@ -93,6 +93,7 @@ class ChannelPage extends StatelessWidget {
     BuildContext context,
     MessageDetails details,
     List<Message> messages,
+    MessageWidget _,
   ) {
     final message = details.message;
     final isCurrentUser = StreamChat.of(context).user!.id == message.user!.id;

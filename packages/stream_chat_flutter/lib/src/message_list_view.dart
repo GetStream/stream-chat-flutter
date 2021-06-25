@@ -19,10 +19,13 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 /// Widget builder for message
+/// [defaultMessageWidget] is the default [MessageWidget] configuration
+/// Use [defaultMessageWidget.copyWith] to easily customize it
 typedef MessageBuilder = Widget Function(
   BuildContext,
   MessageDetails,
   List<Message>,
+  MessageWidget defaultMessageWidget,
 );
 
 /// Widget builder for parent message
@@ -63,7 +66,6 @@ class MessageDetails {
     this.message,
     List<Message> messages,
     this.index,
-    this.defaultMessageWidget,
   ) {
     isMyMessage = message.user?.id == currentUserId;
     isLastUser = index + 1 < messages.length &&
@@ -71,10 +73,6 @@ class MessageDetails {
     isNextUser =
         index - 1 >= 0 && message.user!.id == messages[index - 1].user?.id;
   }
-
-  /// Default [MessageWidget] configuration
-  /// use [defaultMessageWidget.copyWith] to easily customize it
-  final MessageWidget defaultMessageWidget;
 
   /// True if the message belongs to the current user
   late final bool isMyMessage;
@@ -1082,9 +1080,9 @@ class _MessageListViewState extends State<MessageListView> {
           message,
           messages,
           index,
-          messageWidget as MessageWidget,
         ),
         messages,
+        messageWidget as MessageWidget,
       );
     }
 
