@@ -572,7 +572,7 @@ class _MessageWidgetState extends State<MessageWidget>
     super.build(context);
     final avatarWidth =
         widget.messageTheme.avatarTheme?.constraints.maxWidth ?? 40;
-    final leftPadding =
+    final bottomRowPadding =
         widget.showUserAvatar != DisplayWidget.gone ? avatarWidth + 8.5 : 0.5;
 
     return Material(
@@ -627,7 +627,8 @@ class _MessageWidgetState extends State<MessageWidget>
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                if (widget.showUserAvatar ==
+                                if (!widget.reverse &&
+                                    widget.showUserAvatar ==
                                         DisplayWidget.show &&
                                     widget.message.user != null) ...[
                                   _buildUserAvatar(),
@@ -753,6 +754,13 @@ class _MessageWidgetState extends State<MessageWidget>
                                     ),
                                   ),
                                 ),
+                                if (widget.reverse &&
+                                    widget.showUserAvatar ==
+                                        DisplayWidget.show &&
+                                    widget.message.user != null) ...[
+                                  _buildUserAvatar(),
+                                  const SizedBox(width: 4),
+                                ]
                               ],
                             ),
                             if (showBottomRow)
@@ -763,7 +771,8 @@ class _MessageWidgetState extends State<MessageWidget>
                       if (showBottomRow)
                         Padding(
                           padding: EdgeInsets.only(
-                            left: leftPadding,
+                            left: !widget.reverse ? bottomRowPadding : 0,
+                            right: widget.reverse ? bottomRowPadding : 0,
                             bottom:
                                 isPinned && widget.showPinHighlight ? 6.0 : 0.0,
                           ),
