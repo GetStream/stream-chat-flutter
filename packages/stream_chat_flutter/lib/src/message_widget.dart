@@ -500,7 +500,7 @@ class MessageWidget extends StatefulWidget {
         showPinButton: showPinButton ?? this.showPinButton,
         showPinHighlight: showPinHighlight ?? this.showPinHighlight,
         customAttachmentBuilders:
-            customAttachmentBuilders ?? this.attachmentBuilders,
+            customAttachmentBuilders ?? attachmentBuilders,
         translateUserAvatar: translateUserAvatar ?? this.translateUserAvatar,
         onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
         onMessageTap: onMessageTap ?? this.onMessageTap,
@@ -1075,18 +1075,29 @@ class _MessageWidgetState extends State<MessageWidget>
       builder: (context) => StreamChannel(
         channel: channel,
         child: MessageReactionsModal(
-          textBuilder: widget.textBuilder,
-          attachmentBorderRadiusGeometry:
-              widget.attachmentBorderRadiusGeometry as BorderRadius?,
-          showUserAvatar:
-              widget.message.user!.id == channel.client.state.user!.id
-                  ? DisplayWidget.gone
-                  : DisplayWidget.show,
+          messageWidget: widget.copyWith(
+            key: const Key('MessageWidget'),
+            message: widget.message.copyWith(
+              text: widget.message.text!.length > 200
+                  ? '${widget.message.text!.substring(0, 200)}...'
+                  : widget.message.text,
+            ),
+            showReactions: false,
+            showUsername: false,
+            showTimestamp: false,
+            translateUserAvatar: false,
+            showSendingIndicator: false,
+            padding: const EdgeInsets.all(0),
+            showReactionPickerIndicator: widget.showReactions &&
+                (widget.message.status == MessageSendingStatus.sent),
+            showPinHighlight: false,
+            showUserAvatar:
+                widget.message.user!.id == channel.client.state.user!.id
+                    ? DisplayWidget.gone
+                    : DisplayWidget.show,
+          ),
           onUserAvatarTap: widget.onUserAvatarTap,
           messageTheme: widget.messageTheme,
-          messageShape: widget.shape ?? _getDefaultShape(context),
-          attachmentShape:
-              widget.attachmentShape ?? _getDefaultAttachmentShape(context),
           reverse: widget.reverse,
           message: widget.message,
           showReactions: widget.showReactions,

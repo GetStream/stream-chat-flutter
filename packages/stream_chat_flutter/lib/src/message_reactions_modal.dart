@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/src/extension.dart';
 import 'package:stream_chat_flutter/src/reaction_bubble.dart';
 import 'package:stream_chat_flutter/src/reaction_picker.dart';
 import 'package:stream_chat_flutter/src/stream_chat.dart';
@@ -15,16 +14,15 @@ class MessageReactionsModal extends StatelessWidget {
   const MessageReactionsModal({
     Key? key,
     required this.message,
+    required this.messageWidget,
     required this.messageTheme,
     this.showReactions = true,
-    this.messageShape,
-    this.attachmentShape,
     this.reverse = false,
-    this.showUserAvatar = DisplayWidget.show,
     this.onUserAvatarTap,
-    this.attachmentBorderRadiusGeometry,
-    this.textBuilder,
   }) : super(key: key);
+
+  /// Widget that shows the message
+  final Widget messageWidget;
 
   /// Message to display reactions of
   final Message message;
@@ -38,23 +36,8 @@ class MessageReactionsModal extends StatelessWidget {
   /// Flag to show reactions on message
   final bool showReactions;
 
-  /// Enum to change user avatar config
-  final DisplayWidget showUserAvatar;
-
-  /// [ShapeBorder] to apply to message
-  final ShapeBorder? messageShape;
-
-  /// [ShapeBorder] to apply to attachment
-  final ShapeBorder? attachmentShape;
-
   /// Callback when user avatar is tapped
   final void Function(User)? onUserAvatarTap;
-
-  /// [BorderRadius] to apply to attachments
-  final BorderRadius? attachmentBorderRadiusGeometry;
-
-  /// Customize the MessageWidget textBuilder
-  final Widget Function(BuildContext context, Message message)? textBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +60,6 @@ class MessageReactionsModal extends StatelessWidget {
     final divFactor = message.attachments.isNotEmpty == true
         ? 1
         : (roughSentenceSize == 0 ? 1 : (roughSentenceSize / roughMaxSize));
-    final hasFileAttachment =
-        message.attachments.any((it) => it.type == 'file') == true;
 
     final numberOfReactions = StreamChatTheme.of(context).reactionIcons.length;
     final shiftFactor =
@@ -110,38 +91,7 @@ class MessageReactionsModal extends StatelessWidget {
                 ),
               const SizedBox(height: 8),
               IgnorePointer(
-                child: MessageWidget(
-                  key: const Key('MessageWidget'),
-                  reverse: reverse,
-                  message: message.copyWith(
-                    text: message.text!.length > 200
-                        ? '${message.text!.substring(0, 200)}...'
-                        : message.text,
-                  ),
-                  messageTheme: messageTheme,
-                  showReactions: false,
-                  showUsername: false,
-                  showUserAvatar: showUserAvatar,
-                  showTimestamp: false,
-                  translateUserAvatar: false,
-                  showSendingIndicator: false,
-                  shape: messageShape,
-                  attachmentShape: attachmentShape,
-                  padding: const EdgeInsets.all(0),
-                  attachmentBorderRadiusGeometry: attachmentBorderRadiusGeometry
-                      ?.mirrorBorderIfReversed(reverse: !reverse),
-                  attachmentPadding: EdgeInsets.all(
-                    hasFileAttachment ? 4 : 2,
-                  ),
-                  textPadding: EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: message.text!.isOnlyEmoji ? 0 : 16.0,
-                  ),
-                  showReactionPickerIndicator: showReactions &&
-                      (message.status == MessageSendingStatus.sent),
-                  textBuilder: textBuilder,
-                  showPinHighlight: false,
-                ),
+                child: messageWidget,
               ),
               if (message.latestReactions?.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
