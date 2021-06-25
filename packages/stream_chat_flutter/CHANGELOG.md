@@ -1,3 +1,79 @@
+## 2.0.0-1.0.nullsafety.0
+
+ - **TEST**: add tests for stream chat flutter (#335).
+ - **TEST**: add tests for stream chat flutter core (#354).
+ - **STYLE**: Update for team lint (#297).
+ - **FIX**: Fixed sendingbutton.outside case (#355).
+ - **FIX**: Corrected message padding.
+ - **FIX**: tests.
+ - **FIX**: added comment.
+ - **FIX**: Channel list builder perf fix.
+ - **FIX**: update goldens.
+ - **FIX**: analysis.
+ - **FIX**: attachment borders.
+ - **FIX**: attachment borders.
+ - **FIX**: .copy and export reactionIcons.
+ - **FIX**: paint bubble.
+ - **FIX**: paint bubble.
+ - **FIX**: analysis.
+ - **FIX**: Fixed threads.
+ - **FIX**: added final.
+ - **FIX**: Timestamp alignment.
+ - **FIX**: Keyboard now closes when a command is enabled.
+ - **FIX**: message input (#382).
+ - **FIX**: attachments upload when size exceeds (#377).
+ - **FIX**: fix channel list pagination spinner (#375).
+ - **FIX**: corrected duration.
+ - **FIX**: channel header text style.
+ - **FIX**: import.
+ - **FIX**: Delete now deletes a single image.
+ - **FIX**: analysis.
+ - **FIX**: tests.
+ - **FIX**: Delete now deletes a single image.
+ - **FIX**: unread count not updating while the chat is open.
+ - **FIX**: add more actions locations, merge actions and add showCommandsButton option (#333).
+ - **FIX**: persistence (#329).
+ - **FIX**: attachment builder  (#326).
+ - **FIX**: pre release (#324).
+ - **FIX**: show error messages as system and keep them in the message input (#319).
+ - **FIX**: Method being called during build (#317).
+ - **FIX**: remove notification badge logic from the sdk and move it to sample app.
+ - **FIX**: use shimmer in images.
+ - **FIX**: Rolled back changes from other PR.
+ - **FIX**: fixed long system messages overflowing.
+ - **FIX**: Fix attachment upload state uneven progress. (#315).
+ - **FIX**: Fixed shimmer overflow (#316).
+ - **FIX**: Fix message input permission request crash (#311).
+ - **FIX**: generate image thumbnails and use transparent image as placeholder for cached network images (#310).
+ - **FIX**: minor.
+ - **FIX**: fixes message newline issue (#308).
+ - **FIX**: import.
+ - **FIX**: fixed long system messages overflowing.
+ - **FIX**: list scroll keyboard behaviour  (#304).
+ - **FIX**: fix button size.
+ - **FIX**: Commands overflow bug.
+ - **FEAT**: Introduce onAttachmentTap on messages attachment (#309).
+ - **FEAT**: Shifted fields from channel to input theme.
+ - **FEAT**: added customization options in main widgets (#312).
+ - **FEAT**: add flag for floating date divider.
+ - **FEAT**: exposed textbuilder callback (#367).
+ - **FEAT**: Added message input theme and send button animation duration.
+ - **FEAT**: Add support for messages filter in `MessageListView` and `MessageListCore` (#303).
+ - **FEAT**: Exposed customAttachmentBuilders through MessageListView.
+ - **FEAT**: Exposed customAttachmentBuilders through MessageListView.
+ - **FEAT**: Exposed builders.
+ - **FEAT**: bump dependencies.
+ - **FEAT**: Added pin message functionality.
+ - **FEAT**: Added pin permissions list.
+ - **FEAT**: Added callbacks for default slidable options.
+ - **FEAT**: Added list of actions to channel_list_view.dart.
+ - **FEAT**: Fixed modals controller.
+ - **FEAT**: Fixed video refresh bug.
+ - **FEAT**: Added cache for photos and videos screen.
+ - **CHORE**: update deps.
+ - **CHORE**: publish_to: none.
+ - **CHORE**: 1.5.1 (#387).
+
 ## 2.0.0-nullsafety.7
 
 - Minor fixes and improvements

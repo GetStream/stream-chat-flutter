@@ -1,3 +1,40 @@
+## 2.0.0-1.0.nullsafety.0
+
+ - **TEST**: add tests for stream chat flutter core (#354).
+ - **TEST**: Add test for channel query dao.
+ - **TEST**: add tests for connection event dao.
+ - **TEST**: add test for read dao.
+ - **TEST**: add tests for user dao.
+ - **TEST**: add tests for stream chat flutter (#335).
+ - **FIX**: analysis.
+ - **FIX**: dartfmt.
+ - **FIX**: fixed update tests.
+ - **FIX**: `queryChannels` should only throw if we do-not have any channels in cache (#394).
+ - **FIX**: client state migrated to null.
+ - **FIX**: Fixed trailing comma.
+ - **FIX**: Review changes.
+ - **FIX**: Review changes.
+ - **FIX**: generated new models, fixed reactions.
+ - **FIX**: persistence (#329).
+ - **FIX**: Now caches message before update.
+ - **FIX**: fixed pin tests.
+ - **FIX**: ws disconnection (#345).
+ - **FIX**: granular scroll.
+ - **FIX**: fixed pin tests.
+ - **FIX**: interceptor handlers.
+ - **FEAT**: Apply team lints to core package (#334).
+ - **FEAT**: upgrade to null safe dependencies.
+ - **FEAT**: Converted to ios models part II.
+ - **FEAT**: add support for type safe filters.
+ - **FEAT**: Added pin message functionality.
+ - **FEAT**: Converted to ios models.
+ - **FEAT**: Added new API endpoint.
+ - **FEAT**: Added test.
+ - **FEAT**: Added test.
+ - **FEAT**: Added updatePartial endpoint.
+ - **CHORE**: re-generate all files.
+ - **CHORE**: 1.5.1 (#387).
+
 ## 2.0.0-nullsafety.6
 
 - Fix thread reply not working with attachments
