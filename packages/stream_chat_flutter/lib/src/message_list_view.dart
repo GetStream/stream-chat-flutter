@@ -74,7 +74,7 @@ class MessageDetails {
 
   /// Default [MessageWidget] configuration
   /// use [defaultMessageWidget.copyWith] to easily customize it
-  late final MessageWidget defaultMessageWidget;
+  final MessageWidget defaultMessageWidget;
 
   /// True if the message belongs to the current user
   late final bool isMyMessage;
@@ -86,10 +86,10 @@ class MessageDetails {
   late final bool isNextUser;
 
   /// The message
-  late final Message message;
+  final Message message;
 
   /// The index of the message
-  late final int index;
+  final int index;
 }
 
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/message_listview.png)
