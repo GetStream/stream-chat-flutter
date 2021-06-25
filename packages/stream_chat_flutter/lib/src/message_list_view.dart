@@ -26,9 +26,12 @@ typedef MessageBuilder = Widget Function(
 );
 
 /// Widget builder for parent message
+/// [defaultMessageWidget] is the default [MessageWidget] configuration
+/// Use [defaultMessageWidget.copyWith] to easily customize it
 typedef ParentMessageBuilder = Widget Function(
   BuildContext,
   Message?,
+  MessageWidget defaultMessageWidget,
 );
 
 /// Widget builder for system message
@@ -69,6 +72,8 @@ class MessageDetails {
         index - 1 >= 0 && message.user!.id == messages[index - 1].user?.id;
   }
 
+  /// Default [MessageWidget] configuration
+  /// use [defaultMessageWidget.copyWith] to easily customize it
   late final MessageWidget defaultMessageWidget;
 
   /// True if the message belongs to the current user
@@ -548,11 +553,7 @@ class _MessageListViewState extends State<MessageListView> {
                   itemBuilder: (context, i) {
                     if (i == itemCount - 1) {
                       if (widget.parentMessage == null) return const Offstage();
-                      return widget.parentMessageBuilder?.call(
-                            context,
-                            widget.parentMessage,
-                          ) ??
-                          buildParentMessage(widget.parentMessage!);
+                      return buildParentMessage(widget.parentMessage!);
                     }
 
                     if (i == itemCount - 2) {
@@ -804,7 +805,7 @@ class _MessageListViewState extends State<MessageListView> {
     final currentUserMember =
         members.firstWhereOrNull((e) => e.user!.id == currentUser!.id);
 
-    return MessageWidget(
+    final defaultMessageWidget = MessageWidget(
       showReplyMessage: false,
       showResendMessage: false,
       showThreadReplyMessage: false,
@@ -858,6 +859,16 @@ class _MessageListViewState extends State<MessageListView> {
       showPinButton: currentUserMember != null &&
           widget.pinPermissions.contains(currentUserMember.role),
     );
+
+    if (widget.parentMessageBuilder != null) {
+      return widget.parentMessageBuilder!.call(
+        context,
+        widget.parentMessage,
+        defaultMessageWidget,
+      );
+    }
+
+    return defaultMessageWidget;
   }
 
   Widget buildMessage(
