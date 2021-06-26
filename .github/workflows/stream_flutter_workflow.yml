@@ -30,7 +30,7 @@ jobs:
         if: steps.flutter-cache.outputs.cache-hit != 'true'
         uses: subosito/flutter-action@v1
         with:
-          channel: 'stable'
+          flutter-version: ${{ env.flutter_version }}
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
