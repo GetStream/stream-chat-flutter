@@ -2,6 +2,7 @@ name: stream_flutter_workflow
 
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+  flutter_version: "2.2.2"
 
 on:
   pull_request:
@@ -19,7 +20,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Cache Flutter dependencies
+        id: flutter-cache
+        uses: actions/cache@v2
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
+        if: steps.flutter-cache.outputs.cache-hit != 'true'
         uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
