@@ -27,12 +27,48 @@ void main() {
 
     const path = '/channels/$channelType/$channelId/message';
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'message': message,
+            'skip_push': false,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'message': message.toJson(),
+        }));
 
     final res = await messageApi.sendMessage(channelId, channelType, message);
+
+    expect(res, isNotNull);
+    expect(res.message.id, message.id);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('sendMessage with skipPush: true', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    final message = Message(id: 'test-message-id', text: 'test-message-text');
+
+    const path = '/channels/$channelType/$channelId/message';
+
+    when(() => client.post(
+          path,
+          data: {
+            'message': message,
+            'skip_push': true,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'message': message.toJson(),
+        }));
+
+    final res = await messageApi.sendMessage(
+      channelId,
+      channelType,
+      message,
+      skipPush: true,
+    );
 
     expect(res, isNotNull);
     expect(res.message.id, message.id);
@@ -53,10 +89,12 @@ void main() {
       (index) => Message(id: 'test-message-id-$index'),
     );
 
-    when(() => client.get(path, queryParameters: any(named: 'queryParameters')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'messages': [...messages.map((it) => it.toJson())],
-            }));
+    when(() => client.get(
+          path,
+          queryParameters: {'ids': messageIds.join(',')},
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'messages': [...messages.map((it) => it.toJson())],
+        }));
 
     final res = await messageApi.getMessagesById(
       channelId,
@@ -97,7 +135,10 @@ void main() {
 
     final path = '/messages/${message.id}';
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+    when(() => client.post(
+          path,
+          data: {'message': message},
+        )).thenAnswer(
       (_) async => successResponse(path, data: {'message': message.toJson()}),
     );
 
@@ -169,8 +210,17 @@ void main() {
 
     const path = '/messages/$messageId/action';
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(
+              path,
+              data: {
+                'id': channelId,
+                'type': channelType,
+                'form_data': formData,
+                'message_id': messageId,
+              },
+            ))
+        .thenAnswer(
+            (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await messageApi.sendAction(
       channelId,
@@ -195,16 +245,60 @@ void main() {
     final message = Message(id: messageId);
     final reaction = Reaction(type: reactionType, messageId: messageId);
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'message': message.toJson(),
-              'reaction': reaction.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'reaction': Map<String, Object?>.from(extraData)
+              ..addAll({'type': reactionType}),
+            'enforce_unique': false,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'message': message.toJson(),
+          'reaction': reaction.toJson(),
+        }));
 
     final res = await messageApi.sendReaction(
       messageId,
       reactionType,
       extraData: extraData,
+    );
+
+    expect(res, isNotNull);
+    expect(res.message.id, messageId);
+    expect(res.reaction.messageId, messageId);
+    expect(res.reaction.type, reactionType);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('sendReaction with enforceUnique: true', () async {
+    const messageId = 'test-message-id';
+    const reactionType = 'test-reaction-type';
+    const extraData = {'test-key': 'test-data'};
+
+    const path = '/messages/$messageId/reaction';
+
+    final message = Message(id: messageId);
+    final reaction = Reaction(type: reactionType, messageId: messageId);
+
+    when(() => client.post(
+          path,
+          data: {
+            'reaction': Map<String, Object?>.from(extraData)
+              ..addAll({'type': reactionType}),
+            'enforce_unique': true,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'message': message.toJson(),
+          'reaction': reaction.toJson(),
+        }));
+
+    final res = await messageApi.sendReaction(
+      messageId,
+      reactionType,
+      extraData: extraData,
+      enforceUnique: true,
     );
 
     expect(res, isNotNull);
@@ -247,12 +341,16 @@ void main() {
       ),
     );
 
-    when(() => client.get(path, queryParameters: any(named: 'queryParameters')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'reactions': [...reactions.map((it) => it.toJson())]
-            }));
+    when(() => client.get(
+          path,
+          queryParameters: {
+            ...const PaginationParams().toJson(),
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'reactions': [...reactions.map((it) => it.toJson())]
+        }));
 
-    final res = await messageApi.getReactions(messageId, options: options);
+    final res = await messageApi.getReactions(messageId, pagination: options);
 
     expect(res, isNotNull);
     expect(res.reactions.length, reactions.length);
@@ -277,10 +375,12 @@ void main() {
       language: translatedMessageText,
     });
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'message': translatedMessage.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {'language': language},
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'message': translatedMessage.toJson(),
+        }));
 
     final res = await messageApi.translateMessage(messageId, language);
 
@@ -306,10 +406,14 @@ void main() {
       ),
     );
 
-    when(() => client.get(path, queryParameters: any(named: 'queryParameters')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'messages': [...messages.map((it) => it.toJson())]
-            }));
+    when(() => client.get(
+          path,
+          queryParameters: {
+            ...options.toJson(),
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'messages': [...messages.map((it) => it.toJson())]
+        }));
 
     final res = await messageApi.getReplies(parentId, options: options);
 
