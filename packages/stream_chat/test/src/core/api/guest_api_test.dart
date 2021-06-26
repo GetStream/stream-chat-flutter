@@ -26,11 +26,13 @@ void main() {
 
     const path = '/guest';
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'access_token': accessToken,
-              'user': user.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {'user': user},
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'access_token': accessToken,
+          'user': user.toJson(),
+        }));
 
     final res = await guestApi.getGuestUser(user);
 
