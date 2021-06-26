@@ -80,7 +80,7 @@ jobs:
       - name: Cache Flutter dependencies
         uses: actions/cache@v2
         with:
-          path: /opt/hostedtoolcache/flutter
+          path: /Users/runner/hostedtoolcache/flutter
           key: ${{ env.flutter_version }}-flutter
       - name: "Install Flutter"
         uses: subosito/flutter-action@v1
