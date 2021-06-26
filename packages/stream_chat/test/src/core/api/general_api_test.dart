@@ -35,10 +35,17 @@ void main() {
     final events =
         List.generate(3, (index) => Event(type: 'test-event-type-$index'));
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'events': [...events.map((it) => it.toJson())]
-            }));
+    final data = {
+      'channel_cids': cids,
+      'last_sync_at': lastSyncAt.toUtc().toIso8601String(),
+    };
+
+    when(() => client.post(
+          path,
+          data: data,
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'events': [...events.map((it) => it.toJson())]
+        }));
 
     final res = await generalApi.sync(cids, lastSyncAt);
 
@@ -87,8 +94,20 @@ void main() {
 
       const path = '/search';
 
+      final payload = jsonEncode({
+        'filter_conditions': filter,
+        'sort': sort,
+        'query': query,
+        ...pagination.toJson(),
+      });
+
       when(
-        () => client.get(path, queryParameters: any(named: 'queryParameters')),
+        () => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        ),
       ).thenAnswer((_) async => successResponse(path, data: {'results': []}));
 
       final res = await generalApi.searchMessages(
@@ -115,8 +134,20 @@ void main() {
 
       const path = '/search';
 
+      final payload = jsonEncode({
+        'filter_conditions': filter,
+        'sort': sort,
+        'message_filter_conditions': messageFilter,
+        ...pagination.toJson(),
+      });
+
       when(
-        () => client.get(path, queryParameters: any(named: 'queryParameters')),
+        () => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        ),
       ).thenAnswer((_) async => successResponse(path, data: {'results': []}));
 
       final res = await generalApi.searchMessages(
