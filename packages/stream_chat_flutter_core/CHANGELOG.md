@@ -1,3 +1,13 @@
+## 2.0.0-nullsafety.8
+
+🛑️ Breaking Changes from `2.0.0-nullsafety.7`
+- `channelsBloc.queryChannels()`, `ChannelListCore` options param/property is removed in favor of individual params/properties
+  - `options.state` -> bool state
+  - `options.watch` -> bool watch
+  - `options.presence` -> bool presence
+- `usersBloc.queryUsers()`, `UserListCore` options param/property is removed in favor of individual params/properties
+  - `options.presence` -> bool presence
+  
 ## 2.0.0-nullsafety.7
 
 * Fixed a bug with connectivity implementation
