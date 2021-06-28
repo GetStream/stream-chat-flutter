@@ -68,7 +68,6 @@ class MessageListCore extends StatefulWidget {
     required this.emptyBuilder,
     required this.messageListBuilder,
     required this.errorWidgetBuilder,
-    this.showScrollToBottom = true,
     this.parentMessage,
     this.messageListController,
     this.messageFilter,
@@ -93,10 +92,6 @@ class MessageListCore extends StatefulWidget {
   /// This parameter can be used to display an error message to users in the
   /// event of a connection failure.
   final ErrorBuilder errorWidgetBuilder;
-
-  /// If true will show a scroll to bottom message when there are new messages
-  /// and the scroll offset is not zero.
-  final bool showScrollToBottom;
 
   /// If the current message belongs to a `thread`, this property represents the
   /// first message or the parent of the conversation.

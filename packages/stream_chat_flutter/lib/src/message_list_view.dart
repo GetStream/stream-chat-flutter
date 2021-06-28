@@ -368,7 +368,6 @@ class _MessageListViewState extends State<MessageListView> {
             (context, list) => _buildListView(list),
         messageListController: _messageListController,
         parentMessage: widget.parentMessage,
-        showScrollToBottom: widget.showScrollToBottom,
         errorWidgetBuilder: widget.errorWidgetBuilder ??
             (BuildContext context, Object error) => Center(
                   child: Text(
