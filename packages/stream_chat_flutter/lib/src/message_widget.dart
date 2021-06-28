@@ -89,6 +89,7 @@ class MessageWidget extends StatefulWidget {
     this.onLinkTap,
     this.onMessageActions,
     this.onShowMessage,
+    this.userAvatarBuilder,
     this.editMessageInputBuilder,
     this.textBuilder,
     this.onReturnAction,
@@ -274,6 +275,8 @@ class MessageWidget extends StatefulWidget {
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
 
+  final Widget Function(BuildContext, User)? userAvatarBuilder;
+
   /// The message
   final Message message;
 
@@ -448,6 +451,7 @@ class MessageWidget extends StatefulWidget {
     void Function(Message)? onMessageTap,
     List<MessageAction>? customActions,
     void Function(Message message, Attachment attachment)? onAttachmentTap,
+    Widget Function(BuildContext, User)? userAvatarBuilder,
   }) =>
       MessageWidget(
         key: key ?? this.key,
@@ -506,6 +510,7 @@ class MessageWidget extends StatefulWidget {
         onMessageTap: onMessageTap ?? this.onMessageTap,
         customActions: customActions ?? this.customActions,
         onAttachmentTap: onAttachmentTap ?? this.onAttachmentTap,
+        userAvatarBuilder: userAvatarBuilder ?? this.userAvatarBuilder,
       );
 
   @override
@@ -1231,13 +1236,14 @@ class _MessageWidgetState extends State<MessageWidget>
                   2
               : 0,
         ),
-        child: UserAvatar(
-          user: widget.message.user!,
-          onTap: widget.onUserAvatarTap,
-          constraints: widget.messageTheme.avatarTheme!.constraints,
-          borderRadius: widget.messageTheme.avatarTheme!.borderRadius,
-          showOnlineStatus: false,
-        ),
+        child: widget.userAvatarBuilder?.call(context, widget.message.user!) ??
+            UserAvatar(
+              user: widget.message.user!,
+              onTap: widget.onUserAvatarTap,
+              constraints: widget.messageTheme.avatarTheme!.constraints,
+              borderRadius: widget.messageTheme.avatarTheme!.borderRadius,
+              showOnlineStatus: false,
+            ),
       );
 
   Widget _buildTextBubble() {
