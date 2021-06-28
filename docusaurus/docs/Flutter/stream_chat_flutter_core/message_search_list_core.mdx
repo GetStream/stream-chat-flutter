@@ -3,3 +3,30 @@ id: message_search_list_core
 sidebar_position: 6
 title: MessageSearchListCore
 ---
+
+
+`MessageSearchListCore` is a simplified class that allows searching for
+ messages across channels while exposing UI builders.
+ A `MessageSearchListController` is used to load and paginate data.
+
+```dart
+class MessageSearchPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: MessageSearchListCore(
+              messageQuery: _channelQuery,
+              filters: {
+                'members': {
+                  r'$in': [user.id]
+                }
+              },
+              paginationParams: PaginationParams(limit: 20),
+      ),
+    );
+  }
+}
+```
+
+Make sure to have a `MessageSearchBloc` ancestor in order to provide the
+information about the messages.

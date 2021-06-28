@@ -4,3 +4,52 @@ sidebar_position: 4
 title: ChannelListCore
 ---
 
+`ChannelListCore` is a simplified class that allows fetching a list of
+channels while exposing UI builders.
+
+This allows you to construct your own UI while not having to
+worry about the specific logic of fetching channels in your app.
+
+A `ChannelListController` is used to reload and paginate data.
+
+```dart
+class ChannelListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ChannelListCore(
+        filter: {
+          'members': {
+            '\$in': [StreamChat.of(context).user.id],
+          }
+        },
+        sort: [SortOption('last_message_at')],
+        pagination: PaginationParams(
+          limit: 20,
+        ),
+        errorBuilder: (err) {
+          return Center(
+            child: Text('An error has occured'),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: Text('Nothing here...'),
+          );
+        },
+        emptyBuilder: (context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        listBuilder: (context, list) {
+          return ChannelPage(list);
+        }
+      ),
+    );
+  }
+}
+```
+
+Make sure to have a `StreamChatCore` ancestor in order to provide the
+information about the channels.

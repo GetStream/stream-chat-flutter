@@ -3,3 +3,54 @@ id: message_list_core
 sidebar_position: 5
 title: MessageListCore
 ---
+
+`MessageListCore` is a simplified class that allows fetching a list of
+messages while exposing UI builders.
+
+This allows you to construct your own UI while not having to
+worry about the specific logic of fetching messages in a channel.
+
+A `MessageListController` is used to paginate data.
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListCore(
+        emptyBuilder: (context) {
+          return Center(
+            child: Text('Nothing here...'),
+          );
+        },
+        loadingBuilder: (context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+        messageListBuilder: (context, list) {
+          return MessagesPage(list);
+        },
+        errorWidgetBuilder: (context, err) {
+          return Center(
+            child: Text('Error'),
+          );
+        },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+Make sure to have a `StreamChannel` ancestor in order to provide the
+information about the channels.
