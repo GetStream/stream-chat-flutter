@@ -1,3 +1,13 @@
+## 2.0.0-nullsafety.8
+
+🛑️ Breaking Changes from `2.0.0-nullsafety.7`
+- `ChannelListCore` options property is removed in favor of individual properties
+    - `options.state` -> bool state
+    - `options.watch` -> bool watch
+    - `options.presence` -> bool presence
+- `UserListCore` options property is removed in favor of individual properties
+    - `options.presence` -> bool presence
+
 ## 2.0.0-nullsafety.7
 
 - Minor fixes and improvements
@@ -139,7 +149,8 @@
 
 ## 0.2.20+2
 
-- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message arrives
+- Added `shouldAddChannel` to ChannelsBloc in order to check if a channel has to be added to the list when a new message
+  arrives
 
 ## 0.2.20+1
 
@@ -358,27 +369,27 @@
 
 ## 0.2.1-alpha+1
 
-- Removed the additional `Navigator` in `StreamChat` widget.
-    It was added to make the app have the `StreamChat` widget as ancestor in every route.
-    Now the recommended way to add `StreamChat` to your app is using the `builder` property of your `MaterialApp` widget.
-    Otherwise you can use it in the usual way, but you need to add a `StreamChat` widget to every route of your app.
-    Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more information.
+- Removed the additional `Navigator` in `StreamChat` widget. It was added to make the app have the `StreamChat` widget
+  as ancestor in every route. Now the recommended way to add `StreamChat` to your app is using the `builder` property of
+  your `MaterialApp` widget. Otherwise you can use it in the usual way, but you need to add a `StreamChat` widget to
+  every route of your app. Read [this issue](https://github.com/GetStream/stream-chat-flutter/issues/47) for more
+  information.
 
 ```dart
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
-      builder: (context, widget) {
-        return StreamChat(
-          child: widget,
-          client: client,
-        );
-      },
-      home: ChannelListPage(),
-    );
+Widget build(BuildContext context) {
+  return MaterialApp(
+    theme: ThemeData.light(),
+    darkTheme: ThemeData.dark(),
+    themeMode: ThemeMode.system,
+    builder: (context, widget) {
+      return StreamChat(
+        child: widget,
+        client: client,
+      );
+    },
+    home: ChannelListPage(),
+  );
 ```
 
 - Fix reaction bubble going below previous message on iOS
@@ -462,7 +473,8 @@
 
 - Add gesture (vertical drag down) to close the keyboard
 
-- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will even close the keyboard)
+- Add keyboard type parameters (set it to TextInputType.text to show the submit button that will even close the
+  keyboard)
 
 The property showVideoFullScreen was added mainly because of this issue brianegan/chewie#261
 
