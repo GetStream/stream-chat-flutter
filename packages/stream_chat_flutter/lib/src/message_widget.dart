@@ -275,6 +275,7 @@ class MessageWidget extends StatefulWidget {
   /// Function called on long press
   final void Function(BuildContext, Message)? onMessageActions;
 
+  /// Widget builder for building user avatar
   final Widget Function(BuildContext, User)? userAvatarBuilder;
 
   /// The message
