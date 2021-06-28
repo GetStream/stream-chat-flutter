@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_flutter_core/src/users_bloc.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 ///
 /// [UserListCore] is a simplified class that allows fetching users while
@@ -76,7 +77,7 @@ class UserListCore extends StatefulWidget {
   final UserListController? userListController;
 
   /// The builder that will be used in case of error
-  final Widget Function(Object error) errorBuilder;
+  final ErrorBuilder errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users) listBuilder;
@@ -170,7 +171,7 @@ class UserListCoreState extends State<UserListCore>
         stream: _buildUserStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return widget.errorBuilder(snapshot.error!);
+            return widget.errorBuilder(context, snapshot.error!);
           }
           if (!snapshot.hasData) {
             return widget.loadingBuilder(context);
