@@ -11,9 +11,11 @@
   - `StreamWebSocketError` -> for user websocket related errors.
   - `StreamChatNetworkError` -> for network related errors.
 - `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
-  - `option.state` -> bool state
-  - `option.watch` -> bool watch
-  - `option.presence` -> bool presence
+  - `options.state` -> bool state
+  - `options.watch` -> bool watch
+  - `options.presence` -> bool presence
+- `client.queryUsers()` options param is removed in favor of individual params
+  - `options.presence` -> bool presence
 
 ✅ Added
 - New `Location` enum is introduced for easily changing the client location/baseUrl.
