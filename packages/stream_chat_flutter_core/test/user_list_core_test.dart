@@ -43,7 +43,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       await tester.pumpWidget(userListCore);
@@ -62,7 +62,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockClient = MockClient();
@@ -91,7 +91,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         userListController: controller,
       );
 
@@ -125,7 +125,8 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Container(key: errorWidgetKey),
+        errorBuilder: (BuildContext context, Object error) =>
+            Container(key: errorWidgetKey),
       );
 
       final mockClient = MockClient();
@@ -170,7 +171,7 @@ void main() {
         listBuilder: (_, __) => Offstage(),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Container(key: emptyWidgetKey),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockClient = MockClient();
@@ -215,7 +216,7 @@ void main() {
         listBuilder: (_, __) => Container(key: listWidgetKey),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
       );
 
       final mockClient = MockClient();
@@ -273,7 +274,7 @@ void main() {
         ),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         groupAlphabetically: true,
       );
 
@@ -341,7 +342,7 @@ void main() {
         ),
         loadingBuilder: (BuildContext context) => Offstage(),
         emptyBuilder: (BuildContext context) => Offstage(),
-        errorBuilder: (Object error) => Offstage(),
+        errorBuilder: (BuildContext context, Object error) => Offstage(),
         pagination: pagination,
         groupAlphabetically: true,
       );
@@ -446,7 +447,7 @@ void main() {
             ),
             loadingBuilder: (BuildContext context) => Offstage(),
             emptyBuilder: (BuildContext context) => Offstage(),
-            errorBuilder: (Object error) => Offstage(),
+            errorBuilder: (BuildContext context, Object error) => Offstage(),
             pagination: pagination.copyWith(limit: limit),
             groupAlphabetically: true,
           );
