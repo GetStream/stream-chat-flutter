@@ -26,8 +26,15 @@ void main() {
 
     const path = '/devices';
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(
+              path,
+              data: {
+                'id': deviceId,
+                'push_provider': pushProvider.name,
+              },
+            ))
+        .thenAnswer(
+            (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await deviceApi.addDevice(deviceId, pushProvider);
 
@@ -69,7 +76,10 @@ void main() {
     const path = '/devices';
 
     when(
-      () => client.delete(path, queryParameters: any(named: 'queryParameters')),
+      () => client.delete(
+        path,
+        queryParameters: {'id': deviceId},
+      ),
     ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await deviceApi.removeDevice(deviceId);

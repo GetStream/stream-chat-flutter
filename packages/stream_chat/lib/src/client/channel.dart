@@ -989,11 +989,11 @@ class Channel {
   /// List the reactions for a message in the channel
   Future<QueryReactionsResponse> getReactions(
     String messageId, {
-    PaginationParams? options,
+    PaginationParams? pagination,
   }) =>
       _client.getReactions(
         messageId,
-        options: options,
+        pagination: pagination,
       );
 
   /// Retrieves a list of messages by ID

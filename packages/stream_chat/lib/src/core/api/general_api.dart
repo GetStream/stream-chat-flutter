@@ -79,16 +79,17 @@ class GeneralApi {
       queryParameters: {
         'payload': jsonEncode({
           'type': channelType,
+          'filter_conditions': filter ?? {},
           if (channelId != null)
             'id': channelId
           else if (members != null)
             'members': members,
           if (sort != null) 'sort': sort,
-          if (filter != null) 'filter': filter,
           if (pagination != null) ...pagination.toJson(),
         }),
       },
     );
+
     return QueryMembersResponse.fromJson(response.data);
   }
 }

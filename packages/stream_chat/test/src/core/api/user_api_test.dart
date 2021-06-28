@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/requests.dart';
@@ -32,10 +34,16 @@ void main() {
 
     final users = List.generate(3, (index) => User(id: 'test-user-id-$index'));
 
-    when(() => client.get(path, queryParameters: any(named: 'queryParameters')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'users': [...users.map((it) => it.toJson())]
-            }));
+    when(() => client.get(path, queryParameters: {
+          'payload': jsonEncode({
+            'presence': presence,
+            'sort': sort,
+            'filter_conditions': filter,
+            ...pagination.toJson(),
+          }),
+        })).thenAnswer((_) async => successResponse(path, data: {
+          'users': [...users.map((it) => it.toJson())]
+        }));
 
     final res = await userApi.queryUsers(
       presence: presence,
@@ -60,8 +68,10 @@ void main() {
 
     final updatedUsers = {for (final user in users) user.id: user};
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-        (_) async => successResponse(path, data: {
+    when(() => client.post(path, data: {
+          'users': updatedUsers,
+        })).thenAnswer((_) async => successResponse(path,
+            data: {
               'users': updatedUsers
                   .map((key, value) => MapEntry(key, value.toJson()))
             }));

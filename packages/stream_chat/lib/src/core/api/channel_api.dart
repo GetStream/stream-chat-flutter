@@ -76,7 +76,7 @@ class ChannelApi {
 
           // pagination
           ...paginationParams.toJson()
-        })
+        }),
       },
     );
     return QueryChannelsResponse.fromJson(response.data);

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
@@ -76,11 +78,24 @@ void main() {
     const path = '$channelPath/query';
 
     final channelState = _generateChannelState(channelId, channelType);
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(
-              path,
-              data: channelState.toJson(),
-            ));
+
+    final data = {
+      'state': true,
+      'watch': false,
+      'presence': false,
+      'data': channelData,
+      'messages': messagePagination,
+      'members': membersPagination,
+      'watchers': watchersPagination,
+    };
+
+    when(() => client.post(
+          path,
+          data: data,
+        )).thenAnswer((_) async => successResponse(
+          path,
+          data: channelState.toJson(),
+        ));
 
     final res = await channelApi.queryChannel(
       channelType,
@@ -115,13 +130,34 @@ void main() {
     const path = '/channels';
 
     final channelState = _generateChannelState(channelId, channelType);
-    when(() => client.get(path, queryParameters: any(named: 'queryParameters')))
-        .thenAnswer((_) async => successResponse(
-              path,
-              data: {
-                'channels': [channelState.toJson()]
-              },
-            ));
+
+    final payload = jsonEncode({
+      // default options
+      'state': true,
+      'watch': true,
+      'presence': false,
+
+      // passed options
+      'sort': sort,
+      'filter_conditions': filter,
+      'member_limit': memberLimit,
+      'message_limit': messageLimit,
+
+      // pagination
+      ...const PaginationParams().toJson()
+    });
+
+    when(() => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        )).thenAnswer((_) async => successResponse(
+          path,
+          data: {
+            'channels': [channelState.toJson()]
+          },
+        ));
 
     final res = await channelApi.queryChannels(
       filter: filter,
@@ -166,11 +202,18 @@ void main() {
       extraData: data,
     );
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: any(
+            named: 'data',
+            that: wrapMatcher((Map v) =>
+                containsPair('data', data).matches(v, {}) &&
+                contains('message').matches(v, {})),
+          ),
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+          'message': message.toJson(),
+        }));
 
     final res = await channelApi.updateChannel(
       channelId,
@@ -235,11 +278,16 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'accept_invite': true,
+            'message': message,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+          'message': message.toJson(),
+        }));
 
     final res = await channelApi.acceptChannelInvite(
       channelId,
@@ -264,11 +312,16 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'reject_invite': true,
+            'message': message,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+          'message': message.toJson(),
+        }));
 
     final res = await channelApi.rejectChannelInvite(
       channelId,
@@ -293,11 +346,16 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'invites': memberIds,
+            'message': message,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+          'message': message.toJson(),
+        }));
 
     final res = await channelApi.inviteChannelMembers(
       channelId,
@@ -323,11 +381,16 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'add_members': memberIds,
+            'message': message,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+          'message': message.toJson(),
+        }));
 
     final res = await channelApi.addMembers(
       channelId,
@@ -353,11 +416,16 @@ void main() {
 
     final path = _getChannelUrl(channelId, channelType);
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'channel': channelModel.toJson(),
-              'message': message.toJson(),
-            }));
+    when(() => client.post(
+          path,
+          data: {
+            'remove_members': memberIds,
+            'message': message,
+          },
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'channel': channelModel.toJson(),
+          'message': message.toJson(),
+        }));
 
     final res = await channelApi.removeMembers(
       channelId,
@@ -381,7 +449,7 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/event';
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+    when(() => client.post(path, data: {'event': event})).thenAnswer(
         (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.sendEvent(channelId, channelType, event);
@@ -432,10 +500,43 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/hide';
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(
+      () => client.post(
+        path,
+        data: {
+          'clear_history': false,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.hideChannel(channelId, channelType);
+
+    expect(res, isNotNull);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('hideChannel with clear_history: true', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+
+    final path = '${_getChannelUrl(channelId, channelType)}/hide';
+
+    when(
+      () => client.post(
+        path,
+        data: {
+          'clear_history': true,
+        },
+      ),
+    ).thenAnswer((_) async => successResponse(path, data: <String, dynamic>{}));
+
+    final res = await channelApi.hideChannel(
+      channelId,
+      channelType,
+      clearHistory: true,
+    );
 
     expect(res, isNotNull);
 
@@ -467,8 +568,14 @@ void main() {
 
     final path = '${_getChannelUrl(channelId, channelType)}/read';
 
-    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
-        (_) async => successResponse(path, data: <String, dynamic>{}));
+    when(() => client.post(
+              path,
+              data: {
+                'message_id': messageId,
+              },
+            ))
+        .thenAnswer(
+            (_) async => successResponse(path, data: <String, dynamic>{}));
 
     final res = await channelApi.markRead(
       channelId,

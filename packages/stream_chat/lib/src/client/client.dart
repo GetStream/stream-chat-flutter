@@ -1149,11 +1149,11 @@ class StreamChatClient {
   /// Get all the reactions for a [messageId]
   Future<QueryReactionsResponse> getReactions(
     String messageId, {
-    PaginationParams? options,
+    PaginationParams? pagination,
   }) =>
       _chatApi.message.getReactions(
         messageId,
-        options: options,
+        pagination: pagination,
       );
 
   /// Update the given message

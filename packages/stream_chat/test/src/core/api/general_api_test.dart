@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
@@ -33,10 +35,17 @@ void main() {
     final events =
         List.generate(3, (index) => Event(type: 'test-event-type-$index'));
 
-    when(() => client.post(path, data: any(named: 'data')))
-        .thenAnswer((_) async => successResponse(path, data: {
-              'events': [...events.map((it) => it.toJson())]
-            }));
+    final data = {
+      'channel_cids': cids,
+      'last_sync_at': lastSyncAt.toUtc().toIso8601String(),
+    };
+
+    when(() => client.post(
+          path,
+          data: data,
+        )).thenAnswer((_) async => successResponse(path, data: {
+          'events': [...events.map((it) => it.toJson())]
+        }));
 
     final res = await generalApi.sync(cids, lastSyncAt);
 
@@ -85,8 +94,20 @@ void main() {
 
       const path = '/search';
 
+      final payload = jsonEncode({
+        'filter_conditions': filter,
+        'sort': sort,
+        'query': query,
+        ...pagination.toJson(),
+      });
+
       when(
-        () => client.get(path, queryParameters: any(named: 'queryParameters')),
+        () => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        ),
       ).thenAnswer((_) async => successResponse(path, data: {'results': []}));
 
       final res = await generalApi.searchMessages(
@@ -113,8 +134,20 @@ void main() {
 
       const path = '/search';
 
+      final payload = jsonEncode({
+        'filter_conditions': filter,
+        'sort': sort,
+        'message_filter_conditions': messageFilter,
+        ...pagination.toJson(),
+      });
+
       when(
-        () => client.get(path, queryParameters: any(named: 'queryParameters')),
+        () => client.get(
+          path,
+          queryParameters: {
+            'payload': payload,
+          },
+        ),
       ).thenAnswer((_) async => successResponse(path, data: {'results': []}));
 
       final res = await generalApi.searchMessages(
@@ -149,11 +182,22 @@ void main() {
         (index) => Member(userId: 'test-user-id=$index'),
       );
 
-      when(() =>
-              client.get(path, queryParameters: any(named: 'queryParameters')))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'members': [...members.map((it) => it.toJson())]
-              }));
+      final payload = jsonEncode({
+        'type': channelType,
+        'filter_conditions': filter,
+        'id': channelId,
+        'sort': sort,
+        ...pagination.toJson(),
+      });
+
+      when(() => client.get(
+            path,
+            queryParameters: {
+              'payload': payload,
+            },
+          )).thenAnswer((_) async => successResponse(path, data: {
+            'members': [...members.map((it) => it.toJson())]
+          }));
 
       final res = await generalApi.queryMembers(
         channelType,
@@ -185,11 +229,22 @@ void main() {
         (index) => Member(userId: 'test-user-id=$index'),
       );
 
-      when(() =>
-              client.get(path, queryParameters: any(named: 'queryParameters')))
-          .thenAnswer((_) async => successResponse(path, data: {
-                'members': [...members.map((it) => it.toJson())]
-              }));
+      final payload = jsonEncode({
+        'type': channelType,
+        'filter_conditions': filter,
+        'members': members,
+        'sort': sort,
+        ...pagination.toJson(),
+      });
+
+      when(() => client.get(
+            path,
+            queryParameters: {
+              'payload': payload,
+            },
+          )).thenAnswer((_) async => successResponse(path, data: {
+            'members': [...members.map((it) => it.toJson())]
+          }));
 
       final res = await generalApi.queryMembers(
         channelType,

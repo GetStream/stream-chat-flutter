@@ -143,12 +143,12 @@ class MessageApi {
   /// Get all the reactions for a [messageId]
   Future<QueryReactionsResponse> getReactions(
     String messageId, {
-    PaginationParams? options,
+    PaginationParams? pagination,
   }) async {
     final response = await _client.get(
       '/messages/$messageId/reactions',
       queryParameters: {
-        if (options != null) ...options.toJson(),
+        if (pagination != null) ...pagination.toJson(),
       },
     );
     return QueryReactionsResponse.fromJson(response.data);
