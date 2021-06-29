@@ -56,7 +56,7 @@ scripts:
       dir-exists: test
 
   test:flutter:
-    run: melos exec -c 1 --fail-fast -- "flutter test --coverage"
+    run: melos exec -c 3 --fail-fast -- "flutter test --coverage"
     description: Run Flutter tests for a specific package in this project.
     select-package:
       flutter: true

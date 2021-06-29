@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'mocks.dart';
+import 'simple_frame.dart';
 
 void main() {
   testWidgets(
@@ -49,6 +51,59 @@ void main() {
       ));
 
       expect(find.byType(MarkdownBody), findsOneWidget);
+    },
+  );
+
+  testGoldens(
+    'control test',
+    (WidgetTester tester) async {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final channel = MockChannel();
+      final channelState = MockChannelState();
+      final lastMessageAt = DateTime.parse('2020-06-22 12:00:00');
+      final themeData = ThemeData();
+      final streamTheme = StreamChatThemeData.fromTheme(themeData);
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.user).thenReturn(OwnUser(id: 'user-id'));
+      when(() => channel.lastMessageAt).thenReturn(lastMessageAt);
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channel.isMuted).thenReturn(false);
+      when(() => channel.isMutedStream).thenAnswer((i) => Stream.value(false));
+      when(() => channel.extraDataStream).thenAnswer((i) => Stream.value({
+            'name': 'test',
+          }));
+      when(() => channel.extraData).thenReturn({
+        'name': 'test',
+      });
+
+      final messageText = '''a message.
+with multiple lines
+and a list:
+- a. okasd
+- b lllll
+
+cool.''';
+
+      await tester.pumpWidgetBuilder(
+        materialAppWrapper()(SimpleFrame(
+          child: StreamChannel(
+            channel: channel,
+            child: Scaffold(
+              body: MessageText(
+                message: Message(
+                  text: messageText,
+                ),
+                messageTheme: streamTheme.otherMessageTheme,
+              ),
+            ),
+          ),
+        )),
+        surfaceSize: const Size(500, 500),
+      );
+      await screenMatchesGolden(tester, 'message_text');
     },
   );
 }
