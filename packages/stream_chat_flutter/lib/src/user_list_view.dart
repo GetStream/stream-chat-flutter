@@ -128,7 +128,7 @@ class UserListView extends StatefulWidget {
   final int crossAxisCount;
 
   /// The builder that will be used in case of error
-  final Widget Function(Error error)? errorBuilder;
+  final ErrorBuilder? errorBuilder;
 
   /// The builder that will be used to build the list
   final Widget Function(BuildContext context, List<ListItem> users)?
@@ -153,8 +153,8 @@ class _UserListViewState extends State<UserListView>
   @override
   Widget build(BuildContext context) {
     final child = UserListCore(
-      errorBuilder: widget.errorBuilder as Widget Function(Object)? ??
-          (err) => _buildError(err as Error),
+      errorBuilder: widget.errorBuilder ??
+          (BuildContext context, Object err) => _buildError(err),
       emptyBuilder: widget.emptyBuilder ?? (context) => _buildEmpty(),
       loadingBuilder: widget.loadingBuilder ??
           (context) => LayoutBuilder(
@@ -194,52 +194,33 @@ class _UserListViewState extends State<UserListView>
   bool get isListAlreadySorted =>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
-  Widget _buildError(Error error) {
-    print(error.stackTrace);
-
-    var message = error.toString();
-    if (error is DioError) {
-      final dioError = error as DioError;
-      if (dioError.type == DioErrorType.response) {
-        message = dioError.message;
-      } else {
-        message = 'Check your connection and retry';
-      }
-    }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text.rich(
-            const TextSpan(
-              children: [
-                WidgetSpan(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: 2,
+  Widget _buildError(Object error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text.rich(
+              const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: 2,
+                      ),
+                      child: Icon(Icons.error_outline),
                     ),
-                    child: Icon(Icons.error_outline),
                   ),
-                ),
-                TextSpan(text: 'Error loading channels'),
-              ],
+                  TextSpan(text: 'Error loading users'),
+                ],
+              ),
+              style: Theme.of(context).textTheme.headline6,
             ),
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 16,
+            TextButton(
+              onPressed: () => _userListController.loadData!(),
+              child: const Text('Retry'),
             ),
-            child: Text(message),
-          ),
-          TextButton(
-            onPressed: () => _userListController.loadData!(),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 
   Widget _buildEmpty() => LayoutBuilder(
         builder: (context, viewportConstraints) => SingleChildScrollView(
