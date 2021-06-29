@@ -22,6 +22,7 @@ You can call `.copyWith` to customize just a subset of properties
 ✅  Added
 - TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
 - [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
+- `MessageWidget` accepts a `userAvatarBuilder`
 
 🐞  Fixed
 - [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing message
