@@ -27,6 +27,7 @@ You can call `.copyWith` to customize just a subset of properties
 - [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing message
 - Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
 - [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
+- `MessageListView` not rendering if the user is not a member of the channel
 
 ## 2.0.0-nullsafety.7
 
