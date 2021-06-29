@@ -17,14 +17,22 @@ class HomePage extends StatelessWidget {
   }) : super(key: key);
 
   final StreamChatClient chatClient;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return StreamChat(
       client: chatClient,
-      child: Navigator(
-        onGenerateRoute: AppRoutes.generateRoute,
-        initialRoute: Routes.CHANNEL_LIST_PAGE,
+      child: WillPopScope(
+        onWillPop: () async {
+          final canPop = await _navigatorKey.currentState?.maybePop() ?? false;
+          return !canPop;
+        },
+        child: Navigator(
+          key: _navigatorKey,
+          onGenerateRoute: AppRoutes.generateRoute,
+          initialRoute: Routes.CHANNEL_LIST_PAGE,
+        ),
       ),
     );
   }
