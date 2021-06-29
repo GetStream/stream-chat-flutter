@@ -201,8 +201,9 @@ class ChannelListView extends StatefulWidget {
 class _ChannelListViewState extends State<ChannelListView> {
   final _slideController = SlidableController();
 
-  late final _channelListController =
-      widget.channelListController ?? ChannelListController();
+  final _defaultController = ChannelListController();
+  ChannelListController get _channelListController =>
+      widget.channelListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) {

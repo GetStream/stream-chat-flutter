@@ -139,8 +139,9 @@ class MessageSearchListView extends StatefulWidget {
 }
 
 class _MessageSearchListViewState extends State<MessageSearchListView> {
-  late final MessageSearchListController _messageSearchListController =
-      widget.messageSearchListController ?? MessageSearchListController();
+  final _defaultController = MessageSearchListController();
+  MessageSearchListController get _messageSearchListController =>
+      widget.messageSearchListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) => MessageSearchListCore(
