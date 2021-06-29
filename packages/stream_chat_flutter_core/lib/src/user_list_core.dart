@@ -99,7 +99,7 @@ class UserListCore extends StatefulWidget {
   /// created_at or member_count. Direction can be ascending or descending.
   final List<SortOption>? sort;
 
-  ///
+  /// If true you’ll receive user presence updates via the websocket events
   final bool? presence;
 
   /// Pagination parameters

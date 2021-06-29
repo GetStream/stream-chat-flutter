@@ -65,7 +65,7 @@ class StreamChatClient {
     LogHandlerFunction? logHandlerFunction,
     RetryPolicy? retryPolicy,
     Location? location,
-    String? baseURL,
+    @Deprecated('Use location to change baseUrl instead') String? baseURL,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     StreamChatApi? chatApi,
