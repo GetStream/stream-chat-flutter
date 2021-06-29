@@ -1,31 +1,37 @@
 ## 2.0.0-nullsafety.8
 
-🛑️  Breaking Changes from `2.0.0-nullsafety.7`
+🛑️ Breaking Changes from `2.0.0-nullsafety.7`
+
 - `ChannelListCore` options property is removed in favor of individual properties
     - `options.state` -> bool state
     - `options.watch` -> bool watch
     - `options.presence` -> bool presence
-- `UserListCore` options property is removed in favor of individual properties
+- `UserListView` options property is removed in favor of individual properties
     - `options.presence` -> bool presence
 - `MessageBuilder` and `ParentMessageBuilder` signature is now
+
 ```dart
 typedef MessageBuilder = Widget Function(
-  BuildContext,
-  MessageDetails,
-  List<Message>,
-  MessageWidget defaultMessageWidget,
-);
+    BuildContext,
+    MessageDetails,
+    List<Message>,
+    MessageWidget defaultMessageWidget,
+    );
 ```
+
 the last parameter is the default `MessageWidget`
 You can call `.copyWith` to customize just a subset of properties
 
-✅  Added
+✅ Added
+
 - TypingIndicator now has a property called `parentId` to show typing indicator specific to threads
 - [#493](https://github.com/GetStream/stream-chat-flutter/pull/493): add support for messageListView header/footer
 - `MessageWidget` accepts a `userAvatarBuilder`
 
-🐞  Fixed
-- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing message
+🐞 Fixed
+
+- [#483](https://github.com/GetStream/stream-chat-flutter/issues/483): Keyboard covers input text box when editing
+  message
 - Modals are shown using the nearest `Navigator` to make using the SDK easier in a nested navigator use case
 - [#484](https://github.com/GetStream/stream-chat-flutter/issues/484): messages don't update without a reload
 - `MessageListView` not rendering if the user is not a member of the channel
