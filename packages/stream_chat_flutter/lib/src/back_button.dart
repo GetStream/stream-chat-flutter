@@ -44,7 +44,7 @@ class StreamBackButton extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: StreamSvgIcon.left(
               size: 24,
-              color: StreamChatTheme.of(context).colorTheme.black,
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             ),
           ),
           if (showUnreads)

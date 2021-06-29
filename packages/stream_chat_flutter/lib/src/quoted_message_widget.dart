@@ -154,7 +154,7 @@ class QuotedMessageWidget extends StatelessWidget {
         color: _getBackgroundColor(context),
         border: showBorder
             ? Border.all(
-                color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                color: StreamChatTheme.of(context).colorTheme.disabled,
               )
             : null,
         borderRadius: BorderRadius.only(
@@ -280,7 +280,7 @@ class QuotedMessageWidget extends StatelessWidget {
 
   Color? _getBackgroundColor(BuildContext context) {
     if (_containsScrapeUrl) {
-      return StreamChatTheme.of(context).colorTheme.blueAlice;
+      return StreamChatTheme.of(context).colorTheme.linkBg;
     }
     return messageTheme.messageBackgroundColor;
   }

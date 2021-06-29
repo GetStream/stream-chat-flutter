@@ -51,7 +51,7 @@ class GroupImage extends StatelessWidget {
           constraints: constraints ??
               streamChatTheme.ownMessageTheme.avatarTheme?.constraints,
           decoration: BoxDecoration(
-            color: streamChatTheme.colorTheme.accentBlue,
+            color: streamChatTheme.colorTheme.accentPrimary,
           ),
           child: Flex(
             direction: Axis.vertical,
@@ -119,7 +119,7 @@ class GroupImage extends StatelessWidget {
                 BorderRadius.zero) +
             BorderRadius.circular(selectionThickness),
         child: Container(
-          color: selectionColor ?? streamChatTheme.colorTheme.accentBlue,
+          color: selectionColor ?? streamChatTheme.colorTheme.accentPrimary,
           height: 64,
           width: 64,
           child: Padding(

@@ -143,7 +143,7 @@ class ChannelInfo extends StatelessWidget {
             child: Text(
               'Try Again',
               style: textStyle?.copyWith(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                color: StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),
             ),
           ),

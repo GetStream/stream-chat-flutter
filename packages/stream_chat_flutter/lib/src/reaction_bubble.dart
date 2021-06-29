@@ -141,8 +141,8 @@ class ReactionBubble extends StatelessWidget {
               Icons.help_outline_rounded,
               size: 16,
               color: (!highlightOwnReactions || reaction.user?.id == userId)
-                  ? chatThemeData.colorTheme.accentBlue
-                  : chatThemeData.colorTheme.black.withOpacity(.5),
+                  ? chatThemeData.colorTheme.accentPrimary
+                  : chatThemeData.colorTheme.textHighEmphasis.withOpacity(.5),
             ),
     );
   }

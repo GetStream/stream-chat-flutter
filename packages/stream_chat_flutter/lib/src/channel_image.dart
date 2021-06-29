@@ -110,8 +110,8 @@ class ChannelImage extends StatelessWidget {
                             .channelPreviewTheme.avatarTheme?.constraints,
                     onTap: onTap != null ? (_) => onTap!() : null,
                     selected: selected,
-                    selectionColor:
-                        selectionColor ?? chatThemeData.colorTheme.accentBlue,
+                    selectionColor: selectionColor ??
+                        chatThemeData.colorTheme.accentPrimary,
                     selectionThickness: selectionThickness,
                   ));
         } else {
@@ -132,7 +132,7 @@ class ChannelImage extends StatelessWidget {
             onTap: onTap,
             selected: selected,
             selectionColor:
-                selectionColor ?? chatThemeData.colorTheme.accentBlue,
+                selectionColor ?? chatThemeData.colorTheme.accentPrimary,
             selectionThickness: selectionThickness,
           );
         }
@@ -144,7 +144,7 @@ class ChannelImage extends StatelessWidget {
             constraints: constraints ??
                 chatThemeData.channelPreviewTheme.avatarTheme?.constraints,
             decoration: BoxDecoration(
-              color: chatThemeData.colorTheme.accentBlue,
+              color: chatThemeData.colorTheme.accentPrimary,
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -157,7 +157,7 @@ class ChannelImage extends StatelessWidget {
                       child: Text(
                         data.containsKey('name') ? data['name'][0] : '',
                         style: TextStyle(
-                          color: chatThemeData.colorTheme.white,
+                          color: chatThemeData.colorTheme.barsBg,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -189,7 +189,7 @@ class ChannelImage extends StatelessWidget {
             child: Container(
               constraints: constraints ??
                   chatThemeData.ownMessageTheme.avatarTheme?.constraints,
-              color: selectionColor ?? chatThemeData.colorTheme.accentBlue,
+              color: selectionColor ?? chatThemeData.colorTheme.accentPrimary,
               child: Padding(
                 padding: EdgeInsets.all(selectionThickness),
                 child: child,

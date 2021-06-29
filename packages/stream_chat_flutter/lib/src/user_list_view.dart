@@ -285,7 +285,7 @@ class _UserListViewState extends State<UserListView>
           final chatThemeData = StreamChatTheme.of(context);
           return Container(
             key: ValueKey<String>('HEADER-$header'),
-            color: chatThemeData.colorTheme.black.withOpacity(0.05),
+            color: chatThemeData.colorTheme.textHighEmphasis.withOpacity(0.05),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: Text(
@@ -293,7 +293,7 @@ class _UserListViewState extends State<UserListView>
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14.5,
-                  color: chatThemeData.colorTheme.grey,
+                  color: chatThemeData.colorTheme.textLowEmphasis,
                 ),
               ),
             ),
@@ -385,7 +385,7 @@ class _UserListViewState extends State<UserListView>
               return Container(
                 color: StreamChatTheme.of(context)
                     .colorTheme
-                    .accentRed
+                    .accentError
                     .withOpacity(.2),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -408,6 +408,6 @@ class _UserListViewState extends State<UserListView>
 
   Widget _separatorBuilder(context, i) => Container(
         height: 1,
-        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+        color: StreamChatTheme.of(context).colorTheme.borders,
       );
 }
