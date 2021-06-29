@@ -120,8 +120,10 @@ class MessageSearchListCoreState extends State<MessageSearchListCore> {
   }
 
   void _setupController() {
-    widget.messageSearchListController!.loadData = loadData;
-    widget.messageSearchListController!.paginateData = paginateData;
+    if (widget.messageSearchListController != null) {
+      widget.messageSearchListController!.loadData = loadData;
+      widget.messageSearchListController!.paginateData = paginateData;
+    }
   }
 
   @override

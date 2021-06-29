@@ -139,8 +139,10 @@ class UserListCoreState extends State<UserListCore>
   }
 
   void _setupController() {
-    widget.userListController!.loadData = loadData;
-    widget.userListController!.paginateData = paginateData;
+    if (widget.userListController != null) {
+      widget.userListController!.loadData = loadData;
+      widget.userListController!.paginateData = paginateData;
+    }
   }
 
   @override
