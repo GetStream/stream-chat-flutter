@@ -352,7 +352,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool _inBetweenList = false;
 
-  final _defaultController = MessageListController();
+  late final _defaultController = MessageListController();
   MessageListController get _messageListController =>
       widget.messageListController ?? _defaultController;
 

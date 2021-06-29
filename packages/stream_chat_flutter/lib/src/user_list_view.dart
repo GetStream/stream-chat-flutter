@@ -154,7 +154,7 @@ class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 
-  final _defaultController = UserListController();
+  late final _defaultController = UserListController();
   UserListController get _userListController =>
       widget.userListController ?? _defaultController;
 
