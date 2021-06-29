@@ -172,6 +172,7 @@ class MessageListView extends StatefulWidget {
     this.usernameBuilder,
     this.showFloatingDateDivider = true,
     this.threadSeparatorBuilder,
+    this.messageListController,
   }) : super(key: key);
 
   /// Function used to build a custom message widget
@@ -296,6 +297,10 @@ class MessageListView extends StatefulWidget {
   /// Builder used to build the thread separator in case it's a thread view
   final WidgetBuilder? threadSeparatorBuilder;
 
+  /// A [MessageListController] allows pagination.
+  /// Use [ChannelListController.paginateData] pagination.
+  final MessageListController? messageListController;
+
   @override
   _MessageListViewState createState() => _MessageListViewState();
 }
@@ -347,7 +352,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   bool _inBetweenList = false;
 
-  final MessageListController _messageListController = MessageListController();
+  late final MessageListController _messageListController =
+      widget.messageListController ?? MessageListController();
 
   @override
   Widget build(BuildContext context) => MessageListCore(

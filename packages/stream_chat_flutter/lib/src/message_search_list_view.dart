@@ -68,6 +68,7 @@ class MessageSearchListView extends StatefulWidget {
     this.errorBuilder,
     this.loadingBuilder,
     this.childBuilder,
+    this.messageSearchListController,
   }) : super(key: key);
 
   /// Message String to search on
@@ -127,13 +128,19 @@ class MessageSearchListView extends StatefulWidget {
   /// The builder that will be used in case of loading
   final WidgetBuilder? loadingBuilder;
 
+  /// A [MessageSearchListController] allows reloading and pagination.
+  /// Use [MessageSearchListController.loadData] and
+  /// [MessageSearchListController.paginateData] respectively for reloading and
+  /// pagination.
+  final MessageSearchListController? messageSearchListController;
+
   @override
   _MessageSearchListViewState createState() => _MessageSearchListViewState();
 }
 
 class _MessageSearchListViewState extends State<MessageSearchListView> {
-  final MessageSearchListController _messageSearchListController =
-      MessageSearchListController();
+  late final MessageSearchListController _messageSearchListController =
+      widget.messageSearchListController ?? MessageSearchListController();
 
   @override
   Widget build(BuildContext context) => MessageSearchListCore(

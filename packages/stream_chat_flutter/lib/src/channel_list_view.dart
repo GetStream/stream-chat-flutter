@@ -89,6 +89,7 @@ class ChannelListView extends StatefulWidget {
     this.onMoreDetailsPressed,
     this.onDeletePressed,
     this.swipeActions,
+    this.channelListController,
   }) : super(key: key);
 
   /// If true a default swipe to action behaviour will be added to this widget
@@ -187,6 +188,12 @@ class ChannelListView extends StatefulWidget {
   /// List of actions for slidable
   final List<SwipeAction>? swipeActions;
 
+  /// A [ChannelListController] allows reloading and pagination.
+  /// Use [ChannelListController.loadData] and
+  /// [ChannelListController.paginateData] respectively for reloading and
+  /// pagination.
+  final ChannelListController? channelListController;
+
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
 }
@@ -194,7 +201,8 @@ class ChannelListView extends StatefulWidget {
 class _ChannelListViewState extends State<ChannelListView> {
   final _slideController = SlidableController();
 
-  final _channelListController = ChannelListController();
+  late final _channelListController =
+      widget.channelListController ?? ChannelListController();
 
   @override
   Widget build(BuildContext context) {
