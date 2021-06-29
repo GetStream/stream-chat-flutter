@@ -690,6 +690,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     var channel = StreamChannel.of(context).channel;
 
     showDialog(
+      useRootNavigator: false,
       context: context,
       barrierColor: StreamChatTheme.of(context).colorTheme.overlay,
       builder: (context) {
@@ -851,6 +852,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     final color = StreamChatTheme.of(context).colorTheme.white;
 
     showModalBottomSheet(
+      useRootNavigator: false,
       context: context,
       clipBehavior: Clip.antiAlias,
       isScrollControlled: true,
