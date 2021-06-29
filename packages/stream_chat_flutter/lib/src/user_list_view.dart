@@ -194,50 +194,33 @@ class _UserListViewState extends State<UserListView>
   bool get isListAlreadySorted =>
       widget.sort?.any((e) => e.field == 'name' && e.direction == 1) ?? false;
 
-  Widget _buildError(Object error) {
-    var message = error.toString();
-    if (error is DioError) {
-      final dioError = error;
-      if (dioError.type == DioErrorType.response) {
-        message = dioError.message;
-      } else {
-        message = 'Check your connection and retry';
-      }
-    }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text.rich(
-            const TextSpan(
-              children: [
-                WidgetSpan(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: 2,
+  Widget _buildError(Object error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text.rich(
+              const TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: 2,
+                      ),
+                      child: Icon(Icons.error_outline),
                     ),
-                    child: Icon(Icons.error_outline),
                   ),
-                ),
-                TextSpan(text: 'Error loading channels'),
-              ],
+                  TextSpan(text: 'Error loading users'),
+                ],
+              ),
+              style: Theme.of(context).textTheme.headline6,
             ),
-            style: Theme.of(context).textTheme.headline6,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 16,
+            TextButton(
+              onPressed: () => _userListController.loadData!(),
+              child: const Text('Retry'),
             ),
-            child: Text(message),
-          ),
-          TextButton(
-            onPressed: () => _userListController.loadData!(),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 
   Widget _buildEmpty() => LayoutBuilder(
         builder: (context, viewportConstraints) => SingleChildScrollView(
