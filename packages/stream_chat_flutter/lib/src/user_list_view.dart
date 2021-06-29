@@ -64,6 +64,7 @@ class UserListView extends StatefulWidget {
     this.emptyBuilder,
     this.loadingBuilder,
     this.listBuilder,
+    this.userListController,
   })  : assert(
           crossAxisCount == 1 || groupAlphabetically == false,
           'Cannot group alphabetically when crossAxisCount > 1',
@@ -140,6 +141,11 @@ class UserListView extends StatefulWidget {
   /// The builder used when the channel list is empty.
   final WidgetBuilder? emptyBuilder;
 
+  /// A [UserListController] allows reloading and pagination.
+  /// Use [UserListController.loadData] and [UserListController.paginateData]
+  /// respectively for reloading and pagination.
+  final UserListController? userListController;
+
   @override
   _UserListViewState createState() => _UserListViewState();
 }
@@ -148,7 +154,9 @@ class _UserListViewState extends State<UserListView>
     with WidgetsBindingObserver {
   bool get _isListView => widget.crossAxisCount == 1;
 
-  final UserListController _userListController = UserListController();
+  late final _defaultController = UserListController();
+  UserListController get _userListController =>
+      widget.userListController ?? _defaultController;
 
   @override
   Widget build(BuildContext context) {

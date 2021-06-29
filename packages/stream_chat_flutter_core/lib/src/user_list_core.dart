@@ -128,12 +128,21 @@ class UserListCoreState extends State<UserListCore>
     if (newUsersBloc != _usersBloc) {
       _usersBloc = newUsersBloc;
       loadData();
-      if (widget.userListController != null) {
-        widget.userListController!.loadData = loadData;
-        widget.userListController!.paginateData = paginateData;
-      }
     }
     super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setupController();
+  }
+
+  void _setupController() {
+    if (widget.userListController != null) {
+      widget.userListController!.loadData = loadData;
+      widget.userListController!.paginateData = paginateData;
+    }
   }
 
   @override
@@ -211,6 +220,10 @@ class UserListCoreState extends State<UserListCore>
         widget.pagination?.toJson().toString() !=
             oldWidget.pagination?.toJson().toString()) {
       loadData();
+    }
+
+    if (widget.userListController != oldWidget.userListController) {
+      _setupController();
     }
   }
 }
