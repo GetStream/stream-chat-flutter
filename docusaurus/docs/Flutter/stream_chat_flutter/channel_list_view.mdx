@@ -4,3 +4,34 @@ sidebar_position: 4
 title: ChannelListView
 ---
 
+![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view.png)
+![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/screenshots/channel_list_view_paint.png)
+
+It shows the list of current channels.
+
+```dart
+class ChannelListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ChannelListView(
+        filter: Filter.in_('members', [StreamChat.of(context).user.id]),
+        sort: [SortOption('last_message_at')],
+        pagination: PaginationParams(
+          limit: 20,
+        ),
+        channelWidget: ChannelPage(),
+      ),
+    );
+  }
+}
+```
+
+
+Make sure to have a [StreamChat] ancestor in order to provide the
+information about the channels.
+The widget uses a [ListView.custom] to render the list of channels.
+
+The widget components render the ui based on the first ancestor of
+type [StreamChatTheme].
+Modify it to change the widget appearance.

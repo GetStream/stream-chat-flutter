@@ -4,3 +4,47 @@ sidebar_position: 6
 title: Message Input
 ---
 
+The `MessageInput` widget deals with common elements related to sending a message such as a text field for typing text, 
+adding media to a message, quoting a message and more. The message input uses a stream channel ancestor to send a message. 
+The message input can be used along with a message list view to display messages.
+
+The message input also has commands such as Giphy and more which can be added. It can also be used to add custom attachments to your messages. 
+The message input is customisable and the orientation of the icons the text field and the send button can be changed.
+
+Widget used to enter the message and add attachments
+
+```dart
+class ChannelPage extends StatelessWidget {
+  const ChannelPage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: ChannelHeader(),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: MessageListView(
+              threadBuilder: (_, parentMessage) {
+                return ThreadPage(
+                  parent: parentMessage,
+                );
+              },
+            ),
+          ),
+          MessageInput(),
+        ],
+      ),
+    );
+  }
+}
+```
+
+You usually put this widget in the same page of a [MessageListView]
+as the bottom widget.
+
+The widget renders the ui based on the first ancestor of
+type [StreamChatTheme].
+Modify it to change the widget appearance.
