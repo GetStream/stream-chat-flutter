@@ -1,6 +1,6 @@
 ## 2.0.0-nullsafety.7
 
-🛑️ Breaking Changes from `2.0.0-nullsafety.6`
+🛑️  Breaking Changes from `2.0.0-nullsafety.6`
 - `ConnectUserWithProvider` now requires `tokenProvider` as a required param. (Removed from the constructor)
 - `client.disconnect()` is now divided into two different functions 
   - `client.closeConnection()` -> for closing user websocket connection.
@@ -11,21 +11,19 @@
   - `StreamWebSocketError` -> for user websocket related errors.
   - `StreamChatNetworkError` -> for network related errors.
 - `client.queryChannels()`, `channel.query()` options param is removed in favor of individual params
-  - `options.state` -> bool state
-  - `options.watch` -> bool watch
-  - `options.presence` -> bool presence
-- `client.queryUsers()` options param is removed in favor of individual params
-  - `options.presence` -> bool presence
+  - `option.state` -> bool state
+  - `option.watch` -> bool watch
+  - `option.presence` -> bool presence
 
-✅ Added
+✅  Added
 - New `Location` enum is introduced for easily changing the client location/baseUrl.
 - New `client.openConnection()` and `client.closeConnection()` is introduced to connect/disconnect user ws connection.
 
-🔄 Changed
+🔄  Changed
 - `baseURL` is now deprecated in favor of using `Location` to change data location.
 
-🐞 Fixed
-- Client does not return without internet connection [#369](https://github.com/GetStream/stream-chat-flutter/issues/369)
+🐞  Fixed
+- [#369](https://github.com/GetStream/stream-chat-flutter/issues/369): Client does not return without internet connection
 
 ## 2.0.0-nullsafety.6
 
