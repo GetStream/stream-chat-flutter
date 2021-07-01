@@ -134,11 +134,6 @@ class StreamChatState extends State<StreamChat> {
   Stream<User?> get userStream => widget.client.state.userStream;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     final locale = ui.window.locale;
     Jiffy.locale(locale.languageCode);

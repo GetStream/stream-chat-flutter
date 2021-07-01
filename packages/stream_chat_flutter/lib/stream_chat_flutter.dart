@@ -28,6 +28,7 @@ export 'src/reaction_icon.dart';
 export 'src/reaction_picker.dart';
 export 'src/sending_indicator.dart';
 export 'src/stream_chat.dart';
+export 'src/stream_chat_localizations.dart';
 export 'src/stream_chat_theme.dart';
 export 'src/stream_neumorphic_button.dart';
 export 'src/stream_svg_icon.dart';
