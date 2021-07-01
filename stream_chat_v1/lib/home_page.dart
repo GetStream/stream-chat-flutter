@@ -10,19 +10,25 @@ class HomePageArgs {
   HomePageArgs(this.chatClient);
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({
     Key? key,
     required this.chatClient,
   }) : super(key: key);
 
   final StreamChatClient chatClient;
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return StreamChat(
-      client: chatClient,
+      client: widget.chatClient,
       child: WillPopScope(
         onWillPop: () async {
           final canPop = await _navigatorKey.currentState?.maybePop() ?? false;
