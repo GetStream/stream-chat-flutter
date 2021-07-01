@@ -368,7 +368,8 @@ class _MessageListViewState extends State<MessageListView> {
                   child: Text(
                     'No chats here yet...',
                     style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.black.withOpacity(.5)),
+                        color: _streamTheme.colorTheme.textHighEmphasis
+                            .withOpacity(.5)),
                   ),
                 ),
         messageListBuilder: widget.messageListBuilder ??
@@ -380,7 +381,8 @@ class _MessageListViewState extends State<MessageListView> {
                   child: Text(
                     'Something went wrong',
                     style: _streamTheme.textTheme.footnote.copyWith(
-                        color: _streamTheme.colorTheme.black.withOpacity(.5)),
+                        color: _streamTheme.colorTheme.textHighEmphasis
+                            .withOpacity(.5)),
                   ),
                 ),
       );
@@ -710,7 +712,7 @@ class _MessageListViewState extends State<MessageListView> {
               clipBehavior: Clip.none,
               children: [
                 FloatingActionButton(
-                  backgroundColor: _streamTheme.colorTheme.white,
+                  backgroundColor: _streamTheme.colorTheme.barsBg,
                   onPressed: () {
                     if (unreadCount > 0) {
                       streamChannel!.channel.markRead();
@@ -729,7 +731,7 @@ class _MessageListViewState extends State<MessageListView> {
                     }
                   },
                   child: StreamSvgIcon.down(
-                    color: _streamTheme.colorTheme.black,
+                    color: _streamTheme.colorTheme.textHighEmphasis,
                   ),
                 ),
                 if (showUnreadCount)
@@ -1106,7 +1108,7 @@ class _MessageListViewState extends State<MessageListView> {
             widget.onMessageSwiped?.call(message);
           },
           backgroundIcon: StreamSvgIcon.reply(
-            color: _streamTheme.colorTheme.accentBlue,
+            color: _streamTheme.colorTheme.accentPrimary,
           ),
           child: child,
         ),
@@ -1122,7 +1124,7 @@ class _MessageListViewState extends State<MessageListView> {
       child = TweenAnimationBuilder<Color?>(
         tween: ColorTween(
           begin: highlightColor,
-          end: colorTheme.white.withOpacity(0),
+          end: colorTheme.barsBg.withOpacity(0),
         ),
         duration: const Duration(seconds: 3),
         onEnd: () => initialMessageHighlightComplete = true,
@@ -1252,7 +1254,7 @@ class _LoadingIndicator extends StatelessWidget {
       stream: stream,
       initialData: false,
       errorBuilder: (context, error) => Container(
-        color: streamTheme.colorTheme.accentRed.withOpacity(.2),
+        color: streamTheme.colorTheme.accentError.withOpacity(.2),
         child: const Center(
           child: Text('Error loading messages'),
         ),

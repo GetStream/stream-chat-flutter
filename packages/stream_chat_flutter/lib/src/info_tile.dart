@@ -46,8 +46,8 @@ class InfoTile extends StatelessWidget {
       childAnchor: childAnchor ?? Alignment.bottomCenter,
       portal: Container(
         height: 25,
-        color:
-            backgroundColor ?? chatThemeData.colorTheme.grey.withOpacity(0.9),
+        color: backgroundColor ??
+            chatThemeData.colorTheme.textLowEmphasis.withOpacity(0.9),
         child: Center(
           child: Text(
             message,

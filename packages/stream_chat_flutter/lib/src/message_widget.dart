@@ -222,7 +222,7 @@ class MessageWidget extends StatefulWidget {
             final border = RoundedRectangleBorder(
               side: attachmentBorderSide ??
                   BorderSide(
-                    color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+                    color: StreamChatTheme.of(context).colorTheme.borders,
                   ),
               borderRadius: attachmentBorderRadiusGeometry ?? BorderRadius.zero,
             );
@@ -749,7 +749,7 @@ class _MessageWidgetState extends State<MessageWidget>
                                             child: CustomPaint(
                                               painter: ReactionBubblePainter(
                                                 _streamChatTheme
-                                                    .colorTheme.white,
+                                                    .colorTheme.barsBg,
                                                 Colors.transparent,
                                                 Colors.transparent,
                                                 tailCirclesSpace: 1,
@@ -835,14 +835,14 @@ class _MessageWidgetState extends State<MessageWidget>
         mainAxisSize: MainAxisSize.min,
         children: [
           StreamSvgIcon.eye(
-            color: chatThemeData.colorTheme.grey,
+            color: chatThemeData.colorTheme.textLowEmphasis,
             size: 16,
           ),
           const SizedBox(width: 8),
           Text(
             'Only visible to you',
             style: chatThemeData.textTheme.footnote
-                .copyWith(color: chatThemeData.colorTheme.grey),
+                .copyWith(color: chatThemeData.colorTheme.textLowEmphasis),
           ),
         ],
       );
@@ -1218,7 +1218,7 @@ class _MessageWidgetState extends State<MessageWidget>
             Text(
               widget.readList!.length.toString(),
               style: style.copyWith(
-                color: _streamChatTheme.colorTheme.accentBlue,
+                color: _streamChatTheme.colorTheme.accentPrimary,
               ),
             ),
           const SizedBox(width: 2),
@@ -1292,7 +1292,7 @@ class _MessageWidgetState extends State<MessageWidget>
           Text(
             'Pinned by ${pinnedByMe ? 'You' : pinnedBy.name}',
             style: TextStyle(
-              color: _streamChatTheme.colorTheme.grey,
+              color: _streamChatTheme.colorTheme.textLowEmphasis,
               fontSize: 13,
               fontWeight: FontWeight.w400,
             ),
@@ -1310,7 +1310,7 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     if (hasUrlAttachments) {
-      return _streamChatTheme.colorTheme.blueAlice;
+      return _streamChatTheme.colorTheme.linkBg;
     }
 
     if (isOnlyEmoji) {
@@ -1366,7 +1366,7 @@ class _ThreadParticipants extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _streamChatTheme.colorTheme.white,
+              color: _streamChatTheme.colorTheme.barsBg,
             ),
             padding: const EdgeInsets.all(1),
             child: UserAvatar(
@@ -1395,7 +1395,7 @@ class _ThreadReplyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color ?? StreamChatTheme.of(context!).colorTheme.greyGainsboro
+      ..color = color ?? StreamChatTheme.of(context!).colorTheme.disabled
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;

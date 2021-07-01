@@ -94,8 +94,8 @@ class _VideoThumbnailImageState extends State<VideoThumbnailImage> {
                   constraints: const BoxConstraints.expand(),
                   child: widget.placeholderBuilder?.call(context) ??
                       Shimmer.fromColors(
-                        baseColor: _streamChatTheme.colorTheme.greyGainsboro,
-                        highlightColor: _streamChatTheme.colorTheme.whiteSmoke,
+                        baseColor: _streamChatTheme.colorTheme.disabled,
+                        highlightColor: _streamChatTheme.colorTheme.inputBg,
                         child: Image.asset(
                           'images/placeholder.png',
                           fit: BoxFit.cover,

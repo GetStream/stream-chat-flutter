@@ -151,9 +151,8 @@ class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .greyGainsboro,
+                          color:
+                              StreamChatTheme.of(context).colorTheme.disabled,
                         ),
                       ),
                       child: widget.backgroundIcon,

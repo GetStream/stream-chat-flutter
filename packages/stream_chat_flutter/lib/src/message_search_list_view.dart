@@ -199,7 +199,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
 
   Widget _separatorBuilder(BuildContext context, int index) => Container(
         height: 1,
-        color: StreamChatTheme.of(context).colorTheme.greyWhisper,
+        color: StreamChatTheme.of(context).colorTheme.borders,
       );
 
   Widget _listItemBuilder(
@@ -224,7 +224,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
             return Container(
               color: StreamChatTheme.of(context)
                   .colorTheme
-                  .accentRed
+                  .accentError
                   .withOpacity(.2),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
@@ -294,7 +294,7 @@ class _MessageSearchListViewState extends State<MessageSearchListView> {
               child: Text(
                 '${items.length} results',
                 style: TextStyle(
-                  color: chatThemeData.colorTheme.grey,
+                  color: chatThemeData.colorTheme.textLowEmphasis,
                 ),
               ),
             ),

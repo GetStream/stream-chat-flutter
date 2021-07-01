@@ -101,12 +101,12 @@ class ChannelListPage extends StatelessWidget {
             StreamChatTheme.of(context).channelPreviewTheme.title!.copyWith(
                   color: StreamChatTheme.of(context)
                       .colorTheme
-                      .black
+                      .textHighEmphasis
                       .withOpacity(opacity),
                 ),
       ),
       subtitle: Text(subtitle),
-      trailing: channel.state!.unreadCount! > 0
+      trailing: channel.state!.unreadCount > 0
           ? CircleAvatar(
               radius: 10,
               child: Text(channel.state!.unreadCount.toString()),

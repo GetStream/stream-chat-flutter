@@ -290,7 +290,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                         padding: const EdgeInsets.all(8),
                         child: StreamSvgIcon.message(
                           size: 136,
-                          color: chatThemeData.colorTheme.greyGainsboro,
+                          color: chatThemeData.colorTheme.disabled,
                         ),
                       ),
                       Padding(
@@ -309,7 +309,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                           'How about sending your first message to a friend?',
                           textAlign: TextAlign.center,
                           style: chatThemeData.textTheme.body.copyWith(
-                            color: chatThemeData.colorTheme.grey,
+                            color: chatThemeData.colorTheme.textLowEmphasis,
                           ),
                         ),
                       ),
@@ -327,7 +327,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                         child: Text(
                           'Start a chat',
                           style: chatThemeData.textTheme.bodyBold.copyWith(
-                            color: chatThemeData.colorTheme.accentBlue,
+                            color: chatThemeData.colorTheme.accentPrimary,
                           ),
                         ),
                       ),
@@ -362,8 +362,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     final chatThemeData = StreamChatTheme.of(context);
     if (widget.crossAxisCount > 1) {
       return Shimmer.fromColors(
-        baseColor: chatThemeData.colorTheme.greyGainsboro,
-        highlightColor: chatThemeData.colorTheme.whiteSmoke,
+        baseColor: chatThemeData.colorTheme.disabled,
+        highlightColor: chatThemeData.colorTheme.inputBg,
         child: Column(
           children: [
             const SizedBox(height: 4),
@@ -391,12 +391,12 @@ class _ChannelListViewState extends State<ChannelListView> {
       );
     } else {
       return Shimmer.fromColors(
-        baseColor: chatThemeData.colorTheme.greyGainsboro,
-        highlightColor: chatThemeData.colorTheme.whiteSmoke,
+        baseColor: chatThemeData.colorTheme.disabled,
+        highlightColor: chatThemeData.colorTheme.inputBg,
         child: ListTile(
           leading: Container(
             decoration: BoxDecoration(
-              color: chatThemeData.colorTheme.white,
+              color: chatThemeData.colorTheme.barsBg,
               shape: BoxShape.circle,
             ),
             constraints: const BoxConstraints.tightFor(
@@ -412,7 +412,7 @@ class _ChannelListViewState extends State<ChannelListView> {
             alignment: Alignment.centerLeft,
             child: Container(
               decoration: BoxDecoration(
-                color: chatThemeData.colorTheme.white,
+                color: chatThemeData.colorTheme.barsBg,
                 borderRadius: BorderRadius.circular(11),
               ),
               constraints: const BoxConstraints.tightFor(
@@ -429,7 +429,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   alignment: Alignment.centerLeft,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: chatThemeData.colorTheme.white,
+                      color: chatThemeData.colorTheme.barsBg,
                       borderRadius: BorderRadius.circular(11),
                     ),
                     constraints: const BoxConstraints.expand(
@@ -441,7 +441,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               Container(
                 margin: const EdgeInsets.only(left: 16),
                 decoration: BoxDecoration(
-                  color: chatThemeData.colorTheme.white,
+                  color: chatThemeData.colorTheme.barsBg,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 constraints: const BoxConstraints.tightFor(
@@ -488,7 +488,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     final channelsBloc = ChannelsBloc.of(context);
     final onTap = _getChannelTap(context);
     final chatThemeData = StreamChatTheme.of(context);
-    final backgroundColor = chatThemeData.colorTheme.whiteSmoke;
+    final backgroundColor = chatThemeData.colorTheme.inputBg;
 
     if (i < channels.length) {
       final channel = channels[i];
@@ -549,7 +549,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                   IconSlideAction(
                     color: backgroundColor,
                     iconWidget: StreamSvgIcon.delete(
-                      color: chatThemeData.colorTheme.accentRed,
+                      color: chatThemeData.colorTheme.accentError,
                     ),
                     onTap: widget.onDeletePressed != null
                         ? () {
@@ -565,7 +565,7 @@ class _ChannelListViewState extends State<ChannelListView> {
                                   'Are you sure you want to delete this conversation?',
                               cancelText: 'CANCEL',
                               icon: StreamSvgIcon.delete(
-                                color: chatThemeData.colorTheme.accentRed,
+                                color: chatThemeData.colorTheme.accentError,
                               ),
                             );
                             if (res == true) {
@@ -576,7 +576,7 @@ class _ChannelListViewState extends State<ChannelListView> {
               ],
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: chatThemeData.colorTheme.whiteSnow,
+              color: chatThemeData.colorTheme.appBg,
             ),
             child: widget.channelPreviewBuilder?.call(context, channel) ??
                 ChannelPreview(
@@ -664,7 +664,7 @@ class _ChannelListViewState extends State<ChannelListView> {
           errorBuilder: (context, err) => Container(
                 color: StreamChatTheme.of(context)
                     .colorTheme
-                    .accentRed
+                    .accentError
                     .withOpacity(.2),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),

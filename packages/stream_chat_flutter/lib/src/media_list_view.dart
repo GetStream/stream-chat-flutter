@@ -90,8 +90,8 @@ class _MediaListViewState extends State<MediaListView> {
                                   ? 1.0
                                   : 0.0,
                           child: Container(
-                            color:
-                                chatThemeData.colorTheme.black.withOpacity(0.5),
+                            color: chatThemeData.colorTheme.textHighEmphasis
+                                .withOpacity(0.5),
                             alignment: Alignment.topRight,
                             padding: const EdgeInsets.only(
                               top: 8,
@@ -99,10 +99,11 @@ class _MediaListViewState extends State<MediaListView> {
                             ),
                             child: CircleAvatar(
                               radius: 12,
-                              backgroundColor: chatThemeData.colorTheme.white,
+                              backgroundColor: chatThemeData.colorTheme.barsBg,
                               child: StreamSvgIcon.check(
                                 size: 24,
-                                color: chatThemeData.colorTheme.black,
+                                color:
+                                    chatThemeData.colorTheme.textHighEmphasis,
                               ),
                             ),
                           ),
@@ -124,7 +125,7 @@ class _MediaListViewState extends State<MediaListView> {
                         child: Text(
                           media.videoDuration.format(),
                           style: TextStyle(
-                            color: chatThemeData.colorTheme.white,
+                            color: chatThemeData.colorTheme.barsBg,
                           ),
                         ),
                       ),

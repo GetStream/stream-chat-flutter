@@ -55,7 +55,7 @@ class DateDivider extends StatelessWidget {
         child: Text(
           dayInfo,
           style: chatThemeData.textTheme.footnote.copyWith(
-            color: chatThemeData.colorTheme.white,
+            color: chatThemeData.colorTheme.barsBg,
           ),
         ),
       ),
