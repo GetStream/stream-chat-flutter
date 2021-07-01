@@ -40,7 +40,7 @@ import 'package:stream_chat_flutter_core/src/typedef.dart';
 ///         messageListBuilder: (context, list) {
 ///           return MessagesPage(list);
 ///         },
-///         errorWidgetBuilder: (context, err) {
+///         errorBuilder: (context, err) {
 ///           return Center(
 ///             child: Text('Error'),
 ///           );
@@ -67,7 +67,7 @@ class MessageListCore extends StatefulWidget {
     required this.loadingBuilder,
     required this.emptyBuilder,
     required this.messageListBuilder,
-    required this.errorWidgetBuilder,
+    required this.errorBuilder,
     this.parentMessage,
     this.messageListController,
     this.messageFilter,
@@ -91,7 +91,7 @@ class MessageListCore extends StatefulWidget {
   ///
   /// This parameter can be used to display an error message to users in the
   /// event of a connection failure.
-  final ErrorBuilder errorWidgetBuilder;
+  final ErrorBuilder errorBuilder;
 
   /// If the current message belongs to a `thread`, this property represents the
   /// first message or the parent of the conversation.
@@ -144,7 +144,7 @@ class MessageListCoreState extends State<MessageListCore> {
                   growable: false,
                 ),
       ),
-      errorBuilder: widget.errorWidgetBuilder,
+      errorBuilder: widget.errorBuilder,
       loadingBuilder: widget.loadingBuilder,
       builder: (context, data) {
         final messageList = data?.reversed.toList(growable: false) ?? [];
