@@ -269,7 +269,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       },
                     );
                   },
-                  errorWidgetBuilder: (BuildContext context, error) {
+                  errorBuilder: (BuildContext context, error) {
                     print(error.toString());
                     return Center(
                       child: SizedBox(
