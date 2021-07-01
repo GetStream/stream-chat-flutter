@@ -59,16 +59,16 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
         appBar: AppBar(
           brightness: Theme.of(context).brightness,
           elevation: 1,
-          backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+          backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
           leading: const StreamBackButton(),
           title: Text(
             'Name of Group Chat',
             style: TextStyle(
-              color: StreamChatTheme.of(context).colorTheme.black,
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
               fontSize: 16,
             ),
           ),
@@ -83,7 +83,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     'NAME',
                     style: TextStyle(
                       fontSize: 12,
-                      color: StreamChatTheme.of(context).colorTheme.grey,
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .textLowEmphasis,
                     ),
                   ),
                   SizedBox(width: 16),
@@ -101,7 +103,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         hintText: 'Choose a group chat name',
                         hintStyle: TextStyle(
                           fontSize: 14,
-                          color: StreamChatTheme.of(context).colorTheme.grey,
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .textLowEmphasis,
                         ),
                       ),
                     ),
@@ -117,8 +121,8 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                 icon: StreamSvgIcon.check(
                   size: 24,
                   color: _isGroupNameEmpty
-                      ? StreamChatTheme.of(context).colorTheme.grey
-                      : StreamChatTheme.of(context).colorTheme.accentBlue,
+                      ? StreamChatTheme.of(context).colorTheme.textLowEmphasis
+                      : StreamChatTheme.of(context).colorTheme.accentPrimary,
                 ),
                 onPressed: _isGroupNameEmpty
                     ? null
@@ -188,7 +192,9 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       child: Text(
                         '$_totalUsers ${_totalUsers > 1 ? 'Members' : 'Member'}',
                         style: TextStyle(
-                          color: StreamChatTheme.of(context).colorTheme.grey,
+                          color: StreamChatTheme.of(context)
+                              .colorTheme
+                              .textLowEmphasis,
                         ),
                       ),
                     ),
@@ -201,9 +207,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         itemCount: _selectedUsers.length + 1,
                         separatorBuilder: (_, __) => Container(
                           height: 1,
-                          color: StreamChatTheme.of(context)
-                              .colorTheme
-                              .greyWhisper,
+                          color: StreamChatTheme.of(context).colorTheme.borders,
                         ),
                         itemBuilder: (_, index) {
                           if (index == _selectedUsers.length) {
@@ -211,7 +215,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                               height: 1,
                               color: StreamChatTheme.of(context)
                                   .colorTheme
-                                  .greyWhisper,
+                                  .borders,
                             );
                           }
                           final user = _selectedUsers[index];
@@ -237,7 +241,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                                 Icons.clear_rounded,
                                 color: StreamChatTheme.of(context)
                                     .colorTheme
-                                    .black,
+                                    .textHighEmphasis,
                               ),
                               padding: const EdgeInsets.all(0),
                               splashRadius: 24,
@@ -267,7 +271,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
   void _showErrorAlert() {
     showModalBottomSheet(
       useRootNavigator: false,
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       context: context,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -282,7 +286,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 26.0,
             ),
             StreamSvgIcon.error(
-              color: StreamChatTheme.of(context).colorTheme.accentRed,
+              color: StreamChatTheme.of(context).colorTheme.accentError,
               size: 24.0,
             ),
             SizedBox(
@@ -300,8 +304,10 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
               height: 36.0,
             ),
             Container(
-              color:
-                  StreamChatTheme.of(context).colorTheme.black.withOpacity(.08),
+              color: StreamChatTheme.of(context)
+                  .colorTheme
+                  .textHighEmphasis
+                  .withOpacity(.08),
               height: 1.0,
             ),
             Row(
@@ -316,7 +322,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                         .copyWith(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .accentBlue),
+                                .accentPrimary),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();

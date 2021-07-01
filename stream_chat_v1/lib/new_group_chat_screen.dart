@@ -51,15 +51,15 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: AppBar(
         elevation: 1,
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
         title: Text(
           'Add Group Members',
           style: TextStyle(
-            color: StreamChatTheme.of(context).colorTheme.black,
+            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16,
           ),
         ),
@@ -68,7 +68,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
           if (_selectedUsers.isNotEmpty)
             IconButton(
               icon: StreamSvgIcon.arrowRight(
-                color: StreamChatTheme.of(context).colorTheme.accentBlue,
+                color: StreamChatTheme.of(context).colorTheme.accentPrimary,
               ),
               onPressed: () async {
                 final updatedList = await Navigator.pushNamed(
@@ -159,18 +159,18 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                           decoration: BoxDecoration(
                                             color: StreamChatTheme.of(context)
                                                 .colorTheme
-                                                .white,
+                                                .appBg,
                                             shape: BoxShape.circle,
                                             border: Border.all(
                                               color: StreamChatTheme.of(context)
                                                   .colorTheme
-                                                  .whiteSnow,
+                                                  .appBg,
                                             ),
                                           ),
                                           child: StreamSvgIcon.close(
                                             color: StreamChatTheme.of(context)
                                                 .colorTheme
-                                                .black,
+                                                .textHighEmphasis,
                                             size: 24,
                                           ),
                                         ),
@@ -212,8 +212,9 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                 ? 'Matches for \"$_userNameQuery\"'
                                 : 'On the platform',
                             style: TextStyle(
-                              color:
-                                  StreamChatTheme.of(context).colorTheme.grey,
+                              color: StreamChatTheme.of(context)
+                                  .colorTheme
+                                  .textLowEmphasis,
                             ),
                           ),
                         ),
@@ -273,7 +274,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                         size: 96,
                                         color: StreamChatTheme.of(context)
                                             .colorTheme
-                                            .grey,
+                                            .textLowEmphasis,
                                       ),
                                     ),
                                     Text(
@@ -284,7 +285,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                           .copyWith(
                                             color: StreamChatTheme.of(context)
                                                 .colorTheme
-                                                .grey,
+                                                .textLowEmphasis,
                                           ),
                                     ),
                                   ],
@@ -319,7 +320,7 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: StreamChatTheme.of(context).colorTheme.white,
+      color: StreamChatTheme.of(context).colorTheme.barsBg,
       child: child,
     );
   }

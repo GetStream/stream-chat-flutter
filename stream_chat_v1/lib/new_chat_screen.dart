@@ -117,18 +117,16 @@ class _NewChatScreenState extends State<NewChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.whiteSnow,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.appBg,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 0,
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
         leading: const StreamBackButton(),
         title: Text(
           'New Chat',
-          style: StreamChatTheme.of(context)
-              .textTheme
-              .headlineBold
-              .copyWith(color: StreamChatTheme.of(context).colorTheme.black),
+          style: StreamChatTheme.of(context).textTheme.headlineBold.copyWith(
+              color: StreamChatTheme.of(context).colorTheme.textHighEmphasis),
         ),
         centerTitle: true,
       ),
@@ -177,7 +175,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                               decoration: BoxDecoration(
                                 color: StreamChatTheme.of(context)
                                     .colorTheme
-                                    .greyGainsboro,
+                                    .disabled,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.only(left: 24),
@@ -189,7 +187,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   style: TextStyle(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black,
+                                        .textHighEmphasis,
                                   ),
                                 ),
                               ),
@@ -240,7 +238,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                   child: StreamSvgIcon.contacts(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .accentBlue,
+                                        .accentPrimary,
                                     size: 24,
                                   ),
                                 ),
@@ -279,7 +277,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                 .copyWith(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black
+                                        .textHighEmphasis
                                         .withOpacity(.5))),
                       ),
                     ),
@@ -350,7 +348,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                                           color: StreamChatTheme
                                                                   .of(context)
                                                               .colorTheme
-                                                              .black
+                                                              .textHighEmphasis
                                                               .withOpacity(.5)),
                                                 ),
                                               ],
@@ -378,7 +376,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                                     fontSize: 12,
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black
+                                        .textHighEmphasis
                                         .withOpacity(.5),
                                   ),
                                 ),
@@ -396,7 +394,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
                         Routes.CHANNEL_PAGE,
-                        ModalRoute.withName(Routes.HOME),
+                        ModalRoute.withName(Routes.CHANNEL_LIST_PAGE),
                         arguments: ChannelPageArgs(channel: channel),
                       );
                     },

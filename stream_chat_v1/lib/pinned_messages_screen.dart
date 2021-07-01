@@ -58,7 +58,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+      backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       appBar: AppBar(
         brightness: Theme.of(context).brightness,
         elevation: 1,
@@ -66,12 +66,12 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
         title: Text(
           'Pinned Messages',
           style: TextStyle(
-            color: StreamChatTheme.of(context).colorTheme.black,
+            color: StreamChatTheme.of(context).colorTheme.textHighEmphasis,
             fontSize: 16.0,
           ),
         ),
         leading: StreamBackButton(),
-        backgroundColor: StreamChatTheme.of(context).colorTheme.white,
+        backgroundColor: StreamChatTheme.of(context).colorTheme.barsBg,
       ),
       body: _buildMediaGrid(),
     );
@@ -98,14 +98,15 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
               children: [
                 StreamSvgIcon.pin(
                   size: 136.0,
-                  color: StreamChatTheme.of(context).colorTheme.greyGainsboro,
+                  color: StreamChatTheme.of(context).colorTheme.disabled,
                 ),
                 SizedBox(height: 16.0),
                 Text(
                   'No pinned items',
                   style: TextStyle(
                     fontSize: 17.0,
-                    color: StreamChatTheme.of(context).colorTheme.black,
+                    color:
+                        StreamChatTheme.of(context).colorTheme.textHighEmphasis,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -119,7 +120,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                         fontSize: 14.0,
                         color: StreamChatTheme.of(context)
                             .colorTheme
-                            .black
+                            .textHighEmphasis
                             .withOpacity(0.5),
                       ),
                     ),
@@ -130,7 +131,7 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                         fontWeight: FontWeight.bold,
                         color: StreamChatTheme.of(context)
                             .colorTheme
-                            .black
+                            .textHighEmphasis
                             .withOpacity(0.5),
                       ),
                     ),
@@ -176,7 +177,9 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
                 title: Text(
                   user.name,
                   style: TextStyle(
-                      color: StreamChatTheme.of(context).colorTheme.black,
+                      color: StreamChatTheme.of(context)
+                          .colorTheme
+                          .textHighEmphasis,
                       fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(

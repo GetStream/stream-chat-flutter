@@ -66,7 +66,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
       onTap: _pauseItemAddition ? resumeItemAddition : null,
       child: Material(
         elevation: 1,
-        color: StreamChatTheme.of(context).colorTheme.white,
+        color: StreamChatTheme.of(context).colorTheme.barsBg,
         child: Container(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -82,7 +82,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                         .copyWith(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .black
+                                .textHighEmphasis
                                 .withOpacity(.5)),
                   ),
                 ),
@@ -119,7 +119,7 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                                 .copyWith(
                                     color: StreamChatTheme.of(context)
                                         .colorTheme
-                                        .black
+                                        .textHighEmphasis
                                         .withOpacity(.5)),
                           ),
                         ),
@@ -134,14 +134,14 @@ class ChipInputTextFieldState<T> extends State<ChipsInputTextField<T>> {
                         ? StreamSvgIcon.user(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .black
+                                .textHighEmphasis
                                 .withOpacity(0.5),
                             size: 24,
                           )
                         : StreamSvgIcon.userAdd(
                             color: StreamChatTheme.of(context)
                                 .colorTheme
-                                .black
+                                .textHighEmphasis
                                 .withOpacity(0.5),
                             size: 24,
                           ),

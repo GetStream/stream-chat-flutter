@@ -18,7 +18,7 @@ import 'routes/routes.dart';
 
 final chatPersistentClient = StreamChatPersistenceClient(
   logLevel: Level.SEVERE,
-  connectionMode: ConnectionMode.background,
+  connectionMode: ConnectionMode.regular,
 );
 
 void main() async {
@@ -46,8 +46,8 @@ class _MyAppState extends State<MyApp>
 
     final client = StreamChatClient(
       apiKey ?? kDefaultStreamApiKey,
-      logLevel: Level.INFO,
-    )..chatPersistenceClient = chatPersistentClient;
+      logLevel: Level.SEVERE,
+    );
 
     if (userId != null && token != null) {
       await client.connectUser(
