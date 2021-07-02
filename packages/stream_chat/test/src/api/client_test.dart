@@ -321,6 +321,93 @@ void main() {
     );
   });
 
+  group('Connect user calls with `connectWebsocket`: false', () {
+    const apiKey = 'test-api-key';
+    late final api = FakeChatApi();
+
+    late StreamChatClient client;
+
+    setUpAll(() {
+      // fallback values
+      registerFallbackValue<User>(FakeUser());
+    });
+
+    setUp(() {
+      client = StreamChatClient(apiKey, chatApi: api);
+    });
+
+    tearDown(() {
+      client.dispose();
+    });
+
+    test('`.connectUser` should succeed without connecting', () async {
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      final res = await client.connectUser(
+        user,
+        token,
+        connectWebsocket: false,
+      );
+      expect(res, isSameUserAs(user));
+      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+    });
+
+    test(
+      '`.connectUserWithProvider` should succeed without connecting',
+      () async {
+        final user = User(id: 'test-user-id');
+        Future<String> tokenProvider(String userId) async {
+          expect(userId, user.id);
+          return Token.development(userId).rawValue;
+        }
+
+        final res = await client.connectUserWithProvider(
+          user,
+          tokenProvider,
+          connectWebsocket: false,
+        );
+        expect(res, isSameUserAs(user));
+        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      },
+    );
+
+    test('`.connectGuestUser` should succeed without connecting', () async {
+      final user = User(id: 'test-user-id');
+      final token = Token.development(user.id).rawValue;
+
+      when(() => api.guest.getGuestUser(any(that: isSameUserAs(user))))
+          .thenAnswer(
+        (_) async => ConnectGuestUserResponse()
+          ..user = user
+          ..accessToken = token,
+      );
+
+      final res = await client.connectGuestUser(
+        user,
+        connectWebsocket: false,
+      );
+
+      expect(res, isSameUserAs(user));
+      expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      verify(
+        () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
+      ).called(1);
+    });
+
+    test(
+      '`.connectAnonymousUser` should succeed without connecting',
+      () async {
+        final res = await client.connectAnonymousUser(
+          connectWebsocket: false,
+        );
+
+        expect(res, isNotNull);
+        expect(client.wsConnectionStatus, ConnectionStatus.disconnected);
+      },
+    );
+  });
+
   group('Fake web-socket connection function with failure and persistence', () {
     const apiKey = 'test-api-key';
     late final api = FakeChatApi();
