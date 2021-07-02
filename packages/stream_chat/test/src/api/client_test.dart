@@ -64,9 +64,7 @@ void main() {
 
       final res = await client.connectUser(user, token);
       expect(res, isNotNull);
-      expect(res.type, event.type);
-      expect(res.connectionId, event.connectionId);
-      expect(res.me, isSameUserAs(user));
+      expect(res, isSameUserAs(user));
     });
 
     test('`.connectUserWithProvider` should work fine', () async {
@@ -93,9 +91,7 @@ void main() {
 
       final res = await client.connectUserWithProvider(user, tokenProvider);
       expect(res, isNotNull);
-      expect(res.type, event.type);
-      expect(res.connectionId, event.connectionId);
-      expect(res.me, isSameUserAs(user));
+      expect(res, isSameUserAs(user));
     });
 
     group('`.connectGuestUser`', () {
@@ -127,9 +123,7 @@ void main() {
 
         final res = await client.connectGuestUser(user);
         expect(res, isNotNull);
-        expect(res.type, event.type);
-        expect(res.connectionId, event.connectionId);
-        expect(res.me, isSameUserAs(user));
+        expect(res, isSameUserAs(user));
 
         verify(
           () => api.guest.getGuestUser(any(that: isSameUserAs(user))),
@@ -175,9 +169,6 @@ void main() {
 
       final res = await client.connectAnonymousUser();
       expect(res, isNotNull);
-      expect(res.type, EventType.healthCheck);
-      expect(res.connectionId, 'fake-connection-id');
-      expect(res.me, isNotNull);
     });
 
     group('`.openConnection`', () {
@@ -366,8 +357,7 @@ void main() {
 
         final res = await client.connectUser(user, token);
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -391,8 +381,7 @@ void main() {
 
         final res = await client.connectUserWithProvider(user, tokenProvider);
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -420,8 +409,7 @@ void main() {
 
         final res = await client.connectGuestUser(user);
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -446,8 +434,7 @@ void main() {
 
         final res = await client.connectAnonymousUser();
         expect(res, isNotNull);
-        expect(res.connectionId, 'test-connection-id');
-        expect(res.me?.id, user.id);
+        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);

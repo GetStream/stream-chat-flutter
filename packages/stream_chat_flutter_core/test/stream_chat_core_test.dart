@@ -204,7 +204,8 @@ void main() {
 
         final event = Event(type: EventType.any);
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.openConnection())
+            .thenAnswer((_) async => OwnUser(id: 'test'));
         when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
@@ -238,7 +239,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.openConnection())
+            .thenAnswer((_) async => OwnUser(id: 'test'));
         when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
@@ -327,7 +329,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.openConnection())
+            .thenAnswer((_) async => OwnUser(id: 'test'));
         when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);
@@ -376,7 +379,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.openConnection())
+            .thenAnswer((_) async => OwnUser(id: 'test'));
         when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.connected);
@@ -402,7 +406,8 @@ void main() {
 
         final event = Event();
         when(() => mockClient.on()).thenAnswer((_) => Stream.value(event));
-        when(() => mockClient.openConnection()).thenAnswer((_) async => event);
+        when(() => mockClient.openConnection())
+            .thenAnswer((_) async => OwnUser(id: 'test'));
         when(() => mockClient.closeConnection()).thenAnswer((_) async => null);
         when(() => mockClient.wsConnectionStatus)
             .thenReturn(ConnectionStatus.disconnected);

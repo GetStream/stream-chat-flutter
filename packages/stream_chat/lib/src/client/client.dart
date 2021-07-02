@@ -220,27 +220,53 @@ class StreamChatClient {
 
   /// Connects the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectUser(User user, String token) =>
-      _connectUser(user, token: Token.fromRawValue(token));
+  /// Pass [connectWebsocket]: false, if you want to connect to websocket
+  /// at a later stage or use the client in connection-less mode
+  Future<OwnUser?> connectUser(
+    User user,
+    String token, {
+    bool connectWebsocket = true,
+  }) =>
+      _connectUser(
+        user,
+        token: Token.fromRawValue(token),
+        connectWebsocket: connectWebsocket,
+      );
 
   /// Connects the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectUserWithProvider(
-          User user, TokenProvider tokenProvider) =>
-      _connectUser(user, provider: tokenProvider);
+  Future<OwnUser?> connectUserWithProvider(
+    User user,
+    TokenProvider tokenProvider, {
+    bool connectWebsocket = true,
+  }) =>
+      _connectUser(
+        user,
+        provider: tokenProvider,
+        connectWebsocket: connectWebsocket,
+      );
 
   /// Connects the current user with an anonymous id, this triggers a connection
   /// to the API. It returns a [Future] that resolves when the connection is
   /// setup.
-  Future<Event> connectAnonymousUser() async {
+  Future<OwnUser?> connectAnonymousUser({
+    bool connectWebsocket = true,
+  }) async {
     final token = Token.anonymous();
     final user = OwnUser(id: token.userId);
-    return _connectUser(user, token: token);
+    return _connectUser(
+      user,
+      token: token,
+      connectWebsocket: connectWebsocket,
+    );
   }
 
   /// Connects the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> connectGuestUser(User user) async {
+  Future<OwnUser?> connectGuestUser(
+    User user, {
+    bool connectWebsocket = true,
+  }) async {
     final userId = user.id;
     final anonymousToken = Token.anonymous(userId: userId);
 
@@ -253,13 +279,18 @@ class StreamChatClient {
     _tokenManager.reset();
 
     final guestUserToken = Token.fromRawValue(guestUser.accessToken);
-    return _connectUser(guestUser.user, token: guestUserToken);
+    return _connectUser(
+      guestUser.user,
+      token: guestUserToken,
+      connectWebsocket: connectWebsocket,
+    );
   }
 
-  Future<Event> _connectUser(
+  Future<OwnUser?> _connectUser(
     User user, {
     Token? token,
     TokenProvider? provider,
+    bool connectWebsocket = true,
   }) async {
     if (_ws.connectionCompleter?.isCompleted == false) {
       throw const StreamChatError(
@@ -268,7 +299,7 @@ class StreamChatClient {
       );
     }
 
-    logger.info('connecting user : ${user.id}');
+    logger.info('setting user : ${user.id}');
 
     await _tokenManager.setTokenOrProvider(
       user.id,
@@ -278,6 +309,10 @@ class StreamChatClient {
 
     final ownUser = OwnUser.fromUser(user);
     state.user = ownUser;
+
+    if (!connectWebsocket) {
+      return ownUser;
+    }
 
     try {
       if (_originalChatPersistenceClient != null) {
@@ -289,7 +324,7 @@ class StreamChatClient {
     } catch (e, stk) {
       if (e is StreamWebSocketError && e.isRetriable) {
         final event = await _chatPersistenceClient?.getConnectionInfo();
-        if (event != null) return event;
+        if (event != null) return event.me;
       }
       logger.severe('error connecting user : ${ownUser.id}', e, stk);
       rethrow;
@@ -297,7 +332,7 @@ class StreamChatClient {
   }
 
   /// Creates a new WebSocket connection with the current user.
-  Future<Event> openConnection() async {
+  Future<OwnUser> openConnection() async {
     assert(
       state.user != null,
       'User is not set on client, '
@@ -327,7 +362,8 @@ class StreamChatClient {
         _ws.connectionStatusStream.skip(1).listen(_connectionStatusHandler);
 
     try {
-      return await _ws.connect(user);
+      await _ws.connect(user);
+      return state.user!;
     } catch (e, stk) {
       logger.severe('error connecting ws', e, stk);
       rethrow;
