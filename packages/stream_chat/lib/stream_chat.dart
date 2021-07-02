@@ -13,7 +13,7 @@ export './src/core/api/attachment_file_uploader.dart'
 export './src/core/api/requests.dart';
 export './src/core/api/requests.dart';
 export './src/core/api/responses.dart';
-export './src/core/api/stream_chat_api.dart';
+export './src/core/api/stream_chat_api.dart' show PushProvider;
 export './src/core/error/error.dart';
 export './src/core/models/action.dart';
 export './src/core/models/attachment.dart';
