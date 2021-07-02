@@ -521,7 +521,6 @@ void main() {
 
         final res = await client.connectAnonymousUser();
         expect(res, isNotNull);
-        expect(res, isSameUserAs(user));
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
